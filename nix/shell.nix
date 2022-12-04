@@ -30,6 +30,8 @@ mkShell {
   SEL4_PREFIX = kernel;
   SEL4_LOADER_CONFIG = loaderConfigJSON;
 
+  hardeningDisable = [ "all" ];
+
   nativeBuildInputs = [
     rustup
     git
