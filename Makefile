@@ -7,4 +7,4 @@ clean:
 
 .PHONY: example
 example:
-	nix-shell --pure -A worlds.aarch64.default.shell --run "$(MAKE) -f mk/example.mk run"
+	nix-shell --pure -A worlds.aarch64.default.shell --run "make -f mk/example.mk run"

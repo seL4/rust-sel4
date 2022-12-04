@@ -9,8 +9,12 @@ top_level_build_dir := $(top_level_dir)/build
 build_dir := $(top_level_build_dir)/$(build_subdir)
 target_dir := $(build_dir)/target
 
-sel4_target := $(RUST_SEL4_TARGET)
-bare_metal_target := $(RUST_BARE_METAL_TARGET)
+cargo_build := \
+	cargo build \
+		--locked \
+		--manifest-path $(abspath $(manifest_path)) \
+		--target-dir $(abspath $(target_dir)) \
+		--out-dir $(build_dir)
 
 app_crate := minimal-without-runtime
 app := $(build_dir)/$(app_crate).elf
@@ -31,13 +35,8 @@ $(app): $(app_intermediate)
 
 .INTERMDIATE: $(app_intermediate)
 $(app_intermediate):
-	pwd
-	cargo build \
-		-Z unstable-options \
-		--locked \
-		--target $(sel4_target) \
-		--target-dir $(target_dir) \
-		--out-dir $(build_dir) \
+	$(cargo_build) \
+		--target $(RUST_SEL4_TARGET) \
 		-p $(app_crate)
 
 $(loader): $(loader_intermediate)
@@ -45,19 +44,10 @@ $(loader): $(loader_intermediate)
 .INTERMDIATE: $(loader_intermediate)
 $(loader_intermediate): $(app)
 	SEL4_APP=$(abspath $(app)) \
-		cargo build \
-			-Z unstable-options \
-			--locked \
-			--target $(bare_metal_target) \
-			--target-dir $(target_dir) \
-			--out-dir $(build_dir) \
+		$(cargo_build) \
+			--target $(RUST_BARE_METAL_TARGET) \
 			-p $(loader_crate)
 
 .PHONY: run
 run: $(loader)
-	qemu-system-aarch64 \
-		-machine virt,virtualization=on \
-			-cpu cortex-a57 -smp 2 -m 1024 \
-			-serial mon:stdio \
-			-nographic \
-			-kernel $(loader)
+	$(QEMU_SCRIPT) $(loader)

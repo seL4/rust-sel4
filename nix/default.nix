@@ -25,6 +25,7 @@ let
   mkWorld =
     { crossPkgs, kernelConfig, loaderConfig
     , rustSeL4Target, rustBareMetalTarget
+    , qemuCmd
     } @ args:
     let
     in args // rec {
@@ -34,6 +35,7 @@ let
       shell = crossPkgs.callPackage ./shell.nix {} {
         inherit kernel loaderConfig;
         inherit rustSeL4Target rustBareMetalTarget;
+        inherit qemuCmd;
       };
     };
 
@@ -60,6 +62,13 @@ let
               KernelMaxNumNodes = mkString "2";
               KernelVerificationBuild = off;
             };
+            qemuCmd = [
+              "qemu-system-aarch64"
+		            "-machine" "virt,virtualization=on"
+			          "-cpu" "cortex-a57" "-smp" "2" "-m" "1024"
+                "-serial" "mon:stdio"
+                "-nographic"
+            ];
           };
         };
       riscv64 =
@@ -77,6 +86,9 @@ let
               KernelPlatform = mkString "spike";
               KernelVerificationBuild = off;
             };
+            qemuCmd = [
+              # TODO
+            ];
           };
         };
     };

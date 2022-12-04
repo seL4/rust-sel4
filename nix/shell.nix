@@ -1,6 +1,5 @@
-{ lib, stdenv, writeText
-, buildPackages
-, mkShell
+{ lib, stdenv, buildPackages
+, writeText, writeScript, mkShell
 , llvmPackages
 , rustup
 , git
@@ -10,10 +9,24 @@
 
 { kernel, loaderConfig
 , rustSeL4Target, rustBareMetalTarget
+, qemuCmd
 }:
 
 let
   loaderConfigJSON = writeText "loader-config.json" (builtins.toJSON loaderConfig);
+
+  qemuScript = writeScript "simulate" ''
+    #!${buildPackages.runtimeShell}
+
+    set -eu
+
+    image="$1"
+    shift
+
+    ${lib.concatStringsSep " " qemuCmd} \
+      -kernel "$image" \
+      "$@"
+  '';
 
 in
 mkShell {
@@ -29,6 +42,8 @@ mkShell {
   # for local crates
   SEL4_PREFIX = kernel;
   SEL4_LOADER_CONFIG = loaderConfigJSON;
+
+  QEMU_SCRIPT = qemuScript;
 
   hardeningDisable = [ "all" ];
 
