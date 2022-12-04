@@ -8,12 +8,12 @@
 { config }:
 
 let
-  # src =../../../../../../local/seL4;
+  # src =../../../../../local/seL4;
 
   src = builtins.fetchGit {
     url = "https://gitlab.com/coliasgroup/seL4.git";
     ref = "rust";
-    rev = "4a980702a820c6a2aed461e0d02cdbfb5a23749d";
+    rev = "417a06317366ba2b2865af606650aaf38df9c89f";
   };
 
   settings = writeText "settings.cmake" ''
