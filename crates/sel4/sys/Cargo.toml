@@ -1,0 +1,29 @@
+[package]
+name = "sel4-sys"
+version = "0.1.0"
+edition = "2021"
+license = "BSD-2-Clause"
+authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
+build = "build/main.rs"
+
+[features]
+wrappers = []
+
+[dependencies]
+log = "*"
+sel4-bitfield-types = { path = "../bitfield-types" }
+sel4-config = { path = "../config" }
+
+[build-dependencies]
+bindgen = "*"
+glob = "*"
+proc-macro2 = "1"
+quote = "1"
+regex = "*"
+syn = "1"
+xmltree = "*"
+sel4-bitfield-parser = { path = "../bitfield-parser" }
+sel4-build-env = { path = "../build-env" }
+sel4-config = { path = "../config" }
+sel4-config-data = { path = "../config/data" }
+sel4-rustfmt-helper = { path = "../rustfmt-helper" }

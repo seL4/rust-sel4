@@ -1,0 +1,36 @@
+[workspace]
+
+resolver = "2"
+
+members = [
+    "crates/sel4",
+    "crates/sel4/bitfield-parser",
+    "crates/sel4/bitfield-types",
+    "crates/sel4/build-env",
+    "crates/sel4/config",
+    "crates/sel4/config/consts",
+    "crates/sel4/config/data",
+    "crates/sel4/config/generic/build-core",
+    "crates/sel4/config/generic/macros-core",
+    "crates/sel4/config/generic/types",
+    "crates/sel4/config/macros",
+    "crates/sel4/platform-info",
+    "crates/sel4/platform-info/types",
+    "crates/sel4/rustfmt-helper",
+    "crates/sel4/sys",
+    "crates/sel4/sys/wrappers",
+
+    "crates/loader",
+    "crates/loader/build-env",
+    "crates/loader/config",
+    "crates/loader/config/data",
+    "crates/loader/config/macros",
+    "crates/loader/core",
+    "crates/loader/payload",
+    "crates/loader/payload/at-build-time",
+    "crates/loader/payload/at-build-time/types",
+    "crates/loader/payload/types",
+    "crates/loader/sanity-check",
+
+    "crates/examples/minimal-without-runtime",
+]

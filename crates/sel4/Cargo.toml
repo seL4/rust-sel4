@@ -1,0 +1,10 @@
+[package]
+name = "sel4-placeholder"
+version = "0.1.0"
+edition = "2021"
+license = "BSD-2-Clause"
+authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
+
+[dependencies]
+sel4-config = { path = "./config" }
+sel4-sys = { path = "./sys" }

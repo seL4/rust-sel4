@@ -1,0 +1,13 @@
+[package]
+name = "loader"
+version = "0.1.0"
+edition = "2021"
+license = "BSD-2-Clause"
+authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
+
+[dependencies]
+loader-core = { path = "./core" }
+loader-payload = { path = "./payload" }
+
+[build-dependencies]
+loader-payload-at-build-time = { path = "./payload/at-build-time" }

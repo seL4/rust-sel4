@@ -1,0 +1,12 @@
+[package]
+name = "sel4-config-consts"
+version = "0.1.0"
+edition = "2021"
+license = "BSD-2-Clause"
+authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
+
+[build-dependencies]
+sel4-build-env = { path = "../../build-env" }
+sel4-config-data = { path = "../data" }
+sel4-config-generic-build-core = { path = "../generic/build-core" }
+sel4-rustfmt-helper = { path = "../../rustfmt-helper" }

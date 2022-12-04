@@ -1,0 +1,14 @@
+[package]
+name = "sel4-config-macros"
+version = "0.1.0"
+edition = "2021"
+license = "BSD-2-Clause"
+authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
+
+[lib]
+proc-macro = true
+
+[dependencies]
+sel4-config-data = { path = "../data" }
+sel4-config-generic-macros-core = { path = "../generic/macros-core" }
+sel4-config-generic-types = { path = "../generic/types" }

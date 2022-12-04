@@ -1,0 +1,25 @@
+[package]
+name = "loader-core"
+version = "0.1.0"
+edition = "2021"
+license = "BSD-2-Clause"
+authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
+
+[dependencies]
+aarch64-cpu = "*"
+aligned = "*"
+cfg-if = "*"
+log = "*"
+psci = { version = "*", default-features = false }
+spin = "*"
+tock-registers = "*"
+loader-config = { path = "../config" }
+loader-payload-types = { path = "../payload/types" }
+loader-sanity-check = { path = "../sanity-check" }
+sel4-config = { path = "../../sel4/config" }
+sel4-platform-info = { path = "../../sel4/platform-info" }
+
+[build-dependencies]
+cc = "*"
+glob = "*"
+sel4-build-env = { path = "../../sel4/build-env" }

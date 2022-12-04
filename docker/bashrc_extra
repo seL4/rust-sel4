@@ -1,0 +1,3 @@
+for f in ~/.bash_completion.d/*; do
+  . $f
+done

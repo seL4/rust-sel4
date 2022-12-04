@@ -1,0 +1,8 @@
+[package]
+name = "sel4-config"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+sel4-config-consts = { path = "./consts" }
+sel4-config-macros = { path = "./macros" }

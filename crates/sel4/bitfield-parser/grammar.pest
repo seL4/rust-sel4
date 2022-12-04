@@ -1,0 +1,33 @@
+file = { SOI ~ (entity)* ~ EOI }
+
+entity = { base | block | tagged_union }
+
+base = { "base" ~ intlit ~ (opt_base_mask)? }
+opt_base_mask = { (base_mask)? }
+base_mask = { "(" ~ intlit ~ "," ~ intlit ~ ")" }
+
+block = { "block" ~ ident ~ opt_visible_order_spec ~ "{" ~ segments ~ "}" }
+opt_visible_order_spec = { (visible_order_spec)? }
+visible_order_spec = { "(" ~ ident ~ ("," ~ ident)* ~ ")" }
+segments = { (segment)* }
+segment = { (segment_field | segment_padding) ~ intlit }
+segment_field = { (field_high|field_low) ~ ident }
+field_low = { "field" }
+field_high = { "field_high" }
+segment_padding = { "padding" }
+
+tagged_union = { "tagged_union" ~ ident ~ ident ~ opt_tag_slices ~ "{" ~ classes ~ tags ~ "}" }
+opt_tag_slices = { (tag_slices)? }
+tag_slices = { "(" ~ ident ~ ("," ~ ident)* ~ ")" }
+classes = { (class)* }
+class = { "mask" ~ intlit ~ intlit }
+tags = { (tag)* }
+tag = { "tag" ~ ident ~ tag_value }
+tag_value = { tag_value_one | tag_value_many }
+tag_value_one = { intlit }
+tag_value_many = { "(" ~ intlit ~ ("," ~ intlit)* ~ ")" }
+
+ident = @{ ASCII_ALPHA ~ (ASCII_ALPHANUMERIC | "_")* }
+intlit = @{ "0" | ASCII_NONZERO_DIGIT ~ (ASCII_DIGIT)* }
+
+WHITESPACE = _{ " " | "\t" | "\r" | "\n" }

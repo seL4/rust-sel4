@@ -1,0 +1,16 @@
+[package]
+name = "sel4-config-data"
+version = "0.1.0"
+edition = "2021"
+license = "BSD-2-Clause"
+authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
+
+[dependencies]
+lazy_static = "*"
+sel4-config-generic-types = { path = "../generic/types" }
+
+[build-dependencies]
+quote = "1"
+sel4-build-env = { path = "../../build-env" }
+sel4-config-generic-build-core = { path = "../generic/build-core" }
+sel4-rustfmt-helper = { path = "../../rustfmt-helper" }

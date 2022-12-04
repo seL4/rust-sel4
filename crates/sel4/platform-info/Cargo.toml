@@ -1,0 +1,16 @@
+[package]
+name = "sel4-platform-info"
+version = "0.1.0"
+edition = "2021"
+license = "BSD-2-Clause"
+authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
+
+[dependencies]
+sel4-platform-info-types = { path = "./types" }
+
+[build-dependencies]
+proc-macro2 = "1"
+quote = "1"
+serde = { version = "*", features = ["derive"] }
+serde_yaml = "*"
+sel4-build-env = { path = "../build-env" }
