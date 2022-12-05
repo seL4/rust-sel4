@@ -18,7 +18,7 @@ clean:
 
 .PHONY: docs
 docs:
-	cargo build \
+	cargo doc \
 		--locked \
 		--manifest-path $(abspath $(manifest_path)) \
 		--target-dir $(abspath $(target_dir)) \
