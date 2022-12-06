@@ -49,8 +49,9 @@ let
           crossPkgs = pkgs.aarch64;
           rustSeL4Target = "aarch64-unknown-sel4";
           rustBareMetalTarget = "aarch64-unknown-none";
-        in {
-          default = mkWorld {
+        in rec {
+          default = qemu-arm-virt;
+          qemu-arm-virt = mkWorld {
             inherit crossPkgs loaderConfig;
             inherit rustSeL4Target rustBareMetalTarget;
             kernelConfig = {
@@ -68,6 +69,22 @@ let
 			          "-cpu" "cortex-a57" "-smp" "2" "-m" "1024"
                 "-serial" "mon:stdio"
                 "-nographic"
+            ];
+          };
+          bcm2711 = mkWorld {
+            inherit crossPkgs loaderConfig;
+            inherit rustSeL4Target rustBareMetalTarget;
+            kernelConfig = {
+              ARM_CPU = mkString "cortex-a57";
+              KernelArch = mkString "arm";
+              KernelSel4Arch = mkString "aarch64";
+              KernelPlatform = mkString "bcm2711";
+              KernelArmHypervisorSupport = on;
+              # KernelMaxNumNodes = mkString "2";
+              KernelVerificationBuild = off;
+            };
+            qemuCmd = [
+              "false"
             ];
           };
         };

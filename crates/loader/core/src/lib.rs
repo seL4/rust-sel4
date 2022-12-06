@@ -14,6 +14,7 @@ use spin::Barrier;
 use loader_payload_types::{Payload, PayloadInfo};
 use sel4_platform_info::PLATFORM_INFO;
 
+mod bcm2835_aux_uart;
 mod copy_payload_data;
 mod debug;
 mod enter_kernel;
@@ -24,6 +25,7 @@ mod init_platform_state;
 mod init_translation_structures;
 mod logging;
 mod pl011;
+mod plat;
 mod psci;
 mod smp;
 
@@ -62,7 +64,9 @@ pub fn main<'a>(payload: &Payload<'a>, own_footprint: &Range<usize>) -> ! {
         loader_sanity_check::sanity_check(&own_footprint, &payload.data);
     }
 
+    log::debug!("Copying payload data...");
     copy_payload_data::copy_payload_data(&payload.data);
+    log::debug!("...done");
 
     {
         let kernel_phys_start = payload.info.kernel_image.phys_addr_range.start;
