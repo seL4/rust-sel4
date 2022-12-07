@@ -29,7 +29,6 @@ mod plat;
 mod psci;
 mod smp;
 
-use fmt::{debug_print, debug_println};
 use logging::Logger;
 
 const LOG_LEVEL: LevelFilter = LevelFilter::Debug;
@@ -79,10 +78,6 @@ pub fn main<'a>(payload: &Payload<'a>, own_footprint: &Range<usize>) -> ! {
 
     smp::start_secondary_cores(&payload.info);
 
-    // NOTE
-    // In elfloader, some of this init happens before secondary core bringup
-    init_platform_state::init_platform_state_primary_core();
-
     common_epilogue(0, &payload.info)
 }
 
@@ -91,11 +86,12 @@ fn secondary_core_main(core_id: usize, payload_info: &PayloadInfo) -> ! {
 }
 
 fn common_epilogue(core_id: usize, payload_info: &PayloadInfo) -> ! {
-    init_platform_state::init_platform_state_per_core(core_id);
-    log::info!("Core {}: entering kernel", core_id);
     KERNEL_ENTRY_BARRIER.wait();
+    init_platform_state::init_platform_state_per_core(core_id);
+    log::info!("Core {}: enabling MMU and entering kernel", core_id);
+    init_platform_state::init_platform_state_per_core_after_which_no_syncronization(core_id);
     enter_kernel::enter_kernel(&payload_info);
-    log::error!("Core {}: failed to enter kernel", core_id);
+    fmt::debug_println_without_synchronization!("Core {}: failed to enter kernel", core_id);
     idle()
 }
 
@@ -103,7 +99,7 @@ fn common_epilogue(core_id: usize, payload_info: &PayloadInfo) -> ! {
 
 #[panic_handler]
 extern "C" fn panic_handler(info: &PanicInfo) -> ! {
-    debug_println!("{}", info);
+    log::error!("{}", info);
     idle()
 }
 

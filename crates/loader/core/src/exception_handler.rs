@@ -2,6 +2,7 @@ use core::arch::asm;
 use core::fmt;
 
 use crate::idle;
+use crate::fmt::debug_println_without_synchronization;
 
 #[used]
 #[no_mangle]
@@ -16,7 +17,7 @@ unsafe extern "C" fn exception_handler(vector_table_index: usize, esr: usize, fa
         tpidr_el1: get_tpidr(),
         registers: unsafe { exception_register_state.clone() },
     };
-    log::error!("!!! Exception:\n{}", exception);
+    debug_println_without_synchronization!("!!! Exception:\n{}", exception);
     idle()
 }
 

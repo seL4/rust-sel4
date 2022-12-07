@@ -5,13 +5,6 @@ use tock_registers::interfaces::Readable;
 
 extern "C" {
     fn el2_mmu_enable();
-    fn disable_caches_hyp();
-}
-
-pub fn init_platform_state_primary_core() {
-    unsafe {
-        disable_caches_hyp();
-    }
 }
 
 pub fn init_platform_state_per_core(core_id: usize) {
@@ -19,13 +12,16 @@ pub fn init_platform_state_per_core(core_id: usize) {
     assert!(current_el == Some(CurrentEL::EL::Value::EL2));
 
     unsafe {
-        el2_mmu_enable();
-    }
-
-    unsafe {
         set_tpidr(core_id);
     }
 }
+
+pub fn init_platform_state_per_core_after_which_no_syncronization(_core_id: usize) {
+    unsafe {
+        el2_mmu_enable();
+    }
+}
+
 
 fn get_current_el() -> Option<CurrentEL::EL::Value> {
     CurrentEL.read_as_enum(CurrentEL::EL)

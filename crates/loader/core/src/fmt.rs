@@ -22,12 +22,42 @@ macro_rules! debug_print {
 }
 
 macro_rules! debug_println {
-    () => ($crate::debug_print!("\n"));
+    () => ($crate::fmt::debug_print!("\n"));
     ($($arg:tt)*) => ({
-        $crate::debug_print!($($arg)*);
-        $crate::debug_print!("\n");
+        $crate::fmt::debug_print!($($arg)*);
+        $crate::fmt::debug_print!("\n");
     })
 }
 
 pub(crate) use debug_print;
 pub(crate) use debug_println;
+
+struct DebugWriteWithoutSynchronization;
+
+impl fmt::Write for DebugWriteWithoutSynchronization {
+    fn write_str(&mut self, s: &str) -> fmt::Result {
+        for &c in s.as_bytes() {
+            debug::put_char_without_synchronization(c);
+        }
+        Ok(())
+    }
+}
+
+pub(crate) fn debug_print_helper_without_synchronization(args: fmt::Arguments) {
+    fmt::write(&mut DebugWriteWithoutSynchronization, args).unwrap_or_else(|err| panic!("write error: {:?}", err))
+}
+
+macro_rules! debug_print_without_synchronization {
+    ($($arg:tt)*) => ($crate::fmt::debug_print_helper_without_synchronization(format_args!($($arg)*)));
+}
+
+macro_rules! debug_println_without_synchronization {
+    () => ($crate::fmt::debug_print_without_synchronization!("\n"));
+    ($($arg:tt)*) => ({
+        $crate::fmt::debug_print_without_synchronization!($($arg)*);
+        $crate::fmt::debug_print_without_synchronization!("\n");
+    })
+}
+
+pub(crate) use debug_print_without_synchronization;
+pub(crate) use debug_println_without_synchronization;
