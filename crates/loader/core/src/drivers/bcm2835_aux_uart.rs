@@ -37,8 +37,7 @@ impl Bcm2835AuxUartDevice {
         self.base_addr as *const _
     }
 
-    pub fn init(&self) {
-    }
+    pub fn init(&self) {}
 }
 
 impl Deref for Bcm2835AuxUartDevice {
@@ -53,7 +52,7 @@ impl Bcm2835AuxUartDevice {
     pub fn put_char(&self, c: u8) {
         loop {
             if self.LSR.get() & MU_LSR_TXIDLE != 0 {
-                break
+                break;
             }
         }
         self.IO.set(c);

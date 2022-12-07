@@ -1,11 +1,9 @@
-use core::arch::global_asm;
-
 use aligned::{Aligned, A16};
 use spin::{Barrier, RwLock};
 
 use loader_payload_types::PayloadInfo;
 
-use crate::{psci, secondary_core_main, NUM_SECONDARY_CORES};
+use crate::{plat, secondary_core_main, NUM_SECONDARY_CORES};
 
 static SECONDARY_CORE_INIT_INFO: RwLock<Option<SecondaryCoreInitInfo>> = RwLock::new(None);
 
@@ -18,7 +16,6 @@ struct SecondaryCoreInitInfo {
 pub(crate) fn start_secondary_cores(payload_info: &PayloadInfo) {
     for i in 0..NUM_SECONDARY_CORES {
         let core_id = i + 1;
-        let start = (secondary_core_start as *const SecondaryCoreStartFn).to_bits();
         let sp = get_secondary_core_initial_stack_pointer(i);
         {
             let mut init_info = SECONDARY_CORE_INIT_INFO.write();
@@ -28,12 +25,8 @@ pub(crate) fn start_secondary_cores(payload_info: &PayloadInfo) {
                 barrier: Barrier::new(2),
             });
         }
-        psci::cpu_on(
-            core_id.try_into().unwrap(),
-            start.try_into().unwrap(),
-            sp.try_into().unwrap(),
-        )
-        .unwrap();
+        log::debug!("Primary core: starting core {}", core_id);
+        plat::smp::start_secondary_core(core_id, sp);
         {
             let init_info = SECONDARY_CORE_INIT_INFO.read();
             let init_info = init_info.as_ref().unwrap();
@@ -43,27 +36,9 @@ pub(crate) fn start_secondary_cores(payload_info: &PayloadInfo) {
     }
 }
 
-type SecondaryCoreStartFn = extern "C" fn() -> !;
-
-extern "C" {
-    fn secondary_core_start() -> !;
-}
-
-global_asm! {
-    r#"
-        .global secondary_core_start
-        .extern secondary_core_start_rust
-
-        .section .text
-
-        secondary_core_start:
-            mov sp, x0
-            b secondary_core_start_rust
-    "#
-}
-
 #[no_mangle]
-extern "C" fn secondary_core_start_rust() -> ! {
+extern "C" fn secondary_core_entry() -> ! {
+    // crate::fmt::debug_println_without_synchronization!("secondary_core_entry()");
     let core_id;
     let payload_info;
     {

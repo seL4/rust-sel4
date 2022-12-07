@@ -1,6 +1,6 @@
 use spin::Mutex;
 
-use crate::bcm2835_aux_uart::Bcm2835AuxUartDevice;
+use crate::drivers::bcm2835_aux_uart::Bcm2835AuxUartDevice;
 
 const BASE_ADDR: usize = 0xfe21_5000;
 

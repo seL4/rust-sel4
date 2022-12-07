@@ -1,6 +1,6 @@
 use spin::Mutex;
 
-use crate::pl011::Pl011Device;
+use crate::drivers::pl011::Pl011Device;
 
 const BASE_ADDR: usize = 0x0900_0000;
 

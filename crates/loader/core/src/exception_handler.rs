@@ -1,25 +1,35 @@
 use core::arch::asm;
 use core::fmt;
 
-use crate::idle;
 use crate::fmt::debug_println_without_synchronization;
+use crate::idle;
 
 #[used]
 #[no_mangle]
 static mut exception_register_state: Registers = [0; NUM_REGISTERS];
 
 #[no_mangle]
-unsafe extern "C" fn exception_handler(vector_table_index: usize, esr: usize, far: usize) {
+unsafe extern "C" fn exception_handler(vector_table_index: usize) {
+    let mut esr;
+    let mut far;
+    let mut tpidr_el1;
+    {
+        asm!("mrs {}, esr_el2", out(reg) esr);
+        asm!("mrs {}, far_el2", out(reg) far);
+        asm!("mrs {}, tpidr_el1", out(reg) tpidr_el1);
+    }
     let exception = Exception {
         vector_table_index,
         esr,
         far,
-        tpidr_el1: get_tpidr(),
+        tpidr_el1,
         registers: unsafe { exception_register_state.clone() },
     };
     debug_println_without_synchronization!("!!! Exception:\n{}", exception);
     idle()
 }
+
+//
 
 const NUM_REGISTERS: usize = 32;
 
@@ -70,11 +80,4 @@ fn show_vector_table_index(ix: usize) -> Option<&'static str> {
         15 => Some("SError 32-bit EL0"),
         _ => None,
     }
-}
-
-#[inline(never)] // never inline to work around issues with optimizer
-unsafe fn get_tpidr() -> usize {
-    let mut tpidr;
-    asm!("mrs {tpidr}, tpidr_el1", tpidr = out(reg) tpidr);
-    tpidr
 }

@@ -1,8 +1,9 @@
 #![no_std]
 #![no_main]
-#![feature(proc_macro_hygiene)]
+#![feature(atomic_from_mut)]
 #![feature(ptr_to_from_bits)]
 #![allow(unreachable_code)]
+#![allow(dead_code)]
 
 use core::ops::Range;
 use core::panic::PanicInfo;
@@ -14,9 +15,9 @@ use spin::Barrier;
 use loader_payload_types::{Payload, PayloadInfo};
 use sel4_platform_info::PLATFORM_INFO;
 
-mod bcm2835_aux_uart;
 mod copy_payload_data;
 mod debug;
+mod drivers;
 mod enter_kernel;
 mod exception_handler;
 mod fmt;
@@ -24,14 +25,12 @@ mod head;
 mod init_platform_state;
 mod init_translation_structures;
 mod logging;
-mod pl011;
 mod plat;
-mod psci;
 mod smp;
 
 use logging::Logger;
 
-const LOG_LEVEL: LevelFilter = LevelFilter::Debug;
+const LOG_LEVEL: LevelFilter = LevelFilter::Info;
 
 static LOGGER: Logger = Logger::new(LOG_LEVEL);
 
@@ -44,6 +43,8 @@ pub fn main<'a>(payload: &Payload<'a>, own_footprint: &Range<usize>) -> ! {
     debug::init();
 
     LOGGER.set().unwrap();
+
+    log::info!("Starting loader");
 
     log::debug!("Platform info: {:#x?}", PLATFORM_INFO);
     log::debug!("Loader footprint: {:#x?}", own_footprint);
@@ -63,10 +64,10 @@ pub fn main<'a>(payload: &Payload<'a>, own_footprint: &Range<usize>) -> ! {
         loader_sanity_check::sanity_check(&own_footprint, &payload.data);
     }
 
-    log::debug!("Copying payload data...");
+    log::debug!("Copying payload data");
     copy_payload_data::copy_payload_data(&payload.data);
-    log::debug!("...done");
 
+    log::debug!("Initializing translation structures");
     {
         let kernel_phys_start = payload.info.kernel_image.phys_addr_range.start;
         let kernel_virt_start = payload.info.kernel_image.virt_addr_range().start;
@@ -86,9 +87,12 @@ fn secondary_core_main(core_id: usize, payload_info: &PayloadInfo) -> ! {
 }
 
 fn common_epilogue(core_id: usize, payload_info: &PayloadInfo) -> ! {
+    if core_id == 0 {
+        log::info!("Entering kernel");
+    }
     KERNEL_ENTRY_BARRIER.wait();
     init_platform_state::init_platform_state_per_core(core_id);
-    log::info!("Core {}: enabling MMU and entering kernel", core_id);
+    log::debug!("Core {}: Entering kernel", core_id);
     init_platform_state::init_platform_state_per_core_after_which_no_syncronization(core_id);
     enter_kernel::enter_kernel(&payload_info);
     fmt::debug_println_without_synchronization!("Core {}: failed to enter kernel", core_id);

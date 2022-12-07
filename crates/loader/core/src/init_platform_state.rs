@@ -22,7 +22,6 @@ pub fn init_platform_state_per_core_after_which_no_syncronization(_core_id: usiz
     }
 }
 
-
 fn get_current_el() -> Option<CurrentEL::EL::Value> {
     CurrentEL.read_as_enum(CurrentEL::EL)
 }

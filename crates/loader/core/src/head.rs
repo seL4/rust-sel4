@@ -23,7 +23,7 @@ global_asm! {
 
         _start:
             mrs     x0, mpidr_el1
-            and     x0, x0,#0xF         // Check processor id
+            and     x0, x0, #0xf        // Check processor id
             cbz     x0, primary         // Hang for all non-primary CPU
 
         secondary_hang:

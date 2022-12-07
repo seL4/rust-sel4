@@ -414,8 +414,6 @@ END_FUNC(call_psci)
     stp     x26, x27, [x0, #16 * 13]
     stp     x28, x29, [x0, #16 * 14]
     mov     x0, \id
-    mrs     x1, ESR_EL1
-    mrs     x2, FAR_EL1
     b       exception_handler
 .endm
 

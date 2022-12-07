@@ -32,6 +32,8 @@ macro_rules! debug_println {
 pub(crate) use debug_print;
 pub(crate) use debug_println;
 
+// TODO
+
 struct DebugWriteWithoutSynchronization;
 
 impl fmt::Write for DebugWriteWithoutSynchronization {
@@ -44,7 +46,8 @@ impl fmt::Write for DebugWriteWithoutSynchronization {
 }
 
 pub(crate) fn debug_print_helper_without_synchronization(args: fmt::Arguments) {
-    fmt::write(&mut DebugWriteWithoutSynchronization, args).unwrap_or_else(|err| panic!("write error: {:?}", err))
+    fmt::write(&mut DebugWriteWithoutSynchronization, args)
+        .unwrap_or_else(|err| panic!("write error: {:?}", err))
 }
 
 macro_rules! debug_print_without_synchronization {

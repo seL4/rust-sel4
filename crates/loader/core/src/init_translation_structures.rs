@@ -18,7 +18,7 @@ const PD_LEVEL_FROM_LSB: u64 = 1;
 const PT_LEVEL_FROM_LSB: u64 = 0;
 
 const fn get_level_index(level_from_lsb: u64, addr: u64) -> u64 {
-    (addr >> (LEVEL_BITS * level_from_lsb + PAGE_BITS)) & ((1 << LEVEL_BITS) -1)
+    (addr >> (LEVEL_BITS * level_from_lsb + PAGE_BITS)) & ((1 << LEVEL_BITS) - 1)
 }
 
 const fn get_pgd_index(addr: u64) -> u64 {
