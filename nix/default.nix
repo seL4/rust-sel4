@@ -50,27 +50,37 @@ let
           rustSeL4Target = "aarch64-unknown-sel4";
           rustBareMetalTarget = "aarch64-unknown-none";
         in rec {
-          default = qemu-arm-virt;
-          qemu-arm-virt = mkWorld {
-            inherit crossPkgs loaderConfig;
-            inherit rustSeL4Target rustBareMetalTarget;
-            kernelConfig = {
-              ARM_CPU = mkString "cortex-a57";
-              KernelArch = mkString "arm";
-              KernelSel4Arch = mkString "aarch64";
-              KernelPlatform = mkString "qemu-arm-virt";
-              KernelArmHypervisorSupport = on;
-              KernelMaxNumNodes = mkString "2";
-              KernelVerificationBuild = off;
+          default = qemu-arm-virt.el2;
+          qemu-arm-virt =
+            let
+              mk = hypervisor: mkWorld {
+                inherit crossPkgs loaderConfig;
+                inherit rustSeL4Target rustBareMetalTarget;
+                kernelConfig = {
+                  ARM_CPU = mkString "cortex-a57";
+                  KernelArch = mkString "arm";
+                  KernelSel4Arch = mkString "aarch64";
+                  KernelPlatform = mkString "qemu-arm-virt";
+                  KernelMaxNumNodes = mkString "2";
+                  KernelVerificationBuild = off;
+                } // lib.optionalAttrs hypervisor {
+                  KernelArmHypervisorSupport = on;
+                };
+                qemuCmd = [
+                  # NOTE
+                  # virtualization=on even when hypervisor to test loader dropping exception level
+                  "qemu-system-aarch64"
+                    "-machine" "virt,virtualization=on"
+                    "-cpu" "cortex-a57" "-smp" "2" "-m" "1024"
+                    "-serial" "mon:stdio"
+                    "-nographic"
+                ];
+              };
+            in rec {
+              default = el2;
+              el1 = mk false;
+              el2 = mk true;
             };
-            qemuCmd = [
-              "qemu-system-aarch64"
-		            "-machine" "virt,virtualization=on"
-			          "-cpu" "cortex-a57" "-smp" "2" "-m" "1024"
-                "-serial" "mon:stdio"
-                "-nographic"
-            ];
-          };
           bcm2711 = mkWorld {
             inherit crossPkgs loaderConfig;
             inherit rustSeL4Target rustBareMetalTarget;
