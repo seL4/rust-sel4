@@ -4,10 +4,10 @@ build_subdir := docs
 
 include $(here)/common.mk
 
-target_dir := $(build_dir)/$(target)
-
 # HACK for now
 target := $(RUST_BARE_METAL_TARGET)
+
+target_dir := $(build_dir)/$(target)
 
 .PHONY: all
 all: docs
