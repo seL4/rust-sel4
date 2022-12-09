@@ -15,7 +15,7 @@
 let
   loaderConfigJSON = writeText "loader-config.json" (builtins.toJSON loaderConfig);
 
-  qemuScript = writeScript "simulate" ''
+  simulate = writeScript "simulate" ''
     #!${buildPackages.runtimeShell}
 
     set -eu
@@ -43,7 +43,7 @@ mkShell {
   SEL4_PREFIX = kernel;
   SEL4_LOADER_CONFIG = loaderConfigJSON;
 
-  QEMU_SCRIPT = qemuScript;
+  SIMULATE = simulate;
 
   hardeningDisable = [ "all" ];
 

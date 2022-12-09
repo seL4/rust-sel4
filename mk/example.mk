@@ -1,12 +1,9 @@
 here := $(dir $(realpath $(firstword $(MAKEFILE_LIST))))
-
-top_level_dir := $(here)/..
-
+root_dir := $(here)/..
 build_subdir := example
 
-manifest_path := $(top_level_dir)/Cargo.toml
-top_level_build_dir := $(top_level_dir)/build
-build_dir := $(top_level_build_dir)/$(build_subdir)
+include $(here)/common.mk
+
 target_dir := $(build_dir)/target
 
 cargo_build := \
@@ -50,4 +47,4 @@ $(loader_intermediate): $(app)
 
 .PHONY: run
 run: $(loader)
-	$(QEMU_SCRIPT) $(loader)
+	$(SIMULATE) $(loader)
