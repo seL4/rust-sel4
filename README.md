@@ -1,8 +1,17 @@
 # Rust support for seL4 userspace
 
-This repository contains crates for seL4 userspace.
+This repository contains crates for supporting the use of Rust in seL4 userspace. So far, this includes:
+
+- A Rust implementation of libsel4 ([sel4-sys](./crates/sel4/sys))
+- A limited [loader](./crates/loader) for the seL4 kernel
+
+This repository also contains some code for building and testing these crates using Nix, Make, and, optionally, Docker. However, the crates are in no way bound to this build system code.
+
+Note that, for now, these crates depend on some patches to libsel4 which can be found at [coliasgroup/seL4:rust](https://gitlab.com/coliasgroup/seL4/-/tree/rust).
 
 ### Quick start
+
+The only requirements for getting started are Git, Make, and Docker.
 
 First, clone this respository:
 
