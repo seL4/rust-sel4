@@ -51,12 +51,11 @@ stdenv.mkDerivation {
 
   configurePhase = ''
     build=$(pwd)/build
-    install_prefix=$(pwd)/install
 
     cmake \
       -DCROSS_COMPILER_PREFIX=${stdenv.cc.targetPrefix} \
       -DCMAKE_TOOLCHAIN_FILE=gcc.cmake \
-      -DCMAKE_INSTALL_PREFIX=$install_prefix \
+      -DCMAKE_INSTALL_PREFIX=$out \
       -C ${settings} \
       -G Ninja \
       -B $build
@@ -67,19 +66,21 @@ stdenv.mkDerivation {
   '';  
 
   installPhase = ''
+    cp_if_exists() {
+      src=$1
+      dst=$2
+      if [ -e $src ]; then 
+        cp $src $dst
+      fi
+    }
+
     ninja -C $build install
 
-    mkdir $out
+    mkdir $out/support
 
-    mv $install_prefix/libsel4/include $out
-
-    install -D -t $out/boot \
-      $build/kernel.dtb \
-      $install_prefix/bin/kernel.elf
-
-    install -D -t $out/sel4-aux \
-      $build/gen_config/kernel/gen_config.json \
-      $build/gen_headers/plat/machine/platform_gen.yaml
+    cp $build/gen_config/kernel/gen_config.json $out/support/config.json
+    cp_if_exists $build/kernel.dtb $out/support/kernel.dtb
+    cp_if_exists $build/gen_headers/plat/machine/platform_gen.yaml $out/support/platform-info.yaml
   '';
 
   dontFixup = true;

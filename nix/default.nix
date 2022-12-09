@@ -16,6 +16,8 @@ let
     dev = mkPkgs null;
     aarch64 = mkPkgs { config = "aarch64-none-elf"; };
     riscv64 = mkPkgs { config = "riscv64-none-elf"; };
+    # Use this instead of x86_64-none-elf to avoid cache miss at the expense of uniformity
+    x86_64 = mkPkgs { config = "x86_64-unknown-linux-gnu"; };
   };
 
   inherit (pkgs.dev) lib;
@@ -43,12 +45,13 @@ let
     with configHelpers;
     let
       loaderConfig = {};
+      noQemuCmd = [ "false" ];
     in {
       aarch64 =
         let
           crossPkgs = pkgs.aarch64;
-          rustSeL4Target = "aarch64-unknown-sel4";
           rustBareMetalTarget = "aarch64-unknown-none";
+          rustSeL4Target = "aarch64-unknown-sel4";
         in rec {
           default = qemu-arm-virt.el2;
           qemu-arm-virt =
@@ -90,21 +93,20 @@ let
               KernelSel4Arch = mkString "aarch64";
               KernelPlatform = mkString "bcm2711";
               KernelArmHypervisorSupport = on;
-              # KernelMaxNumNodes = mkString "2";
+              # KernelMaxNumNodes = mkString "2"; # TODO
               KernelVerificationBuild = off;
             };
-            qemuCmd = [
-              "false"
-            ];
+            qemuCmd = noQemuCmd;
           };
         };
       riscv64 =
         let
           crossPkgs = pkgs.riscv64;
-          rustSeL4Target = "riscv64imac-unknown-none-elf";
           rustBareMetalTarget = "riscv64imac-unknown-none-elf";
-        in {
-          default = mkWorld {
+          rustSeL4Target = rustBareMetalTarget; # TODO
+        in rec {
+          default = spike;
+          spike = mkWorld {
             inherit crossPkgs loaderConfig;
             inherit rustSeL4Target rustBareMetalTarget;
             kernelConfig = {
@@ -113,9 +115,26 @@ let
               KernelPlatform = mkString "spike";
               KernelVerificationBuild = off;
             };
-            qemuCmd = [
-              # TODO
-            ];
+            qemuCmd = noQemuCmd; # TODO
+          };
+        };
+      x86_64 =
+        let
+          crossPkgs = pkgs.x86_64;
+          rustBareMetalTarget = "x86_64-unknown-none";
+          rustSeL4Target = rustBareMetalTarget; # TODO
+        in rec {
+          default = pc99;
+          pc99 = mkWorld {
+            inherit crossPkgs loaderConfig;
+            inherit rustSeL4Target rustBareMetalTarget;
+            kernelConfig = {
+              KernelArch = mkString "x86";
+              KernelSel4Arch = mkString "x86_64";
+              KernelPlatform = mkString "pc99";
+              KernelVerificationBuild = off;
+            };
+            qemuCmd = noQemuCmd; # TODO
           };
         };
     };

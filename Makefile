@@ -1,6 +1,7 @@
 architectures := \
 	aarch64 \
-	riscv64
+	riscv64 \
+	x86_64
 
 .PHONY: none
 none:

@@ -3,16 +3,14 @@ use std::marker::PhantomData;
 use std::path::{Path, PathBuf};
 
 pub const SEL4_CONFIG: Var<PathVarType<'static>> =
-    Var::new("SEL4_CONFIG", SEL4_PREFIX_ENV, "sel4-aux/gen_config.json");
+    Var::new("SEL4_CONFIG", SEL4_PREFIX_ENV, "support/config.json");
 pub const SEL4_PLATFORM_INFO: Var<PathVarType<'static>> = Var::new(
     "SEL4_PLATFORM_INFO",
     SEL4_PREFIX_ENV,
-    "sel4-aux/platform_gen.yaml",
+    "support/platform-info.yaml",
 );
 pub const SEL4_INCLUDE_DIRS: Var<PathsVarType<'static>> =
-    Var::new("SEL4_INCLUDE_DIRS", SEL4_PREFIX_ENV, ["include"].as_slice());
-pub const SEL4_LIB_DIRS: Var<PathsVarType<'static>> =
-    Var::new("SEL4_LIB_DIRS", SEL4_PREFIX_ENV, ["lib"].as_slice());
+    Var::new("SEL4_INCLUDE_DIRS", SEL4_PREFIX_ENV, ["libsel4/include"].as_slice());
 
 pub const SEL4_PREFIX_ENV: &str = "SEL4_PREFIX";
 
