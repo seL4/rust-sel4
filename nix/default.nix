@@ -28,6 +28,7 @@ let
     { crossPkgs, kernelConfig, loaderConfig
     , rustSeL4Target, rustBareMetalTarget
     , qemuCmd
+    , ...
     } @ args:
     let
     in args // rec {
@@ -75,8 +76,8 @@ let
                   "qemu-system-aarch64"
                     "-machine" "virt,virtualization=on"
                     "-cpu" "cortex-a57" "-smp" "2" "-m" "1024"
-                    "-serial" "mon:stdio"
                     "-nographic"
+                    "-serial" "mon:stdio"
                 ];
               };
             in rec {
@@ -125,7 +126,7 @@ let
           rustSeL4Target = rustBareMetalTarget; # TODO
         in rec {
           default = pc99;
-          pc99 = mkWorld {
+          pc99 = lib.fix (self: mkWorld {
             inherit crossPkgs loaderConfig;
             inherit rustSeL4Target rustBareMetalTarget;
             kernelConfig = {
@@ -133,9 +134,40 @@ let
               KernelSel4Arch = mkString "x86_64";
               KernelPlatform = mkString "pc99";
               KernelVerificationBuild = off;
+
+              # for the sake of simulation (see seL4_tools/cmake-tool/helpers/application_settings.cmake)
+              KernelFSGSBase = mkString "msr";
+              KernelSupportPCID = off;
+              KernelIOMMU = off;
+              KernelFPU = mkString "FXSAVE";
             };
-            qemuCmd = noQemuCmd; # TODO
-          };
+            qemuCmd =
+              let
+                enable = opt: "+${opt}";
+                disable = opt: "-${opt}";
+                opts = lib.concatStringsSep "," [
+                  (disable "vme")
+                  (enable "pdpe1gb")
+                  (disable "xsave")
+                  (disable "xsaveopt")
+                  (disable "xsavec")
+                  (disable "fsgsbase")
+                  (disable "invpcid")
+                  (enable "syscall")
+                  (enable "lm")
+                ];
+              in [
+                "qemu-system-x86_64"
+                  "-cpu" "Nehalem,${opts},enforce"
+                  "-m" "size=512M"
+                  "-nographic"
+                  "-serial" "mon:stdio"
+                  "-kernel" "${self.kernel32Bit}"
+              ];
+            kernel32Bit = crossPkgs.runCommandCC "kernel32.elf" {} ''
+              $OBJCOPY -O elf32-i386 ${self.kernel}/bin/kernel.elf $out
+            '';
+          });
         };
     };
 

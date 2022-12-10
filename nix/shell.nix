@@ -15,21 +15,9 @@
 let
   loaderConfigJSON = writeText "loader-config.json" (builtins.toJSON loaderConfig);
 
-  simulate = writeScript "simulate" ''
-    #!${buildPackages.runtimeShell}
-
-    set -eu
-
-    image="$1"
-    shift
-
-    ${lib.concatStringsSep " " qemuCmd} \
-      -kernel "$image" \
-      "$@"
-  '';
-
 in
 mkShell {
+  ARCH = stdenv.hostPlatform.parsed.cpu.name;
 
   RUST_TARGET_PATH = toString ../support/targets; # absolute path
 
@@ -43,7 +31,7 @@ mkShell {
   SEL4_PREFIX = kernel;
   SEL4_LOADER_CONFIG = loaderConfigJSON;
 
-  SIMULATE = simulate;
+  QEMU_CMD = qemuCmd;
 
   hardeningDisable = [ "all" ];
 

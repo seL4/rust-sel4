@@ -1,6 +1,7 @@
 #![no_std]
 #![no_main]
 #![feature(core_intrinsics)]
+#![feature(exclusive_wrapper)]
 
 use core::panic::PanicInfo;
 
