@@ -17,8 +17,7 @@ cargo_build := \
 default: build
 
 app_crate := minimal-without-runtime
-app_extension := $(if $(filter-out x86_64,$(ARCH)),.elf)
-app := $(build_dir)/$(app_crate)$(app_extension)
+app := $(build_dir)/$(app_crate).elf
 app_intermediate := $(build_dir)/app.intermediate
 
 $(app): $(app_intermediate)

@@ -123,7 +123,7 @@ let
         let
           crossPkgs = pkgs.x86_64;
           rustBareMetalTarget = "x86_64-unknown-none";
-          rustSeL4Target = rustBareMetalTarget; # TODO
+          rustSeL4Target = "x86_64-unknown-sel4";
         in rec {
           default = pc99;
           pc99 = lib.fix (self: mkWorld {
