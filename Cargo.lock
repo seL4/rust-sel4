@@ -4,9 +4,9 @@ version = 3
 
 [[package]]
 name = "aarch64-cpu"
-version = "9.0.0"
+version = "9.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3aceb88e55ba626a5479279268d009a92d9d00eacce0de1b8c236c7ad31b7225"
+checksum = "3478265322ad2c3e68e88606b00e92c45e6f4c26b6d5e042c209254e0d56e9c1"
 dependencies = [
  "tock-registers",
 ]
@@ -250,8 +250,13 @@ name = "loader"
 version = "0.1.0"
 dependencies = [
  "loader-core",
+ "loader-embed-aarch64-translation-tables",
  "loader-payload",
  "loader-payload-at-build-time",
+ "quote",
+ "sel4-config",
+ "sel4-platform-info",
+ "sel4-rustfmt-helper",
 ]
 
 [[package]]
@@ -299,6 +304,7 @@ dependencies = [
  "cfg-if",
  "glob",
  "loader-config",
+ "loader-embed-aarch64-translation-tables",
  "loader-payload-types",
  "loader-sanity-check",
  "log",
@@ -308,6 +314,14 @@ dependencies = [
  "sel4-platform-info",
  "spin",
  "tock-registers",
+]
+
+[[package]]
+name = "loader-embed-aarch64-translation-tables"
+version = "0.1.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
 ]
 
 [[package]]
@@ -686,18 +700,18 @@ dependencies = [
 
 [[package]]
 name = "serde"
-version = "1.0.148"
+version = "1.0.150"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e53f64bb4ba0191d6d0676e1b141ca55047d83b74f5607e6d8eb88126c52c2dc"
+checksum = "e326c9ec8042f1b5da33252c8a37e9ffbd2c9bef0155215b6e6c80c790e05f91"
 dependencies = [
  "serde_derive",
 ]
 
 [[package]]
 name = "serde_derive"
-version = "1.0.148"
+version = "1.0.150"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a55492425aa53521babf6137309e7d34c20bbfbbfcfe2c7f3a047fd1f6b92c0c"
+checksum = "42a3df25b0713732468deadad63ab9da1f1fd75a48a15024b50363f128db627e"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -799,9 +813,9 @@ checksum = "696941a0aee7e276a165a978b37918fd5d22c55c3d6bda197813070ca9c0f21c"
 
 [[package]]
 name = "typenum"
-version = "1.15.0"
+version = "1.16.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dcf81ac59edc17cc8697ff311e8f5ef2d99fcbd9817b34cec66f90b6c3dfd987"
+checksum = "497961ef93d974e23eb6f433eb5fe1b7930b659f06d12dec6fc44a8f554c0bba"
 
 [[package]]
 name = "ucd-trie"

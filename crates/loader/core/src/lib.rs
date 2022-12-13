@@ -23,7 +23,6 @@ mod exception_handler;
 mod fmt;
 mod head;
 mod init_platform_state;
-mod init_translation_structures;
 mod logging;
 mod plat;
 mod smp;
@@ -66,16 +65,6 @@ pub fn main<'a>(payload: &Payload<'a>, own_footprint: &Range<usize>) -> ! {
 
     log::debug!("Copying payload data");
     copy_payload_data::copy_payload_data(&payload.data);
-
-    log::debug!("Initializing translation structures");
-    {
-        let kernel_phys_start = payload.info.kernel_image.phys_addr_range.start;
-        let kernel_virt_start = payload.info.kernel_image.virt_addr_range().start;
-        init_translation_structures::init_translation_structures(
-            kernel_phys_start.try_into().unwrap(),
-            kernel_virt_start.try_into().unwrap(),
-        );
-    }
 
     smp::start_secondary_cores(&payload.info);
 

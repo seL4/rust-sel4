@@ -10,4 +10,9 @@ loader-core = { path = "./core" }
 loader-payload = { path = "./payload" }
 
 [build-dependencies]
+quote = "1"
+loader-embed-aarch64-translation-tables = { path = "./embed-aarch64-translation-tables" }
 loader-payload-at-build-time = { path = "./payload/at-build-time" }
+sel4-config = { path = "../sel4/config" }
+sel4-platform-info = { path = "../sel4/platform-info" }
+sel4-rustfmt-helper = { path = "../sel4/rustfmt-helper" }

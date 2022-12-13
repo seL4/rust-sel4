@@ -1,6 +1,9 @@
 #![no_std]
 #![no_main]
 #![feature(core_intrinsics)]
+#![feature(ptr_to_from_bits)]
+#![feature(pointer_byte_offsets)]
+#![feature(const_pointer_byte_offsets)]
 
 use core::ops::Range;
 
@@ -24,3 +27,7 @@ extern "C" {
 
 const LOADER_PHYS_START: usize =
     include!(concat!(env!("OUT_DIR"), "/loader_phys_start.fragment.rs"));
+
+mod translation_tables {
+    include!(concat!(env!("OUT_DIR"), "/translation_tables.rs"));
+}
