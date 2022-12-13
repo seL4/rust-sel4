@@ -16,7 +16,7 @@ impl Table {
         });
         quote! {
             #[repr(C, align(4096))]
-            pub struct Table([*const (); #NUM_ENTRIES]);
+            pub struct Table(pub [*const (); #NUM_ENTRIES]);
 
             #[no_mangle]
             #[allow(unused_unsafe)]

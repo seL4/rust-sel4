@@ -35,21 +35,38 @@ impl Entry {
     }
 
     fn new(value: u64, child: Option<Box<Table>>) -> Self {
+        if child.is_some() {
+            assert_eq!(value & (PHYS_BOUNDS.end - 1) & !(PAGE_BITS - 1), 0);
+        }
         Self { value, child }
     }
 }
 
 pub struct Region {
     pub phys_range: Range<u64>,
-    pub mk_block_entry: Box<dyn Fn(u64) -> u64>,
+    pub entries_valid_at_level_0: bool,
+    pub mk_entry: Box<dyn Fn(u64) -> u64>,
 }
 
 impl Region {
-    pub fn new(phys_range: Range<u64>, mk_block_entry: impl 'static + Fn(u64) -> u64) -> Self {
+    pub fn new(
+        phys_range: Range<u64>,
+        entries_valid_at_level_0: bool,
+        mk_entry: impl 'static + Fn(u64) -> u64,
+    ) -> Self {
         Self {
             phys_range,
-            mk_block_entry: Box::new(mk_block_entry),
+            entries_valid_at_level_0,
+            mk_entry: Box::new(mk_entry),
         }
+    }
+
+    pub fn valid(phys_range: Range<u64>, mk_entry: impl 'static + Fn(u64) -> u64) -> Self {
+        Self::new(phys_range, false, mk_entry)
+    }
+
+    pub fn invalid(phys_range: Range<u64>) -> Self {
+        Self::new(phys_range, true, |_| 0)
     }
 }
 
@@ -77,8 +94,12 @@ where
         self.current.borrow().phys_range.end
     }
 
-    fn current_mk_block_entry(&self, vaddr: u64) -> u64 {
-        (self.current.borrow().mk_block_entry)(vaddr)
+    fn current_mk_entry(&self, vaddr: u64) -> u64 {
+        (self.current.borrow().mk_entry)(vaddr)
+    }
+
+    fn current_entries_valid_at_level_0(&self) -> bool {
+        self.current.borrow().entries_valid_at_level_0
     }
 
     fn advance(&mut self) -> bool {
@@ -114,11 +135,13 @@ where
                     assert!(self.advance())
                 }
                 assert!(self.current_end() > entry_vaddr);
-                if self.current_end() < entry_vaddr + step {
+                if (level == 0 && !self.current_entries_valid_at_level_0())
+                    || self.current_end() < entry_vaddr + step
+                {
                     assert!(level < (NUM_LEVELS - 1));
                     Entry::branch(Box::new(self.construct_inner(level + 1, entry_vaddr)))
                 } else {
-                    Entry::leaf(self.current_mk_block_entry(entry_vaddr))
+                    Entry::leaf(self.current_mk_entry(entry_vaddr))
                 }
             }),
         }

@@ -29,7 +29,7 @@ mod smp;
 
 use logging::Logger;
 
-const LOG_LEVEL: LevelFilter = LevelFilter::Info;
+const LOG_LEVEL: LevelFilter = LevelFilter::Debug;
 
 static LOGGER: Logger = Logger::new(LOG_LEVEL);
 

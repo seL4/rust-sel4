@@ -1,3 +1,5 @@
+#![feature(int_roundings)]
+
 use std::env;
 use std::fs;
 use std::path::PathBuf;
@@ -35,20 +37,24 @@ fn mk_translation_tables() -> String {
     let info = &payload.info.kernel_image;
     let phys_to_virt_offset = u64::try_from(info.phys_to_virt_offset).unwrap();
     let virt_start = info.phys_addr_range.start + phys_to_virt_offset;
+    let virt_end = virt_start.next_multiple_of(1 << 39);
+    let identity_map = |vaddr| {
+        vaddr
+        | (1 << 10) // access flag
+        | (0 << 2) // select MT_DEVICE_nGnRnE
+        | (1 << 0) // mark as valid
+    };
+    let kernel_map = move |vaddr| {
+        (vaddr - phys_to_virt_offset)
+        | (1 << 10) // access flag
+        | (4 << 2) // select MT_NORMAL
+        | (1 << 0) // mark as valid
+        | if sel4_config::sel4_cfg_usize!(MAX_NUM_NODES) > 1 { 3 << 8 } else { 0 }
+    };
     let regions = vec![
-        Region::new(0..virt_start, |vaddr| {
-            vaddr
-            | (1 << 10) // access flag
-            | (0 << 2) // select MT_DEVICE_nGnRnE
-            | (1 << 0) // mark as valid
-        }),
-        Region::new(virt_start..PHYS_BOUNDS.end, move |vaddr| {
-            (vaddr - phys_to_virt_offset)
-            | (1 << 10) // access flag
-            | (4 << 2) // select MT_NORMAL
-            | (1 << 0) // mark as valid
-            | if sel4_config::sel4_cfg_usize!(MAX_NUM_NODES) > 1 { 3 << 8 } else { 0 }
-        }),
+        Region::valid(0..virt_start, identity_map),
+        Region::valid(virt_start..virt_end, kernel_map),
+        Region::invalid(virt_end..PHYS_BOUNDS.end),
     ];
     let toks = embed(format_ident!("boot_level_0_table"), regions.iter());
     format!("{}", toks)
