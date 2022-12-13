@@ -9,8 +9,11 @@ pub const SEL4_PLATFORM_INFO: Var<PathVarType<'static>> = Var::new(
     SEL4_PREFIX_ENV,
     "support/platform-info.yaml",
 );
-pub const SEL4_INCLUDE_DIRS: Var<PathsVarType<'static>> =
-    Var::new("SEL4_INCLUDE_DIRS", SEL4_PREFIX_ENV, ["libsel4/include"].as_slice());
+pub const SEL4_INCLUDE_DIRS: Var<PathsVarType<'static>> = Var::new(
+    "SEL4_INCLUDE_DIRS",
+    SEL4_PREFIX_ENV,
+    ["libsel4/include"].as_slice(),
+);
 
 pub const SEL4_PREFIX_ENV: &str = "SEL4_PREFIX";
 

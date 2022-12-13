@@ -9,9 +9,7 @@ struct Stack([u8; STACK_SIZE]);
 static mut STACK: Stack = Stack([0; STACK_SIZE]);
 
 #[no_mangle]
-static __stack_top: Exclusive<*const u8> = Exclusive::new(unsafe {
-    STACK.0.as_ptr_range().end
-});
+static __stack_top: Exclusive<*const u8> = Exclusive::new(unsafe { STACK.0.as_ptr_range().end });
 
 cfg_if::cfg_if! {
     if #[cfg(target_arch = "aarch64")] {
