@@ -59,7 +59,7 @@ BEGIN_FUNC(el2_mmu_enable)
     msr     tcr_el2, x8
     isb
 
-    adrp    x8, boot_level_0_table
+    adrp    x8, kernel_boot_level_0_table
     msr     ttbr0_el2, x8
     isb
 

@@ -2,6 +2,8 @@
 #![no_main]
 #![feature(atomic_from_mut)]
 #![feature(ptr_to_from_bits)]
+#![feature(pointer_byte_offsets)]
+#![feature(const_pointer_byte_offsets)]
 #![allow(unreachable_code)]
 #![allow(dead_code)]
 
@@ -83,6 +85,9 @@ fn common_epilogue(core_id: usize, payload_info: &PayloadInfo) -> ! {
     init_platform_state::init_platform_state_per_core(core_id);
     log::debug!("Core {}: Entering kernel", core_id);
     init_platform_state::init_platform_state_per_core_after_which_no_syncronization(core_id);
+    plat::debug::put_char_without_synchronization(b'x');
+    plat::debug::put_char_without_synchronization(b'\n');
+    // fmt::debug_println_without_synchronization!("xxx");
     enter_kernel::enter_kernel(&payload_info);
     fmt::debug_println_without_synchronization!("Core {}: failed to enter kernel", core_id);
     idle()
@@ -100,4 +105,10 @@ fn idle() -> ! {
     loop {
         wfe();
     }
+}
+
+//
+
+mod translation_tables {
+    include!(concat!(env!("OUT_DIR"), "/translation_tables.rs"));
 }

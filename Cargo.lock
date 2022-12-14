@@ -309,9 +309,11 @@ dependencies = [
  "loader-sanity-check",
  "log",
  "psci",
+ "quote",
  "sel4-build-env",
  "sel4-config",
  "sel4-platform-info",
+ "sel4-rustfmt-helper",
  "spin",
  "tock-registers",
 ]

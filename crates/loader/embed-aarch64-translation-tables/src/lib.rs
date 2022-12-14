@@ -1,12 +1,8 @@
-use std::borrow::Borrow;
-
-use proc_macro2::{Ident, TokenStream};
-
 mod embed;
+mod glue;
+mod regions;
 mod table;
 
-pub use table::{Region, PHYS_BOUNDS};
-
-pub fn embed(ident: Ident, regions: impl Iterator<Item = impl Borrow<Region>>) -> TokenStream {
-    table::Table::construct(regions).embed(ident)
-}
+pub use glue::{construct_and_embed_table, BlockDescriptor, Region, Regions};
+pub use regions::{AbstractRegion, AbstractRegions};
+pub use table::{AbstractEntry, MkLeafFnParams, RegionContent, PHYS_BOUNDS};

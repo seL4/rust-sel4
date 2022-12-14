@@ -6,7 +6,7 @@ use std::path::PathBuf;
 
 use quote::format_ident;
 
-use loader_embed_aarch64_translation_tables::{embed, Region, PHYS_BOUNDS};
+use loader_embed_aarch64_translation_tables::{MkLeafFnParams, Region, Regions};
 use sel4_rustfmt_helper::Rustfmt;
 
 fn main() {
@@ -38,24 +38,32 @@ fn mk_translation_tables() -> String {
     let phys_to_virt_offset = u64::try_from(info.phys_to_virt_offset).unwrap();
     let virt_start = info.phys_addr_range.start + phys_to_virt_offset;
     let virt_end = virt_start.next_multiple_of(1 << 39);
-    let identity_map = |vaddr| {
-        vaddr
-        | (1 << 10) // access flag
-        | (0 << 2) // select MT_DEVICE_nGnRnE
-        | (1 << 0) // mark as valid
+
+    let normal_shareability = if sel4_config::sel4_cfg_usize!(MAX_NUM_NODES) > 1 {
+        3
+    } else {
+        0
     };
-    let kernel_map = move |vaddr| {
-        (vaddr - phys_to_virt_offset)
-        | (1 << 10) // access flag
-        | (4 << 2) // select MT_NORMAL
-        | (1 << 0) // mark as valid
-        | if sel4_config::sel4_cfg_usize!(MAX_NUM_NODES) > 1 { 3 << 8 } else { 0 }
+
+    let identity_map = |params: MkLeafFnParams| {
+        params
+            .mk_identity()
+            .set_access_flag(true)
+            .set_attribute_index(0) // select MT_DEVICE_nGnRnE
     };
-    let regions = vec![
-        Region::valid(0..virt_start, identity_map),
-        Region::valid(virt_start..virt_end, kernel_map),
-        Region::invalid(virt_end..PHYS_BOUNDS.end),
-    ];
-    let toks = embed(format_ident!("boot_level_0_table"), regions.iter());
+
+    let kernel_map = move |params: MkLeafFnParams| {
+        params
+            .mk(|vaddr| vaddr - phys_to_virt_offset)
+            .set_access_flag(true)
+            .set_attribute_index(4) // select MT_NORMAL
+            .set_shareability(normal_shareability)
+    };
+
+    let regions = Regions::new()
+        .insert(Region::valid(0..virt_start, identity_map))
+        .insert(Region::valid(virt_start..virt_end, kernel_map));
+
+    let toks = regions.construct_and_embed_table(format_ident!("kernel_boot_level_0_table"));
     format!("{}", toks)
 }

@@ -22,6 +22,9 @@ sel4-platform-info = { path = "../../sel4/platform-info" }
 [build-dependencies]
 cc = "*"
 glob = "*"
+quote = "1"
 loader-embed-aarch64-translation-tables = { path = "../embed-aarch64-translation-tables" }
 sel4-build-env = { path = "../../sel4/build-env" }
+sel4-config = { path = "../../sel4/config" }
 sel4-platform-info = { path = "../../sel4/platform-info" }
+sel4-rustfmt-helper = { path = "../../sel4/rustfmt-helper" }

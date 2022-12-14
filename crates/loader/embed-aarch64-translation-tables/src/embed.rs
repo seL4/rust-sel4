@@ -3,17 +3,46 @@ use std::collections::BTreeMap;
 use proc_macro2::{Ident, TokenStream};
 use quote::quote;
 
-use crate::table::{Table, NUM_ENTRIES};
+use crate::table::{AbstractEntry, Table, NUM_ENTRIES};
 
-impl Table {
+impl<T> Table<T>
+where
+    for<'a> &'a AbstractEntry<T>: Into<EntryForEmbedding<'a, T>>,
+{
     pub fn embed(&self, ident: Ident) -> TokenStream {
-        let mut embedding = Embedding::new(&ident);
-        let _ = embedding.embed(self);
-        let num_tables = embedding.next_index;
-        let tables = embedding.tables.iter().enumerate().map(|(i, (k, v))| {
-            assert_eq!(i, *k);
-            v
-        });
+        Embedding::new(ident).embed(self)
+    }
+}
+
+pub struct EntryForEmbedding<'a, T> {
+    pub offset: u64,
+    pub ptr: Option<&'a Table<T>>,
+}
+
+struct Embedding {
+    ident: Ident,
+    next_index: usize,
+    tables: BTreeMap<usize, TokenStream>,
+}
+
+impl Embedding {
+    fn new(ident: Ident) -> Self {
+        Self {
+            ident,
+            next_index: 0,
+            tables: BTreeMap::new(),
+        }
+    }
+
+    fn embed<'a, T>(mut self, table: &'a Table<T>) -> TokenStream
+    where
+        &'a AbstractEntry<T>: Into<EntryForEmbedding<'a, T>>,
+    {
+        let _ = self.embed_inner(table);
+        self.check_tables_order();
+        let ident = self.ident;
+        let num_tables = self.next_index;
+        let tables = self.tables.values();
         quote! {
             #[repr(C, align(4096))]
             pub struct Table(pub [*const (); #NUM_ENTRIES]);
@@ -25,44 +54,32 @@ impl Table {
             };
         }
     }
-}
 
-struct Embedding<'a> {
-    ident: &'a Ident,
-    next_index: usize,
-    tables: BTreeMap<usize, TokenStream>,
-}
-
-impl<'a> Embedding<'a> {
-    fn new(ident: &'a Ident) -> Self {
-        Self {
-            ident,
-            next_index: 0,
-            tables: BTreeMap::new(),
-        }
+    fn check_tables_order(&self) {
+        self.tables.keys().enumerate().for_each(|(i, k)| {
+            assert_eq!(i, *k);
+        });
     }
 
-    fn allocate_index(&mut self) -> usize {
-        let index = self.next_index;
-        self.next_index += 1;
-        index
-    }
-
-    fn embed(&mut self, table: &Table) -> usize {
-        let ident = self.ident;
+    fn embed_inner<'a, T>(&mut self, table: &'a Table<T>) -> usize
+    where
+        &'a AbstractEntry<T>: Into<EntryForEmbedding<'a, T>>,
+    {
         let index = self.allocate_index();
         let entries = table.entries.iter().map(|entry| {
-            let value = entry.value;
-            match &entry.child {
+            let entry: EntryForEmbedding<T> = entry.into();
+            let offset = entry.offset;
+            match &entry.ptr {
                 None => {
                     quote! {
-                        (#value as *const ())
+                        (#offset as *const ())
                     }
                 }
-                Some(table) => {
-                    let child_index = self.embed(&table);
+                Some(ptr) => {
+                    let child_index = self.embed_inner(&ptr);
+                    let ident = &self.ident;
                     quote! {
-                        (&#ident[#child_index] as *const Table as *const ()).byte_add(#value as usize)
+                        (&#ident[#child_index] as *const Table as *const ()).byte_add(#offset as usize)
                     }
                 }
             }
@@ -71,6 +88,12 @@ impl<'a> Embedding<'a> {
             Table([#(#entries,)*])
         };
         self.tables.insert(index, toks);
+        index
+    }
+
+    fn allocate_index(&mut self) -> usize {
+        let index = self.next_index;
+        self.next_index += 1;
         index
     }
 }
