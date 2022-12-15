@@ -1,5 +1,10 @@
 let
-  nixpkgsFn = import (builtins.getFlake "nixpkgs/227de2b3bbec142f912c09d5e8a1b4e778aa54fb").outPath;
+  nixpkgsSrc = builtins.fetchGit {
+    url = "https://github.com/NixOS/nixpkgs.git";
+    rev = "227de2b3bbec142f912c09d5e8a1b4e778aa54fb";
+  };
+
+  nixpkgsFn = import nixpkgsSrc;
 
   mkPkgs = crossSystem: nixpkgsFn {
     inherit crossSystem;
