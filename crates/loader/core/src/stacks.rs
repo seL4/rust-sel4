@@ -10,7 +10,8 @@ const PRIMARY_STACK_SIZE: usize = 4096 * 3;
 static mut PRIMARY_STACK: Stack<PRIMARY_STACK_SIZE> = Stack([0; PRIMARY_STACK_SIZE]);
 
 #[no_mangle]
-static __primary_stack_bottom: Exclusive<*const u8> = Exclusive::new(unsafe { PRIMARY_STACK.0.as_ptr_range().end });
+static __primary_stack_bottom: Exclusive<*const u8> =
+    Exclusive::new(unsafe { PRIMARY_STACK.0.as_ptr_range().end });
 
 const SECONDARY_STACK_SIZE: usize = 4096 * 2;
 const SECONDARY_STACKS_SIZE: usize = SECONDARY_STACK_SIZE * NUM_SECONDARY_CORES;
