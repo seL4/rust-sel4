@@ -1,26 +1,71 @@
-#include <sel4/config.h>
 #include "macros.h"
-#include "mm.h"
-#include "registers.h"
 
-#ifdef CONFIG_ARM_PA_SIZE_BITS_40
-#define TCR_PS TCR_PS_1T
-#else
-#define TCR_PS TCR_PS_16T
-#endif
+// Derived from:
+// https://developer.arm.com/documentation/den0024/a/Caches/Cache-maintenance
 
+.macro dcache op
+    dsb     sy
+    mrs     x0, clidr_el1
+    and     x3, x0, #0x7000000
+    lsr     x3, x3, #23
+
+    cbz     x3, finished_\op
+    mov     x10, #0
+
+loop1_\op:
+    add     x2, x10, x10, lsr #1
+    lsr     x1, x0, x2
+    and     x1, x1, #7
+    cmp     x1, #2
+    b.lt    skip_\op
+
+    msr     csselr_el1, x10
+    isb
+
+    mrs     x1, ccsidr_el1
+    and     x2, x1, #7
+    add     x2, x2, #4
+    mov     x4, #0x3ff
+    and     x4, x4, x1, lsr #3
+    clz     w5, w4
+    mov     x7, #0x7fff
+    and     x7, x7, x1, lsr #13
+
+loop2_\op:
+    mov     x9, x4
+
+loop3_\op:
+    lsl     x6, x9, x5
+    orr     x11, x10, x6
+    lsl     x6, x7, x2
+    orr     x11, x11, x6
+    dc      \op, x11
+    subs    x9, x9, #1
+    b.ge    loop3_\op
+    subs    x7, x7, #1
+    b.ge    loop2_\op
+
+skip_\op:
+    add     x10, x10, #2
+    cmp     x3, x10
+    b.gt    loop1_\op
+
+finished_\op:
+    mov     x10, #0
+    msr     csselr_el1, x10
+    dsb     sy
+    isb
+.endm
 
 BEGIN_FUNC(invalidate_dcache)
     dcache  isw
     ret
 END_FUNC(invalidate_dcache)
 
-
-BEGIN_FUNC(flush_dcache)
+BEGIN_FUNC(clean_and_invalideate_dcache)
     dcache  cisw
     ret
-END_FUNC(flush_dcache)
-
+END_FUNC(clean_and_invalideate_dcache)
 
 BEGIN_FUNC(invalidate_icache)
     ic      iallu
@@ -28,56 +73,3 @@ BEGIN_FUNC(invalidate_icache)
     isb
     ret
 END_FUNC(invalidate_icache)
-
-
-BEGIN_FUNC(el2_mmu_enable)
-    stp     x29, x30, [sp, #-16]!
-    mov     x29, sp
-
-    bl      flush_dcache
-
-    disable_mmu sctlr_el2, x8
-
-    bl      invalidate_icache
-
-    /*
-     *   DEVICE_nGnRnE      000     00000000
-     *   DEVICE_nGnRE       001     00000100
-     *   DEVICE_GRE         010     00001100
-     *   NORMAL_NC          011     01000100
-     *   NORMAL             100     11111111
-     *   NORMAL_WT          101     10101010
-     */
-    ldr     x5, =MAIR(0x00, MT_DEVICE_nGnRnE) | \
-                 MAIR(0x04, MT_DEVICE_nGnRE) | \
-                 MAIR(0x0c, MT_DEVICE_GRE) | \
-                 MAIR(0x44, MT_NORMAL_NC) | \
-                 MAIR(0xff, MT_NORMAL) | \
-                 MAIR(0xaa, MT_NORMAL_WT)
-    msr     mair_el2, x5
-    ldr     x8, =TCR_T0SZ(48) | TCR_IRGN0_WBWC | TCR_ORGN0_WBWC | TCR_SH0_ISH | TCR_TG0_4K | TCR_PS | TCR_EL2_RES1
-    msr     tcr_el2, x8
-    isb
-
-    adrp    x8, kernel_boot_level_0_table
-    msr     ttbr0_el2, x8
-    isb
-
-    tlbi    alle2is
-    dsb     ish
-    isb
-
-    enable_mmu  sctlr_el2, x8
-
-    adrp    x8, arm_vector_table
-    msr     vbar_el2, x8
-
-    ic  ialluis
-    dsb ish
-    isb
-    tlbi    alle2is
-    dsb     ish
-    isb
-    ldp     x29, x30, [sp], #16
-    ret
-END_FUNC(el2_mmu_enable)

@@ -7,7 +7,6 @@ authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
 
 [dependencies]
 aarch64-cpu = "*"
-aligned = "*"
 cfg-if = "*"
 log = "*"
 psci = { version = "*", default-features = false }

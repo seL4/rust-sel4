@@ -47,12 +47,12 @@ extern "C" {
 global_asm! {
     r#"
         .global psci_secondary_core_entry_without_sp
-        .extern secondary_core_entry
+        .extern secondary_entry
 
         .section .text
 
         psci_secondary_core_entry_without_sp:
             mov sp, x0
-            b secondary_core_entry
+            b secondary_entry
     "#
 }

@@ -39,9 +39,9 @@ fn main() {
 
 fn mk_translation_tables() -> String {
     let normal_shareability = if sel4_config::sel4_cfg_usize!(MAX_NUM_NODES) > 1 {
-        3
+        0b11
     } else {
-        0
+        0b00
     };
 
     let mk_normal_entry = move |params: MkLeafFnParams| {
@@ -77,9 +77,14 @@ fn get_device_regions() -> Vec<Range<u64>> {
     let page = |start| start..start + 4096;
     sel4_config::sel4_cfg_if! {
         if #[cfg(PLAT_QEMU_ARM_VIRT)] {
-            vec![page(0x0900_0000)]
+            vec![
+                page(0x0900_0000),
+            ]
         } else if #[cfg(PLAT_BCM2711)] {
-            vec![page(0xfe21_5000)]
+            vec![
+                page(0x0000_0000),
+                page(0xfe21_5000),
+            ]
         } else {
             compile_error!("Unsupported platform");
         }

@@ -1,34 +1,36 @@
 #![no_std]
 #![no_main]
 #![feature(atomic_from_mut)]
+#![feature(exclusive_wrapper)]
 #![feature(ptr_to_from_bits)]
 #![feature(pointer_byte_offsets)]
 #![feature(const_pointer_byte_offsets)]
 #![allow(unreachable_code)]
 #![allow(dead_code)]
 
+use core::arch::asm;
 use core::ops::Range;
 use core::panic::PanicInfo;
 
-use aarch64_cpu::asm::wfe;
 use log::LevelFilter;
-use spin::Barrier;
 
 use loader_payload_types::{Payload, PayloadInfo};
 use sel4_platform_info::PLATFORM_INFO;
 
+mod barrier;
 mod copy_payload_data;
 mod debug;
 mod drivers;
 mod enter_kernel;
 mod exception_handler;
 mod fmt;
-mod head;
 mod init_platform_state;
 mod logging;
 mod plat;
 mod smp;
+mod stacks;
 
+use barrier::Barrier;
 use logging::Logger;
 
 const LOG_LEVEL: LevelFilter = LevelFilter::Debug;
@@ -83,7 +85,6 @@ fn common_epilogue(core_id: usize, payload_info: &PayloadInfo) -> ! {
     }
     KERNEL_ENTRY_BARRIER.wait();
     init_platform_state::init_platform_state_per_core(core_id);
-    log::debug!("Core {}: Entering kernel", core_id);
     init_platform_state::init_platform_state_per_core_after_which_no_syncronization(core_id);
     enter_kernel::enter_kernel(&payload_info);
     fmt::debug_println_without_synchronization!("Core {}: failed to enter kernel", core_id);
@@ -100,7 +101,9 @@ extern "C" fn panic_handler(info: &PanicInfo) -> ! {
 
 fn idle() -> ! {
     loop {
-        wfe();
+        unsafe {
+            asm!("wfe");
+        }
     }
 }
 

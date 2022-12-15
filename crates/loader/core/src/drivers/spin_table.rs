@@ -35,7 +35,7 @@ global_asm! {
     r#"
         .global spin_table_secondary_core_entry
         .extern spin_table_secondary_core_stack
-        .extern secondary_core_entry
+        .extern secondary_entry
 
         .section .text
 
@@ -43,7 +43,7 @@ global_asm! {
             ldr x9, =spin_table_secondary_core_stack
             ldr x9, [x9]
             mov sp, x9
-            b secondary_core_entry
+            b secondary_entry
     "#
 }
 
