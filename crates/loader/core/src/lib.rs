@@ -85,9 +85,6 @@ fn common_epilogue(core_id: usize, payload_info: &PayloadInfo) -> ! {
     init_platform_state::init_platform_state_per_core(core_id);
     log::debug!("Core {}: Entering kernel", core_id);
     init_platform_state::init_platform_state_per_core_after_which_no_syncronization(core_id);
-    plat::debug::put_char_without_synchronization(b'x');
-    plat::debug::put_char_without_synchronization(b'\n');
-    // fmt::debug_println_without_synchronization!("xxx");
     enter_kernel::enter_kernel(&payload_info);
     fmt::debug_println_without_synchronization!("Core {}: failed to enter kernel", core_id);
     idle()
