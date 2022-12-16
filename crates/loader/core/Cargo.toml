@@ -14,7 +14,6 @@ spin = "*"
 tock-registers = "*"
 loader-config = { path = "../config" }
 loader-payload-types = { path = "../payload/types" }
-loader-sanity-check = { path = "../sanity-check" }
 sel4-config = { path = "../../sel4/config" }
 sel4-platform-info = { path = "../../sel4/platform-info" }
 

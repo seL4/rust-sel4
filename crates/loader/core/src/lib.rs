@@ -27,6 +27,7 @@ mod fmt;
 mod init_platform_state;
 mod logging;
 mod plat;
+mod sanity_check;
 mod smp;
 mod stacks;
 
@@ -64,7 +65,7 @@ pub fn main<'a>(payload: &Payload<'a>, own_footprint: &Range<usize>) -> ! {
     {
         let own_footprint =
             own_footprint.start.try_into().unwrap()..own_footprint.end.try_into().unwrap();
-        loader_sanity_check::sanity_check(&own_footprint, &payload.data);
+        sanity_check::sanity_check(&own_footprint, &payload.data);
     }
 
     log::debug!("Copying payload data");

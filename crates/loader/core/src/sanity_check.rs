@@ -1,11 +1,9 @@
-#![no_std]
-
 use core::ops::Range;
 
 use loader_payload_types::Region;
 use sel4_platform_info::PLATFORM_INFO;
 
-pub fn sanity_check<T>(own_footprint: &Range<u64>, regions: &[Region<T>]) {
+pub(crate) fn sanity_check<T>(own_footprint: &Range<u64>, regions: &[Region<T>]) {
     let memory = &PLATFORM_INFO.memory;
     assert!(any_range_contains(memory.iter(), own_footprint));
     for region in regions.iter() {
