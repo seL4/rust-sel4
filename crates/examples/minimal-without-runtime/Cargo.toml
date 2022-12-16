@@ -7,4 +7,4 @@ authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
 
 [dependencies]
 cfg-if = "*"
-sel4-sys = { path = "../../sel4/sys" }
+sel4 = { path = "../../sel4" }

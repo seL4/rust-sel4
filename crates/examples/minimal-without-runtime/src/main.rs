@@ -2,25 +2,12 @@
 #![no_main]
 #![feature(core_intrinsics)]
 #![feature(exclusive_wrapper)]
+#![feature(ptr_to_from_bits)]
 
-use core::panic::PanicInfo;
+mod rt;
 
-mod fmt;
-mod head;
-
-use fmt::debug_print;
-
-#[no_mangle]
-extern "C" fn main(bootinfo: *const sel4_sys::seL4_BootInfo) -> ! {
-    let bootinfo = unsafe { &*bootinfo };
-    let ipc_buffer = unsafe { &mut *bootinfo.ipcBuffer };
-    debug_print!("Hello, World!\n");
-    let _ = ipc_buffer.seL4_TCB_Suspend(sel4_sys::seL4_RootCapSlot::seL4_CapInitThreadTCB.into());
+fn main(bootinfo: &sel4::BootInfo) -> ! {
+    sel4::debug_println!("Hello, World!");
+    sel4::BootInfo::init_thread_tcb().suspend().unwrap();
     unreachable!()
-}
-
-#[panic_handler]
-fn panic(info: &PanicInfo<'_>) -> ! {
-    debug_print!("{}\n", info);
-    core::intrinsics::abort()
 }

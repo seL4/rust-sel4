@@ -383,7 +383,7 @@ name = "minimal-without-runtime"
 version = "0.1.0"
 dependencies = [
  "cfg-if",
- "sel4-sys",
+ "sel4",
 ]
 
 [[package]]
@@ -531,6 +531,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d29ab0c6d3fc0ee92fe66e2d99f700eab17a8d57d1c1d3b748380fb20baa78cd"
 
 [[package]]
+name = "sel4"
+version = "0.1.0"
+dependencies = [
+ "sel4-config",
+ "sel4-helper-macros",
+ "sel4-sys",
+]
+
+[[package]]
 name = "sel4-bitfield-parser"
 version = "0.1.0"
 dependencies = [
@@ -615,11 +624,11 @@ dependencies = [
 ]
 
 [[package]]
-name = "sel4-placeholder"
+name = "sel4-helper-macros"
 version = "0.1.0"
 dependencies = [
- "sel4-config",
- "sel4-sys",
+ "quote",
+ "syn",
 ]
 
 [[package]]
