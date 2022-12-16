@@ -29,7 +29,7 @@ extern "C" {
 //
 
 pub(crate) fn start_secondary_core(core_id: usize, sp: usize) {
-    let start = (psci_secondary_core_entry_without_sp as *const SecondaryCoreStartFn).to_bits();
+    let start = (psci_secondary_entry as *const PsciSecondaryEntryFn).to_bits();
     cpu_on(
         core_id.try_into().unwrap(),
         start.try_into().unwrap(),
@@ -38,20 +38,20 @@ pub(crate) fn start_secondary_core(core_id: usize, sp: usize) {
     .unwrap();
 }
 
-type SecondaryCoreStartFn = extern "C" fn() -> !;
+type PsciSecondaryEntryFn = extern "C" fn() -> !;
 
 extern "C" {
-    fn psci_secondary_core_entry_without_sp() -> !;
+    fn psci_secondary_entry() -> !;
 }
 
 global_asm! {
     r#"
-        .global psci_secondary_core_entry_without_sp
         .extern secondary_entry
 
         .section .text
 
-        psci_secondary_core_entry_without_sp:
+        .global psci_secondary_entry
+        psci_secondary_entry:
             mov sp, x0
             b secondary_entry
     "#

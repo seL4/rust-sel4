@@ -18,7 +18,7 @@ const SECONDARY_STACKS_SIZE: usize = SECONDARY_STACK_SIZE * NUM_SECONDARY_CORES;
 
 static SECONDARY_STACKS: Stack<SECONDARY_STACKS_SIZE> = Stack([0; SECONDARY_STACKS_SIZE]);
 
-pub(crate) fn get_secondary_core_initial_stack_pointer(i: usize) -> usize {
+pub(crate) fn get_secondary_stack_bottom(i: usize) -> usize {
     unsafe {
         SECONDARY_STACKS
             .0

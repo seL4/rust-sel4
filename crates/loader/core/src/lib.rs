@@ -75,7 +75,7 @@ pub fn main<'a>(payload: &Payload<'a>, own_footprint: &Range<usize>) -> ! {
     common_epilogue(0, &payload.info)
 }
 
-fn secondary_core_main(core_id: usize, payload_info: &PayloadInfo) -> ! {
+fn secondary_main(core_id: usize, payload_info: &PayloadInfo) -> ! {
     common_epilogue(core_id, payload_info)
 }
 

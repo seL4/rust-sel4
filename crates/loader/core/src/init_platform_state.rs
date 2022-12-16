@@ -4,7 +4,7 @@ use aarch64_cpu::registers::CurrentEL;
 use tock_registers::interfaces::Readable;
 
 extern "C" {
-    fn switch_translation_table_base_el2();
+    fn switch_translation_tables_el2();
 }
 
 pub fn init_platform_state_per_core(core_id: usize) {
@@ -18,7 +18,7 @@ pub fn init_platform_state_per_core(core_id: usize) {
 
 pub fn init_platform_state_per_core_after_which_no_syncronization(_core_id: usize) {
     unsafe {
-        switch_translation_table_base_el2();
+        switch_translation_tables_el2();
     }
 }
 

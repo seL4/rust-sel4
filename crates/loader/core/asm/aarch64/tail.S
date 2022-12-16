@@ -2,7 +2,7 @@
 #include "registers.h"
 #include "mm.h"
 
-BEGIN_FUNC(switch_translation_table_base_el2)
+BEGIN_FUNC(switch_translation_tables_el2)
 
     stp     x29, x30, [sp, #-16]!
     mov     x29, sp
@@ -35,4 +35,4 @@ BEGIN_FUNC(switch_translation_table_base_el2)
 
     ret
 
-END_FUNC(switch_translation_table_base_el2)
+END_FUNC(switch_translation_tables_el2)

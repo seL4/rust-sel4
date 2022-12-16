@@ -3,13 +3,13 @@ use core::sync::atomic::{AtomicUsize, Ordering};
 
 #[used]
 #[no_mangle]
-static mut spin_table_secondary_core_stack: usize = 0;
+static mut spin_table_secondary_stack_bottom: usize = 0;
 
 pub(crate) fn start_secondary_core(spin_table: &[usize], core_id: usize, sp: usize) {
     unsafe {
-        spin_table_secondary_core_stack = sp;
+        spin_table_secondary_stack_bottom = sp;
 
-        let start = (spin_table_secondary_core_entry as *const SecondaryCoreStartFn).to_bits();
+        let start = (spin_table_secondary_entry as *const SpinTableSecondaryEntryFn).to_bits();
         let start_ptr = <*mut usize>::from_bits(spin_table[core_id]);
 
         // Emits strl instruction. Ensures jump address is observed by spinning
@@ -17,7 +17,7 @@ pub(crate) fn start_secondary_core(spin_table: &[usize], core_id: usize, sp: usi
         AtomicUsize::from_mut(&mut *start_ptr).store(start, Ordering::Release);
 
         dc_cvac(start_ptr.to_bits());
-        dc_cvac((&spin_table_secondary_core_stack as *const usize).to_bits());
+        dc_cvac((&spin_table_secondary_stack_bottom as *const usize).to_bits());
 
         // Barrier ensure both strl and dc cvac happen before sev
         asm!("dsb sy");
@@ -25,22 +25,22 @@ pub(crate) fn start_secondary_core(spin_table: &[usize], core_id: usize, sp: usi
     }
 }
 
-type SecondaryCoreStartFn = extern "C" fn() -> !;
+type SpinTableSecondaryEntryFn = extern "C" fn() -> !;
 
 extern "C" {
-    fn spin_table_secondary_core_entry() -> !;
+    fn spin_table_secondary_entry() -> !;
 }
 
 global_asm! {
     r#"
-        .global spin_table_secondary_core_entry
-        .extern spin_table_secondary_core_stack
+        .extern spin_table_secondary_stack_bottom
         .extern secondary_entry
 
         .section .text
 
-        spin_table_secondary_core_entry:
-            ldr x9, =spin_table_secondary_core_stack
+        .global spin_table_secondary_entry
+        spin_table_secondary_entry:
+            ldr x9, =spin_table_secondary_stack_bottom
             ldr x9, [x9]
             mov sp, x9
             b secondary_entry
