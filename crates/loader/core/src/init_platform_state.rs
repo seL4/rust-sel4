@@ -30,3 +30,8 @@ fn get_current_el() -> Option<CurrentEL::EL::Value> {
 unsafe fn set_tpidr(tpidr: usize) {
     asm!("msr tpidr_el1, {tpidr}", tpidr = in(reg) tpidr);
 }
+
+#[inline(never)]
+pub(crate) unsafe fn reset_cntvoff() {
+    asm!("msr cntvoff_el2, xzr");
+}
