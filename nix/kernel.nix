@@ -8,8 +8,6 @@
 { config }:
 
 let
-  # src =../../../../../local/seL4;
-
   src = builtins.fetchGit {
     url = "https://gitlab.com/coliasgroup/seL4.git";
     ref = "rust";
@@ -31,13 +29,14 @@ stdenv.mkDerivation {
   nativeBuildInputs = [
     cmake ninja
     dtc libxml2
-  ];
-
-  depsBuildBuild = [
-    qemu
 
     # NOTE: use buildPackages to work around splicing issue
     buildPackages.python3Packages.sel4-deps
+  ];
+
+  depsBuildBuild = [
+    # NOTE: cause drv.__spliced.buildBuild to be used to work around splicing issue
+    qemu
   ];
 
   hardeningDisable = [ "all" ];
