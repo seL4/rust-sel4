@@ -3,6 +3,8 @@ use crate::{
     ObjectBlueprintArm, Result, VMAttributes, IPC_BUFFER, PGD,
 };
 
+pub const GRANULE: FrameSize = FrameSize::Small;
+
 impl FrameSize {
     pub fn blueprint(self) -> ObjectBlueprint {
         match self {

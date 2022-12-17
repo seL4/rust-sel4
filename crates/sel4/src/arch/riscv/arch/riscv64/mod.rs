@@ -8,6 +8,6 @@ pub(crate) mod top_level {
             ObjectBlueprintRISCV64, ObjectBlueprintSeL4Arch, ObjectTypeRISCV64, ObjectTypeSeL4Arch,
         },
         user_context::UserContext,
-        vspace::FrameSize,
+        vspace::{FrameSize, GRANULE},
     };
 }

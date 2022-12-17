@@ -3,8 +3,8 @@ use core::ops::Range;
 use core::slice;
 
 use crate::{
-    newtype_methods, sys, ASIDControl, ASIDPool, CNode, CPtr, CapType, FrameSize, IRQControl,
-    LocalCPtr, PGD, TCB,
+    newtype_methods, sys, ASIDControl, ASIDPool, CNode, CPtr, CapType, IRQControl,
+    LocalCPtr, PGD, TCB, GRANULE,
 };
 
 #[derive(Clone, Debug)]
@@ -16,7 +16,7 @@ pub type InitCSpaceSlot = usize;
 
 impl BootInfo {
     pub unsafe fn from_ptr(ptr: *const sys::seL4_BootInfo) -> Self {
-        assert_eq!(ptr.addr() % FrameSize::Small.bytes(), 0); // sanity check
+        assert_eq!(ptr.addr() % GRANULE.bytes(), 0); // sanity check
         Self { ptr }
     }
 
@@ -28,7 +28,7 @@ impl BootInfo {
         unsafe {
             self.ptr
                 .cast::<u8>()
-                .offset(FrameSize::Small.bytes().try_into().unwrap())
+                .offset(GRANULE.bytes().try_into().unwrap())
         }
     }
 
