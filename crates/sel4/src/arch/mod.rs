@@ -10,6 +10,9 @@ sel4_cfg_if! {
     if #[cfg(ARCH_AARCH64)] {
         #[path = "arm/mod.rs"]
         mod imp;
+    } else if #[cfg(ARCH_X86_64)] {
+        #[path = "x86/mod.rs"]
+        mod imp;
     }
 }
 

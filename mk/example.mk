@@ -16,12 +16,7 @@ cargo_build := \
 .PHONY: default
 default: build
 
-ifeq ($(ARCH),aarch64)
 app_crate := minimal-without-runtime
-else
-app_crate := minimal-without-runtime-just-sys
-endif
-
 app := $(build_dir)/$(app_crate).elf
 app_intermediate := $(build_dir)/app.intermediate
 
