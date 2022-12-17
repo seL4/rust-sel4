@@ -1,3 +1,5 @@
+CRATE ?= minimal-without-runtime
+
 here := $(dir $(realpath $(firstword $(MAKEFILE_LIST))))
 root_dir := $(here)/..
 build_subdir := example/$(ARCH)
@@ -16,7 +18,7 @@ cargo_build := \
 .PHONY: default
 default: build
 
-app_crate := minimal-without-runtime
+app_crate := $(CRATE)
 app := $(build_dir)/$(app_crate).elf
 app_intermediate := $(build_dir)/app.intermediate
 

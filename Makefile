@@ -1,9 +1,9 @@
+ARCH ?= aarch64
+
 architectures := \
 	aarch64 \
 	riscv64 \
 	x86_64
-
-ARCH ?= aarch64
 
 .PHONY: none
 none:
