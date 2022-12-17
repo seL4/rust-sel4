@@ -3,7 +3,11 @@ name = "sel4"
 version = "0.1.0"
 edition = "2021"
 
+[features]
+single-threaded = []
+
 [dependencies]
+cfg-if = "*"
 sel4-config = { path = "./config" }
 sel4-helper-macros = { path = "./helper-macros" }
 sel4-sys = { path = "./sys" }
