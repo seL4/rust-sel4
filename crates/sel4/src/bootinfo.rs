@@ -44,6 +44,10 @@ impl BootInfo {
         self.sys().extraLen.try_into().unwrap()
     }
 
+    pub fn ipc_buffer(&self) -> *mut sys::seL4_IPCBuffer {
+        self.sys().ipcBuffer
+    }
+
     pub fn empty(&self) -> Range<InitCSpaceSlot> {
         region_to_range(self.sys().empty)
     }

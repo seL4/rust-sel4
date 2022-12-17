@@ -17,9 +17,8 @@ static __stack_top: Exclusive<*const u8> = Exclusive::new(unsafe { STACK.0.as_pt
 
 #[no_mangle]
 unsafe extern "C" fn __rust_entry(bootinfo: *const sel4::sys::seL4_BootInfo) -> ! {
-    let ipc_buffer = (*bootinfo).ipcBuffer;
-    sel4::set_ipc_buffer_ptr(NonNull::new(ipc_buffer).unwrap());
     let bootinfo = sel4::BootInfo::from_ptr(bootinfo);
+    sel4::set_ipc_buffer_ptr(NonNull::new(bootinfo.ipc_buffer()).unwrap());
     main(&bootinfo)
 }
 
