@@ -2,7 +2,7 @@ use core::ffi::c_uint;
 
 use sel4_config::{sel4_cfg_enum, sel4_cfg_match};
 
-use crate::{sys, ObjectType, ObjectBlueprint, ObjectTypeSeL4Arch, ObjectBlueprintSeL4Arch};
+use crate::{sys, ObjectBlueprint, ObjectBlueprintSeL4Arch, ObjectType, ObjectTypeSeL4Arch};
 
 pub type ObjectTypeArch = ObjectTypeArm;
 
@@ -56,7 +56,7 @@ pub enum ObjectBlueprintArm {
     PD,
     #[sel4_cfg(ARM_HYPERVISOR_SUPPORT)]
     VCPU,
-    SeL4Arch(ObjectBlueprintSeL4Arch)
+    SeL4Arch(ObjectBlueprintSeL4Arch),
 }
 
 impl ObjectBlueprintArm {

@@ -1,17 +1,20 @@
 use core::ops::{BitAnd, BitAndAssign, BitOr, BitOrAssign, Not};
 
-use crate::{sys, newtype_methods};
+use crate::{newtype_methods, sys};
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub struct VMAttributes(pub sys::seL4_ARM_VMAttributes::Type);
 
 impl VMAttributes {
-
     pub const NONE: Self = Self::from_inner(0);
-    pub const DEFAULT: Self = Self::from_inner(sys::seL4_ARM_VMAttributes::seL4_ARM_Default_VMAttributes);
-    pub const PAGE_CACHEABLE: Self = Self::from_inner(sys::seL4_ARM_VMAttributes::seL4_ARM_PageCacheable);
-    pub const PARITY_ENABLED: Self = Self::from_inner(sys::seL4_ARM_VMAttributes::seL4_ARM_ParityEnabled);
-    pub const EXECUTE_NEVER: Self = Self::from_inner(sys::seL4_ARM_VMAttributes::seL4_ARM_ExecuteNever);
+    pub const DEFAULT: Self =
+        Self::from_inner(sys::seL4_ARM_VMAttributes::seL4_ARM_Default_VMAttributes);
+    pub const PAGE_CACHEABLE: Self =
+        Self::from_inner(sys::seL4_ARM_VMAttributes::seL4_ARM_PageCacheable);
+    pub const PARITY_ENABLED: Self =
+        Self::from_inner(sys::seL4_ARM_VMAttributes::seL4_ARM_ParityEnabled);
+    pub const EXECUTE_NEVER: Self =
+        Self::from_inner(sys::seL4_ARM_VMAttributes::seL4_ARM_ExecuteNever);
 
     newtype_methods!(sys::seL4_ARM_VMAttributes::Type);
 

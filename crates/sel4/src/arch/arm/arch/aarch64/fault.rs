@@ -1,6 +1,8 @@
-use sel4_config::{sel4_cfg};
+use sel4_config::sel4_cfg;
 
-use crate::{Word, CapFault, UnknownSyscall, UserException, VMFault, VCPUFault, VGICMaintenance, VPPIEvent};
+use crate::{
+    CapFault, UnknownSyscall, UserException, VCPUFault, VGICMaintenance, VMFault, VPPIEvent, Word,
+};
 
 impl CapFault {
     // TODO

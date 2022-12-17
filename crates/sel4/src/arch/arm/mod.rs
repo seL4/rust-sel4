@@ -1,22 +1,14 @@
 mod arch;
-mod object;
 mod fault;
+mod object;
 
 pub(crate) mod top_level {
     pub use super::{
-        object::{ObjectBlueprintArch, ObjectTypeArch, ObjectBlueprintArm, ObjectTypeArm},
-        fault::{
-            Fault,
-            CapFault,
-            NullFault,
-            UnknownSyscall,
-            UserException,
-            VCPUFault,
-            VGICMaintenance,
-            VPPIEvent,
-            VMFault,
-        },
-
         arch::top_level::*,
+        fault::{
+            CapFault, Fault, NullFault, UnknownSyscall, UserException, VCPUFault, VGICMaintenance,
+            VMFault, VPPIEvent,
+        },
+        object::{ObjectBlueprintArch, ObjectBlueprintArm, ObjectTypeArch, ObjectTypeArm},
     };
 }

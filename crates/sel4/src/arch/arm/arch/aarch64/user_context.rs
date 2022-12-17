@@ -1,10 +1,9 @@
-use crate::{sys, newtype_methods, Word};
+use crate::{newtype_methods, sys, Word};
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct UserContext(pub sys::seL4_UserContext);
 
 impl UserContext {
-
     newtype_methods!(sys::seL4_UserContext);
 
     pub fn pc(&self) -> &Word {

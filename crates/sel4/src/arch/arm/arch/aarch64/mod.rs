@@ -1,19 +1,21 @@
-mod vm_attributes;
-mod user_context;
-mod vspace;
-mod vcpu_reg;
+mod fault;
 mod invocations;
 mod object;
-mod fault;
+mod user_context;
+mod vcpu_reg;
+mod vm_attributes;
+mod vspace;
 
 pub(crate) mod top_level {
     pub use super::{
-        vm_attributes::VMAttributes,
+        object::{
+            ObjectBlueprintAArch64, ObjectBlueprintSeL4Arch, ObjectTypeAArch64, ObjectTypeSeL4Arch,
+        },
         user_context::UserContext,
         vcpu_reg::VCPUReg,
+        vm_attributes::VMAttributes,
         vspace::{
             AnyFrame, FrameSize, FrameType, IntermediateTranslationStructureType, LEVEL_BITS,
         },
-        object::{ObjectBlueprintSeL4Arch, ObjectTypeSeL4Arch, ObjectBlueprintAArch64, ObjectTypeAArch64},
     };
 }

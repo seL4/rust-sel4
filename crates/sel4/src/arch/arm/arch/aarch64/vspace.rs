@@ -1,4 +1,7 @@
-use crate::{cap_type, sys, CPtr, CapRights, CapType, ObjectBlueprint, ObjectBlueprintArm, ObjectBlueprintAArch64, Result, VMAttributes, PGD, IPC_BUFFER};
+use crate::{
+    cap_type, sys, CPtr, CapRights, CapType, ObjectBlueprint, ObjectBlueprintAArch64,
+    ObjectBlueprintArm, Result, VMAttributes, IPC_BUFFER, PGD,
+};
 
 impl FrameSize {
     pub fn blueprint(self) -> ObjectBlueprint {
@@ -68,7 +71,9 @@ impl IntermediateTranslationStructureType for cap_type::PUD {
         vaddr: sys::seL4_Word,
         attr: sys::seL4_ARM_VMAttributes::Type,
     ) -> sys::seL4_Error::Type {
-        IPC_BUFFER.borrow_mut().seL4_ARM_PageUpperDirectory_Map(service, vspace, vaddr, attr)
+        IPC_BUFFER
+            .borrow_mut()
+            .seL4_ARM_PageUpperDirectory_Map(service, vspace, vaddr, attr)
     }
 }
 
@@ -81,7 +86,9 @@ impl IntermediateTranslationStructureType for cap_type::PD {
         vaddr: sys::seL4_Word,
         attr: sys::seL4_ARM_VMAttributes::Type,
     ) -> sys::seL4_Error::Type {
-        IPC_BUFFER.borrow_mut().seL4_ARM_PageDirectory_Map(service, vspace, vaddr, attr)
+        IPC_BUFFER
+            .borrow_mut()
+            .seL4_ARM_PageDirectory_Map(service, vspace, vaddr, attr)
     }
 }
 
@@ -94,7 +101,9 @@ impl IntermediateTranslationStructureType for cap_type::PT {
         vaddr: sys::seL4_Word,
         attr: sys::seL4_ARM_VMAttributes::Type,
     ) -> sys::seL4_Error::Type {
-        IPC_BUFFER.borrow_mut().seL4_ARM_PageTable_Map(service, vspace, vaddr, attr)
+        IPC_BUFFER
+            .borrow_mut()
+            .seL4_ARM_PageTable_Map(service, vspace, vaddr, attr)
     }
 }
 
