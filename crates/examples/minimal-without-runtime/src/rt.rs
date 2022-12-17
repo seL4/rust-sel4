@@ -17,7 +17,7 @@ static __stack_top: Exclusive<*const u8> = Exclusive::new(unsafe { STACK.0.as_pt
 
 const TLS_REGION_SIZE: usize = 4096;
 
-// [HACK] Assume max alignment for now
+// [HACK] Assume alignment <= 4096 for now
 // [HACK] Assume TLS filesz == 0 for now
 #[repr(C, align(4096))]
 struct TLSRegion([u8; TLS_REGION_SIZE]);
