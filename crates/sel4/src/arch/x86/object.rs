@@ -1,29 +1,63 @@
 use core::ffi::c_uint;
 
-use crate::ObjectType;
+use crate::{ObjectBlueprint, ObjectBlueprintSeL4Arch, ObjectType, ObjectTypeSeL4Arch};
 
 pub type ObjectTypeArch = ObjectTypeX86;
 
 pub type ObjectBlueprintArch = ObjectBlueprintX86;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub enum ObjectTypeX86 {}
+pub enum ObjectTypeX86 {
+    SeL4Arch(ObjectTypeSeL4Arch),
+}
 
 impl ObjectTypeX86 {
     pub const fn into_sys(self) -> c_uint {
-        match self {}
+        match self {
+            Self::SeL4Arch(sel4_arch) => sel4_arch.into_sys(),
+        }
+    }
+}
+
+impl From<ObjectTypeSeL4Arch> for ObjectTypeArch {
+    fn from(ty: ObjectTypeSeL4Arch) -> Self {
+        Self::SeL4Arch(ty)
+    }
+}
+
+impl From<ObjectTypeSeL4Arch> for ObjectType {
+    fn from(ty: ObjectTypeSeL4Arch) -> Self {
+        Self::from(ObjectTypeArch::from(ty))
     }
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
-pub enum ObjectBlueprintX86 {}
+pub enum ObjectBlueprintX86 {
+    SeL4Arch(ObjectBlueprintSeL4Arch),
+}
 
 impl ObjectBlueprintX86 {
     pub fn ty(self) -> ObjectType {
-        match self {}
+        match self {
+            Self::SeL4Arch(sel4_arch) => sel4_arch.ty(),
+        }
     }
 
     pub fn physical_size_bits(self) -> usize {
-        match self {}
+        match self {
+            Self::SeL4Arch(sel4_arch) => sel4_arch.physical_size_bits(),
+        }
+    }
+}
+
+impl From<ObjectBlueprintSeL4Arch> for ObjectBlueprintArch {
+    fn from(blueprint: ObjectBlueprintSeL4Arch) -> Self {
+        Self::SeL4Arch(blueprint)
+    }
+}
+
+impl From<ObjectBlueprintSeL4Arch> for ObjectBlueprint {
+    fn from(ty: ObjectBlueprintSeL4Arch) -> Self {
+        Self::from(ObjectBlueprintArch::from(ty))
     }
 }
