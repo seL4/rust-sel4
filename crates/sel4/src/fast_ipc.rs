@@ -3,7 +3,10 @@
 
 use core::array;
 
-use crate::{local_cptr::*, sys, Badge, Endpoint, IPCBuffer, MessageInfo, Word, IPC_BUFFER, NUM_FAST_MESSAGE_REGISTERS};
+use crate::{
+    local_cptr::*, sys, Badge, Endpoint, IPCBuffer, MessageInfo, Word, IPC_BUFFER,
+    NUM_FAST_MESSAGE_REGISTERS,
+};
 
 const UNUSED_FOR_IN: Word = 0;
 

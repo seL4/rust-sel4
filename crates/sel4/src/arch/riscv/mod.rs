@@ -4,10 +4,10 @@ mod object;
 
 pub(crate) mod top_level {
     pub use super::{
-        NUM_FAST_MESSAGE_REGISTERS,
         arch::top_level::*,
         fault::Fault,
         object::{ObjectBlueprintArch, ObjectBlueprintRISCV, ObjectTypeArch, ObjectTypeRISCV},
+        NUM_FAST_MESSAGE_REGISTERS,
     };
 }
 
