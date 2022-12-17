@@ -8,6 +8,7 @@ mod rt;
 
 fn main(bootinfo: &sel4::BootInfo) -> ! {
     sel4::debug_println!("Hello, World!");
+    sel4::debug_println!("#untyped: {}", bootinfo.untyped_list().len());
     sel4::BootInfo::init_thread_tcb().suspend().unwrap();
     unreachable!()
 }

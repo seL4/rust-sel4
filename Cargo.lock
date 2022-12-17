@@ -387,6 +387,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "minimal-without-runtime-just-sys"
+version = "0.1.0"
+dependencies = [
+ "cfg-if",
+ "sel4-config",
+ "sel4-sys",
+]
+
+[[package]]
 name = "miniz_oxide"
 version = "0.6.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"

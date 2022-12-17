@@ -34,4 +34,5 @@ members = [
     "crates/loader/payload/types",
 
     "crates/examples/minimal-without-runtime",
+    "crates/examples/minimal-without-runtime-just-sys",
 ]

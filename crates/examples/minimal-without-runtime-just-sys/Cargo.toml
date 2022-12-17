@@ -1,0 +1,11 @@
+[package]
+name = "minimal-without-runtime-just-sys"
+version = "0.1.0"
+edition = "2021"
+license = "BSD-2-Clause"
+authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
+
+[dependencies]
+cfg-if = "*"
+sel4-config = { path = "../../sel4/config" }
+sel4-sys = { path = "../../sel4/sys" }
