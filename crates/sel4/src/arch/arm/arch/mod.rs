@@ -1,10 +1,7 @@
-use sel4_config::sel4_cfg_if;
+use sel4_config::sel4_cfg;
 
-sel4_cfg_if! {
-    if #[cfg(ARCH_AARCH64)] {
-        #[path = "aarch64/mod.rs"]
-        mod imp;
-    }
-}
+#[sel4_cfg(ARCH_AARCH64)]
+#[path = "aarch64/mod.rs"]
+mod imp;
 
 pub(crate) use imp::*;

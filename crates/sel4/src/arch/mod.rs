@@ -1,4 +1,4 @@
-use sel4_config::sel4_cfg_if;
+use sel4_config::sel4_cfg;
 
 // [TODO]
 // sel4-config doesn't yet play nicely with:
@@ -6,14 +6,12 @@ use sel4_config::sel4_cfg_if;
 //   - ARCH_RISCV
 //   - ARCH_X86
 
-sel4_cfg_if! {
-    if #[cfg(ARCH_AARCH64)] {
-        #[path = "arm/mod.rs"]
-        mod imp;
-    } else if #[cfg(ARCH_X86_64)] {
-        #[path = "x86/mod.rs"]
-        mod imp;
-    }
-}
+#[sel4_cfg(any(ARCH_AARCH32, ARCH_AARCH64))]
+#[path = "arm/mod.rs"]
+mod imp;
+
+#[sel4_cfg(any(ARCH_IA32, ARCH_X86_64))]
+#[path = "x86/mod.rs"]
+mod imp;
 
 pub(crate) use imp::*;
