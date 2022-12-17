@@ -22,11 +22,6 @@ impl CPtr {
     pub const fn cast<T: CapType>(self) -> LocalCPtr<T> {
         LocalCPtr::from_cptr(self)
     }
-
-    // for when depth == 0
-    pub const fn arbitrary() -> Self {
-        Self::from_bits(0)
-    }
 }
 
 #[derive(Copy, Clone, Eq, PartialEq)]
@@ -157,6 +152,10 @@ impl CPtrWithDepth {
         self.depth
     }
 
+    pub const fn empty() -> Self {
+        Self::from_bits_with_depth(0, 0)
+    }
+
     // convenience
     pub(crate) fn depth_for_kernel(&self) -> u8 {
         self.depth().try_into().unwrap()
@@ -220,9 +219,7 @@ impl CNode {
     }
 
     pub fn relative_self(self) -> RelativeCPtr {
-        // TODO which is preferred?
-        // self.relative(CPtr::arbitrary)
-        self.relative(self)
+        self.relative(CPtrWithDepth::empty())
     }
 
     pub fn save_caller(&self, ep: Endpoint) -> Result<()> {
