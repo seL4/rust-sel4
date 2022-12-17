@@ -1,7 +1,7 @@
 use core::arch::{asm, global_asm};
-use core::sync::Exclusive;
 use core::panic::PanicInfo;
 use core::ptr::NonNull;
+use core::sync::Exclusive;
 
 use crate::main;
 
@@ -33,7 +33,7 @@ unsafe extern "C" fn __rust_entry(bootinfo: *const sel4::sys::seL4_BootInfo) -> 
     main(&bootinfo)
 }
 
-#[inline(never)] 
+#[inline(never)]
 unsafe fn set_tls_base() {
     let tls_base = TLS_REGION.0.as_mut_ptr();
     cfg_if::cfg_if! {

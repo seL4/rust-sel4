@@ -1,9 +1,9 @@
 use core::arch::global_asm;
-use core::sync::Exclusive;
 use core::panic::PanicInfo;
+use core::sync::Exclusive;
 
-use crate::main;
 use crate::fmt::debug_print;
+use crate::main;
 
 const STACK_SIZE: usize = 4096 * 4;
 
