@@ -9,8 +9,6 @@ mod rt;
 fn main(bootinfo: &sel4::BootInfo) -> ! {
     sel4::debug_println!("Hello, World!");
 
-    let cnode = sel4::BootInfo::init_thread_cnode();
-
     let blueprint = sel4::ObjectBlueprint::Notification;
 
     let untyped = {
@@ -25,8 +23,6 @@ fn main(bootinfo: &sel4::BootInfo) -> ! {
         sel4::BootInfo::init_cspace_local_cptr::<sel4::cap_type::Untyped>(slot)
     };
 
-    let badge = 0x1337;
-
     let first_empty_slot = bootinfo.empty().start;
     let unbadged_notification_slot = first_empty_slot;
     let badged_notification_slot = first_empty_slot + 1;
@@ -37,6 +33,8 @@ fn main(bootinfo: &sel4::BootInfo) -> ! {
         badged_notification_slot,
     );
 
+    let cnode = sel4::BootInfo::init_thread_cnode();
+
     untyped
         .retype(
             &blueprint,
@@ -45,6 +43,8 @@ fn main(bootinfo: &sel4::BootInfo) -> ! {
             1,
         )
         .unwrap();
+
+    let badge = 0x1337;
 
     cnode
         .relative(badged_notification)
@@ -56,6 +56,7 @@ fn main(bootinfo: &sel4::BootInfo) -> ! {
         .unwrap();
 
     badged_notification.signal();
+
     let observed_badge = unbadged_notification.wait();
 
     sel4::debug_println!("badge: {:#x}", badge);
