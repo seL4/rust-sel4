@@ -52,7 +52,8 @@ let
     let
       loaderConfig = {};
       noQemuCmd = [ "false" ];
-    in {
+    in rec {
+      inherit (aarch64) default;
       aarch64 =
         let
           crossPkgs = pkgs.aarch64;
