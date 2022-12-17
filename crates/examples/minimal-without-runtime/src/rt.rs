@@ -89,5 +89,6 @@ cfg_if::cfg_if! {
 #[panic_handler]
 fn panic(info: &PanicInfo<'_>) -> ! {
     sel4::debug_println!("{}", info);
+    let _ = sel4::BootInfo::init_thread_tcb().suspend();
     core::intrinsics::abort()
 }
