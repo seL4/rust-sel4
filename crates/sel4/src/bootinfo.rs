@@ -3,8 +3,8 @@ use core::ops::Range;
 use core::slice;
 
 use crate::{
-    newtype_methods, sys, ASIDControl, ASIDPool, CNode, CPtr, CapType, IRQControl,
-    LocalCPtr, PGD, TCB, GRANULE,
+    newtype_methods, sys, ASIDControl, ASIDPool, CNode, CPtr, CapType, IRQControl, LocalCPtr,
+    GRANULE, PGD, TCB,
 };
 
 #[derive(Clone, Debug)]

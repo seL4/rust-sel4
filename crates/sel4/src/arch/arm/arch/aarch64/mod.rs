@@ -15,7 +15,8 @@ pub(crate) mod top_level {
         vcpu_reg::VCPUReg,
         vm_attributes::VMAttributes,
         vspace::{
-            AnyFrame, FrameSize, FrameType, IntermediateTranslationStructureType, LEVEL_BITS, GRANULE,
+            AnyFrame, FrameSize, FrameType, IntermediateTranslationStructureType, GRANULE,
+            LEVEL_BITS,
         },
     };
 }
