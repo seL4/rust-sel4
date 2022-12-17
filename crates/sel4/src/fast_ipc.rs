@@ -3,9 +3,7 @@
 
 use core::array;
 
-use crate::{local_cptr::*, sys, Badge, Endpoint, IPCBuffer, MessageInfo, Word, IPC_BUFFER};
-
-pub const NUM_FAST_MESSAGE_REGISTERS: usize = sys::seL4_FastMessageRegisters as usize; // no other const way to convert
+use crate::{local_cptr::*, sys, Badge, Endpoint, IPCBuffer, MessageInfo, Word, IPC_BUFFER, NUM_FAST_MESSAGE_REGISTERS};
 
 const UNUSED_FOR_IN: Word = 0;
 

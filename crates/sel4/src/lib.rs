@@ -39,7 +39,7 @@ pub use cptr::{
     NotCNodeCapType, RelativeCPtr,
 };
 pub use error::{Error, Result};
-pub use fast_ipc::{CallWithMRs, FastMessages, RecvWithMRs, NUM_FAST_MESSAGE_REGISTERS};
+pub use fast_ipc::{CallWithMRs, FastMessages, RecvWithMRs};
 pub use ipc_buffer::{
     set_ipc_buffer_ptr, with_ipc_buffer, with_ipc_buffer_mut, IPCBuffer, IPC_BUFFER,
 };
