@@ -3,7 +3,8 @@ use core::ops::Range;
 use core::slice;
 
 use crate::{
-    sys, ASIDControl, ASIDPool, CNode, CPtr, CapType, FrameSize, IRQControl, LocalCPtr, PGD, TCB,
+    newtype_methods, sys, ASIDControl, ASIDPool, CNode, CPtr, CapType, FrameSize, IRQControl,
+    LocalCPtr, PGD, TCB,
 };
 
 #[derive(Clone, Debug)]
@@ -59,19 +60,25 @@ impl BootInfo {
         usize::try_from(self.untyped().end - self.untyped().start).unwrap()
     }
 
-    pub fn untyped_list(&self) -> &[sys::seL4_UntypedDesc] {
+    fn untyped_list_inner(&self) -> &[sys::seL4_UntypedDesc] {
         &self.sys().untypedList[..self.num_untyped()]
     }
 
-    fn untyped_list_partition_point(&self) -> usize {
-        self.untyped_list().partition_point(|ut| ut.isDevice == 1)
+    pub fn untyped_list(&self) -> &[UntypedDesc] {
+        let inner = self.untyped_list_inner();
+        // safe because of #[repr(trasnparent)]
+        unsafe { slice::from_raw_parts(inner.as_ptr().cast(), inner.len()) }
     }
 
-    pub fn device_untyped_list(&self) -> &[sys::seL4_UntypedDesc] {
+    fn untyped_list_partition_point(&self) -> usize {
+        self.untyped_list().partition_point(|ut| ut.is_device())
+    }
+
+    pub fn device_untyped_list(&self) -> &[UntypedDesc] {
         &self.untyped_list()[..self.untyped_list_partition_point()]
     }
 
-    pub fn kernel_untyped_list(&self) -> &[sys::seL4_UntypedDesc] {
+    pub fn kernel_untyped_list(&self) -> &[UntypedDesc] {
         &self.untyped_list()[self.untyped_list_partition_point()..]
     }
 
@@ -204,5 +211,31 @@ impl<'a> Iterator for BootInfoExtraIter<'a> {
             }
         }
         None
+    }
+}
+
+#[repr(transparent)]
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct UntypedDesc(pub sys::seL4_UntypedDesc);
+
+impl UntypedDesc {
+    newtype_methods!(sys::seL4_UntypedDesc);
+
+    pub fn paddr(&self) -> usize {
+        self.inner().paddr.try_into().unwrap()
+    }
+
+    pub fn size_bits(&self) -> usize {
+        self.inner().sizeBits.try_into().unwrap()
+    }
+
+    pub fn is_device(&self) -> bool {
+        self.inner().isDevice != 0
+    }
+}
+
+impl From<sys::seL4_UntypedDesc> for UntypedDesc {
+    fn from(desc: sys::seL4_UntypedDesc) -> Self {
+        Self::from_inner(desc)
     }
 }

@@ -29,7 +29,9 @@ mod misc;
 mod object;
 mod syscalls;
 
-pub use bootinfo::{BootInfo, BootInfoExtraStructure, BootInfoExtraStructureId, InitCSpaceSlot};
+pub use bootinfo::{
+    BootInfo, BootInfoExtraStructure, BootInfoExtraStructureId, InitCSpaceSlot, UntypedDesc,
+};
 pub use cap_rights::{CapRights, CapRightsBuilder};
 pub use cnode_cap_data::CNodeCapData;
 pub use cptr::{

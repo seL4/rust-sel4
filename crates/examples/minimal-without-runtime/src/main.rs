@@ -12,17 +12,17 @@ fn main(bootinfo: &sel4::BootInfo) -> ! {
     let cnode = sel4::BootInfo::init_thread_cnode();
 
     let blueprint = sel4::ObjectBlueprint::Notification;
+
     let untyped = {
         let slot = bootinfo.untyped().start
             + bootinfo
                 .untyped_list()
                 .iter()
                 .position(|desc| {
-                    desc.isDevice == 0
-                        && usize::from(desc.sizeBits) >= blueprint.physical_size_bits()
+                    !desc.is_device() && desc.size_bits() >= blueprint.physical_size_bits()
                 })
                 .unwrap();
-        sel4::Untyped::from_bits(slot.try_into().unwrap())
+        sel4::BootInfo::init_cspace_local_cptr::<sel4::cap_type::Untyped>(slot)
     };
 
     let badge = 0x1337;
@@ -30,10 +30,12 @@ fn main(bootinfo: &sel4::BootInfo) -> ! {
     let first_empty_slot = bootinfo.empty().start;
     let unbadged_notification_slot = first_empty_slot;
     let badged_notification_slot = first_empty_slot + 1;
-    let unbadged_notification =
-        sel4::Notification::from_bits(unbadged_notification_slot.try_into().unwrap());
-    let badged_notification =
-        sel4::Notification::from_bits(badged_notification_slot.try_into().unwrap());
+    let unbadged_notification = sel4::BootInfo::init_cspace_local_cptr::<
+        sel4::cap_type::Notification,
+    >(unbadged_notification_slot);
+    let badged_notification = sel4::BootInfo::init_cspace_local_cptr::<sel4::cap_type::Notification>(
+        badged_notification_slot,
+    );
 
     untyped
         .retype(
@@ -48,7 +50,7 @@ fn main(bootinfo: &sel4::BootInfo) -> ! {
         .relative(badged_notification)
         .mint(
             &cnode.relative(unbadged_notification),
-            sel4::CapRightsBuilder::none().write(true).build(),
+            sel4::CapRights::write_only(),
             badge,
         )
         .unwrap();

@@ -30,6 +30,10 @@ impl CapRights {
     pub fn read_only() -> Self {
         CapRightsBuilder::none().read(true).build()
     }
+
+    pub fn write_only() -> Self {
+        CapRightsBuilder::none().write(true).build()
+    }
 }
 
 impl From<CapRightsBuilder> for CapRights {
