@@ -9,11 +9,7 @@ target := $(RUST_BARE_METAL_TARGET)
 
 target_dir := $(build_dir)/$(target)
 
-ifeq ($(ARCH),aarch64)
-root_crate := sel4
-else
-root_crate := sel4-sys
-endif
+crate_args := -p sel4
 
 .PHONY: all
 all: docs
@@ -30,4 +26,4 @@ docs:
 			--manifest-path $(abspath $(manifest_path)) \
 			--target-dir $(abspath $(target_dir)) \
 			--target $(target) \
-			-p $(root_crate)
+			$(crate_args)
