@@ -20,4 +20,4 @@ mk_docs = nix-shell --pure -A worlds.$(1).default.shell --run "make -f mk/docs.m
 
 .PHONY: docs
 docs:
-	$(foreach arch,$(architectures),$(call mk_docs,$(arch));)
+	$(foreach arch,$(architectures),$(call mk_docs,$(arch)) &&) true
