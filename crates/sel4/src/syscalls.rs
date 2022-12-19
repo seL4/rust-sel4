@@ -8,22 +8,34 @@ impl Endpoint {
     pub fn send(&self, info: MessageInfo) {
         IPC_BUFFER
             .borrow_mut()
+            .as_mut()
+            .unwrap()
             .seL4_Send(self.bits(), info.into_inner())
     }
 
     pub fn nb_send(&self, info: MessageInfo) {
         IPC_BUFFER
             .borrow_mut()
+            .as_mut()
+            .unwrap()
             .seL4_NBSend(self.bits(), info.into_inner())
     }
 
     pub fn recv(&self) -> (MessageInfo, Badge) {
-        let (raw_msg_info, badge) = IPC_BUFFER.borrow_mut().seL4_Recv(self.bits());
+        let (raw_msg_info, badge) = IPC_BUFFER
+            .borrow_mut()
+            .as_mut()
+            .unwrap()
+            .seL4_Recv(self.bits());
         (MessageInfo::from_inner(raw_msg_info), badge)
     }
 
     pub fn nb_recv(&self) -> (MessageInfo, Badge) {
-        let (raw_msg_info, badge) = IPC_BUFFER.borrow_mut().seL4_NBRecv(self.bits());
+        let (raw_msg_info, badge) = IPC_BUFFER
+            .borrow_mut()
+            .as_mut()
+            .unwrap()
+            .seL4_NBRecv(self.bits());
         (MessageInfo::from_inner(raw_msg_info), badge)
     }
 
@@ -31,6 +43,8 @@ impl Endpoint {
         MessageInfo::from_inner(
             IPC_BUFFER
                 .borrow_mut()
+                .as_mut()
+                .unwrap()
                 .seL4_Call(self.bits(), info.into_inner()),
         )
     }
@@ -38,16 +52,28 @@ impl Endpoint {
 
 impl Notification {
     pub fn signal(&self) {
-        IPC_BUFFER.borrow_mut().seL4_Signal(self.bits());
+        IPC_BUFFER
+            .borrow_mut()
+            .as_mut()
+            .unwrap()
+            .seL4_Signal(self.bits());
     }
 
     pub fn wait(&self) -> Badge {
-        IPC_BUFFER.borrow_mut().seL4_Wait(self.bits())
+        IPC_BUFFER
+            .borrow_mut()
+            .as_mut()
+            .unwrap()
+            .seL4_Wait(self.bits())
     }
 }
 
 pub fn reply(info: MessageInfo) {
-    IPC_BUFFER.borrow_mut().seL4_Reply(info.into_inner())
+    IPC_BUFFER
+        .borrow_mut()
+        .as_mut()
+        .unwrap()
+        .seL4_Reply(info.into_inner())
 }
 
 pub fn r#yield() {

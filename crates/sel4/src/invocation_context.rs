@@ -1,19 +1,19 @@
-use core::ptr::NonNull;
 use core::cell::RefCell;
+use core::ptr::NonNull;
 
 #[allow(unused_imports)]
 use core::ops::{Deref, DerefMut};
 
 use crate::{sys, IPCBuffer};
 
-const IPC_BUFFER_INIT: RefCell<IPCBuffer> = RefCell::new(IPCBuffer::unset());
+const IPC_BUFFER_INIT: RefCell<Option<IPCBuffer>> = RefCell::new(None);
 
 cfg_if::cfg_if! {
     if #[cfg(not(feature = "single-threaded"))] {
         #[thread_local]
-        pub static IPC_BUFFER: RefCell<IPCBuffer> = IPC_BUFFER_INIT;
+        pub static IPC_BUFFER: RefCell<Option<IPCBuffer>> = IPC_BUFFER_INIT;
     } else {
-        pub static IPC_BUFFER: SingleThreaded<RefCell<IPCBuffer>> = SingleThreaded(IPC_BUFFER_INIT);
+        pub static IPC_BUFFER: SingleThreaded<RefCell<Option<IPCBuffer>>> = SingleThreaded(IPC_BUFFER_INIT);
 
         pub struct SingleThreaded<T>(pub T);
 
@@ -36,19 +36,19 @@ cfg_if::cfg_if! {
 }
 
 pub unsafe fn set_ipc_buffer_ptr(ptr: NonNull<sys::seL4_IPCBuffer>) {
-    IPC_BUFFER.borrow_mut().set_ptr(ptr);
+    let _ = IPC_BUFFER.replace(Some(IPCBuffer::from_ptr(ptr)));
 }
 
 pub fn with_ipc_buffer<F, T>(f: F) -> T
 where
     F: FnOnce(&IPCBuffer) -> T,
 {
-    f(&IPC_BUFFER.borrow())
+    f(IPC_BUFFER.borrow().as_ref().unwrap())
 }
 
 pub fn with_ipc_buffer_mut<F, T>(f: F) -> T
 where
     F: FnOnce(&mut IPCBuffer) -> T,
 {
-    f(&mut IPC_BUFFER.borrow_mut())
+    f(IPC_BUFFER.borrow_mut().as_mut().unwrap())
 }

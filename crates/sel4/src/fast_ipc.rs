@@ -15,7 +15,7 @@ const __ASSERTION: [(); NUM_FAST_MESSAGE_REGISTERS] = [(); 4];
 impl Endpoint {
     pub fn send_with_mrs<T: FastMessages>(&self, info: MessageInfo, messages: T) {
         let [msg0, msg1, msg2, msg3] = messages.prepare_in();
-        IPC_BUFFER.borrow_mut().seL4_SendWithMRs(
+        IPC_BUFFER.borrow_mut().as_mut().unwrap().seL4_SendWithMRs(
             self.bits(),
             info.into_inner(),
             msg0,
@@ -28,10 +28,13 @@ impl Endpoint {
     pub fn recv_with_mrs(&self) -> RecvWithMRs {
         let mut msg = [0; NUM_FAST_MESSAGE_REGISTERS];
         let [mr0, mr1, mr2, mr3] = msg.each_mut().map(Some);
-        let (raw_msg_info, badge) =
-            IPC_BUFFER
-                .borrow_mut()
-                .seL4_RecvWithMRs(self.bits(), mr0, mr1, mr2, mr3);
+        let (raw_msg_info, badge) = IPC_BUFFER.borrow_mut().as_mut().unwrap().seL4_RecvWithMRs(
+            self.bits(),
+            mr0,
+            mr1,
+            mr2,
+            mr3,
+        );
         RecvWithMRs {
             info: MessageInfo::from_inner(raw_msg_info),
             badge,
@@ -42,7 +45,7 @@ impl Endpoint {
     pub fn call_with_mrs<T: FastMessages>(&self, info: MessageInfo, messages: T) -> CallWithMRs {
         let mut msg = messages.prepare_in_out();
         let [mr0, mr1, mr2, mr3] = msg.each_mut().map(Some);
-        let raw_msg_info = IPC_BUFFER.borrow_mut().seL4_CallWithMRs(
+        let raw_msg_info = IPC_BUFFER.borrow_mut().as_mut().unwrap().seL4_CallWithMRs(
             self.bits(),
             info.into_inner(),
             mr0,

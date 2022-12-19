@@ -12,7 +12,7 @@ pub fn debug_snapshot() {
 
 impl TCB {
     pub fn debug_name(self, name: &[u8]) {
-        sys::seL4_DebugNameThread(self.bits(), name, &mut IPC_BUFFER.borrow_mut())
+        sys::seL4_DebugNameThread(self.bits(), name, IPC_BUFFER.borrow_mut().as_mut().unwrap())
     }
 }
 

@@ -10,6 +10,8 @@ impl VCPU {
         Error::wrap(
             IPC_BUFFER
                 .borrow_mut()
+                .as_mut()
+                .unwrap()
                 .seL4_ARM_VCPU_SetTCB(self.bits(), tcb.bits()),
         )
     }
@@ -17,34 +19,40 @@ impl VCPU {
     pub fn read_regs(&self, field: VCPUReg) -> Result<Word> {
         let res = IPC_BUFFER
             .borrow_mut()
+            .as_mut()
+            .unwrap()
             .seL4_ARM_VCPU_ReadRegs(self.bits(), field.into_sys().try_into().unwrap());
         Error::or(res.error.try_into().unwrap(), res.value)
     }
 
     pub fn write_regs(&self, field: VCPUReg, value: Word) -> Result<()> {
-        Error::wrap(IPC_BUFFER.borrow_mut().seL4_ARM_VCPU_WriteRegs(
-            self.bits(),
-            field.into_sys().try_into().unwrap(),
-            value,
-        ))
+        Error::wrap(
+            IPC_BUFFER
+                .borrow_mut()
+                .as_mut()
+                .unwrap()
+                .seL4_ARM_VCPU_WriteRegs(self.bits(), field.into_sys().try_into().unwrap(), value),
+        )
     }
 
     pub fn ack_vppi(&self, irq: Word) -> Result<()> {
         Error::wrap(
             IPC_BUFFER
                 .borrow_mut()
+                .as_mut()
+                .unwrap()
                 .seL4_ARM_VCPU_AckVPPI(self.bits(), irq),
         )
     }
 
     pub fn inject_irq(&self, virq: u16, priority: u8, group: u8, index: u8) -> Result<()> {
-        Error::wrap(IPC_BUFFER.borrow_mut().seL4_ARM_VCPU_InjectIRQ(
-            self.bits(),
-            virq,
-            priority,
-            group,
-            index,
-        ))
+        Error::wrap(
+            IPC_BUFFER
+                .borrow_mut()
+                .as_mut()
+                .unwrap()
+                .seL4_ARM_VCPU_InjectIRQ(self.bits(), virq, priority, group, index),
+        )
     }
 }
 
@@ -56,7 +64,7 @@ impl<T: FrameType> LocalCPtr<T> {
         rights: CapRights,
         attrs: VMAttributes,
     ) -> Result<()> {
-        Error::wrap(IPC_BUFFER.borrow_mut().seL4_ARM_Page_Map(
+        Error::wrap(IPC_BUFFER.borrow_mut().as_mut().unwrap().seL4_ARM_Page_Map(
             self.bits(),
             pgd.bits(),
             vaddr.try_into().unwrap(),
@@ -66,12 +74,20 @@ impl<T: FrameType> LocalCPtr<T> {
     }
 
     pub fn unmap(&self) -> Result<()> {
-        Error::wrap(IPC_BUFFER.borrow_mut().seL4_ARM_Page_Unmap(self.bits()))
+        Error::wrap(
+            IPC_BUFFER
+                .borrow_mut()
+                .as_mut()
+                .unwrap()
+                .seL4_ARM_Page_Unmap(self.bits()),
+        )
     }
 
     pub fn get_address(&self) -> Result<usize> {
         let ret = IPC_BUFFER
             .borrow_mut()
+            .as_mut()
+            .unwrap()
             .seL4_ARM_Page_GetAddress(self.bits());
         match Error::from_sys(ret.error.try_into().unwrap()) {
             None => Ok(ret.paddr.try_into().unwrap()),
@@ -106,45 +122,71 @@ impl IRQControl {
         target: Word,
         dst: &RelativeCPtr,
     ) -> Result<()> {
-        Error::wrap(IPC_BUFFER.borrow_mut().seL4_IRQControl_GetTriggerCore(
-            self.bits(),
-            irq,
-            trigger,
-            dst.root().bits(),
-            dst.path().bits(),
-            dst.path().depth_for_kernel(),
-            target,
-        ))
+        Error::wrap(
+            IPC_BUFFER
+                .borrow_mut()
+                .as_mut()
+                .unwrap()
+                .seL4_IRQControl_GetTriggerCore(
+                    self.bits(),
+                    irq,
+                    trigger,
+                    dst.root().bits(),
+                    dst.path().bits(),
+                    dst.path().depth_for_kernel(),
+                    target,
+                ),
+        )
     }
 }
 
 impl IRQHandler {
     pub fn ack(&self) -> Result<()> {
-        Error::wrap(IPC_BUFFER.borrow_mut().seL4_IRQHandler_Ack(self.bits()))
+        Error::wrap(
+            IPC_BUFFER
+                .borrow_mut()
+                .as_mut()
+                .unwrap()
+                .seL4_IRQHandler_Ack(self.bits()),
+        )
     }
 
     pub fn set_notification(&self, notification: Notification) -> Result<()> {
         Error::wrap(
             IPC_BUFFER
                 .borrow_mut()
+                .as_mut()
+                .unwrap()
                 .seL4_IRQHandler_SetNotification(self.bits(), notification.bits()),
         )
     }
 
     pub fn clear(&self) -> Result<()> {
-        Error::wrap(IPC_BUFFER.borrow_mut().seL4_IRQHandler_Clear(self.bits()))
+        Error::wrap(
+            IPC_BUFFER
+                .borrow_mut()
+                .as_mut()
+                .unwrap()
+                .seL4_IRQHandler_Clear(self.bits()),
+        )
     }
 }
 
 impl ASIDControl {
     pub fn make_pool(&self, untyped: Untyped, dst: &RelativeCPtr) -> Result<()> {
-        Error::wrap(IPC_BUFFER.borrow_mut().seL4_ARM_ASIDControl_MakePool(
-            self.bits(),
-            untyped.bits(),
-            dst.root().bits(),
-            dst.path().bits(),
-            dst.path().depth_for_kernel(),
-        ))
+        Error::wrap(
+            IPC_BUFFER
+                .borrow_mut()
+                .as_mut()
+                .unwrap()
+                .seL4_ARM_ASIDControl_MakePool(
+                    self.bits(),
+                    untyped.bits(),
+                    dst.root().bits(),
+                    dst.path().bits(),
+                    dst.path().depth_for_kernel(),
+                ),
+        )
     }
 }
 
@@ -153,6 +195,8 @@ impl ASIDPool {
         Error::wrap(
             IPC_BUFFER
                 .borrow_mut()
+                .as_mut()
+                .unwrap()
                 .seL4_ARM_ASIDPool_Assign(self.bits(), pd.bits()),
         )
     }

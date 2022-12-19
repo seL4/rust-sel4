@@ -6,26 +6,20 @@ use core::slice;
 use crate::{sys, Word};
 
 pub struct IPCBuffer {
-    ptr: Option<NonNull<sys::seL4_IPCBuffer>>,
+    ptr: NonNull<sys::seL4_IPCBuffer>,
 }
 
 impl IPCBuffer {
-    pub const fn unset() -> Self {
-        Self {
-            ptr: None,
-        }
-    }
-
-    pub unsafe fn set_ptr(&mut self, ptr: NonNull<sys::seL4_IPCBuffer>) {
-        self.ptr = Some(ptr)
+    pub unsafe fn from_ptr(ptr: NonNull<sys::seL4_IPCBuffer>) -> Self {
+        Self { ptr }
     }
 
     fn inner(&self) -> &sys::seL4_IPCBuffer {
-        unsafe { self.ptr.unwrap().as_ref() }
+        unsafe { self.ptr.as_ref() }
     }
 
     fn inner_mut(&mut self) -> &mut sys::seL4_IPCBuffer {
-        unsafe { self.ptr.unwrap().as_mut() }
+        unsafe { self.ptr.as_mut() }
     }
 
     pub fn msg_regs(&self) -> &[Word] {

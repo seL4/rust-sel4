@@ -75,6 +75,8 @@ impl IntermediateTranslationStructureType for cap_type::PUD {
     ) -> sys::seL4_Error::Type {
         IPC_BUFFER
             .borrow_mut()
+            .as_mut()
+            .unwrap()
             .seL4_ARM_PageUpperDirectory_Map(service, vspace, vaddr, attr)
     }
 }
@@ -90,6 +92,8 @@ impl IntermediateTranslationStructureType for cap_type::PD {
     ) -> sys::seL4_Error::Type {
         IPC_BUFFER
             .borrow_mut()
+            .as_mut()
+            .unwrap()
             .seL4_ARM_PageDirectory_Map(service, vspace, vaddr, attr)
     }
 }
@@ -105,6 +109,8 @@ impl IntermediateTranslationStructureType for cap_type::PT {
     ) -> sys::seL4_Error::Type {
         IPC_BUFFER
             .borrow_mut()
+            .as_mut()
+            .unwrap()
             .seL4_ARM_PageTable_Map(service, vspace, vaddr, attr)
     }
 }
