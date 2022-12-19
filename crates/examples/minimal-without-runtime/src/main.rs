@@ -9,6 +9,8 @@ mod rt;
 fn main(bootinfo: &sel4::BootInfo) -> ! {
     sel4::debug_println!("Hello, World!");
 
+    let mut ipc_buffer = unsafe { bootinfo.ipc_buffer() };
+
     let blueprint = sel4::ObjectBlueprint::Notification;
 
     let untyped = {
@@ -36,6 +38,7 @@ fn main(bootinfo: &sel4::BootInfo) -> ! {
     let cnode = sel4::BootInfo::init_thread_cnode();
 
     untyped
+        .with(&mut ipc_buffer)
         .retype(
             &blueprint,
             &cnode.relative_self(),
@@ -48,6 +51,7 @@ fn main(bootinfo: &sel4::BootInfo) -> ! {
 
     cnode
         .relative(badged_notification)
+        .with(&mut ipc_buffer)
         .mint(
             &cnode.relative(unbadged_notification),
             sel4::CapRights::write_only(),
@@ -55,13 +59,16 @@ fn main(bootinfo: &sel4::BootInfo) -> ! {
         )
         .unwrap();
 
-    badged_notification.signal();
+    badged_notification.with(&mut ipc_buffer).signal();
 
-    let observed_badge = unbadged_notification.wait();
+    let observed_badge = unbadged_notification.with(&mut ipc_buffer).wait();
 
     sel4::debug_println!("badge: {:#x}", badge);
     assert_eq!(observed_badge, badge);
 
-    sel4::BootInfo::init_thread_tcb().suspend().unwrap();
+    sel4::BootInfo::init_thread_tcb()
+        .with(&mut ipc_buffer)
+        .suspend()
+        .unwrap();
     unreachable!()
 }

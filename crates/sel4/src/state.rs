@@ -3,7 +3,7 @@ use core::cell::RefCell;
 #[allow(unused_imports)]
 use core::ops::{Deref, DerefMut};
 
-use crate::{sys, IPCBuffer};
+use crate::{IPCBuffer, InvocationContext};
 
 const IPC_BUFFER_INIT: RefCell<Option<IPCBuffer>> = RefCell::new(None);
 
@@ -36,8 +36,8 @@ cfg_if::cfg_if! {
     }
 }
 
-pub unsafe fn set_ipc_buffer_ptr(ptr: *mut sys::seL4_IPCBuffer) {
-    let _ = IPC_BUFFER.replace(Some(IPCBuffer::from_ptr(ptr)));
+pub unsafe fn set_ipc_buffer(ipc_buffer: IPCBuffer) {
+    let _ = IPC_BUFFER.replace(Some(ipc_buffer));
 }
 
 pub fn with_ipc_buffer<F, T>(f: F) -> T
@@ -52,4 +52,19 @@ where
     F: FnOnce(&mut IPCBuffer) -> T,
 {
     f(IPC_BUFFER.borrow_mut().as_mut().unwrap())
+}
+
+#[derive(Debug, Copy, Clone, Default, PartialEq, Eq, Hash)]
+pub struct ImplicitInvocationContext;
+
+impl ImplicitInvocationContext {
+    pub const fn new() -> Self {
+        Self
+    }
+}
+
+impl InvocationContext for ImplicitInvocationContext {
+    fn invoke<T>(self, f: impl FnOnce(&mut IPCBuffer) -> T) -> T {
+        with_ipc_buffer_mut(f)
+    }
 }

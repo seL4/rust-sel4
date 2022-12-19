@@ -3,8 +3,8 @@ use core::ops::Range;
 use core::slice;
 
 use crate::{
-    newtype_methods, sys, ASIDControl, ASIDPool, CNode, CPtr, CapType, IRQControl, LocalCPtr,
-    GRANULE, PGD, TCB,
+    newtype_methods, sys, ASIDControl, ASIDPool, CNode, CPtr, CapType, IPCBuffer, IRQControl,
+    LocalCPtr, GRANULE, PGD, TCB,
 };
 
 #[derive(Debug)]
@@ -44,8 +44,8 @@ impl BootInfo {
         self.inner().extraLen.try_into().unwrap()
     }
 
-    pub fn ipc_buffer(&self) -> *mut sys::seL4_IPCBuffer {
-        self.inner().ipcBuffer
+    pub unsafe fn ipc_buffer(&self) -> IPCBuffer {
+        IPCBuffer::from_ptr(self.inner().ipcBuffer)
     }
 
     pub fn empty(&self) -> Range<InitCSpaceSlot> {

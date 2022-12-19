@@ -22,6 +22,7 @@ mod error;
 mod fast_ipc;
 mod fault;
 mod helper_macros;
+mod invocation_context;
 mod invocations;
 mod ipc_buffer;
 mod message_info;
@@ -40,11 +41,12 @@ pub use cptr::{
 };
 pub use error::{Error, Result};
 pub use fast_ipc::{CallWithMRs, FastMessages, RecvWithMRs};
+pub use invocation_context::{InvocationContext, NoExplicitInvocationContext, NoInvocationContext};
 pub use ipc_buffer::IPCBuffer;
 pub use message_info::{MessageInfo, MessageInfoBuilder};
 pub use misc::{Badge, Word, WORD_SIZE};
 pub use object::{ObjectBlueprint, ObjectType};
-pub use syscalls::{r#yield, reply};
+pub use syscalls::r#yield;
 
 pub use arch::top_level::*;
 
@@ -75,15 +77,12 @@ sel4_cfg_if! {
     }
 }
 
-#[cfg(not(feature = "state"))]
-compile_error!("feature \"state\" is currently required");
-
 #[cfg(feature = "state")]
 mod state;
 
 #[cfg(feature = "state")]
 pub use state::{
-    set_ipc_buffer_ptr, with_ipc_buffer, with_ipc_buffer_mut, IPC_BUFFER,
+    set_ipc_buffer, with_ipc_buffer, with_ipc_buffer_mut, ImplicitInvocationContext, IPC_BUFFER,
 };
 
 #[doc(hidden)]
