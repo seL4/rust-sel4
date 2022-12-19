@@ -1,5 +1,4 @@
 use core::cell::RefCell;
-use core::ptr::NonNull;
 
 #[allow(unused_imports)]
 use core::ops::{Deref, DerefMut};
@@ -35,7 +34,7 @@ cfg_if::cfg_if! {
     }
 }
 
-pub unsafe fn set_ipc_buffer_ptr(ptr: NonNull<sys::seL4_IPCBuffer>) {
+pub unsafe fn set_ipc_buffer_ptr(ptr: *mut sys::seL4_IPCBuffer) {
     let _ = IPC_BUFFER.replace(Some(IPCBuffer::from_ptr(ptr)));
 }
 

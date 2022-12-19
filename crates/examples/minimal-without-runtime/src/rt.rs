@@ -1,6 +1,5 @@
 use core::arch::global_asm;
 use core::panic::PanicInfo;
-use core::ptr::NonNull;
 use core::sync::Exclusive;
 
 use crate::main;
@@ -18,7 +17,7 @@ static __stack_top: Exclusive<*const u8> = Exclusive::new(unsafe { STACK.0.as_pt
 #[no_mangle]
 unsafe extern "C" fn __rust_entry(bootinfo: *const sel4::sys::seL4_BootInfo) -> ! {
     let bootinfo = sel4::BootInfo::from_ptr(bootinfo);
-    sel4::set_ipc_buffer_ptr(NonNull::new(bootinfo.ipc_buffer()).unwrap());
+    sel4::set_ipc_buffer_ptr(bootinfo.ipc_buffer());
     main(&bootinfo)
 }
 

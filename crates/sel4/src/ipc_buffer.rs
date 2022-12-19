@@ -1,25 +1,25 @@
 use core::mem;
 use core::ops::{Deref, DerefMut};
-use core::ptr::NonNull;
 use core::slice;
 
 use crate::{sys, Word};
 
+#[derive(Debug)]
 pub struct IPCBuffer {
-    ptr: NonNull<sys::seL4_IPCBuffer>,
+    ptr: *mut sys::seL4_IPCBuffer,
 }
 
 impl IPCBuffer {
-    pub unsafe fn from_ptr(ptr: NonNull<sys::seL4_IPCBuffer>) -> Self {
+    pub unsafe fn from_ptr(ptr: *mut sys::seL4_IPCBuffer) -> Self {
         Self { ptr }
     }
 
-    fn inner(&self) -> &sys::seL4_IPCBuffer {
-        unsafe { self.ptr.as_ref() }
+    pub fn inner(&self) -> &sys::seL4_IPCBuffer {
+        unsafe { self.ptr.as_ref().unwrap() }
     }
 
-    fn inner_mut(&mut self) -> &mut sys::seL4_IPCBuffer {
-        unsafe { self.ptr.as_mut() }
+    pub fn inner_mut(&mut self) -> &mut sys::seL4_IPCBuffer {
+        unsafe { self.ptr.as_mut().unwrap() }
     }
 
     pub fn msg_regs(&self) -> &[Word] {

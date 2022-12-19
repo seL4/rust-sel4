@@ -7,7 +7,7 @@ use crate::{
     GRANULE, PGD, TCB,
 };
 
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct BootInfo {
     ptr: *const sys::seL4_BootInfo,
 }
@@ -20,8 +20,8 @@ impl BootInfo {
         Self { ptr }
     }
 
-    pub fn sys(&self) -> &sys::seL4_BootInfo {
-        unsafe { &*self.ptr }
+    pub fn inner(&self) -> &sys::seL4_BootInfo {
+        unsafe { self.ptr.as_ref().unwrap() }
     }
 
     fn extra_ptr(&self) -> *const u8 {
@@ -41,23 +41,23 @@ impl BootInfo {
     }
 
     pub fn extra_len(&self) -> usize {
-        self.sys().extraLen.try_into().unwrap()
+        self.inner().extraLen.try_into().unwrap()
     }
 
     pub fn ipc_buffer(&self) -> *mut sys::seL4_IPCBuffer {
-        self.sys().ipcBuffer
+        self.inner().ipcBuffer
     }
 
     pub fn empty(&self) -> Range<InitCSpaceSlot> {
-        region_to_range(self.sys().empty)
+        region_to_range(self.inner().empty)
     }
 
     pub fn user_image_frames(&self) -> Range<InitCSpaceSlot> {
-        region_to_range(self.sys().userImageFrames)
+        region_to_range(self.inner().userImageFrames)
     }
 
     pub fn untyped(&self) -> Range<InitCSpaceSlot> {
-        region_to_range(self.sys().untyped)
+        region_to_range(self.inner().untyped)
     }
 
     pub fn num_untyped(&self) -> usize {
@@ -65,7 +65,7 @@ impl BootInfo {
     }
 
     fn untyped_list_inner(&self) -> &[sys::seL4_UntypedDesc] {
-        &self.sys().untypedList[..self.num_untyped()]
+        &self.inner().untypedList[..self.num_untyped()]
     }
 
     pub fn untyped_list(&self) -> &[UntypedDesc] {
