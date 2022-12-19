@@ -22,6 +22,7 @@ mod error;
 mod fast_ipc;
 mod fault;
 mod helper_macros;
+mod invocation_context;
 mod invocations;
 mod ipc_buffer;
 mod message_info;
@@ -40,9 +41,10 @@ pub use cptr::{
 };
 pub use error::{Error, Result};
 pub use fast_ipc::{CallWithMRs, FastMessages, RecvWithMRs};
-pub use ipc_buffer::{
-    set_ipc_buffer_ptr, with_ipc_buffer, with_ipc_buffer_mut, IPCBuffer, IPC_BUFFER,
+pub use invocation_context::{
+    set_ipc_buffer_ptr, with_ipc_buffer, with_ipc_buffer_mut, IPC_BUFFER,
 };
+pub use ipc_buffer::IPCBuffer;
 pub use message_info::{MessageInfo, MessageInfoBuilder};
 pub use misc::{Badge, Word, WORD_SIZE};
 pub use object::{ObjectBlueprint, ObjectType};
