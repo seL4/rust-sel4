@@ -19,7 +19,7 @@ impl<C: InvocationContext> Untyped<C> {
         num_objects: usize,
     ) -> Result<()> {
         Error::wrap(self.invoke(|cptr, ipc_buffer| {
-            ipc_buffer.seL4_Untyped_Retype(
+            ipc_buffer.inner_mut().seL4_Untyped_Retype(
                 cptr.bits(),
                 blueprint.ty().into_sys().try_into().unwrap(),
                 blueprint.api_size_bits().unwrap_or(0).try_into().unwrap(),
@@ -39,7 +39,7 @@ impl<C: InvocationContext> TCB<C> {
     pub fn read_registers(self, suspend: bool, count: Word) -> Result<UserContext> {
         let mut regs: UserContext = Default::default();
         let err = self.invoke(|cptr, ipc_buffer| {
-            ipc_buffer.seL4_TCB_ReadRegisters(
+            ipc_buffer.inner_mut().seL4_TCB_ReadRegisters(
                 cptr.bits(),
                 suspend.into(),
                 0,
@@ -57,7 +57,7 @@ impl<C: InvocationContext> TCB<C> {
     // HACK should not be mut
     pub fn write_registers(self, resume: bool, count: Word, regs: &mut UserContext) -> Result<()> {
         Error::wrap(self.invoke(|cptr, ipc_buffer| {
-            ipc_buffer.seL4_TCB_WriteRegisters(
+            ipc_buffer.inner_mut().seL4_TCB_WriteRegisters(
                 cptr.bits(),
                 resume.into(),
                 0,
@@ -72,11 +72,15 @@ impl<C: InvocationContext> TCB<C> {
     }
 
     pub fn resume(self) -> Result<()> {
-        Error::wrap(self.invoke(|cptr, ipc_buffer| ipc_buffer.seL4_TCB_Resume(cptr.bits())))
+        Error::wrap(
+            self.invoke(|cptr, ipc_buffer| ipc_buffer.inner_mut().seL4_TCB_Resume(cptr.bits())),
+        )
     }
 
     pub fn suspend(self) -> Result<()> {
-        Error::wrap(self.invoke(|cptr, ipc_buffer| ipc_buffer.seL4_TCB_Suspend(cptr.bits())))
+        Error::wrap(
+            self.invoke(|cptr, ipc_buffer| ipc_buffer.inner_mut().seL4_TCB_Suspend(cptr.bits())),
+        )
     }
 
     pub fn configure(
@@ -89,7 +93,7 @@ impl<C: InvocationContext> TCB<C> {
         ipc_buffer_frame: SmallPage,
     ) -> Result<()> {
         Error::wrap(self.invoke(|cptr, ctx_ipc_buffer| {
-            ctx_ipc_buffer.seL4_TCB_Configure(
+            ctx_ipc_buffer.inner_mut().seL4_TCB_Configure(
                 cptr.bits(),
                 fault_ep.bits(),
                 cspace_root.bits(),
@@ -104,26 +108,37 @@ impl<C: InvocationContext> TCB<C> {
 
     pub fn set_sched_params(self, authority: TCB, mcp: Word, priority: Word) -> Result<()> {
         Error::wrap(self.invoke(|cptr, ipc_buffer| {
-            ipc_buffer.seL4_TCB_SetSchedParams(cptr.bits(), authority.bits(), mcp, priority)
+            ipc_buffer.inner_mut().seL4_TCB_SetSchedParams(
+                cptr.bits(),
+                authority.bits(),
+                mcp,
+                priority,
+            )
         }))
     }
 
     #[sel4_cfg(not(MAX_NUM_NODES = "1"))]
     pub fn set_affinity(self, affinity: Word) -> Result<()> {
-        Error::wrap(
-            self.invoke(|cptr, ipc_buffer| ipc_buffer.seL4_TCB_SetAffinity(cptr.bits(), affinity)),
-        )
+        Error::wrap(self.invoke(|cptr, ipc_buffer| {
+            ipc_buffer
+                .inner_mut()
+                .seL4_TCB_SetAffinity(cptr.bits(), affinity)
+        }))
     }
 
     pub fn set_tls_base(self, tls_base: Word) -> Result<()> {
-        Error::wrap(
-            self.invoke(|cptr, ipc_buffer| ipc_buffer.seL4_TCB_SetTLSBase(cptr.bits(), tls_base)),
-        )
+        Error::wrap(self.invoke(|cptr, ipc_buffer| {
+            ipc_buffer
+                .inner_mut()
+                .seL4_TCB_SetTLSBase(cptr.bits(), tls_base)
+        }))
     }
 
     pub fn bind_notification(self, notification: Notification) -> Result<()> {
         Error::wrap(self.invoke(|cptr, ipc_buffer| {
-            ipc_buffer.seL4_TCB_BindNotification(cptr.bits(), notification.bits())
+            ipc_buffer
+                .inner_mut()
+                .seL4_TCB_BindNotification(cptr.bits(), notification.bits())
         }))
     }
 }
@@ -131,19 +146,27 @@ impl<C: InvocationContext> TCB<C> {
 impl<C: InvocationContext> RelativeCPtr<C> {
     pub fn revoke(self) -> Result<()> {
         Error::wrap(self.invoke(|cptr, path, ipc_buffer| {
-            ipc_buffer.seL4_CNode_Revoke(cptr.bits(), path.bits(), path.depth_for_kernel())
+            ipc_buffer.inner_mut().seL4_CNode_Revoke(
+                cptr.bits(),
+                path.bits(),
+                path.depth_for_kernel(),
+            )
         }))
     }
 
     pub fn delete(self) -> Result<()> {
         Error::wrap(self.invoke(|cptr, path, ipc_buffer| {
-            ipc_buffer.seL4_CNode_Delete(cptr.bits(), path.bits(), path.depth_for_kernel())
+            ipc_buffer.inner_mut().seL4_CNode_Delete(
+                cptr.bits(),
+                path.bits(),
+                path.depth_for_kernel(),
+            )
         }))
     }
 
     pub fn copy(self, src: &RelativeCPtr, rights: CapRights) -> Result<()> {
         Error::wrap(self.invoke(|cptr, path, ipc_buffer| {
-            ipc_buffer.seL4_CNode_Copy(
+            ipc_buffer.inner_mut().seL4_CNode_Copy(
                 cptr.bits(),
                 path.bits(),
                 path.depth_for_kernel(),
@@ -157,7 +180,7 @@ impl<C: InvocationContext> RelativeCPtr<C> {
 
     pub fn mint(self, src: &RelativeCPtr, rights: CapRights, badge: Word) -> Result<()> {
         Error::wrap(self.invoke(|cptr, path, ipc_buffer| {
-            ipc_buffer.seL4_CNode_Mint(
+            ipc_buffer.inner_mut().seL4_CNode_Mint(
                 cptr.bits(),
                 path.bits(),
                 path.depth_for_kernel(),
@@ -172,7 +195,7 @@ impl<C: InvocationContext> RelativeCPtr<C> {
 
     pub fn mutate(self, src: &RelativeCPtr, badge: Word) -> Result<()> {
         Error::wrap(self.invoke(|cptr, path, ipc_buffer| {
-            ipc_buffer.seL4_CNode_Mutate(
+            ipc_buffer.inner_mut().seL4_CNode_Mutate(
                 cptr.bits(),
                 path.bits(),
                 path.depth_for_kernel(),
@@ -186,7 +209,11 @@ impl<C: InvocationContext> RelativeCPtr<C> {
 
     pub fn save_caller(self) -> Result<()> {
         Error::wrap(self.invoke(|cptr, path, ipc_buffer| {
-            ipc_buffer.seL4_CNode_SaveCaller(cptr.bits(), path.bits(), path.depth_for_kernel())
+            ipc_buffer.inner_mut().seL4_CNode_SaveCaller(
+                cptr.bits(),
+                path.bits(),
+                path.depth_for_kernel(),
+            )
         }))
     }
 }

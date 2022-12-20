@@ -7,23 +7,25 @@ use crate::{
 
 impl<C: InvocationContext> VCPU<C> {
     pub fn set_tcb(self, tcb: TCB) -> Result<()> {
-        Error::wrap(
-            self.invoke(|cptr, ipc_buffer| {
-                ipc_buffer.seL4_ARM_VCPU_SetTCB(cptr.bits(), tcb.bits())
-            }),
-        )
+        Error::wrap(self.invoke(|cptr, ipc_buffer| {
+            ipc_buffer
+                .inner_mut()
+                .seL4_ARM_VCPU_SetTCB(cptr.bits(), tcb.bits())
+        }))
     }
 
     pub fn read_regs(self, field: VCPUReg) -> Result<Word> {
         let res = self.invoke(|cptr, ipc_buffer| {
-            ipc_buffer.seL4_ARM_VCPU_ReadRegs(cptr.bits(), field.into_sys().try_into().unwrap())
+            ipc_buffer
+                .inner_mut()
+                .seL4_ARM_VCPU_ReadRegs(cptr.bits(), field.into_sys().try_into().unwrap())
         });
         Error::or(res.error.try_into().unwrap(), res.value)
     }
 
     pub fn write_regs(self, field: VCPUReg, value: Word) -> Result<()> {
         Error::wrap(self.invoke(|cptr, ipc_buffer| {
-            ipc_buffer.seL4_ARM_VCPU_WriteRegs(
+            ipc_buffer.inner_mut().seL4_ARM_VCPU_WriteRegs(
                 cptr.bits(),
                 field.into_sys().try_into().unwrap(),
                 value,
@@ -32,14 +34,22 @@ impl<C: InvocationContext> VCPU<C> {
     }
 
     pub fn ack_vppi(self, irq: Word) -> Result<()> {
-        Error::wrap(
-            self.invoke(|cptr, ipc_buffer| ipc_buffer.seL4_ARM_VCPU_AckVPPI(cptr.bits(), irq)),
-        )
+        Error::wrap(self.invoke(|cptr, ipc_buffer| {
+            ipc_buffer
+                .inner_mut()
+                .seL4_ARM_VCPU_AckVPPI(cptr.bits(), irq)
+        }))
     }
 
     pub fn inject_irq(self, virq: u16, priority: u8, group: u8, index: u8) -> Result<()> {
         Error::wrap(self.invoke(|cptr, ipc_buffer| {
-            ipc_buffer.seL4_ARM_VCPU_InjectIRQ(cptr.bits(), virq, priority, group, index)
+            ipc_buffer.inner_mut().seL4_ARM_VCPU_InjectIRQ(
+                cptr.bits(),
+                virq,
+                priority,
+                group,
+                index,
+            )
         }))
     }
 }
@@ -47,7 +57,7 @@ impl<C: InvocationContext> VCPU<C> {
 impl<T: FrameType, C: InvocationContext> LocalCPtr<T, C> {
     pub fn map(self, pgd: PGD, vaddr: usize, rights: CapRights, attrs: VMAttributes) -> Result<()> {
         Error::wrap(self.invoke(|cptr, ipc_buffer| {
-            ipc_buffer.seL4_ARM_Page_Map(
+            ipc_buffer.inner_mut().seL4_ARM_Page_Map(
                 cptr.bits(),
                 pgd.bits(),
                 vaddr.try_into().unwrap(),
@@ -58,11 +68,15 @@ impl<T: FrameType, C: InvocationContext> LocalCPtr<T, C> {
     }
 
     pub fn unmap(self) -> Result<()> {
-        Error::wrap(self.invoke(|cptr, ipc_buffer| ipc_buffer.seL4_ARM_Page_Unmap(cptr.bits())))
+        Error::wrap(
+            self.invoke(|cptr, ipc_buffer| ipc_buffer.inner_mut().seL4_ARM_Page_Unmap(cptr.bits())),
+        )
     }
 
     pub fn get_address(self) -> Result<usize> {
-        let ret = self.invoke(|cptr, ipc_buffer| ipc_buffer.seL4_ARM_Page_GetAddress(cptr.bits()));
+        let ret = self.invoke(|cptr, ipc_buffer| {
+            ipc_buffer.inner_mut().seL4_ARM_Page_GetAddress(cptr.bits())
+        });
         match Error::from_sys(ret.error.try_into().unwrap()) {
             None => Ok(ret.paddr.try_into().unwrap()),
             Some(err) => Err(err),
@@ -100,7 +114,7 @@ impl<C: InvocationContext> IRQControl<C> {
         dst: &RelativeCPtr,
     ) -> Result<()> {
         Error::wrap(self.invoke(|cptr, ipc_buffer| {
-            ipc_buffer.seL4_IRQControl_GetTriggerCore(
+            ipc_buffer.inner_mut().seL4_IRQControl_GetTriggerCore(
                 cptr.bits(),
                 irq,
                 trigger,
@@ -115,24 +129,32 @@ impl<C: InvocationContext> IRQControl<C> {
 
 impl<C: InvocationContext> IRQHandler<C> {
     pub fn ack(self) -> Result<()> {
-        Error::wrap(self.invoke(|cptr, ipc_buffer| ipc_buffer.seL4_IRQHandler_Ack(cptr.bits())))
+        Error::wrap(
+            self.invoke(|cptr, ipc_buffer| ipc_buffer.inner_mut().seL4_IRQHandler_Ack(cptr.bits())),
+        )
     }
 
     pub fn set_notification(self, notification: Notification) -> Result<()> {
         Error::wrap(self.invoke(|cptr, ipc_buffer| {
-            ipc_buffer.seL4_IRQHandler_SetNotification(cptr.bits(), notification.bits())
+            ipc_buffer
+                .inner_mut()
+                .seL4_IRQHandler_SetNotification(cptr.bits(), notification.bits())
         }))
     }
 
     pub fn clear(self) -> Result<()> {
-        Error::wrap(self.invoke(|cptr, ipc_buffer| ipc_buffer.seL4_IRQHandler_Clear(cptr.bits())))
+        Error::wrap(
+            self.invoke(|cptr, ipc_buffer| {
+                ipc_buffer.inner_mut().seL4_IRQHandler_Clear(cptr.bits())
+            }),
+        )
     }
 }
 
 impl<C: InvocationContext> ASIDControl<C> {
     pub fn make_pool(self, untyped: Untyped, dst: &RelativeCPtr) -> Result<()> {
         Error::wrap(self.invoke(|cptr, ipc_buffer| {
-            ipc_buffer.seL4_ARM_ASIDControl_MakePool(
+            ipc_buffer.inner_mut().seL4_ARM_ASIDControl_MakePool(
                 cptr.bits(),
                 untyped.bits(),
                 dst.root().bits(),
@@ -145,10 +167,10 @@ impl<C: InvocationContext> ASIDControl<C> {
 
 impl<C: InvocationContext> ASIDPool<C> {
     pub fn assign(self, pd: PGD) -> Result<()> {
-        Error::wrap(
-            self.invoke(|cptr, ipc_buffer| {
-                ipc_buffer.seL4_ARM_ASIDPool_Assign(cptr.bits(), pd.bits())
-            }),
-        )
+        Error::wrap(self.invoke(|cptr, ipc_buffer| {
+            ipc_buffer
+                .inner_mut()
+                .seL4_ARM_ASIDPool_Assign(cptr.bits(), pd.bits())
+        }))
     }
 }

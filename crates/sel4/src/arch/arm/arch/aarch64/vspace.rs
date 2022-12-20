@@ -75,7 +75,9 @@ impl IntermediateTranslationStructureType for cap_type::PUD {
         vaddr: sys::seL4_Word,
         attr: sys::seL4_ARM_VMAttributes::Type,
     ) -> sys::seL4_Error::Type {
-        ipc_buffer.seL4_ARM_PageUpperDirectory_Map(service, vspace, vaddr, attr)
+        ipc_buffer
+            .inner_mut()
+            .seL4_ARM_PageUpperDirectory_Map(service, vspace, vaddr, attr)
     }
 }
 
@@ -89,7 +91,9 @@ impl IntermediateTranslationStructureType for cap_type::PD {
         vaddr: sys::seL4_Word,
         attr: sys::seL4_ARM_VMAttributes::Type,
     ) -> sys::seL4_Error::Type {
-        ipc_buffer.seL4_ARM_PageDirectory_Map(service, vspace, vaddr, attr)
+        ipc_buffer
+            .inner_mut()
+            .seL4_ARM_PageDirectory_Map(service, vspace, vaddr, attr)
     }
 }
 
@@ -103,7 +107,9 @@ impl IntermediateTranslationStructureType for cap_type::PT {
         vaddr: sys::seL4_Word,
         attr: sys::seL4_ARM_VMAttributes::Type,
     ) -> sys::seL4_Error::Type {
-        ipc_buffer.seL4_ARM_PageTable_Map(service, vspace, vaddr, attr)
+        ipc_buffer
+            .inner_mut()
+            .seL4_ARM_PageTable_Map(service, vspace, vaddr, attr)
     }
 }
 

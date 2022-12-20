@@ -16,7 +16,14 @@ impl<C: InvocationContext> Endpoint<C> {
     pub fn send_with_mrs<T: FastMessages>(self, info: MessageInfo, messages: T) {
         let [msg0, msg1, msg2, msg3] = messages.prepare_in();
         self.invoke(|cptr, ipc_buffer| {
-            ipc_buffer.seL4_SendWithMRs(cptr.bits(), info.into_inner(), msg0, msg1, msg2, msg3)
+            ipc_buffer.inner_mut().seL4_SendWithMRs(
+                cptr.bits(),
+                info.into_inner(),
+                msg0,
+                msg1,
+                msg2,
+                msg3,
+            )
         })
     }
 
@@ -24,7 +31,9 @@ impl<C: InvocationContext> Endpoint<C> {
         let mut msg = [0; NUM_FAST_MESSAGE_REGISTERS];
         let [mr0, mr1, mr2, mr3] = msg.each_mut().map(Some);
         let (raw_msg_info, badge) = self.invoke(|cptr, ipc_buffer| {
-            ipc_buffer.seL4_RecvWithMRs(cptr.bits(), mr0, mr1, mr2, mr3)
+            ipc_buffer
+                .inner_mut()
+                .seL4_RecvWithMRs(cptr.bits(), mr0, mr1, mr2, mr3)
         });
         RecvWithMRs {
             info: MessageInfo::from_inner(raw_msg_info),
@@ -37,7 +46,14 @@ impl<C: InvocationContext> Endpoint<C> {
         let mut msg = messages.prepare_in_out();
         let [mr0, mr1, mr2, mr3] = msg.each_mut().map(Some);
         let raw_msg_info = self.invoke(|cptr, ipc_buffer| {
-            ipc_buffer.seL4_CallWithMRs(cptr.bits(), info.into_inner(), mr0, mr1, mr2, mr3)
+            ipc_buffer.inner_mut().seL4_CallWithMRs(
+                cptr.bits(),
+                info.into_inner(),
+                mr0,
+                mr1,
+                mr2,
+                mr3,
+            )
         });
         CallWithMRs {
             info: MessageInfo::from_inner(raw_msg_info),

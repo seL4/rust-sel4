@@ -13,7 +13,7 @@ pub fn debug_snapshot() {
 impl<C: InvocationContext> TCB<C> {
     pub fn debug_name(self, name: &[u8]) {
         self.invoke(|cptr, ipc_buffer| {
-            sys::seL4_DebugNameThread(cptr.bits(), name, ipc_buffer)
+            sys::seL4_DebugNameThread(cptr.bits(), name, ipc_buffer.inner_mut())
         })
     }
 }

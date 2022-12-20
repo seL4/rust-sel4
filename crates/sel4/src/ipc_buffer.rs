@@ -1,5 +1,4 @@
 use core::mem;
-use core::ops::{Deref, DerefMut};
 use core::slice;
 
 use crate::{sys, Word};
@@ -50,19 +49,5 @@ impl IPCBuffer {
 
     pub fn set_user_data(&mut self, data: Word) {
         self.inner_mut().userData = data;
-    }
-}
-
-impl Deref for IPCBuffer {
-    type Target = sys::seL4_IPCBuffer_;
-
-    fn deref(&self) -> &Self::Target {
-        self.inner()
-    }
-}
-
-impl DerefMut for IPCBuffer {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        self.inner_mut()
     }
 }
