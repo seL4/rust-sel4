@@ -14,7 +14,6 @@ members = [
     "crates/sel4/config/generic/macros-core",
     "crates/sel4/config/generic/types",
     "crates/sel4/config/macros",
-    "crates/sel4/helper-macros",
     "crates/sel4/platform-info",
     "crates/sel4/platform-info/types",
     "crates/sel4/rustfmt-helper",

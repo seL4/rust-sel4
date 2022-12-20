@@ -95,14 +95,16 @@ pub trait CapType: Copy {
 }
 
 pub mod cap_type {
-    use sel4_helper_macros::CapType;
-
     use super::CapType;
 
     macro_rules! declare {
         ($t:ident) => {
-            #[derive(Copy, Clone, Eq, PartialEq, CapType)]
+            #[derive(Copy, Clone, Eq, PartialEq)]
             pub struct $t;
+
+            impl CapType for $t {
+                const NAME: &'static str = stringify!($t);
+            }
         };
     }
 
