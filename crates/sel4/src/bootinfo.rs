@@ -12,16 +12,18 @@ pub struct BootInfo {
     ptr: *const sys::seL4_BootInfo,
 }
 
-pub type InitCSpaceSlot = usize;
-
 impl BootInfo {
     pub unsafe fn from_ptr(ptr: *const sys::seL4_BootInfo) -> Self {
         assert_eq!(ptr.addr() % GRANULE.bytes(), 0); // sanity check
         Self { ptr }
     }
 
+    pub fn ptr(&self) -> *const sys::seL4_BootInfo {
+        self.ptr
+    }
+
     pub fn inner(&self) -> &sys::seL4_BootInfo {
-        unsafe { self.ptr.as_ref().unwrap() }
+        unsafe { self.ptr().as_ref().unwrap() }
     }
 
     fn extra_ptr(&self) -> *const u8 {
@@ -147,6 +149,28 @@ impl BootInfo {
     }
 }
 
+pub type InitCSpaceSlot = usize;
+
+#[repr(transparent)]
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct UntypedDesc(sys::seL4_UntypedDesc);
+
+impl UntypedDesc {
+    newtype_methods!(sys::seL4_UntypedDesc);
+
+    pub fn paddr(&self) -> usize {
+        self.inner().paddr.try_into().unwrap()
+    }
+
+    pub fn size_bits(&self) -> usize {
+        self.inner().sizeBits.try_into().unwrap()
+    }
+
+    pub fn is_device(&self) -> bool {
+        self.inner().isDevice != 0
+    }
+}
+
 fn region_to_range(region: sys::seL4_SlotRegion) -> Range<InitCSpaceSlot> {
     region.start.try_into().unwrap()..region.end.try_into().unwrap()
 }
@@ -164,8 +188,6 @@ pub enum BootInfoExtraStructureId {
 }
 
 impl BootInfoExtraStructureId {
-    // precondition: id \in seL4_BootInfoID
-    // SEL4_BOOTINFO_HEADER_PADDING => None
     pub fn from_sys(id: sys::seL4_BootInfoID::Type) -> Option<Self> {
         match id {
             sys::seL4_BootInfoID::SEL4_BOOTINFO_HEADER_PADDING => {
@@ -215,31 +237,5 @@ impl<'a> Iterator for BootInfoExtraIter<'a> {
             }
         }
         None
-    }
-}
-
-#[repr(transparent)]
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct UntypedDesc(pub sys::seL4_UntypedDesc);
-
-impl UntypedDesc {
-    newtype_methods!(sys::seL4_UntypedDesc);
-
-    pub fn paddr(&self) -> usize {
-        self.inner().paddr.try_into().unwrap()
-    }
-
-    pub fn size_bits(&self) -> usize {
-        self.inner().sizeBits.try_into().unwrap()
-    }
-
-    pub fn is_device(&self) -> bool {
-        self.inner().isDevice != 0
-    }
-}
-
-impl From<sys::seL4_UntypedDesc> for UntypedDesc {
-    fn from(desc: sys::seL4_UntypedDesc) -> Self {
-        Self::from_inner(desc)
     }
 }

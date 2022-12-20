@@ -1,7 +1,7 @@
 use core::mem;
 use core::slice;
 
-use crate::{sys, Word};
+use crate::{sys, CNode, RelativeCPtr, Word, GRANULE};
 
 #[derive(Debug)]
 pub struct IPCBuffer {
@@ -10,15 +10,20 @@ pub struct IPCBuffer {
 
 impl IPCBuffer {
     pub unsafe fn from_ptr(ptr: *mut sys::seL4_IPCBuffer) -> Self {
+        assert_eq!(ptr.addr() % GRANULE.bytes(), 0); // sanity check
         Self { ptr }
     }
 
+    pub fn ptr(&self) -> *mut sys::seL4_IPCBuffer {
+        self.ptr
+    }
+
     pub fn inner(&self) -> &sys::seL4_IPCBuffer {
-        unsafe { self.ptr.as_ref().unwrap() }
+        unsafe { self.ptr().as_ref().unwrap() }
     }
 
     pub fn inner_mut(&mut self) -> &mut sys::seL4_IPCBuffer {
-        unsafe { self.ptr.as_mut().unwrap() }
+        unsafe { self.ptr().as_mut().unwrap() }
     }
 
     pub fn msg_regs(&self) -> &[Word] {
@@ -49,5 +54,26 @@ impl IPCBuffer {
 
     pub fn set_user_data(&mut self, data: Word) {
         self.inner_mut().userData = data;
+    }
+
+    pub fn caps_or_badges(&self) -> &[Word] {
+        &self.inner().caps_or_badges[..]
+    }
+
+    pub fn caps_or_badges_mut(&mut self) -> &mut [Word] {
+        &mut self.inner_mut().caps_or_badges[..]
+    }
+
+    pub fn recv_slot(&self) -> RelativeCPtr {
+        let inner = self.inner();
+        CNode::from_bits(inner.receiveCNode)
+            .relative_bits_with_depth(inner.receiveIndex, inner.receiveCNode.try_into().unwrap())
+    }
+
+    pub fn set_recv_slot(&mut self, slot: &RelativeCPtr) {
+        let inner = self.inner_mut();
+        inner.receiveCNode = slot.root().bits();
+        inner.receiveIndex = slot.path().bits();
+        inner.receiveCNode = slot.path().depth().try_into().unwrap();
     }
 }
