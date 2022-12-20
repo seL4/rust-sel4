@@ -47,7 +47,7 @@ pub use ipc_buffer::IPCBuffer;
 pub use message_info::{MessageInfo, MessageInfoBuilder};
 pub use misc::{Badge, Word, WORD_SIZE};
 pub use object::{ObjectBlueprint, ObjectType};
-pub use syscalls::r#yield;
+pub use syscalls::{r#yield, reply};
 
 pub use arch::top_level::*;
 

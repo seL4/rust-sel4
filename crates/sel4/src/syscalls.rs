@@ -48,10 +48,8 @@ impl<C: InvocationContext> Notification<C> {
     }
 }
 
-impl IPCBuffer {
-    pub fn reply(&mut self, info: MessageInfo) {
-        self.inner_mut().seL4_Reply(info.into_inner())
-    }
+pub fn reply(ipc_buffer: &mut IPCBuffer, info: MessageInfo) {
+    ipc_buffer.inner_mut().seL4_Reply(info.into_inner())
 }
 
 pub fn r#yield() {
