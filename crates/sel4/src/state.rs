@@ -1,8 +1,5 @@
 use core::cell::RefCell;
 
-#[allow(unused_imports)]
-use core::ops::{Deref, DerefMut};
-
 use crate::{IPCBuffer, InvocationContext};
 
 const IPC_BUFFER_INIT: RefCell<Option<IPCBuffer>> = RefCell::new(None);
@@ -12,6 +9,8 @@ cfg_if::cfg_if! {
         #[thread_local]
         pub static IPC_BUFFER: RefCell<Option<IPCBuffer>> = IPC_BUFFER_INIT;
     } else if #[cfg(feature = "single-threaded")] {
+        use core::ops::{Deref, DerefMut};
+
         pub static IPC_BUFFER: SingleThreaded<RefCell<Option<IPCBuffer>>> = SingleThreaded(IPC_BUFFER_INIT);
 
         pub struct SingleThreaded<T>(pub T);
