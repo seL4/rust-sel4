@@ -2,8 +2,6 @@
 #![feature(thread_local)]
 #![feature(proc_macro_hygiene)]
 #![feature(stmt_expr_attributes)]
-#![feature(auto_traits)]
-#![feature(negative_impls)]
 #![feature(strict_provenance)]
 #![feature(array_methods)]
 #![feature(variant_count)]
@@ -38,7 +36,7 @@ pub use cap_rights::{CapRights, CapRightsBuilder};
 pub use cnode_cap_data::CNodeCapData;
 pub use cptr::{
     cap_type, local_cptr, local_cptr::*, CPtr, CPtrBits, CPtrWithDepth, CapType, LocalCPtr,
-    NotCNodeCapType, RelativeCPtr,
+    RelativeCPtr,
 };
 pub use error::{Error, Result};
 pub use fast_ipc::{CallWithMRs, FastMessages, RecvWithMRs};

@@ -279,8 +279,3 @@ impl<C> Unspecified<C> {
         self.cast()
     }
 }
-
-// HACK until we get negative reasoning
-pub auto trait NotCNodeCapType {}
-
-impl !NotCNodeCapType for cap_type::CNode {}
