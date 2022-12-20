@@ -19,7 +19,6 @@ mod cnode_cap_data;
 mod cptr;
 mod error;
 mod fast_ipc;
-mod fault;
 mod helper_macros;
 mod invocation_context;
 mod invocations;
@@ -29,14 +28,15 @@ mod misc;
 mod object;
 mod syscalls;
 
+pub mod fault;
+
 pub use bootinfo::{
     BootInfo, BootInfoExtraStructure, BootInfoExtraStructureId, InitCSpaceSlot, UntypedDesc,
 };
 pub use cap_rights::{CapRights, CapRightsBuilder};
 pub use cnode_cap_data::CNodeCapData;
 pub use cptr::{
-    cap_type, local_cptr, local_cptr::*, CPtr, CPtrBits, CPtrWithDepth, CapType, LocalCPtr,
-    RelativeCPtr,
+    cap_type, local_cptr, CPtr, CPtrBits, CPtrWithDepth, CapType, LocalCPtr, RelativeCPtr,
 };
 pub use error::{Error, Result};
 pub use fast_ipc::{CallWithMRs, FastMessages, RecvWithMRs};
@@ -48,6 +48,12 @@ pub use object::{ObjectBlueprint, ObjectType};
 pub use syscalls::{r#yield, reply};
 
 pub use arch::top_level::*;
+
+#[doc(no_inline)]
+pub use local_cptr::*;
+
+#[doc(no_inline)]
+pub use fault::*;
 
 pub(crate) use helper_macros::newtype_methods;
 

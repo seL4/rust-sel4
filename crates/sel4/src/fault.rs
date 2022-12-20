@@ -1,4 +1,6 @@
-use crate::{sys, Fault, IPCBuffer, MessageInfo};
+use crate::{sys, IPCBuffer, MessageInfo};
+
+pub use crate::arch::fault::*;
 
 impl Fault {
     pub fn new(ipc_buffer: &IPCBuffer, info: &MessageInfo) -> Self {

@@ -1,7 +1,10 @@
 use sel4_config::sel4_cfg;
 
 use crate::{
-    CapFault, UnknownSyscall, UserException, VCPUFault, VGICMaintenance, VMFault, VPPIEvent, Word,
+    fault::{
+        CapFault, UnknownSyscall, UserException, VCPUFault, VGICMaintenance, VMFault, VPPIEvent,
+    },
+    Word,
 };
 
 impl CapFault {
