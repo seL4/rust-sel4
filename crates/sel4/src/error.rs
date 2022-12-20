@@ -50,13 +50,12 @@ impl Error {
     }
 }
 
-mod assertions {
+#[allow(dead_code)]
+#[allow(non_upper_case_globals)]
+mod __assertions {
     use super::*;
 
-    #[allow(dead_code)]
-    const _: () = assert_all_errors_accounted_for();
-
-    const fn assert_all_errors_accounted_for() {
+    const __assert_all_errors_accounted_for: () = {
         assert!(mem::variant_count::<Error>() == sys::seL4_Error::seL4_NumErrors as usize - 1);
-    }
+    };
 }

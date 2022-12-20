@@ -10,8 +10,6 @@ use crate::{
 
 const UNUSED_FOR_IN: Word = 0;
 
-const __ASSERTION: [(); NUM_FAST_MESSAGE_REGISTERS] = [(); 4];
-
 impl<C: InvocationContext> Endpoint<C> {
     pub fn send_with_mrs<T: FastMessages>(self, info: MessageInfo, messages: T) {
         let [msg0, msg1, msg2, msg3] = messages.prepare_in();
@@ -109,4 +107,14 @@ impl<const N: usize> FastMessagesUnchecked for [Word; N] {
             }
         })
     }
+}
+
+#[allow(dead_code)]
+#[allow(non_upper_case_globals)]
+mod __assertions {
+    use super::*;
+
+    const __assert_num_fast_message_registers: () = {
+        assert!(NUM_FAST_MESSAGE_REGISTERS == 4);
+    };
 }
