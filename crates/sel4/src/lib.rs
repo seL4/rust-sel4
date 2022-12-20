@@ -6,6 +6,7 @@
 #![feature(negative_impls)]
 #![feature(strict_provenance)]
 #![feature(array_methods)]
+#![feature(variant_count)]
 
 pub use sel4_config::{
     self as config, sel4_cfg, sel4_cfg_bool, sel4_cfg_if, sel4_cfg_str, sel4_cfg_usize,

@@ -49,3 +49,14 @@ impl Error {
         }
     }
 }
+
+mod assertions {
+    use super::*;
+
+    #[allow(dead_code)]
+    const _: () = assert_all_errors_accounted_for();
+
+    const fn assert_all_errors_accounted_for() {
+        assert!(mem::variant_count::<Error>() == sys::seL4_Error::seL4_NumErrors as usize - 1);
+    }
+}
