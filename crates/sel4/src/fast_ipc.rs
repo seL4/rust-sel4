@@ -1,12 +1,6 @@
-#![allow(dead_code)]
-#![allow(unused_imports)]
-
 use core::array;
 
-use crate::{
-    local_cptr::*, sys, Badge, Endpoint, IPCBuffer, InvocationContext, MessageInfo, Word,
-    NUM_FAST_MESSAGE_REGISTERS,
-};
+use crate::{Badge, Endpoint, InvocationContext, MessageInfo, Word, NUM_FAST_MESSAGE_REGISTERS};
 
 const UNUSED_FOR_IN: Word = 0;
 
