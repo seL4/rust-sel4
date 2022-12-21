@@ -2,7 +2,6 @@
 #![no_main]
 #![feature(core_intrinsics)]
 #![feature(exclusive_wrapper)]
-#![feature(ptr_to_from_bits)]
 
 mod rt;
 
@@ -25,9 +24,9 @@ fn main(bootinfo: &sel4::BootInfo) -> ! {
         sel4::BootInfo::init_cspace_local_cptr::<sel4::cap_type::Untyped>(slot)
     };
 
-    let first_empty_slot = bootinfo.empty().start;
-    let unbadged_notification_slot = first_empty_slot;
-    let badged_notification_slot = first_empty_slot + 1;
+    let mut empty_slots = bootinfo.empty();
+    let unbadged_notification_slot = empty_slots.next().unwrap();
+    let badged_notification_slot = empty_slots.next().unwrap();
     let unbadged_notification = sel4::BootInfo::init_cspace_local_cptr::<
         sel4::cap_type::Notification,
     >(unbadged_notification_slot);
@@ -63,12 +62,13 @@ fn main(bootinfo: &sel4::BootInfo) -> ! {
 
     let observed_badge = unbadged_notification.with(&mut ipc_buffer).wait();
 
-    sel4::debug_println!("badge: {:#x}", badge);
+    sel4::debug_println!("badge = {:#x}", badge);
     assert_eq!(observed_badge, badge);
 
     sel4::BootInfo::init_thread_tcb()
         .with(&mut ipc_buffer)
         .suspend()
         .unwrap();
+
     unreachable!()
 }
