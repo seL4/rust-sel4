@@ -5,6 +5,7 @@ use crate::{
     InvocationContext, LocalCPtr, RelativeCPtr, Result, VCPUReg, VMAttributes, Word,
 };
 
+#[sel4_cfg(ARM_HYPERVISOR_SUPPORT)]
 impl<C: InvocationContext> VCPU<C> {
     pub fn set_tcb(self, tcb: TCB) -> Result<()> {
         Error::wrap(self.invoke(|cptr, ipc_buffer| {
@@ -124,30 +125,6 @@ impl<C: InvocationContext> IRQControl<C> {
                 target,
             )
         }))
-    }
-}
-
-impl<C: InvocationContext> IRQHandler<C> {
-    pub fn ack(self) -> Result<()> {
-        Error::wrap(
-            self.invoke(|cptr, ipc_buffer| ipc_buffer.inner_mut().seL4_IRQHandler_Ack(cptr.bits())),
-        )
-    }
-
-    pub fn set_notification(self, notification: Notification) -> Result<()> {
-        Error::wrap(self.invoke(|cptr, ipc_buffer| {
-            ipc_buffer
-                .inner_mut()
-                .seL4_IRQHandler_SetNotification(cptr.bits(), notification.bits())
-        }))
-    }
-
-    pub fn clear(self) -> Result<()> {
-        Error::wrap(
-            self.invoke(|cptr, ipc_buffer| {
-                ipc_buffer.inner_mut().seL4_IRQHandler_Clear(cptr.bits())
-            }),
-        )
     }
 }
 
