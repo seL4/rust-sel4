@@ -88,9 +88,9 @@ impl<C: InvocationContext> TCB<C> {
         fault_ep: CPtr,
         cspace_root: CNode,
         cspace_root_data: CNodeCapData,
-        vspace_root: PGD,
+        vspace_root: VSpace,
         ipc_buffer: Word,
-        ipc_buffer_frame: SmallPage,
+        ipc_buffer_frame: Granule,
     ) -> Result<()> {
         Error::wrap(self.invoke(|cptr, ctx_ipc_buffer| {
             ctx_ipc_buffer.inner_mut().seL4_TCB_Configure(

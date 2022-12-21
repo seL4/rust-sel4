@@ -18,4 +18,24 @@ macro_rules! newtype_methods {
     };
 }
 
+macro_rules! declare_cap_type {
+    ($t:ident) => {
+        #[derive(Copy, Clone, Eq, PartialEq)]
+        pub struct $t;
+
+        impl $crate::CapType for $t {
+            const NAME: &'static str = stringify!($t);
+        }
+    };
+}
+
+macro_rules! declare_local_cptr_alias {
+    ($t:ident) => {
+        pub type $t<C = $crate::NoExplicitInvocationContext> =
+            $crate::LocalCPtr<$crate::cap_type::$t, C>;
+    };
+}
+
+pub(crate) use declare_cap_type;
+pub(crate) use declare_local_cptr_alias;
 pub(crate) use newtype_methods;

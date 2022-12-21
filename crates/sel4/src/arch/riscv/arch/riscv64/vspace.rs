@@ -1,4 +1,4 @@
-pub const GRANULE: FrameSize = FrameSize::Granule;
+pub const GRANULE_SIZE: FrameSize = FrameSize::Granule;
 
 impl FrameSize {
     pub const fn bits(self) -> usize {

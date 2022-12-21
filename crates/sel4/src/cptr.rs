@@ -95,70 +95,46 @@ pub trait CapType: Copy {
 }
 
 pub mod cap_type {
-    use super::CapType;
+    use crate::declare_cap_type;
 
-    macro_rules! declare {
-        ($t:ident) => {
-            #[derive(Copy, Clone, Eq, PartialEq)]
-            pub struct $t;
+    pub use crate::arch::cap_type_arch::*;
 
-            impl CapType for $t {
-                const NAME: &'static str = stringify!($t);
-            }
-        };
-    }
+    declare_cap_type!(Untyped);
+    declare_cap_type!(Endpoint);
+    declare_cap_type!(Notification);
+    declare_cap_type!(TCB);
+    declare_cap_type!(CNode);
+    declare_cap_type!(IRQControl);
+    declare_cap_type!(IRQHandler);
+    declare_cap_type!(ASIDControl);
+    declare_cap_type!(ASIDPool);
 
-    declare!(Untyped);
-    declare!(Endpoint);
-    declare!(Notification);
-    declare!(TCB);
-    declare!(VCPU);
-    declare!(CNode);
-    declare!(SmallPage);
-    declare!(LargePage);
-    declare!(HugePage);
-    declare!(PGD);
-    declare!(PUD);
-    declare!(PD);
-    declare!(PT);
-    declare!(IRQControl);
-    declare!(IRQHandler);
-    declare!(ASIDControl);
-    declare!(ASIDPool);
-    declare!(Unspecified);
-    declare!(Null);
+    declare_cap_type!(Null);
+    declare_cap_type!(Unspecified);
 }
 
 use local_cptr::*;
 
 pub mod local_cptr {
-    use super::{cap_type, LocalCPtr, NoExplicitInvocationContext};
+    use crate::declare_local_cptr_alias;
 
-    macro_rules! alias {
-        ($t:ident) => {
-            pub type $t<C = NoExplicitInvocationContext> = LocalCPtr<cap_type::$t, C>;
-        };
-    }
+    pub use crate::arch::local_cptr_arch::*;
 
-    alias!(Untyped);
-    alias!(Endpoint);
-    alias!(Notification);
-    alias!(TCB);
-    alias!(VCPU);
-    alias!(CNode);
-    alias!(SmallPage);
-    alias!(LargePage);
-    alias!(HugePage);
-    alias!(PGD);
-    alias!(PUD);
-    alias!(PD);
-    alias!(PT);
-    alias!(IRQControl);
-    alias!(IRQHandler);
-    alias!(ASIDControl);
-    alias!(ASIDPool);
-    alias!(Unspecified);
-    alias!(Null);
+    declare_local_cptr_alias!(Untyped);
+    declare_local_cptr_alias!(Endpoint);
+    declare_local_cptr_alias!(Notification);
+    declare_local_cptr_alias!(TCB);
+    declare_local_cptr_alias!(CNode);
+    declare_local_cptr_alias!(IRQControl);
+    declare_local_cptr_alias!(IRQHandler);
+    declare_local_cptr_alias!(ASIDControl);
+    declare_local_cptr_alias!(ASIDPool);
+
+    declare_local_cptr_alias!(Null);
+    declare_local_cptr_alias!(Unspecified);
+
+    declare_local_cptr_alias!(VSpace);
+    declare_local_cptr_alias!(Granule);
 }
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]

@@ -1,7 +1,7 @@
 use core::mem;
 use core::slice;
 
-use crate::{sys, CNode, RelativeCPtr, Word, GRANULE};
+use crate::{sys, CNode, RelativeCPtr, Word, GRANULE_SIZE};
 
 #[derive(Debug)]
 pub struct IPCBuffer {
@@ -10,7 +10,7 @@ pub struct IPCBuffer {
 
 impl IPCBuffer {
     pub unsafe fn from_ptr(ptr: *mut sys::seL4_IPCBuffer) -> Self {
-        assert_eq!(ptr.addr() % GRANULE.bytes(), 0); // sanity check
+        assert_eq!(ptr.addr() % GRANULE_SIZE.bytes(), 0); // sanity check
         Self { ptr }
     }
 

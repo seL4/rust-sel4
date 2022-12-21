@@ -4,7 +4,7 @@ use core::slice;
 
 use crate::{
     newtype_methods, sys, ASIDControl, ASIDPool, CNode, CPtr, CapType, IPCBuffer, IRQControl,
-    LocalCPtr, GRANULE, PGD, TCB,
+    LocalCPtr, VSpace, GRANULE_SIZE, TCB,
 };
 
 #[derive(Debug)]
@@ -14,7 +14,7 @@ pub struct BootInfo {
 
 impl BootInfo {
     pub unsafe fn from_ptr(ptr: *const sys::seL4_BootInfo) -> Self {
-        assert_eq!(ptr.addr() % GRANULE.bytes(), 0); // sanity check
+        assert_eq!(ptr.addr() % GRANULE_SIZE.bytes(), 0); // sanity check
         Self { ptr }
     }
 
@@ -30,7 +30,7 @@ impl BootInfo {
         unsafe {
             self.ptr
                 .cast::<u8>()
-                .offset(GRANULE.bytes().try_into().unwrap())
+                .offset(GRANULE_SIZE.bytes().try_into().unwrap())
         }
     }
 
@@ -124,8 +124,8 @@ impl BootInfo {
         )
     }
 
-    pub fn init_thread_vspace() -> PGD {
-        PGD::from_bits(
+    pub fn init_thread_vspace() -> VSpace {
+        VSpace::from_bits(
             sys::seL4_RootCapSlot::seL4_CapInitThreadVSpace
                 .try_into()
                 .unwrap(),

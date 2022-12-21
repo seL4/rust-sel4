@@ -55,7 +55,7 @@ pub use local_cptr::*;
 #[doc(no_inline)]
 pub use fault::*;
 
-pub(crate) use helper_macros::newtype_methods;
+pub(crate) use helper_macros::{declare_cap_type, declare_local_cptr_alias, newtype_methods};
 
 sel4_cfg_if! {
     if #[cfg(DEBUG_BUILD)] {

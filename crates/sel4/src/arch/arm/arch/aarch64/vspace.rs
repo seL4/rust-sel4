@@ -3,7 +3,7 @@ use crate::{
     ObjectBlueprintAArch64, ObjectBlueprintArm, Result, Unspecified, VMAttributes, PGD,
 };
 
-pub const GRANULE: FrameSize = FrameSize::Small;
+pub const GRANULE_SIZE: FrameSize = FrameSize::Small;
 
 impl FrameSize {
     pub fn blueprint(self) -> ObjectBlueprint {
