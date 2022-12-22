@@ -1,3 +1,5 @@
+use core::cell::RefCell;
+
 use crate::IPCBuffer;
 
 pub trait InvocationContext {
@@ -18,6 +20,12 @@ pub type ExplicitInvocationContext<'a> = &'a mut IPCBuffer;
 impl<'a> InvocationContext for ExplicitInvocationContext<'a> {
     fn invoke<T>(self, f: impl FnOnce(&mut IPCBuffer) -> T) -> T {
         f(self)
+    }
+}
+
+impl InvocationContext for &RefCell<IPCBuffer> {
+    fn invoke<T>(self, f: impl FnOnce(&mut IPCBuffer) -> T) -> T {
+        f(&mut self.borrow_mut())
     }
 }
 
