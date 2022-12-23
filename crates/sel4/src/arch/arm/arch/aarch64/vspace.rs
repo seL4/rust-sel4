@@ -5,6 +5,13 @@ use crate::{
 
 pub const GRANULE_SIZE: FrameSize = FrameSize::Small;
 
+#[derive(Copy, Clone, Debug)]
+pub enum FrameSize {
+    Small,
+    Large,
+    Huge,
+}
+
 impl FrameSize {
     pub fn blueprint(self) -> ObjectBlueprint {
         match self {
@@ -43,12 +50,60 @@ impl FrameType for cap_type::HugePage {
     const FRAME_SIZE: FrameSize = FrameSize::Huge;
 }
 
+//
+
 #[derive(Copy, Clone, Debug)]
-pub enum FrameSize {
-    Small,
-    Large,
-    Huge,
+pub struct AnyFrame<C> {
+    cptr: Unspecified<C>,
+    size: FrameSize,
 }
+
+impl<C> AnyFrame<C> {
+    pub fn cptr(&self) -> &Unspecified<C> {
+        &self.cptr
+    }
+
+    pub fn size(&self) -> &FrameSize {
+        &self.size
+    }
+}
+
+impl<C: InvocationContext> AnyFrame<C> {
+    pub fn map(self, pgd: PGD, vaddr: usize, rights: CapRights, attrs: VMAttributes) -> Result<()> {
+        match self.size() {
+            FrameSize::Small => self
+                .cptr
+                .downcast::<cap_type::SmallPage>()
+                .map(pgd, vaddr, rights, attrs),
+            FrameSize::Large => self
+                .cptr
+                .downcast::<cap_type::LargePage>()
+                .map(pgd, vaddr, rights, attrs),
+            FrameSize::Huge => self
+                .cptr
+                .downcast::<cap_type::HugePage>()
+                .map(pgd, vaddr, rights, attrs),
+        }
+    }
+
+    pub fn unmap(self) -> Result<()> {
+        match self.size() {
+            FrameSize::Small => self.cptr.downcast::<cap_type::SmallPage>().unmap(),
+            FrameSize::Large => self.cptr.downcast::<cap_type::LargePage>().unmap(),
+            FrameSize::Huge => self.cptr.downcast::<cap_type::HugePage>().unmap(),
+        }
+    }
+
+    pub fn get_address(self) -> Result<usize> {
+        match self.size() {
+            FrameSize::Small => self.cptr.downcast::<cap_type::SmallPage>().get_address(),
+            FrameSize::Large => self.cptr.downcast::<cap_type::LargePage>().get_address(),
+            FrameSize::Huge => self.cptr.downcast::<cap_type::HugePage>().get_address(),
+        }
+    }
+}
+
+//
 
 pub const LEVEL_BITS: usize = 9;
 
@@ -110,56 +165,5 @@ impl IntermediateTranslationStructureType for cap_type::PT {
         ipc_buffer
             .inner_mut()
             .seL4_ARM_PageTable_Map(service, vspace, vaddr, attr)
-    }
-}
-
-#[derive(Copy, Clone, Debug)]
-pub struct AnyFrame<C> {
-    cptr: Unspecified<C>,
-    size: FrameSize,
-}
-
-impl<C> AnyFrame<C> {
-    pub fn cptr(&self) -> &Unspecified<C> {
-        &self.cptr
-    }
-
-    pub fn size(&self) -> &FrameSize {
-        &self.size
-    }
-}
-
-impl<C: InvocationContext> AnyFrame<C> {
-    pub fn map(self, pgd: PGD, vaddr: usize, rights: CapRights, attrs: VMAttributes) -> Result<()> {
-        match self.size() {
-            FrameSize::Small => self
-                .cptr
-                .downcast::<cap_type::SmallPage>()
-                .map(pgd, vaddr, rights, attrs),
-            FrameSize::Large => self
-                .cptr
-                .downcast::<cap_type::LargePage>()
-                .map(pgd, vaddr, rights, attrs),
-            FrameSize::Huge => self
-                .cptr
-                .downcast::<cap_type::HugePage>()
-                .map(pgd, vaddr, rights, attrs),
-        }
-    }
-
-    pub fn unmap(self) -> Result<()> {
-        match self.size() {
-            FrameSize::Small => self.cptr.downcast::<cap_type::SmallPage>().unmap(),
-            FrameSize::Large => self.cptr.downcast::<cap_type::LargePage>().unmap(),
-            FrameSize::Huge => self.cptr.downcast::<cap_type::HugePage>().unmap(),
-        }
-    }
-
-    pub fn get_address(self) -> Result<usize> {
-        match self.size() {
-            FrameSize::Small => self.cptr.downcast::<cap_type::SmallPage>().get_address(),
-            FrameSize::Large => self.cptr.downcast::<cap_type::LargePage>().get_address(),
-            FrameSize::Huge => self.cptr.downcast::<cap_type::HugePage>().get_address(),
-        }
     }
 }
