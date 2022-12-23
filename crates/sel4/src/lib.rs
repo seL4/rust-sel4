@@ -37,12 +37,12 @@ pub use cnode_cap_data::CNodeCapData;
 pub use cptr::{
     cap_type, local_cptr, CPtr, CPtrBits, CPtrWithDepth, CapType, LocalCPtr, RelativeCPtr,
 };
-pub use endpoint::{CallWithMRs, FastMessages, RecvWithMRs, reply};
+pub use endpoint::{reply, CallWithMRs, FastMessages, RecvWithMRs};
 pub use error::{Error, Result};
 pub use invocation_context::{InvocationContext, NoExplicitInvocationContext, NoInvocationContext};
 pub use ipc_buffer::IPCBuffer;
 pub use message_info::{MessageInfo, MessageInfoBuilder};
-pub use misc::{Badge, Word, WORD_SIZE, r#yield};
+pub use misc::{r#yield, Badge, Word, WORD_SIZE};
 pub use object::{ObjectBlueprint, ObjectType};
 
 pub use arch::top_level::*;

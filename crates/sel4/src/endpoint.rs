@@ -1,6 +1,8 @@
 use core::array;
 
-use crate::{Badge, Endpoint, InvocationContext, MessageInfo, Word, NUM_FAST_MESSAGE_REGISTERS, IPCBuffer};
+use crate::{
+    Badge, Endpoint, IPCBuffer, InvocationContext, MessageInfo, Word, NUM_FAST_MESSAGE_REGISTERS,
+};
 
 const UNUSED_FOR_IN: Word = 0;
 

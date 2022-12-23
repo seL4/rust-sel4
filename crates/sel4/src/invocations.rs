@@ -3,8 +3,7 @@ use core::mem;
 use sel4_config::sel4_cfg;
 
 use crate::{
-    sys,
-    local_cptr::*, CNodeCapData, CPtr, CapRights, Error, InvocationContext, ObjectBlueprint,
+    local_cptr::*, sys, CNodeCapData, CPtr, CapRights, Error, InvocationContext, ObjectBlueprint,
     RelativeCPtr, Result, UserContext, Word,
 };
 
@@ -41,7 +40,8 @@ impl<C: InvocationContext> Untyped<C> {
     }
 }
 
-const USER_CONTEXT_MAX_REG_COUNT: usize = mem::size_of::<sys::seL4_UserContext>() / mem::size_of::<Word>();
+const USER_CONTEXT_MAX_REG_COUNT: usize =
+    mem::size_of::<sys::seL4_UserContext>() / mem::size_of::<Word>();
 
 impl<C: InvocationContext> TCB<C> {
     pub fn read_registers(self, suspend: bool, count: Word) -> Result<UserContext> {
