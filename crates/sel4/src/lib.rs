@@ -25,6 +25,7 @@ mod ipc_buffer;
 mod message_info;
 mod object;
 mod syscalls;
+mod vspace;
 
 pub mod fault;
 
@@ -42,6 +43,7 @@ pub use ipc_buffer::IPCBuffer;
 pub use message_info::{MessageInfo, MessageInfoBuilder};
 pub use object::{ObjectBlueprint, ObjectType};
 pub use syscalls::{r#yield, reply, Badge, CallWithMRs, FastMessages, RecvWithMRs};
+pub use vspace::{AnyFrame, FrameType, GRANULE_SIZE};
 
 pub use arch::top_level::*;
 

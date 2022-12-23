@@ -1,9 +1,7 @@
 use crate::{
-    cap_type, sys, CapRights, CapType, IPCBuffer, InvocationContext, ObjectBlueprint,
-    ObjectBlueprintAArch64, ObjectBlueprintArm, Result, Unspecified, VMAttributes, PGD,
+    cap_type, sys, AnyFrame, CapRights, CapType, FrameType, IPCBuffer, InvocationContext,
+    ObjectBlueprint, ObjectBlueprintAArch64, ObjectBlueprintArm, Result, VMAttributes, PGD,
 };
-
-pub const GRANULE_SIZE: FrameSize = FrameSize::Small;
 
 #[derive(Copy, Clone, Debug)]
 pub enum FrameSize {
@@ -28,14 +26,6 @@ impl FrameSize {
             FrameSize::Huge => 30,
         }
     }
-
-    pub const fn bytes(self) -> usize {
-        1 << self.bits()
-    }
-}
-
-pub trait FrameType: CapType {
-    const FRAME_SIZE: FrameSize;
 }
 
 impl FrameType for cap_type::SmallPage {
@@ -52,35 +42,19 @@ impl FrameType for cap_type::HugePage {
 
 //
 
-#[derive(Copy, Clone, Debug)]
-pub struct AnyFrame<C> {
-    cptr: Unspecified<C>,
-    size: FrameSize,
-}
-
-impl<C> AnyFrame<C> {
-    pub fn cptr(&self) -> &Unspecified<C> {
-        &self.cptr
-    }
-
-    pub fn size(&self) -> &FrameSize {
-        &self.size
-    }
-}
-
 impl<C: InvocationContext> AnyFrame<C> {
     pub fn map(self, pgd: PGD, vaddr: usize, rights: CapRights, attrs: VMAttributes) -> Result<()> {
         match self.size() {
             FrameSize::Small => self
-                .cptr
+                .cptr()
                 .downcast::<cap_type::SmallPage>()
                 .map(pgd, vaddr, rights, attrs),
             FrameSize::Large => self
-                .cptr
+                .cptr()
                 .downcast::<cap_type::LargePage>()
                 .map(pgd, vaddr, rights, attrs),
             FrameSize::Huge => self
-                .cptr
+                .cptr()
                 .downcast::<cap_type::HugePage>()
                 .map(pgd, vaddr, rights, attrs),
         }
@@ -88,17 +62,17 @@ impl<C: InvocationContext> AnyFrame<C> {
 
     pub fn unmap(self) -> Result<()> {
         match self.size() {
-            FrameSize::Small => self.cptr.downcast::<cap_type::SmallPage>().unmap(),
-            FrameSize::Large => self.cptr.downcast::<cap_type::LargePage>().unmap(),
-            FrameSize::Huge => self.cptr.downcast::<cap_type::HugePage>().unmap(),
+            FrameSize::Small => self.cptr().downcast::<cap_type::SmallPage>().unmap(),
+            FrameSize::Large => self.cptr().downcast::<cap_type::LargePage>().unmap(),
+            FrameSize::Huge => self.cptr().downcast::<cap_type::HugePage>().unmap(),
         }
     }
 
     pub fn get_address(self) -> Result<usize> {
         match self.size() {
-            FrameSize::Small => self.cptr.downcast::<cap_type::SmallPage>().get_address(),
-            FrameSize::Large => self.cptr.downcast::<cap_type::LargePage>().get_address(),
-            FrameSize::Huge => self.cptr.downcast::<cap_type::HugePage>().get_address(),
+            FrameSize::Small => self.cptr().downcast::<cap_type::SmallPage>().get_address(),
+            FrameSize::Large => self.cptr().downcast::<cap_type::LargePage>().get_address(),
+            FrameSize::Huge => self.cptr().downcast::<cap_type::HugePage>().get_address(),
         }
     }
 }

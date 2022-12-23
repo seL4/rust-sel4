@@ -14,9 +14,6 @@ pub(crate) mod top_level {
         user_context::UserContext,
         vcpu_reg::VCPUReg,
         vm_attributes::VMAttributes,
-        vspace::{
-            AnyFrame, FrameSize, FrameType, IntermediateTranslationStructureType, GRANULE_SIZE,
-            LEVEL_BITS,
-        },
+        vspace::{FrameSize, IntermediateTranslationStructureType, LEVEL_BITS},
     };
 }
