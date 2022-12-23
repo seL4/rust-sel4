@@ -36,6 +36,24 @@ macro_rules! declare_local_cptr_alias {
     };
 }
 
+macro_rules! declare_fault_newtype {
+    ($t:ident, $sys:path) => {
+        #[derive(Debug, Clone, PartialEq, Eq)]
+        pub struct $t($sys);
+
+        impl $t {
+            pub const fn from_inner(inner: $sys) -> Self {
+                Self(inner)
+            }
+
+            pub const fn inner(&self) -> &$sys {
+                &self.0
+            }
+        }
+    };
+}
+
 pub(crate) use declare_cap_type;
+pub(crate) use declare_fault_newtype;
 pub(crate) use declare_local_cptr_alias;
 pub(crate) use newtype_methods;
