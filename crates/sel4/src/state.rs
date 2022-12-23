@@ -8,41 +8,47 @@ cfg_if::cfg_if! {
     if #[cfg(not(feature = "single-threaded"))] {
         #[thread_local]
         static IPC_BUFFER: RefCell<Option<IPCBuffer>> = IPC_BUFFER_INIT;
-    } else {
-        use core::ops::Deref;
 
+        pub fn with_ipc_buffer_refcell<F, T>(f: F) -> T
+        where
+            F: FnOnce(&RefCell<Option<IPCBuffer>>) -> T,
+        {
+            f(&IPC_BUFFER)
+        }
+    } else {
         static IPC_BUFFER: SingleThreaded<RefCell<Option<IPCBuffer>>> = SingleThreaded(IPC_BUFFER_INIT);
 
         struct SingleThreaded<T>(T);
 
         unsafe impl<T> Sync for SingleThreaded<T> {}
 
-        impl<T> Deref for SingleThreaded<T> {
-            type Target = T;
-
-            fn deref(&self) -> &Self::Target {
-                &self.0
-            }
+        pub fn with_ipc_buffer_refcell<F, T>(f: F) -> T
+        where
+            F: FnOnce(&RefCell<Option<IPCBuffer>>) -> T,
+        {
+            f(&IPC_BUFFER.0)
         }
     }
 }
 
 pub unsafe fn set_ipc_buffer(ipc_buffer: IPCBuffer) {
-    let _ = IPC_BUFFER.replace(Some(ipc_buffer));
+    with_ipc_buffer_refcell(|refcell| {
+        let _ = refcell.replace(Some(ipc_buffer));
+    })
 }
 
 pub fn with_ipc_buffer<F, T>(f: F) -> T
 where
     F: FnOnce(&IPCBuffer) -> T,
 {
-    f(IPC_BUFFER.borrow().as_ref().unwrap())
+    with_ipc_buffer_refcell(|refcell| f(refcell.borrow().as_ref().unwrap()))
 }
 
 pub fn with_ipc_buffer_mut<F, T>(f: F) -> T
 where
     F: FnOnce(&mut IPCBuffer) -> T,
 {
-    f(IPC_BUFFER.borrow_mut().as_mut().unwrap())
+    with_ipc_buffer_refcell(|refcell| f(refcell.borrow_mut().as_mut().unwrap()))
 }
 
 #[derive(Debug, Copy, Clone, Default, PartialEq, Eq, Hash)]
