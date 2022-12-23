@@ -1,10 +1,11 @@
 use core::array;
 
 use crate::{
-    Badge, Endpoint, IPCBuffer, InvocationContext, MessageInfo, Word, NUM_FAST_MESSAGE_REGISTERS,
+    sys, Endpoint, IPCBuffer, InvocationContext, MessageInfo, Notification, Word,
+    NUM_FAST_MESSAGE_REGISTERS,
 };
 
-const UNUSED_FOR_IN: Word = 0;
+pub type Badge = Word;
 
 impl<C: InvocationContext> Endpoint<C> {
     pub fn send(self, info: MessageInfo) {
@@ -92,9 +93,27 @@ impl<C: InvocationContext> Endpoint<C> {
     }
 }
 
+impl<C: InvocationContext> Notification<C> {
+    pub fn signal(self) {
+        self.invoke(|cptr, ipc_buffer| ipc_buffer.inner_mut().seL4_Signal(cptr.bits()))
+    }
+
+    pub fn wait(self) -> Word {
+        self.invoke(|cptr, ipc_buffer| ipc_buffer.inner_mut().seL4_Wait(cptr.bits()))
+    }
+}
+
 pub fn reply(ipc_buffer: &mut IPCBuffer, info: MessageInfo) {
     ipc_buffer.inner_mut().seL4_Reply(info.into_inner())
 }
+
+pub fn r#yield() {
+    sys::seL4_Yield()
+}
+
+//
+
+const UNUSED_FOR_IN: Word = 0;
 
 pub struct RecvWithMRs {
     pub info: MessageInfo,

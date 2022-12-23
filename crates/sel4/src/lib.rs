@@ -17,15 +17,14 @@ mod bootinfo;
 mod cap_rights;
 mod cnode_cap_data;
 mod cptr;
-mod endpoint;
 mod error;
 mod helper_macros;
 mod invocation_context;
 mod invocations;
 mod ipc_buffer;
 mod message_info;
-mod misc;
 mod object;
+mod syscalls;
 
 pub mod fault;
 
@@ -37,13 +36,12 @@ pub use cnode_cap_data::CNodeCapData;
 pub use cptr::{
     cap_type, local_cptr, CPtr, CPtrBits, CPtrWithDepth, CapType, LocalCPtr, RelativeCPtr,
 };
-pub use endpoint::{reply, CallWithMRs, FastMessages, RecvWithMRs};
 pub use error::{Error, Result};
 pub use invocation_context::{InvocationContext, NoExplicitInvocationContext, NoInvocationContext};
 pub use ipc_buffer::IPCBuffer;
 pub use message_info::{MessageInfo, MessageInfoBuilder};
-pub use misc::{r#yield, Badge, Word, WORD_SIZE};
 pub use object::{ObjectBlueprint, ObjectType};
+pub use syscalls::{r#yield, reply, Badge, CallWithMRs, FastMessages, RecvWithMRs};
 
 pub use arch::top_level::*;
 
@@ -87,6 +85,10 @@ mod state;
 pub use state::{
     set_ipc_buffer, with_ipc_buffer, with_ipc_buffer_mut, ImplicitInvocationContext, IPC_BUFFER,
 };
+
+pub type Word = sys::seL4_Word;
+
+pub const WORD_SIZE: usize = sel4_cfg_usize!(WORD_SIZE);
 
 #[doc(hidden)]
 pub mod _private {

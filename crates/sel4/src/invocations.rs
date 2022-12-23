@@ -7,16 +7,6 @@ use crate::{
     RelativeCPtr, Result, UserContext, Word,
 };
 
-impl<C: InvocationContext> Notification<C> {
-    pub fn signal(self) {
-        self.invoke(|cptr, ipc_buffer| ipc_buffer.inner_mut().seL4_Signal(cptr.bits()))
-    }
-
-    pub fn wait(self) -> Word {
-        self.invoke(|cptr, ipc_buffer| ipc_buffer.inner_mut().seL4_Wait(cptr.bits()))
-    }
-}
-
 impl<C: InvocationContext> Untyped<C> {
     pub fn retype(
         self,
