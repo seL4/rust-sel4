@@ -24,6 +24,41 @@ impl CPtr {
     }
 }
 
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+pub struct CPtrWithDepth {
+    bits: CPtrBits,
+    depth: usize,
+}
+
+impl CPtrWithDepth {
+    pub const fn from_bits_with_depth(bits: CPtrBits, depth: usize) -> Self {
+        Self { bits, depth }
+    }
+
+    pub const fn bits(&self) -> CPtrBits {
+        self.bits
+    }
+
+    pub const fn depth(&self) -> usize {
+        self.depth
+    }
+
+    pub const fn empty() -> Self {
+        Self::from_bits_with_depth(0, 0)
+    }
+
+    // convenience
+    pub(crate) fn depth_for_kernel(&self) -> u8 {
+        self.depth().try_into().unwrap()
+    }
+}
+
+impl From<CPtr> for CPtrWithDepth {
+    fn from(cptr: CPtr) -> Self {
+        Self::from_bits_with_depth(cptr.bits(), WORD_SIZE)
+    }
+}
+
 #[derive(Copy, Clone, Eq, PartialEq)]
 pub struct LocalCPtr<T: CapType, C = NoExplicitInvocationContext> {
     phantom: PhantomData<T>,
@@ -137,38 +172,9 @@ pub mod local_cptr {
     declare_local_cptr_alias!(Granule);
 }
 
-#[derive(Copy, Clone, Debug, Eq, PartialEq)]
-pub struct CPtrWithDepth {
-    bits: CPtrBits,
-    depth: usize,
-}
-
-impl CPtrWithDepth {
-    pub const fn from_bits_with_depth(bits: CPtrBits, depth: usize) -> Self {
-        Self { bits, depth }
-    }
-
-    pub const fn bits(&self) -> CPtrBits {
-        self.bits
-    }
-
-    pub const fn depth(&self) -> usize {
-        self.depth
-    }
-
-    pub const fn empty() -> Self {
-        Self::from_bits_with_depth(0, 0)
-    }
-
-    // convenience
-    pub(crate) fn depth_for_kernel(&self) -> u8 {
-        self.depth().try_into().unwrap()
-    }
-}
-
-impl From<CPtr> for CPtrWithDepth {
-    fn from(cptr: CPtr) -> Self {
-        Self::from_bits_with_depth(cptr.bits(), WORD_SIZE)
+impl<C> Unspecified<C> {
+    pub fn downcast<T: CapType>(self) -> LocalCPtr<T, C> {
+        self.cast()
     }
 }
 
@@ -249,11 +255,5 @@ impl<C> CNode<C> {
 impl<C: InvocationContext> CNode<C> {
     pub fn save_caller(self, ep: Endpoint) -> Result<()> {
         self.relative(ep).save_caller()
-    }
-}
-
-impl<C> Unspecified<C> {
-    pub fn downcast<T: CapType>(self) -> LocalCPtr<T, C> {
-        self.cast()
     }
 }
