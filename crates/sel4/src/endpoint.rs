@@ -1,10 +1,46 @@
 use core::array;
 
-use crate::{Badge, Endpoint, InvocationContext, MessageInfo, Word, NUM_FAST_MESSAGE_REGISTERS};
+use crate::{Badge, Endpoint, InvocationContext, MessageInfo, Word, NUM_FAST_MESSAGE_REGISTERS, IPCBuffer};
 
 const UNUSED_FOR_IN: Word = 0;
 
 impl<C: InvocationContext> Endpoint<C> {
+    pub fn send(self, info: MessageInfo) {
+        self.invoke(|cptr, ipc_buffer| {
+            ipc_buffer
+                .inner_mut()
+                .seL4_Send(cptr.bits(), info.into_inner())
+        })
+    }
+
+    pub fn nb_send(self, info: MessageInfo) {
+        self.invoke(|cptr, ipc_buffer| {
+            ipc_buffer
+                .inner_mut()
+                .seL4_NBSend(cptr.bits(), info.into_inner())
+        })
+    }
+
+    pub fn recv(self) -> (MessageInfo, Badge) {
+        let (raw_msg_info, badge) =
+            self.invoke(|cptr, ipc_buffer| ipc_buffer.inner_mut().seL4_Recv(cptr.bits()));
+        (MessageInfo::from_inner(raw_msg_info), badge)
+    }
+
+    pub fn nb_recv(self) -> (MessageInfo, Badge) {
+        let (raw_msg_info, badge) =
+            self.invoke(|cptr, ipc_buffer| ipc_buffer.inner_mut().seL4_NBRecv(cptr.bits()));
+        (MessageInfo::from_inner(raw_msg_info), badge)
+    }
+
+    pub fn call(self, info: MessageInfo) -> MessageInfo {
+        MessageInfo::from_inner(self.invoke(|cptr, ipc_buffer| {
+            ipc_buffer
+                .inner_mut()
+                .seL4_Call(cptr.bits(), info.into_inner())
+        }))
+    }
+
     pub fn send_with_mrs<T: FastMessages>(self, info: MessageInfo, messages: T) {
         let [msg0, msg1, msg2, msg3] = messages.prepare_in();
         self.invoke(|cptr, ipc_buffer| {
@@ -52,6 +88,10 @@ impl<C: InvocationContext> Endpoint<C> {
             msg,
         }
     }
+}
+
+pub fn reply(ipc_buffer: &mut IPCBuffer, info: MessageInfo) {
+    ipc_buffer.inner_mut().seL4_Reply(info.into_inner())
 }
 
 pub struct RecvWithMRs {

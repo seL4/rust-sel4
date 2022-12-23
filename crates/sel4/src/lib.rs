@@ -17,8 +17,8 @@ mod bootinfo;
 mod cap_rights;
 mod cnode_cap_data;
 mod cptr;
+mod endpoint;
 mod error;
-mod fast_ipc;
 mod helper_macros;
 mod invocation_context;
 mod invocations;
@@ -26,7 +26,6 @@ mod ipc_buffer;
 mod message_info;
 mod misc;
 mod object;
-mod syscalls;
 
 pub mod fault;
 
@@ -38,14 +37,13 @@ pub use cnode_cap_data::CNodeCapData;
 pub use cptr::{
     cap_type, local_cptr, CPtr, CPtrBits, CPtrWithDepth, CapType, LocalCPtr, RelativeCPtr,
 };
+pub use endpoint::{CallWithMRs, FastMessages, RecvWithMRs, reply};
 pub use error::{Error, Result};
-pub use fast_ipc::{CallWithMRs, FastMessages, RecvWithMRs};
 pub use invocation_context::{InvocationContext, NoExplicitInvocationContext, NoInvocationContext};
 pub use ipc_buffer::IPCBuffer;
 pub use message_info::{MessageInfo, MessageInfoBuilder};
-pub use misc::{Badge, Word, WORD_SIZE};
+pub use misc::{Badge, Word, WORD_SIZE, r#yield};
 pub use object::{ObjectBlueprint, ObjectType};
-pub use syscalls::{r#yield, reply};
 
 pub use arch::top_level::*;
 
