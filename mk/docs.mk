@@ -9,7 +9,7 @@ target := $(RUST_BARE_METAL_TARGET)
 
 target_dir := $(build_dir)/$(target)
 
-crate_args := -p sel4
+crate_args := -p sel4 --features=tls
 
 .PHONY: all
 all: docs
