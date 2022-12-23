@@ -1,12 +1,18 @@
+use crate::{cap_type, FrameType};
+
+#[derive(Copy, Clone, Debug)]
+pub enum FrameSize {
+    _4K,
+}
+
 impl FrameSize {
     pub const fn bits(self) -> usize {
         match self {
-            FrameSize::Granule => 12,
+            FrameSize::_4K => 12,
         }
     }
 }
 
-#[derive(Copy, Clone, Debug)]
-pub enum FrameSize {
-    Granule,
+impl FrameType for cap_type::_4K {
+    const FRAME_SIZE: FrameSize = FrameSize::_4K;
 }
