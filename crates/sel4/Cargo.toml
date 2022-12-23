@@ -7,7 +7,6 @@ edition = "2021"
 default = ["state"]
 single-threaded = []
 state = []
-tls = []
 
 [dependencies]
 cfg-if = "*"
