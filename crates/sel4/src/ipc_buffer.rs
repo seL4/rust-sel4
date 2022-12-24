@@ -3,6 +3,7 @@ use core::slice;
 
 use crate::{sys, CNode, RelativeCPtr, Word, GRANULE_SIZE};
 
+/// Corresponds to `seL4_IPCBuffer`.
 #[derive(Debug)]
 pub struct IPCBuffer {
     ptr: *mut sys::seL4_IPCBuffer,

@@ -3,9 +3,10 @@ use core::marker::PhantomData;
 
 use crate::{sys, IPCBuffer, InvocationContext, NoExplicitInvocationContext, Result, WORD_SIZE};
 
+/// The raw bits of a capability pointer.
 pub type CPtrBits = sys::seL4_CPtr;
 
-/// Corresponds to `seL4_CPtr`.
+/// A capability pointer.
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub struct CPtr {
     bits: CPtrBits,
@@ -25,6 +26,7 @@ impl CPtr {
     }
 }
 
+/// A capability pointer with a number of bits to resolve.
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub struct CPtrWithDepth {
     bits: CPtrBits,
@@ -60,6 +62,15 @@ impl From<CPtr> for CPtrWithDepth {
     }
 }
 
+/// A capability pointer in the current CSpace.
+///
+/// - The `T` parameter is a [`CapType`] marking the type of the pointed-to capability.
+/// - The `C` parameter is a strategy for discovering the current thread's IPC buffer. When the
+///   `"state"` feature is enabled, [`NoExplicitInvocationContext`] is an alias for
+///   [`ImplicitInvocationContext`](crate::ImplicitInvocationContext), which uses the [`IPCBuffer`]
+///   set by [`set_ipc_buffer`](crate::set_ipc_buffer). Otherwise, it is an alias for
+///   [`NoInvocationContext`](crate::NoInvocationContext), which does not implement
+///   [`InvocationContext`].
 #[derive(Copy, Clone, Eq, PartialEq)]
 pub struct LocalCPtr<T: CapType, C = NoExplicitInvocationContext> {
     phantom: PhantomData<T>,

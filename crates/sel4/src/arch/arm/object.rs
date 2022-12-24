@@ -4,10 +4,12 @@ use sel4_config::{sel4_cfg_enum, sel4_cfg_match};
 
 use crate::{sys, ObjectBlueprint, ObjectBlueprintSeL4Arch, ObjectType, ObjectTypeSeL4Arch};
 
+/// Alias for [`ObjectTypeArm`].
 pub type ObjectTypeArch = ObjectTypeArm;
 
 pub type ObjectBlueprintArch = ObjectBlueprintArm;
 
+/// Corresponds to `seL4_ArchObjectType`.
 #[sel4_cfg_enum]
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum ObjectTypeArm {

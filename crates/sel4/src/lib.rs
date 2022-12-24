@@ -41,7 +41,9 @@ pub use cptr::{
     cap_type, local_cptr, CPtr, CPtrBits, CPtrWithDepth, CapType, LocalCPtr, RelativeCPtr,
 };
 pub use error::{Error, Result};
-pub use invocation_context::{InvocationContext, NoExplicitInvocationContext, NoInvocationContext};
+pub use invocation_context::{
+    ExplicitInvocationContext, InvocationContext, NoExplicitInvocationContext, NoInvocationContext,
+};
 pub use ipc_buffer::IPCBuffer;
 pub use message_info::{MessageInfo, MessageInfoBuilder};
 pub use object::{ObjectBlueprint, ObjectType};
@@ -94,8 +96,10 @@ pub use state::{
     ImplicitInvocationContext,
 };
 
+/// Corresponds to `seL4_Word`.
 pub type Word = sys::seL4_Word;
 
+/// The size of [`Word`] in bits.
 pub const WORD_SIZE: usize = sel4_cfg_usize!(WORD_SIZE);
 
 #[doc(hidden)]

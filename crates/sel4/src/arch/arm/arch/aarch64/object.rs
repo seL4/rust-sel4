@@ -2,10 +2,12 @@ use core::ffi::c_uint;
 
 use crate::{sys, ObjectType};
 
+/// Alias for [`ObjectTypeAArch64`].
 pub type ObjectTypeSeL4Arch = ObjectTypeAArch64;
 
 pub type ObjectBlueprintSeL4Arch = ObjectBlueprintAArch64;
 
+/// Corresponds to `seL4_ModeObjectType`.
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub enum ObjectTypeAArch64 {
     HugePage,

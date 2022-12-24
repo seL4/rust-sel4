@@ -2,6 +2,7 @@ use core::ffi::c_uint;
 
 use crate::{sys, ObjectBlueprintArch, ObjectTypeArch};
 
+/// Corresponds to `seL4_ObjectType`.
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum ObjectType {
     Untyped,

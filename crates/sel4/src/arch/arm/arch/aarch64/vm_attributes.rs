@@ -2,6 +2,7 @@ use core::ops::{BitAnd, BitAndAssign, BitOr, BitOrAssign, Not};
 
 use crate::{newtype_methods, sys};
 
+/// Corresponds to `seL4_ARM_VMAttributes`.
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub struct VMAttributes(sys::seL4_ARM_VMAttributes::Type);
 

@@ -1,5 +1,6 @@
 use crate::{newtype_methods, sys, Word, WORD_SIZE};
 
+/// Corresponds to `seL4_CNode_CapData`.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CNodeCapData(sys::seL4_CNode_CapData);
 
