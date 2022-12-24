@@ -1,8 +1,8 @@
 use sel4_config::sel4_cfg;
 
 use crate::{
-    local_cptr::*, CapRights, Error, FrameType, IntermediateTranslationStructureType,
-    InvocationContext, LocalCPtr, RelativeCPtr, Result, VCPUReg, VMAttributes, Word,
+    local_cptr::*, CapRights, Error, FrameType, InvocationContext, LocalCPtr, RelativeCPtr, Result,
+    TranslationTableType, VCPUReg, VMAttributes, Word,
 };
 
 #[sel4_cfg(ARM_HYPERVISOR_SUPPORT)]
@@ -91,7 +91,7 @@ impl<T: FrameType, C: InvocationContext> LocalCPtr<T, C> {
     }
 }
 
-impl<T: IntermediateTranslationStructureType, C: InvocationContext> LocalCPtr<T, C> {
+impl<T: TranslationTableType, C: InvocationContext> LocalCPtr<T, C> {
     pub fn translation_table_map(
         self,
         vspace: PGD,

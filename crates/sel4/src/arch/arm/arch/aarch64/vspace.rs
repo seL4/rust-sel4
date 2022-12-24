@@ -36,7 +36,7 @@ impl FrameType for cap_type::HugePage {
 
 const LEVEL_BITS: usize = 9;
 
-pub trait IntermediateTranslationStructureType: CapType {
+pub trait TranslationTableType: CapType {
     const SPAN_BITS: usize;
     const SPAN_BYTES: usize = 1 << Self::SPAN_BITS;
 
@@ -49,7 +49,7 @@ pub trait IntermediateTranslationStructureType: CapType {
     ) -> sys::seL4_Error::Type;
 }
 
-impl IntermediateTranslationStructureType for cap_type::PUD {
+impl TranslationTableType for cap_type::PUD {
     const SPAN_BITS: usize = cap_type::PD::SPAN_BITS + LEVEL_BITS;
 
     fn _map_raw(
@@ -65,7 +65,7 @@ impl IntermediateTranslationStructureType for cap_type::PUD {
     }
 }
 
-impl IntermediateTranslationStructureType for cap_type::PD {
+impl TranslationTableType for cap_type::PD {
     const SPAN_BITS: usize = cap_type::PT::SPAN_BITS + LEVEL_BITS;
 
     fn _map_raw(
@@ -81,7 +81,7 @@ impl IntermediateTranslationStructureType for cap_type::PD {
     }
 }
 
-impl IntermediateTranslationStructureType for cap_type::PT {
+impl TranslationTableType for cap_type::PT {
     const SPAN_BITS: usize = FrameSize::Small.bits() + LEVEL_BITS;
 
     fn _map_raw(
