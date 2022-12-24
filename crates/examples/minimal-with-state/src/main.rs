@@ -6,11 +6,11 @@
 mod rt;
 
 fn main(bootinfo: &sel4::BootInfo) -> ! {
+    sel4::debug_println!("Hello, World!");
+
     unsafe {
         sel4::set_ipc_buffer(bootinfo.ipc_buffer());
     }
-
-    sel4::debug_println!("Hello, World!");
 
     let blueprint = sel4::ObjectBlueprint::Notification;
 
