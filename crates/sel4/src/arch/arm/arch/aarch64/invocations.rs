@@ -7,6 +7,7 @@ use crate::{
 
 #[sel4_cfg(ARM_HYPERVISOR_SUPPORT)]
 impl<C: InvocationContext> VCPU<C> {
+    /// Corresponds to `seL4_ARM_VCPU_SetTCB`.
     pub fn vcpu_set_tcb(self, tcb: TCB) -> Result<()> {
         Error::wrap(self.invoke(|cptr, ipc_buffer| {
             ipc_buffer
@@ -15,6 +16,7 @@ impl<C: InvocationContext> VCPU<C> {
         }))
     }
 
+    /// Corresponds to `seL4_ARM_VCPU_ReadRegs`.
     pub fn vcpu_read_regs(self, field: VCPUReg) -> Result<Word> {
         let res = self.invoke(|cptr, ipc_buffer| {
             ipc_buffer
@@ -24,6 +26,7 @@ impl<C: InvocationContext> VCPU<C> {
         Error::or(res.error.try_into().unwrap(), res.value)
     }
 
+    /// Corresponds to `seL4_ARM_VCPU_WriteRegs`.
     pub fn vcpu_write_regs(self, field: VCPUReg, value: Word) -> Result<()> {
         Error::wrap(self.invoke(|cptr, ipc_buffer| {
             ipc_buffer.inner_mut().seL4_ARM_VCPU_WriteRegs(
@@ -34,6 +37,7 @@ impl<C: InvocationContext> VCPU<C> {
         }))
     }
 
+    /// Corresponds to `seL4_ARM_VCPU_AckVPPI`.
     pub fn vcpu_ack_vppi(self, irq: Word) -> Result<()> {
         Error::wrap(self.invoke(|cptr, ipc_buffer| {
             ipc_buffer
@@ -42,6 +46,7 @@ impl<C: InvocationContext> VCPU<C> {
         }))
     }
 
+    /// Corresponds to `seL4_ARM_VCPU_InjectIRQ`.
     pub fn vcpu_inject_irq(self, virq: u16, priority: u8, group: u8, index: u8) -> Result<()> {
         Error::wrap(self.invoke(|cptr, ipc_buffer| {
             ipc_buffer.inner_mut().seL4_ARM_VCPU_InjectIRQ(
@@ -56,6 +61,7 @@ impl<C: InvocationContext> VCPU<C> {
 }
 
 impl<T: FrameType, C: InvocationContext> LocalCPtr<T, C> {
+    /// Corresponds to `seL4_ARM_Page_Map`.
     pub fn frame_map(
         self,
         pgd: PGD,
@@ -74,12 +80,14 @@ impl<T: FrameType, C: InvocationContext> LocalCPtr<T, C> {
         }))
     }
 
+    /// Corresponds to `seL4_ARM_Page_Unmap`.
     pub fn frame_unmap(self) -> Result<()> {
         Error::wrap(
             self.invoke(|cptr, ipc_buffer| ipc_buffer.inner_mut().seL4_ARM_Page_Unmap(cptr.bits())),
         )
     }
 
+    /// Corresponds to `seL4_ARM_Page_GetAddress`.
     pub fn frame_get_address(self) -> Result<usize> {
         let ret = self.invoke(|cptr, ipc_buffer| {
             ipc_buffer.inner_mut().seL4_ARM_Page_GetAddress(cptr.bits())
@@ -111,6 +119,7 @@ impl<T: TranslationTableType, C: InvocationContext> LocalCPtr<T, C> {
 }
 
 impl<C: InvocationContext> IRQControl<C> {
+    /// Corresponds to `seL4_IRQControl_GetTriggerCore`.
     // TODO structured trigger type
     #[sel4_cfg(not(MAX_NUM_NODES = "1"))]
     pub fn irq_control_get_trigger_core(
@@ -135,6 +144,7 @@ impl<C: InvocationContext> IRQControl<C> {
 }
 
 impl<C: InvocationContext> ASIDControl<C> {
+    /// Corresponds to `seL4_ARM_ASIDControl_MakePool`.
     pub fn asid_control_make_pool(self, untyped: Untyped, dst: &RelativeCPtr) -> Result<()> {
         Error::wrap(self.invoke(|cptr, ipc_buffer| {
             ipc_buffer.inner_mut().seL4_ARM_ASIDControl_MakePool(
@@ -149,6 +159,7 @@ impl<C: InvocationContext> ASIDControl<C> {
 }
 
 impl<C: InvocationContext> ASIDPool<C> {
+    /// Corresponds to `seL4_ARM_ASIDPool_Assign`.
     pub fn asid_pool_assign(self, pd: PGD) -> Result<()> {
         Error::wrap(self.invoke(|cptr, ipc_buffer| {
             ipc_buffer
