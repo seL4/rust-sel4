@@ -130,22 +130,68 @@ pub trait CapType: Copy {
 }
 
 pub mod cap_type {
+    //! Marker types corresponding to capability types and classes of capability types.
+    //!
+    //! These types are used for marking [`LocalCPtr`](crate::LocalCPtr).
+
     use crate::declare_cap_type;
 
     pub use crate::arch::cap_type_arch::*;
 
-    declare_cap_type!(Untyped);
-    declare_cap_type!(Endpoint);
-    declare_cap_type!(Notification);
-    declare_cap_type!(TCB);
-    declare_cap_type!(CNode);
-    declare_cap_type!(IRQControl);
-    declare_cap_type!(IRQHandler);
-    declare_cap_type!(ASIDControl);
-    declare_cap_type!(ASIDPool);
+    declare_cap_type! {
+        /// Corresponds to `seL4_Untyped`.
+        Untyped
+    }
 
-    declare_cap_type!(Null);
-    declare_cap_type!(Unspecified);
+    declare_cap_type! {
+        /// Corresponds to the endpoint capability type.
+        Endpoint
+    }
+
+    declare_cap_type! {
+        /// Corresponds to the notification capability type.
+        Notification
+    }
+
+    declare_cap_type! {
+        /// Corresponds to `seL4_TCB`.
+        TCB
+    }
+
+    declare_cap_type! {
+        /// Corresponds to `seL4_CNode`.
+        CNode
+    }
+
+    declare_cap_type! {
+        /// Corresponds to `seL4_IRQControl`.
+        IRQControl
+    }
+
+    declare_cap_type! {
+        /// Corresponds to `seL4_IRQHandler`.
+        IRQHandler
+    }
+
+    declare_cap_type! {
+        /// Corresponds to `seL4_ASIDControl`.
+        ASIDControl
+    }
+
+    declare_cap_type! {
+        /// Corresponds to `seL4_ASIDPool`.
+        ASIDPool
+    }
+
+    declare_cap_type! {
+        /// Corresponds to the null capability.
+        Null
+    }
+
+    declare_cap_type! {
+        /// Any capability.
+        Unspecified
+    }
 }
 
 use local_cptr::*;
@@ -156,6 +202,7 @@ pub mod local_cptr {
     pub use crate::arch::local_cptr_arch::*;
 
     declare_local_cptr_alias!(Untyped);
+
     declare_local_cptr_alias!(Endpoint);
     declare_local_cptr_alias!(Notification);
     declare_local_cptr_alias!(TCB);

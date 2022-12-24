@@ -19,17 +19,50 @@ pub(crate) mod cap_type_arch {
     use crate::{declare_cap_type, sel4_cfg};
 
     #[sel4_cfg(ARM_HYPERVISOR_SUPPORT)]
-    declare_cap_type!(VCPU);
+    declare_cap_type! {
+        /// Corresponds to `seL4_ARM_VCPU`.
+        VCPU
+    }
 
-    declare_cap_type!(SmallPage);
-    declare_cap_type!(LargePage);
-    declare_cap_type!(HugePage);
-    declare_cap_type!(PGD);
-    declare_cap_type!(PUD);
-    declare_cap_type!(PD);
-    declare_cap_type!(PT);
+    declare_cap_type! {
+        /// Corresponds to `seL4_ARM_Page` with `size_bits = 12`.
+        SmallPage
+    }
 
+    declare_cap_type! {
+        /// Corresponds to `seL4_ARM_Page` with `size_bits = 21`.
+        LargePage
+    }
+
+    declare_cap_type! {
+        /// Corresponds to `seL4_ARM_Page` with `size_bits = 30`.
+        HugePage
+    }
+
+    declare_cap_type! {
+        /// Corresponds to `seL4_ARM_VSpace`.
+        PGD
+    }
+
+    declare_cap_type! {
+        /// Corresponds to `seL4_ARM_PageUpperDirectory`.
+        PUD
+    }
+
+    declare_cap_type! {
+        /// Corresponds to `seL4_ARM_PageDirectory`.
+        PD
+    }
+
+    declare_cap_type! {
+        /// Corresponds to `seL4_ARM_PageTable`.
+        PT
+    }
+
+    /// Alias for [`cap_type::PGD`](PGD).
     pub type VSpace = PGD;
+
+    /// Alias for [`cap_type::SmallPage`](SmallPage).
     pub type Granule = SmallPage;
 }
 

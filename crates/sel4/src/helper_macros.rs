@@ -19,7 +19,11 @@ macro_rules! newtype_methods {
 }
 
 macro_rules! declare_cap_type {
-    ($t:ident) => {
+    (
+        $(#[$outer:meta])*
+        $t:ident
+    ) => {
+        $(#[$outer])*
         #[derive(Copy, Clone, Eq, PartialEq)]
         pub struct $t;
 
@@ -30,7 +34,11 @@ macro_rules! declare_cap_type {
 }
 
 macro_rules! declare_local_cptr_alias {
-    ($t:ident) => {
+    (
+        $(#[$outer:meta])*
+        $t:ident
+    ) => {
+        $(#[$outer])*
         pub type $t<C = $crate::NoExplicitInvocationContext> =
             $crate::LocalCPtr<$crate::cap_type::$t, C>;
     };
