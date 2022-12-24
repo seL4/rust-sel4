@@ -6,8 +6,8 @@ use proc_macro::TokenStream;
 
 use sel4_config_data::get_kernel_config as get_config;
 use sel4_config_generic_macros_core::{
-    cfg_bool_impl, cfg_enum_impl, cfg_from_str_impl, cfg_if_impl, cfg_impl, cfg_match_impl,
-    cfg_struct_impl,
+    cfg_attr_impl, cfg_bool_impl, cfg_enum_impl, cfg_from_str_impl, cfg_if_impl, cfg_impl,
+    cfg_match_impl, cfg_struct_impl,
 };
 
 const SYNTHETIC_ATTRIBUTE: &str = "sel4_cfg";
@@ -15,6 +15,11 @@ const SYNTHETIC_ATTRIBUTE: &str = "sel4_cfg";
 #[proc_macro_attribute]
 pub fn sel4_cfg(input: TokenStream, item: TokenStream) -> TokenStream {
     cfg_impl(get_config(), input.into(), item.into()).into()
+}
+
+#[proc_macro_attribute]
+pub fn sel4_cfg_attr(input: TokenStream, item: TokenStream) -> TokenStream {
+    cfg_attr_impl(get_config(), input.into(), item.into()).into()
 }
 
 #[proc_macro_attribute]

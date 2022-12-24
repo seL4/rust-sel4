@@ -1,6 +1,6 @@
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote, quote_spanned, ToTokens};
-use syn::{parse2, spanned::Spanned};
+use syn::{parse2, spanned::Spanned, Token};
 
 use sel4_config_generic_types::Configuration;
 
@@ -28,6 +28,40 @@ pub fn cfg_impl(config: &Configuration, input: TokenStream, item: TokenStream) -
             }
         }
         Err(err) => err.render(),
+    }
+}
+
+pub fn cfg_attr_impl(config: &Configuration, input: TokenStream, item: TokenStream) -> TokenStream {
+    let input = parse_or_return!(input as CfgAttrInput);
+    let r = Evaluator::new(config).eval_nested_meta(&input.condition);
+    match r {
+        Ok(pass) => {
+            let this = if pass {
+                let body = &input.body;
+                quote!(#[#body])
+            } else {
+                quote!()
+            };
+            quote! {
+                #this
+                #item
+            }
+        }
+        Err(err) => err.render(),
+    }
+}
+
+struct CfgAttrInput {
+    condition: syn::NestedMeta,
+    body: syn::NestedMeta,
+}
+
+impl syn::parse::Parse for CfgAttrInput {
+    fn parse(input: syn::parse::ParseStream) -> syn::Result<Self> {
+        let condition = input.parse()?;
+        input.parse::<Token![,]>()?;
+        let body = input.parse()?;
+        Ok(Self { condition, body })
     }
 }
 
