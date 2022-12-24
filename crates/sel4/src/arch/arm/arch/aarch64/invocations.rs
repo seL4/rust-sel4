@@ -1,7 +1,7 @@
 use sel4_config::sel4_cfg;
 
 use crate::{
-    local_cptr::*, CapRights, Error, FrameType, InvocationContext, LocalCPtr, RelativeCPtr, Result,
+    local_cptr::*, AbsoluteCPtr, CapRights, Error, FrameType, InvocationContext, LocalCPtr, Result,
     TranslationTableType, VCPUReg, VMAttributes, Word,
 };
 
@@ -127,7 +127,7 @@ impl<C: InvocationContext> IRQControl<C> {
         irq: Word,
         trigger: Word,
         target: Word,
-        dst: &RelativeCPtr,
+        dst: &AbsoluteCPtr,
     ) -> Result<()> {
         Error::wrap(self.invoke(|cptr, ipc_buffer| {
             ipc_buffer.inner_mut().seL4_IRQControl_GetTriggerCore(
@@ -145,7 +145,7 @@ impl<C: InvocationContext> IRQControl<C> {
 
 impl<C: InvocationContext> ASIDControl<C> {
     /// Corresponds to `seL4_ARM_ASIDControl_MakePool`.
-    pub fn asid_control_make_pool(self, untyped: Untyped, dst: &RelativeCPtr) -> Result<()> {
+    pub fn asid_control_make_pool(self, untyped: Untyped, dst: &AbsoluteCPtr) -> Result<()> {
         Error::wrap(self.invoke(|cptr, ipc_buffer| {
             ipc_buffer.inner_mut().seL4_ARM_ASIDControl_MakePool(
                 cptr.bits(),

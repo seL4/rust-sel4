@@ -3,8 +3,8 @@ use core::mem;
 use sel4_config::sel4_cfg;
 
 use crate::{
-    local_cptr::*, sys, CNodeCapData, CPtr, CapRights, Error, InvocationContext, ObjectBlueprint,
-    RelativeCPtr, Result, UserContext, Word,
+    local_cptr::*, sys, AbsoluteCPtr, CNodeCapData, CPtr, CapRights, Error, InvocationContext,
+    ObjectBlueprint, Result, UserContext, Word,
 };
 
 impl<C: InvocationContext> Untyped<C> {
@@ -12,7 +12,7 @@ impl<C: InvocationContext> Untyped<C> {
     pub fn untyped_retype(
         self,
         blueprint: &ObjectBlueprint,
-        dst: &RelativeCPtr,
+        dst: &AbsoluteCPtr,
         dst_offset: usize,
         num_objects: usize,
     ) -> Result<()> {
@@ -183,7 +183,7 @@ impl<C: InvocationContext> IRQHandler<C> {
     }
 }
 
-impl<C: InvocationContext> RelativeCPtr<C> {
+impl<C: InvocationContext> AbsoluteCPtr<C> {
     /// Corresponds to `seL4_CNode_Revoke`.
     pub fn revoke(self) -> Result<()> {
         Error::wrap(self.invoke(|cptr, path, ipc_buffer| {
@@ -207,7 +207,7 @@ impl<C: InvocationContext> RelativeCPtr<C> {
     }
 
     /// Corresponds to `seL4_CNode_Copy`.
-    pub fn copy(self, src: &RelativeCPtr, rights: CapRights) -> Result<()> {
+    pub fn copy(self, src: &AbsoluteCPtr, rights: CapRights) -> Result<()> {
         Error::wrap(self.invoke(|cptr, path, ipc_buffer| {
             ipc_buffer.inner_mut().seL4_CNode_Copy(
                 cptr.bits(),
@@ -222,7 +222,7 @@ impl<C: InvocationContext> RelativeCPtr<C> {
     }
 
     /// Corresponds to `seL4_CNode_Mint`.
-    pub fn mint(self, src: &RelativeCPtr, rights: CapRights, badge: Word) -> Result<()> {
+    pub fn mint(self, src: &AbsoluteCPtr, rights: CapRights, badge: Word) -> Result<()> {
         Error::wrap(self.invoke(|cptr, path, ipc_buffer| {
             ipc_buffer.inner_mut().seL4_CNode_Mint(
                 cptr.bits(),
@@ -238,7 +238,7 @@ impl<C: InvocationContext> RelativeCPtr<C> {
     }
 
     /// Corresponds to `seL4_CNode_Mutate`.
-    pub fn mutate(self, src: &RelativeCPtr, badge: Word) -> Result<()> {
+    pub fn mutate(self, src: &AbsoluteCPtr, badge: Word) -> Result<()> {
         Error::wrap(self.invoke(|cptr, path, ipc_buffer| {
             ipc_buffer.inner_mut().seL4_CNode_Mutate(
                 cptr.bits(),

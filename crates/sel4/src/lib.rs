@@ -38,8 +38,8 @@ pub use bootinfo::{BootInfo, BootInfoExtra, BootInfoExtraId, InitCSpaceSlot, Unt
 pub use cap_rights::{CapRights, CapRightsBuilder};
 pub use cnode_cap_data::CNodeCapData;
 pub use cptr::{
-    cap_type, local_cptr, CPtr, CPtrBits, CPtrWithDepth, CapType, HasCPtrWithDepth, LocalCPtr,
-    RelativeCPtr,
+    cap_type, local_cptr, AbsoluteCPtr, CPtr, CPtrBits, CPtrWithDepth, CapType, HasCPtrWithDepth,
+    LocalCPtr,
 };
 pub use error::{Error, Result};
 pub use invocation_context::{

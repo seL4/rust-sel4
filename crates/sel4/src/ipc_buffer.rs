@@ -1,7 +1,7 @@
 use core::mem;
 use core::slice;
 
-use crate::{sys, CNode, RelativeCPtr, Word, GRANULE_SIZE};
+use crate::{sys, AbsoluteCPtr, CNode, Word, GRANULE_SIZE};
 
 /// Corresponds to `seL4_IPCBuffer`.
 #[derive(Debug)]
@@ -65,13 +65,13 @@ impl IPCBuffer {
         &mut self.inner_mut().caps_or_badges[..]
     }
 
-    pub fn recv_slot(&self) -> RelativeCPtr {
+    pub fn recv_slot(&self) -> AbsoluteCPtr {
         let inner = self.inner();
         CNode::from_bits(inner.receiveCNode)
             .relative_bits_with_depth(inner.receiveIndex, inner.receiveCNode.try_into().unwrap())
     }
 
-    pub fn set_recv_slot(&mut self, slot: &RelativeCPtr) {
+    pub fn set_recv_slot(&mut self, slot: &AbsoluteCPtr) {
         let inner = self.inner_mut();
         inner.receiveCNode = slot.root().bits();
         inner.receiveIndex = slot.path().bits();

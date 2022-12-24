@@ -242,12 +242,12 @@ impl<C> Unspecified<C> {
 
 /// A [`CPtrWithDepth`] in a particular [`CNode`].
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
-pub struct RelativeCPtr<C = NoExplicitInvocationContext> {
+pub struct AbsoluteCPtr<C = NoExplicitInvocationContext> {
     root: CNode<C>,
     path: CPtrWithDepth,
 }
 
-impl<C> RelativeCPtr<C> {
+impl<C> AbsoluteCPtr<C> {
     pub const fn root(&self) -> &CNode<C> {
         &self.root
     }
@@ -256,19 +256,19 @@ impl<C> RelativeCPtr<C> {
         &self.path
     }
 
-    pub fn with<C1>(self, context: C1) -> RelativeCPtr<C1> {
-        RelativeCPtr {
+    pub fn with<C1>(self, context: C1) -> AbsoluteCPtr<C1> {
+        AbsoluteCPtr {
             root: self.root.with(context),
             path: self.path,
         }
     }
 
-    pub fn without_context(self) -> RelativeCPtr {
+    pub fn without_context(self) -> AbsoluteCPtr {
         self.with(NoExplicitInvocationContext::new())
     }
 }
 
-impl<C: InvocationContext> RelativeCPtr<C> {
+impl<C: InvocationContext> AbsoluteCPtr<C> {
     pub fn invoke<R>(self, f: impl FnOnce(CPtr, CPtrWithDepth, &mut IPCBuffer) -> R) -> R {
         let path = *self.path();
         self.root
@@ -300,18 +300,18 @@ impl HasCPtrWithDepth for CPtrWithDepth {
 }
 
 impl<C> CNode<C> {
-    pub fn relative<T: HasCPtrWithDepth>(self, path: T) -> RelativeCPtr<C> {
-        RelativeCPtr {
+    pub fn relative<T: HasCPtrWithDepth>(self, path: T) -> AbsoluteCPtr<C> {
+        AbsoluteCPtr {
             root: self,
             path: path.cptr_with_depth(),
         }
     }
 
-    pub fn relative_bits_with_depth(self, bits: CPtrBits, depth: usize) -> RelativeCPtr<C> {
+    pub fn relative_bits_with_depth(self, bits: CPtrBits, depth: usize) -> AbsoluteCPtr<C> {
         self.relative(CPtrWithDepth::from_bits_with_depth(bits, depth))
     }
 
-    pub fn relative_self(self) -> RelativeCPtr<C> {
+    pub fn relative_self(self) -> AbsoluteCPtr<C> {
         self.relative(CPtrWithDepth::empty())
     }
 }
