@@ -80,6 +80,7 @@ impl ObjectBlueprintArm {
             Self::LargePage => sys::seL4_LargePageBits.try_into().ok().unwrap(),
             Self::PT => sys::seL4_PageTableBits.try_into().ok().unwrap(),
             Self::PD => sys::seL4_PageDirBits.try_into().ok().unwrap(),
+            #[sel4_cfg(ARM_HYPERVISOR_SUPPORT)]
             Self::VCPU => sys::seL4_VCPUBits.try_into().ok().unwrap(),
             Self::SeL4Arch(sel4_arch) => sel4_arch.physical_size_bits(),
         }
