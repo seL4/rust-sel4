@@ -34,7 +34,7 @@ impl FrameType for cap_type::HugePage {
 
 //
 
-pub const LEVEL_BITS: usize = 9;
+const LEVEL_BITS: usize = 9;
 
 pub trait IntermediateTranslationStructureType: CapType {
     const SPAN_BITS: usize;
