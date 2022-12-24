@@ -1,5 +1,6 @@
 use crate::{newtype_methods, sys, Word};
 
+/// Corresponds to `seL4_UserContext`.
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct UserContext(pub sys::seL4_UserContext);
 

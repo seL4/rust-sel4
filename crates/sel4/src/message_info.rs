@@ -39,6 +39,7 @@ impl From<MessageInfoBuilder> for MessageInfo {
     }
 }
 
+/// Helper for constructing [`MessageInfo`].
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct MessageInfoBuilder {
     label: Word,

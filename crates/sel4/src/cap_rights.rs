@@ -43,6 +43,7 @@ impl From<CapRightsBuilder> for CapRights {
     }
 }
 
+/// Helper for constructing [`CapRights`].
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct CapRightsBuilder {
     grant_reply: bool,
