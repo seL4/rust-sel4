@@ -34,9 +34,7 @@ mod vspace;
 
 pub mod fault;
 
-pub use bootinfo::{
-    BootInfo, BootInfoExtraStructure, BootInfoExtraStructureId, InitCSpaceSlot, UntypedDesc,
-};
+pub use bootinfo::{BootInfo, BootInfoExtra, BootInfoExtraId, InitCSpaceSlot, UntypedDesc};
 pub use cap_rights::{CapRights, CapRightsBuilder};
 pub use cnode_cap_data::CNodeCapData;
 pub use cptr::{

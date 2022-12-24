@@ -7,6 +7,7 @@ use crate::{
     LocalCPtr, VSpace, GRANULE_SIZE, TCB,
 };
 
+/// Corresponds to `seL4_BootInfo`.
 #[derive(Debug)]
 pub struct BootInfo {
     ptr: *const sys::seL4_BootInfo,
@@ -149,8 +150,10 @@ impl BootInfo {
     }
 }
 
+/// The index of a slot in the root task's top-level CNode.
 pub type InitCSpaceSlot = usize;
 
+/// Corresponds to `seL4_UntypedDesc`.
 #[repr(transparent)]
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct UntypedDesc(sys::seL4_UntypedDesc);
@@ -175,25 +178,25 @@ fn region_to_range(region: sys::seL4_SlotRegion) -> Range<InitCSpaceSlot> {
     region.start.try_into().unwrap()..region.end.try_into().unwrap()
 }
 
+/// An extra bootinfo chunk along with its ID.
 #[derive(Clone, Debug)]
-pub struct BootInfoExtraStructure<'a> {
-    pub id: BootInfoExtraStructureId,
+pub struct BootInfoExtra<'a> {
+    pub id: BootInfoExtraId,
     pub content: &'a [u8],
 }
 
+/// Corresponds to `seL4_BootInfoID`.
 #[derive(Clone, Debug)]
-pub enum BootInfoExtraStructureId {
+pub enum BootInfoExtraId {
     Padding,
     Fdt,
 }
 
-impl BootInfoExtraStructureId {
+impl BootInfoExtraId {
     pub fn from_sys(id: sys::seL4_BootInfoID::Type) -> Option<Self> {
         match id {
-            sys::seL4_BootInfoID::SEL4_BOOTINFO_HEADER_PADDING => {
-                Some(BootInfoExtraStructureId::Padding)
-            }
-            sys::seL4_BootInfoID::SEL4_BOOTINFO_HEADER_FDT => Some(BootInfoExtraStructureId::Fdt),
+            sys::seL4_BootInfoID::SEL4_BOOTINFO_HEADER_PADDING => Some(BootInfoExtraId::Padding),
+            sys::seL4_BootInfoID::SEL4_BOOTINFO_HEADER_FDT => Some(BootInfoExtraId::Fdt),
             _ => None,
         }
     }
@@ -214,7 +217,7 @@ impl<'a> BootInfoExtraIter<'a> {
 }
 
 impl<'a> Iterator for BootInfoExtraIter<'a> {
-    type Item = BootInfoExtraStructure<'a>;
+    type Item = BootInfoExtra<'a>;
 
     fn next(&mut self) -> Option<Self::Item> {
         while self.cursor < self.bootinfo.extra_slice().len() {
@@ -229,8 +232,8 @@ impl<'a> Iterator for BootInfoExtraIter<'a> {
             let content_start = self.cursor + mem::size_of::<sys::seL4_BootInfoHeader>();
             let content_end = self.cursor + usize::try_from(header.len).unwrap();
             self.cursor = content_end;
-            if let Some(id) = BootInfoExtraStructureId::from_sys(header.id) {
-                return Some(BootInfoExtraStructure {
+            if let Some(id) = BootInfoExtraId::from_sys(header.id) {
+                return Some(BootInfoExtra {
                     id,
                     content: &self.bootinfo.extra_slice()[content_start..content_end],
                 });
