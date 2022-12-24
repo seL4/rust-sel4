@@ -31,7 +31,7 @@ pub enum ObjectBlueprintAArch64 {
 }
 
 impl ObjectBlueprintAArch64 {
-    pub fn ty(self) -> ObjectType {
+    pub const fn ty(self) -> ObjectType {
         match self {
             Self::HugePage => ObjectTypeAArch64::HugePage.into(),
             Self::PUD => ObjectTypeAArch64::PUD.into(),
@@ -39,11 +39,11 @@ impl ObjectBlueprintAArch64 {
         }
     }
 
-    pub fn physical_size_bits(self) -> usize {
+    pub const fn physical_size_bits(self) -> usize {
         match self {
-            Self::HugePage => sys::seL4_HugePageBits.try_into().unwrap(),
-            Self::PUD => sys::seL4_PUDBits.try_into().unwrap(),
-            Self::PGD => sys::seL4_PGDBits.try_into().unwrap(),
+            Self::HugePage => sys::seL4_HugePageBits.try_into().ok().unwrap(),
+            Self::PUD => sys::seL4_PUDBits.try_into().ok().unwrap(),
+            Self::PGD => sys::seL4_PGDBits.try_into().ok().unwrap(),
         }
     }
 }

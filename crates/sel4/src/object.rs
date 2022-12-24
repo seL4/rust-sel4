@@ -25,7 +25,7 @@ impl ObjectType {
     }
 }
 
-impl From<ObjectTypeArch> for ObjectType {
+impl const From<ObjectTypeArch> for ObjectType {
     fn from(ty: ObjectTypeArch) -> Self {
         Self::Arch(ty)
     }
@@ -42,7 +42,7 @@ pub enum ObjectBlueprint {
 }
 
 impl ObjectBlueprint {
-    pub fn ty(self) -> ObjectType {
+    pub const fn ty(self) -> ObjectType {
         match self {
             Self::Untyped { .. } => ObjectType::Untyped,
             Self::Endpoint => ObjectType::Endpoint,
@@ -61,25 +61,27 @@ impl ObjectBlueprint {
         }
     }
 
-    pub fn physical_size_bits(self) -> usize {
+    pub const fn physical_size_bits(self) -> usize {
         match self {
             Self::Untyped { size_bits } => size_bits,
-            Self::Endpoint => sys::seL4_EndpointBits.try_into().unwrap(),
-            Self::Notification => sys::seL4_NotificationBits.try_into().unwrap(),
-            Self::CNode { size_bits } => usize::try_from(sys::seL4_SlotBits).unwrap() + size_bits,
-            Self::TCB => sys::seL4_TCBBits.try_into().unwrap(),
+            Self::Endpoint => sys::seL4_EndpointBits.try_into().ok().unwrap(),
+            Self::Notification => sys::seL4_NotificationBits.try_into().ok().unwrap(),
+            Self::CNode { size_bits } => {
+                usize::try_from(sys::seL4_SlotBits).ok().unwrap() + size_bits
+            }
+            Self::TCB => sys::seL4_TCBBits.try_into().ok().unwrap(),
             Self::Arch(arch) => arch.physical_size_bits(),
         }
     }
 
-    pub fn asid_pool() -> Self {
+    pub const fn asid_pool() -> Self {
         Self::Untyped {
-            size_bits: sys::seL4_ASIDPoolBits.try_into().unwrap(),
+            size_bits: sys::seL4_ASIDPoolBits.try_into().ok().unwrap(),
         }
     }
 }
 
-impl From<ObjectBlueprintArch> for ObjectBlueprint {
+impl const From<ObjectBlueprintArch> for ObjectBlueprint {
     fn from(blueprint: ObjectBlueprintArch) -> Self {
         Self::Arch(blueprint)
     }

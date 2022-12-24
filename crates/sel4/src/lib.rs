@@ -1,10 +1,15 @@
 #![no_std]
-#![feature(thread_local)]
+#![feature(array_methods)]
+#![feature(const_convert)]
+#![feature(const_num_from_num)]
+#![feature(const_option)]
+#![feature(const_result_drop)]
+#![feature(const_trait_impl)]
 #![feature(proc_macro_hygiene)]
 #![feature(stmt_expr_attributes)]
 #![feature(strict_provenance)]
-#![feature(array_methods)]
 #![feature(variant_count)]
+#![cfg_attr(not(feature = "single-threaded"), feature(thread_local))]
 
 pub use sel4_config::{
     self as config, sel4_cfg, sel4_cfg_bool, sel4_cfg_if, sel4_cfg_str, sel4_cfg_usize,
@@ -43,7 +48,7 @@ pub use ipc_buffer::IPCBuffer;
 pub use message_info::{MessageInfo, MessageInfoBuilder};
 pub use object::{ObjectBlueprint, ObjectType};
 pub use syscalls::{r#yield, reply, Badge, CallWithMRs, FastMessages, RecvWithMRs};
-pub use vspace::{AnyFrame, FrameType, GRANULE_SIZE};
+pub use vspace::{FrameType, GRANULE_SIZE};
 
 pub use arch::top_level::*;
 

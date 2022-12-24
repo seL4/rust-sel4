@@ -35,13 +35,13 @@ impl ObjectTypeArm {
     }
 }
 
-impl From<ObjectTypeSeL4Arch> for ObjectTypeArch {
+impl const From<ObjectTypeSeL4Arch> for ObjectTypeArch {
     fn from(ty: ObjectTypeSeL4Arch) -> Self {
         Self::SeL4Arch(ty)
     }
 }
 
-impl From<ObjectTypeSeL4Arch> for ObjectType {
+impl const From<ObjectTypeSeL4Arch> for ObjectType {
     fn from(ty: ObjectTypeSeL4Arch) -> Self {
         Self::from(ObjectTypeArch::from(ty))
     }
@@ -60,7 +60,7 @@ pub enum ObjectBlueprintArm {
 }
 
 impl ObjectBlueprintArm {
-    pub fn ty(self) -> ObjectType {
+    pub const fn ty(self) -> ObjectType {
         #[sel4_cfg_match]
         match self {
             Self::SmallPage => ObjectTypeArm::SmallPage.into(),
@@ -73,26 +73,26 @@ impl ObjectBlueprintArm {
         }
     }
 
-    pub fn physical_size_bits(self) -> usize {
+    pub const fn physical_size_bits(self) -> usize {
         #[sel4_cfg_match]
         match self {
-            Self::SmallPage => sys::seL4_PageBits.try_into().unwrap(),
-            Self::LargePage => sys::seL4_LargePageBits.try_into().unwrap(),
-            Self::PT => sys::seL4_PageTableBits.try_into().unwrap(),
-            Self::PD => sys::seL4_PageDirBits.try_into().unwrap(),
-            Self::VCPU => sys::seL4_VCPUBits.try_into().unwrap(),
+            Self::SmallPage => sys::seL4_PageBits.try_into().ok().unwrap(),
+            Self::LargePage => sys::seL4_LargePageBits.try_into().ok().unwrap(),
+            Self::PT => sys::seL4_PageTableBits.try_into().ok().unwrap(),
+            Self::PD => sys::seL4_PageDirBits.try_into().ok().unwrap(),
+            Self::VCPU => sys::seL4_VCPUBits.try_into().ok().unwrap(),
             Self::SeL4Arch(sel4_arch) => sel4_arch.physical_size_bits(),
         }
     }
 }
 
-impl From<ObjectBlueprintSeL4Arch> for ObjectBlueprintArch {
+impl const From<ObjectBlueprintSeL4Arch> for ObjectBlueprintArch {
     fn from(blueprint: ObjectBlueprintSeL4Arch) -> Self {
         Self::SeL4Arch(blueprint)
     }
 }
 
-impl From<ObjectBlueprintSeL4Arch> for ObjectBlueprint {
+impl const From<ObjectBlueprintSeL4Arch> for ObjectBlueprint {
     fn from(ty: ObjectBlueprintSeL4Arch) -> Self {
         Self::from(ObjectBlueprintArch::from(ty))
     }
