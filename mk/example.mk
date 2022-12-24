@@ -1,4 +1,4 @@
-CRATE ?= minimal-example
+CRATE ?= minimal
 
 here := $(dir $(realpath $(firstword $(MAKEFILE_LIST))))
 root_dir := $(here)/..

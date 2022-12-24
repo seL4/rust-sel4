@@ -33,4 +33,5 @@ members = [
     "crates/loader/payload/types",
 
     "crates/examples/minimal",
+    "crates/examples/minimal-with-state",
 ]

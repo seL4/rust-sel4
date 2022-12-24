@@ -1,5 +1,5 @@
 [package]
-name = "minimal"
+name = "minimal-with-state"
 version = "0.1.0"
 edition = "2021"
 license = "BSD-2-Clause"
@@ -7,4 +7,4 @@ authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
 
 [dependencies]
 cfg-if = "*"
-sel4 = { path = "../../sel4", default-features = false }
+sel4 = { path = "../../sel4", features = ["single-threaded"] }
