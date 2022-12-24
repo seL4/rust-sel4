@@ -130,7 +130,7 @@ pub trait CapType: Copy {
 }
 
 pub mod cap_type {
-    //! Marker types corresponding to capability types and classes of capability types.
+    //! Markers corresponding to capability types and classes of capability types.
     //!
     //! These types are used for marking [`LocalCPtr`](crate::LocalCPtr).
 
@@ -197,12 +197,15 @@ pub mod cap_type {
 use local_cptr::*;
 
 pub mod local_cptr {
+    //! Marked aliases of [`LocalCPtr`](crate::LocalCPtr).
+    //!
+    //! Each type `$t<C = NoExplicitInvocationContext>` in this module is an alias for `LocalCPtr<$t, C>`.
+
     use crate::declare_local_cptr_alias;
 
     pub use crate::arch::local_cptr_arch::*;
 
     declare_local_cptr_alias!(Untyped);
-
     declare_local_cptr_alias!(Endpoint);
     declare_local_cptr_alias!(Notification);
     declare_local_cptr_alias!(TCB);

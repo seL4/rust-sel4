@@ -31,11 +31,13 @@ pub fn debug_print_helper(args: fmt::Arguments) {
     })
 }
 
+/// Prints using `seL4_DebugPutChar`.
 #[macro_export]
 macro_rules! debug_print {
     ($($arg:tt)*) => ($crate::_private::fmt::debug_print_helper(format_args!($($arg)*)));
 }
 
+/// Prints using `seL4_DebugPutChar`, with a newline.
 #[macro_export]
 macro_rules! debug_println {
     () => ($crate::debug_print!("\n"));

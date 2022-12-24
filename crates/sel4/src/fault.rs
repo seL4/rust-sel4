@@ -1,3 +1,5 @@
+//! Fault types.
+
 use crate::{sys, IPCBuffer, MessageInfo};
 
 pub use crate::arch::fault::*;
