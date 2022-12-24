@@ -5,6 +5,7 @@ use crate::{
     NUM_FAST_MESSAGE_REGISTERS,
 };
 
+/// A capability badge.
 pub type Badge = Word;
 
 impl<C: InvocationContext> Endpoint<C> {
@@ -124,12 +125,14 @@ pub fn r#yield() {
 
 const UNUSED_FOR_IN: Word = 0;
 
+/// The result of [`Endpoint::recv_with_mrs`].
 pub struct RecvWithMRs {
     pub info: MessageInfo,
     pub badge: Badge,
     pub msg: [Word; NUM_FAST_MESSAGE_REGISTERS],
 }
 
+/// The result of [`Endpoint::call_with_mrs`].
 pub struct CallWithMRs {
     pub info: MessageInfo,
     pub msg: [Word; NUM_FAST_MESSAGE_REGISTERS],

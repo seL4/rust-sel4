@@ -3,6 +3,7 @@ use crate::{
     ObjectBlueprintArm,
 };
 
+/// Frame sizes for AArch64.
 #[derive(Copy, Clone, Debug)]
 pub enum FrameSize {
     Small,

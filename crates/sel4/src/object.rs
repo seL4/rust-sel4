@@ -32,6 +32,7 @@ impl const From<ObjectTypeArch> for ObjectType {
     }
 }
 
+/// An object description for [`Untyped::untyped_retype`](crate::Untyped::untyped_retype).
 #[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub enum ObjectBlueprint {
     Untyped { size_bits: usize },

@@ -2,6 +2,7 @@ use core::{fmt, mem, result};
 
 use crate::sys;
 
+/// Alias for `Result<_, Error>`.
 pub type Result<T> = result::Result<T, Error>;
 
 /// Corresponds to `seL4_Error`.

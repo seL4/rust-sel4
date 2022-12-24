@@ -1,5 +1,6 @@
 use crate::{cap_type, CapType, FrameSize};
 
+/// The smallest [`FrameSize`].
 pub const GRANULE_SIZE: FrameSize = cap_type::Granule::FRAME_SIZE;
 
 impl FrameSize {

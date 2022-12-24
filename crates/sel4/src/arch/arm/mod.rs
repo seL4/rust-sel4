@@ -13,6 +13,7 @@ pub(crate) mod top_level {
     };
 }
 
+/// The number of message registers which are passed in architectural registers.
 pub const NUM_FAST_MESSAGE_REGISTERS: usize = sys::seL4_FastMessageRegisters as usize; // no other const way to convert
 
 pub(crate) mod cap_type_arch {

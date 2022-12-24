@@ -5,6 +5,7 @@ use crate::{sys, ObjectType};
 /// Alias for [`ObjectTypeAArch64`].
 pub type ObjectTypeSeL4Arch = ObjectTypeAArch64;
 
+/// Alias for [`ObjectBlueprintAArch64`].
 pub type ObjectBlueprintSeL4Arch = ObjectBlueprintAArch64;
 
 /// Corresponds to `seL4_ModeObjectType`.
@@ -25,6 +26,7 @@ impl ObjectTypeAArch64 {
     }
 }
 
+/// AArch64-specific variants of [`ObjectBlueprint`](crate::ObjectBlueprint).
 #[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub enum ObjectBlueprintAArch64 {
     HugePage,

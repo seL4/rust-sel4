@@ -7,6 +7,7 @@ use crate::{sys, ObjectBlueprint, ObjectBlueprintSeL4Arch, ObjectType, ObjectTyp
 /// Alias for [`ObjectTypeArm`].
 pub type ObjectTypeArch = ObjectTypeArm;
 
+/// Alias for [`ObjectBlueprintArm`].
 pub type ObjectBlueprintArch = ObjectBlueprintArm;
 
 /// Corresponds to `seL4_ArchObjectType`.
@@ -49,6 +50,7 @@ impl const From<ObjectTypeSeL4Arch> for ObjectType {
     }
 }
 
+/// Arm-specific variants of [`ObjectBlueprint`].
 #[sel4_cfg_enum]
 #[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub enum ObjectBlueprintArm {
