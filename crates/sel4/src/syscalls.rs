@@ -8,6 +8,7 @@ use crate::{
 pub type Badge = Word;
 
 impl<C: InvocationContext> Endpoint<C> {
+    /// Corresponds to `seL4_Send`.
     pub fn send(self, info: MessageInfo) {
         self.invoke(|cptr, ipc_buffer| {
             ipc_buffer
@@ -16,6 +17,7 @@ impl<C: InvocationContext> Endpoint<C> {
         })
     }
 
+    /// Corresponds to `seL4_NBSend`.
     pub fn nb_send(self, info: MessageInfo) {
         self.invoke(|cptr, ipc_buffer| {
             ipc_buffer
@@ -24,18 +26,21 @@ impl<C: InvocationContext> Endpoint<C> {
         })
     }
 
+    /// Corresponds to `seL4_Recv`.
     pub fn recv(self) -> (MessageInfo, Badge) {
         let (raw_msg_info, badge) =
             self.invoke(|cptr, ipc_buffer| ipc_buffer.inner_mut().seL4_Recv(cptr.bits()));
         (MessageInfo::from_inner(raw_msg_info), badge)
     }
 
+    /// Corresponds to `seL4_NBRecv`.
     pub fn nb_recv(self) -> (MessageInfo, Badge) {
         let (raw_msg_info, badge) =
             self.invoke(|cptr, ipc_buffer| ipc_buffer.inner_mut().seL4_NBRecv(cptr.bits()));
         (MessageInfo::from_inner(raw_msg_info), badge)
     }
 
+    /// Corresponds to `seL4_Call`.
     pub fn call(self, info: MessageInfo) -> MessageInfo {
         MessageInfo::from_inner(self.invoke(|cptr, ipc_buffer| {
             ipc_buffer
@@ -94,19 +99,23 @@ impl<C: InvocationContext> Endpoint<C> {
 }
 
 impl<C: InvocationContext> Notification<C> {
+    /// Corresponds to `seL4_Signal`.
     pub fn signal(self) {
         self.invoke(|cptr, ipc_buffer| ipc_buffer.inner_mut().seL4_Signal(cptr.bits()))
     }
 
+    /// Corresponds to `seL4_Wait`.
     pub fn wait(self) -> Word {
         self.invoke(|cptr, ipc_buffer| ipc_buffer.inner_mut().seL4_Wait(cptr.bits()))
     }
 }
 
+/// Corresponds to `seL4_Reply`.
 pub fn reply(ipc_buffer: &mut IPCBuffer, info: MessageInfo) {
     ipc_buffer.inner_mut().seL4_Reply(info.into_inner())
 }
 
+/// Corresponds to `seL4_Yield`.
 pub fn r#yield() {
     sys::seL4_Yield()
 }

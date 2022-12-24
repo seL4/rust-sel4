@@ -4,6 +4,7 @@ use crate::sys;
 
 pub type Result<T> = result::Result<T, Error>;
 
+/// Corresponds to `seL4_Error`.
 #[repr(u32)]
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub enum Error {

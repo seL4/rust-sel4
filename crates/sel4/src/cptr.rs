@@ -5,6 +5,7 @@ use crate::{sys, IPCBuffer, InvocationContext, NoExplicitInvocationContext, Resu
 
 pub type CPtrBits = sys::seL4_CPtr;
 
+/// Corresponds to `seL4_CPtr`.
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub struct CPtr {
     bits: CPtrBits,

@@ -1,5 +1,6 @@
 use crate::{newtype_methods, sys};
 
+/// Corresponds to `seL4_CapRights_t`.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CapRights(sys::seL4_CapRights);
 
