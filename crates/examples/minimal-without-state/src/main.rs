@@ -3,6 +3,7 @@
 #![feature(core_intrinsics)]
 #![feature(exclusive_wrapper)]
 
+#[path = "../../minimal-with-state/src/rt.rs"]
 mod rt;
 
 fn main(bootinfo: &sel4::BootInfo) -> ! {

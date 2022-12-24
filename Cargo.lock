@@ -373,14 +373,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2dffe52ecf27772e601905b7522cb4ef790d2cc203488bbd0e2fe85fcb74566d"
 
 [[package]]
-name = "minimal"
-version = "0.1.0"
-dependencies = [
- "cfg-if",
- "sel4",
-]
-
-[[package]]
 name = "minimal-lexical"
 version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -388,6 +380,14 @@ checksum = "68354c5c6bd36d73ff3feceb05efa59b6acb7626617f4962be322a825e61f79a"
 
 [[package]]
 name = "minimal-with-state"
+version = "0.1.0"
+dependencies = [
+ "cfg-if",
+ "sel4",
+]
+
+[[package]]
+name = "minimal-without-state"
 version = "0.1.0"
 dependencies = [
  "cfg-if",
