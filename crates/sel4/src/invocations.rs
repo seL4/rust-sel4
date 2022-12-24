@@ -8,7 +8,7 @@ use crate::{
 };
 
 impl<C: InvocationContext> Untyped<C> {
-    pub fn retype(
+    pub fn untyped_retype(
         self,
         blueprint: &ObjectBlueprint,
         dst: &RelativeCPtr,
@@ -34,7 +34,7 @@ const USER_CONTEXT_MAX_REG_COUNT: usize =
     mem::size_of::<sys::seL4_UserContext>() / mem::size_of::<Word>();
 
 impl<C: InvocationContext> TCB<C> {
-    pub fn read_registers(self, suspend: bool, count: Word) -> Result<UserContext> {
+    pub fn tcb_read_registers(self, suspend: bool, count: Word) -> Result<UserContext> {
         let mut regs: UserContext = Default::default();
         let err = self.invoke(|cptr, ipc_buffer| {
             ipc_buffer.inner_mut().seL4_TCB_ReadRegisters(
@@ -48,12 +48,17 @@ impl<C: InvocationContext> TCB<C> {
         Error::or(err, regs)
     }
 
-    pub fn read_all_registers(self, suspend: bool) -> Result<UserContext> {
-        self.read_registers(suspend, USER_CONTEXT_MAX_REG_COUNT.try_into().unwrap())
+    pub fn tcb_read_all_registers(self, suspend: bool) -> Result<UserContext> {
+        self.tcb_read_registers(suspend, USER_CONTEXT_MAX_REG_COUNT.try_into().unwrap())
     }
 
     // HACK should not be mut
-    pub fn write_registers(self, resume: bool, count: Word, regs: &mut UserContext) -> Result<()> {
+    pub fn tcb_write_registers(
+        self,
+        resume: bool,
+        count: Word,
+        regs: &mut UserContext,
+    ) -> Result<()> {
         Error::wrap(self.invoke(|cptr, ipc_buffer| {
             ipc_buffer.inner_mut().seL4_TCB_WriteRegisters(
                 cptr.bits(),
@@ -65,23 +70,23 @@ impl<C: InvocationContext> TCB<C> {
         }))
     }
 
-    pub fn write_all_registers(self, resume: bool, regs: &mut UserContext) -> Result<()> {
-        self.write_registers(resume, USER_CONTEXT_MAX_REG_COUNT.try_into().unwrap(), regs)
+    pub fn tcb_write_all_registers(self, resume: bool, regs: &mut UserContext) -> Result<()> {
+        self.tcb_write_registers(resume, USER_CONTEXT_MAX_REG_COUNT.try_into().unwrap(), regs)
     }
 
-    pub fn resume(self) -> Result<()> {
+    pub fn tcb_resume(self) -> Result<()> {
         Error::wrap(
             self.invoke(|cptr, ipc_buffer| ipc_buffer.inner_mut().seL4_TCB_Resume(cptr.bits())),
         )
     }
 
-    pub fn suspend(self) -> Result<()> {
+    pub fn tcb_suspend(self) -> Result<()> {
         Error::wrap(
             self.invoke(|cptr, ipc_buffer| ipc_buffer.inner_mut().seL4_TCB_Suspend(cptr.bits())),
         )
     }
 
-    pub fn configure(
+    pub fn tcb_configure(
         self,
         fault_ep: CPtr,
         cspace_root: CNode,
@@ -104,7 +109,7 @@ impl<C: InvocationContext> TCB<C> {
         }))
     }
 
-    pub fn set_sched_params(self, authority: TCB, mcp: Word, priority: Word) -> Result<()> {
+    pub fn tcb_set_sched_params(self, authority: TCB, mcp: Word, priority: Word) -> Result<()> {
         Error::wrap(self.invoke(|cptr, ipc_buffer| {
             ipc_buffer.inner_mut().seL4_TCB_SetSchedParams(
                 cptr.bits(),
@@ -116,7 +121,7 @@ impl<C: InvocationContext> TCB<C> {
     }
 
     #[sel4_cfg(not(MAX_NUM_NODES = "1"))]
-    pub fn set_affinity(self, affinity: Word) -> Result<()> {
+    pub fn tcb_set_affinity(self, affinity: Word) -> Result<()> {
         Error::wrap(self.invoke(|cptr, ipc_buffer| {
             ipc_buffer
                 .inner_mut()
@@ -124,7 +129,7 @@ impl<C: InvocationContext> TCB<C> {
         }))
     }
 
-    pub fn set_tls_base(self, tls_base: Word) -> Result<()> {
+    pub fn tcb_set_tls_base(self, tls_base: Word) -> Result<()> {
         Error::wrap(self.invoke(|cptr, ipc_buffer| {
             ipc_buffer
                 .inner_mut()
@@ -132,7 +137,7 @@ impl<C: InvocationContext> TCB<C> {
         }))
     }
 
-    pub fn bind_notification(self, notification: Notification) -> Result<()> {
+    pub fn tcb_bind_notification(self, notification: Notification) -> Result<()> {
         Error::wrap(self.invoke(|cptr, ipc_buffer| {
             ipc_buffer
                 .inner_mut()
@@ -142,13 +147,13 @@ impl<C: InvocationContext> TCB<C> {
 }
 
 impl<C: InvocationContext> IRQHandler<C> {
-    pub fn ack(self) -> Result<()> {
+    pub fn irq_handler_ack(self) -> Result<()> {
         Error::wrap(
             self.invoke(|cptr, ipc_buffer| ipc_buffer.inner_mut().seL4_IRQHandler_Ack(cptr.bits())),
         )
     }
 
-    pub fn set_notification(self, notification: Notification) -> Result<()> {
+    pub fn irq_handler_set_notification(self, notification: Notification) -> Result<()> {
         Error::wrap(self.invoke(|cptr, ipc_buffer| {
             ipc_buffer
                 .inner_mut()
@@ -156,7 +161,7 @@ impl<C: InvocationContext> IRQHandler<C> {
         }))
     }
 
-    pub fn clear(self) -> Result<()> {
+    pub fn irq_handler_clear(self) -> Result<()> {
         Error::wrap(
             self.invoke(|cptr, ipc_buffer| {
                 ipc_buffer.inner_mut().seL4_IRQHandler_Clear(cptr.bits())

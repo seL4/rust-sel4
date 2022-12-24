@@ -7,7 +7,7 @@ use crate::{
 
 #[sel4_cfg(ARM_HYPERVISOR_SUPPORT)]
 impl<C: InvocationContext> VCPU<C> {
-    pub fn set_tcb(self, tcb: TCB) -> Result<()> {
+    pub fn vcpu_set_tcb(self, tcb: TCB) -> Result<()> {
         Error::wrap(self.invoke(|cptr, ipc_buffer| {
             ipc_buffer
                 .inner_mut()
@@ -15,7 +15,7 @@ impl<C: InvocationContext> VCPU<C> {
         }))
     }
 
-    pub fn read_regs(self, field: VCPUReg) -> Result<Word> {
+    pub fn vcpu_read_regs(self, field: VCPUReg) -> Result<Word> {
         let res = self.invoke(|cptr, ipc_buffer| {
             ipc_buffer
                 .inner_mut()
@@ -24,7 +24,7 @@ impl<C: InvocationContext> VCPU<C> {
         Error::or(res.error.try_into().unwrap(), res.value)
     }
 
-    pub fn write_regs(self, field: VCPUReg, value: Word) -> Result<()> {
+    pub fn vcpu_write_regs(self, field: VCPUReg, value: Word) -> Result<()> {
         Error::wrap(self.invoke(|cptr, ipc_buffer| {
             ipc_buffer.inner_mut().seL4_ARM_VCPU_WriteRegs(
                 cptr.bits(),
@@ -34,7 +34,7 @@ impl<C: InvocationContext> VCPU<C> {
         }))
     }
 
-    pub fn ack_vppi(self, irq: Word) -> Result<()> {
+    pub fn vcpu_ack_vppi(self, irq: Word) -> Result<()> {
         Error::wrap(self.invoke(|cptr, ipc_buffer| {
             ipc_buffer
                 .inner_mut()
@@ -42,7 +42,7 @@ impl<C: InvocationContext> VCPU<C> {
         }))
     }
 
-    pub fn inject_irq(self, virq: u16, priority: u8, group: u8, index: u8) -> Result<()> {
+    pub fn vcpu_inject_irq(self, virq: u16, priority: u8, group: u8, index: u8) -> Result<()> {
         Error::wrap(self.invoke(|cptr, ipc_buffer| {
             ipc_buffer.inner_mut().seL4_ARM_VCPU_InjectIRQ(
                 cptr.bits(),
@@ -56,7 +56,13 @@ impl<C: InvocationContext> VCPU<C> {
 }
 
 impl<T: FrameType, C: InvocationContext> LocalCPtr<T, C> {
-    pub fn map(self, pgd: PGD, vaddr: usize, rights: CapRights, attrs: VMAttributes) -> Result<()> {
+    pub fn frame_map(
+        self,
+        pgd: PGD,
+        vaddr: usize,
+        rights: CapRights,
+        attrs: VMAttributes,
+    ) -> Result<()> {
         Error::wrap(self.invoke(|cptr, ipc_buffer| {
             ipc_buffer.inner_mut().seL4_ARM_Page_Map(
                 cptr.bits(),
@@ -68,13 +74,13 @@ impl<T: FrameType, C: InvocationContext> LocalCPtr<T, C> {
         }))
     }
 
-    pub fn unmap(self) -> Result<()> {
+    pub fn frame_unmap(self) -> Result<()> {
         Error::wrap(
             self.invoke(|cptr, ipc_buffer| ipc_buffer.inner_mut().seL4_ARM_Page_Unmap(cptr.bits())),
         )
     }
 
-    pub fn get_address(self) -> Result<usize> {
+    pub fn frame_get_address(self) -> Result<usize> {
         let ret = self.invoke(|cptr, ipc_buffer| {
             ipc_buffer.inner_mut().seL4_ARM_Page_GetAddress(cptr.bits())
         });
@@ -86,7 +92,7 @@ impl<T: FrameType, C: InvocationContext> LocalCPtr<T, C> {
 }
 
 impl<T: IntermediateTranslationStructureType, C: InvocationContext> LocalCPtr<T, C> {
-    pub fn map_translation_structure(
+    pub fn translation_table_map(
         self,
         vspace: PGD,
         vaddr: usize,
@@ -107,7 +113,7 @@ impl<T: IntermediateTranslationStructureType, C: InvocationContext> LocalCPtr<T,
 impl<C: InvocationContext> IRQControl<C> {
     // TODO structured trigger type
     #[sel4_cfg(not(MAX_NUM_NODES = "1"))]
-    pub fn get_trigger_core(
+    pub fn irq_control_get_trigger_core(
         self,
         irq: Word,
         trigger: Word,
@@ -129,7 +135,7 @@ impl<C: InvocationContext> IRQControl<C> {
 }
 
 impl<C: InvocationContext> ASIDControl<C> {
-    pub fn make_pool(self, untyped: Untyped, dst: &RelativeCPtr) -> Result<()> {
+    pub fn asid_control_make_pool(self, untyped: Untyped, dst: &RelativeCPtr) -> Result<()> {
         Error::wrap(self.invoke(|cptr, ipc_buffer| {
             ipc_buffer.inner_mut().seL4_ARM_ASIDControl_MakePool(
                 cptr.bits(),
@@ -143,7 +149,7 @@ impl<C: InvocationContext> ASIDControl<C> {
 }
 
 impl<C: InvocationContext> ASIDPool<C> {
-    pub fn assign(self, pd: PGD) -> Result<()> {
+    pub fn asid_pool_assign(self, pd: PGD) -> Result<()> {
         Error::wrap(self.invoke(|cptr, ipc_buffer| {
             ipc_buffer
                 .inner_mut()

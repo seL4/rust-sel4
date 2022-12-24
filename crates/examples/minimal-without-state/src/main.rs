@@ -39,7 +39,7 @@ fn main(bootinfo: &sel4::BootInfo) -> ! {
 
     untyped
         .with(&mut ipc_buffer)
-        .retype(
+        .untyped_retype(
             &blueprint,
             &cnode.relative_self(),
             unbadged_notification_slot,
@@ -68,7 +68,7 @@ fn main(bootinfo: &sel4::BootInfo) -> ! {
 
     sel4::BootInfo::init_thread_tcb()
         .with(&mut ipc_buffer)
-        .suspend()
+        .tcb_suspend()
         .unwrap();
 
     unreachable!()

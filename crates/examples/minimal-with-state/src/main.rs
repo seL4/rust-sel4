@@ -39,7 +39,7 @@ fn main(bootinfo: &sel4::BootInfo) -> ! {
     let cnode = sel4::BootInfo::init_thread_cnode();
 
     untyped
-        .retype(
+        .untyped_retype(
             &blueprint,
             &cnode.relative_self(),
             unbadged_notification_slot,
@@ -65,7 +65,7 @@ fn main(bootinfo: &sel4::BootInfo) -> ! {
     sel4::debug_println!("badge = {:#x}", badge);
     assert_eq!(observed_badge, badge);
 
-    sel4::BootInfo::init_thread_tcb().suspend().unwrap();
+    sel4::BootInfo::init_thread_tcb().tcb_suspend().unwrap();
 
     unreachable!()
 }
