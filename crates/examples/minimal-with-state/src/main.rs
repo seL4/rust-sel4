@@ -3,9 +3,14 @@
 #![feature(core_intrinsics)]
 #![feature(exclusive_wrapper)]
 
+#[path = "../../minimal/src/rt.rs"]
 mod rt;
 
 fn main(bootinfo: &sel4::BootInfo) -> ! {
+    unsafe {
+        sel4::set_ipc_buffer(bootinfo.ipc_buffer());
+    }
+
     sel4::debug_println!("Hello, World!");
 
     let blueprint = sel4::ObjectBlueprint::Notification;
