@@ -2,7 +2,7 @@ use crate::{newtype_methods, sys, Word};
 
 /// Corresponds to `seL4_MessageInfo_t`.
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct MessageInfo(pub sys::seL4_MessageInfo);
+pub struct MessageInfo(sys::seL4_MessageInfo);
 
 impl MessageInfo {
     newtype_methods!(sys::seL4_MessageInfo);

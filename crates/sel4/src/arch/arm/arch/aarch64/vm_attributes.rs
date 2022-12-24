@@ -3,7 +3,7 @@ use core::ops::{BitAnd, BitAndAssign, BitOr, BitOrAssign, Not};
 use crate::{newtype_methods, sys};
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
-pub struct VMAttributes(pub sys::seL4_ARM_VMAttributes::Type);
+pub struct VMAttributes(sys::seL4_ARM_VMAttributes::Type);
 
 impl VMAttributes {
     pub const NONE: Self = Self::from_inner(0);
