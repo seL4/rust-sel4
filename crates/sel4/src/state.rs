@@ -9,7 +9,7 @@ cfg_if::cfg_if! {
         #[thread_local]
         static IPC_BUFFER: RefCell<Option<IPCBuffer>> = IPC_BUFFER_INIT;
 
-        pub fn with_ipc_buffer_refcell<F, T>(f: F) -> T
+        pub fn with_ipc_buffer<F, T>(f: F) -> T
         where
             F: FnOnce(&RefCell<Option<IPCBuffer>>) -> T,
         {
@@ -22,7 +22,7 @@ cfg_if::cfg_if! {
 
         unsafe impl<T> Sync for SingleThreaded<T> {}
 
-        pub fn with_ipc_buffer_refcell<F, T>(f: F) -> T
+        pub fn with_ipc_buffer<F, T>(f: F) -> T
         where
             F: FnOnce(&RefCell<Option<IPCBuffer>>) -> T,
         {
@@ -32,23 +32,23 @@ cfg_if::cfg_if! {
 }
 
 pub unsafe fn set_ipc_buffer(ipc_buffer: IPCBuffer) {
-    with_ipc_buffer_refcell(|refcell| {
-        let _ = refcell.replace(Some(ipc_buffer));
+    with_ipc_buffer(|buf| {
+        let _ = buf.replace(Some(ipc_buffer));
     })
 }
 
-pub fn with_ipc_buffer<F, T>(f: F) -> T
+pub fn with_borrow_ipc_buffer<F, T>(f: F) -> T
 where
     F: FnOnce(&IPCBuffer) -> T,
 {
-    with_ipc_buffer_refcell(|refcell| f(refcell.borrow().as_ref().unwrap()))
+    with_ipc_buffer(|buf| f(buf.borrow().as_ref().unwrap()))
 }
 
-pub fn with_ipc_buffer_mut<F, T>(f: F) -> T
+pub fn with_borrow_ipc_buffer_mut<F, T>(f: F) -> T
 where
     F: FnOnce(&mut IPCBuffer) -> T,
 {
-    with_ipc_buffer_refcell(|refcell| f(refcell.borrow_mut().as_mut().unwrap()))
+    with_ipc_buffer(|buf| f(buf.borrow_mut().as_mut().unwrap()))
 }
 
 #[derive(Debug, Copy, Clone, Default, PartialEq, Eq, Hash)]
@@ -62,6 +62,6 @@ impl ImplicitInvocationContext {
 
 impl InvocationContext for ImplicitInvocationContext {
     fn invoke<T>(self, f: impl FnOnce(&mut IPCBuffer) -> T) -> T {
-        with_ipc_buffer_mut(f)
+        with_borrow_ipc_buffer_mut(f)
     }
 }

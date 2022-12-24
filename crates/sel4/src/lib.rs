@@ -87,7 +87,7 @@ mod state;
 
 #[cfg(feature = "state")]
 pub use state::{
-    set_ipc_buffer, with_ipc_buffer, with_ipc_buffer_mut, with_ipc_buffer_refcell,
+    set_ipc_buffer, with_borrow_ipc_buffer, with_borrow_ipc_buffer_mut, with_ipc_buffer,
     ImplicitInvocationContext,
 };
 
