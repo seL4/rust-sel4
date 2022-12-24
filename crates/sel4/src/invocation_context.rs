@@ -43,7 +43,7 @@ cfg_if::cfg_if! {
 }
 
 /// The default strategy for discovering the current thread's IPC buffer.
-/// 
+///
 /// When the `"state"` feature is enabled, [`NoExplicitInvocationContext`] is an alias for
 /// [`ImplicitInvocationContext`](crate::ImplicitInvocationContext), which uses the [`IPCBuffer`]
 /// set by [`set_ipc_buffer`](crate::set_ipc_buffer). Otherwise, it is an alias for

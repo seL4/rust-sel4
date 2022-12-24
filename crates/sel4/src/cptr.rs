@@ -240,6 +240,7 @@ impl<C> Unspecified<C> {
     }
 }
 
+/// A [`CPtrWithDepth`] in a particular [`CNode`].
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub struct RelativeCPtr<C = NoExplicitInvocationContext> {
     root: CNode<C>,
@@ -275,6 +276,7 @@ impl<C: InvocationContext> RelativeCPtr<C> {
     }
 }
 
+/// Trait for types whose members which logically contain a [`CPtrWithDepth`].
 pub trait HasCPtrWithDepth {
     fn cptr_with_depth(self) -> CPtrWithDepth;
 }
