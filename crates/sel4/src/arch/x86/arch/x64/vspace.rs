@@ -1,4 +1,4 @@
-use crate::{cap_type, FrameType, ObjectBlueprint};
+use crate::{cap_type, FrameType, ObjectBlueprint, ObjectBlueprintX86};
 
 #[derive(Copy, Clone, Debug)]
 pub enum FrameSize {
@@ -8,7 +8,7 @@ pub enum FrameSize {
 impl FrameSize {
     pub const fn blueprint(self) -> ObjectBlueprint {
         match self {
-            FrameSize::_4K => todo!(),
+            FrameSize::_4K => ObjectBlueprintX86::_4K.into(),
         }
     }
 }
