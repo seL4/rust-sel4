@@ -19,13 +19,13 @@ impl ObjectTypeX86 {
     }
 }
 
-impl From<ObjectTypeSeL4Arch> for ObjectTypeArch {
+impl const From<ObjectTypeSeL4Arch> for ObjectTypeArch {
     fn from(ty: ObjectTypeSeL4Arch) -> Self {
         Self::SeL4Arch(ty)
     }
 }
 
-impl From<ObjectTypeSeL4Arch> for ObjectType {
+impl const From<ObjectTypeSeL4Arch> for ObjectType {
     fn from(ty: ObjectTypeSeL4Arch) -> Self {
         Self::from(ObjectTypeArch::from(ty))
     }
@@ -37,26 +37,26 @@ pub enum ObjectBlueprintX86 {
 }
 
 impl ObjectBlueprintX86 {
-    pub fn ty(self) -> ObjectType {
+    pub const fn ty(self) -> ObjectType {
         match self {
             Self::SeL4Arch(sel4_arch) => sel4_arch.ty(),
         }
     }
 
-    pub fn physical_size_bits(self) -> usize {
+    pub const fn physical_size_bits(self) -> usize {
         match self {
             Self::SeL4Arch(sel4_arch) => sel4_arch.physical_size_bits(),
         }
     }
 }
 
-impl From<ObjectBlueprintSeL4Arch> for ObjectBlueprintArch {
+impl const From<ObjectBlueprintSeL4Arch> for ObjectBlueprintArch {
     fn from(blueprint: ObjectBlueprintSeL4Arch) -> Self {
         Self::SeL4Arch(blueprint)
     }
 }
 
-impl From<ObjectBlueprintSeL4Arch> for ObjectBlueprint {
+impl const From<ObjectBlueprintSeL4Arch> for ObjectBlueprint {
     fn from(ty: ObjectBlueprintSeL4Arch) -> Self {
         Self::from(ObjectBlueprintArch::from(ty))
     }

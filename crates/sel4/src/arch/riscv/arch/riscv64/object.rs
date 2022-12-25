@@ -19,11 +19,11 @@ impl ObjectTypeRISCV64 {
 pub enum ObjectBlueprintRISCV64 {}
 
 impl ObjectBlueprintRISCV64 {
-    pub fn ty(self) -> ObjectType {
+    pub const fn ty(self) -> ObjectType {
         match self {}
     }
 
-    pub fn physical_size_bits(self) -> usize {
+    pub const fn physical_size_bits(self) -> usize {
         match self {}
     }
 }
