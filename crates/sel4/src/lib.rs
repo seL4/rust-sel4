@@ -1,3 +1,41 @@
+//! This crate provides straightforward, pure-Rust bindings to the [seL4
+//! API](https://sel4.systems/Info/Docs/seL4-manual-latest.pdf).
+//!
+//! This crate's implementation is based on the lower-level [`sel4-sys`](::sel4_sys) crate, which is
+//! generated from the libsel4 headers and interface definition files.
+//!
+//! ### Features
+//!
+//! The `"state"` feature enables a thread-local `Option<RefCell<IPCBuffer>>` which, once set, in
+//! turn enables threads to make seL4 API calls without having to explicitly specify an IPC buffer.
+//! Specifically, it causes [`NoExplicitInvocationContext`] to be an alias for
+//! [`ImplicitInvocationContext`], which implements [`InvocationContext`] by accessing the
+//! thread-local pointer to an IPC buffer. When `"state"` is not set,
+//! [`NoExplicitInvocationContext`] is an alias for [`NoInvocationContext`], which does not
+//! implement [`InvocationContext`]. The thread-local IPC buffer pointer is modified and accessed by
+//! the [`with_ipc_buffer`] family of functions.
+//!
+//! By default, `"state"` is implemented using `#[thread_local]`, and thus depends on ELF TLS. When
+//! the feature `"single-threaded"` is enabled, this crate assumes that it will only be running in a
+//! single thread, and instead implements `"state"` using a global `static`. This feature is useful
+//! for runtimes where ELF TLS is not supported, but is only safe to use when this crate will only
+//! be running in a single thread.
+//!
+//! ### Building
+//!
+//! This crate and its dependencies depend, at build time, on a JSON representation of a seL4 kernel
+//! configuration, and a corresponding set of libsel4 headers. The locations of these dependencies
+//! are provided to this crate at build time by environment variables. If `SEL4_CONFIG` is set, then
+//! its value is interpreted as the path for the JSON seL4 kernel configuration file. Otherwise, if
+//! `SEL4_PREFIX` is set, then `$SEL4_PREFIX/support/config.json` is used. If `SEL4_INCLUDE_DIRS` is
+//! set, then its value is interpreted as a colon-separated list of include paths for the libsel4
+//! headers. Otherwise, if `SEL4_PREFIX` is set, then `$SEL4_PREFIX/libsel4/include` is used.
+//!
+//! #### Note
+//!
+//! For now, this crate depends on some build system-related patches to the seL4 kernel. These
+//! patches can be found in [this branch](https://gitlab.com/coliasgroup/seL4/-/tree/rust).
+
 #![no_std]
 #![feature(array_methods)]
 #![feature(const_convert)]

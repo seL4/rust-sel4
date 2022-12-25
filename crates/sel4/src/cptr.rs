@@ -70,7 +70,8 @@ impl From<CPtr> for CPtrWithDepth {
 ///   [`ImplicitInvocationContext`](crate::ImplicitInvocationContext), which uses the [`IPCBuffer`]
 ///   set by [`set_ipc_buffer`](crate::set_ipc_buffer). Otherwise, it is an alias for
 ///   [`NoInvocationContext`](crate::NoInvocationContext), which does not implement
-///   [`InvocationContext`].
+///   [`InvocationContext`]. In such cases, the [`with`](LocalCPtr::with) method is used to specify
+///   an invocation context before the capability is invoked.
 #[derive(Copy, Clone, Eq, PartialEq)]
 pub struct LocalCPtr<T: CapType, C = NoExplicitInvocationContext> {
     phantom: PhantomData<T>,
