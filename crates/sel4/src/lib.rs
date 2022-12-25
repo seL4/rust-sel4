@@ -1,6 +1,6 @@
 //! This crate provides straightforward, pure-Rust bindings to the [seL4
 //! API](https://sel4.systems/Info/Docs/seL4-manual-latest.pdf).
-//! 
+//!
 //! Most items in this crate correspond to types, constants, and functions in
 //! [libsel4](https://docs.sel4.systems/projects/sel4/api-doc.html). Notably, when applicable,
 //! `seL4_CPtr` is agumented in [`LocalCPtr`] with a marker specifying the type of capability it
