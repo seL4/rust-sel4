@@ -2,7 +2,7 @@
 
 This repository contains crates for supporting the use of Rust in seL4 userspace. So far, this includes:
 
-- A Rust implementation of libsel4 ([sel4-sys](./crates/sel4/sys))
+- Rust bindings to the seL4 API ([sel4](./crates/sel4))
 - A limited [loader](./crates/loader) for the seL4 kernel
 
 This repository also contains some code for building and testing these crates using Nix, Make, and, optionally, Docker. However, the crates are in no way bound to this build system code.
