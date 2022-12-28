@@ -9,9 +9,13 @@ This repository also contains some code for building and testing these crates us
 
 Note that, for now, these crates depend on some patches to libsel4 which can be found at [coliasgroup/seL4:rust](https://gitlab.com/coliasgroup/seL4/-/tree/rust).
 
+The best way to learn how to use these crates is to check out this concrete example of their use in simple example project with a simple build system:
+
+https://gitlab.com/coliasgroup/rust-seL4-simple-build-system-demo
+
 ### Quick start
 
-The only requirements for getting started are Git, Make, and Docker.
+The only requirements for running the tests in this repository are Git, Make, and Docker.
 
 First, clone this respository:
 
