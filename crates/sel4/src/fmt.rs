@@ -8,7 +8,7 @@ pub mod _private {
     pub use super::debug_print_helper;
 }
 
-/// Implements [`core::fmt::Write`] using [`debug::debug_put_char`].
+/// Implements `core::fmt::Write` using [`debug_put_char`].
 pub struct DebugWrite;
 
 impl fmt::Write for DebugWrite {
