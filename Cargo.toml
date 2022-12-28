@@ -20,6 +20,7 @@ members = [
     "crates/sel4/sys",
     "crates/sel4/sys/wrappers",
 
+    "crates/runtime/sel4-logging",
     "crates/runtime/sel4-minimal-root-task-runtime",
     "crates/runtime/sel4-minimal-root-task-runtime/macros",
     "crates/runtime/sel4-runtime-building-blocks/root-task-head",
