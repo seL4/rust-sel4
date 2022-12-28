@@ -292,6 +292,7 @@ dependencies = [
  "quote",
  "sel4-build-env",
  "sel4-config",
+ "sel4-logging",
  "sel4-platform-info",
  "sel4-rustfmt-helper",
  "spin",
@@ -629,6 +630,13 @@ dependencies = [
  "sel4-config-data",
  "sel4-config-generic-macros-core",
  "sel4-config-generic-types",
+]
+
+[[package]]
+name = "sel4-logging"
+version = "0.1.0"
+dependencies = [
+ "log",
 ]
 
 [[package]]

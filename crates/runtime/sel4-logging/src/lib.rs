@@ -20,8 +20,16 @@ pub struct Logger {
 pub type FmtRecordFn = fn(&Record, &mut fmt::Formatter) -> fmt::Result;
 
 impl Logger {
+    pub fn level_filter(&self) -> LevelFilter {
+        self.level_filter
+    }
+
+    pub fn set_max_level(&self) {
+        log::set_max_level(self.level_filter());
+    }
+
     pub fn set(&'static self) -> Result<(), SetLoggerError> {
-        log::set_max_level(self.level_filter);
+        self.set_max_level();
         log::set_logger(self)?;
         Ok(())
     }

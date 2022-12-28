@@ -5,6 +5,7 @@
 #![feature(ptr_to_from_bits)]
 #![feature(pointer_byte_offsets)]
 #![feature(const_pointer_byte_offsets)]
+#![feature(const_trait_impl)]
 #![allow(unreachable_code)]
 #![allow(dead_code)]
 
@@ -12,9 +13,8 @@ use core::arch::asm;
 use core::ops::Range;
 use core::panic::PanicInfo;
 
-use log::LevelFilter;
-
 use loader_payload_types::{Payload, PayloadInfo};
+use sel4_logging::LevelFilter;
 use sel4_platform_info::PLATFORM_INFO;
 
 mod barrier;
@@ -32,11 +32,8 @@ mod smp;
 mod stacks;
 
 use barrier::Barrier;
-use logging::Logger;
 
 const LOG_LEVEL: LevelFilter = LevelFilter::Debug;
-
-static LOGGER: Logger = Logger::new(LOG_LEVEL);
 
 const MAX_NUM_NODES: usize = sel4_config::sel4_cfg_usize!(MAX_NUM_NODES);
 const NUM_SECONDARY_CORES: usize = MAX_NUM_NODES - 1;
@@ -46,7 +43,7 @@ static KERNEL_ENTRY_BARRIER: Barrier = Barrier::new(MAX_NUM_NODES);
 pub fn main<'a>(payload: &Payload<'a>, own_footprint: &Range<usize>) -> ! {
     debug::init();
 
-    LOGGER.set().unwrap();
+    logging::set_logger();
 
     log::info!("Starting loader");
 

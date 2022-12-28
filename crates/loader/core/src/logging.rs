@@ -1,54 +1,42 @@
-use core::fmt;
-
+use log::{Log, Metadata, Record};
 use spin::Mutex;
 
-use log::{LevelFilter, Log, Metadata, Record, SetLoggerError};
+use sel4_logging::{Logger, LoggerBuilder};
 
-use crate::fmt::debug_println;
+use crate::fmt::debug_print;
+use crate::LOG_LEVEL;
 
-pub struct Logger {
-    level_filter: LevelFilter,
-    mutex: Mutex<()>,
+static LOGGER: SynchronizedLogger<Logger> = SynchronizedLogger::new(
+    LoggerBuilder::default()
+        .level_filter(LOG_LEVEL)
+        .write(|s| debug_print!("{}", s))
+        .fmt(|record, f| write!(f, "seL4 loader | {:<5}  {}", record.level(), record.args()))
+        .build(),
+);
+
+pub(crate) fn set_logger() {
+    log::set_max_level(LOGGER.0.lock().level_filter);
+    log::set_logger(&LOGGER).unwrap();
 }
 
-impl Logger {
-    pub const fn new(level_filter: LevelFilter) -> Self {
-        Self {
-            level_filter,
-            mutex: Mutex::new(()),
-        }
+struct SynchronizedLogger<T>(Mutex<T>);
+
+impl<T> SynchronizedLogger<T> {
+    const fn new(inner: T) -> Self {
+        Self(Mutex::new(inner))
     }
 }
 
-impl Log for Logger {
+impl<T: Log> Log for SynchronizedLogger<T> {
     fn enabled(&self, metadata: &Metadata) -> bool {
-        metadata.level() <= self.level_filter
+        self.0.lock().enabled(metadata)
     }
 
     fn log(&self, record: &Record) {
-        if self.enabled(record.metadata()) {
-            let guard = self.mutex.lock();
-            debug_println!("{}", RecordDisplay(record));
-            drop(guard);
-        }
+        self.0.lock().log(record)
     }
 
-    fn flush(&self) {}
-}
-
-impl Logger {
-    pub fn set(&'static self) -> Result<(), SetLoggerError> {
-        log::set_max_level(self.level_filter);
-        log::set_logger(self)?;
-        Ok(())
-    }
-}
-
-struct RecordDisplay<'a>(&'a Record<'a>);
-
-impl<'a> fmt::Display for RecordDisplay<'a> {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let record = self.0;
-        write!(f, "seL4 loader [{:<5}] {}", record.level(), record.args())
+    fn flush(&self) {
+        self.0.lock().flush()
     }
 }
