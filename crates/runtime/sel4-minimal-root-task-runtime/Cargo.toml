@@ -1,0 +1,15 @@
+[package]
+name = "sel4-minimal-root-task-runtime"
+version = "0.1.0"
+edition = "2021"
+
+[features]
+default = ["state", "panic-handler"]
+panic-handler = []
+state = ["sel4/state"]
+
+[dependencies]
+sel4 = { path = "../../sel4", default-features = false, features = ["single-threaded"] }
+sel4-minimal-root-task-runtime-macros = { path = "./macros" }
+sel4-runtime-building-blocks-root-task-head = { path = "../sel4-runtime-building-blocks/root-task-head" }
+sel4-runtime-building-blocks-termination = { path = "../sel4-runtime-building-blocks/termination" }

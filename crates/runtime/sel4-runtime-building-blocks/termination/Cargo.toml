@@ -1,0 +1,4 @@
+[package]
+name = "sel4-runtime-building-blocks-termination"
+version = "0.1.0"
+edition = "2021"

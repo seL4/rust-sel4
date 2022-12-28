@@ -1,12 +1,8 @@
 #![no_std]
 #![no_main]
-#![feature(core_intrinsics)]
-#![feature(exclusive_wrapper)]
 
-#[path = "../../minimal-with-state/src/rt.rs"]
-mod rt;
-
-fn main(bootinfo: &sel4::BootInfo) -> ! {
+#[sel4_minimal_root_task_runtime::main]
+fn main(bootinfo: &sel4::BootInfo) -> sel4::Result<()> {
     sel4::debug_println!("Hello, World!");
 
     let mut ipc_buffer = unsafe { bootinfo.ipc_buffer() };
@@ -37,15 +33,12 @@ fn main(bootinfo: &sel4::BootInfo) -> ! {
 
     let cnode = sel4::BootInfo::init_thread_cnode();
 
-    untyped
-        .with(&mut ipc_buffer)
-        .untyped_retype(
-            &blueprint,
-            &cnode.relative_self(),
-            unbadged_notification_slot,
-            1,
-        )
-        .unwrap();
+    untyped.with(&mut ipc_buffer).untyped_retype(
+        &blueprint,
+        &cnode.relative_self(),
+        unbadged_notification_slot,
+        1,
+    )?;
 
     let badge = 0x1337;
 
@@ -56,8 +49,7 @@ fn main(bootinfo: &sel4::BootInfo) -> ! {
             &cnode.relative(unbadged_notification),
             sel4::CapRights::write_only(),
             badge,
-        )
-        .unwrap();
+        )?;
 
     badged_notification.with(&mut ipc_buffer).signal();
 
@@ -66,10 +58,5 @@ fn main(bootinfo: &sel4::BootInfo) -> ! {
     sel4::debug_println!("badge = {:#x}", badge);
     assert_eq!(observed_badge, badge);
 
-    sel4::BootInfo::init_thread_tcb()
-        .with(&mut ipc_buffer)
-        .tcb_suspend()
-        .unwrap();
-
-    unreachable!()
+    Ok(())
 }

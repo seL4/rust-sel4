@@ -112,6 +112,7 @@ sel4_cfg_if! {
         mod fmt;
 
         pub use debug::{debug_put_char, debug_snapshot};
+        pub use fmt::DebugWrite;
     }
 }
 

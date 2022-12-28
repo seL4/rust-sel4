@@ -6,5 +6,5 @@ license = "BSD-2-Clause"
 authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
 
 [dependencies]
-cfg-if = "*"
-sel4 = { path = "../../sel4", features = ["single-threaded"] }
+sel4 = { path = "../../sel4" }
+sel4-minimal-root-task-runtime = { path = "../../runtime/sel4-minimal-root-task-runtime" }

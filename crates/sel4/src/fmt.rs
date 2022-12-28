@@ -8,9 +8,10 @@ pub mod _private {
     pub use super::debug_print_helper;
 }
 
-struct Debug;
+/// Implements [`core::fmt::Write`] using [`debug::debug_put_char`].
+pub struct DebugWrite;
 
-impl fmt::Write for Debug {
+impl fmt::Write for DebugWrite {
     fn write_str(&mut self, s: &str) -> fmt::Result {
         for &c in s.as_bytes() {
             debug_put_char(c as c_char)
@@ -20,7 +21,7 @@ impl fmt::Write for Debug {
 }
 
 pub fn debug_print_helper(args: fmt::Arguments) {
-    fmt::write(&mut Debug, args).unwrap_or_else(|err| {
+    fmt::write(&mut DebugWrite, args).unwrap_or_else(|err| {
         // NOTE(nspin)
         // If a runtime's #[panic_handler] uses this debug_print{ln}, then this
         // would result in a panic-within-panic. I think it is best to rely

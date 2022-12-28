@@ -1,10 +1,12 @@
+#![no_std]
+#![no_main]
+#![feature(core_intrinsics)]
+#![feature(exclusive_wrapper)]
+
 use core::arch::global_asm;
-use core::panic::PanicInfo;
 use core::sync::Exclusive;
 
-use crate::main;
-
-const STACK_SIZE: usize = 4096 * 4;
+const STACK_SIZE: usize = include!(concat!(env!("OUT_DIR"), "/stack_size.fragment.rs"));
 
 #[repr(C, align(16))]
 struct Stack([u8; STACK_SIZE]);
@@ -13,11 +15,6 @@ static mut STACK: Stack = Stack([0; STACK_SIZE]);
 
 #[no_mangle]
 static __stack_top: Exclusive<*const u8> = Exclusive::new(unsafe { STACK.0.as_ptr_range().end });
-
-#[no_mangle]
-unsafe extern "C" fn __rust_entry(bootinfo: *const sel4::sys::seL4_BootInfo) -> ! {
-    main(&sel4::BootInfo::from_ptr(bootinfo))
-}
 
 cfg_if::cfg_if! {
     if #[cfg(target_arch = "aarch64")] {
@@ -56,10 +53,4 @@ cfg_if::cfg_if! {
     } else {
         compile_error!("unsupported architecture");
     }
-}
-
-#[panic_handler]
-fn panic(info: &PanicInfo<'_>) -> ! {
-    sel4::debug_println!("{}", info);
-    core::intrinsics::abort()
 }
