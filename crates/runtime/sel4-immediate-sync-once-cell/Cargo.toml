@@ -1,0 +1,4 @@
+[package]
+name = "sel4-immediate-sync-once-cell"
+version = "0.1.0"
+edition = "2021"
