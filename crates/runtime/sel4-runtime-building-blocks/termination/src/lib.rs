@@ -1,37 +1,25 @@
 #![no_std]
 #![feature(never_type)]
-
-use core::convert::Infallible;
-use core::fmt;
-use core::write;
+#![feature(unwrap_infallible)]
 
 pub trait Termination {
-    fn report(self, writer: impl fmt::Write) -> fmt::Result;
-}
+    type Error;
 
-impl Termination for () {
-    fn report(self, _writer: impl fmt::Write) -> fmt::Result {
-        Ok(())
-    }
+    fn report(self) -> Self::Error;
 }
 
 impl Termination for ! {
-    fn report(self, _writer: impl fmt::Write) -> fmt::Result {
+    type Error = !;
+
+    fn report(self) -> Self::Error {
         self
     }
 }
 
-impl Termination for Infallible {
-    fn report(self, _writer: impl fmt::Write) -> fmt::Result {
-        match self {}
-    }
-}
+impl<E> Termination for Result<!, E> {
+    type Error = E;
 
-impl<T: Termination, E: fmt::Debug> Termination for Result<T, E> {
-    fn report(self, mut writer: impl fmt::Write) -> fmt::Result {
-        match self {
-            Ok(val) => val.report(writer),
-            Err(err) => write!(writer, "Error: {err:?}"),
-        }
+    fn report(self) -> Self::Error {
+        self.into_err()
     }
 }

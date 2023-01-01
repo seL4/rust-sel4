@@ -3,6 +3,8 @@
 
 extern crate sel4_runtime_building_blocks_root_task_head;
 
+use core::fmt;
+
 use sel4_runtime_building_blocks_termination::Termination;
 
 pub use sel4_minimal_root_task_runtime_macros::main;
@@ -17,10 +19,11 @@ macro_rules! declare_main {
     };
 }
 
-pub fn run_main<T: Termination>(
-    f: impl Fn(&sel4::BootInfo) -> T,
-    bootinfo: *const sel4::sys::seL4_BootInfo,
-) -> ! {
+pub fn run_main<T>(f: impl Fn(&sel4::BootInfo) -> T, bootinfo: *const sel4::sys::seL4_BootInfo) -> !
+where
+    T: Termination,
+    T::Error: fmt::Debug,
+{
     let bootinfo = unsafe { sel4::BootInfo::from_ptr(bootinfo) };
 
     #[cfg(feature = "state")]
@@ -28,13 +31,9 @@ pub fn run_main<T: Termination>(
         sel4::set_ipc_buffer(bootinfo.ipc_buffer());
     }
 
-    f(&bootinfo).report(&mut sel4::DebugWrite).unwrap();
+    let err = f(&bootinfo).report();
 
-    let r = sel4::BootInfo::init_thread_tcb()
-        .with(&mut unsafe { bootinfo.ipc_buffer() })
-        .tcb_suspend()
-        .unwrap();
-    sel4::debug_println!("Failed to suspend: {:?}", r);
+    sel4::debug_println!("Terminated with error: {:?}", err);
     abort()
 }
 

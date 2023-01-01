@@ -1,8 +1,9 @@
 #![no_std]
 #![no_main]
+#![feature(never_type)]
 
 #[sel4_minimal_root_task_runtime::main]
-fn main(bootinfo: &sel4::BootInfo) -> sel4::Result<()> {
+fn main(bootinfo: &sel4::BootInfo) -> sel4::Result<!> {
     sel4::debug_println!("Hello, World!");
 
     let mut ipc_buffer = unsafe { bootinfo.ipc_buffer() };
@@ -58,5 +59,8 @@ fn main(bootinfo: &sel4::BootInfo) -> sel4::Result<()> {
     sel4::debug_println!("badge = {:#x}", badge);
     assert_eq!(observed_badge, badge);
 
-    Ok(())
+    sel4::BootInfo::init_thread_tcb()
+        .with(&mut ipc_buffer)
+        .tcb_suspend()?;
+    unreachable!()
 }

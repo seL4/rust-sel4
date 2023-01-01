@@ -1,10 +1,11 @@
 #![no_std]
 #![no_main]
+#![feature(never_type)]
 
 use sel4_minimal_root_task_runtime::main;
 
 #[main]
-fn main(bootinfo: &sel4::BootInfo) -> sel4::Result<()> {
+fn main(bootinfo: &sel4::BootInfo) -> sel4::Result<!> {
     sel4::debug_println!("Hello, World!");
 
     let blueprint = sel4::ObjectBlueprint::Notification;
@@ -55,5 +56,6 @@ fn main(bootinfo: &sel4::BootInfo) -> sel4::Result<()> {
     sel4::debug_println!("badge = {:#x}", badge);
     assert_eq!(observed_badge, badge);
 
-    Ok(())
+    sel4::BootInfo::init_thread_tcb().tcb_suspend()?;
+    unreachable!()
 }
