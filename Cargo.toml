@@ -23,6 +23,11 @@ members = [
     "crates/runtime/sel4-logging",
     "crates/runtime/sel4-minimal-root-task-runtime",
     "crates/runtime/sel4-minimal-root-task-runtime/macros",
+    "crates/runtime/sel4-runtime-building-blocks/abort",
+    "crates/runtime/sel4-runtime-building-blocks/elf",
+    "crates/runtime/sel4-runtime-building-blocks/injected-phdrs",
+    "crates/runtime/sel4-runtime-building-blocks/injected-phdrs/cli/sel4-inject-phdrs",
+    "crates/runtime/sel4-runtime-building-blocks/reserve-tls-on-stack",
     "crates/runtime/sel4-runtime-building-blocks/root-task-head",
     "crates/runtime/sel4-runtime-building-blocks/termination",
 

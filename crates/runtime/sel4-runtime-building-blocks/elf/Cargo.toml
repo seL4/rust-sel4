@@ -1,6 +1,9 @@
 [package]
-name = "sel4-immediate-sync-once-cell"
+name = "sel4-runtime-building-blocks-elf"
 version = "0.1.0"
 edition = "2021"
 license = "BSD-2-Clause"
 authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
+
+[dependencies]
+zerocopy = "*"

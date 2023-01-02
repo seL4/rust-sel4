@@ -1,6 +1,11 @@
 [package]
-name = "sel4-immediate-sync-once-cell"
+name = "sel4-inject-phdrs"
 version = "0.1.0"
 edition = "2021"
 license = "BSD-2-Clause"
 authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
+
+[dependencies]
+anyhow = "*"
+clap = "3.2"
+object = { version = "*", features = ["all"] }
