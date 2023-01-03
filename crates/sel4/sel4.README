@@ -1,0 +1,3 @@
+The top-level 'sel4' crate is derived, with significant modification, from https://gitlab.com/icecap-project/icecap.
+
+See sel4.LICENSE for copyright information.
