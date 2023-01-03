@@ -205,3 +205,15 @@ impl<T: Fn(), U: Fn()> MutexSyncOps for AbstractMutexSyncOps<T, U> {
         (self.wait)()
     }
 }
+
+pub struct PanickingMutexSyncOps;
+
+impl MutexSyncOps for PanickingMutexSyncOps {
+    fn signal(&self) {
+        panic!("unexpected contention: signal")
+    }
+
+    fn wait(&self) {
+        panic!("unexpected contention: wait")
+    }
+}
