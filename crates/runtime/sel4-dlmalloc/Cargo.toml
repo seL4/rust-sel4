@@ -1,0 +1,10 @@
+[package]
+name = "sel4-dlmalloc"
+version = "0.1.0"
+edition = "2021"
+license = "BSD-2-Clause"
+authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
+
+[dependencies]
+dlmalloc = "0.2.3"
+sel4-sync = { path = "../sel4-sync" }
