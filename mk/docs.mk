@@ -18,9 +18,14 @@ all: docs
 clean:
 	rm -rf $(build_dir)
 
+cargo_build_std_args := \
+	-Z build-std=core,alloc,compiler_builtins \
+	-Z build-std-features=compiler-builtins-mem
+
 cargo_invocation = \
 	RUSTDOCFLAGS="-Z unstable-options --enable-index-page" \
 		cargo $(1) \
+			$(cargo_build_std_args) \
 			--locked \
 			--manifest-path $(abspath $(manifest_path)) \
 			--target-dir $(abspath $(target_dir)) \
