@@ -14,29 +14,34 @@ Note that, for now, these crates depend on some patches to libsel4 which can be 
 
 ##### Application-facing crates
 
-- [`sel4`](./crates/sel4)
-- [`sel4-config`](./crates/sel4/config)
-- [`sel4-platform-info`](./crates/sel4/platform-info)
-- [`sel4-sync`](./crates/runtime/sel4-sync)
-- [`sel4-logging`](./crates/runtime/sel4-logging)
+- [`sel4`](./crates/sel4): Straightforward, pure-Rust bindings to the seL4 API.
+- [`sel4-config`](./crates/sel4/config): Macros and constants corresponding to the seL4 kernel configuration. Can be used by all targets (i.e. in all of: application code, build scripts, and build-time tools).
+- [`sel4-platform-info`](./crates/sel4/platform-info): Constants corresponding to the contents of `platform_info.h`. Can be used by all targets.
+- [`sel4-sync`](./crates/runtime/sel4-sync): Synchronization constructs using seL4 IPC. Currently only supports notification-based mutexes.
+- [`sel4-logging`](./crates/runtime/sel4-logging): Log implementation for the [`log`](https://crates.io/crates/log) crate.
 
 ##### Example root task runtimes
 
-- [`sel4-minimal-root-task-runtime`](./crates/runtime/sel4-minimal-root-task-runtime)
+- [`sel4-minimal-root-task-runtime`](./crates/runtime/sel4-minimal-root-task-runtime): A minimal runtime which only supports a single thread without unwinding and without a global allocator.
+- [`sel4-full-root-task-runtime`](./crates/runtime/sel4-minimal-root-task-runtime): A featureful runtime which supports thread-local storage and unwinding, and provides a global allocator. 
 
 ##### Build system-facing crates
 
-- [`loader`](./crates/loader)
+- [`loader`](./crates/loader): A loader for the seL4 kernel, similar in purpose to [elfloader](https://github.com/seL4/seL4_tools/tree/master/elfloader-tool).
 
 ##### Other crates of interest
 
-- [`sel4-sys`](./crates/sel4/sys)
+- [`sel4-sys`](./crates/sel4/sys): Raw bindings to the seL4 API, generated from the libsel4 headers and interface definition files. The `sel4` crate's implementation is based on this crate.
 
 ### Integrating these crates into your project
 
 The best way to learn how to integrate these crates into your project is to check out this concrete example of their use in a project with a simple build system:
 
 https://gitlab.com/coliasgroup/rust-seL4-simple-build-system-demo
+
+```
+TODO
+```
 
 ### Running the tests in this repository (quick start)
 
