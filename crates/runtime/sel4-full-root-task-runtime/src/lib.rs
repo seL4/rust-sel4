@@ -25,10 +25,10 @@ pub mod _private {
 
 // re-exports
 
+pub use sel4_full_root_task_runtime_macros::main;
 pub use sel4_panicking::catch_unwind;
 pub use sel4_runtime_building_blocks_abort::{abort, debug_print, debug_println};
 pub use sel4_runtime_building_blocks_termination::Termination;
-pub use sel4_full_root_task_runtime_macros::main;
 
 //
 
