@@ -1,0 +1,19 @@
+[package]
+name = "sel4-panicking"
+version = "0.1.0"
+edition = "2021"
+license = "BSD-2-Clause"
+authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
+
+[features]
+alloc = []
+allow-panic-unwind = ["unwinding"]
+force-abort = []
+force-unwind = ["allow-panic-unwind"]
+full = ["alloc", "allow-panic-unwind"]
+
+[dependencies]
+cfg-if = "*"
+unwinding = { version = "0.1.4", default-features = false, features = ["unwinder", "fde-gnu-eh-frame-hdr", "hide-trace", "personality"], optional = true }
+sel4-immediate-sync-once-cell = { path = "../sel4-immediate-sync-once-cell" }
+sel4-runtime-building-blocks-abort = { path = "../sel4-runtime-building-blocks/abort" }

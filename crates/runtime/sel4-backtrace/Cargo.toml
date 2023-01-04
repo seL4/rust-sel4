@@ -1,0 +1,19 @@
+[package]
+name = "sel4-backtrace"
+version = "0.1.0"
+edition = "2021"
+license = "BSD-2-Clause"
+authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
+
+[features]
+alloc = ["sel4-backtrace-types/alloc"]
+full = ["alloc", "postcard", "unwinding"]
+postcard = ["sel4-backtrace-types/postcard", "dep:postcard", "dep:serde"]
+unwinding = ["dep:unwinding"]
+
+[dependencies]
+cfg-if = "*"
+postcard = { version = "*", default-features = false, features = [], optional = true }
+serde = { version = "*", default-features = false, features = [], optional = true }
+unwinding = { version = "0.1.4", default-features = false, features = ["unwinder", "fde-gnu-eh-frame-hdr", "hide-trace"], optional = true }
+sel4-backtrace-types = { path = "./types" }
