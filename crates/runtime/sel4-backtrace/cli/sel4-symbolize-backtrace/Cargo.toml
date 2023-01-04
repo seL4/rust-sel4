@@ -2,7 +2,7 @@
 name = "sel4-symbolize-backtrace"
 version = "0.1.0"
 edition = "2021"
-license = "BSD-2-Clause"
+license = "MIT"
 authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
 
 [dependencies]

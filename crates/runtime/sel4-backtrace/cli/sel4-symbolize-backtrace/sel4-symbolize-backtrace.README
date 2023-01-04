@@ -1,0 +1,5 @@
+The 'sel4-symbolize-backtrace' crate is derived, with significant modification, from:
+
+https://gitlab.com/icecap-project/icecap/-/tree/main/src/rust/crates/framework/base/icecap-backtrace/cli/icecap-show-backtrace
+
+See sel4-symbolize-backtrace.LICENSE for copyright information.
