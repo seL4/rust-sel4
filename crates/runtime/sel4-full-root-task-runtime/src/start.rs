@@ -46,14 +46,14 @@ macro_rules! declare_main {
     };
 }
 
-pub fn run_main<T>(f: impl Fn(sel4::BootInfo) -> T, bootinfo: *const sel4::sys::seL4_BootInfo)
+pub fn run_main<T>(f: impl Fn(&sel4::BootInfo) -> T, bootinfo: *const sel4::sys::seL4_BootInfo)
 where
     T: Termination,
     T::Error: fmt::Debug,
 {
     let _ = catch_unwind(|| {
         let bootinfo = unsafe { sel4::BootInfo::from_ptr(bootinfo) };
-        let err = f(bootinfo).report();
+        let err = f(&bootinfo).report();
         sel4::debug_println!("Terminated with error: {:?}", err);
     });
 }

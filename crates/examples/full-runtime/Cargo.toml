@@ -1,0 +1,10 @@
+[package]
+name = "full-runtime"
+version = "0.1.0"
+edition = "2021"
+license = "BSD-2-Clause"
+authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
+
+[dependencies]
+sel4 = { path = "../../sel4" }
+sel4-full-root-task-runtime = { path = "../../runtime/sel4-full-root-task-runtime", features = ["full"] }

@@ -14,7 +14,7 @@ clean:
 
 .PHONY: example
 example:
-	nix-shell --pure -A worlds.$(ARCH).default.shell --run "make -f mk/example.mk run"
+	nix-shell --pure -A worlds.$(ARCH).default.shell --run "make -f mk/examples/minimal-runtime.mk run"
 
 mk_docs = nix-shell --pure -A worlds.$(1).default.shell --run "make -f mk/docs.mk"
 
