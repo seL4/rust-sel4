@@ -26,4 +26,5 @@ sel4-runtime-building-blocks-injected-phdrs = { path = "../sel4-runtime-building
 sel4-runtime-building-blocks-reserve-tls-on-stack = { path = "../sel4-runtime-building-blocks/reserve-tls-on-stack" }
 sel4-runtime-building-blocks-root-task-head = { path = "../sel4-runtime-building-blocks/root-task-head" }
 sel4-runtime-building-blocks-termination = { path = "../sel4-runtime-building-blocks/termination" }
+sel4-runtime-building-blocks-unwinding-support = { path = "../sel4-runtime-building-blocks/unwinding-support" }
 sel4-sync = { path = "../sel4-sync" }

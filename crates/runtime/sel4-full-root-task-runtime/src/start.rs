@@ -24,6 +24,12 @@ pub unsafe extern "C" fn __rust_entry(bootinfo: *const sel4::sys::seL4_BootInfo)
 
 pub unsafe extern "C" fn cont_fn(cont_arg: *mut c_void) -> ! {
     let bootinfo = cont_arg.cast_const().cast::<sel4::sys::seL4_BootInfo>();
+
+    #[cfg(feature = "unwinding")]
+    {
+        crate::unwinding::init();
+    }
+
     sel4::set_ipc_buffer(sel4::BootInfo::from_ptr(bootinfo).ipc_buffer());
     sel4_panicking::set_hook(&panic_hook);
     __sel4_for_simple_root_task_main(bootinfo);

@@ -1,7 +1,2 @@
 [unstable]
 unstable-options = true
-
-
-# TODO(nspin) until flexibility is added to unwinding crate upstream
-[target.aarch64-unknown-sel4]
-linker = "aarch64-none-elf-ld"

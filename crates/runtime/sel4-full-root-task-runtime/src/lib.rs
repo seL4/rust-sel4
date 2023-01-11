@@ -16,6 +16,9 @@ mod start;
 #[cfg(feature = "global-allocator")]
 mod global_allocator;
 
+#[cfg(feature = "unwinding")]
+mod unwinding;
+
 #[cfg(all(feature = "unwinding", feature = "postcard"))]
 pub mod backtrace;
 
