@@ -6,17 +6,12 @@ license = "MIT"
 authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
 
 [dependencies]
-addr2line = "0.11.0"
-backtrace = "*"
-clap = "2.34"
-cpp_demangle = "*"
-fallible-iterator = "*"
-gimli = "0.20.0"
-hex = "*"
-log = "*"
-memmap = "*"
-object = "0.17.*"
+addr2line = "0"
+clap = "3"
+fallible-iterator = "0"
+gimli = "0"
+hex = "0"
+memmap = "0"
+object = "0"
 postcard = { version = "*", default-features = false, features = ["alloc"] }
-rustc-demangle = "*"
-serde = "*"
 sel4-backtrace-types = { path = "../../types", features = ["full"] }
