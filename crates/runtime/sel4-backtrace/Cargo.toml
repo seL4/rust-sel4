@@ -16,4 +16,10 @@ cfg-if = "*"
 postcard = { version = "*", default-features = false, features = [], optional = true }
 sel4-backtrace-types = { path = "./types" }
 serde = { version = "*", default-features = false, features = [], optional = true }
-unwinding = { git = "https://github.com/nspin/unwinding.git", rev = "75c9607b61418e49cb5059eabb782c13c3ae4b6b", default-features = false, features = ["unwinder", "fde-custom", "hide-trace"], optional = true }
+
+[dependencies.unwinding]
+git = "https://github.com/nspin/unwinding.git"
+rev = "75c9607b61418e49cb5059eabb782c13c3ae4b6b"
+default-features = false
+features = ["unwinder", "fde-custom", "hide-trace"]
+optional = true

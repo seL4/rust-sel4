@@ -16,4 +16,10 @@ full = ["alloc", "allow-panic-unwind"]
 cfg-if = "*"
 sel4-immediate-sync-once-cell = { path = "../sel4-immediate-sync-once-cell" }
 sel4-runtime-building-blocks-abort = { path = "../sel4-runtime-building-blocks/abort" }
-unwinding = { git = "https://github.com/nspin/unwinding.git", rev = "75c9607b61418e49cb5059eabb782c13c3ae4b6b", default-features = false, features = ["unwinder", "fde-custom", "hide-trace", "personality"], optional = true }
+
+[dependencies.unwinding]
+git = "https://github.com/nspin/unwinding.git"
+rev = "75c9607b61418e49cb5059eabb782c13c3ae4b6b"
+default-features = false
+features = ["unwinder", "fde-custom", "hide-trace", "personality"]
+optional = true
