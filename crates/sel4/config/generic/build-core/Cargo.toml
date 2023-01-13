@@ -1,12 +1,12 @@
 [package]
 name = "sel4-config-generic-build-core"
 version = "0.1.0"
+authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
 edition = "2021"
 license = "BSD-2-Clause"
-authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
 
 [dependencies]
 proc-macro2 = "1"
 quote = "1"
-serde_json = "*"
 sel4-config-generic-types = { path = "../types", features = ["serde"] }
+serde_json = "*"

@@ -1,9 +1,9 @@
 [package]
 name = "sel4-minimal-root-task-runtime"
 version = "0.1.0"
+authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
 edition = "2021"
 license = "BSD-2-Clause"
-authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
 
 [features]
 default = ["state", "panic-handler"]

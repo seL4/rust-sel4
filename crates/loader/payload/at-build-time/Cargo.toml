@@ -1,19 +1,19 @@
 [package]
 name = "loader-payload-at-build-time"
 version = "0.1.0"
+authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
 edition = "2021"
 license = "BSD-2-Clause"
-authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
 
 [dependencies]
-serde_json = "*"
 loader-payload-at-build-time-types = { path = "./types" }
+serde_json = "*"
 
 [build-dependencies]
-object = "*"
-quote = "1"
-serde_json = "*"
 loader-build-env = { path = "../../build-env" }
 loader-payload-at-build-time-types = { path = "./types" }
+object = "*"
+quote = "1"
 sel4-config = { path = "../../../sel4/config" }
 sel4-platform-info = { path = "../../../sel4/platform-info" }
+serde_json = "*"

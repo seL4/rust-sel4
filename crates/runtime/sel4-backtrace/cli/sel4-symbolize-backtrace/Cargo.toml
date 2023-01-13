@@ -1,9 +1,9 @@
 [package]
 name = "sel4-symbolize-backtrace"
 version = "0.1.0"
+authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
 edition = "2021"
 license = "MIT"
-authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
 
 [dependencies]
 addr2line = "0"
