@@ -19,7 +19,7 @@ serde = { version = "*", default-features = false, features = [], optional = tru
 
 [dependencies.unwinding]
 git = "https://github.com/nspin/unwinding.git"
-rev = "75c9607b61418e49cb5059eabb782c13c3ae4b6b"
+rev = "02b5c86f8937edbbe8bbe79fedbab374156b4134"
 default-features = false
 features = ["unwinder", "fde-custom", "hide-trace"]
 optional = true
