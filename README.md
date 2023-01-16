@@ -39,9 +39,46 @@ The best way to learn how to integrate these crates into your project is to chec
 
 https://gitlab.com/coliasgroup/rust-seL4-simple-build-system-demo
 
-```
-TODO
-```
+Many of these crates depend, at build time, on external components and configuration.
+In all cases, information about these dependencies is passed to the dependant crates via environment variables which are interpreted by `build.rs` scripts.
+Here is a list of environment variables and the crates which use them:
+
+- For crates in [`./crates/sel4`](./crates/sel4).
+  See the rustdoc for the `sel4` crate for more information.
+  See the `sel4-build-env` crate and its dependencies for implementation details.
+    - `$SEL4_CONFIG`, defaulting to `$SEL4_PREFIX/support/config.json` if `$SEL4_PREFIX` is set:
+      Must contain the path of a JSON representation of a seL4 kernel configuration.
+      Required by the `sel4-config`, whose dependencies include the `sel4-sys` and `sel4` crates.
+    - `$SEL4_INCLUDE_DIRS`, defaulting to `$SEL4_PREFIX/libsel4/include` if `$SEL4_PREFIX` is set:
+      Must contain a colon-separated list of include paths for the libsel4 headers.
+      Required by the `sel4-sys` crate , whose dependencies include the `sel4` crate.
+    - `$SEL4_PLATFORM_INFO`, defaulting to `$SEL4_PREFIX/support/platform-info.yaml` if `$SEL4_PREFIX` is set:
+      Must contain the path of a `platform-info.yaml` file from the seL4 kernel build system.
+      Required by the `sel4-platform-info` crate, whose dependencies include the `loader` crate.
+- For crates in [`./crates/loader`](./crates/loader). See the `loader-build-env` crate and its dependencies for implementation details.
+    - `$SEL4_KERNEL`, defaulting to `$SEL4_PREFIX/bin/kernel.elf` if `$SEL4_PREFIX` is set:
+      Must contain the path of the seL4 kernel (as an ELF executable).
+      Required by the `loader` crate.
+    - `$SEL4_DTB`, defaulting to `$SEL4_PREFIX/support/kernel.dtb` if `$SEL4_PREFIX` is set:
+      Must contain the path a DTB for use by userspace.
+      Required by the `loader` crate.
+      In the future, providing this DTB at build time will be optional.
+    - `$SEL4_APP`:
+      Must contain the path of the root task (as an ELF executable).
+      Required by the `loader` crate.
+    - `$SEL4_LOADER_CONFIG`:
+      Must contain the path of a JSON representation of a loader configuration.
+      Required by the `loader` crate.
+      Note that configuration for the loader isn't actually implemented yet!
+      This configuration should be an empty JSON object.
+- For crates in [`./crates/runtime`](./crates/runtime).
+    - `$SEL4_RUNTIME_ROOT_TASK_STACK_SIZE`, defaulting to `0x4000`:
+      Contains the stack size, in bytes, of the root task stack.
+      Used by the `sel4-minimal-root-task-runtime` and `sel4-full-root-task-runtime` crates.
+      See the `sel4-runtime-building-blocks-root-task-head` crate for implementation details.
+    - `$SEL4_RUNTIME_ROOT_TASK_HEAP_SIZE`, defaulting to `0`:
+      Contains the stack size, in bytes, of the root task static heap.
+      Used by the `sel4-full-root-task-runtime` crate.
 
 ### Running the tests in this repository (quick start)
 
