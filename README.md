@@ -94,11 +94,13 @@ cd rust-seL4
 Next, build, run, and enter a Docker container for development:
 
 ```
-make -C docker/ run && make -C docker/ exec
+cd hacking/docker
+make run && make exec
 ```
 
 Finally, inside the container, build and emulate a simple seL4-based system with a root task written in Rust:
 
 ```
-make -C hacking/ example
+cd hacking
+make example
 ```
