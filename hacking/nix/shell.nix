@@ -19,7 +19,7 @@ in
 mkShell {
   ARCH = stdenv.hostPlatform.parsed.cpu.name;
 
-  RUST_TARGET_PATH = toString ../support/targets; # absolute path
+  RUST_TARGET_PATH = toString ../../support/targets; # absolute path
 
   RUST_SEL4_TARGET = rustSeL4Target;
   RUST_BARE_METAL_TARGET = rustBareMetalTarget;

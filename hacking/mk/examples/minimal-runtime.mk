@@ -1,7 +1,7 @@
 CRATE ?= minimal-runtime-with-state
 
 here := $(dir $(realpath $(firstword $(MAKEFILE_LIST))))
-root_dir := $(here)/../..
+root_dir := $(here)/../../..
 build_subdir := examples/minimal-runtime/$(CRATE)/$(ARCH)
 
 include $(here)/../common.mk

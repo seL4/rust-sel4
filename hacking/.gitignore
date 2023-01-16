@@ -1,0 +1,5 @@
+result
+result-*
+/target/
+/build/
+/tmp/
