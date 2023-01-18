@@ -1,4 +1,4 @@
-{ lib
+{ lib, pkgsBuildBuild
 , configHelpers
 , mkWorld
 }:
@@ -30,7 +30,7 @@ in rec {
             mkQemuCmd = loader: [
               # NOTE
               # virtualization=on even when hypervisor to test loader dropping exception level
-              "qemu-system-aarch64"
+              "${pkgsBuildBuild.qemu}/bin/qemu-system-aarch64"
                 "-machine" "virt,virtualization=on"
                 "-cpu" "cortex-a57" "-smp" "2" "-m" "1024"
                 "-nographic"
@@ -110,7 +110,7 @@ in rec {
               (enable "lm")
             ];
           in task: [
-            "qemu-system-x86_64"
+            "${pkgsBuildBuild.qemu}/bin/qemu-system-x86_64"
               "-cpu" "Nehalem,${opts},enforce"
               "-m" "size=512M"
               "-nographic"
