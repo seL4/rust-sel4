@@ -108,14 +108,19 @@ let
 
   vendorRemoteGitPackage = { name, version, url, rev, ref }:
     let
-      superTree = builtins.fetchGit ({
+      superTree = builtins.fetchGit {
         inherit url rev;
         submodules = fetchGitSubmodules;
-      } // (if ref != null then {
-        ref = ref.value;
-      } else {
         allRefs = true; # HACK
-      }));
+      };
+
+      # TODO
+      # // (if ref != null then {
+      #   ref = ref.value;
+      # } else {
+      #   # allRefs = true; # HACK
+      # });
+
       tree = runCommand "${name}-${version}" {
         nativeBuildInputs = [ jq rustToolchain ];
       } ''
