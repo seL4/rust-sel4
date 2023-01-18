@@ -1,6 +1,6 @@
 STATEFUL ?= $(if $(findstring Linux,$(shell uname -s)),0,1)
 
-work_root := ..
+work_root := ../..
 
 label := rust-sel4
 image_repository := $(label)
