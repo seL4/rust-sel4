@@ -1,4 +1,5 @@
 { lib
+, hostPlatform
 , runCommandCC
 }:
 
@@ -15,7 +16,7 @@ self: with self;
 
   kernel = callPackage ./kernel.nix {};
 
-  kernel32Bit = runCommandCC "kernel32.elf" {} ''
+  kernel32Bit = assert hostPlatform.isx86_64; runCommandCC "kernel32.elf" {} ''
     $OBJCOPY -O elf32-i386 ${kernel}/bin/kernel.elf $out
   '';
 
@@ -26,5 +27,5 @@ self: with self;
 
   mkTask = callPackage ./mk-task.nix {};
 
-  test = callPackage ./test.nix {};
+  instances = callPackage ./instances.nix {};
 }
