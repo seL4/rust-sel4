@@ -35,7 +35,7 @@ let
     else v
   );
 
-  pkgSpecs = {
+  crossSystems = {
     build = mkLeaf null;
     host =
       let
@@ -71,12 +71,11 @@ let
   mkThis = args: lib.fix (self:
     let
       concreteArgs = args self;
-      pkgs = mapLeaves (pkgSpec:
-        nixpkgsFn (concreteArgs.nixpkgsArgsFor pkgSpec)
-      ) pkgSpecs;
+      pkgs = mapLeaves (crossSystem:
+        nixpkgsFn (concreteArgs.nixpkgsArgsFor crossSystem)
+      ) crossSystems;
     in {
       inherit lib pkgs;
-      inherit (concreteArgs) config;
     } // import ./top-level self);
 
   this = makeOverridableWith lib.id mkThis baseArgs;
