@@ -59,6 +59,8 @@ fn main(bootinfo: &sel4::BootInfo) -> sel4::Result<!> {
     sel4::debug_println!("badge = {:#x}", badge);
     assert_eq!(observed_badge, badge);
 
+    sel4::debug_println!("TEST_PASS");
+
     sel4::BootInfo::init_thread_tcb()
         .with(&mut ipc_buffer)
         .tcb_suspend()?;

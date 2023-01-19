@@ -98,9 +98,14 @@ cd hacking/docker
 make run && make exec
 ```
 
-Finally, inside the container, build and emulate a simple seL4-based system with a root task written in Rust:
+Inside the container, build and simulate a simple seL4-based system with a root task written in Rust:
 
 ```
-cd hacking
-make example
+make -C hacking example
+```
+
+Also inside the container, build run all of this repository's automated tests:
+
+```
+make -C hacking run-automated-tests
 ```

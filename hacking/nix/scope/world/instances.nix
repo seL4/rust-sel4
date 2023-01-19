@@ -103,6 +103,7 @@ in rec {
         };
       };
       isSupported = haveMinimalRuntime;
+      canAutomate = true;
     };
 
     minimal-runtime-without-state = mk {
@@ -114,6 +115,7 @@ in rec {
         };
       };
       isSupported = haveMinimalRuntime;
+      canAutomate = true;
     };
 
     full-runtime = mk {
@@ -123,6 +125,7 @@ in rec {
         release = false;
       };
       isSupported = haveFullRuntime;
+      canAutomate = true;
     };
   };
 

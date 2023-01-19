@@ -12,7 +12,7 @@ self: with self; {
     pkgs.host.riscv64.none.this.worlds.default.kernel
   ];
 
-  example = pkgs.host.aarch64.none.this.worlds.default.instances.examples.full-runtime.run;
+  example = pkgs.host.aarch64.none.this.worlds.default.instances.examples.full-runtime.simulate;
 
   worlds.default = pkgs.host.aarch64.none.this.worlds.default;
 
@@ -36,6 +36,10 @@ self: with self; {
         echo "<<< running case: ${name} >>>"
         ${script}
       ''))}
+
+      echo
+      echo '# All tests passed.'
+      echo
     '';
 
 }
