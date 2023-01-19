@@ -28,4 +28,6 @@ self: with self;
   mkTask = callPackage ./mk-task.nix {};
 
   instances = callPackage ./instances.nix {};
+
+  shell = callPackage ./shell.nix {};
 }
