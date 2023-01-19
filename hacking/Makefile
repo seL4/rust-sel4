@@ -17,6 +17,10 @@ none:
 everything:
 	$(nix_build) -A everything --no-out-link
 
+.PHONY: run-automated-tests
+run-automated-tests:
+	script=$$($(nix_build) -A runAutomatedTests --no-out-link) && $$script
+
 .PHONY: example
 example:
 	script=$$($(nix_build) -A example --no-out-link) && $$script

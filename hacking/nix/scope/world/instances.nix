@@ -6,8 +6,8 @@
 }:
 
 let
-  mk = { rootTask, isSupported }: rec {
-    inherit rootTask isSupported;
+  mk = { rootTask, isSupported, canAutomate ? false, automateTimeout ? defaultTimeout }: rec {
+    inherit rootTask isSupported canAutomate;
 
     loader = mkLoader {
       appELF = rootTask.elf;
@@ -33,10 +33,46 @@ let
       { name = "root-task.elf"; path = rootTask.elf; }
       { name = "symbolize-root-task-backtrace"; path = symbolizeRootTaskBacktrace; }
     ]);
+
+    automate =
+      assert canAutomate;
+      assert automateTimeout != null;
+      automateQemuBasic {
+        inherit simulate;
+        timeout = automateTimeout;
+      };
   };
 
   haveFullRuntime = hostPlatform.isAarch64;
   haveMinimalRuntime = haveFullRuntime || hostPlatform.isx86_64;
+
+  automateQemuBasic = { simulate, timeout }:
+    writeScript "automate-qemu" ''
+      #!${buildPackages.runtimeShell}
+      set -eu
+
+      script=${simulate}
+      timeout_=${toString timeout}
+
+      echo "running '$script' with timeout ''${timeout_}s"
+
+      # the odd structure of this next part is due to bash's limitations on
+      # pipes, process substition, and coprocesses.
+
+      coproc $script < /dev/null
+      result=$( \
+        timeout $timeout_ bash -c \
+          'head -n1 <(bash -c "tee >(cat >&2)" | grep -E -a --line-buffered --only-matching "TEST_(PASS|FAIL)")' \
+          <&''${COPROC[0]} \
+          || true
+      )
+      kill $COPROC_PID
+
+      echo "result: '$result'"
+      [ "$result" == "TEST_PASS" ]
+    '';
+
+  defaultTimeout = 30;
 
 in rec {
 
@@ -98,6 +134,7 @@ in rec {
         injectPhdrs = true;
       };
       isSupported = haveFullRuntime;
+      canAutomate = true;
     };
 
     core-libs = mk {
@@ -107,6 +144,7 @@ in rec {
         injectPhdrs = true;
       };
       isSupported = haveFullRuntime;
+      canAutomate = true;
     };
 
     config = mk {
@@ -116,6 +154,7 @@ in rec {
         injectPhdrs = true;
       };
       isSupported = haveFullRuntime;
+      canAutomate = true;
     };
 
     tls = mk {
@@ -125,6 +164,7 @@ in rec {
         injectPhdrs = true;
       };
       isSupported = haveFullRuntime;
+      canAutomate = true;
     };
 
     backtrace = mk {
@@ -135,6 +175,7 @@ in rec {
         injectPhdrs = true;
       };
       isSupported = haveFullRuntime;
+      canAutomate = true;
     };
 
     panicking =
@@ -162,6 +203,7 @@ in rec {
                   injectPhdrs = true;
                 };
                 isSupported = haveFullRuntime;
+                canAutomate = panicStrategyName == "unwind";
               }));
 
   };

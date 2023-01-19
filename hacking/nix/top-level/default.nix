@@ -16,4 +16,26 @@ self: with self; {
 
   worlds.default = pkgs.host.aarch64.none.this.worlds.default;
 
+  runAutomatedTests = mkRunAutomatedTests
+    (lib.flatten
+      (lib.forEach worldsForEverythingInstances (world:
+        lib.forEach (lib.filter (instance: instance.canAutomate) world.instances.supported) (instance: {
+          name = "unnamed"; # TODO
+          script = instance.automate;
+        })
+      ))
+    );
+
+  mkRunAutomatedTests = tests:
+    with pkgs.build;
+    writeScript "run-all" ''
+      #!${runtimeShell}
+      set -e
+
+      ${lib.concatStrings (lib.forEach tests ({ name, script }: ''
+        echo "<<< running case: ${name} >>>"
+        ${script}
+      ''))}
+    '';
+
 }

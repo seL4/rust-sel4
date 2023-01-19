@@ -4,7 +4,7 @@ use core::mem;
 
 use sel4_runtime_building_blocks_elf::ProgramHeader;
 
-const MAX_NUM_PHDRS: usize = 8;
+const MAX_NUM_PHDRS: usize = 16;
 
 const PLACEHOLDER_NUM_PHDRS: usize = usize::MAX;
 
