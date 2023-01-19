@@ -2,13 +2,17 @@
 
 This repository contains crates for supporting the use of Rust in seL4 userspace. So far, this includes:
 
-- Rust bindings to the seL4 API ([source](./crates/sel4), [docs](https://coliasgroup.gitlab.io/rust-seL4-html/))
+- Rust bindings to the seL4 API ([source](./crates/sel4))
 - Crates supporting the construction of Rust language runtimes for seL4 userspace ([source](./crates/runtime))
 - A limited loader for the seL4 kernel ([source](./crates/loader))
 
 This repository also contains some code for building and testing these crates using Nix, Make, and, optionally, Docker. However, the crates are in no way bound to this build system code.
 
 Note that, for now, these crates depend on some patches to libsel4 which can be found at [coliasgroup/seL4:rust](https://gitlab.com/coliasgroup/seL4/-/tree/rust).
+
+### Rendered rustdoc
+
+[https://coliasgroup.gitlab.io/rust-seL4-html/](https://coliasgroup.gitlab.io/rust-seL4-html/)
 
 ### Overview of crates
 
@@ -23,7 +27,7 @@ Note that, for now, these crates depend on some patches to libsel4 which can be 
 ##### Example root task runtimes
 
 - [`sel4-minimal-root-task-runtime`](./crates/runtime/sel4-minimal-root-task-runtime): A minimal runtime which only supports a single thread without unwinding and without a global allocator.
-- [`sel4-full-root-task-runtime`](./crates/runtime/sel4-minimal-root-task-runtime): A featureful runtime which supports thread-local storage and unwinding, and provides a global allocator. 
+- [`sel4-full-root-task-runtime`](./crates/runtime/sel4-full-root-task-runtime): A featureful runtime which supports thread-local storage and unwinding, and provides a global allocator. 
 
 ##### Build system-facing crates
 
