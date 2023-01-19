@@ -13,7 +13,6 @@ minimal-root-task-runtime = ["dep:sel4-minimal-root-task-runtime"]
 sel4 = { path = "../../sel4" }
 sel4-config = { path = "../../sel4/config" }
 sel4-logging = { path = "../../runtime/sel4-logging" }
-sel4-platform-info = { path = "../../sel4/platform-info" }
 sel4-sync = { path = "../../runtime/sel4-sync" }
 sel4-sys = { path = "../../sel4/sys" }
 
@@ -25,3 +24,6 @@ optional = true
 [dependencies.sel4-minimal-root-task-runtime]
 path = "../../runtime/sel4-minimal-root-task-runtime"
 optional = true
+
+[target."cfg(not(target_arch = \"x86_64\"))".dependencies]
+sel4-platform-info = { path = "../../sel4/platform-info" }

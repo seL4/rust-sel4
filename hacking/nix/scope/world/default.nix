@@ -29,5 +29,7 @@ self: with self;
 
   instances = callPackage ./instances.nix {};
 
+  docs = callPackage ./docs.nix {};
+
   shell = callPackage ./shell.nix {};
 }

@@ -45,6 +45,8 @@ superCallPackage ../rust-utils {} self //
 
   topLevelLockfile = srcRoot + "/Cargo.lock";
 
+  vendoredTopLevelLockfile = vendorLockfile { lockfile = topLevelLockfile; };
+
   defaultRustToolchain = rustToolchain;
 
   defaultRustTargetName =
@@ -52,6 +54,7 @@ superCallPackage ../rust-utils {} self //
     then hostPlatform.config
     else {
       aarch64 = "aarch64-unknown-sel4";
+      riscv64 = "riscv64imac-unknown-sel4";
       x86_64 = "x86_64-unknown-sel4";
     }."${hostPlatform.parsed.cpu.name}";
 
@@ -86,6 +89,7 @@ superCallPackage ../rust-utils {} self //
   crates = callPackage ./crates.nix {};
 
   buildCrateInLayersHere = buildCrateInLayers {
+    # TODO pass vendored lockfile instead
     superLockfile = topLevelLockfile;
   };
 

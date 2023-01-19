@@ -12,9 +12,10 @@ self: with self; {
     pkgs.host.riscv64.none.this.worlds.default.kernel
   ];
 
-  example = pkgs.host.aarch64.none.this.worlds.default.instances.examples.full-runtime.simulate;
-
-  worlds.default = pkgs.host.aarch64.none.this.worlds.default;
+  everythingWithExcess = lib.flatten [
+    everything
+    html
+  ];
 
   runAutomatedTests = mkRunAutomatedTests
     (lib.flatten
@@ -41,5 +42,16 @@ self: with self; {
       echo '# All tests passed.'
       echo
     '';
+
+  docs = import ./docs.nix {
+    inherit lib pkgs;
+  };
+
+  inherit (docs) html;
+
+  example = pkgs.host.aarch64.none.this.worlds.default.instances.examples.full-runtime.simulate;
+
+  # convenience
+  worlds.default = pkgs.host.aarch64.none.this.worlds.default;
 
 }
