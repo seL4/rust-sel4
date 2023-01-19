@@ -236,15 +236,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "docs-root"
-version = "0.1.0"
-dependencies = [
- "sel4",
- "sel4-full-root-task-runtime",
- "sel4-platform-info",
-]
-
-[[package]]
 name = "either"
 version = "1.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -541,6 +532,20 @@ checksum = "6585fd95e7bb50d6cc31e20d4cf9afb4e2ba16c5846fc76793f11218da9c475b"
 dependencies = [
  "libc",
  "winapi",
+]
+
+[[package]]
+name = "meta-for-docs"
+version = "0.1.0"
+dependencies = [
+ "sel4",
+ "sel4-config",
+ "sel4-full-root-task-runtime",
+ "sel4-logging",
+ "sel4-minimal-root-task-runtime",
+ "sel4-platform-info",
+ "sel4-sync",
+ "sel4-sys",
 ]
 
 [[package]]
