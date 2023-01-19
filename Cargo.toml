@@ -63,4 +63,6 @@ members = [
     "crates/examples/full-runtime",
     "crates/examples/minimal-runtime-with-state",
     "crates/examples/minimal-runtime-without-state",
+
+    "crates/docs/root",
 ]

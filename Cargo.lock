@@ -236,6 +236,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "docs-root"
+version = "0.1.0"
+dependencies = [
+ "sel4",
+ "sel4-full-root-task-runtime",
+ "sel4-platform-info",
+]
+
+[[package]]
 name = "either"
 version = "1.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
