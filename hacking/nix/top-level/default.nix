@@ -5,17 +5,20 @@ self: with self; {
     pkgs.host.x86_64.none.this.worlds.default
   ];
 
-  everything = lib.flatten [
+  everythingList = lib.flatten [
     (lib.forEach worldsForEverythingInstances (world:
       map (instance: instance.links) world.instances.supported
     ))
     pkgs.host.riscv64.none.this.worlds.default.kernel
   ];
 
-  everythingWithExcess = lib.flatten [
+  everythingWithExcessList = lib.flatten [
     everything
     html
   ];
+
+  everything = pkgs.build.writeText "everything" (toString everythingList);
+  everythingWithExcess = pkgs.build.writeText "everything" (toString everythingWithExcessList);
 
   runAutomatedTests = mkRunAutomatedTests
     (lib.flatten
