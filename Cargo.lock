@@ -538,6 +538,7 @@ dependencies = [
 name = "meta-for-docs"
 version = "0.1.0"
 dependencies = [
+ "log",
  "sel4",
  "sel4-config",
  "sel4-full-root-task-runtime",
