@@ -1,0 +1,13 @@
+[package]
+name = "tests-root-task-loader"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+fdt = "*"
+sel4 = { path = "../../../sel4" }
+sel4-platform-info = { path = "../../../sel4/platform-info" }
+
+[dependencies.sel4-full-root-task-runtime]
+path = "../../../runtime/sel4-full-root-task-runtime"
+features = ["full"]

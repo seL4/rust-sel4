@@ -53,6 +53,13 @@ members = [
     "crates/loader/payload/at-build-time/types",
     "crates/loader/payload/types",
 
+    "crates/tests/root-task/backtrace",
+    "crates/tests/root-task/config",
+    "crates/tests/root-task/core-libs",
+    "crates/tests/root-task/loader",
+    "crates/tests/root-task/panicking",
+    "crates/tests/root-task/tls",
+
     "crates/examples/full-runtime",
     "crates/examples/minimal-runtime-with-state",
     "crates/examples/minimal-runtime-without-state",

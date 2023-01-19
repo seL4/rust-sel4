@@ -9,6 +9,7 @@
 
 let
   rustTargetName = bareMetalRustTargetName;
+  rustTargetPath = null;
 
   release = false;
 
@@ -29,7 +30,7 @@ let
   ];
 
   sysroot = buildSysroot {
-    inherit release rustTargetName;
+    inherit release rustTargetName rustTargetPath;
     extraManifest = profiles;
   };
 
@@ -56,8 +57,7 @@ buildCrateInLayersHere {
   inherit release;
   inherit rootCrate;
   inherit rustTargetName;
-
-  rustTargetPath = null;
+  inherit rustTargetPath;
 
   features = [];
 

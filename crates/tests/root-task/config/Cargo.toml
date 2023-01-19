@@ -1,0 +1,11 @@
+[package]
+name = "tests-root-task-config"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+sel4 = { path = "../../../sel4" }
+
+[dependencies.sel4-full-root-task-runtime]
+path = "../../../runtime/sel4-full-root-task-runtime"
+features = ["full"]

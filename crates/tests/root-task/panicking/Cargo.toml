@@ -1,0 +1,15 @@
+[package]
+name = "tests-root-task-panicking"
+version = "0.1.0"
+edition = "2021"
+
+[features]
+alloc = ["sel4-full-root-task-runtime/alloc", "sel4-full-root-task-runtime/global-allocator"]
+panic-abort = []
+panic-unwind = ["sel4-full-root-task-runtime/full-less-alloc"]
+
+[dependencies]
+cfg-if = "*"
+sel4 = { path = "../../../sel4" }
+sel4-full-root-task-runtime = { path = "../../../runtime/sel4-full-root-task-runtime" }
+sel4-panicking = { path = "../../../runtime/sel4-panicking" }

@@ -78,6 +78,11 @@ superCallPackage ../rust-utils {} self //
     then "${rustToolchain}/lib/rustlib/${buildPlatform.config}/bin/rust-lld"
     else null;
 
+  # chooseLinkerForRustTarget = { rustToolchain, rustTargetName, platform }:
+  #   if platform.isNone
+  #   then "${stdenv.cc.targetPrefix}ld"
+  #   else null;
+
   crates = callPackage ./crates.nix {};
 
   buildCrateInLayersHere = buildCrateInLayers {
@@ -90,6 +95,7 @@ superCallPackage ../rust-utils {} self //
   };
 
   sel4-inject-phdrs = mkTool crates.sel4-inject-phdrs;
+  sel4-symbolize-backtrace = mkTool crates.sel4-symbolize-backtrace;
 
   injectPhdrs = callPackage ./inject-phdrs.nix {};
 

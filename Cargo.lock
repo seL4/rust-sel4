@@ -13,15 +13,14 @@ dependencies = [
 
 [[package]]
 name = "addr2line"
-version = "0.11.0"
+version = "0.19.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1c4e698660ed2d0f625c39bb877332b4269668720e330e2aa3d67bb1187a656a"
+checksum = "a76fd60b23679b7d19bd066031410fb7e458ccc5e958eb5c325888ce4baedc97"
 dependencies = [
  "cpp_demangle",
  "fallible-iterator",
- "gimli 0.20.0",
- "lazycell",
- "object 0.17.0",
+ "gimli 0.27.0",
+ "object",
  "rustc-demangle",
  "smallvec",
 ]
@@ -38,7 +37,7 @@ version = "0.8.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bf6ccdb167abbf410dcb915cabd428929d7f6a04980b54a11f26a39f1c7f7107"
 dependencies = [
- "cfg-if 1.0.0",
+ "cfg-if",
  "once_cell",
  "version_check",
 ]
@@ -57,12 +56,6 @@ name = "anyhow"
 version = "1.0.68"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2cb2f989d18dd141ab8ae82f64d1a8cdd37e0840f73a406896cf5e99502fab61"
-
-[[package]]
-name = "arrayvec"
-version = "0.5.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "23b62fc65de8e4e7f52534fb52b0f3ed04746ae267519eef2a83941e8085068b"
 
 [[package]]
 name = "atty"
@@ -141,12 +134,6 @@ dependencies = [
 
 [[package]]
 name = "cfg-if"
-version = "0.1.10"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4785bdd1c96b2a846b2bd7cc02e86b6b3dbf14e7e53446c4f54c92a361040822"
-
-[[package]]
-name = "cfg-if"
 version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
@@ -194,12 +181,11 @@ checksum = "67ba02a97a2bd10f4b59b25c7973101c79642302776489e030cd13cdab09ed15"
 
 [[package]]
 name = "cpp_demangle"
-version = "0.2.16"
+version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "13c924384107361ca729c7d46b9134151b9a955ce99a773784f2777498e8552d"
+checksum = "b446fd40bcc17eddd6a4a78f24315eb90afdb3334999ddfd4909985c47722442"
 dependencies = [
- "cfg-if 0.1.10",
- "glob",
+ "cfg-if",
 ]
 
 [[package]]
@@ -217,7 +203,7 @@ version = "1.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b540bd8bc810d3885c6ea91e2018302f68baba2129ab3e88f32389ee9370880d"
 dependencies = [
- "cfg-if 1.0.0",
+ "cfg-if",
 ]
 
 [[package]]
@@ -262,6 +248,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4443176a9f2c162692bd3d352d745ef9413eec5782a80d8fd6f8a1ac692a07f7"
 
 [[package]]
+name = "fdt"
+version = "0.1.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "964f5becd44d069dca0beea2b4bc05639ae7bf3b3f5369c295aff360bb57cca2"
+
+[[package]]
 name = "flate2"
 version = "1.0.25"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -291,40 +283,26 @@ dependencies = [
 
 [[package]]
 name = "gimli"
-version = "0.20.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "81dd6190aad0f05ddbbf3245c54ed14ca4aa6dd32f22312b70d8f168c3e3e633"
-dependencies = [
- "arrayvec",
- "byteorder",
- "fallible-iterator",
- "indexmap",
- "smallvec",
- "stable_deref_trait",
-]
-
-[[package]]
-name = "gimli"
 version = "0.26.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "22030e2c5a68ec659fde1e949a745124b48e6fa8b045b7ed5bd1fe4ccc5c4e5d"
+
+[[package]]
+name = "gimli"
+version = "0.27.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "dec7af912d60cdbd3677c1af9352ebae6fb8394d165568a2234df0fa00f87793"
+dependencies = [
+ "fallible-iterator",
+ "indexmap",
+ "stable_deref_trait",
+]
 
 [[package]]
 name = "glob"
 version = "0.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d2fabcfbdc87f4758337ca535fb41a6d701b65693ce38287d856d1674551ec9b"
-
-[[package]]
-name = "goblin"
-version = "0.1.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3081214398d39e4bd7f2c1975f0488ed04614ffdd976c6fc7a0708278552c0da"
-dependencies = [
- "log",
- "plain",
- "scroll",
-]
 
 [[package]]
 name = "hashbrown"
@@ -334,9 +312,9 @@ checksum = "8a9ee70c43aaf417c914396645a0fa852624801b24ebb7ae78fe8272889ac888"
 
 [[package]]
 name = "hashbrown"
-version = "0.13.1"
+version = "0.13.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "33ff8ae62cd3a9102e5637afc8452c55acf3844001bd5374e0b0bd7b6616c038"
+checksum = "43a3c133739dddd0d2990f9a4bdf8eb4b21ef50e4851ca85ab661199821d510e"
 dependencies = [
  "ahash",
 ]
@@ -396,7 +374,7 @@ version = "0.7.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b67380fd3b2fbe7527a606e18729d21c6f3951633d0500574c4dc22d2d638b9f"
 dependencies = [
- "cfg-if 1.0.0",
+ "cfg-if",
  "winapi",
 ]
 
@@ -455,7 +433,7 @@ version = "0.1.0"
 dependencies = [
  "aarch64-cpu",
  "cc",
- "cfg-if 1.0.0",
+ "cfg-if",
  "glob",
  "loader-config",
  "loader-embed-aarch64-translation-tables",
@@ -499,7 +477,7 @@ version = "0.1.0"
 dependencies = [
  "loader-build-env",
  "loader-payload-at-build-time-types",
- "object 0.30.2",
+ "object",
  "quote",
  "sel4-config",
  "sel4-platform-info",
@@ -537,7 +515,7 @@ version = "0.4.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "abb12e687cfb44aa40f41fc3978ef76448f9b6038cad6aef4259d3c095a2382e"
 dependencies = [
- "cfg-if 1.0.0",
+ "cfg-if",
 ]
 
 [[package]]
@@ -589,26 +567,12 @@ dependencies = [
 
 [[package]]
 name = "nom"
-version = "7.1.2"
+version = "7.1.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e5507769c4919c998e69e49c839d9dc6e693ede4cc4290d6ad8b41d4f09c548c"
+checksum = "d273983c5a657a70a3e8f2a01329822f3b8c8172b73826411a55751e404a0a4a"
 dependencies = [
  "memchr",
  "minimal-lexical",
-]
-
-[[package]]
-name = "object"
-version = "0.17.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ea44a4fd660ab0f38434934ca0212e90fbeaaee54126ef20a3451c30c95bafae"
-dependencies = [
- "flate2",
- "goblin",
- "parity-wasm",
- "scroll",
- "target-lexicon",
- "uuid",
 ]
 
 [[package]]
@@ -619,7 +583,7 @@ checksum = "2b8c786513eb403643f2a88c244c2aaa270ef2153f55094587d0c48a3cf22a83"
 dependencies = [
  "crc32fast",
  "flate2",
- "hashbrown 0.13.1",
+ "hashbrown 0.13.2",
  "indexmap",
  "memchr",
  "wasmparser",
@@ -636,12 +600,6 @@ name = "os_str_bytes"
 version = "6.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9b7820b9daea5457c9f21c69448905d723fbd21136ccf521748f23fd49e723ee"
-
-[[package]]
-name = "parity-wasm"
-version = "0.41.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ddfc878dac00da22f8f61e7af3157988424567ab01d9920b962ef7dcbd7cd865"
 
 [[package]]
 name = "peeking_take_while"
@@ -694,12 +652,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "plain"
-version = "0.2.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b4596b6d070b27117e987119b4dac604f3c58cfb0b191112e24771b2faeac1a6"
-
-[[package]]
 name = "postcard"
 version = "1.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -711,9 +663,9 @@ dependencies = [
 
 [[package]]
 name = "proc-macro2"
-version = "1.0.49"
+version = "1.0.50"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "57a8eca9f9c4ffde41714334dee777596264c7825420f521abc92b5b5deb63a5"
+checksum = "6ef7d57beacfaf2d8aee5937dab7b7f28de3cb8b1828479bb5de2a7106f2bae2"
 dependencies = [
  "unicode-ident",
 ]
@@ -775,30 +727,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d29ab0c6d3fc0ee92fe66e2d99f700eab17a8d57d1c1d3b748380fb20baa78cd"
 
 [[package]]
-name = "scroll"
-version = "0.10.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fda28d4b4830b807a8b43f7b0e6b5df875311b3e7621d84577188c175b6ec1ec"
-dependencies = [
- "scroll_derive",
-]
-
-[[package]]
-name = "scroll_derive"
-version = "0.10.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "aaaae8f38bb311444cfb7f1979af0bc9240d95795f75f9ceddf6a59b79ceffa0"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn",
-]
-
-[[package]]
 name = "sel4"
 version = "0.1.0"
 dependencies = [
- "cfg-if 1.0.0",
+ "cfg-if",
  "sel4-config",
  "sel4-sys",
 ]
@@ -807,7 +739,7 @@ dependencies = [
 name = "sel4-backtrace"
 version = "0.1.0"
 dependencies = [
- "cfg-if 1.0.0",
+ "cfg-if",
  "postcard",
  "sel4-backtrace-types",
  "serde",
@@ -818,7 +750,7 @@ dependencies = [
 name = "sel4-backtrace-types"
 version = "0.1.0"
 dependencies = [
- "cfg-if 1.0.0",
+ "cfg-if",
  "postcard",
  "serde",
 ]
@@ -953,7 +885,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "clap",
- "object 0.30.2",
+ "object",
 ]
 
 [[package]]
@@ -986,7 +918,7 @@ dependencies = [
 name = "sel4-panicking"
 version = "0.1.0"
 dependencies = [
- "cfg-if 1.0.0",
+ "cfg-if",
  "sel4-immediate-sync-once-cell",
  "sel4-runtime-building-blocks-abort",
  "unwinding",
@@ -1031,7 +963,7 @@ dependencies = [
 name = "sel4-runtime-building-blocks-reserve-tls-on-stack"
 version = "0.1.0"
 dependencies = [
- "cfg-if 1.0.0",
+ "cfg-if",
  "sel4-runtime-building-blocks-elf",
 ]
 
@@ -1039,7 +971,7 @@ dependencies = [
 name = "sel4-runtime-building-blocks-root-task-head"
 version = "0.1.0"
 dependencies = [
- "cfg-if 1.0.0",
+ "cfg-if",
 ]
 
 [[package]]
@@ -1068,10 +1000,10 @@ dependencies = [
  "addr2line",
  "clap",
  "fallible-iterator",
- "gimli 0.20.0",
+ "gimli 0.27.0",
  "hex",
  "memmap",
- "object 0.17.0",
+ "object",
  "postcard",
  "sel4-backtrace-types",
 ]
@@ -1161,7 +1093,7 @@ version = "0.10.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "82e6b795fe2e3b1e845bafcb27aa35405c4d47cdfc92af5fc8d3002f76cebdc0"
 dependencies = [
- "cfg-if 1.0.0",
+ "cfg-if",
  "cpufeatures",
  "digest",
 ]
@@ -1211,18 +1143,67 @@ dependencies = [
 ]
 
 [[package]]
-name = "target-lexicon"
-version = "0.10.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ab0e7238dcc7b40a7be719a25365910f6807bd864f4cce6b2e6b873658e2b19d"
-
-[[package]]
 name = "termcolor"
-version = "1.1.3"
+version = "1.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bab24d30b911b2376f3a13cc2cd443142f0c81dda04c118693e35b3835757755"
+checksum = "be55cf8942feac5c765c2c993422806843c9a9a45d4d5c407ad6dd2ea95eb9b6"
 dependencies = [
  "winapi-util",
+]
+
+[[package]]
+name = "tests-root-task-backtrace"
+version = "0.1.0"
+dependencies = [
+ "sel4",
+ "sel4-backtrace",
+ "sel4-full-root-task-runtime",
+]
+
+[[package]]
+name = "tests-root-task-config"
+version = "0.1.0"
+dependencies = [
+ "sel4",
+ "sel4-full-root-task-runtime",
+]
+
+[[package]]
+name = "tests-root-task-core-libs"
+version = "0.1.0"
+dependencies = [
+ "sel4",
+ "sel4-config",
+ "sel4-full-root-task-runtime",
+ "sel4-sys",
+]
+
+[[package]]
+name = "tests-root-task-loader"
+version = "0.1.0"
+dependencies = [
+ "fdt",
+ "sel4",
+ "sel4-full-root-task-runtime",
+ "sel4-platform-info",
+]
+
+[[package]]
+name = "tests-root-task-panicking"
+version = "0.1.0"
+dependencies = [
+ "cfg-if",
+ "sel4",
+ "sel4-full-root-task-runtime",
+ "sel4-panicking",
+]
+
+[[package]]
+name = "tests-root-task-tls"
+version = "0.1.0"
+dependencies = [
+ "sel4",
+ "sel4-full-root-task-runtime",
 ]
 
 [[package]]
@@ -1288,12 +1269,6 @@ source = "git+https://github.com/nspin/unwinding.git?rev=02b5c86f8937edbbe8bbe79
 dependencies = [
  "gimli 0.26.2",
 ]
-
-[[package]]
-name = "uuid"
-version = "0.8.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bc5cf98d8186244414c848017f0e2676b3fcb46807f6668a97dfe67359a3c4b7"
 
 [[package]]
 name = "version_check"
