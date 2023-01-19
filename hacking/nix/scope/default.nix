@@ -121,4 +121,8 @@ superCallPackage ../rust-utils {} self //
 
   worlds = (callPackage ./worlds.nix {})."${hostPlatform.parsed.cpu.name}";
 
+  ###
+
+  sel4cp = callPackage ./sel4cp {};
+
 })
