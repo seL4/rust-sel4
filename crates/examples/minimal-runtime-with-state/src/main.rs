@@ -51,7 +51,7 @@ fn main(bootinfo: &sel4::BootInfo) -> sel4::Result<!> {
 
     badged_notification.signal();
 
-    let observed_badge = unbadged_notification.wait();
+    let (_, observed_badge) = unbadged_notification.wait();
 
     sel4::debug_println!("badge = {:#x}", badge);
     assert_eq!(observed_badge, badge);

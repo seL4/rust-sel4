@@ -52,9 +52,16 @@ self: with self; {
 
   inherit (docs) html;
 
-  example = pkgs.host.aarch64.none.this.worlds.default.instances.examples.full-runtime.simulate;
-
   # convenience
-  worlds.default = pkgs.host.aarch64.none.this.worlds.default;
+
+  worlds = lib.fix (self: {
+    default = self.aarch64.default;
+  } // lib.listToAttrs
+    (lib.forEach
+      [ "aarch64" "riscv64" "x86_64" ]
+      (arch: lib.nameValuePair arch (pkgs.host.${arch}.none.this.worlds)))
+  );
+
+  example = worlds.default.instances.examples.full-runtime.simulate;
 
 }

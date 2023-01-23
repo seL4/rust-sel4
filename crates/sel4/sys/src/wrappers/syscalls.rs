@@ -1,9 +1,12 @@
 use core::ffi::{c_char, CStr};
 
-use sel4_config::sel4_cfg_if;
+use sel4_config::{sel4_cfg, sel4_cfg_if};
 
-use super::ipc_buffer::get_ipc_buffer_mut;
-use crate::{seL4_CPtr, seL4_MessageInfo, seL4_Uint32, seL4_Word};
+use super::tls::get_ipc_buffer_mut;
+use crate::{seL4_CPtr, seL4_MessageInfo, seL4_Uint32, seL4_Word, ReplyAuthority};
+
+#[sel4_cfg(not(KERNEL_MCS))]
+const DUMMY_REPLY_ARG: ReplyAuthority = ();
 
 macro_rules! ptr_to_opt {
     (
@@ -78,11 +81,13 @@ pub unsafe extern "C" fn seL4_NBSendWithMRs(
 }
 
 #[no_mangle]
+#[sel4_cfg(not(KERNEL_MCS))]
 pub unsafe extern "C" fn seL4_Reply(msg_info: seL4_MessageInfo) {
     get_ipc_buffer_mut().seL4_Reply(msg_info)
 }
 
 #[no_mangle]
+#[sel4_cfg(not(KERNEL_MCS))]
 pub unsafe extern "C" fn seL4_ReplyWithMRs(
     msg_info: seL4_MessageInfo,
     msg0: *mut seL4_Word,
@@ -105,9 +110,12 @@ pub unsafe extern "C" fn seL4_Signal(dest: seL4_CPtr) {
     get_ipc_buffer_mut().seL4_Signal(dest)
 }
 
-#[no_mangle]
-pub unsafe extern "C" fn seL4_Recv(src: seL4_CPtr, sender: *mut seL4_Word) -> seL4_MessageInfo {
-    let (msg_info, badge) = get_ipc_buffer_mut().seL4_Recv(src);
+unsafe fn recv_common(
+    src: seL4_CPtr,
+    sender: *mut seL4_Word,
+    reply_authority: ReplyAuthority,
+) -> seL4_MessageInfo {
+    let (msg_info, badge) = get_ipc_buffer_mut().seL4_Recv(src, reply_authority);
 
     if !sender.is_null() {
         *sender = badge;
@@ -116,14 +124,28 @@ pub unsafe extern "C" fn seL4_Recv(src: seL4_CPtr, sender: *mut seL4_Word) -> se
     msg_info
 }
 
-#[no_mangle]
-pub unsafe extern "C" fn seL4_RecvWithMRs(
+sel4_cfg_if! {
+    if #[cfg(KERNEL_MCS)] {
+        #[no_mangle]
+        pub unsafe extern "C" fn seL4_Recv(src: seL4_CPtr, sender: *mut seL4_Word, reply: seL4_CPtr) -> seL4_MessageInfo {
+            recv_common(src, sender, reply)
+        }
+    } else {
+        #[no_mangle]
+        pub unsafe extern "C" fn seL4_Recv(src: seL4_CPtr, sender: *mut seL4_Word) -> seL4_MessageInfo {
+            recv_common(src, sender, DUMMY_REPLY_ARG)
+        }
+    }
+}
+
+unsafe fn recv_with_mrs_common(
     src: seL4_CPtr,
     sender: *mut seL4_Word,
     msg0: *mut seL4_Word,
     msg1: *mut seL4_Word,
     msg2: *mut seL4_Word,
     msg3: *mut seL4_Word,
+    reply_authority: ReplyAuthority,
 ) -> seL4_MessageInfo {
     let m0;
     let m1;
@@ -132,7 +154,8 @@ pub unsafe extern "C" fn seL4_RecvWithMRs(
 
     ptr_to_opt_ref!(msg0, msg1, msg2, msg3, m0, m1, m2, m3,);
 
-    let (msg_info, badge) = crate::seL4_RecvWithMRsWithoutIPCBuffer(src, m0, m1, m2, m3);
+    let (msg_info, badge) =
+        crate::seL4_RecvWithMRsWithoutIPCBuffer(src, m0, m1, m2, m3, reply_authority);
 
     if !sender.is_null() {
         *sender = badge;
@@ -141,15 +164,61 @@ pub unsafe extern "C" fn seL4_RecvWithMRs(
     msg_info
 }
 
-#[no_mangle]
-pub unsafe extern "C" fn seL4_NBRecv(src: seL4_CPtr, sender: *mut seL4_Word) -> seL4_MessageInfo {
-    let (msg_info, badge) = get_ipc_buffer_mut().seL4_NBRecv(src);
+sel4_cfg_if! {
+    if #[cfg(KERNEL_MCS)] {
+        #[no_mangle]
+        pub unsafe extern "C" fn seL4_RecvWithMRs(
+            src: seL4_CPtr,
+            sender: *mut seL4_Word,
+            msg0: *mut seL4_Word,
+            msg1: *mut seL4_Word,
+            msg2: *mut seL4_Word,
+            msg3: *mut seL4_Word,
+            reply: seL4_CPtr,
+        ) -> seL4_MessageInfo {
+            recv_with_mrs_common(src, sender, msg0, msg1, msg2, msg3, reply)
+        }
+    } else {
+        #[no_mangle]
+        pub unsafe extern "C" fn seL4_RecvWithMRs(
+            src: seL4_CPtr,
+            sender: *mut seL4_Word,
+            msg0: *mut seL4_Word,
+            msg1: *mut seL4_Word,
+            msg2: *mut seL4_Word,
+            msg3: *mut seL4_Word,
+        ) -> seL4_MessageInfo {
+            recv_with_mrs_common(src, sender, msg0, msg1, msg2, msg3, DUMMY_REPLY_ARG)
+        }
+    }
+}
+
+unsafe fn nb_recv_common(
+    src: seL4_CPtr,
+    sender: *mut seL4_Word,
+    reply_authority: ReplyAuthority,
+) -> seL4_MessageInfo {
+    let (msg_info, badge) = get_ipc_buffer_mut().seL4_NBRecv(src, reply_authority);
 
     if !sender.is_null() {
         *sender = badge;
     }
 
     msg_info
+}
+
+sel4_cfg_if! {
+    if #[cfg(KERNEL_MCS)] {
+        #[no_mangle]
+        pub unsafe extern "C" fn seL4_NBRecv(src: seL4_CPtr, sender: *mut seL4_Word, reply: seL4_CPtr) -> seL4_MessageInfo {
+            nb_recv_common(src, sender, reply)
+        }
+    } else {
+        #[no_mangle]
+        pub unsafe extern "C" fn seL4_NBRecv(src: seL4_CPtr, sender: *mut seL4_Word) -> seL4_MessageInfo {
+            nb_recv_common(src, sender, DUMMY_REPLY_ARG)
+        }
+    }
 }
 
 #[no_mangle]
@@ -181,13 +250,13 @@ pub unsafe extern "C" fn seL4_CallWithMRs(
     msg_info
 }
 
-#[no_mangle]
-pub unsafe extern "C" fn seL4_ReplyRecv(
+unsafe fn reply_recv_common(
     src: seL4_CPtr,
     msg_info: seL4_MessageInfo,
     sender: *mut seL4_Word,
+    reply_authority: ReplyAuthority,
 ) -> seL4_MessageInfo {
-    let (out_msg_info, badge) = get_ipc_buffer_mut().seL4_ReplyRecv(src, msg_info);
+    let (out_msg_info, badge) = get_ipc_buffer_mut().seL4_ReplyRecv(src, msg_info, reply_authority);
 
     if !sender.is_null() {
         *sender = badge;
@@ -196,17 +265,104 @@ pub unsafe extern "C" fn seL4_ReplyRecv(
     out_msg_info
 }
 
+sel4_cfg_if! {
+    if #[cfg(KERNEL_MCS)] {
+        #[no_mangle]
+        pub unsafe extern "C" fn seL4_ReplyRecv(src: seL4_CPtr, msg_info: seL4_MessageInfo, sender: *mut seL4_Word, reply: seL4_CPtr) -> seL4_MessageInfo {
+            reply_recv_common(src, msg_info, sender, reply)
+        }
+    } else {
+        #[no_mangle]
+        pub unsafe extern "C" fn seL4_ReplyRecv(src: seL4_CPtr, msg_info: seL4_MessageInfo, sender: *mut seL4_Word) -> seL4_MessageInfo {
+            reply_recv_common(src, msg_info, sender, DUMMY_REPLY_ARG)
+        }
+    }
+}
+
 #[no_mangle]
 pub unsafe extern "C" fn seL4_Yield() {
     crate::seL4_Yield()
 }
 
-#[no_mangle]
-pub unsafe extern "C" fn seL4_Wait(src: seL4_CPtr, sender: *mut seL4_Word) {
-    let badge = get_ipc_buffer_mut().seL4_Wait(src);
+sel4_cfg_if! {
+    if #[cfg(KERNEL_MCS)] {
+        #[no_mangle]
+        pub unsafe extern "C" fn seL4_NBSendRecv(
+            dest: seL4_CPtr,
+            msg_info: seL4_MessageInfo,
+            src: seL4_CPtr,
+            sender: *mut seL4_Word,
+            reply_authority: ReplyAuthority,
+        ) -> seL4_MessageInfo {
+            let (out_msg_info, badge) = get_ipc_buffer_mut().seL4_NBSendRecv(dest, msg_info, src, reply_authority);
 
-    if !sender.is_null() {
-        *sender = badge;
+            if !sender.is_null() {
+                *sender = badge;
+            }
+
+            out_msg_info
+        }
+
+        #[no_mangle]
+        pub unsafe extern "C" fn seL4_NBSendWait(
+            dest: seL4_CPtr,
+            msg_info: seL4_MessageInfo,
+            src: seL4_CPtr,
+            sender: *mut seL4_Word,
+        ) -> seL4_MessageInfo {
+            let (out_msg_info, badge) = get_ipc_buffer_mut().seL4_NBSendWait(dest, msg_info, src);
+
+            if !sender.is_null() {
+                *sender = badge;
+            }
+
+            out_msg_info
+        }
+
+        #[no_mangle]
+        pub unsafe extern "C" fn seL4_Wait(src: seL4_CPtr, sender: *mut seL4_Word) -> seL4_MessageInfo {
+            let (out_msg_info, badge) = get_ipc_buffer_mut().seL4_Wait(src);
+
+            if !sender.is_null() {
+                *sender = badge;
+            }
+
+            out_msg_info
+        }
+
+        #[no_mangle]
+        pub unsafe extern "C" fn seL4_WaitWithMRs(
+            src: seL4_CPtr,
+            sender: *mut seL4_Word,
+            msg0: *mut seL4_Word,
+            msg1: *mut seL4_Word,
+            msg2: *mut seL4_Word,
+            msg3: *mut seL4_Word,
+        ) -> seL4_MessageInfo {
+            let m0;
+            let m1;
+            let m2;
+            let m3;
+
+            ptr_to_opt_ref!(msg0, msg1, msg2, msg3, m0, m1, m2, m3,);
+
+            let (msg_info, badge) = crate::seL4_WaitWithMRsWithoutIPCBuffer(src, m0, m1, m2, m3);
+
+            if !sender.is_null() {
+                *sender = badge;
+            }
+
+            msg_info
+        }
+    } else {
+        #[no_mangle]
+        pub unsafe extern "C" fn seL4_Wait(src: seL4_CPtr, sender: *mut seL4_Word) {
+            let ((), badge) = get_ipc_buffer_mut().seL4_Wait(src);
+
+            if !sender.is_null() {
+                *sender = badge;
+            }
+        }
     }
 }
 

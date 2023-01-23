@@ -72,6 +72,7 @@ mod invocations;
 mod ipc_buffer;
 mod message_info;
 mod object;
+mod reply_authority;
 mod syscalls;
 mod vspace;
 
@@ -91,8 +92,16 @@ pub use invocation_context::{
 pub use ipc_buffer::IPCBuffer;
 pub use message_info::{MessageInfo, MessageInfoBuilder};
 pub use object::{ObjectBlueprint, ObjectType};
-pub use syscalls::{r#yield, reply, Badge, CallWithMRs, FastMessages, RecvWithMRs};
+pub use reply_authority::{ConveysReplyAuthority, ReplyAuthority};
+pub use syscalls::{r#yield, Badge, CallWithMRs, FastMessages, RecvWithMRs};
 pub use vspace::{FrameType, GRANULE_SIZE};
+
+sel4_cfg_if! {
+    if #[cfg(not(KERNEL_MCS))] {
+        pub use syscalls::reply;
+        pub use reply_authority::ImplicitReplyAuthority;
+    }
+}
 
 pub use arch::top_level::*;
 

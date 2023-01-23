@@ -1,12 +1,33 @@
 use core::array;
 
+use sel4_config::{sel4_cfg, sel4_cfg_if};
+
 use crate::{
-    sys, Endpoint, IPCBuffer, InvocationContext, MessageInfo, Notification, Word,
+    sys, ConveysReplyAuthority, Endpoint, InvocationContext, MessageInfo, Notification, Word,
     NUM_FAST_MESSAGE_REGISTERS,
 };
 
+#[sel4_cfg(not(KERNEL_MCS))]
+use crate::IPCBuffer;
+
 /// A capability badge.
 pub type Badge = Word;
+
+sel4_cfg_if! {
+    if #[cfg(KERNEL_MCS)] {
+        pub type WaitMessageInfo = MessageInfo;
+
+        fn wait_message_info_from_sys(info: sys::WaitMessageInfo) -> WaitMessageInfo {
+            MessageInfo::from_inner(info)
+        }
+    } else {
+        pub type WaitMessageInfo = ();
+
+        fn wait_message_info_from_sys(info: sys::WaitMessageInfo) -> WaitMessageInfo {
+            info
+        }
+    }
+}
 
 impl<C: InvocationContext> Endpoint<C> {
     /// Corresponds to `seL4_Send`.
@@ -28,16 +49,28 @@ impl<C: InvocationContext> Endpoint<C> {
     }
 
     /// Corresponds to `seL4_Recv`.
-    pub fn recv(self) -> (MessageInfo, Badge) {
-        let (raw_msg_info, badge) =
-            self.invoke(|cptr, ipc_buffer| ipc_buffer.inner_mut().seL4_Recv(cptr.bits()));
+    pub fn recv(self, reply_authority: impl ConveysReplyAuthority) -> (MessageInfo, Badge) {
+        let (raw_msg_info, badge) = self.invoke(|cptr, ipc_buffer| {
+            ipc_buffer.inner_mut().seL4_Recv(
+                cptr.bits(),
+                reply_authority
+                    .into_reply_authority()
+                    .into_sys_reply_authority(),
+            )
+        });
         (MessageInfo::from_inner(raw_msg_info), badge)
     }
 
     /// Corresponds to `seL4_NBRecv`.
-    pub fn nb_recv(self) -> (MessageInfo, Badge) {
-        let (raw_msg_info, badge) =
-            self.invoke(|cptr, ipc_buffer| ipc_buffer.inner_mut().seL4_NBRecv(cptr.bits()));
+    pub fn nb_recv(self, reply_authority: impl ConveysReplyAuthority) -> (MessageInfo, Badge) {
+        let (raw_msg_info, badge) = self.invoke(|cptr, ipc_buffer| {
+            ipc_buffer.inner_mut().seL4_NBRecv(
+                cptr.bits(),
+                reply_authority
+                    .into_reply_authority()
+                    .into_sys_reply_authority(),
+            )
+        });
         (MessageInfo::from_inner(raw_msg_info), badge)
     }
 
@@ -64,13 +97,20 @@ impl<C: InvocationContext> Endpoint<C> {
         })
     }
 
-    pub fn recv_with_mrs(self) -> RecvWithMRs {
+    pub fn recv_with_mrs(self, reply_authority: impl ConveysReplyAuthority) -> RecvWithMRs {
         let mut msg = [0; NUM_FAST_MESSAGE_REGISTERS];
         let [mr0, mr1, mr2, mr3] = msg.each_mut().map(Some);
         let (raw_msg_info, badge) = self.invoke(|cptr, ipc_buffer| {
-            ipc_buffer
-                .inner_mut()
-                .seL4_RecvWithMRs(cptr.bits(), mr0, mr1, mr2, mr3)
+            ipc_buffer.inner_mut().seL4_RecvWithMRs(
+                cptr.bits(),
+                mr0,
+                mr1,
+                mr2,
+                mr3,
+                reply_authority
+                    .into_reply_authority()
+                    .into_sys_reply_authority(),
+            )
         });
         RecvWithMRs {
             info: MessageInfo::from_inner(raw_msg_info),
@@ -106,12 +146,15 @@ impl<C: InvocationContext> Notification<C> {
     }
 
     /// Corresponds to `seL4_Wait`.
-    pub fn wait(self) -> Word {
-        self.invoke(|cptr, ipc_buffer| ipc_buffer.inner_mut().seL4_Wait(cptr.bits()))
+    pub fn wait(self) -> (WaitMessageInfo, Badge) {
+        let (info, badge) =
+            self.invoke(|cptr, ipc_buffer| ipc_buffer.inner_mut().seL4_Wait(cptr.bits()));
+        (wait_message_info_from_sys(info), badge)
     }
 }
 
 /// Corresponds to `seL4_Reply`.
+#[sel4_cfg(not(KERNEL_MCS))]
 pub fn reply(ipc_buffer: &mut IPCBuffer, info: MessageInfo) {
     ipc_buffer.inner_mut().seL4_Reply(info.into_inner())
 }

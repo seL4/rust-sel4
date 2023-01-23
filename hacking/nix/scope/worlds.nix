@@ -8,6 +8,14 @@ with configHelpers;
 let
   loaderConfig = {};
 
+  # smp = false;
+  smp = true;
+
+  kernelConfigCommon = {
+    KernelIsMCS = on;
+    KernelVerificationBuild = off;
+  };
+
 in rec {
   aarch64 =
     let
@@ -15,15 +23,15 @@ in rec {
       default = qemu-arm-virt.el2;
       qemu-arm-virt =
         let
+          numCores = if smp then "2" else "1";
           mk = hypervisor: mkWorld {
             inherit loaderConfig;
-            kernelConfig = {
+            kernelConfig = kernelConfigCommon // {
               ARM_CPU = mkString "cortex-a57";
               KernelArch = mkString "arm";
               KernelSel4Arch = mkString "aarch64";
               KernelPlatform = mkString "qemu-arm-virt";
-              KernelMaxNumNodes = mkString "2";
-              KernelVerificationBuild = off;
+              KernelMaxNumNodes = mkString numCores;
             } // lib.optionalAttrs hypervisor {
               KernelArmHypervisorSupport = on;
             };
@@ -32,7 +40,7 @@ in rec {
               # virtualization=on even when hypervisor to test loader dropping exception level
               "${pkgsBuildBuild.qemu}/bin/qemu-system-aarch64"
                 "-machine" "virt,virtualization=on"
-                "-cpu" "cortex-a57" "-smp" "2" "-m" "1024"
+                "-cpu" "cortex-a57" "-smp" numCores "-m" "1024"
                 "-nographic"
                 "-serial" "mon:stdio"
                 "-kernel" loader
@@ -46,14 +54,13 @@ in rec {
 
       bcm2711 = mkWorld {
         inherit loaderConfig;
-        kernelConfig = {
+        kernelConfig = kernelConfigCommon // {
           ARM_CPU = mkString "cortex-a57";
           KernelArch = mkString "arm";
           KernelSel4Arch = mkString "aarch64";
           KernelPlatform = mkString "bcm2711";
           KernelArmHypervisorSupport = on;
           # KernelMaxNumNodes = mkString "2"; # TODO
-          KernelVerificationBuild = off;
         };
       };
     };
@@ -65,11 +72,10 @@ in rec {
 
       spike = mkWorld {
         inherit loaderConfig;
-        kernelConfig = {
+        kernelConfig = kernelConfigCommon // {
           KernelArch = mkString "riscv";
           KernelSel4Arch = mkString "riscv64";
           KernelPlatform = mkString "spike";
-          KernelVerificationBuild = off;
         };
       };
     };
@@ -81,11 +87,10 @@ in rec {
 
       pc99 = lib.fix (self: mkWorld {
         inherit loaderConfig;
-        kernelConfig = {
+        kernelConfig = kernelConfigCommon // {
           KernelArch = mkString "x86";
           KernelSel4Arch = mkString "x86_64";
           KernelPlatform = mkString "pc99";
-          KernelVerificationBuild = off;
 
           # for the sake of simulation (see seL4_tools/cmake-tool/helpers/application_settings.cmake)
           KernelFSGSBase = mkString "msr";

@@ -1,7 +1,7 @@
 { lib, buildPackages, writeText
 , buildCrateInLayersHere, buildSysroot, crateUtils
 , crates, bareMetalRustTargetName
-, seL4ForBoot
+, seL4ForUserspace, seL4ForBoot
 , loaderConfig
 }:
 
@@ -38,7 +38,7 @@ let
 
   intermediateModifications = crateUtils.elaborateModifications {
     modifyDerivation = drv: drv.overrideAttrs (self: super: {
-      SEL4_PREFIX = seL4ForBoot;
+      SEL4_PREFIX = seL4ForUserspace;
       SEL4_LOADER_CONFIG = writeText "loader-config.json" (builtins.toJSON loaderConfig);
     });
   };
@@ -78,6 +78,8 @@ buildCrateInLayersHere {
 
   lastLayerModifications = crateUtils.composeModifications intermediateModifications (crateUtils.elaborateModifications {
     modifyDerivation = drv: drv.overrideAttrs (self: super: {
+      SEL4_KERNEL = "${seL4ForBoot}/bin/kernel.elf";
+      SEL4_DTB = "${seL4ForBoot}/support/kernel.dtb";
       SEL4_APP = appELF;
 
       passthru = (super.passthru or {}) // {

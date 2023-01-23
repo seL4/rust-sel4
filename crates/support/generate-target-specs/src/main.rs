@@ -26,13 +26,6 @@ fn apply_common(target: &mut Target) {
     options.is_builtin = false;
     options.env = "sel4".into();
     options.exe_suffix = ".elf".into();
-    // options.has_thread_local = true;
-    // options.eh_frame_header = true;
-    // options.panic_strategy = PanicStrategy::Unwind;
-}
-
-fn apply_extra(target: &mut Target) {
-    let options = &mut target.options;
     options.has_thread_local = true;
     options.eh_frame_header = true;
     options.panic_strategy = PanicStrategy::Unwind;
@@ -41,7 +34,6 @@ fn apply_extra(target: &mut Target) {
 fn aarch64_sel4() -> Target {
     let mut target = builtin("aarch64-unknown-none");
     apply_common(&mut target);
-    apply_extra(&mut target);
     target.llvm_target = "aarch64-none-elf".into();
     target
 }

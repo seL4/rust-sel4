@@ -1,6 +1,6 @@
 use core::mem;
 
-use sel4_config::sel4_cfg;
+use sel4_config::{sel4_cfg, sel4_cfg_if};
 
 use crate::{
     local_cptr::*, sys, AbsoluteCPtr, CNodeCapData, CPtr, CapRights, Error, InvocationContext,
@@ -91,44 +91,95 @@ impl<C: InvocationContext> TCB<C> {
         )
     }
 
-    /// Corresponds to `seL4_TCB_Configure`.
-    pub fn tcb_configure(
-        self,
-        fault_ep: CPtr,
-        cspace_root: CNode,
-        cspace_root_data: CNodeCapData,
-        vspace_root: VSpace,
-        ipc_buffer: Word,
-        ipc_buffer_frame: Granule,
-    ) -> Result<()> {
-        Error::wrap(self.invoke(|cptr, ctx_ipc_buffer| {
-            ctx_ipc_buffer.inner_mut().seL4_TCB_Configure(
-                cptr.bits(),
-                fault_ep.bits(),
-                cspace_root.bits(),
-                cspace_root_data.into_word(),
-                vspace_root.bits(),
-                0, /* HACK */
-                ipc_buffer,
-                ipc_buffer_frame.bits(),
-            )
-        }))
+    sel4_cfg_if! {
+        if #[cfg(KERNEL_MCS)] {
+            /// Corresponds to `seL4_TCB_Configure`.
+            pub fn tcb_configure(
+                self,
+                cspace_root: CNode,
+                cspace_root_data: CNodeCapData,
+                vspace_root: VSpace,
+                ipc_buffer: Word,
+                ipc_buffer_frame: Granule,
+            ) -> Result<()> {
+                Error::wrap(self.invoke(|cptr, ctx_ipc_buffer| {
+                    ctx_ipc_buffer.inner_mut().seL4_TCB_Configure(
+                        cptr.bits(),
+                        cspace_root.bits(),
+                        cspace_root_data.into_word(),
+                        vspace_root.bits(),
+                        0, /* HACK */
+                        ipc_buffer,
+                        ipc_buffer_frame.bits(),
+                    )
+                }))
+            }
+        } else {
+            /// Corresponds to `seL4_TCB_Configure`.
+            pub fn tcb_configure(
+                self,
+                fault_ep: CPtr,
+                cspace_root: CNode,
+                cspace_root_data: CNodeCapData,
+                vspace_root: VSpace,
+                ipc_buffer: Word,
+                ipc_buffer_frame: Granule,
+            ) -> Result<()> {
+                Error::wrap(self.invoke(|cptr, ctx_ipc_buffer| {
+                    ctx_ipc_buffer.inner_mut().seL4_TCB_Configure(
+                        cptr.bits(),
+                        fault_ep.bits(),
+                        cspace_root.bits(),
+                        cspace_root_data.into_word(),
+                        vspace_root.bits(),
+                        0, /* HACK */
+                        ipc_buffer,
+                        ipc_buffer_frame.bits(),
+                    )
+                }))
+            }
+        }
     }
 
-    /// Corresponds to `seL4_TCB_SetSchedParams`.
-    pub fn tcb_set_sched_params(self, authority: TCB, mcp: Word, priority: Word) -> Result<()> {
-        Error::wrap(self.invoke(|cptr, ipc_buffer| {
-            ipc_buffer.inner_mut().seL4_TCB_SetSchedParams(
-                cptr.bits(),
-                authority.bits(),
-                mcp,
-                priority,
-            )
-        }))
+    sel4_cfg_if! {
+        if #[cfg(KERNEL_MCS)] {
+            /// Corresponds to `seL4_TCB_SetSchedParams`.
+            pub fn tcb_set_sched_params(
+                self,
+                authority: TCB,
+                mcp: Word,
+                priority: Word,
+                sched_context: SchedContext,
+                fault_ep: CPtr,
+            ) -> Result<()> {
+                Error::wrap(self.invoke(|cptr, ipc_buffer| {
+                    ipc_buffer.inner_mut().seL4_TCB_SetSchedParams(
+                        cptr.bits(),
+                        authority.bits(),
+                        mcp,
+                        priority,
+                        sched_context.bits(),
+                        fault_ep.bits(),
+                    )
+                }))
+            }
+        } else {
+            /// Corresponds to `seL4_TCB_SetSchedParams`.
+            pub fn tcb_set_sched_params(self, authority: TCB, mcp: Word, priority: Word) -> Result<()> {
+                Error::wrap(self.invoke(|cptr, ipc_buffer| {
+                    ipc_buffer.inner_mut().seL4_TCB_SetSchedParams(
+                        cptr.bits(),
+                        authority.bits(),
+                        mcp,
+                        priority,
+                    )
+                }))
+            }
+        }
     }
 
     /// Corresponds to `seL4_TCB_SetAffinity`.
-    #[sel4_cfg(not(MAX_NUM_NODES = "1"))]
+    #[sel4_cfg(all(not(KERNEL_MCS), not(MAX_NUM_NODES = "1")))]
     pub fn tcb_set_affinity(self, affinity: Word) -> Result<()> {
         Error::wrap(self.invoke(|cptr, ipc_buffer| {
             ipc_buffer
@@ -253,6 +304,7 @@ impl<C: InvocationContext> AbsoluteCPtr<C> {
     }
 
     /// Corresponds to `seL4_CNode_SaveCaller`.
+    #[sel4_cfg(not(KERNEL_MCS))]
     pub fn save_caller(self) -> Result<()> {
         Error::wrap(self.invoke(|cptr, path, ipc_buffer| {
             ipc_buffer.inner_mut().seL4_CNode_SaveCaller(

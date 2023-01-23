@@ -1,7 +1,12 @@
 use core::fmt;
 use core::marker::PhantomData;
 
-use crate::{sys, IPCBuffer, InvocationContext, NoExplicitInvocationContext, Result, WORD_SIZE};
+use sel4_config::sel4_cfg;
+
+use crate::{sys, IPCBuffer, InvocationContext, NoExplicitInvocationContext, WORD_SIZE};
+
+#[sel4_cfg(not(KERNEL_MCS))]
+use crate::Result;
 
 /// The raw bits of a capability pointer.
 pub type CPtrBits = sys::seL4_CPtr;
@@ -147,6 +152,8 @@ pub mod cap_type {
     //!
     //! These types are used for marking [`LocalCPtr`](crate::LocalCPtr).
 
+    use sel4_config::sel4_cfg_if;
+
     use crate::declare_cap_type;
 
     pub use crate::arch::cap_type_arch::*;
@@ -205,6 +212,20 @@ pub mod cap_type {
         /// Any capability.
         Unspecified
     }
+
+    sel4_cfg_if! {
+        if #[cfg(KERNEL_MCS)] {
+            declare_cap_type! {
+                /// Corresponds to the reply capability type (MCS only).
+                Reply
+            }
+
+            declare_cap_type! {
+                /// Corresponds to the scheduling context capability type (MCS only).
+                SchedContext
+            }
+        }
+    }
 }
 
 use local_cptr::*;
@@ -213,6 +234,8 @@ pub mod local_cptr {
     //! Marked aliases of [`LocalCPtr`](crate::LocalCPtr).
     //!
     //! Each type `$t<C = NoExplicitInvocationContext>` in this module is an alias for `LocalCPtr<$t, C>`.
+
+    use sel4_config::sel4_cfg_if;
 
     use crate::declare_local_cptr_alias;
 
@@ -233,6 +256,13 @@ pub mod local_cptr {
 
     declare_local_cptr_alias!(VSpace);
     declare_local_cptr_alias!(Granule);
+
+    sel4_cfg_if! {
+        if #[cfg(KERNEL_MCS)] {
+            declare_local_cptr_alias!(Reply);
+            declare_local_cptr_alias!(SchedContext);
+        }
+    }
 }
 
 impl<C> Unspecified<C> {
@@ -318,6 +348,7 @@ impl<C> CNode<C> {
 }
 
 impl<C: InvocationContext> CNode<C> {
+    #[sel4_cfg(not(KERNEL_MCS))]
     pub fn save_caller(self, ep: Endpoint) -> Result<()> {
         self.relative(ep).save_caller()
     }

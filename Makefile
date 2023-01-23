@@ -13,6 +13,10 @@ nix_build = nix-build $(nix_root) $(keep_going) $(jobs)
 .PHONY: none
 none:
 
+.PHONY: clean
+clean:
+	rm -rf target
+
 .PHONY: everything
 everything:
 	$(nix_build) -A everything --no-out-link

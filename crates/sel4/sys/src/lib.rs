@@ -21,3 +21,19 @@ pub use syscalls::*;
 
 #[cfg(feature = "wrappers")]
 pub mod wrappers;
+
+pub type ReplyAuthority = sel4_config::sel4_cfg_if! {
+    if #[cfg(KERNEL_MCS)] {
+        seL4_CPtr
+    } else {
+        ()
+    }
+};
+
+pub type WaitMessageInfo = sel4_config::sel4_cfg_if! {
+    if #[cfg(KERNEL_MCS)] {
+        seL4_MessageInfo
+    } else {
+        ()
+    }
+};

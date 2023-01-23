@@ -20,8 +20,11 @@ self: with self;
     $OBJCOPY -O elf32-i386 ${kernel}/bin/kernel.elf $out
   '';
 
-  seL4ForBoot = kernel;
   seL4ForUserspace = kernel;
+
+  seL4ForBoot = kernel.overrideAttrs (_: {
+    # src = lib.cleanSource ../../../../../../../../x/seL4;
+  });
 
   mkLoader = callPackage ./mk-loader.nix {};
 

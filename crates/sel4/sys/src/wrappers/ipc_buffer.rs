@@ -1,31 +1,79 @@
-use core::ptr;
+use core::ffi::c_int;
 
-use crate::seL4_IPCBuffer;
+use super::{get_ipc_buffer, get_ipc_buffer_mut, get_ipc_buffer_ptr, set_ipc_buffer_ptr};
+use crate::{seL4_CPtr, seL4_IPCBuffer, seL4_Word};
 
-#[thread_local]
-#[cfg_attr(feature = "wrappers", no_mangle)]
-static mut __sel4_ipc_buffer: *mut seL4_IPCBuffer = ptr::null_mut();
-
-pub unsafe fn set_ipc_buffer_ptr(ptr: *mut seL4_IPCBuffer) {
-    __sel4_ipc_buffer = ptr;
+#[no_mangle]
+pub unsafe extern "C" fn seL4_SetIPCBuffer(ipc_buffer_ptr: *mut seL4_IPCBuffer) {
+    set_ipc_buffer_ptr(ipc_buffer_ptr)
 }
 
-pub unsafe fn get_ipc_buffer_ptr() -> *mut seL4_IPCBuffer {
-    __sel4_ipc_buffer
+#[no_mangle]
+pub unsafe extern "C" fn seL4_GetIPCBuffer() -> *mut seL4_IPCBuffer {
+    get_ipc_buffer_ptr()
 }
 
-pub(crate) fn get_ipc_buffer() -> &'static seL4_IPCBuffer {
-    unsafe {
-        let ptr = get_ipc_buffer_ptr();
-        assert!(!ptr.is_null());
-        &*ptr
+#[no_mangle]
+pub extern "C" fn seL4_GetMR(i: c_int) -> seL4_Word {
+    get_ipc_buffer().get_mr(i.try_into().unwrap())
+}
+
+#[no_mangle]
+pub extern "C" fn seL4_SetMR(i: c_int, value: seL4_Word) {
+    get_ipc_buffer_mut().set_mr(i.try_into().unwrap(), value)
+}
+
+#[no_mangle]
+pub extern "C" fn seL4_GetUserData() -> seL4_Word {
+    get_ipc_buffer().userData
+}
+
+#[no_mangle]
+pub extern "C" fn seL4_SetUserData(data: seL4_Word) {
+    get_ipc_buffer_mut().userData = data;
+}
+
+#[no_mangle]
+pub extern "C" fn seL4_GetBadge(i: c_int) -> seL4_Word {
+    get_ipc_buffer().caps_or_badges[usize::try_from(i).unwrap()]
+}
+
+#[no_mangle]
+pub extern "C" fn seL4_GetCap(i: c_int) -> seL4_CPtr {
+    get_ipc_buffer().get_cap(i.try_into().unwrap())
+}
+
+#[no_mangle]
+pub extern "C" fn seL4_SetCap(i: c_int, cap: seL4_CPtr) {
+    get_ipc_buffer_mut().set_cap(i.try_into().unwrap(), cap)
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn seL4_GetCapReceivePath(
+    receiveCNode: *mut seL4_CPtr,
+    receiveIndex: *mut seL4_CPtr,
+    receiveDepth: *mut seL4_Word,
+) {
+    let ipc_buffer = get_ipc_buffer();
+    if !receiveCNode.is_null() {
+        *receiveCNode = ipc_buffer.receiveCNode;
+    }
+    if !receiveIndex.is_null() {
+        *receiveIndex = ipc_buffer.receiveIndex;
+    }
+    if !receiveDepth.is_null() {
+        *receiveDepth = ipc_buffer.receiveDepth;
     }
 }
 
-pub(crate) fn get_ipc_buffer_mut() -> &'static mut seL4_IPCBuffer {
-    unsafe {
-        let ptr = get_ipc_buffer_ptr();
-        assert!(!ptr.is_null());
-        &mut *ptr
-    }
+#[no_mangle]
+pub extern "C" fn seL4_SetCapReceivePath(
+    receiveCNode: seL4_CPtr,
+    receiveIndex: seL4_CPtr,
+    receiveDepth: seL4_Word,
+) {
+    let ipc_buffer = get_ipc_buffer_mut();
+    ipc_buffer.receiveCNode = receiveCNode;
+    ipc_buffer.receiveIndex = receiveIndex;
+    ipc_buffer.receiveDepth = receiveDepth;
 }

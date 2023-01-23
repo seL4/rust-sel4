@@ -7,11 +7,15 @@
 }:
 
 let
-  src = builtins.fetchGit {
-    url = "https://gitlab.com/coliasgroup/seL4.git";
-    ref = "rust";
-    rev = "417a06317366ba2b2865af606650aaf38df9c89f";
-  };
+  src =
+    let
+      rev = "0c9a1980867f715c1d06e53b5fbb6bac4a88845e";
+      ref = "refs/tags/keep/${builtins.substring 0 32 rev}";
+    in
+      builtins.fetchGit {
+        url = "https://gitlab.com/coliasgroup/seL4.git";
+        inherit rev ref;
+      };
 
   settings = writeText "settings.cmake" ''
     ${lib.concatStrings (lib.mapAttrsToList (k: v: ''

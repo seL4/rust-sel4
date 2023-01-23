@@ -14,7 +14,12 @@ pub fn generate_rust(syscalls_xml_path: impl AsRef<Path>) -> TokenStream {
     let ty = quote!(i32);
     let mut i = -1i32;
     let mut toks = quote!();
-    for api in [&syscalls.api_master, &syscalls.debug].into_iter() {
+    let syscalls_for_api = if sel4_config::sel4_cfg_bool!(KERNEL_MCS) {
+        &syscalls.api_mcs
+    } else {
+        &syscalls.api_master
+    };
+    for api in [syscalls_for_api, &syscalls.debug].into_iter() {
         for block in api.iter() {
             for syscall in block.syscalls.iter() {
                 if Condition::eval_option(&block.condition) {
