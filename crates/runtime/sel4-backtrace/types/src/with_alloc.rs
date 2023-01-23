@@ -138,7 +138,7 @@ mod test {
     fn test() {
         let bt = Backtrace::<String> {
             preamble: Preamble {
-                image_path: "foo".to_owned(),
+                image: "foo".to_owned(),
             },
             entries: vec![
                 Entry {
