@@ -6,7 +6,7 @@ This repository contains crates for supporting the use of Rust in seL4 userspace
 - Crates supporting the construction of Rust language runtimes for seL4 userspace ([source](./crates/runtime))
 - A limited loader for the seL4 kernel ([source](./crates/loader))
 
-The [./hacking](./hacking) directory contains code for building and testing these crates using Nix and, optionally, Docker. However, the crates in this repository are in no way bound to this build system code.
+The [./hacking](./hacking) directory contains code for building and testing these crates using Nix and, optionally, Docker. However, the crates in this repository are in no way bound to that build system code.
 
 Note that, for now, these crates depend on some patches to libsel4 which can be found at [coliasgroup/seL4:rust](https://gitlab.com/coliasgroup/seL4/-/tree/rust).
 
@@ -101,14 +101,14 @@ Next, build, run, and enter a Docker container for development:
 cd hacking/docker && make run && make exec
 ```
 
-Inside the container, build and simulate a simple seL4-based system with a root task written in Rust (this will take a few minutes):
+Inside the container at the repository's top-level directory, build and simulate a simple seL4-based system with a root task written in Rust (this will take a few minutes):
 
 ```
-make -C hacking example
+make example
 ```
 
-Also inside the container, build run all of this repository's automated tests:
+Also inside the container at the repository's top-level directory, build run all of this repository's automated tests:
 
 ```
-make -C hacking run-automated-tests
+make run-automated-tests
 ```

@@ -6,9 +6,9 @@ ifneq ($(J),)
 	jobs := -j$(J)
 endif
 
-root = ..
+nix_root = hacking/nix
 
-nix_build = nix-build $(keep_going) $(jobs)
+nix_build = nix-build $(nix_root) $(keep_going) $(jobs)
 
 .PHONY: none
 none:
@@ -31,9 +31,8 @@ example:
 
 .PHONY: fmt
 fmt:
-	cd $(root) && cargo fmt --all
+	cargo fmt --all
 
 .PHONY: update-lockfile
 update-lockfile:
-	cd $(root) && cargo update -w
-
+	cargo update -w
