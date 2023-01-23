@@ -6,7 +6,7 @@ This repository contains crates for supporting the use of Rust in seL4 userspace
 - Crates supporting the construction of Rust language runtimes for seL4 userspace ([source](./crates/runtime))
 - A limited loader for the seL4 kernel ([source](./crates/loader))
 
-This repository also contains some code for building and testing these crates using Nix, Make, and, optionally, Docker. However, the crates are in no way bound to this build system code.
+The [./hacking](./hacking) directory contains code for building and testing these crates using Nix and, optionally, Docker. However, the crates in this repository are in no way bound to this build system code.
 
 Note that, for now, these crates depend on some patches to libsel4 which can be found at [coliasgroup/seL4:rust](https://gitlab.com/coliasgroup/seL4/-/tree/rust).
 
