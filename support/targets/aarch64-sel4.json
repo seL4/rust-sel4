@@ -10,15 +10,6 @@
   "linker-flavor": "ld.lld",
   "llvm-target": "aarch64-none-elf",
   "max-atomic-width": 128,
-  "panic-strategy": "unwind",
-  "pre-link-args": {
-    "ld": [
-      "--eh-frame-hdr"
-    ]
-  },
   "relocation-model": "static",
-  "target-c-int-width": "32",
-  "target-endian": "little",
   "target-pointer-width": "64"
 }
-  

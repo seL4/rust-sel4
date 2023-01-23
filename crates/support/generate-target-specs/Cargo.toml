@@ -1,0 +1,10 @@
+[package]
+name = "generate-target-specs"
+version = "0.1.0"
+authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
+edition = "2021"
+license = "BSD-2-Clause"
+
+[dependencies]
+clap = "3.2"
+serde_json = "1"

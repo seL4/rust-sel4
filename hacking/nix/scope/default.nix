@@ -53,9 +53,9 @@ superCallPackage ../rust-utils {} self //
     if !hostPlatform.isNone
     then hostPlatform.config
     else {
-      aarch64 = "aarch64-unknown-sel4";
-      riscv64 = "riscv64imac-unknown-sel4";
-      x86_64 = "x86_64-unknown-sel4";
+      aarch64 = "aarch64-sel4";
+      riscv64 = "riscv64imac-sel4";
+      x86_64 = "x86_64-sel4";
     }."${hostPlatform.parsed.cpu.name}";
 
   bareMetalRustTargetName =
@@ -63,6 +63,8 @@ superCallPackage ../rust-utils {} self //
     then hostPlatform.config
     else {
       aarch64 = "aarch64-unknown-none";
+      riscv64 = "riscv64imac-unknown-none-elf";
+      x86_64 = "x86_64-unknown-none";
     }."${hostPlatform.parsed.cpu.name}";
 
   defaultRustTargetPath =

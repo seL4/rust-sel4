@@ -272,6 +272,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "generate-target-specs"
+version = "0.1.0"
+dependencies = [
+ "clap",
+ "serde_json",
+]
+
+[[package]]
 name = "generic-array"
 version = "0.14.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"

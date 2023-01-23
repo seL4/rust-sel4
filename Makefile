@@ -36,3 +36,7 @@ fmt:
 .PHONY: update-lockfile
 update-lockfile:
 	cargo update -w
+
+.PHONY: generate-target-specs
+generate-target-specs:
+	cargo run -p generate-target-specs -- support/targets/

@@ -65,4 +65,6 @@ members = [
     "crates/examples/minimal-runtime-without-state",
 
     "crates/meta/for-docs",
+
+    "crates/support/generate-target-specs",
 ]
