@@ -77,9 +77,9 @@ let
 in rec {
 
   all = [
-    examples.minimal-runtime-with-state
-    examples.minimal-runtime-without-state
-    examples.full-runtime
+    examples.root-task.with-full-runtime
+    examples.root-task.with-minimal-runtime-with-state
+    examples.root-task.with-minimal-runtime-without-state
     tests.loader
     tests.core-libs
     tests.config
@@ -94,38 +94,40 @@ in rec {
   supported = lib.filter (instance: instance.isSupported) all;
 
   examples = {
-    minimal-runtime-with-state = mk {
-      rootTask = mkTask {
-        rootCrate = crates.minimal-runtime-with-state;
-        release = false;
-        extraProfile = {
-          panic = "abort";
+    root-task = {
+      with-minimal-runtime-with-state = mk {
+        rootTask = mkTask {
+          rootCrate = crates.root-task-with-minimal-runtime-with-state;
+          release = false;
+          extraProfile = {
+            panic = "abort";
+          };
         };
+        isSupported = haveMinimalRuntime;
+        canAutomate = true;
       };
-      isSupported = haveMinimalRuntime;
-      canAutomate = true;
-    };
 
-    minimal-runtime-without-state = mk {
-      rootTask = mkTask {
-        rootCrate = crates.minimal-runtime-without-state;
-        release = false;
-        extraProfile = {
-          panic = "abort";
+      with-minimal-runtime-without-state = mk {
+        rootTask = mkTask {
+          rootCrate = crates.root-task-with-minimal-runtime-without-state;
+          release = false;
+          extraProfile = {
+            panic = "abort";
+          };
         };
+        isSupported = haveMinimalRuntime;
+        canAutomate = true;
       };
-      isSupported = haveMinimalRuntime;
-      canAutomate = true;
-    };
 
-    full-runtime = mk {
-      rootTask = mkTask {
-        rootCrate = crates.full-runtime;
-        injectPhdrs = true;
-        release = false;
+      with-full-runtime = mk {
+        rootTask = mkTask {
+          rootCrate = crates.root-task-with-full-runtime;
+          injectPhdrs = true;
+          release = false;
+        };
+        isSupported = haveFullRuntime;
+        canAutomate = true;
       };
-      isSupported = haveFullRuntime;
-      canAutomate = true;
     };
   };
 
