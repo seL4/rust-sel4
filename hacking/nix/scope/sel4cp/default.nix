@@ -1,6 +1,6 @@
 { lib, stdenv
 , buildPackages, pkgsBuildBuild
-, linkFarm, writeScript
+, linkFarm, writeScript, runCommand
 , callPackage
 , cmake, ninja
 , dtc, libxml2
@@ -10,9 +10,12 @@
 }:
 
 let
+
+  # sel4cpSource = lib.cleanSource ../../../../../../../../x/sel4cp;
+
   sel4cpSource =
     let
-      rev = "4008bcacec0dfe37f0e73186582399e6fe15bfc4";
+      rev = "8e4c0d3719c490bf0955f9207abdab210af5b2a6";
       ref = "refs/tags/keep/${builtins.substring 0 32 rev}";
     in
       builtins.fetchGit {
@@ -91,12 +94,12 @@ let
   };
 
   tool = linkFarm "sel4cp-tool" [
-    (rec { name = "sel4coreplat"; path = sel4cpSource + "/tool/${name}"; })
+    (rec { name = "sel4coreplat"; path = lib.cleanSource (sel4cpSource + "/tool/${name}"); })
   ];
 
   exampleSource = sel4cpSource + "/example/qemu_arm_virt/hello";
 
-  example = stdenv.mkDerivation {
+  examplePDs = stdenv.mkDerivation {
     name = "example";
 
     src = exampleSource;
@@ -125,18 +128,58 @@ let
     '';
 
     installPhase = ''
-      mv build $out
+      mkdir $out
+      mv build/hello.elf $out
     '';
   };
 
-  run = writeScript "x.sh" ''
+  mkSystem = { searchPath, systemXML }:
+    lib.fix (self: runCommand "system" {
+      SEL4CP_SDK = sdk;
+      SEL4CP_BOARD = "qemu_arm_virt";
+      SEL4CP_CONFIG = "debug";
+
+      nativeBuildInputs = [
+        python3Packages.sel4-deps
+      ];
+
+      passthru = rec {
+        loader = "${self}/loader.img";
+        simulate = mkSimulate loader;
+        links = linkFarm "links" [
+          { name = "simulate"; path = simulate; }
+          { name = "pds"; path = searchPath; }
+          { name = "loader.elf"; path = loader; }
+          { name = "report.txt"; path = "${self}/report.txt"; }
+          { name = "sdk/monitor.elf"; path = "${sdk}/board/qemu_arm_virt/debug/elf/monitor.elf"; }
+          { name = "sdk/loader.elf"; path = "${sdk}/board/qemu_arm_virt/debug/elf/loader.elf"; }
+        ];
+      };
+    } ''
+      export PYTHONPATH=${tool}:$PYTHONPATH
+      mkdir $out
+	    python3 -m sel4coreplat ${systemXML} \
+        --search-path ${searchPath} \
+        --board $SEL4CP_BOARD \
+        --config $SEL4CP_CONFIG \
+        -o $out/loader.img \
+        -r $out/report.txt
+    '');
+
+  example = mkSystem {
+    searchPath = examplePDs;
+    systemXML = exampleSource + "/hello.system";
+  };
+
+  mkSimulate = loader: writeScript "x.sh" ''
     #!${buildPackages.runtimeShell}
     exec ${pkgsBuildBuild.qemu}/bin/qemu-system-aarch64 \
       -machine virt \
       -cpu cortex-a53 -m size=1G \
-      -device loader,file=${example}/loader.img,addr=0x70000000,cpu-num=0 \
+      -device loader,file=${loader},addr=0x70000000,cpu-num=0 \
       -serial mon:stdio \
-      -nographic
+      -nographic \
+      "$@"
   '';
 
   pyoxidizer = callPackage ./pyoxidizer.nix {};
@@ -145,7 +188,8 @@ let
 in rec {
   inherit
     sdk tool
-    example run
+    mkSystem mkSimulate
     pyoxidizer pyoxidizerBroken
+    example
   ;
 }

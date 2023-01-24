@@ -2,8 +2,11 @@ use sel4_config::sel4_cfg;
 
 use crate::{
     local_cptr::*, AbsoluteCPtr, CapRights, Error, FrameType, InvocationContext, LocalCPtr, Result,
-    TranslationTableType, VCPUReg, VMAttributes, Word,
+    TranslationTableType, VMAttributes,
 };
+
+#[sel4_cfg(ARM_HYPERVISOR_SUPPORT)]
+use crate::{VCPUReg, Word};
 
 #[sel4_cfg(ARM_HYPERVISOR_SUPPORT)]
 impl<C: InvocationContext> VCPU<C> {

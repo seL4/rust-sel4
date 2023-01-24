@@ -23,33 +23,37 @@ in rec {
       default = qemu-arm-virt.el2;
       qemu-arm-virt =
         let
-          numCores = if smp then "2" else "1";
-          mk = hypervisor: mkWorld {
-            inherit loaderConfig;
-            kernelConfig = kernelConfigCommon // {
-              ARM_CPU = mkString "cortex-a57";
-              KernelArch = mkString "arm";
-              KernelSel4Arch = mkString "aarch64";
-              KernelPlatform = mkString "qemu-arm-virt";
-              KernelMaxNumNodes = mkString numCores;
-            } // lib.optionalAttrs hypervisor {
-              KernelArmHypervisorSupport = on;
-            };
-            mkQemuCmd = loader: [
-              # NOTE
-              # virtualization=on even when hypervisor to test loader dropping exception level
-              "${pkgsBuildBuild.qemu}/bin/qemu-system-aarch64"
-                "-machine" "virt,virtualization=on"
-                "-cpu" "cortex-a57" "-smp" numCores "-m" "1024"
-                "-nographic"
-                "-serial" "mon:stdio"
-                "-kernel" loader
-            ];
-          };
+          mk = { smp ? false, hypervisor ? false, cpu ? "cortex-a57", forCP ? false }:
+            let
+              numCores = if smp then "2" else "1";
+            in
+              mkWorld {
+                inherit loaderConfig;
+                kernelConfig = kernelConfigCommon // {
+                  ARM_CPU = mkString cpu;
+                  KernelArch = mkString "arm";
+                  KernelSel4Arch = mkString "aarch64";
+                  KernelPlatform = mkString "qemu-arm-virt";
+                  KernelMaxNumNodes = mkString numCores;
+                } // lib.optionalAttrs hypervisor {
+                  KernelArmHypervisorSupport = on;
+                };
+                mkQemuCmd = loader: [
+                  # NOTE
+                  # virtualization=on even when hypervisor to test loader dropping exception level
+                  "${pkgsBuildBuild.qemu}/bin/qemu-system-aarch64"
+                    "-machine" "virt,virtualization=on"
+                    "-cpu" cpu "-smp" numCores "-m" "1024"
+                    "-nographic"
+                    "-serial" "mon:stdio"
+                    "-kernel" loader
+                ];
+              };
         in rec {
           default = el2;
-          el1 = mk false;
-          el2 = mk true;
+          el1 = mk { smp = true; };
+          el2 = mk { smp = true; hypervisor = true; };
+          sel4cp = mk { forCP = true; cpu = "cortex-a53"; };
         };
 
       bcm2711 = mkWorld {

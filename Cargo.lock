@@ -264,14 +264,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "full-runtime"
-version = "0.1.0"
-dependencies = [
- "sel4",
- "sel4-full-root-task-runtime",
-]
-
-[[package]]
 name = "generate-target-specs"
 version = "0.1.0"
 dependencies = [
@@ -564,22 +556,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "68354c5c6bd36d73ff3feceb05efa59b6acb7626617f4962be322a825e61f79a"
 
 [[package]]
-name = "minimal-runtime-with-state"
-version = "0.1.0"
-dependencies = [
- "sel4",
- "sel4-minimal-root-task-runtime",
-]
-
-[[package]]
-name = "minimal-runtime-without-state"
-version = "0.1.0"
-dependencies = [
- "sel4",
- "sel4-minimal-root-task-runtime",
-]
-
-[[package]]
 name = "miniz_oxide"
 version = "0.6.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -724,6 +700,30 @@ name = "regex-syntax"
 version = "0.6.28"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "456c603be3e8d448b072f410900c09faf164fbce2d480456f50eea6e25f9c848"
+
+[[package]]
+name = "root-task-with-full-runtime"
+version = "0.1.0"
+dependencies = [
+ "sel4",
+ "sel4-full-root-task-runtime",
+]
+
+[[package]]
+name = "root-task-with-minimal-runtime-with-state"
+version = "0.1.0"
+dependencies = [
+ "sel4",
+ "sel4-minimal-root-task-runtime",
+]
+
+[[package]]
+name = "root-task-with-minimal-runtime-without-state"
+version = "0.1.0"
+dependencies = [
+ "sel4",
+ "sel4-minimal-root-task-runtime",
+]
 
 [[package]]
 name = "rustc-demangle"
@@ -1064,6 +1064,34 @@ name = "sel4-sys-wrappers"
 version = "0.1.0"
 dependencies = [
  "sel4-sys",
+]
+
+[[package]]
+name = "sel4cp"
+version = "0.1.0"
+dependencies = [
+ "cfg-if",
+ "sel4",
+ "sel4-dlmalloc",
+ "sel4-sync",
+ "sel4cp-macros",
+]
+
+[[package]]
+name = "sel4cp-hello"
+version = "0.1.0"
+dependencies = [
+ "sel4",
+ "sel4cp",
+]
+
+[[package]]
+name = "sel4cp-macros"
+version = "0.1.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
 ]
 
 [[package]]

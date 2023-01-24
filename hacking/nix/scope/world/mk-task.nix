@@ -49,7 +49,7 @@ let
   theseCommonModifications = crateUtils.elaborateModifications {
     modifyManifest = lib.flip lib.recursiveUpdate profiles;
     modifyConfig = lib.flip lib.recursiveUpdate {
-      target.${defaultRustTargetName}.rustflags = [
+      target.${rustTargetName}.rustflags = [
         "--sysroot" sysroot
       ];
     };

@@ -1,11 +1,12 @@
 use sel4_config::sel4_cfg;
 
 use crate::{
-    fault::{
-        CapFault, UnknownSyscall, UserException, VCPUFault, VGICMaintenance, VMFault, VPPIEvent,
-    },
+    fault::{CapFault, UnknownSyscall, UserException, VMFault},
     Word,
 };
+
+#[sel4_cfg(ARM_HYPERVISOR_SUPPORT)]
+use crate::fault::{VCPUFault, VGICMaintenance, VPPIEvent};
 
 impl CapFault {
     // TODO

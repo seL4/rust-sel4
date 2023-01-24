@@ -1,7 +1,3 @@
-#![no_std]
-#![feature(core_intrinsics)]
-#![feature(exclusive_wrapper)]
-
 use core::arch::global_asm;
 use core::sync::Exclusive;
 
@@ -22,7 +18,7 @@ cfg_if::cfg_if! {
                 .extern __rust_entry
                 .extern __stack_top
 
-                .section .text
+                .section .text.start
 
                 .global _start
                 _start:
@@ -30,23 +26,6 @@ cfg_if::cfg_if! {
                     ldr x9, [x9]
                     mov sp, x9
                     b __rust_entry
-            "#
-        }
-    } else if #[cfg(target_arch = "x86_64")] {
-        global_asm! {
-            r#"
-                .extern __rust_entry
-                .extern __stack_top
-
-                .section .text
-
-                .global _start
-                _start:
-                    mov rsp, __stack_top
-                    mov rbp, rsp
-                    sub rsp, 0x8 // Stack must be 16-byte aligned before call
-                    push rbp
-                    call __rust_entry
             "#
         }
     } else {

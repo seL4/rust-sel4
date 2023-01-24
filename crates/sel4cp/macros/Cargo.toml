@@ -1,10 +1,14 @@
 [package]
-name = "sel4-config"
+name = "sel4cp-macros"
 version = "0.1.0"
 authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
 edition = "2021"
 license = "BSD-2-Clause"
 
+[lib]
+proc-macro = true
+
 [dependencies]
-sel4-config-consts = { path = "./consts" }
-sel4-config-macros = { path = "./macros" }
+proc-macro2 = "1"
+quote = "1"
+syn = { version = "1", features = ["full"] }

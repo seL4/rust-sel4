@@ -3,6 +3,8 @@
 , crates
 , mkTask, mkLoader
 , worldConfig
+
+, sel4cp
 }:
 
 let

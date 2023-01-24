@@ -83,6 +83,24 @@ impl<C: InvocationContext> Endpoint<C> {
         }))
     }
 
+    /// Corresponds to `seL4_ReplyRecv`.
+    pub fn reply_recv(
+        self,
+        info: MessageInfo,
+        reply_authority: impl ConveysReplyAuthority,
+    ) -> (MessageInfo, Badge) {
+        let (raw_msg_info, badge) = self.invoke(|cptr, ipc_buffer| {
+            ipc_buffer.inner_mut().seL4_ReplyRecv(
+                cptr.bits(),
+                info.into_inner(),
+                reply_authority
+                    .into_reply_authority()
+                    .into_sys_reply_authority(),
+            )
+        });
+        (MessageInfo::from_inner(raw_msg_info), badge)
+    }
+
     pub fn send_with_mrs<T: FastMessages>(self, info: MessageInfo, messages: T) {
         let [msg0, msg1, msg2, msg3] = messages.prepare_in();
         self.invoke(|cptr, ipc_buffer| {
