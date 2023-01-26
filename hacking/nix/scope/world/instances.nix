@@ -86,6 +86,7 @@ in rec {
     tests.core-libs
     tests.config
     tests.tls
+    tests.injected-phdrs
     tests.backtrace
     tests.panicking.abort.withAlloc
     tests.panicking.abort.withoutAlloc
@@ -124,7 +125,6 @@ in rec {
       with-full-runtime = mk {
         rootTask = mkTask {
           rootCrate = crates.root-task-with-full-runtime;
-          injectPhdrs = true;
           release = false;
         };
         isSupported = haveFullRuntime;
@@ -138,7 +138,6 @@ in rec {
       rootTask = mkTask {
         rootCrate = crates.tests-root-task-loader;
         release = false;
-        injectPhdrs = true;
       };
       isSupported = haveFullRuntime;
       canAutomate = true;
@@ -148,7 +147,6 @@ in rec {
       rootTask = mkTask {
         rootCrate = crates.tests-root-task-core-libs;
         release = false;
-        injectPhdrs = true;
       };
       isSupported = haveFullRuntime;
       canAutomate = true;
@@ -158,7 +156,6 @@ in rec {
       rootTask = mkTask {
         rootCrate = crates.tests-root-task-config;
         release = false;
-        injectPhdrs = true;
       };
       isSupported = haveFullRuntime;
       canAutomate = true;
@@ -168,6 +165,15 @@ in rec {
       rootTask = mkTask {
         rootCrate = crates.tests-root-task-tls;
         release = false;
+      };
+      isSupported = haveFullRuntime;
+      canAutomate = true;
+    };
+
+    injected-phdrs = mk {
+      rootTask = mkTask {
+        rootCrate = crates.tests-root-task-injected-phdrs;
+        release = true;
         injectPhdrs = true;
       };
       isSupported = haveFullRuntime;
@@ -179,7 +185,6 @@ in rec {
         rootCrate = crates.tests-root-task-backtrace;
         release = false;
         rootTaskStackSize = 4096 * 64; # TODO
-        injectPhdrs = true;
       };
       isSupported = haveFullRuntime;
       canAutomate = true;
@@ -202,12 +207,12 @@ in rec {
               (_: allocFeatures: mk {
                 rootTask = mkTask {
                   rootCrate = crates.tests-root-task-panicking;
+                  release = false;
                   features = allocFeatures ++ [ "panic-${panicStrategyName}" ];
                   extraProfile = {
                     panic = panicStrategyName;
                   };
                   rootTaskStackSize = 4096 * 64; # TODO
-                  injectPhdrs = true;
                 };
                 isSupported = haveFullRuntime;
                 canAutomate = panicStrategyName == "unwind";

@@ -1,5 +1,5 @@
 use sel4_runtime_building_blocks_elf::ProgramHeader;
-use sel4_runtime_building_blocks_injected_phdrs::get_phdrs;
+use sel4_runtime_building_blocks_embedded_phdrs::get_phdrs;
 use sel4_runtime_building_blocks_unwinding_support::{
     set_custom_eh_frame_finder, EhFrameFinder, ProgramHeadersEhFrameFinder, ProgramHeadersFinder,
 };
