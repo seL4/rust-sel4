@@ -54,6 +54,9 @@ let
       ];
     };
     modifyDerivation = drv: drv.overrideAttrs (self: super: {
+      # TODO
+      # hardeningDisable = [ "all" ];
+
       LIBCLANG_PATH = "${lib.getLib buildPackages.llvmPackages.libclang}/lib";
 
       dontStrip = true;

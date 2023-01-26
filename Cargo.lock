@@ -1220,6 +1220,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "tests-root-task-c"
+version = "0.1.0"
+dependencies = [
+ "cc",
+ "glob",
+ "sel4",
+ "sel4-full-root-task-runtime",
+]
+
+[[package]]
 name = "tests-root-task-config"
 version = "0.1.0"
 dependencies = [

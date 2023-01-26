@@ -60,6 +60,7 @@ members = [
     "crates/sel4cp/macros",
     "crates/support/generate-target-specs",
     "crates/tests/root-task/backtrace",
+    "crates/tests/root-task/c",
     "crates/tests/root-task/config",
     "crates/tests/root-task/core-libs",
     "crates/tests/root-task/injected-phdrs",

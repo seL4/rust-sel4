@@ -3,7 +3,7 @@
 , crateUtils
 , vendorLockfile, pruneLockfile
 , defaultRustToolchain, defaultRustTargetName, defaultRustTargetPath
-}:
+} @ outerArgs:
 
 { superLockfile
 }:
@@ -27,6 +27,8 @@ in
 , rustToolchain ? defaultRustToolchain
 , rustTargetName ? defaultRustTargetName
 , rustTargetPath ? defaultRustTargetPath
+
+, stdenv ? outerArgs.stdenv
 }:
 
 let

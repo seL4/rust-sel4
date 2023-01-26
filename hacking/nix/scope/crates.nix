@@ -26,6 +26,11 @@ let
         "asm"
       ];
     };
+    tests-root-task-c = {
+      extraPaths = [
+        "cbits"
+      ];
+    };
   };
 
   crates = lib.listToAttrs (lib.forEach workspaceMemberPaths (cratePath: rec {

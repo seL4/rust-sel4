@@ -21,7 +21,6 @@ fn main() {
 
     cc::Build::new()
         .files(&asm_files)
-        .target("aarch64-unknown-none")
         .includes(SEL4_INCLUDE_DIRS.get().iter())
         .compile("asm");
 

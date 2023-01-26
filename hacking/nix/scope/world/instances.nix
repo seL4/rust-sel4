@@ -3,8 +3,7 @@
 , crates
 , mkTask, mkLoader
 , worldConfig
-
-, sel4cp
+, callPackage
 }:
 
 let
@@ -218,6 +217,9 @@ in rec {
                 canAutomate = panicStrategyName == "unwind";
               }));
 
+    c = callPackage ./instances/c.nix {
+      inherit mk;
+    };
   };
 
 }
