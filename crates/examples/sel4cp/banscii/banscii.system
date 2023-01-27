@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<system>
+
+    <memory_region name="pl011_mmio" size="0x1000" phys_addr="0x9000000" />
+
+    <protection_domain name="pl011_driver" priority="254">
+        <program_image path="banscii-pl011-driver.elf" />
+        <map mr="pl011_mmio" vaddr="0x2000000" perms="rw" setvar_vaddr="pl011_mmio_base" />
+        <irq irq="33" id="0" />
+    </protection_domain>
+
+    <protection_domain name="assistant" priority="254">
+        <program_image path="banscii-assistant.elf" />
+    </protection_domain>
+
+    <channel>
+        <end pd="pl011_driver" id="1" />
+        <end pd="assistant" id="0" />
+    </channel>
+
+</system>

@@ -1,0 +1,11 @@
+[package]
+name = "banscii-assistant"
+version = "0.1.0"
+authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
+edition = "2021"
+license = "BSD-2-Clause"
+
+[dependencies]
+banscii-assistant-core = { path = "./core" }
+sel4 = { path = "../../../../../sel4" }
+sel4cp = { path = "../../../../../sel4cp" }

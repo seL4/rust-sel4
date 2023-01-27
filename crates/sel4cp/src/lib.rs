@@ -4,12 +4,14 @@
 #![feature(exclusive_wrapper)]
 #![feature(unwrap_infallible)]
 #![feature(never_type)]
+#![feature(ptr_to_from_bits)]
 
 use core::fmt;
 
 pub use sel4cp_macros::main;
 
 mod channel;
+mod global_allocator;
 mod handler;
 mod head;
 mod ipc_buffer;

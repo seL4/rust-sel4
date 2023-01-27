@@ -1,5 +1,5 @@
 { lib, buildPlatform, hostPlatform
-, writeText, linkFarm
+, writeText, linkFarm, runCommand
 , toTOMLFile
 , chooseLinkerForRustTarget ? throw "chooseLinkerForRustTarget must be set"
 }:
@@ -264,6 +264,7 @@ rec {
     cratePath:
 
     { extraPaths ? []
+    , resolveLinks ? false
     }:
 
     let
@@ -291,7 +292,13 @@ rec {
         })
       ];
 
-      real = linkFarm "real-crate-${name}" ([
+      real = if resolveLinks then realResolved else realUnresolved;
+
+      realResolved = runCommand realUnresolved.name {} ''
+        cp -rL ${realUnresolved} $out
+      '';
+
+      realUnresolved = linkFarm "real-crate-${name}" ([
         (rec {
           name = "Cargo.toml";
           path = toTOMLFile name realPatchedManifest;

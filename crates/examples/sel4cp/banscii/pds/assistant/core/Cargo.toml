@@ -1,0 +1,12 @@
+[package]
+name = "banscii-assistant-core"
+version = "0.1.0"
+authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
+edition = "2021"
+license = "BSD-2-Clause"
+
+[dependencies]
+libm = { version = "0.2.1", default-features = false }
+log = "*"
+rsa = { version = "0.8.1", default-features = false, features = ["pem"] }
+rusttype = { version = "0.9.3", default-features = false, features = ["has-atomics", "libm-math"] }

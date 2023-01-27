@@ -1,0 +1,11 @@
+[package]
+name = "banscii-pl011-driver"
+version = "0.1.0"
+authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
+edition = "2021"
+license = "BSD-2-Clause"
+
+[dependencies]
+sel4 = { path = "../../../../../sel4" }
+sel4cp = { path = "../../../../../sel4cp" }
+tock-registers = "*"

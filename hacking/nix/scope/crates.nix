@@ -31,6 +31,12 @@ let
         "cbits"
       ];
     };
+    banscii-assistant-core = {
+      resolveLinks = true;
+      extraPaths = [
+        "assets"
+      ];
+    };
   };
 
   crates = lib.listToAttrs (lib.forEach workspaceMemberPaths (cratePath: rec {

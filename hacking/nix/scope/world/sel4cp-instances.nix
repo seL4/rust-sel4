@@ -1,6 +1,6 @@
 { lib, stdenv
 , buildPackages, pkgsBuildBuild
-, linkFarm, writeText, runCommand
+, linkFarm, symlinkJoin, writeText, runCommand
 , callPackage
 , sel4cp
 , mkTask
@@ -11,50 +11,65 @@
 }:
 
 let
-  pds = {
-    hello = mkTask rec {
-      rootCrate = crates.sel4cp-hello;
-      release = false;
-      layers = [
-        crateUtils.defaultIntermediateLayer
-        {
-          crates = [ "sel4" ];
-          modifications = {
-            modifyDerivation = drv: drv.overrideAttrs (self: super: {
-              SEL4_PREFIX = seL4ForUserspace;
-            });
-          };
-        }
-      ];
-      extraProfile = {
-        panic = "abort";
-        debug = 2;
+  mkPD = args: mkTask (args // rec {
+    layers = [
+      crateUtils.defaultIntermediateLayer
+      {
+        crates = [ "sel4" ];
+        modifications = {
+          modifyDerivation = drv: drv.overrideAttrs (self: super: {
+            SEL4_PREFIX = seL4ForUserspace;
+          });
+        };
+      }
+    ];
+    extraProfile = {
+      panic = "abort";
+    };
+    rustTargetName = "aarch64-sel4cp";
+    rustTargetPath =
+      let
+        fname = "${rustTargetName}.json";
+      in
+        linkFarm "targets" [
+          { name = fname; path = srcRoot + "/support/targets/${fname}"; }
+        ];
+  });
+
+in {
+  hello = rec {
+    pds = {
+      hello = mkPD rec {
+        rootCrate = crates.sel4cp-hello;
+        release = false;
       };
-      lastLayerModifications = {
-        # modifyConfig = old: lib.recursiveUpdate old {
-        #   target.${rustTargetName}.rustflags = old.target.${rustTargetName}.rustflags or [] ++ [
-        #     "-C" "link-args=--verbose"
-        #   ];
-        # };
-      };
-      rustTargetName = "aarch64-sel4cp";
-      rustTargetPath =
-        let
-          fname = "${rustTargetName}.json";
-        in
-          linkFarm "targets" [
-            { name = fname; path = srcRoot + "/support/targets/${fname}"; }
-          ];
+    };
+    system = sel4cp.mkSystem {
+      searchPath = "${pds.hello}/bin";
+      systemXML = srcRoot + "/crates/examples/sel4cp/hello/hello.system";
     };
   };
 
-  system = sel4cp.mkSystem {
-    searchPath = "${pds.hello}/bin";
-    systemXML = srcRoot + "/crates/examples/sel4cp/hello/hello.system";
+  banscii = rec {
+    pds = {
+      pl011-driver = mkPD rec {
+        rootCrate = crates.banscii-pl011-driver;
+        release = false;
+      };
+      assistant = mkPD rec {
+        rootCrate = crates.banscii-assistant;
+        release = false;
+      };
+    };
+    system = sel4cp.mkSystem {
+      searchPath = symlinkJoin {
+        name = "x";
+        paths = [
+          "${pds.assistant}/bin"
+          "${pds.pl011-driver}/bin"
+        ];
+      };
+      systemXML = srcRoot + "/crates/examples/sel4cp/banscii/banscii.system";
+    };
   };
-
-in rec {
-  inherit
-    pds system
-  ;
 }

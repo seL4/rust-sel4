@@ -3,6 +3,13 @@
 resolver = "2"
 
 members = [
+    "crates/examples/sel4cp/banscii/pds/assistant",
+    "crates/examples/sel4cp/banscii/pds/assistant/core",
+    "crates/examples/sel4cp/banscii/pds/assistant/core/test",
+    "crates/examples/sel4cp/banscii/pds/pl011-driver",
+    "crates/examples/sel4cp/banscii/pds/talent",
+    "crates/examples/sel4cp/banscii/pds/talent/core",
+    "crates/examples/sel4cp/banscii/pds/talent/core/test",
     "crates/examples/root-task/with-full-runtime",
     "crates/examples/root-task/with-minimal-runtime-with-state",
     "crates/examples/root-task/with-minimal-runtime-without-state",
