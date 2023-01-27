@@ -217,7 +217,7 @@ in rec {
                 canAutomate = panicStrategyName == "unwind";
               }));
 
-    c = callPackage ./instances/c.nix {
+    c = callPackage ./c.nix {
       inherit mk;
     };
   };

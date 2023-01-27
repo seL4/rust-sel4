@@ -30,7 +30,7 @@ self: with self;
 
   mkTask = callPackage ./mk-task.nix {};
 
-  instances = callPackage ./instances.nix {};
+  instances = callPackage ./instances {};
   sel4cpInstances = callPackage ./sel4cp-instances.nix {};
 
   docs = callPackage ./docs.nix {};
