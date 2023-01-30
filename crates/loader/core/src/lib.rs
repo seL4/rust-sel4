@@ -2,7 +2,7 @@
 #![no_main]
 #![feature(atomic_from_mut)]
 #![feature(exclusive_wrapper)]
-#![feature(ptr_to_from_bits)]
+#![feature(strict_provenance)]
 #![feature(pointer_byte_offsets)]
 #![feature(const_pointer_byte_offsets)]
 #![feature(const_trait_impl)]

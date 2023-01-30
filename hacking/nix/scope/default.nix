@@ -20,8 +20,12 @@ let
 
   rustToolchainParams = {
     channel = "nightly";
-    date = "2022-11-11";
-    sha256 = "sha256-rL0Y1pPrK8RS2UbYHpFXJDMls4ZQYDWK5MbUscwUxbI=";
+    date = "2023-01-26";
+    sha256 = "sha256-UdHZxhV3QQ+1ZdATle9/dl3zheEHw6nz14Aq4gMHj7Y=";
+    # TODO
+    # loader crashes when profile.{}.debug = "2"
+    # date = "2023-01-27";
+    # sha256 = "sha256-JHs8yGthsweFSeamjAt2wzPh4ZeR4dsmHb9tcfT9k5A=";
   };
 
   mkRustToolchain = target: fenix.targets.${target}.toolchainOf rustToolchainParams;

@@ -24,6 +24,6 @@ pub(crate) fn get_secondary_stack_bottom(i: usize) -> usize {
             .0
             .as_ptr()
             .offset(((i + 1) * SECONDARY_STACK_SIZE).try_into().unwrap())
-            .to_bits()
+            .expose_addr()
     }
 }

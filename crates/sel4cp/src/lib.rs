@@ -4,7 +4,7 @@
 #![feature(exclusive_wrapper)]
 #![feature(unwrap_infallible)]
 #![feature(never_type)]
-#![feature(ptr_to_from_bits)]
+#![feature(strict_provenance)]
 
 use core::fmt;
 

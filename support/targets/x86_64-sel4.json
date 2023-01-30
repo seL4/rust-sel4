@@ -21,5 +21,8 @@
       0
     ]
   },
+  "supported-sanitizers": [
+    "kcfi"
+  ],
   "target-pointer-width": "64"
 }

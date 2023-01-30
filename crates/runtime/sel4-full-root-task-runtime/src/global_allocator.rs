@@ -19,8 +19,8 @@ static mut STATIC_HEAP: StaticHeap = StaticHeap([0; STATIC_HEAP_SIZE]);
 fn get_static_heap_bounds() -> Range<usize> {
     unsafe {
         let ptr = &mut STATIC_HEAP as *mut StaticHeap;
-        let start = ptr.to_bits();
-        let end = ptr.offset(1).to_bits();
+        let start = ptr.expose_addr();
+        let end = ptr.offset(1).expose_addr();
         start..end
     }
 }

@@ -29,7 +29,7 @@ extern "C" {
 //
 
 pub(crate) fn start_secondary_core(core_id: usize, sp: usize) {
-    let start = (psci_secondary_entry as *const PsciSecondaryEntryFn).to_bits();
+    let start = (psci_secondary_entry as *const PsciSecondaryEntryFn).expose_addr();
     cpu_on(
         core_id.try_into().unwrap(),
         start.try_into().unwrap(),

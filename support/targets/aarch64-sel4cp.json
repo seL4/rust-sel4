@@ -12,5 +12,8 @@
   "llvm-target": "aarch64-none-elf",
   "max-atomic-width": 128,
   "relocation-model": "static",
+  "supported-sanitizers": [
+    "kcfi"
+  ],
   "target-pointer-width": "64"
 }

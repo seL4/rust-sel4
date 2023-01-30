@@ -1,9 +1,10 @@
 #![no_std]
 #![feature(int_roundings)]
-#![feature(ptr_to_from_bits)]
+#![feature(strict_provenance)]
 
 use core::arch::{asm, global_asm};
 use core::ffi::c_void;
+use core::ptr;
 use core::slice;
 
 use sel4_runtime_building_blocks_elf::{ProgramHeader, Word, PT_TLS};
@@ -49,14 +50,14 @@ impl TlsImage {
 
     unsafe fn init(&self, tpidr: usize) {
         let addr = (tpidr + RESERVED_ABOVE_TPIDR).next_multiple_of(self.align);
-        let window = slice::from_raw_parts_mut(<*mut u8>::from_bits(addr), self.memsz);
+        let window = slice::from_raw_parts_mut(ptr::from_exposed_addr_mut(addr), self.memsz);
         let (tdata, tbss) = window.split_at_mut(self.filesz);
         tdata.copy_from_slice(self.data());
         tbss.fill(0);
     }
 
     unsafe fn data(&self) -> &'static [u8] {
-        slice::from_raw_parts(<*const u8>::from_bits(self.vaddr), self.filesz)
+        slice::from_raw_parts(ptr::from_exposed_addr_mut(self.vaddr), self.filesz)
     }
 }
 

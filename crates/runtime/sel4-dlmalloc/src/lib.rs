@@ -1,5 +1,5 @@
 #![no_std]
-#![feature(ptr_to_from_bits)]
+#![feature(strict_provenance)]
 
 use core::alloc::{GlobalAlloc, Layout};
 use core::cell::RefCell;
@@ -95,7 +95,7 @@ unsafe impl<T: Fn() -> Range<usize> + Send> DlmallocAllocator for StaticDlmalloc
             (ptr::null_mut(), 0, 0)
         } else {
             free.start = end;
-            (<*mut u8>::from_bits(start), size, 0)
+            (ptr::from_exposed_addr_mut(start), size, 0)
         }
     }
 

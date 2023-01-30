@@ -76,6 +76,9 @@ members = [
     "crates/tests/root-task/tls",
 ]
 
-# HACK
 [profile.dev]
 panic = "abort"
+
+[profile.dev-unwind]
+inherits = "dev"
+panic = "unwind"

@@ -1,10 +1,10 @@
 #![no_std]
 #![feature(core_intrinsics)]
 #![feature(const_trait_impl)]
-#![feature(ptr_to_from_bits)]
 #![feature(alloc_error_handler)]
 #![feature(unwrap_infallible)]
 #![feature(never_type)]
+#![feature(strict_provenance)]
 #![feature(lang_items)]
 
 extern crate sel4_runtime_building_blocks_root_task_head;
