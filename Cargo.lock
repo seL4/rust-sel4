@@ -242,7 +242,17 @@ dependencies = [
 ]
 
 [[package]]
-name = "capdl-loader"
+name = "capdl-loader-core"
+version = "0.1.0"
+dependencies = [
+ "capdl-types",
+ "log",
+ "sel4",
+ "sel4-platform-info",
+]
+
+[[package]]
+name = "capdl-loader-with-embedded-spec"
 version = "0.1.0"
 dependencies = [
  "capdl-embedded-spec",
@@ -252,16 +262,6 @@ dependencies = [
  "sel4",
  "sel4-logging",
  "sel4-minimal-root-task-runtime",
-]
-
-[[package]]
-name = "capdl-loader-core"
-version = "0.1.0"
-dependencies = [
- "capdl-types",
- "log",
- "sel4",
- "sel4-platform-info",
 ]
 
 [[package]]
