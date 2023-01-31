@@ -3,7 +3,7 @@
 #![feature(const_trait_impl)]
 
 use capdl_embedded_spec::SPEC;
-use capdl_loader_core::{load, LoaderBuffers};
+use capdl_loader_core::{load, LoaderBuffers, PerObjectBuffer};
 use sel4::BootInfo;
 use sel4_logging::{LevelFilter, Logger, LoggerBuilder};
 
@@ -14,10 +14,12 @@ static LOGGER: Logger = LoggerBuilder::default()
     .write(|s| sel4::debug_print!("{}", s))
     .build();
 
-static mut BUFFERS: LoaderBuffers<{ SPEC.objects.as_slice().len() }> = LoaderBuffers::new();
+static mut BUFFERS: LoaderBuffers<[PerObjectBuffer; SPEC.objects.as_slice().len()]> =
+    LoaderBuffers::new([PerObjectBuffer::default(); SPEC.objects.as_slice().len()]);
 
 #[sel4_minimal_root_task_runtime::main]
 fn main(bootinfo: &BootInfo) -> ! {
     LOGGER.set().unwrap();
-    load(&SPEC, &bootinfo, unsafe { &mut BUFFERS }).unwrap_or_else(|err| panic!("Error: {}", err))
+    load(&SPEC, &(), &bootinfo, unsafe { &mut BUFFERS })
+        .unwrap_or_else(|err| panic!("Error: {}", err))
 }

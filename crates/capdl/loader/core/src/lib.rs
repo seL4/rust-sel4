@@ -6,9 +6,10 @@
 #![feature(proc_macro_hygiene)]
 #![feature(int_roundings)]
 #![feature(never_type)]
-#![allow(unused_variables)]
+#![feature(const_trait_impl)]
 
 use core::array;
+use core::borrow::BorrowMut;
 use core::ptr;
 use core::result;
 use core::slice;
@@ -31,7 +32,7 @@ mod hold_slots;
 mod memory;
 mod utils;
 
-pub use buffers::LoaderBuffers;
+pub use buffers::{LoaderBuffers, PerObjectBuffer};
 use cslot_allocator::{CSlotAllocator, CSlotAllocatorError};
 pub use error::CapDLLoaderError;
 use hold_slots::HoldSlots;
@@ -49,13 +50,14 @@ pub fn load<
     'a,
     'b,
     T: Container<'b>,
-    const N: usize,
+    PO: BorrowMut<[PerObjectBuffer]>,
     S: ObjectName,
-    C: AvailableFillEntryContent,
+    C: AvailableFillEntryContentVia,
 >(
     spec: &'b ConcreteSpec<'b, T, C, S>,
+    via: &'b C::Via,
     bootinfo: &'a BootInfo,
-    buffers: &'a mut LoaderBuffers<N>,
+    buffers: &'a mut LoaderBuffers<PO>,
 ) -> Result<!> {
     info!("Starting CapDL Loader");
 
@@ -65,6 +67,7 @@ pub fn load<
 
     Loader {
         spec,
+        via,
         bootinfo,
         small_frame_copy_addr,
         large_frame_copy_addr,
@@ -74,17 +77,31 @@ pub fn load<
     .load()
 }
 
-struct Loader<'a, 'b, T: Container<'b>, const N: usize, S, C: AvailableFillEntryContent> {
+struct Loader<
+    'a,
+    'b,
+    T: Container<'b>,
+    PO: BorrowMut<[PerObjectBuffer]>,
+    S,
+    C: AvailableFillEntryContentVia,
+> {
     spec: &'b ConcreteSpec<'b, T, C, S>,
+    via: &'b C::Via,
     bootinfo: &'a BootInfo,
     small_frame_copy_addr: usize,
     large_frame_copy_addr: usize,
     cslot_allocator: &'a mut CSlotAllocator,
-    buffers: &'a mut LoaderBuffers<N>,
+    buffers: &'a mut LoaderBuffers<PO>,
 }
 
-impl<'a, 'b, T: Container<'b>, const N: usize, S: ObjectName, C: AvailableFillEntryContent>
-    Loader<'a, 'b, T, N, S, C>
+impl<
+        'a,
+        'b,
+        T: Container<'b>,
+        PO: BorrowMut<[PerObjectBuffer]>,
+        S: ObjectName,
+        C: AvailableFillEntryContentVia,
+    > Loader<'a, 'b, T, PO, S, C>
 {
     pub fn load(&mut self) -> Result<!> {
         self.create_objects()?;
@@ -362,7 +379,7 @@ impl<'a, 'b, T: Container<'b>, const N: usize, S: ObjectName, C: AvailableFillEn
             assert!(offset + length <= U::FRAME_SIZE.bytes());
             let dst_frame = ptr::from_exposed_addr_mut::<u8>(self.copy_addr::<U>());
             let dst = unsafe { slice::from_raw_parts_mut(dst_frame.add(offset), length) };
-            entry.content.copy_out(dst);
+            entry.content.copy_out_via(&self.via, dst);
         }
         atomic::fence(Ordering::SeqCst);
         // atomic::compiler_fence(Ordering::SeqCst);
@@ -582,11 +599,11 @@ impl<'a, 'b, T: Container<'b>, const N: usize, S: ObjectName, C: AvailableFillEn
     }
 
     fn set_orig_cslot(&mut self, obj_id: ObjectId, slot: InitCSpaceSlot) {
-        self.buffers.per_obj[obj_id].orig_slot = Some(slot);
+        self.buffers.per_obj_mut()[obj_id].orig_slot = Some(slot);
     }
 
     fn orig_cslot(&self, obj_id: ObjectId) -> InitCSpaceSlot {
-        self.buffers.per_obj[obj_id].orig_slot.unwrap()
+        self.buffers.per_obj()[obj_id].orig_slot.unwrap()
     }
 
     fn orig_local_cptr<U: CapType>(&self, obj_id: ObjectId) -> LocalCPtr<U> {

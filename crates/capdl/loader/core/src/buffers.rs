@@ -1,16 +1,36 @@
+use core::borrow::{Borrow, BorrowMut};
+
 use sel4::InitCSpaceSlot;
 
-pub struct LoaderBuffers<const N: usize> {
-    pub(crate) per_obj: [PerObjectBuffer; N],
+pub struct LoaderBuffers<T> {
+    pub(crate) per_obj: T,
 }
 
-pub(crate) struct PerObjectBuffer {
+#[derive(Copy, Clone)]
+pub struct PerObjectBuffer {
     pub(crate) orig_slot: Option<InitCSpaceSlot>,
 }
 
-impl<const N: usize> LoaderBuffers<N> {
-    pub const fn new() -> Self {
-        const INIT: PerObjectBuffer = PerObjectBuffer { orig_slot: None };
-        Self { per_obj: [INIT; N] }
+impl const Default for PerObjectBuffer {
+    fn default() -> Self {
+        Self { orig_slot: None }
+    }
+}
+
+impl<T> LoaderBuffers<T> {
+    pub const fn new(per_obj: T) -> Self {
+        Self { per_obj }
+    }
+}
+
+impl<T: Borrow<[PerObjectBuffer]>> LoaderBuffers<T> {
+    pub fn per_obj(&self) -> &[PerObjectBuffer] {
+        self.per_obj.borrow()
+    }
+}
+
+impl<T: BorrowMut<[PerObjectBuffer]>> LoaderBuffers<T> {
+    pub fn per_obj_mut(&mut self) -> &mut [PerObjectBuffer] {
+        self.per_obj.borrow_mut()
     }
 }

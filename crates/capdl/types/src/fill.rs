@@ -1,4 +1,5 @@
 use core::fmt;
+use core::ops::Range;
 
 #[cfg(feature = "deflate")]
 use core::iter;
@@ -89,5 +90,57 @@ impl<'a> AvailableFillEntryContent for FillEntryContentDeflatedBytes<'a> {
         )
         .unwrap();
         assert_eq!(n, dst.len())
+    }
+}
+
+// // //
+
+pub trait AvailableFillEntryContentVia {
+    type Via: ?Sized;
+
+    fn copy_out_via(&self, means: &Self::Via, dst: &mut [u8]);
+}
+
+impl<T: AvailableFillEntryContent> AvailableFillEntryContentVia for T {
+    type Via = ();
+
+    fn copy_out_via(&self, _means: &Self::Via, dst: &mut [u8]) {
+        self.copy_out(dst)
+    }
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct FillEntryContentBytesVia {
+    pub bytes_range: Range<usize>,
+}
+
+impl AvailableFillEntryContentVia for FillEntryContentBytesVia {
+    type Via = [u8];
+
+    fn copy_out_via(&self, means: &Self::Via, dst: &mut [u8]) {
+        FillEntryContentBytes {
+            bytes: &means[self.bytes_range.clone()],
+        }
+        .copy_out(dst)
+    }
+}
+
+#[cfg(feature = "deflate")]
+#[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct FillEntryContentDeflatedBytesVia {
+    pub deflated_bytes_range: Range<usize>,
+}
+
+#[cfg(feature = "deflate")]
+impl AvailableFillEntryContentVia for FillEntryContentDeflatedBytesVia {
+    type Via = [u8];
+
+    fn copy_out_via(&self, means: &Self::Via, dst: &mut [u8]) {
+        FillEntryContentDeflatedBytes {
+            deflated_bytes: &means[self.deflated_bytes_range.clone()],
+        }
+        .copy_out(dst)
     }
 }

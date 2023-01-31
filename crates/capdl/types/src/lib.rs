@@ -25,7 +25,7 @@ mod when_sel4;
 
 pub use cap_table::{CapSlot, CapTableEntry, HasCapTable, PDEntry};
 pub use container::{Container, ContainerType, SliceContainer};
-pub use fill::{AvailableFillEntryContent, FillEntryContentBytes};
+pub use fill::{AvailableFillEntryContent, AvailableFillEntryContentVia, FillEntryContentBytes};
 pub use object_name::{ObjectName, Unnamed};
 pub use spec::{
     cap, object, ASIDSlotEntry, Badge, CPtr, Cap, FillEntry, IRQEntry, NamedObject, Object,
@@ -39,7 +39,7 @@ pub use container::VecContainer;
 pub use fill::{FillEntryContentDigest, FillEntryContentFile};
 
 #[cfg(feature = "deflate")]
-pub use fill::FillEntryContentDeflatedBytes;
+pub use fill::{FillEntryContentDeflatedBytes, FillEntryContentDeflatedBytesVia};
 
 #[cfg(feature = "sel4")]
 pub use when_sel4::*;
