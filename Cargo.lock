@@ -1149,6 +1149,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "sel4-bitfield-parser-test"
+version = "0.1.0"
+dependencies = [
+ "clap",
+ "glob",
+ "sel4-bitfield-parser",
+]
+
+[[package]]
 name = "sel4-bitfield-types"
 version = "0.1.0"
 

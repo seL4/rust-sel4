@@ -49,6 +49,7 @@ members = [
     "crates/runtime/sel4-sync",
     "crates/sel4",
     "crates/sel4/bitfield-parser",
+    "crates/sel4/bitfield-parser/test",
     "crates/sel4/bitfield-types",
     "crates/sel4/build-env",
     "crates/sel4/config",

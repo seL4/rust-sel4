@@ -1,0 +1,9 @@
+[package]
+name = "sel4-bitfield-parser-test"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+clap = "3.2"
+glob = "*"
+sel4-bitfield-parser = { path = ".." }
