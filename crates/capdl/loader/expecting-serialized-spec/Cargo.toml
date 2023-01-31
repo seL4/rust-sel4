@@ -1,0 +1,14 @@
+[package]
+name = "capdl-loader-expecting-serialized-spec"
+version = "0.1.0"
+edition = "2021"
+
+[features]
+deflate = []
+
+[dependencies]
+capdl-loader-core = { path = "../core" }
+capdl-types = { path = "../../types" }
+sel4 = { path = "../../../sel4" }
+sel4-full-root-task-runtime = { path = "../../../runtime/sel4-full-root-task-runtime" }
+sel4-logging = { path = "../../../runtime/sel4-logging" }

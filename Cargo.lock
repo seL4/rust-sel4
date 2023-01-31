@@ -252,6 +252,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "capdl-loader-expecting-serialized-spec"
+version = "0.1.0"
+dependencies = [
+ "capdl-loader-core",
+ "capdl-types",
+ "sel4",
+ "sel4-full-root-task-runtime",
+ "sel4-logging",
+]
+
+[[package]]
 name = "capdl-loader-with-embedded-spec"
 version = "0.1.0"
 dependencies = [
