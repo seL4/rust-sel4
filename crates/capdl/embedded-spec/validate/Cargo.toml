@@ -1,0 +1,9 @@
+[package]
+name = "capdl-embedded-spec-validate"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+capdl-embedded-spec = { path = ".." }
+capdl-embedded-spec-serialized = { path = "../serialized" }
+capdl-types = { path = "../../types" }

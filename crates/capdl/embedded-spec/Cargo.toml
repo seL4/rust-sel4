@@ -1,0 +1,17 @@
+[package]
+name = "capdl-embedded-spec"
+version = "0.1.0"
+edition = "2021"
+
+[features]
+deflate = ["capdl-types/deflate"]
+
+[dependencies]
+capdl-types = { path = "../types" }
+
+[build-dependencies]
+capdl-embed-spec = { path = "../embed-spec" }
+capdl-embedded-spec-serialized = { path = "./serialized" }
+capdl-types = { path = "../types" }
+serde_json = "*"
+which = "*"

@@ -1,0 +1,15 @@
+[package]
+name = "capdl-types"
+version = "0.1.0"
+edition = "2021"
+
+[features]
+alloc = ["serde?/alloc"]
+deflate = ["miniz_oxide"]
+
+[dependencies]
+capdl-types-derive = { path = "./derive" }
+cfg-if = "*"
+miniz_oxide = { version = "0.6.2", default-features = false, optional = true }
+sel4 = { path = "../../sel4", default-features = false, optional = true }
+serde = { version = "*", default-features = false, features = ["derive"], optional = true }

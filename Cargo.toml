@@ -3,6 +3,14 @@
 resolver = "2"
 
 members = [
+    "crates/capdl/embed-spec",
+    "crates/capdl/embedded-spec",
+    "crates/capdl/embedded-spec/serialized",
+    "crates/capdl/embedded-spec/validate",
+    "crates/capdl/loader",
+    "crates/capdl/loader/core",
+    "crates/capdl/types",
+    "crates/capdl/types/derive",
     "crates/examples/sel4cp/banscii/pds/assistant",
     "crates/examples/sel4cp/banscii/pds/assistant/core",
     "crates/examples/sel4cp/banscii/pds/assistant/core/test",

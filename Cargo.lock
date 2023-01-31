@@ -196,6 +196,96 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "14c189c53d098945499cdfa7ecc63567cf3886b3332b312a5b4585d8d3a6a610"
 
 [[package]]
+name = "capdl-embed-spec"
+version = "0.1.0"
+dependencies = [
+ "capdl-types",
+ "hex",
+ "miniz_oxide",
+ "proc-macro2",
+ "quote",
+ "serde",
+ "serde_json",
+ "syn",
+]
+
+[[package]]
+name = "capdl-embedded-spec"
+version = "0.1.0"
+dependencies = [
+ "capdl-embed-spec",
+ "capdl-embedded-spec-serialized",
+ "capdl-types",
+ "serde_json",
+ "which",
+]
+
+[[package]]
+name = "capdl-embedded-spec-serialized"
+version = "0.1.0"
+dependencies = [
+ "capdl-types",
+ "hex",
+ "proc-macro2",
+ "quote",
+ "serde_json",
+ "syn",
+]
+
+[[package]]
+name = "capdl-embedded-spec-validate"
+version = "0.1.0"
+dependencies = [
+ "capdl-embedded-spec",
+ "capdl-embedded-spec-serialized",
+ "capdl-types",
+]
+
+[[package]]
+name = "capdl-loader"
+version = "0.1.0"
+dependencies = [
+ "capdl-embedded-spec",
+ "capdl-embedded-spec-validate",
+ "capdl-loader-core",
+ "capdl-types",
+ "sel4",
+ "sel4-logging",
+ "sel4-minimal-root-task-runtime",
+]
+
+[[package]]
+name = "capdl-loader-core"
+version = "0.1.0"
+dependencies = [
+ "capdl-types",
+ "log",
+ "sel4",
+ "sel4-platform-info",
+]
+
+[[package]]
+name = "capdl-types"
+version = "0.1.0"
+dependencies = [
+ "capdl-types-derive",
+ "cfg-if",
+ "miniz_oxide",
+ "sel4",
+ "serde",
+]
+
+[[package]]
+name = "capdl-types-derive"
+version = "0.1.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+ "synstructure",
+]
+
+[[package]]
 name = "cc"
 version = "1.0.78"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1604,6 +1694,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "synstructure"
+version = "0.12.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f36bdaa60a83aca3921b5259d5400cbf5e90fc51931376a9bd4a0eb79aa7210f"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+ "unicode-xid",
+]
+
+[[package]]
 name = "termcolor"
 version = "1.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1742,6 +1844,12 @@ name = "unicode-ident"
 version = "1.0.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "84a22b9f218b40614adcb3f4ff08b703773ad44fa9423e4e0d346d5db86e4ebc"
+
+[[package]]
+name = "unicode-xid"
+version = "0.2.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f962df74c8c05a667b5ee8bcf162993134c104e96440b663c8daa176dc772d8c"
 
 [[package]]
 name = "unsafe-libyaml"

@@ -1,0 +1,16 @@
+[package]
+name = "capdl-embedded-spec-serialized"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+capdl-types = { path = "../../types", features = ["alloc", "serde"] }
+serde_json = "*"
+
+[build-dependencies]
+capdl-types = { path = "../../types", features = ["alloc", "serde"] }
+hex = "*"
+proc-macro2 = "1"
+quote = "1"
+serde_json = "*"
+syn = "1"

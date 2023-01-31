@@ -1,0 +1,10 @@
+[package]
+name = "capdl-loader-core"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+capdl-types = { path = "../../types", features = ["sel4"] }
+log = "*"
+sel4 = { path = "../../../sel4" }
+sel4-platform-info = { path = "../../../sel4/platform-info" }
