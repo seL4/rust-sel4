@@ -1,7 +1,9 @@
 [package]
 name = "capdl-types"
 version = "0.1.0"
+authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
 edition = "2021"
+license = "BSD-2-Clause"
 
 [features]
 alloc = ["serde?/alloc", "miniz_oxide?/with-alloc"]
