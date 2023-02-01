@@ -196,12 +196,25 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "14c189c53d098945499cdfa7ecc63567cf3886b3332b312a5b4585d8d3a6a610"
 
 [[package]]
+name = "capdl-arm-loader"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "capdl-types",
+ "clap",
+ "fallible-iterator",
+ "object",
+ "postcard",
+ "render-elf-with-data",
+ "serde_json",
+]
+
+[[package]]
 name = "capdl-embed-spec"
 version = "0.1.0"
 dependencies = [
  "capdl-types",
  "hex",
- "miniz_oxide",
  "proc-macro2",
  "quote",
  "serde",
@@ -257,6 +270,8 @@ version = "0.1.0"
 dependencies = [
  "capdl-loader-core",
  "capdl-types",
+ "log",
+ "postcard",
  "sel4",
  "sel4-full-root-task-runtime",
  "sel4-logging",
@@ -1117,6 +1132,16 @@ name = "regex-syntax"
 version = "0.6.28"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "456c603be3e8d448b072f410900c09faf164fbce2d480456f50eea6e25f9c848"
+
+[[package]]
+name = "render-elf-with-data"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "clap",
+ "fallible-iterator",
+ "object",
+]
 
 [[package]]
 name = "root-task-with-full-runtime"
