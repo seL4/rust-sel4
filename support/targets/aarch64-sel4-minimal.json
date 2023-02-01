@@ -6,7 +6,6 @@
   "env": "sel4",
   "exe-suffix": ".elf",
   "features": "+strict-align,+neon,+fp-armv8",
-  "link-script": "__sel4_ipc_buffer_obj = (_end + 4096 - 1) & ~(4096 - 1);",
   "linker": "rust-lld",
   "linker-flavor": "ld.lld",
   "llvm-target": "aarch64-none-elf",

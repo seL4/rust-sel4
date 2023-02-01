@@ -76,7 +76,7 @@ impl Config {
     fn name(&self) -> String {
         let mut name = self.arch.name();
         name.push_str("-sel4");
-        if self.minimal {
+        if self.cp {
             name.push_str("cp");
         }
         if self.minimal {
