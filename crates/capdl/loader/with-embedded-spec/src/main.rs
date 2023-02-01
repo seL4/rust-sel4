@@ -1,6 +1,9 @@
 #![no_std]
 #![no_main]
 #![feature(const_trait_impl)]
+#![feature(strict_provenance)]
+
+use core::ops::Range;
 
 use capdl_embedded_spec::SPEC;
 use capdl_loader_core::{load, LoaderBuffers, PerObjectBuffer};
@@ -20,6 +23,25 @@ static mut BUFFERS: LoaderBuffers<[PerObjectBuffer; SPEC.objects.as_slice().len(
 #[sel4_minimal_root_task_runtime::main]
 fn main(bootinfo: &BootInfo) -> ! {
     LOGGER.set().unwrap();
-    load(&SPEC, &(), &bootinfo, unsafe { &mut BUFFERS })
-        .unwrap_or_else(|err| panic!("Error: {}", err))
+    load(
+        &SPEC,
+        &(),
+        &bootinfo,
+        unsafe { &mut BUFFERS },
+        user_image_bounds(),
+    )
+    .unwrap_or_else(|err| panic!("Error: {}", err))
+}
+
+extern "C" {
+    static __executable_start: u64;
+    static _end: u64;
+}
+
+fn user_image_bounds() -> Range<usize> {
+    unsafe { addr_of_ref(&__executable_start)..addr_of_ref(&_end) }
+}
+
+fn addr_of_ref<T>(x: &T) -> usize {
+    (x as *const T).addr()
 }

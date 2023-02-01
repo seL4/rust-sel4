@@ -45,7 +45,7 @@ impl<'a, T: Container<'a>, F, N: Clone> ConcreteSpec<'a, T, F, N> {
     }
 
     pub fn traverse_fill<F1, E>(
-        self,
+        &self,
         mut f: impl FnMut(&F) -> Result<F1, E>,
     ) -> Result<ConcreteSpec<'a, VecContainer, F1, N>, E> {
         self.traverse_fill_with_context(|entry| f(&entry.content))

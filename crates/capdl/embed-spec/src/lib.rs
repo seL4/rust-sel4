@@ -297,11 +297,11 @@ impl<'a> State<'a> {
                         #[allow(non_upper_case_globals)]
                         const #ident: &[u8] = include_bytes!(concat!(env!("OUT_DIR"), "/", #fname));
                     });
-                    let content = if self.deflate_fill {
-                        miniz_oxide::deflate::compress_to_vec(content_bytes.bytes, 10)
+                    let content = (if self.deflate_fill {
+                        FillEntryContentDeflatedBytes::pack
                     } else {
-                        content_bytes.bytes.to_vec()
-                    };
+                        FillEntryContentBytes::pack
+                    })(&content_bytes.bytes);
                     fills.insert(id, content);
                 }
                 Ok::<(), !>(())

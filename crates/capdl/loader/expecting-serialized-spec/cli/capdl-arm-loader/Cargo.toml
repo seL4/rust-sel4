@@ -1,0 +1,16 @@
+[package]
+name = "capdl-arm-loader"
+version = "0.1.0"
+authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
+edition = "2021"
+license = "MIT"
+
+[dependencies]
+anyhow = "*"
+capdl-types = { path = "../../../../types", features = ["alloc", "serde", "deflate"] }
+clap = "3.2"
+fallible-iterator = "*"
+object = { version = "*", features = ["all"] }
+postcard = { version = "*", default-features = false, features = ["alloc"] }
+render-elf-with-data = { path = "../../../../../build-tools/render-elf-with-data" }
+serde_json = "*"

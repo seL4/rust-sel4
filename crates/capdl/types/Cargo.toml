@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [features]
-alloc = ["serde?/alloc"]
+alloc = ["serde?/alloc", "miniz_oxide?/with-alloc"]
 deflate = ["miniz_oxide"]
 
 [dependencies]

@@ -7,9 +7,11 @@
 #![feature(int_roundings)]
 #![feature(never_type)]
 #![feature(const_trait_impl)]
+#![allow(unused_variables)]
 
 use core::array;
 use core::borrow::BorrowMut;
+use core::ops::Range;
 use core::ptr;
 use core::result;
 use core::slice;
@@ -58,10 +60,11 @@ pub fn load<
     via: &'b C::Via,
     bootinfo: &'a BootInfo,
     buffers: &'a mut LoaderBuffers<PO>,
+    own_footprint: Range<usize>,
 ) -> Result<!> {
     info!("Starting CapDL Loader");
 
-    let (small_frame_copy_addr, large_frame_copy_addr) = init_copy_addrs(bootinfo)?;
+    let (small_frame_copy_addr, large_frame_copy_addr) = init_copy_addrs(bootinfo, &own_footprint)?;
 
     let mut cslot_allocator = CSlotAllocator::new(bootinfo.empty());
 

@@ -28,6 +28,20 @@ impl<'a> fmt::Debug for FillEntryContentBytes<'a> {
     }
 }
 
+#[cfg(feature = "alloc")]
+impl<'a> FillEntryContentBytes<'a> {
+    pub fn pack(content: &[u8]) -> Vec<u8> {
+        content.to_vec()
+    }
+}
+
+#[cfg(all(feature = "alloc", feature = "deflate"))]
+impl<'a> FillEntryContentDeflatedBytes<'a> {
+    pub fn pack(content: &[u8]) -> Vec<u8> {
+        miniz_oxide::deflate::compress_to_vec(content, 10)
+    }
+}
+
 #[cfg(feature = "deflate")]
 #[derive(Clone, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]

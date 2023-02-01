@@ -1,0 +1,10 @@
+[package]
+name = "render-elf-with-data"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "*"
+clap = "3.2"
+fallible-iterator = "*"
+object = { version = "*", features = ["all"] }
