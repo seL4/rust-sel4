@@ -11,12 +11,6 @@ use rustc_target::spec::PanicStrategy;
 use rustc_target::spec::Target;
 use rustc_target::spec::TargetTriple;
 
-// use std::collections::BTreeMap;
-
-// use rustc_target::spec::Cc;
-// use rustc_target::spec::LinkerFlavor;
-// use rustc_target::spec::Lld;
-
 use clap::{App, Arg};
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
@@ -64,15 +58,6 @@ impl Config {
             let options = &mut target.options;
             options.link_script =
                 Some("__sel4_ipc_buffer_obj = (_end + 4096 - 1) & ~(4096 - 1);".into());
-            // options.pre_link_args = BTreeMap::from_iter([
-            //     (
-            //         LinkerFlavor::Gnu(Cc::No, Lld::Yes),
-            //         vec![
-            //             "--defsym".into(),
-            //             "__sel4_ipc_buffer_obj=_end".into(),
-            //         ],
-            //     ),
-            // ]);
         }
 
         if !self.minimal {
