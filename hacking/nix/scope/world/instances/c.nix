@@ -6,7 +6,7 @@
 
 , crates
 , mkTask
-, defaultRustTargetName
+, defaultRustTargetInfo
 
 , mk
 }:
@@ -53,10 +53,10 @@ let
           ];
         });
         modifyConfig = old: lib.recursiveUpdate old {
-          target.${defaultRustTargetName} = {
+          target.${defaultRustTargetInfo.name} = {
 
             linker = "${stdenv.cc.targetPrefix}ld.lld";
-            rustflags = (old.target.${defaultRustTargetName}.rustflags or []) ++ [
+            rustflags = (old.target.${defaultRustTargetInfo.name}.rustflags or []) ++ [
               "-C" "linker-flavor=ld"
               "-C" "link-arg=-lc"
             ];
@@ -67,7 +67,7 @@ let
             # Investigate
             # linker = "${stdenv.cc.targetPrefix}cc";
             # # linker = ccWrapper;
-            # rustflags = (old.target.${defaultRustTargetName}.rustflags or []) ++ [
+            # rustflags = (old.target.${defaultRustTargetInfo.name}.rustflags or []) ++ [
             #   "-C" "linker-flavor=gcc"
             #   "-C" "link-arg=-nostartfiles"
             #   "-C" "default-linker-libraries=on"

@@ -2,6 +2,7 @@
 , writeScript, linkFarm
 , crates
 , mkTask, mkLoader
+, seL4RustTargetInfoWithConfig
 , worldConfig
 , callPackage
 }:
@@ -101,9 +102,7 @@ in rec {
         rootTask = mkTask {
           rootCrate = crates.root-task-with-minimal-runtime-with-state;
           release = false;
-          extraProfile = {
-            panic = "abort";
-          };
+          rustTargetInfo = seL4RustTargetInfoWithConfig { minimal = true; };
         };
         isSupported = haveMinimalRuntime;
         canAutomate = true;
@@ -113,9 +112,7 @@ in rec {
         rootTask = mkTask {
           rootCrate = crates.root-task-with-minimal-runtime-without-state;
           release = false;
-          extraProfile = {
-            panic = "abort";
-          };
+          rustTargetInfo = seL4RustTargetInfoWithConfig { minimal = true; };
         };
         isSupported = haveMinimalRuntime;
         canAutomate = true;

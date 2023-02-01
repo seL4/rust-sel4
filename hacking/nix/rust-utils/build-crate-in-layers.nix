@@ -2,7 +2,7 @@
 , linkFarm, emptyDirectory
 , crateUtils
 , vendorLockfile, pruneLockfile
-, defaultRustToolchain, defaultRustTargetName, defaultRustTargetPath
+, defaultRustToolchain, defaultRustTargetInfo
 } @ outerArgs:
 
 { superLockfile
@@ -25,8 +25,7 @@ in
 , noDefaultFeatures ? false
 
 , rustToolchain ? defaultRustToolchain
-, rustTargetName ? defaultRustTargetName
-, rustTargetPath ? defaultRustTargetPath
+, rustTargetInfo ? defaultRustTargetInfo
 
 , stdenv ? outerArgs.stdenv
 }:
@@ -79,8 +78,8 @@ let
   baseArgs = {
     depsBuildBuild = [ buildPackages.stdenv.cc ];
     nativeBuildInputs = [ rustToolchain ];
-  } // lib.optionalAttrs (rustTargetPath != null) {
-    RUST_TARGET_PATH = rustTargetPath;
+  } // lib.optionalAttrs (rustTargetInfo.path != null) {
+    RUST_TARGET_PATH = rustTargetInfo.path;
   };
 
   baseManifest = {
@@ -89,7 +88,10 @@ let
   };
 
   baseConfig = crateUtils.clobber [
-    (crateUtils.baseConfig { inherit rustToolchain rustTargetName; })
+    (crateUtils.baseConfig {
+      inherit rustToolchain;
+      rustTargetName = rustTargetInfo.name;
+    })
     (vendorLockfile { inherit lockfileContents; }).configFragment
   ];
 
@@ -104,7 +106,7 @@ let
   ] ++ lib.optionals release [
     "--release"
   ] ++ [
-    "--target" rustTargetName
+    "--target" rustTargetInfo.name
   ];
 
   f = accumulatedLayers:

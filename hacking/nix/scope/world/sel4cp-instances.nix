@@ -8,6 +8,7 @@
 , crates
 , seL4ForUserspace
 , crateUtils
+, seL4RustTargetInfoWithConfig
 }:
 
 let
@@ -23,17 +24,7 @@ let
         };
       }
     ];
-    extraProfile = {
-      panic = "abort";
-    };
-    rustTargetName = "aarch64-sel4cp";
-    rustTargetPath =
-      let
-        fname = "${rustTargetName}.json";
-      in
-        linkFarm "targets" [
-          { name = fname; path = srcRoot + "/support/targets/${fname}"; }
-        ];
+    rustTargetInfo = seL4RustTargetInfoWithConfig { cp = true; minimal = true; };
   });
 
 in {

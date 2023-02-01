@@ -4,8 +4,7 @@
 
 , crateUtils
 , defaultRustToolchain
-, defaultRustTargetName
-, defaultRustTargetPath
+, defaultRustTargetInfo
 , vendorLockfile, pruneLockfile
 , crates
 , buildSysroot
@@ -18,8 +17,9 @@
 
 let
   rustToolchain = defaultRustToolchain;
-  rustTargetName = defaultRustTargetName;
-  rustTargetPath = defaultRustTargetPath;
+  rustTargetInfo = defaultRustTargetInfo;
+  rustTargetName = rustTargetInfo.name;
+  rustTargetPath = rustTargetInfo.path;
 
   runtimes = [
     { name = "none"; features = []; }
@@ -44,7 +44,7 @@ let
       };
 
       sysrootHost = buildSysroot {
-        inherit rustTargetName rustTargetPath;
+        inherit rustTargetInfo;
         release = false;
       };
 

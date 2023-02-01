@@ -1,6 +1,6 @@
 { lib, buildPackages, writeText
 , buildCrateInLayersHere, buildSysroot, crateUtils
-, crates, bareMetalRustTargetName
+, crates, bareMetalRustTargetInfo
 , seL4ForUserspace, seL4ForBoot
 , loaderConfig
 }:
@@ -8,8 +8,9 @@
 { appELF }:
 
 let
-  rustTargetName = bareMetalRustTargetName;
-  rustTargetPath = null;
+  rustTargetInfo = bareMetalRustTargetInfo;
+  rustTargetName = rustTargetInfo.name;
+  rustTargetPath = rustTargetInfo.path;
 
   release = false;
 
@@ -30,7 +31,7 @@ let
   ];
 
   sysroot = buildSysroot {
-    inherit release rustTargetName rustTargetPath;
+    inherit release rustTargetInfo;
     extraManifest = profiles;
   };
 
@@ -56,8 +57,8 @@ buildCrateInLayersHere {
 
   inherit release;
   inherit rootCrate;
-  inherit rustTargetName;
-  inherit rustTargetPath;
+
+  rustTargetInfo = bareMetalRustTargetInfo;
 
   features = [];
 

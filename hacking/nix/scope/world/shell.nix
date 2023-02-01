@@ -1,9 +1,8 @@
 { lib, stdenv, buildPackages
 , writeText, mkShell
 , defaultRustToolchain
-, defaultRustTargetName
-, defaultRustTargetPath
-, bareMetalRustTargetName
+, defaultRustTargetInfo
+, bareMetalRustTargetInfo
 , kernel, loaderConfig
 , srcRoot
 }:
@@ -16,15 +15,15 @@ mkShell rec {
   RUST_TARGET_PATH = toString (srcRoot + "/support/targets");
 
   # TODO
-  RUST_SEL4_TARGET = defaultRustTargetName;
+  RUST_SEL4_TARGET = defaultRustTargetInfo.name;
   # RUST_SEL4_TARGET = "aarch64-sel4cp";
 
-  RUST_BARE_METAL_TARGET = bareMetalRustTargetName;
+  RUST_BARE_METAL_TARGET = bareMetalRustTargetInfo.name;
 
   HOST_CARGO_FLAGS = lib.concatStringsSep " " [
     "-Z" "build-std=core,alloc,compiler_builtins"
     "-Z" "build-std-features=compiler-builtins-mem"
-    "--target" RUST_SEL4_TARGET
+    # "--target" RUST_SEL4_TARGET
   ];
 
   LIBCLANG_PATH = "${lib.getLib buildPackages.llvmPackages.libclang}/lib";

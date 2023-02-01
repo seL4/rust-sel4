@@ -1,7 +1,7 @@
 { lib, stdenv, buildPlatform, hostPlatform, buildPackages
 , runCommand, linkFarm
 , vendorLockfile, crateUtils, symlinkToRegularFile
-, defaultRustToolchain, defaultRustTargetPath, defaultRustTargetName
+, defaultRustToolchain, defaultRustTargetInfo
 , rustToolchain ? defaultRustToolchain
 }:
 
@@ -17,8 +17,7 @@ in
 { release ? true
 , extraManifest ? {}
 , extraConfig ? {}
-, rustTargetName ? defaultRustTargetName
-, rustTargetPath ? defaultRustTargetPath
+, rustTargetInfo ? defaultRustTargetInfo
 }:
 
 let
@@ -50,7 +49,7 @@ let
     # baseConfig # TODO will trigger rebuild
     {
       target = {
-        "${rustTargetName}" = {
+        "${rustTargetInfo.name}" = {
           rustflags = [
             # "-C" "force-unwind-tables=yes" # TODO compare with "requires-uwtable" in target.json
             "-C" "embed-bitcode=yes"
@@ -68,7 +67,7 @@ runCommand "sysroot" {
   depsBuildBuild = [ buildPackages.stdenv.cc ];
   nativeBuildInputs = [ rustToolchain ];
 
-  RUST_TARGET_PATH = rustTargetPath;
+  RUST_TARGET_PATH = rustTargetInfo.path;
 } ''
   cargo build \
     -Z unstable-options \
@@ -76,13 +75,13 @@ runCommand "sysroot" {
     --frozen \
     --config ${config} \
     ${lib.optionalString release "--release"} \
-    --target ${rustTargetName} \
+    --target ${rustTargetInfo.name} \
     -Z build-std=core,alloc,compiler_builtins \
     -Z build-std-features=compiler-builtins-mem \
     --manifest-path ${workspace}/Cargo.toml \
     --target-dir $(pwd)/target
 
-  d=$out/lib/rustlib/${rustTargetName}/lib
+  d=$out/lib/rustlib/${rustTargetInfo.name}/lib
   mkdir -p $d
-  mv target/${rustTargetName}/${if release then "release" else "debug"}/deps/* $d
+  mv target/${rustTargetInfo.name}/${if release then "release" else "debug"}/deps/* $d
 ''

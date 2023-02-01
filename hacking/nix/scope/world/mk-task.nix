@@ -1,7 +1,7 @@
 { lib, buildPackages
 , buildCrateInLayersHere, buildSysroot, crateUtils
 , crates, injectPhdrs
-, defaultRustTargetName, defaultRustTargetPath
+, defaultRustTargetInfo
 , seL4ForUserspace
 } @ scopeArgs:
 
@@ -15,8 +15,7 @@
 , replaceSysroot ? null
 , injectPhdrs ? false
 
-, rustTargetName ? defaultRustTargetName
-, rustTargetPath ? defaultRustTargetPath
+, rustTargetInfo ? defaultRustTargetInfo
 , release ? true
 , ...
 } @ args:
@@ -39,8 +38,7 @@ let
   ];
 
   sysroot = (if replaceSysroot != null then replaceSysroot else buildSysroot) {
-    inherit rustTargetName rustTargetPath;
-    inherit release;
+    inherit release rustTargetInfo;
     extraManifest = profiles;
   };
 
@@ -49,7 +47,7 @@ let
   theseCommonModifications = crateUtils.elaborateModifications {
     modifyManifest = lib.flip lib.recursiveUpdate profiles;
     modifyConfig = lib.flip lib.recursiveUpdate {
-      target.${rustTargetName}.rustflags = [
+      target.${rustTargetInfo.name}.rustflags = [
         "--sysroot" sysroot
       ];
     };

@@ -9,7 +9,7 @@ let
         pkgSet = pkgs.host.aarch64.none;
         world = pkgSet.this.worlds.default;
       in rec {
-        name = pkgSet.this.defaultRustTargetName;
+        name = pkgSet.this.defaultRustTargetInfo.name;
         description = "${name} (qemu-virt-arm)";
         byRuntime = world.docs;
       }
@@ -19,7 +19,7 @@ let
         pkgSet = pkgs.host.riscv64.none;
         world = pkgSet.this.worlds.default;
       in rec {
-        name = pkgSet.this.defaultRustTargetName;
+        name = pkgSet.this.defaultRustTargetInfo.name;
         description = "${name} (spike)";
         byRuntime = world.docs;
       }
@@ -29,7 +29,7 @@ let
         pkgSet = pkgs.host.x86_64.none;
         world = pkgSet.this.worlds.default;
       in rec {
-        name = pkgSet.this.defaultRustTargetName;
+        name = pkgSet.this.defaultRustTargetInfo.name;
         description = "${name} (pc99)";
         byRuntime = world.docs;
       }

@@ -53,44 +53,45 @@ superCallPackage ../rust-utils {} self //
 
   defaultRustToolchain = rustToolchain;
 
-  defaultRustTargetName =
-    if !hostPlatform.isNone
-    then hostPlatform.config
-    else {
-      aarch64 = "aarch64-sel4";
-      riscv64 = "riscv64imac-sel4";
-      x86_64 = "x86_64-sel4";
-    }."${hostPlatform.parsed.cpu.name}";
+  rustTargetArchName = {
+    aarch64 = "aarch64";
+    riscv64 = "riscv64imac";
+    x86_64 = "x86_64";
+  }."${hostPlatform.parsed.cpu.name}";
 
-  bareMetalRustTargetName =
+  defaultRustTargetInfo =
     if !hostPlatform.isNone
-    then hostPlatform.config
-    else {
-      aarch64 = "aarch64-unknown-none";
-      riscv64 = "riscv64imac-unknown-none-elf";
-      x86_64 = "x86_64-unknown-none";
-    }."${hostPlatform.parsed.cpu.name}";
+    then mkBuiltinRustTargetInfo hostPlatform.config
+    else seL4RustTargetInfoWithConfig {};
 
-  defaultRustTargetPath =
-    if !hostPlatform.isNone
-    then null
-    else
+  seL4RustTargetInfoWithConfig = { cp ? false, minimal ? false }: mkCustomRustTargetInfo "${rustTargetArchName}-sel4${lib.optionalString cp "cp"}${lib.optionalString minimal "-minimal"}";
+
+  bareMetalRustTargetInfo = mkBuiltinRustTargetInfo {
+    aarch64 = "aarch64-unknown-none";
+    riscv64 = "riscv64imac-unknown-none-elf";
+    x86_64 = "x86_64-unknown-none";
+  }."${hostPlatform.parsed.cpu.name}";
+
+  mkBuiltinRustTargetInfo = name: {
+    inherit name;
+    path = null;
+  };
+
+  mkCustomRustTargetInfo = name: {
+    inherit name;
+    path =
       let
-        fname = "${defaultRustTargetName}.json";
+        fname = "${name}.json";
       in
         linkFarm "targets" [
           { name = fname; path = srcRoot + "/support/targets/${fname}"; }
         ];
+  };
 
   chooseLinkerForRustTarget = { rustToolchain, rustTargetName, platform }:
     if platform.isNone
     then "${rustToolchain}/lib/rustlib/${buildPlatform.config}/bin/rust-lld"
     else null;
-
-  # chooseLinkerForRustTarget = { rustToolchain, rustTargetName, platform }:
-  #   if platform.isNone
-  #   then "${stdenv.cc.targetPrefix}ld"
-  #   else null;
 
   crates = callPackage ./crates.nix {};
 

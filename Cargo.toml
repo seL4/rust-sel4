@@ -87,10 +87,3 @@ members = [
     "crates/tests/root-task/panicking",
     "crates/tests/root-task/tls",
 ]
-
-[profile.dev]
-panic = "abort"
-
-[profile.dev-unwind]
-inherits = "dev"
-panic = "unwind"
