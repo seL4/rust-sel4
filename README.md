@@ -41,7 +41,7 @@ Note that, for now, these crates depend on some patches to libsel4 which can be 
 
 The best way to learn how to integrate these crates into your project is to check out this concrete example of their use in a project with a simple build system:
 
-https://gitlab.com/coliasgroup/rust-seL4-simple-build-system-demo
+https://gitlab.com/coliasgroup/rust-seL4-demos/simple-build-system-demo
 
 Many of these crates depend, at build time, on external components and configuration.
 In all cases, information about these dependencies is passed to the dependant crates via environment variables which are interpreted by `build.rs` scripts.
