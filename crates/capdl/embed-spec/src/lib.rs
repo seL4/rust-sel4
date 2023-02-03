@@ -66,13 +66,15 @@ impl<'a> State<'a> {
         }
     }
 
+    // TODO(nspin) support FillEntryContent::BootInfo
     fn embed_fill(&self, fill: &[FillEntry<FillEntryContentFileAndBytes>]) -> TokenStream {
         let mut toks = quote!();
         for entry in fill.iter() {
-            let offset = entry.offset;
-            let length = entry.length;
-            let content_value =
-                self.embedded_file_ident_from_id(&self.encode_fill_entry_to_id(&entry));
+            let range = format!("{:?}", entry.range).parse::<TokenStream>().unwrap();
+            let content_value = self.embedded_file_ident_from_id(&self.encode_fill_entry_to_id(
+                entry.range.end - entry.range.start,
+                entry.content.as_data().unwrap(),
+            ));
             let (content_type, content_field) = if self.deflate_fill {
                 (
                     quote!(FillEntryContentDeflatedBytes),
@@ -83,11 +85,10 @@ impl<'a> State<'a> {
             };
             toks.extend(quote! {
                 FillEntry {
-                    offset: #offset,
-                    length: #length,
-                    content: #content_type {
+                    range: #range,
+                    content: FillEntryContent::Data(#content_type {
                         #content_field: #content_value,
-                    },
+                    }),
                 },
             })
         }
@@ -131,6 +132,14 @@ impl<'a> State<'a> {
                             init_args: #init_args,
                         })
                     }
+                }
+            }
+            Object::IRQ(obj) => {
+                let toks = self.embed_cap_table(obj.slots.as_slice());
+                quote! {
+                    Object::IRQ(object::IRQ {
+                        slots: #toks,
+                    })
                 }
             }
             Object::SmallPage(obj) => {
@@ -262,12 +271,13 @@ impl<'a> State<'a> {
 
     fn encode_fill_entry_to_id(
         &self,
-        fill_entry: &FillEntry<FillEntryContentFileAndBytes>,
+        length: usize,
+        fill_entry: &FillEntryContentFileAndBytes,
     ) -> FillEntryContentId {
-        let (content_file, _) = &fill_entry.content;
+        let (content_file, _) = &fill_entry;
         hex::encode(format!(
             "{},{},{}",
-            content_file.file_offset, fill_entry.length, content_file.file
+            content_file.file_offset, length, content_file.file
         ))
     }
 
@@ -287,9 +297,9 @@ impl<'a> State<'a> {
         let mut file_definition_toks = quote!();
         let mut fills = BTreeMap::<FillEntryContentId, Vec<u8>>::new();
         self.spec
-            .traverse_fill_with_context(|entry| {
-                let (_, content_bytes) = &entry.content;
-                let id = self.encode_fill_entry_to_id(&entry);
+            .traverse_fill_with_context(|length, content| {
+                let (_, content_bytes) = content;
+                let id = self.encode_fill_entry_to_id(length, content);
                 if !fills.contains_key(&id) {
                     let ident = self.embedded_file_ident_from_id(&id);
                     let fname = self.embedded_file_fname_from_id(&id);

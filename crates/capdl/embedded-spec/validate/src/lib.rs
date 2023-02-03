@@ -66,9 +66,9 @@ fn translate_embedded<'a, S: ObjectNameForComparison, C: AvailableFillEntryConte
     spec: &'static SpecForLoader<'a, S, C>,
 ) -> SpecCommon<'a, S::ComparisonPoint> {
     spec.traverse(
-        |entry| {
-            let mut v = vec![0; entry.length];
-            entry.content.copy_out(&mut v);
+        |length, content| {
+            let mut v = vec![0; length];
+            content.copy_out(&mut v);
             Ok::<_, !>(v)
         },
         |name| Ok(name.us()),
@@ -80,7 +80,7 @@ fn translate_serialized<'a, S: ObjectNameForComparison>(
     spec: &SpecForBuildSystem<'a, (FillEntryContentFile, FillEntryContentBytes<'static>)>,
 ) -> SpecCommon<'a, S::ComparisonPoint> {
     spec.traverse(
-        |entry| Ok::<_, !>(entry.content.1.bytes.to_vec()),
+        |_length, content| Ok::<_, !>(content.1.bytes.to_vec()),
         |name| Ok(S::them(name)),
     )
     .into_ok()
