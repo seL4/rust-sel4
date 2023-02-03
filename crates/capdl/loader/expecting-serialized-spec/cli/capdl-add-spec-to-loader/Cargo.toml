@@ -1,5 +1,5 @@
 [package]
-name = "capdl-arm-loader"
+name = "capdl-add-spec-to-loader"
 version = "0.1.0"
 authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
 edition = "2021"

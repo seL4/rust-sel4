@@ -10,7 +10,7 @@ members = [
     "crates/capdl/embedded-spec/validate",
     "crates/capdl/loader/core",
     "crates/capdl/loader/expecting-serialized-spec",
-    "crates/capdl/loader/expecting-serialized-spec/cli/capdl-arm-loader",
+    "crates/capdl/loader/expecting-serialized-spec/cli/capdl-add-spec-to-loader",
     "crates/capdl/loader/with-embedded-spec",
     "crates/capdl/types",
     "crates/capdl/types/derive",
