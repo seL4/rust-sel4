@@ -207,6 +207,21 @@ impl<C: InvocationContext> TCB<C> {
     }
 }
 
+impl<C: InvocationContext> IRQControl<C> {
+    /// Corresponds to `seL4_IRQControl_Get`.
+    pub fn irq_control_get(self, irq: Word, dst: &AbsoluteCPtr) -> Result<()> {
+        Error::wrap(self.invoke(|cptr, ipc_buffer| {
+            ipc_buffer.inner_mut().seL4_IRQControl_Get(
+                cptr.bits(),
+                irq,
+                dst.root().bits(),
+                dst.path().bits(),
+                dst.path().depth_for_kernel(),
+            )
+        }))
+    }
+}
+
 impl<C: InvocationContext> IRQHandler<C> {
     /// Corresponds to `seL4_IRQHandler_Ack`.
     pub fn irq_handler_ack(self) -> Result<()> {

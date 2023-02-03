@@ -25,15 +25,12 @@ pub fn reserialize_spec(spec_json: &[u8], fill_dir_path: impl AsRef<Path>) -> Ve
     let mut fill = vec![];
     let final_spec: ConcreteSpec<VecContainer, FillEntryContentDeflatedBytesVia, String> =
         input_spec
-            .traverse_fill_with_context(|entry| {
-                let mut uncompressed = vec![0; entry.length];
+            .traverse_fill_with_context(|length, entry| {
+                let mut uncompressed = vec![0; length];
                 open_files
-                    .get(&entry.content.file)
+                    .get(&entry.file)
                     .unwrap()
-                    .read_exact_at(
-                        &mut uncompressed,
-                        entry.content.file_offset.try_into().unwrap(),
-                    )
+                    .read_exact_at(&mut uncompressed, entry.file_offset.try_into().unwrap())
                     .unwrap();
                 let compressed = FillEntryContentDeflatedBytes::pack(&uncompressed);
                 let start = fill.len();

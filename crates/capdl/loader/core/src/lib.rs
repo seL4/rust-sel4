@@ -303,15 +303,34 @@ impl<
         // Create IRQHandler caps
         {
             for IRQEntry { irq, handler } in self.spec.irqs.as_slice().iter() {
-                let obj: &object::ARMIrq<_> = self.spec.object(*handler).try_into().unwrap();
                 let slot = self.cslot_alloc_or_panic();
-                #[sel4::sel4_cfg(not(MAX_NUM_NODES = "1"))]
-                BootInfo::irq_control().irq_control_get_trigger_core(
-                    *irq,
-                    obj.trigger,
-                    obj.target,
-                    &cslot_relative_cptr(slot),
-                )?;
+                match self.spec.object(*handler) {
+                    Object::ARMIrq(obj) => {
+                        sel4::sel4_cfg_if! {
+                            if #[cfg(MAX_NUM_NODES = "1")] {
+                                BootInfo::irq_control().irq_control_get_trigger(
+                                    *irq,
+                                    obj.trigger,
+                                    &cslot_relative_cptr(slot),
+                                )?;
+                            } else {
+                                BootInfo::irq_control().irq_control_get_trigger_core(
+                                    *irq,
+                                    obj.trigger,
+                                    obj.target,
+                                    &cslot_relative_cptr(slot),
+                                )?;
+                            }
+                        }
+                    }
+                    Object::Irq(_) => {
+                        BootInfo::irq_control()
+                            .irq_control_get(*irq, &cslot_relative_cptr(slot))?;
+                    }
+                    _ => {
+                        panic!();
+                    }
+                }
                 self.set_orig_cslot(*handler, slot);
             }
         }
@@ -322,9 +341,18 @@ impl<
     fn init_irqs(&mut self) -> Result<()> {
         debug!("Initializing IRQs");
 
-        for (obj_id, obj) in self.spec.filter_objects::<&object::ARMIrq<CapTable<T>>>() {
+        let irq_notifications = self
+            .spec
+            .filter_objects::<&object::Irq<CapTable<T>>>()
+            .map(|(obj_id, obj)| (obj_id, obj.notification()));
+        let arm_irq_notifications = self
+            .spec
+            .filter_objects::<&object::ARMIrq<CapTable<T>>>()
+            .map(|(obj_id, obj)| (obj_id, obj.notification()));
+
+        for (obj_id, notification) in irq_notifications.chain(arm_irq_notifications) {
             let irq_handler = self.orig_local_cptr::<cap_type::IRQHandler>(obj_id);
-            if let Some(logical_nfn_cap) = obj.notification() {
+            if let Some(logical_nfn_cap) = notification {
                 let nfn = match logical_nfn_cap.badge {
                     0 => self.orig_local_cptr(logical_nfn_cap.object),
                     badge => {
@@ -377,12 +405,34 @@ impl<
         atomic::fence(Ordering::SeqCst);
         // atomic::compiler_fence(Ordering::SeqCst);
         for entry in fill.as_slice() {
-            let offset = entry.offset;
-            let length = entry.length;
-            assert!(offset + length <= U::FRAME_SIZE.bytes());
+            let offset = entry.range.start;
+            let length = entry.range.end - entry.range.start;
+            assert!(entry.range.end <= U::FRAME_SIZE.bytes());
             let dst_frame = ptr::from_exposed_addr_mut::<u8>(self.copy_addr::<U>());
             let dst = unsafe { slice::from_raw_parts_mut(dst_frame.add(offset), length) };
-            entry.content.copy_out_via(&self.via, dst);
+            match &entry.content {
+                FillEntryContent::Data(content_data) => {
+                    content_data.copy_out_via(&self.via, dst);
+                }
+                FillEntryContent::BootInfo(content_bootinfo) => {
+                    for extra in self.bootinfo.extra() {
+                        if extra.id == (&content_bootinfo.id).into() {
+                            let n = dst.len().min(
+                                extra
+                                    .content_with_header()
+                                    .len()
+                                    .saturating_sub(content_bootinfo.offset),
+                            );
+                            if n > 0 {
+                                dst[..n].copy_from_slice(
+                                    &extra.content_with_header()
+                                        [content_bootinfo.offset..(content_bootinfo.offset + n)],
+                                );
+                            }
+                        }
+                    }
+                }
+            }
         }
         atomic::fence(Ordering::SeqCst);
         // atomic::compiler_fence(Ordering::SeqCst);

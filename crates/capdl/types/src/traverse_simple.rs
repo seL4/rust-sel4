@@ -26,6 +26,7 @@ impl<C, F> Object<C, F> {
             Object::Notification => Object::Notification,
             Object::CNode(obj) => Object::CNode(obj.traverse_simple(f)?),
             Object::TCB(obj) => Object::TCB(obj.traverse_simple(f)?),
+            Object::Irq(obj) => Object::Irq(obj.traverse_simple(f)?),
             Object::VCPU => Object::VCPU,
             Object::SmallPage(obj) => Object::SmallPage(obj.traverse_simple(g)?),
             Object::LargePage(obj) => Object::LargePage(obj.traverse_simple(g)?),
@@ -85,6 +86,17 @@ impl<C> object::TCB<C> {
             fault_ep: self.fault_ep,
             extra_info: self.extra_info.clone(),
             init_args: self.init_args.clone(),
+        })
+    }
+}
+
+impl<C> object::Irq<C> {
+    pub fn traverse_simple<C1, E>(
+        &self,
+        f: impl FnOnce(&C) -> Result<C1, E>,
+    ) -> Result<object::Irq<C1>, E> {
+        Ok(object::Irq {
+            slots: f(&self.slots)?,
         })
     }
 }

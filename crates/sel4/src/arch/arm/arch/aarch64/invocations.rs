@@ -121,9 +121,9 @@ impl<T: TranslationTableType, C: InvocationContext> LocalCPtr<T, C> {
     }
 }
 
+// TODO structured trigger type
 impl<C: InvocationContext> IRQControl<C> {
     /// Corresponds to `seL4_IRQControl_GetTriggerCore`.
-    // TODO structured trigger type
     #[sel4_cfg(not(MAX_NUM_NODES = "1"))]
     pub fn irq_control_get_trigger_core(
         self,
@@ -141,6 +141,25 @@ impl<C: InvocationContext> IRQControl<C> {
                 dst.path().bits(),
                 dst.path().depth_for_kernel(),
                 target,
+            )
+        }))
+    }
+
+    /// Corresponds to `seL4_IRQControl_GetTrigger`.
+    pub fn irq_control_get_trigger(
+        self,
+        irq: Word,
+        trigger: Word,
+        dst: &AbsoluteCPtr,
+    ) -> Result<()> {
+        Error::wrap(self.invoke(|cptr, ipc_buffer| {
+            ipc_buffer.inner_mut().seL4_IRQControl_GetTrigger(
+                cptr.bits(),
+                irq,
+                trigger,
+                dst.root().bits(),
+                dst.path().bits(),
+                dst.path().depth_for_kernel(),
             )
         }))
     }

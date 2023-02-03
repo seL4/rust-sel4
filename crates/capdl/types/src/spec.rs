@@ -1,4 +1,5 @@
 use core::fmt;
+use core::ops::Range;
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
@@ -43,6 +44,7 @@ pub enum Object<C, F> {
     Notification,
     CNode(object::CNode<C>),
     TCB(object::TCB<C>),
+    Irq(object::Irq<C>),
     VCPU,
     SmallPage(object::SmallPage<F>),
     LargePage(object::LargePage<F>),
@@ -74,6 +76,7 @@ pub enum Cap {
     Notification(cap::Notification),
     CNode(cap::CNode),
     TCB(cap::TCB),
+    IrqHandler(cap::IrqHandler),
     VCPU(cap::VCPU),
     SmallPage(cap::SmallPage),
     LargePage(cap::LargePage),
@@ -82,7 +85,7 @@ pub enum Cap {
     PUD(cap::PUD),
     PGD(cap::PGD),
     ASIDPool(cap::ASIDPool),
-    ARMIrq(cap::ARMIrq),
+    ARMIrqHandler(cap::ARMIrqHandler),
 }
 
 impl Cap {
@@ -95,13 +98,14 @@ impl Cap {
             Cap::SmallPage(cap) => cap.object,
             Cap::LargePage(cap) => cap.object,
             Cap::TCB(cap) => cap.object,
+            Cap::IrqHandler(cap) => cap.object,
             Cap::VCPU(cap) => cap.object,
             Cap::PT(cap) => cap.object,
             Cap::PD(cap) => cap.object,
             Cap::PUD(cap) => cap.object,
             Cap::PGD(cap) => cap.object,
             Cap::ASIDPool(cap) => cap.object,
-            Cap::ARMIrq(cap) => cap.object,
+            Cap::ARMIrqHandler(cap) => cap.object,
         }
     }
 }
@@ -118,9 +122,37 @@ pub struct Rights {
 #[derive(Debug, Clone, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct FillEntry<F> {
+    pub range: Range<usize>,
+    pub content: FillEntryContent<F>,
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub enum FillEntryContent<F> {
+    Data(F),
+    BootInfo(FillEntryContentBootInfo),
+}
+
+impl<F> FillEntryContent<F> {
+    pub fn as_data(&self) -> Option<&F> {
+        match self {
+            Self::Data(data) => Some(&data),
+            _ => None,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct FillEntryContentBootInfo {
+    pub id: FillEntryContentBootInfoId,
     pub offset: usize,
-    pub length: usize,
-    pub content: F,
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub enum FillEntryContentBootInfoId {
+    Fdt,
 }
 
 pub mod object {
@@ -165,6 +197,12 @@ pub mod object {
         pub ip: Word,
         pub sp: Word,
         pub spsr: Word,
+    }
+
+    #[derive(Debug, Clone, Eq, PartialEq, IsObject)]
+    #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+    pub struct Irq<C> {
+        pub slots: C,
     }
 
     #[derive(Debug, Clone, Eq, PartialEq, IsObject)]
@@ -261,6 +299,12 @@ pub mod cap {
 
     #[derive(Debug, Clone, Eq, PartialEq, IsCap)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+    pub struct IrqHandler {
+        pub object: ObjectId,
+    }
+
+    #[derive(Debug, Clone, Eq, PartialEq, IsCap)]
+    #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
     pub struct VCPU {
         pub object: ObjectId,
     }
@@ -313,7 +357,7 @@ pub mod cap {
 
     #[derive(Debug, Clone, Eq, PartialEq, IsCap)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-    pub struct ARMIrq {
+    pub struct ARMIrqHandler {
         pub object: ObjectId,
     }
 }

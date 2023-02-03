@@ -1,6 +1,6 @@
 use sel4::{CapRights, ObjectBlueprint, ObjectBlueprintAArch64, ObjectBlueprintArm, VMAttributes};
 
-use crate::{cap, Object, Rights};
+use crate::{cap, FillEntryContentBootInfoId, Object, Rights};
 
 impl<C, F> Object<C, F> {
     pub fn blueprint(&self) -> Option<ObjectBlueprint> {
@@ -30,6 +30,14 @@ impl<C, F> Object<C, F> {
 impl From<&Rights> for CapRights {
     fn from(rights: &Rights) -> Self {
         Self::new(rights.grant_reply, rights.grant, rights.read, rights.write)
+    }
+}
+
+impl From<&FillEntryContentBootInfoId> for sel4::BootInfoExtraId {
+    fn from(id: &FillEntryContentBootInfoId) -> Self {
+        match id {
+            FillEntryContentBootInfoId::Fdt => sel4::BootInfoExtraId::Fdt,
+        }
     }
 }
 

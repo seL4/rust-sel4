@@ -179,14 +179,25 @@ fn region_to_range(region: sys::seL4_SlotRegion) -> Range<InitCSpaceSlot> {
 }
 
 /// An extra bootinfo chunk along with its ID.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct BootInfoExtra<'a> {
     pub id: BootInfoExtraId,
-    pub content: &'a [u8],
+    pub content_with_header: &'a [u8],
+}
+
+impl<'a> BootInfoExtra<'a> {
+    pub fn content_with_header(&self) -> &[u8] {
+        self.content_with_header
+    }
+
+    pub fn content(&self) -> &[u8] {
+        let content_with_header = self.content_with_header();
+        &content_with_header[mem::size_of::<sys::seL4_BootInfoHeader>()..]
+    }
 }
 
 /// Corresponds to `seL4_BootInfoID`.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum BootInfoExtraId {
     Padding,
     Fdt,
@@ -229,13 +240,14 @@ impl<'a> Iterator for BootInfoExtraIter<'a> {
                     .offset(self.cursor.try_into().unwrap())
                     .cast::<sys::seL4_BootInfoHeader>()
             };
-            let content_start = self.cursor + mem::size_of::<sys::seL4_BootInfoHeader>();
-            let content_end = self.cursor + usize::try_from(header.len).unwrap();
-            self.cursor = content_end;
+            let content_with_header_start = self.cursor;
+            let content_with_header_end = self.cursor + usize::try_from(header.len).unwrap();
+            self.cursor = content_with_header_end;
             if let Some(id) = BootInfoExtraId::from_sys(header.id) {
                 return Some(BootInfoExtra {
                     id,
-                    content: &self.bootinfo.extra_slice()[content_start..content_end],
+                    content_with_header: &self.bootinfo.extra_slice()
+                        [content_with_header_start..content_with_header_end],
                 });
             }
         }

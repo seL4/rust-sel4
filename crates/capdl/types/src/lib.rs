@@ -28,8 +28,9 @@ pub use container::{Container, ContainerType, SliceContainer};
 pub use fill::{AvailableFillEntryContent, AvailableFillEntryContentVia, FillEntryContentBytes};
 pub use object_name::{ObjectName, Unnamed};
 pub use spec::{
-    cap, object, ASIDSlotEntry, Badge, CPtr, Cap, FillEntry, IRQEntry, NamedObject, Object,
-    ObjectId, Rights, Spec, TryFromCapError, TryFromObjectError, Word,
+    cap, object, ASIDSlotEntry, Badge, CPtr, Cap, FillEntry, FillEntryContent,
+    FillEntryContentBootInfo, FillEntryContentBootInfoId, IRQEntry, NamedObject, Object, ObjectId,
+    Rights, Spec, TryFromCapError, TryFromObjectError, Word,
 };
 
 #[cfg(feature = "alloc")]

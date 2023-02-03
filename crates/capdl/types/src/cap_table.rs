@@ -88,6 +88,24 @@ impl<C: Borrow<[CapTableEntry]>> HasCapTable for object::CNode<C> {
     }
 }
 
+impl<C: Borrow<[CapTableEntry]>> HasCapTable for object::Irq<C> {
+    fn slots(&self) -> &[CapTableEntry] {
+        self.slots.borrow()
+    }
+}
+
+impl<C> object::Irq<C> {
+    // NOTE
+    // magic consts must be kept in sync with capDL-tool
+    pub const SLOT_NOTIFICATION: CapSlot = 0;
+}
+
+impl<C: Borrow<[CapTableEntry]>> object::Irq<C> {
+    pub fn notification(&self) -> Option<&cap::Notification> {
+        self.maybe_slot_as(Self::SLOT_NOTIFICATION)
+    }
+}
+
 impl<C: Borrow<[CapTableEntry]>> HasCapTable for object::PGD<C> {
     fn slots(&self) -> &[CapTableEntry] {
         self.slots.borrow()
