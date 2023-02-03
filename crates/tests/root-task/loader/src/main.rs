@@ -37,7 +37,7 @@ fn main(bootinfo: &sel4::BootInfo) -> ! {
     for extra in bootinfo.extra() {
         match extra.id {
             sel4::BootInfoExtraId::Fdt => {
-                let dt = fdt::Fdt::new(extra.content).unwrap();
+                let dt = fdt::Fdt::new(extra.content()).unwrap();
                 for s in dt.strings().intersperse(" ") {
                     debug_print!("{}", s);
                 }
