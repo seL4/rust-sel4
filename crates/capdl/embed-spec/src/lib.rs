@@ -193,12 +193,12 @@ impl<'a> State<'a> {
                     })
                 }
             }
-            Object::ARMIrq(obj) => {
+            Object::ArmIRQ(obj) => {
                 let toks = self.embed_cap_table(obj.slots.as_slice());
                 let trigger = obj.trigger;
                 let target = obj.target;
                 quote! {
-                    Object::ARMIrq(object::ARMIrq {
+                    Object::ArmIRQ(object::ArmIRQ {
                         slots: #toks,
                         trigger: #trigger,
                         target: #target,

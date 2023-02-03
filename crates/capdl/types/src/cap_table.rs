@@ -88,19 +88,19 @@ impl<C: Borrow<[CapTableEntry]>> HasCapTable for object::CNode<C> {
     }
 }
 
-impl<C: Borrow<[CapTableEntry]>> HasCapTable for object::Irq<C> {
+impl<C: Borrow<[CapTableEntry]>> HasCapTable for object::IRQ<C> {
     fn slots(&self) -> &[CapTableEntry] {
         self.slots.borrow()
     }
 }
 
-impl<C> object::Irq<C> {
+impl<C> object::IRQ<C> {
     // NOTE
     // magic consts must be kept in sync with capDL-tool
     pub const SLOT_NOTIFICATION: CapSlot = 0;
 }
 
-impl<C: Borrow<[CapTableEntry]>> object::Irq<C> {
+impl<C: Borrow<[CapTableEntry]>> object::IRQ<C> {
     pub fn notification(&self) -> Option<&cap::Notification> {
         self.maybe_slot_as(Self::SLOT_NOTIFICATION)
     }
@@ -130,19 +130,19 @@ impl<C: Borrow<[CapTableEntry]>> HasCapTable for object::PT<C> {
     }
 }
 
-impl<C: Borrow<[CapTableEntry]>> HasCapTable for object::ARMIrq<C> {
+impl<C: Borrow<[CapTableEntry]>> HasCapTable for object::ArmIRQ<C> {
     fn slots(&self) -> &[CapTableEntry] {
         self.slots.borrow()
     }
 }
 
-impl<C> object::ARMIrq<C> {
+impl<C> object::ArmIRQ<C> {
     // NOTE
     // magic consts must be kept in sync with capDL-tool
     pub const SLOT_NOTIFICATION: CapSlot = 0;
 }
 
-impl<C: Borrow<[CapTableEntry]>> object::ARMIrq<C> {
+impl<C: Borrow<[CapTableEntry]>> object::ArmIRQ<C> {
     pub fn notification(&self) -> Option<&cap::Notification> {
         self.maybe_slot_as(Self::SLOT_NOTIFICATION)
     }

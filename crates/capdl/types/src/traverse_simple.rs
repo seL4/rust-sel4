@@ -26,7 +26,7 @@ impl<C, F> Object<C, F> {
             Object::Notification => Object::Notification,
             Object::CNode(obj) => Object::CNode(obj.traverse_simple(f)?),
             Object::TCB(obj) => Object::TCB(obj.traverse_simple(f)?),
-            Object::Irq(obj) => Object::Irq(obj.traverse_simple(f)?),
+            Object::IRQ(obj) => Object::IRQ(obj.traverse_simple(f)?),
             Object::VCPU => Object::VCPU,
             Object::SmallPage(obj) => Object::SmallPage(obj.traverse_simple(g)?),
             Object::LargePage(obj) => Object::LargePage(obj.traverse_simple(g)?),
@@ -35,7 +35,7 @@ impl<C, F> Object<C, F> {
             Object::PUD(obj) => Object::PUD(obj.traverse_simple(f)?),
             Object::PGD(obj) => Object::PGD(obj.traverse_simple(f)?),
             Object::ASIDPool(obj) => Object::ASIDPool(obj.clone()),
-            Object::ARMIrq(obj) => Object::ARMIrq(obj.traverse_simple(f)?),
+            Object::ArmIRQ(obj) => Object::ArmIRQ(obj.traverse_simple(f)?),
         })
     }
 }
@@ -90,12 +90,12 @@ impl<C> object::TCB<C> {
     }
 }
 
-impl<C> object::Irq<C> {
+impl<C> object::IRQ<C> {
     pub fn traverse_simple<C1, E>(
         &self,
         f: impl FnOnce(&C) -> Result<C1, E>,
-    ) -> Result<object::Irq<C1>, E> {
-        Ok(object::Irq {
+    ) -> Result<object::IRQ<C1>, E> {
+        Ok(object::IRQ {
             slots: f(&self.slots)?,
         })
     }
@@ -145,12 +145,12 @@ impl<C> object::PGD<C> {
     }
 }
 
-impl<C> object::ARMIrq<C> {
+impl<C> object::ArmIRQ<C> {
     pub fn traverse_simple<C1, E>(
         &self,
         f: impl FnOnce(&C) -> Result<C1, E>,
-    ) -> Result<object::ARMIrq<C1>, E> {
-        Ok(object::ARMIrq {
+    ) -> Result<object::ArmIRQ<C1>, E> {
+        Ok(object::ArmIRQ {
             slots: f(&self.slots)?,
             trigger: self.trigger,
             target: self.target,

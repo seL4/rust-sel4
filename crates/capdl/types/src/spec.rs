@@ -44,7 +44,7 @@ pub enum Object<C, F> {
     Notification,
     CNode(object::CNode<C>),
     TCB(object::TCB<C>),
-    Irq(object::Irq<C>),
+    IRQ(object::IRQ<C>),
     VCPU,
     SmallPage(object::SmallPage<F>),
     LargePage(object::LargePage<F>),
@@ -53,7 +53,7 @@ pub enum Object<C, F> {
     PUD(object::PUD<C>),
     PGD(object::PGD<C>),
     ASIDPool(object::ASIDPool),
-    ARMIrq(object::ARMIrq<C>),
+    ArmIRQ(object::ArmIRQ<C>),
 }
 
 impl<C, F> Object<C, F> {
@@ -76,7 +76,7 @@ pub enum Cap {
     Notification(cap::Notification),
     CNode(cap::CNode),
     TCB(cap::TCB),
-    IrqHandler(cap::IrqHandler),
+    IRQHandler(cap::IRQHandler),
     VCPU(cap::VCPU),
     SmallPage(cap::SmallPage),
     LargePage(cap::LargePage),
@@ -85,7 +85,7 @@ pub enum Cap {
     PUD(cap::PUD),
     PGD(cap::PGD),
     ASIDPool(cap::ASIDPool),
-    ARMIrqHandler(cap::ARMIrqHandler),
+    ArmIRQHandler(cap::ArmIRQHandler),
 }
 
 impl Cap {
@@ -98,14 +98,14 @@ impl Cap {
             Cap::SmallPage(cap) => cap.object,
             Cap::LargePage(cap) => cap.object,
             Cap::TCB(cap) => cap.object,
-            Cap::IrqHandler(cap) => cap.object,
+            Cap::IRQHandler(cap) => cap.object,
             Cap::VCPU(cap) => cap.object,
             Cap::PT(cap) => cap.object,
             Cap::PD(cap) => cap.object,
             Cap::PUD(cap) => cap.object,
             Cap::PGD(cap) => cap.object,
             Cap::ASIDPool(cap) => cap.object,
-            Cap::ARMIrqHandler(cap) => cap.object,
+            Cap::ArmIRQHandler(cap) => cap.object,
         }
     }
 }
@@ -201,7 +201,7 @@ pub mod object {
 
     #[derive(Debug, Clone, Eq, PartialEq, IsObject)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-    pub struct Irq<C> {
+    pub struct IRQ<C> {
         pub slots: C,
     }
 
@@ -251,7 +251,7 @@ pub mod object {
 
     #[derive(Debug, Clone, Eq, PartialEq, IsObject)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-    pub struct ARMIrq<C> {
+    pub struct ArmIRQ<C> {
         pub slots: C,
         pub trigger: Word,
         pub target: Word,
@@ -299,7 +299,7 @@ pub mod cap {
 
     #[derive(Debug, Clone, Eq, PartialEq, IsCap)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-    pub struct IrqHandler {
+    pub struct IRQHandler {
         pub object: ObjectId,
     }
 
@@ -357,7 +357,7 @@ pub mod cap {
 
     #[derive(Debug, Clone, Eq, PartialEq, IsCap)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-    pub struct ARMIrqHandler {
+    pub struct ArmIRQHandler {
         pub object: ObjectId,
     }
 }

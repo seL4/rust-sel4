@@ -305,7 +305,7 @@ impl<
             for IRQEntry { irq, handler } in self.spec.irqs.as_slice().iter() {
                 let slot = self.cslot_alloc_or_panic();
                 match self.spec.object(*handler) {
-                    Object::ARMIrq(obj) => {
+                    Object::ArmIRQ(obj) => {
                         sel4::sel4_cfg_if! {
                             if #[cfg(MAX_NUM_NODES = "1")] {
                                 BootInfo::irq_control().irq_control_get_trigger(
@@ -323,7 +323,7 @@ impl<
                             }
                         }
                     }
-                    Object::Irq(_) => {
+                    Object::IRQ(_) => {
                         BootInfo::irq_control()
                             .irq_control_get(*irq, &cslot_relative_cptr(slot))?;
                     }
@@ -343,11 +343,11 @@ impl<
 
         let irq_notifications = self
             .spec
-            .filter_objects::<&object::Irq<CapTable<T>>>()
+            .filter_objects::<&object::IRQ<CapTable<T>>>()
             .map(|(obj_id, obj)| (obj_id, obj.notification()));
         let arm_irq_notifications = self
             .spec
-            .filter_objects::<&object::ARMIrq<CapTable<T>>>()
+            .filter_objects::<&object::ArmIRQ<CapTable<T>>>()
             .map(|(obj_id, obj)| (obj_id, obj.notification()));
 
         for (obj_id, notification) in irq_notifications.chain(arm_irq_notifications) {
