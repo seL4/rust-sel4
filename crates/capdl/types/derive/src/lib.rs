@@ -10,9 +10,9 @@ pub fn derive_cap(input: TokenStream) -> TokenStream {
 fn derive_cap_impl(ast: &syn::DeriveInput) -> TokenStream {
     let name = &ast.ident;
     let gen = quote! {
-        impl<'a> TryFrom<&'a Cap> for &'a #name {
+        impl<'b> TryFrom<&'b Cap> for &'b #name {
             type Error = TryFromCapError;
-            fn try_from(cap: &'a Cap) -> Result<Self, Self::Error> {
+            fn try_from(cap: &'b Cap) -> Result<Self, Self::Error> {
                 match cap {
                     Cap::#name(cap) => Ok(&cap),
                     _ => Err(TryFromCapError),
@@ -38,17 +38,17 @@ fn derive_object_impl(ast: &syn::DeriveInput) -> TokenStream {
     let name = &ast.ident;
     let generics = &ast.generics;
     let gen = quote! {
-        impl<'a, C, F> TryFrom<&'a Object<C, F>> for &'a #name #generics {
+        impl<'a, 'b, F> TryFrom<&'b Object<'a, F>> for &'b #name #generics {
             type Error = TryFromObjectError;
-            fn try_from(obj: &'a Object<C, F>) -> Result<Self, Self::Error> {
+            fn try_from(obj: &'b Object<'a, F>) -> Result<Self, Self::Error> {
                 match obj {
                     Object::#name(cap) => Ok(&cap),
                     _ => Err(TryFromObjectError),
                 }
             }
         }
-        impl<C, F> Into<Object<C, F>> for #name #generics {
-            fn into(self) -> Object<C, F> {
+        impl<'a, F> Into<Object<'a, F>> for #name #generics {
+            fn into(self) -> Object<'a, F> {
                 Object::#name(self)
             }
         }

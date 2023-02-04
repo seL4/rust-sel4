@@ -3,10 +3,7 @@ use core::fmt;
 use core::iter;
 use core::slice;
 
-use crate::{cap, object, Cap, TryFromCapError};
-
-pub type CapSlot = usize;
-pub type CapTableEntry = (CapSlot, Cap);
+use crate::{cap, object, Cap, CapSlot, CapTableEntry, TryFromCapError};
 
 pub trait HasCapTable {
     fn slots(&self) -> &[CapTableEntry];
@@ -44,13 +41,13 @@ pub trait HasCapTable {
     }
 }
 
-impl<C: Borrow<[CapTableEntry]>> HasCapTable for object::TCB<C> {
+impl<'a> HasCapTable for object::TCB<'a> {
     fn slots(&self) -> &[CapTableEntry] {
         self.slots.borrow()
     }
 }
 
-impl<C> object::TCB<C> {
+impl<'a> object::TCB<'a> {
     // NOTE
     // magic consts must be kept in sync with capDL-tool
     pub const SLOT_CSPACE: CapSlot = 0;
@@ -60,7 +57,7 @@ impl<C> object::TCB<C> {
     pub const SLOT_VCPU: CapSlot = 9;
 }
 
-impl<C: Borrow<[CapTableEntry]>> object::TCB<C> {
+impl<'a> object::TCB<'a> {
     pub fn cspace(&self) -> &cap::CNode {
         self.slot_as(Self::SLOT_CSPACE)
     }
@@ -82,67 +79,67 @@ impl<C: Borrow<[CapTableEntry]>> object::TCB<C> {
     }
 }
 
-impl<C: Borrow<[CapTableEntry]>> HasCapTable for object::CNode<C> {
+impl<'a> HasCapTable for object::CNode<'a> {
     fn slots(&self) -> &[CapTableEntry] {
         self.slots.borrow()
     }
 }
 
-impl<C: Borrow<[CapTableEntry]>> HasCapTable for object::IRQ<C> {
+impl<'a> HasCapTable for object::IRQ<'a> {
     fn slots(&self) -> &[CapTableEntry] {
         self.slots.borrow()
     }
 }
 
-impl<C> object::IRQ<C> {
+impl<'a> object::IRQ<'a> {
     // NOTE
     // magic consts must be kept in sync with capDL-tool
     pub const SLOT_NOTIFICATION: CapSlot = 0;
 }
 
-impl<C: Borrow<[CapTableEntry]>> object::IRQ<C> {
+impl<'a> object::IRQ<'a> {
     pub fn notification(&self) -> Option<&cap::Notification> {
         self.maybe_slot_as(Self::SLOT_NOTIFICATION)
     }
 }
 
-impl<C: Borrow<[CapTableEntry]>> HasCapTable for object::PGD<C> {
+impl<'a> HasCapTable for object::PGD<'a> {
     fn slots(&self) -> &[CapTableEntry] {
         self.slots.borrow()
     }
 }
 
-impl<C: Borrow<[CapTableEntry]>> HasCapTable for object::PUD<C> {
+impl<'a> HasCapTable for object::PUD<'a> {
     fn slots(&self) -> &[CapTableEntry] {
         self.slots.borrow()
     }
 }
 
-impl<C: Borrow<[CapTableEntry]>> HasCapTable for object::PD<C> {
+impl<'a> HasCapTable for object::PD<'a> {
     fn slots(&self) -> &[CapTableEntry] {
         self.slots.borrow()
     }
 }
 
-impl<C: Borrow<[CapTableEntry]>> HasCapTable for object::PT<C> {
+impl<'a> HasCapTable for object::PT<'a> {
     fn slots(&self) -> &[CapTableEntry] {
         self.slots.borrow()
     }
 }
 
-impl<C: Borrow<[CapTableEntry]>> HasCapTable for object::ArmIRQ<C> {
+impl<'a> HasCapTable for object::ArmIRQ<'a> {
     fn slots(&self) -> &[CapTableEntry] {
         self.slots.borrow()
     }
 }
 
-impl<C> object::ArmIRQ<C> {
+impl<'a> object::ArmIRQ<'a> {
     // NOTE
     // magic consts must be kept in sync with capDL-tool
     pub const SLOT_NOTIFICATION: CapSlot = 0;
 }
 
-impl<C: Borrow<[CapTableEntry]>> object::ArmIRQ<C> {
+impl<'a> object::ArmIRQ<'a> {
     pub fn notification(&self) -> Option<&cap::Notification> {
         self.maybe_slot_as(Self::SLOT_NOTIFICATION)
     }
@@ -155,25 +152,25 @@ impl<C: Borrow<[CapTableEntry]>> object::ArmIRQ<C> {
 //     type Entry;
 // }
 
-impl<C: Borrow<[CapTableEntry]>> object::PGD<C> {
+impl<'a> object::PGD<'a> {
     pub fn entries(&self) -> impl Iterator<Item = (CapSlot, &cap::PUD)> {
         self.slots_as()
     }
 }
 
-impl<C: Borrow<[CapTableEntry]>> object::PUD<C> {
+impl<'a> object::PUD<'a> {
     pub fn entries(&self) -> impl Iterator<Item = (CapSlot, &cap::PD)> {
         self.slots_as()
     }
 }
 
-impl<C: Borrow<[CapTableEntry]>> object::PD<C> {
+impl<'a> object::PD<'a> {
     pub fn entries(&self) -> impl Iterator<Item = (CapSlot, PDEntry)> {
         self.slots_as()
     }
 }
 
-impl<C: Borrow<[CapTableEntry]>> object::PT<C> {
+impl<'a> object::PT<'a> {
     pub fn entries(&self) -> impl Iterator<Item = (CapSlot, &cap::SmallPage)> {
         self.slots_as()
     }

@@ -12,8 +12,7 @@ pub fn run() {
     )
 }
 
-type SpecCommon<'a, S> = ConcreteSpec<'a, VecContainer, Fill, S>;
-type Fill = Vec<u8>;
+type SpecCommon<'a, N> = Spec<'a, N, Vec<u8>>;
 
 trait ObjectNameForComparison {
     type ComparisonPoint: Clone + Eq + PartialEq;
@@ -46,9 +45,9 @@ impl ObjectNameForComparison for &str {
     }
 }
 
-fn compare<'a, F: AvailableFillEntryContent, N: ObjectNameForComparison>(
-    serialized: &SpecForBuildSystem<'a, (FillEntryContentFile, FillEntryContentBytes<'static>)>,
-    embedded: &'static SpecForLoader<'a, F, N>,
+fn compare<'a, N: ObjectNameForComparison, F: AvailableFillEntryContent>(
+    serialized: &Spec<'a, String, (FillEntryContentFile, FillEntryContentBytes<'static>)>,
+    embedded: &Spec<'a, N, F>,
 ) where
     N::ComparisonPoint: fmt::Debug,
 {
@@ -62,26 +61,26 @@ fn compare<'a, F: AvailableFillEntryContent, N: ObjectNameForComparison>(
     }
 }
 
-fn translate_embedded<'a, F: AvailableFillEntryContent, N: ObjectNameForComparison>(
-    spec: &'static SpecForLoader<'a, F, N>,
+fn translate_embedded<'a, N: ObjectNameForComparison, F: AvailableFillEntryContent>(
+    spec: &Spec<'a, N, F>,
 ) -> SpecCommon<'a, N::ComparisonPoint> {
     spec.traverse(
+        |name| Ok(name.us()),
         |length, content| {
             let mut v = vec![0; length];
             content.copy_out(&mut v);
             Ok::<_, !>(v)
         },
-        |name| Ok(name.us()),
     )
     .into_ok()
 }
 
 fn translate_serialized<'a, N: ObjectNameForComparison>(
-    spec: &SpecForBuildSystem<'a, (FillEntryContentFile, FillEntryContentBytes<'static>)>,
+    spec: &Spec<'a, String, (FillEntryContentFile, FillEntryContentBytes<'static>)>,
 ) -> SpecCommon<'a, N::ComparisonPoint> {
     spec.traverse(
-        |_length, content| Ok::<_, !>(content.1.bytes.to_vec()),
         |name| Ok(N::them(name)),
+        |_length, content| Ok::<_, !>(content.1.bytes.to_vec()),
     )
     .into_ok()
 }

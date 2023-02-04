@@ -27,10 +27,7 @@ static LOGGER: Logger = LoggerBuilder::default()
 fn main(bootinfo: &BootInfo) -> ! {
     LOGGER.set().unwrap();
     let (spec, fill) = get_serialized_spec();
-    let mut buffers = LoaderBuffers::new(vec![
-        PerObjectBuffer::default();
-        spec.objects.as_slice().len()
-    ]);
+    let mut buffers = LoaderBuffers::new(vec![PerObjectBuffer::default(); spec.objects.len()]);
     load(&spec, fill, &bootinfo, &mut buffers, user_image_bounds())
         .unwrap_or_else(|err| panic!("Error: {}", err))
 }
@@ -46,7 +43,7 @@ static mut capdl_spec_start: *const u8 = ptr::null();
 static mut capdl_spec_size: usize = 0;
 
 fn get_serialized_spec<'a>() -> (
-    ConcreteSpec<'a, VecContainer, FillEntryContentDeflatedBytesVia, String>,
+    Spec<'a, String, FillEntryContentDeflatedBytesVia>,
     &'static [u8],
 ) {
     let blob = unsafe { slice::from_raw_parts(capdl_spec_start, capdl_spec_size) };

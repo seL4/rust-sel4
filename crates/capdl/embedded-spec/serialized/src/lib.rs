@@ -7,8 +7,8 @@ const SPEC: &str = include_str!(concat!(env!("OUT_DIR"), "/spec.json"));
 
 const FILL: &[(&str, &[u8])] = include!(concat!(env!("OUT_DIR"), "/files.rs"));
 
-pub fn get<'a>() -> SpecForBuildSystem<'a, (FillEntryContentFile, FillEntryContentBytes<'static>)> {
-    let spec: SpecForBuildSystem<FillEntryContentFile> = serde_json::from_str(SPEC).unwrap();
+pub fn get<'a>() -> Spec<'a, String, (FillEntryContentFile, FillEntryContentBytes<'static>)> {
+    let spec: Spec<String, FillEntryContentFile> = serde_json::from_str(SPEC).unwrap();
     spec.traverse_fill_with_context(|length, content| {
         Ok::<_, !>((
             content.clone(),

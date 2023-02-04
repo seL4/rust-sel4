@@ -42,20 +42,16 @@ use memory::init_copy_addrs;
 
 // TODO see seL4_ARM_Page_CleanInvalidate_Data/seL4_ARM_Page_Unify_Instruction in upstream
 
-type Fill<'a, T, F> = ContainerType<'a, T, FillEntry<F>>;
-type CapTable<'a, T> = ContainerType<'a, T, CapTableEntry>;
-
 type Result<T> = result::Result<T, CapDLLoaderError>;
 
 pub fn load<
     'a,
     'b,
-    T: Container<'b>,
     F: AvailableFillEntryContentVia,
     N: ObjectName + fmt::Debug,
     B: BorrowMut<[PerObjectBuffer]>,
 >(
-    spec: &'b ConcreteSpec<'b, T, F, N>,
+    spec: &'b Spec<'b, N, F>,
     via: &'b F::Via,
     bootinfo: &'a BootInfo,
     buffers: &'a mut LoaderBuffers<B>,
@@ -79,15 +75,8 @@ pub fn load<
     .load()
 }
 
-struct Loader<
-    'a,
-    'b,
-    T: Container<'b>,
-    F: AvailableFillEntryContentVia,
-    N,
-    B: BorrowMut<[PerObjectBuffer]>,
-> {
-    spec: &'b ConcreteSpec<'b, T, F, N>,
+struct Loader<'a, 'b, F: AvailableFillEntryContentVia, N, B: BorrowMut<[PerObjectBuffer]>> {
+    spec: &'b Spec<'b, N, F>,
     via: &'b F::Via,
     bootinfo: &'a BootInfo,
     small_frame_copy_addr: usize,
@@ -99,11 +88,10 @@ struct Loader<
 impl<
         'a,
         'b,
-        T: Container<'b>,
         F: AvailableFillEntryContentVia,
         N: ObjectName + fmt::Debug,
         B: BorrowMut<[PerObjectBuffer]>,
-    > Loader<'a, 'b, T, F, N, B>
+    > Loader<'a, 'b, F, N, B>
 {
     pub fn load(&mut self) -> Result<!> {
         self.create_objects()?;
@@ -155,7 +143,6 @@ impl<
         let first_obj_without_paddr = self
             .spec
             .objects
-            .as_slice()
             .partition_point(|named_obj| named_obj.object.paddr().is_some());
         let num_objs_with_paddr = first_obj_without_paddr;
 
@@ -291,7 +278,7 @@ impl<
         // this in order of obj.asid_high, for verification reasons (see
         // upstream C CapDL loader).
         {
-            for obj_id in self.spec.asid_slots.as_slice().iter() {
+            for obj_id in self.spec.asid_slots.iter() {
                 let ut = self.orig_local_cptr(*obj_id);
                 let slot = self.cslot_alloc_or_panic();
                 BootInfo::asid_control().asid_control_make_pool(ut, &cslot_relative_cptr(slot))?;
@@ -301,7 +288,7 @@ impl<
 
         // Create IRQHandler caps
         {
-            for IRQEntry { irq, handler } in self.spec.irqs.as_slice().iter() {
+            for IRQEntry { irq, handler } in self.spec.irqs.iter() {
                 let slot = self.cslot_alloc_or_panic();
                 match self.spec.object(*handler) {
                     Object::ArmIRQ(obj) => {
@@ -342,11 +329,11 @@ impl<
 
         let irq_notifications = self
             .spec
-            .filter_objects::<&object::IRQ<CapTable<T>>>()
+            .filter_objects::<&object::IRQ>()
             .map(|(obj_id, obj)| (obj_id, obj.notification()));
         let arm_irq_notifications = self
             .spec
-            .filter_objects::<&object::ArmIRQ<CapTable<T>>>()
+            .filter_objects::<&object::ArmIRQ>()
             .map(|(obj_id, obj)| (obj_id, obj.notification()));
 
         for (obj_id, notification) in irq_notifications.chain(arm_irq_notifications) {
@@ -370,7 +357,7 @@ impl<
 
     fn init_asids(&self) -> Result<()> {
         debug!("Initializing ASIDs");
-        for (obj_id, _obj) in self.spec.filter_objects::<&object::PGD<CapTable<T>>>() {
+        for (obj_id, _obj) in self.spec.filter_objects::<&object::PGD>() {
             let pgd = self.orig_local_cptr::<cap_type::PGD>(obj_id);
             BootInfo::init_thread_asid_pool().asid_pool_assign(pgd)?;
         }
@@ -379,11 +366,11 @@ impl<
 
     fn init_frames(&mut self) -> Result<()> {
         debug!("Initializing Frames");
-        for (obj_id, obj) in self.spec.filter_objects::<&object::SmallPage<Fill<T, F>>>() {
+        for (obj_id, obj) in self.spec.filter_objects::<&object::SmallPage<F>>() {
             let frame = self.orig_local_cptr::<cap_type::SmallPage>(obj_id);
             self.fill_frame(frame, &obj.fill)?;
         }
-        for (obj_id, obj) in self.spec.filter_objects::<&object::LargePage<Fill<T, F>>>() {
+        for (obj_id, obj) in self.spec.filter_objects::<&object::LargePage<F>>() {
             let frame = self.orig_local_cptr::<cap_type::LargePage>(obj_id);
             self.fill_frame(frame, &obj.fill)?;
         }
@@ -393,7 +380,7 @@ impl<
     pub fn fill_frame<U: FrameType>(
         &self,
         frame: LocalCPtr<U>,
-        fill: &Fill<'b, T, F>,
+        fill: &[FillEntry<F>],
     ) -> Result<()> {
         frame.frame_map(
             BootInfo::init_thread_vspace(),
@@ -403,7 +390,7 @@ impl<
         )?;
         atomic::fence(Ordering::SeqCst);
         // atomic::compiler_fence(Ordering::SeqCst);
-        for entry in fill.as_slice() {
+        for entry in fill.iter() {
             let offset = entry.range.start;
             let length = entry.range.end - entry.range.start;
             assert!(entry.range.end <= U::FRAME_SIZE.bytes());
@@ -442,7 +429,7 @@ impl<
     fn init_vspaces(&mut self) -> Result<()> {
         debug!("Initializing VSpaces");
 
-        for (obj_id, obj) in self.spec.filter_objects::<&object::PGD<CapTable<T>>>() {
+        for (obj_id, obj) in self.spec.filter_objects::<&object::PGD>() {
             let pgd = self.orig_local_cptr::<cap_type::PGD>(obj_id);
             for (i, cap) in obj.entries() {
                 let pud = self.orig_local_cptr::<cap_type::PUD>(cap.object);
@@ -450,7 +437,7 @@ impl<
                 pud.translation_table_map(pgd, vaddr, cap.vm_attributes())?;
                 for (i, cap) in self
                     .spec
-                    .lookup_object::<&object::PUD<_>>(cap.object)?
+                    .lookup_object::<&object::PUD>(cap.object)?
                     .entries()
                 {
                     let pd = self.orig_local_cptr::<cap_type::PD>(cap.object);
@@ -458,7 +445,7 @@ impl<
                     pd.translation_table_map(pgd, vaddr, cap.vm_attributes())?;
                     for (i, cap) in self
                         .spec
-                        .lookup_object::<&object::PD<_>>(cap.object)?
+                        .lookup_object::<&object::PD>(cap.object)?
                         .entries()
                     {
                         let vaddr = vaddr + (i << cap_type::PT::SPAN_BITS);
@@ -478,7 +465,7 @@ impl<
                                 pt.translation_table_map(pgd, vaddr, cap.vm_attributes())?;
                                 for (i, cap) in self
                                     .spec
-                                    .lookup_object::<&object::PT<_>>(cap.object)?
+                                    .lookup_object::<&object::PT>(cap.object)?
                                     .entries()
                                 {
                                     let frame =
@@ -504,7 +491,7 @@ impl<
     fn init_tcbs(&self) -> Result<()> {
         debug!("Initializing TCBs");
 
-        for (obj_id, obj) in self.spec.filter_objects::<&object::TCB<CapTable<T>>>() {
+        for (obj_id, obj) in self.spec.filter_objects::<&object::TCB>() {
             let tcb = self.orig_local_cptr::<cap_type::TCB>(obj_id);
 
             if let Some(bound_notification) = obj.bound_notification() {
@@ -573,7 +560,7 @@ impl<
     fn init_cspaces(&self) -> Result<()> {
         debug!("Initializing CSpaces");
 
-        for (obj_id, obj) in self.spec.filter_objects::<&object::CNode<CapTable<T>>>() {
+        for (obj_id, obj) in self.spec.filter_objects::<&object::CNode>() {
             let cnode = self.orig_local_cptr::<cap_type::CNode>(obj_id);
             for (i, cap) in obj.slots() {
                 // TODO
@@ -616,7 +603,7 @@ impl<
 
     fn start_threads(&self) -> Result<()> {
         debug!("Starting threads");
-        for (obj_id, obj) in self.spec.filter_objects::<&object::TCB<CapTable<T>>>() {
+        for (obj_id, obj) in self.spec.filter_objects::<&object::TCB>() {
             let tcb = self.orig_local_cptr::<cap_type::TCB>(obj_id);
             if obj.extra_info.resume {
                 tcb.tcb_resume()?;

@@ -5,6 +5,9 @@ authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
 edition = "2021"
 license = "BSD-2-Clause"
 
+[features]
+deflate = ["capdl-embedded-spec/deflate"]
+
 [dependencies]
 capdl-embedded-spec = { path = ".." }
 capdl-embedded-spec-serialized = { path = "../serialized" }

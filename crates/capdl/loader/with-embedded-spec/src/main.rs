@@ -17,8 +17,8 @@ static LOGGER: Logger = LoggerBuilder::default()
     .write(|s| sel4::debug_print!("{}", s))
     .build();
 
-static mut BUFFERS: LoaderBuffers<[PerObjectBuffer; SPEC.objects.as_slice().len()]> =
-    LoaderBuffers::new([PerObjectBuffer::default(); SPEC.objects.as_slice().len()]);
+static mut BUFFERS: LoaderBuffers<[PerObjectBuffer; SPEC.objects.len()]> =
+    LoaderBuffers::new([PerObjectBuffer::default(); SPEC.objects.len()]);
 
 #[sel4_minimal_root_task_runtime::main]
 fn main(bootinfo: &BootInfo) -> ! {

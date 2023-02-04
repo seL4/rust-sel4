@@ -2,7 +2,7 @@ use sel4::{ObjectBlueprint, ObjectBlueprintAArch64, ObjectBlueprintArm, VMAttrib
 
 use crate::{cap, FillEntryContentBootInfoId, Object, Rights};
 
-impl<C, F> Object<C, F> {
+impl<'a, F> Object<'a, F> {
     pub fn blueprint(&self) -> Option<ObjectBlueprint> {
         Some(match self {
             Object::Untyped(obj) => ObjectBlueprint::Untyped {

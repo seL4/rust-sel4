@@ -36,7 +36,7 @@ fn main() {
     )
     .unwrap();
 
-    let spec: SpecForBuildSystem<FillEntryContentFile> =
+    let spec: Spec<String, FillEntryContentFile> =
         serde_json::from_reader(File::open(spec_file_path).unwrap()).unwrap();
 
     let mut files = BTreeSet::new();

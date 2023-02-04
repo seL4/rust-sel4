@@ -8,7 +8,7 @@ use quote::{format_ident, quote};
 
 use capdl_types::*;
 
-type SpecInput<'a> = ConcreteSpec<'a, VecContainer, FillEntryContentFileAndBytes, String>;
+type SpecInput<'a> = Spec<'a, String, FillEntryContentFileAndBytes>;
 type FillEntryContentFileAndBytes = (FillEntryContentFile, FillEntryContentBytes<'static>);
 
 pub fn embed<'a>(
@@ -62,7 +62,7 @@ impl<'a> State<'a> {
             })
         }
         quote! {
-            ContainerType([#toks].as_slice())
+            Indirect::from_borrowed([#toks].as_slice())
         }
     }
 
@@ -93,17 +93,14 @@ impl<'a> State<'a> {
             })
         }
         quote! {
-            ContainerType([#toks].as_slice())
+            Indirect::from_borrowed([#toks].as_slice())
         }
     }
 
-    fn embed_object(
-        &self,
-        obj: &ConcreteObject<VecContainer, FillEntryContentFileAndBytes>,
-    ) -> TokenStream {
+    fn embed_object(&self, obj: &Object<FillEntryContentFileAndBytes>) -> TokenStream {
         match obj {
             Object::CNode(obj) => {
-                let toks = self.embed_cap_table(obj.slots.as_slice());
+                let toks = self.embed_cap_table(&obj.slots);
                 let size_bits = obj.size_bits;
                 quote! {
                     Object::CNode(object::CNode {
@@ -114,7 +111,7 @@ impl<'a> State<'a> {
             }
             Object::TCB(obj) => {
                 let types_mod = self.types_mod();
-                let slots = self.embed_cap_table(obj.slots.as_slice());
+                let slots = self.embed_cap_table(&obj.slots);
                 let fault_ep = obj.fault_ep;
                 let extra_info = format!("{:?}", obj.extra_info)
                     .parse::<TokenStream>()
@@ -135,7 +132,7 @@ impl<'a> State<'a> {
                 }
             }
             Object::IRQ(obj) => {
-                let toks = self.embed_cap_table(obj.slots.as_slice());
+                let toks = self.embed_cap_table(&obj.slots);
                 quote! {
                     Object::IRQ(object::IRQ {
                         slots: #toks,
@@ -143,7 +140,7 @@ impl<'a> State<'a> {
                 }
             }
             Object::SmallPage(obj) => {
-                let toks = self.embed_fill(obj.fill.as_slice());
+                let toks = self.embed_fill(&obj.fill);
                 let paddr = format!("{:?}", obj.paddr).parse::<TokenStream>().unwrap();
                 quote! {
                     Object::SmallPage(object::SmallPage {
@@ -153,7 +150,7 @@ impl<'a> State<'a> {
                 }
             }
             Object::LargePage(obj) => {
-                let toks = self.embed_fill(obj.fill.as_slice());
+                let toks = self.embed_fill(&obj.fill);
                 let paddr = format!("{:?}", obj.paddr).parse::<TokenStream>().unwrap();
                 quote! {
                     Object::LargePage(object::LargePage {
@@ -163,7 +160,7 @@ impl<'a> State<'a> {
                 }
             }
             Object::PT(obj) => {
-                let toks = self.embed_cap_table(obj.slots.as_slice());
+                let toks = self.embed_cap_table(&obj.slots);
                 quote! {
                     Object::PT(object::PT {
                         slots: #toks,
@@ -171,7 +168,7 @@ impl<'a> State<'a> {
                 }
             }
             Object::PD(obj) => {
-                let toks = self.embed_cap_table(obj.slots.as_slice());
+                let toks = self.embed_cap_table(&obj.slots);
                 quote! {
                     Object::PD(object::PD {
                         slots: #toks,
@@ -179,7 +176,7 @@ impl<'a> State<'a> {
                 }
             }
             Object::PUD(obj) => {
-                let toks = self.embed_cap_table(obj.slots.as_slice());
+                let toks = self.embed_cap_table(&obj.slots);
                 quote! {
                     Object::PUD(object::PUD {
                         slots: #toks,
@@ -187,7 +184,7 @@ impl<'a> State<'a> {
                 }
             }
             Object::PGD(obj) => {
-                let toks = self.embed_cap_table(obj.slots.as_slice());
+                let toks = self.embed_cap_table(&obj.slots);
                 quote! {
                     Object::PGD(object::PGD {
                         slots: #toks,
@@ -203,7 +200,7 @@ impl<'a> State<'a> {
                 }
             }
             Object::ArmIRQ(obj) => {
-                let toks = self.embed_cap_table(obj.slots.as_slice());
+                let toks = self.embed_cap_table(&obj.slots);
                 let trigger = obj.trigger;
                 let target = obj.target;
                 quote! {
@@ -246,26 +243,42 @@ impl<'a> State<'a> {
                 },
             })
         }
+        // TODO(nspin)
+        // This const declaration + type signature are just to appease the borrow checker.
+        // There must be a more elegant way.
+        let name_type = if self.include_names {
+            quote!(&str)
+        } else {
+            quote!(Unnamed)
+        };
+        let fill_type = if self.deflate_fill {
+            quote!(FillEntryContentDeflatedBytes)
+        } else {
+            quote!(FillEntryContentBytes)
+        };
         quote! {
-            ContainerType([#toks].as_slice())
+            Indirect::from_borrowed({
+                const NAMED_OBJECTS: &[NamedObject<#name_type, #fill_type>] = &[#toks];
+                NAMED_OBJECTS
+            })
         }
     }
 
     fn embed_irqs(&self) -> TokenStream {
-        let toks = format!("{:?}", self.spec.irqs.as_slice())
+        let toks = format!("{:?}", self.spec.irqs)
             .parse::<TokenStream>()
             .unwrap();
         quote! {
-            ContainerType(#toks.as_slice())
+            Indirect::from_borrowed(#toks.as_slice())
         }
     }
 
     fn embed_asid_slots(&self) -> TokenStream {
-        let toks = format!("{:?}", self.spec.asid_slots.as_slice())
+        let toks = format!("{:?}", self.spec.asid_slots)
             .parse::<TokenStream>()
             .unwrap();
         quote! {
-            ContainerType(#toks.as_slice())
+            Indirect::from_borrowed(#toks.as_slice())
         }
     }
 
@@ -326,13 +339,13 @@ impl<'a> State<'a> {
         let objects = self.embed_objects();
         let irqs = self.embed_irqs();
         let asid_slots = self.embed_asid_slots();
-        let ty = if self.deflate_fill {
-            quote!(SpecForLoaderWithDeflate)
+        let fill_type = if self.deflate_fill {
+            quote!(#types_mod::FillEntryContentDeflatedBytes)
         } else {
-            quote!(SpecForLoaderWithoutDeflate)
+            quote!(#types_mod::FillEntryContentBytes)
         };
         let toks = quote! {
-            pub const SPEC: #types_mod::#ty<'static, #name_type> = {
+            pub const SPEC: #types_mod::Spec<'static, #name_type, #fill_type> = {
                 use #types_mod::*;
 
                 #file_definition_toks

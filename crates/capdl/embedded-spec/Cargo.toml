@@ -9,7 +9,7 @@ license = "BSD-2-Clause"
 deflate = ["capdl-types/deflate"]
 
 [dependencies]
-capdl-types = { path = "../types" }
+capdl-types = { path = "../types", features = ["borrowed-indirect"] }
 
 [build-dependencies]
 capdl-embed-spec = { path = "../embed-spec" }

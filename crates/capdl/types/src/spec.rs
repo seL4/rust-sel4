@@ -6,21 +6,26 @@ use serde::{Deserialize, Serialize};
 
 use capdl_types_derive::{IsCap, IsObject};
 
+use crate::Indirect;
+
 pub type Word = u64;
 pub type Badge = Word;
 pub type CPtr = Word;
 
 pub type ObjectId = usize;
 
-#[derive(Debug, Clone, Eq, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub struct Spec<T, U, V> {
-    pub objects: T,
-    pub irqs: U,
-    pub asid_slots: V,
-}
+pub type CapSlot = usize;
+pub type CapTableEntry = (CapSlot, Cap);
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct Spec<'a, F, N> {
+    pub objects: Indirect<'a, [NamedObject<'a, F, N>]>,
+    pub irqs: Indirect<'a, [IRQEntry]>,
+    pub asid_slots: Indirect<'a, [ASIDSlotEntry]>,
+}
+
+#[derive(Debug, Clone, Copy, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct IRQEntry {
     pub irq: Word,
@@ -31,32 +36,32 @@ pub type ASIDSlotEntry = ObjectId;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub struct NamedObject<N, C, F> {
+pub struct NamedObject<'a, N, F> {
     pub name: N,
-    pub object: Object<C, F>,
+    pub object: Object<'a, F>,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub enum Object<C, F> {
+pub enum Object<'a, F> {
     Untyped(object::Untyped),
     Endpoint,
     Notification,
-    CNode(object::CNode<C>),
-    TCB(object::TCB<C>),
-    IRQ(object::IRQ<C>),
+    CNode(object::CNode<'a>),
+    TCB(object::TCB<'a>),
+    IRQ(object::IRQ<'a>),
     VCPU,
-    SmallPage(object::SmallPage<F>),
-    LargePage(object::LargePage<F>),
-    PT(object::PT<C>),
-    PD(object::PD<C>),
-    PUD(object::PUD<C>),
-    PGD(object::PGD<C>),
+    SmallPage(object::SmallPage<'a, F>),
+    LargePage(object::LargePage<'a, F>),
+    PT(object::PT<'a>),
+    PD(object::PD<'a>),
+    PUD(object::PUD<'a>),
+    PGD(object::PGD<'a>),
     ASIDPool(object::ASIDPool),
-    ArmIRQ(object::ArmIRQ<C>),
+    ArmIRQ(object::ArmIRQ<'a>),
 }
 
-impl<C, F> Object<C, F> {
+impl<'a, F> Object<'a, F> {
     pub fn paddr(&self) -> Option<usize> {
         match self {
             Object::Untyped(obj) => obj.paddr,
@@ -110,7 +115,7 @@ impl Cap {
     }
 }
 
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Rights {
     pub read: bool,
@@ -142,14 +147,14 @@ impl<F> FillEntryContent<F> {
     }
 }
 
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct FillEntryContentBootInfo {
     pub id: FillEntryContentBootInfoId,
     pub offset: usize,
 }
 
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum FillEntryContentBootInfoId {
     Fdt,
@@ -167,15 +172,15 @@ pub mod object {
 
     #[derive(Debug, Clone, Eq, PartialEq, IsObject)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-    pub struct CNode<C> {
+    pub struct CNode<'a> {
         pub size_bits: usize,
-        pub slots: C,
+        pub slots: Indirect<'a, [CapTableEntry]>,
     }
 
     #[derive(Debug, Clone, Eq, PartialEq, IsObject)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-    pub struct TCB<C> {
-        pub slots: C,
+    pub struct TCB<'a> {
+        pub slots: Indirect<'a, [CapTableEntry]>,
         pub fault_ep: CPtr,
         pub extra_info: TCBExtraInfo,
         pub init_args: [Option<Word>; TCB_NUM_INIT_ARGS],
@@ -201,46 +206,46 @@ pub mod object {
 
     #[derive(Debug, Clone, Eq, PartialEq, IsObject)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-    pub struct IRQ<C> {
-        pub slots: C,
+    pub struct IRQ<'a> {
+        pub slots: Indirect<'a, [CapTableEntry]>,
     }
 
     #[derive(Debug, Clone, Eq, PartialEq, IsObject)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-    pub struct SmallPage<F> {
+    pub struct SmallPage<'a, F> {
         pub paddr: Option<usize>,
-        pub fill: F,
+        pub fill: Indirect<'a, [FillEntry<F>]>,
     }
 
     #[derive(Debug, Clone, Eq, PartialEq, IsObject)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-    pub struct LargePage<F> {
+    pub struct LargePage<'a, F> {
         pub paddr: Option<usize>,
-        pub fill: F,
+        pub fill: Indirect<'a, [FillEntry<F>]>,
     }
 
     #[derive(Debug, Clone, Eq, PartialEq, IsObject)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-    pub struct PT<C> {
-        pub slots: C,
+    pub struct PT<'a> {
+        pub slots: Indirect<'a, [CapTableEntry]>,
     }
 
     #[derive(Debug, Clone, Eq, PartialEq, IsObject)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-    pub struct PD<C> {
-        pub slots: C,
+    pub struct PD<'a> {
+        pub slots: Indirect<'a, [CapTableEntry]>,
     }
 
     #[derive(Debug, Clone, Eq, PartialEq, IsObject)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-    pub struct PUD<C> {
-        pub slots: C,
+    pub struct PUD<'a> {
+        pub slots: Indirect<'a, [CapTableEntry]>,
     }
 
     #[derive(Debug, Clone, Eq, PartialEq, IsObject)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-    pub struct PGD<C> {
-        pub slots: C,
+    pub struct PGD<'a> {
+        pub slots: Indirect<'a, [CapTableEntry]>,
     }
 
     #[derive(Debug, Clone, Eq, PartialEq, IsObject)]
@@ -251,8 +256,8 @@ pub mod object {
 
     #[derive(Debug, Clone, Eq, PartialEq, IsObject)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-    pub struct ArmIRQ<C> {
-        pub slots: C,
+    pub struct ArmIRQ<'a> {
+        pub slots: Indirect<'a, [CapTableEntry]>,
         pub trigger: Word,
         pub target: Word,
     }

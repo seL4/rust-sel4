@@ -6,7 +6,7 @@ edition = "2021"
 license = "BSD-2-Clause"
 
 [features]
-deflate = ["capdl-embedded-spec/deflate"]
+deflate = ["capdl-embedded-spec/deflate", "capdl-embedded-spec-validate/deflate"]
 
 [dependencies]
 capdl-embedded-spec = { path = "../../embedded-spec" }

@@ -1,103 +1,139 @@
-use alloc::vec::Vec;
+use alloc::boxed::Box;
 
-use crate::{
-    ConcreteSpec, Container, ContainerType, FillEntry, FillEntryContent, Spec, VecContainer,
-};
+use crate::{object, FillEntry, FillEntryContent, Indirect, NamedObject, Object, Spec};
 
-impl<'a, T: Container<'a>, F, N> ConcreteSpec<'a, T, F, N> {
-    pub fn traverse<F1, N1, E>(
+impl<'a, N, F> Spec<'a, N, F> {
+    pub fn traverse<N1, F1, E>(
         &self,
-        mut f: impl FnMut(usize, &F) -> Result<F1, E>,
-        mut g: impl FnMut(&N) -> Result<N1, E>,
-    ) -> Result<ConcreteSpec<'a, VecContainer, F1, N1>, E> {
+        mut f: impl FnMut(&N) -> Result<N1, E>,
+        mut g: impl FnMut(usize, &F) -> Result<F1, E>,
+    ) -> Result<Spec<'a, N1, F1>, E> {
         Ok(Spec {
-            objects: self.objects.traverse(|named_object| {
-                named_object.traverse_simple(
-                    &mut g,
-                    |cap_table| Ok(cap_table.to_vec()),
-                    |fill_entries| {
-                        Ok(ContainerType(
-                            fill_entries
-                                .as_slice()
-                                .iter()
-                                .map(|entry| {
-                                    Ok(FillEntry {
-                                        range: entry.range.clone(),
-                                        content: match &entry.content {
-                                            FillEntryContent::BootInfo(content_bootinfo) => {
-                                                FillEntryContent::BootInfo(content_bootinfo.clone())
-                                            }
-                                            FillEntryContent::Data(content_data) => {
-                                                FillEntryContent::Data(f(
-                                                    entry.range.end - entry.range.start,
-                                                    &content_data,
-                                                )?)
-                                            }
-                                        },
-                                    })
-                                })
-                                .collect::<Result<Vec<FillEntry<F1>>, E>>()?,
-                        ))
-                    },
-                )
-            })?,
-            irqs: self.irqs.to_vec(),
-            asid_slots: self.asid_slots.to_vec(),
+            objects: self
+                .objects
+                .traverse(|named_object| named_object.traverse(&mut f, &mut g))?,
+            irqs: self.irqs.clone(),
+            asid_slots: self.asid_slots.clone(),
         })
     }
 }
 
-impl<'a, T: Container<'a>, F, N: Clone> ConcreteSpec<'a, T, F, N> {
+impl<'a, N, F> NamedObject<'a, N, F> {
+    pub fn traverse<N1, F1, E>(
+        &self,
+        f: impl FnOnce(&N) -> Result<N1, E>,
+        g: impl FnMut(usize, &F) -> Result<F1, E>,
+    ) -> Result<NamedObject<'a, N1, F1>, E> {
+        Ok(NamedObject {
+            name: f(&self.name)?,
+            object: self.object.traverse(g)?,
+        })
+    }
+}
+
+impl<'a, F> Object<'a, F> {
+    pub fn traverse<F1, E>(
+        &self,
+        f: impl FnMut(usize, &F) -> Result<F1, E>,
+    ) -> Result<Object<'a, F1>, E> {
+        Ok(match self {
+            Object::Untyped(obj) => Object::Untyped(obj.clone()),
+            Object::Endpoint => Object::Endpoint,
+            Object::Notification => Object::Notification,
+            Object::CNode(obj) => Object::CNode(obj.clone()),
+            Object::TCB(obj) => Object::TCB(obj.clone()),
+            Object::IRQ(obj) => Object::IRQ(obj.clone()),
+            Object::VCPU => Object::VCPU,
+            Object::SmallPage(obj) => Object::SmallPage(obj.traverse(f)?),
+            Object::LargePage(obj) => Object::LargePage(obj.traverse(f)?),
+            Object::PT(obj) => Object::PT(obj.clone()),
+            Object::PD(obj) => Object::PD(obj.clone()),
+            Object::PUD(obj) => Object::PUD(obj.clone()),
+            Object::PGD(obj) => Object::PGD(obj.clone()),
+            Object::ASIDPool(obj) => Object::ASIDPool(obj.clone()),
+            Object::ArmIRQ(obj) => Object::ArmIRQ(obj.clone()),
+        })
+    }
+}
+
+impl<'a, F> object::SmallPage<'a, F> {
+    pub fn traverse<F1, E>(
+        &self,
+        f: impl FnMut(usize, &F) -> Result<F1, E>,
+    ) -> Result<object::SmallPage<'a, F1>, E> {
+        Ok(object::SmallPage {
+            paddr: self.paddr,
+            fill: traverse_fill_entires(&self.fill, f)?,
+        })
+    }
+}
+
+impl<'a, F> object::LargePage<'a, F> {
+    pub fn traverse<F1, E>(
+        &self,
+        f: impl FnMut(usize, &F) -> Result<F1, E>,
+    ) -> Result<object::LargePage<'a, F1>, E> {
+        Ok(object::LargePage {
+            paddr: self.paddr,
+            fill: traverse_fill_entires(&self.fill, f)?,
+        })
+    }
+}
+
+fn traverse_fill_entires<'a, F, F1, E>(
+    fill_entries: &[FillEntry<F>],
+    mut f: impl FnMut(usize, &F) -> Result<F1, E>,
+) -> Result<Indirect<'a, [FillEntry<F1>]>, E> {
+    fill_entries
+        .iter()
+        .map(|entry| {
+            Ok(FillEntry {
+                range: entry.range.clone(),
+                content: match &entry.content {
+                    FillEntryContent::BootInfo(content_bootinfo) => {
+                        FillEntryContent::BootInfo(content_bootinfo.clone())
+                    }
+                    FillEntryContent::Data(content_data) => FillEntryContent::Data(f(
+                        entry.range.end - entry.range.start,
+                        &content_data,
+                    )?),
+                },
+            })
+        })
+        .collect::<Result<Box<[FillEntry<F1>]>, E>>()
+        .map(Indirect::from_owned)
+}
+
+impl<'a, T> Indirect<'a, [T]> {
+    fn traverse<T1, E>(&self, f: impl FnMut(&T) -> Result<T1, E>) -> Result<Indirect<'a, [T1]>, E> {
+        self.iter()
+            .map(f)
+            .collect::<Result<Box<[T1]>, E>>()
+            .map(Indirect::from_owned)
+    }
+}
+
+impl<'a, N: Clone, F> Spec<'a, N, F> {
     pub fn traverse_fill_with_context<F1, E>(
         &self,
         f: impl FnMut(usize, &F) -> Result<F1, E>,
-    ) -> Result<ConcreteSpec<'a, VecContainer, F1, N>, E> {
-        self.traverse(f, |name| Ok(name.clone()))
+    ) -> Result<Spec<'a, N, F1>, E> {
+        self.traverse(|name| Ok(name.clone()), f)
     }
 
     pub fn traverse_fill<F1, E>(
         &self,
         mut f: impl FnMut(&F) -> Result<F1, E>,
-    ) -> Result<ConcreteSpec<'a, VecContainer, F1, N>, E> {
+    ) -> Result<Spec<'a, N, F1>, E> {
         self.traverse_fill_with_context(|_, entry| f(entry))
     }
 }
 
-impl<'a, T: Container<'a>, F: Clone, N> ConcreteSpec<'a, T, F, N> {
+impl<'a, N, F: Clone> Spec<'a, N, F> {
     pub fn traverse_names<N1, E>(
         &self,
         f: impl FnMut(&N) -> Result<N1, E>,
-    ) -> Result<ConcreteSpec<'a, VecContainer, F, N1>, E> {
-        self.traverse(|_, entry| Ok(entry.clone()), f)
-    }
-}
-
-impl<'a, T: Container<'a>, F: Clone, N: Clone> ConcreteSpec<'a, T, F, N> {
-    pub fn to_vec(&self) -> ConcreteSpec<'a, VecContainer, F, N> {
-        self.traverse(
-            |_, entry| Ok::<_, !>(entry.clone()),
-            |name| Ok(name.clone()),
-        )
-        .into_ok()
-    }
-}
-
-impl<'a, T: Container<'a>, A> ContainerType<'a, T, A> {
-    pub fn traverse<B, E>(
-        &self,
-        f: impl FnMut(&A) -> Result<B, E>,
-    ) -> Result<ContainerType<'a, VecContainer, B>, E> {
-        Ok(ContainerType(
-            self.as_slice()
-                .iter()
-                .map(f)
-                .collect::<Result<Vec<B>, E>>()?,
-        ))
-    }
-}
-
-impl<'a, T: Container<'a>, A: Clone> ContainerType<'a, T, A> {
-    pub fn to_vec(&self) -> ContainerType<'a, VecContainer, A> {
-        self.traverse(|x| Ok::<_, !>(x.clone())).into_ok()
+    ) -> Result<Spec<'a, N1, F>, E> {
+        self.traverse(f, |_, entry| Ok(entry.clone()))
     }
 }

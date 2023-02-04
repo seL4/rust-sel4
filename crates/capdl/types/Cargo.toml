@@ -6,12 +6,14 @@ edition = "2021"
 license = "BSD-2-Clause"
 
 [features]
-alloc = ["serde?/alloc", "miniz_oxide?/with-alloc"]
-deflate = ["miniz_oxide"]
+alloc = ["miniz_oxide?/with-alloc"]
+borrowed-indirect = []
+deflate = ["dep:miniz_oxide"]
+serde = ["alloc", "dep:serde"]
 
 [dependencies]
 capdl-types-derive = { path = "./derive" }
 cfg-if = "*"
 miniz_oxide = { version = "0.6.2", default-features = false, optional = true }
 sel4 = { path = "../../sel4", default-features = false, optional = true }
-serde = { version = "*", default-features = false, features = ["derive"], optional = true }
+serde = { version = "*", default-features = false, features = ["derive", "alloc"], optional = true }
