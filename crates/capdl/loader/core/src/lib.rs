@@ -11,6 +11,7 @@
 
 use core::array;
 use core::borrow::BorrowMut;
+use core::fmt;
 use core::ops::Range;
 use core::ptr;
 use core::result;
@@ -32,18 +33,16 @@ mod cslot_allocator;
 mod error;
 mod hold_slots;
 mod memory;
-mod utils;
 
 pub use buffers::{LoaderBuffers, PerObjectBuffer};
 use cslot_allocator::{CSlotAllocator, CSlotAllocatorError};
 pub use error::CapDLLoaderError;
 use hold_slots::HoldSlots;
 use memory::init_copy_addrs;
-use utils::{round_down, round_up};
 
 // TODO see seL4_ARM_Page_CleanInvalidate_Data/seL4_ARM_Page_Unify_Instruction in upstream
 
-type Fill<'a, T, C> = ContainerType<'a, T, FillEntry<C>>;
+type Fill<'a, T, F> = ContainerType<'a, T, FillEntry<F>>;
 type CapTable<'a, T> = ContainerType<'a, T, CapTableEntry>;
 
 type Result<T> = result::Result<T, CapDLLoaderError>;
@@ -52,14 +51,14 @@ pub fn load<
     'a,
     'b,
     T: Container<'b>,
-    PO: BorrowMut<[PerObjectBuffer]>,
-    S: ObjectName,
-    C: AvailableFillEntryContentVia,
+    F: AvailableFillEntryContentVia,
+    N: ObjectName + fmt::Debug,
+    B: BorrowMut<[PerObjectBuffer]>,
 >(
-    spec: &'b ConcreteSpec<'b, T, C, S>,
-    via: &'b C::Via,
+    spec: &'b ConcreteSpec<'b, T, F, N>,
+    via: &'b F::Via,
     bootinfo: &'a BootInfo,
-    buffers: &'a mut LoaderBuffers<PO>,
+    buffers: &'a mut LoaderBuffers<B>,
     own_footprint: Range<usize>,
 ) -> Result<!> {
     info!("Starting CapDL Loader");
@@ -84,27 +83,27 @@ struct Loader<
     'a,
     'b,
     T: Container<'b>,
-    PO: BorrowMut<[PerObjectBuffer]>,
-    S,
-    C: AvailableFillEntryContentVia,
+    F: AvailableFillEntryContentVia,
+    N,
+    B: BorrowMut<[PerObjectBuffer]>,
 > {
-    spec: &'b ConcreteSpec<'b, T, C, S>,
-    via: &'b C::Via,
+    spec: &'b ConcreteSpec<'b, T, F, N>,
+    via: &'b F::Via,
     bootinfo: &'a BootInfo,
     small_frame_copy_addr: usize,
     large_frame_copy_addr: usize,
     cslot_allocator: &'a mut CSlotAllocator,
-    buffers: &'a mut LoaderBuffers<PO>,
+    buffers: &'a mut LoaderBuffers<B>,
 }
 
 impl<
         'a,
         'b,
         T: Container<'b>,
-        PO: BorrowMut<[PerObjectBuffer]>,
-        S: ObjectName,
-        C: AvailableFillEntryContentVia,
-    > Loader<'a, 'b, T, PO, S, C>
+        F: AvailableFillEntryContentVia,
+        N: ObjectName + fmt::Debug,
+        B: BorrowMut<[PerObjectBuffer]>,
+    > Loader<'a, 'b, T, F, N, B>
 {
     pub fn load(&mut self) -> Result<!> {
         self.create_objects()?;
@@ -213,7 +212,7 @@ impl<
                                 let blueprint = named_obj.object.blueprint().unwrap();
                                 assert_eq!(blueprint.physical_size_bits(), size_bits);
                                 trace!(
-                                    "Creating kernel object: paddr=0x{:x}, size_bits={} name='{}'",
+                                    "Creating kernel object: paddr=0x{:x}, size_bits={} name='{:?}'",
                                     cur_paddr,
                                     blueprint.physical_size_bits(),
                                     named_obj.name
@@ -264,7 +263,7 @@ impl<
                     let named_obj = &self.spec.named_object(obj_id);
                     let blueprint = named_obj.object.blueprint().unwrap();
                     trace!(
-                        "Creating device object: paddr=0x{:x}, size_bits={} name='{}'",
+                        "Creating device object: paddr=0x{:x}, size_bits={} name='{:?}'",
                         cur_paddr,
                         blueprint.physical_size_bits(),
                         named_obj.name
@@ -380,11 +379,11 @@ impl<
 
     fn init_frames(&mut self) -> Result<()> {
         debug!("Initializing Frames");
-        for (obj_id, obj) in self.spec.filter_objects::<&object::SmallPage<Fill<T, C>>>() {
+        for (obj_id, obj) in self.spec.filter_objects::<&object::SmallPage<Fill<T, F>>>() {
             let frame = self.orig_local_cptr::<cap_type::SmallPage>(obj_id);
             self.fill_frame(frame, &obj.fill)?;
         }
-        for (obj_id, obj) in self.spec.filter_objects::<&object::LargePage<Fill<T, C>>>() {
+        for (obj_id, obj) in self.spec.filter_objects::<&object::LargePage<Fill<T, F>>>() {
             let frame = self.orig_local_cptr::<cap_type::LargePage>(obj_id);
             self.fill_frame(frame, &obj.fill)?;
         }
@@ -394,7 +393,7 @@ impl<
     pub fn fill_frame<U: FrameType>(
         &self,
         frame: LocalCPtr<U>,
-        fill: &Fill<'b, T, C>,
+        fill: &Fill<'b, T, F>,
     ) -> Result<()> {
         frame.frame_map(
             BootInfo::init_thread_vspace(),
@@ -564,7 +563,7 @@ impl<
 
             {
                 if let Some(name) = self.spec.name(obj_id).object_name() {
-                    tcb.debug_name(name);
+                    tcb.debug_name(name.as_bytes());
                 }
             }
         }

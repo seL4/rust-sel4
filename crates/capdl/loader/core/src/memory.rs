@@ -2,21 +2,11 @@ use core::ops::Range;
 
 use sel4::{cap_type, BootInfo, FrameSize};
 
-use crate::{round_down, round_up};
-
 #[repr(align(4096))]
 struct SmallPagePlaceHolder([u8; FrameSize::Small.bytes()]);
 
 static SMALL_PAGE_PLACEHOLDER: SmallPagePlaceHolder =
     SmallPagePlaceHolder([0; FrameSize::Small.bytes()]);
-
-fn addr_of_ref<T>(x: &T) -> usize {
-    (x as *const T).addr()
-}
-
-fn coarsen_footprint(footprint: &Range<usize>, granularity: usize) -> Range<usize> {
-    round_down(footprint.start, granularity)..round_up(footprint.end, granularity)
-}
 
 pub(crate) fn init_copy_addrs(
     bootinfo: &BootInfo,
@@ -54,8 +44,22 @@ pub(crate) fn init_copy_addrs(
                 round_down(addr_space_footprint.start, FrameSize::Large.bytes())
                     - FrameSize::Large.bytes()
             }
-            (_, _) => round_up(addr_space_footprint.end, FrameSize::Large.bytes()),
+            (_, _) => addr_space_footprint
+                .end
+                .next_multiple_of(FrameSize::Large.bytes()),
         }
     };
     Ok((small_frame_copy_addr, large_frame_copy_addr))
+}
+
+fn coarsen_footprint(footprint: &Range<usize>, granularity: usize) -> Range<usize> {
+    round_down(footprint.start, granularity)..footprint.end.next_multiple_of(granularity)
+}
+
+const fn round_down(n: usize, b: usize) -> usize {
+    n - n % b
+}
+
+fn addr_of_ref<T>(x: &T) -> usize {
+    (x as *const T).addr()
 }

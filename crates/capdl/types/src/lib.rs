@@ -47,15 +47,15 @@ pub use when_sel4::*;
 
 // // //
 
-pub type SpecForLoader<'a, S, C> = ConcreteSpec<'a, SliceContainer<'a>, C, S>;
+pub type SpecForLoader<'a, F, N> = ConcreteSpec<'a, SliceContainer<'a>, F, N>;
 
-pub type SpecForLoaderWithoutDeflate<'a, S> = SpecForLoader<'a, S, FillEntryContentBytes<'a>>;
+pub type SpecForLoaderWithoutDeflate<'a, N> = SpecForLoader<'a, FillEntryContentBytes<'a>, N>;
 
 #[cfg(feature = "deflate")]
-pub type SpecForLoaderWithDeflate<'a, S> = SpecForLoader<'a, S, FillEntryContentDeflatedBytes<'a>>;
+pub type SpecForLoaderWithDeflate<'a, N> = SpecForLoader<'a, FillEntryContentDeflatedBytes<'a>, N>;
 
 #[cfg(feature = "alloc")]
-pub type SpecForBuildSystem<'a, C> = ConcreteSpec<'a, VecContainer, C, String>;
+pub type SpecForBuildSystem<'a, F> = ConcreteSpec<'a, VecContainer, F, String>;
 
 // // //
 

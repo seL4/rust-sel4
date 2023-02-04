@@ -1,4 +1,4 @@
-use sel4::{CapRights, ObjectBlueprint, ObjectBlueprintAArch64, ObjectBlueprintArm, VMAttributes};
+use sel4::{ObjectBlueprint, ObjectBlueprintAArch64, ObjectBlueprintArm, VMAttributes};
 
 use crate::{cap, FillEntryContentBootInfoId, Object, Rights};
 
@@ -27,7 +27,7 @@ impl<C, F> Object<C, F> {
     }
 }
 
-impl From<&Rights> for CapRights {
+impl From<&Rights> for sel4::CapRights {
     fn from(rights: &Rights) -> Self {
         Self::new(rights.grant_reply, rights.grant, rights.read, rights.write)
     }

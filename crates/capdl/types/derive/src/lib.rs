@@ -1,5 +1,3 @@
-extern crate proc_macro;
-
 use proc_macro::TokenStream;
 use quote::quote;
 
@@ -14,9 +12,9 @@ fn derive_cap_impl(ast: &syn::DeriveInput) -> TokenStream {
     let gen = quote! {
         impl<'a> TryFrom<&'a Cap> for &'a #name {
             type Error = TryFromCapError;
-            fn try_from(obj: &'a Cap) -> Result<Self, Self::Error> {
-                match obj {
-                    Cap::#name(obj) => Ok(&obj),
+            fn try_from(cap: &'a Cap) -> Result<Self, Self::Error> {
+                match cap {
+                    Cap::#name(cap) => Ok(&cap),
                     _ => Err(TryFromCapError),
                 }
             }

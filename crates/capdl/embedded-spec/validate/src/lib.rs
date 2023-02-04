@@ -46,13 +46,13 @@ impl ObjectNameForComparison for &str {
     }
 }
 
-fn compare<'a, S: ObjectNameForComparison, C: AvailableFillEntryContent>(
+fn compare<'a, F: AvailableFillEntryContent, N: ObjectNameForComparison>(
     serialized: &SpecForBuildSystem<'a, (FillEntryContentFile, FillEntryContentBytes<'static>)>,
-    embedded: &'static SpecForLoader<'a, S, C>,
+    embedded: &'static SpecForLoader<'a, F, N>,
 ) where
-    S::ComparisonPoint: fmt::Debug,
+    N::ComparisonPoint: fmt::Debug,
 {
-    let serialized = translate_serialized::<S>(serialized);
+    let serialized = translate_serialized::<N>(serialized);
     let embedded = translate_embedded(embedded);
     if serialized != embedded {
         // HACK
@@ -62,9 +62,9 @@ fn compare<'a, S: ObjectNameForComparison, C: AvailableFillEntryContent>(
     }
 }
 
-fn translate_embedded<'a, S: ObjectNameForComparison, C: AvailableFillEntryContent>(
-    spec: &'static SpecForLoader<'a, S, C>,
-) -> SpecCommon<'a, S::ComparisonPoint> {
+fn translate_embedded<'a, F: AvailableFillEntryContent, N: ObjectNameForComparison>(
+    spec: &'static SpecForLoader<'a, F, N>,
+) -> SpecCommon<'a, N::ComparisonPoint> {
     spec.traverse(
         |length, content| {
             let mut v = vec![0; length];
@@ -76,12 +76,12 @@ fn translate_embedded<'a, S: ObjectNameForComparison, C: AvailableFillEntryConte
     .into_ok()
 }
 
-fn translate_serialized<'a, S: ObjectNameForComparison>(
+fn translate_serialized<'a, N: ObjectNameForComparison>(
     spec: &SpecForBuildSystem<'a, (FillEntryContentFile, FillEntryContentBytes<'static>)>,
-) -> SpecCommon<'a, S::ComparisonPoint> {
+) -> SpecCommon<'a, N::ComparisonPoint> {
     spec.traverse(
         |_length, content| Ok::<_, !>(content.1.bytes.to_vec()),
-        |name| Ok(S::them(name)),
+        |name| Ok(N::them(name)),
     )
     .into_ok()
 }
