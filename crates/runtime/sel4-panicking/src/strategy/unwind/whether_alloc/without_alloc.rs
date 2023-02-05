@@ -12,6 +12,9 @@ struct CurrentException {
     exception: MaybeUninit<UnwindException>,
 }
 
+#[cfg(not(target_thread_local))]
+compile_error!();
+
 #[thread_local]
 static CURRENT_PAYLOAD: RefCell<Option<Payload>> = RefCell::new(None);
 

@@ -43,6 +43,7 @@
 
 #![no_std]
 #![feature(array_methods)]
+#![feature(cfg_target_thread_local)]
 #![feature(const_convert)]
 #![feature(const_num_from_num)]
 #![feature(const_option)]

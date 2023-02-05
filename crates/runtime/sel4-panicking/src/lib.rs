@@ -2,6 +2,7 @@
 #![feature(lang_items)]
 #![feature(never_type)]
 #![feature(panic_info_message)]
+#![feature(cfg_target_thread_local)]
 #![feature(core_intrinsics)]
 #![feature(thread_local)]
 
@@ -79,6 +80,9 @@ pub fn catch_unwind<R, F: FnOnce() -> R>(f: F) -> Result<R, Payload> {
         }
     }
 }
+
+#[cfg(not(target_thread_local))]
+compile_error!();
 
 // TODO consider supporting nested panics
 #[thread_local]

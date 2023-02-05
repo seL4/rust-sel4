@@ -1,12 +1,7 @@
-use core::alloc::Layout;
 use core::ops::Range;
 
 use sel4_dlmalloc::StaticDlmallocGlobalAlloc;
-use sel4_runtime_building_blocks_abort::{abort, debug_println};
 use sel4_sync::PanickingMutexSyncOps;
-
-#[cfg(all(feature = "unwinding", feature = "postcard"))]
-use crate::backtrace;
 
 const STATIC_HEAP_SIZE: usize = include!(concat!(env!("OUT_DIR"), "/heap_size.fragment.rs"));
 
@@ -28,14 +23,3 @@ fn get_static_heap_bounds() -> Range<usize> {
 #[global_allocator]
 static GLOBAL_ALLOCATOR: StaticDlmallocGlobalAlloc<PanickingMutexSyncOps, fn() -> Range<usize>> =
     StaticDlmallocGlobalAlloc::new(PanickingMutexSyncOps, get_static_heap_bounds);
-
-// TODO make recoverable, e.g. by using begin_panic in a way that doesn't use the allocator
-#[alloc_error_handler]
-fn alloc_error_handler(layout: Layout) -> ! {
-    debug_println!("alloc error with layout: {:?}", layout);
-
-    #[cfg(all(feature = "unwinding", feature = "postcard"))]
-    backtrace::collect_and_send();
-
-    abort()
-}
