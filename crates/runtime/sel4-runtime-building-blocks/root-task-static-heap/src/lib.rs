@@ -1,3 +1,6 @@
+#![no_std]
+#![feature(strict_provenance)]
+
 use core::ops::Range;
 
 use sel4_dlmalloc::StaticDlmallocGlobalAlloc;
@@ -6,7 +9,7 @@ use sel4_sync::PanickingMutexSyncOps;
 const STATIC_HEAP_SIZE: usize = include!(concat!(env!("OUT_DIR"), "/heap_size.fragment.rs"));
 
 // TODO(nspin) does dlmalloc assume align(PAGE_SIZE)?
-#[repr(C, align(16))]
+#[repr(C, align(4096))]
 struct StaticHeap([u8; STATIC_HEAP_SIZE]);
 
 static mut STATIC_HEAP: StaticHeap = StaticHeap([0; STATIC_HEAP_SIZE]);

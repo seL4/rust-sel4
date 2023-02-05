@@ -3,6 +3,9 @@
 
 extern crate sel4_runtime_building_blocks_root_task_head;
 
+#[cfg(feature = "global-allocator")]
+extern crate sel4_runtime_building_blocks_root_task_static_heap;
+
 use core::fmt;
 
 use sel4_runtime_building_blocks_termination::Termination;

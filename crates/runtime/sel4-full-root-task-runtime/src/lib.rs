@@ -9,12 +9,12 @@
 
 extern crate sel4_runtime_building_blocks_root_task_head;
 
+#[cfg(feature = "global-allocator")]
+extern crate sel4_runtime_building_blocks_root_task_static_heap;
+
 use core::ffi::c_char;
 
 mod start;
-
-#[cfg(feature = "global-allocator")]
-mod global_allocator;
 
 #[cfg(feature = "unwinding")]
 mod unwinding;

@@ -7,6 +7,7 @@ license = "BSD-2-Clause"
 
 [features]
 default = ["state", "panic-handler"]
+global-allocator = ["sel4-runtime-building-blocks-root-task-static-heap"]
 panic-handler = []
 state = ["sel4/state"]
 
@@ -17,3 +18,7 @@ sel4-runtime-building-blocks-termination = { path = "../sel4-runtime-building-bl
 
 [dependencies.sel4-runtime-building-blocks-root-task-head]
 path = "../sel4-runtime-building-blocks/root-task-head"
+
+[dependencies.sel4-runtime-building-blocks-root-task-static-heap]
+path = "../sel4-runtime-building-blocks/root-task-static-heap"
+optional = true

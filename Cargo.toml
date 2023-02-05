@@ -55,6 +55,7 @@ members = [
     "crates/runtime/sel4-runtime-building-blocks/injected-phdrs/cli/sel4-inject-phdrs",
     "crates/runtime/sel4-runtime-building-blocks/reserve-tls-on-stack",
     "crates/runtime/sel4-runtime-building-blocks/root-task-head",
+    "crates/runtime/sel4-runtime-building-blocks/root-task-static-heap",
     "crates/runtime/sel4-runtime-building-blocks/termination",
     "crates/runtime/sel4-runtime-building-blocks/unwinding-support",
     "crates/runtime/sel4-sync",

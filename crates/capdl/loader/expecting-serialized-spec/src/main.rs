@@ -23,7 +23,7 @@ static LOGGER: Logger = LoggerBuilder::default()
     .write(|s| sel4::debug_print!("{}", s))
     .build();
 
-#[sel4_full_root_task_runtime::main]
+#[sel4_minimal_root_task_runtime::main]
 fn main(bootinfo: &BootInfo) -> ! {
     LOGGER.set().unwrap();
     let (spec, fill) = get_serialized_spec();
