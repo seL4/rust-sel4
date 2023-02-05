@@ -229,8 +229,8 @@ dependencies = [
  "capdl-embed-spec",
  "capdl-embedded-spec-serialized",
  "capdl-types",
+ "sel4-rustfmt-helper",
  "serde_json",
- "which",
 ]
 
 [[package]]

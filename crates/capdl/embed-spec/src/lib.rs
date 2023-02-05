@@ -1,272 +1,333 @@
+#![feature(let_chains)]
 #![feature(never_type)]
 #![feature(unwrap_infallible)]
 
 use std::collections::BTreeMap;
+use std::fmt;
 
 use proc_macro2::{Ident, TokenStream};
-use quote::{format_ident, quote};
+use quote::{format_ident, quote, ToTokens};
 
 use capdl_types::*;
 
-type SpecInput<'a> = Spec<'a, String, FillEntryContentFileAndBytes>;
+// TODO(nspin)
+// In a few cases, we use a local const declaration to appease the borrow checker.
+// Using an exposed constructor of `Indirect` would be one way around this.
+
+type InputSpec<'a> = Spec<'a, String, FillEntryContentFileAndBytes>;
 type FillEntryContentFileAndBytes = (FillEntryContentFile, FillEntryContentBytes<'static>);
 
-pub fn embed<'a>(
-    spec: &'a SpecInput<'a>,
-    include_names: bool,
-    deflate_fill: bool,
-) -> (TokenStream, Vec<(String, Vec<u8>)>) {
-    let state = State::new(spec, include_names, deflate_fill);
-    state.embed()
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Config {
+    pub include_object_names: IncludeObjectNamesConfig,
+    pub deflate_fill: bool,
 }
 
-struct State<'a> {
-    spec: &'a SpecInput<'a>,
-    include_names: bool,
-    deflate_fill: bool,
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum IncludeObjectNamesConfig {
+    All,
+    JustTCBs,
+    None,
+}
+
+impl Config {
+    pub fn embed<'a>(&'a self, spec: &'a InputSpec<'a>) -> (TokenStream, Vec<(String, Vec<u8>)>) {
+        Embedding { config: self, spec }.embed()
+    }
+}
+
+struct Embedding<'a> {
+    config: &'a Config,
+    spec: &'a InputSpec<'a>,
 }
 
 type FillEntryContentId = String;
 
-impl<'a> State<'a> {
-    fn new(spec: &'a SpecInput<'a>, include_names: bool, deflate_fill: bool) -> Self {
-        Self {
-            spec,
-            include_names,
-            deflate_fill,
-        }
-    }
+fn to_tokens_via_debug(value: impl fmt::Debug) -> TokenStream {
+    format!("{:?}", value).parse::<TokenStream>().unwrap()
+}
 
+impl<'a> Embedding<'a> {
     fn types_mod(&self) -> TokenStream {
         quote! { capdl_types }
     }
 
-    fn embed_cap(&self, cap: &Cap) -> TokenStream {
-        // code-saving hack
-        let types_mod = self.types_mod();
-        let debug = format!("{:?}", cap).parse::<TokenStream>().unwrap();
+    fn embed_cap_table(&self, slots: &[CapTableEntry]) -> TokenStream {
+        let slots = slots.iter().map(|(i, cap)| {
+            let cap = to_tokens_via_debug(cap);
+            quote! {
+                (#i, Cap::#cap)
+            }
+        });
         quote! {
             {
-                use #types_mod::cap::*;
-                Cap::#debug
+                use cap::*;
+                Indirect::from_borrowed([#(#slots,)*].as_slice())
             }
         }
     }
 
-    fn embed_cap_table(&self, slots: &[CapTableEntry]) -> TokenStream {
-        let mut toks = quote!();
-        for (i, cap) in slots {
-            let cap = self.embed_cap(cap);
-            toks.extend(quote! {
-                (#i, #cap),
-            })
-        }
+    fn embed_fill(&self, fill: &[FillEntry<FillEntryContentFileAndBytes>]) -> TokenStream {
+        let entries = fill.iter().map(|entry| {
+            let range = to_tokens_via_debug(&entry.range);
+            let content = match &entry.content {
+                FillEntryContent::Data(content_data) => {
+                    let inner_value = self.embedded_file_ident_from_id(
+                        &self.encode_fill_entry_to_id(entry.range.len(), &content_data),
+                    );
+                    let outer_value = self.fill_value(inner_value);
+                    quote! {
+                        FillEntryContent::Data(#outer_value)
+                    }
+                }
+                content @ FillEntryContent::BootInfo(_) => to_tokens_via_debug(content),
+            };
+            quote! {
+                FillEntry {
+                    range: #range,
+                    content: #content,
+                }
+            }
+        });
         quote! {
-            Indirect::from_borrowed([#toks].as_slice())
+            {
+                use FillEntryContent::*;
+                use FillEntryContentBootInfoId::*;
+                Indirect::from_borrowed([#(#entries,)*].as_slice())
+            }
         }
     }
 
-    // TODO(nspin) support FillEntryContent::BootInfo
-    fn embed_fill(&self, fill: &[FillEntry<FillEntryContentFileAndBytes>]) -> TokenStream {
-        let mut toks = quote!();
-        for entry in fill.iter() {
-            let range = format!("{:?}", entry.range).parse::<TokenStream>().unwrap();
-            let content_value = self.embedded_file_ident_from_id(&self.encode_fill_entry_to_id(
-                entry.range.end - entry.range.start,
-                entry.content.as_data().unwrap(),
-            ));
-            let (content_type, content_field) = if self.deflate_fill {
-                (
-                    quote!(FillEntryContentDeflatedBytes),
-                    quote!(deflated_bytes),
-                )
-            } else {
-                (quote!(FillEntryContentBytes), quote!(bytes))
-            };
-            toks.extend(quote! {
-                FillEntry {
-                    range: #range,
-                    content: FillEntryContent::Data(#content_type {
-                        #content_field: #content_value,
-                    }),
-                },
-            })
+    fn patch_field(&self, expr_struct: &mut syn::ExprStruct, field_name: &str, value: syn::Expr) {
+        for field in expr_struct.fields.iter_mut() {
+            if let syn::Member::Named(ident) = &field.member && ident == field_name {
+                field.expr = value.clone();
+            }
         }
-        quote! {
-            Indirect::from_borrowed([#toks].as_slice())
-        }
+    }
+
+    fn embed_object_with_cap_table(&self, obj: &(impl fmt::Debug + HasCapTable)) -> TokenStream {
+        let mut expr_struct = syn::parse2::<syn::ExprStruct>(to_tokens_via_debug(&obj)).unwrap();
+        self.patch_field(
+            &mut expr_struct,
+            "slots",
+            syn::parse2::<syn::Expr>(self.embed_cap_table(&obj.slots())).unwrap(),
+        );
+        expr_struct.to_token_stream()
+    }
+
+    fn embed_object_with_fill(
+        &self,
+        obj: impl fmt::Debug,
+        fill: &[FillEntry<FillEntryContentFileAndBytes>],
+    ) -> TokenStream {
+        let mut expr_struct = syn::parse2::<syn::ExprStruct>(to_tokens_via_debug(&obj)).unwrap();
+        self.patch_field(
+            &mut expr_struct,
+            "fill",
+            syn::parse2::<syn::Expr>(self.embed_fill(fill)).unwrap(),
+        );
+        expr_struct.to_token_stream()
     }
 
     fn embed_object(&self, obj: &Object<FillEntryContentFileAndBytes>) -> TokenStream {
         match obj {
             Object::CNode(obj) => {
-                let toks = self.embed_cap_table(&obj.slots);
-                let size_bits = obj.size_bits;
-                quote! {
-                    Object::CNode(object::CNode {
-                        size_bits: #size_bits,
-                        slots: #toks,
-                    })
-                }
+                let toks = self.embed_object_with_cap_table(obj);
+                quote!(Object::CNode(object::#toks))
             }
             Object::TCB(obj) => {
-                let types_mod = self.types_mod();
-                let slots = self.embed_cap_table(&obj.slots);
-                let extra = format!("{:?}", obj.extra).parse::<TokenStream>().unwrap();
+                let mut expr_struct =
+                    syn::parse2::<syn::ExprStruct>(to_tokens_via_debug(&obj)).unwrap();
+                self.patch_field(
+                    &mut expr_struct,
+                    "slots",
+                    syn::parse2::<syn::Expr>(self.embed_cap_table(&obj.slots())).unwrap(),
+                );
+                self.patch_field(
+                    &mut expr_struct,
+                    "extra",
+                    syn::parse2::<syn::Expr>({
+                        let mut inner_expr_struct =
+                            syn::parse2::<syn::ExprStruct>(to_tokens_via_debug(&obj.extra))
+                                .unwrap();
+                        self.patch_field(
+                            &mut inner_expr_struct,
+                            "gprs",
+                            syn::parse2::<syn::Expr>({
+                                let gprs = to_tokens_via_debug(&obj.extra.gprs);
+                                quote!(Indirect::from_borrowed(&#gprs))
+                            })
+                            .unwrap(),
+                        );
+                        quote! {
+                            {
+                                const EXTRA: &TCBExtraInfo<'static> = &#inner_expr_struct;
+                                Indirect::from_borrowed(EXTRA)
+                            }
+                        }
+                    })
+                    .unwrap(),
+                );
+                let toks = expr_struct.to_token_stream();
                 quote! {
                     {
-                        use #types_mod::object::TCBExtraInfo;
-                        Object::TCB(object::TCB {
-                            slots: #slots,
-                            extra: Indirect::from_borrowed(&#extra),
-                        })
+                        use object::{TCB, TCBExtraInfo};
+                        Object::TCB(#toks)
                     }
                 }
             }
             Object::IRQ(obj) => {
-                let toks = self.embed_cap_table(&obj.slots);
-                quote! {
-                    Object::IRQ(object::IRQ {
-                        slots: #toks,
-                    })
-                }
+                let toks = self.embed_object_with_cap_table(obj);
+                quote!(Object::IRQ(object::#toks))
             }
             Object::SmallPage(obj) => {
-                let toks = self.embed_fill(&obj.fill);
-                let paddr = format!("{:?}", obj.paddr).parse::<TokenStream>().unwrap();
-                quote! {
-                    Object::SmallPage(object::SmallPage {
-                        paddr: #paddr,
-                        fill: #toks,
-                    })
-                }
+                let toks = self.embed_object_with_fill(obj, &obj.fill);
+                quote!(Object::SmallPage(object::#toks))
             }
             Object::LargePage(obj) => {
-                let toks = self.embed_fill(&obj.fill);
-                let paddr = format!("{:?}", obj.paddr).parse::<TokenStream>().unwrap();
-                quote! {
-                    Object::LargePage(object::LargePage {
-                        paddr: #paddr,
-                        fill: #toks,
-                    })
-                }
+                let toks = self.embed_object_with_fill(obj, &obj.fill);
+                quote!(Object::LargePage(object::#toks))
             }
             Object::PT(obj) => {
-                let toks = self.embed_cap_table(&obj.slots);
-                quote! {
-                    Object::PT(object::PT {
-                        slots: #toks,
-                    })
-                }
+                let toks = self.embed_object_with_cap_table(obj);
+                quote!(Object::PT(object::#toks))
             }
             Object::PD(obj) => {
-                let toks = self.embed_cap_table(&obj.slots);
-                quote! {
-                    Object::PD(object::PD {
-                        slots: #toks,
-                    })
-                }
+                let toks = self.embed_object_with_cap_table(obj);
+                quote!(Object::PD(object::#toks))
             }
             Object::PUD(obj) => {
-                let toks = self.embed_cap_table(&obj.slots);
-                quote! {
-                    Object::PUD(object::PUD {
-                        slots: #toks,
-                    })
-                }
+                let toks = self.embed_object_with_cap_table(obj);
+                quote!(Object::PUD(object::#toks))
             }
             Object::PGD(obj) => {
-                let toks = self.embed_cap_table(&obj.slots);
-                quote! {
-                    Object::PGD(object::PGD {
-                        slots: #toks,
-                    })
-                }
-            }
-            Object::ASIDPool(obj) => {
-                let high = obj.high;
-                quote! {
-                    Object::ASIDPool(object::ASIDPool {
-                        high: #high,
-                    })
-                }
+                let toks = self.embed_object_with_cap_table(obj);
+                quote!(Object::PGD(object::#toks))
             }
             Object::ArmIRQ(obj) => {
-                let toks = self.embed_cap_table(&obj.slots);
-                let extra = format!("{:?}", obj.extra).parse::<TokenStream>().unwrap();
-                quote! {
-                    Object::ArmIRQ(object::ArmIRQ {
-                        slots: #toks,
-                        extra: #extra,
+                let mut expr_struct =
+                    syn::parse2::<syn::ExprStruct>(to_tokens_via_debug(&obj)).unwrap();
+                self.patch_field(
+                    &mut expr_struct,
+                    "slots",
+                    syn::parse2::<syn::Expr>(self.embed_cap_table(&obj.slots())).unwrap(),
+                );
+                self.patch_field(
+                    &mut expr_struct,
+                    "extra",
+                    syn::parse2::<syn::Expr>({
+                        let extra = to_tokens_via_debug(&obj.extra);
+                        quote!(Indirect::from_borrowed(&#extra))
                     })
-                }
-            }
-            _ => {
-                // code-saving hack
-                let types_mod = self.types_mod();
-                let debug = format!("{:?}", obj).parse::<TokenStream>().unwrap();
+                    .unwrap(),
+                );
+                let toks = expr_struct.to_token_stream();
                 quote! {
                     {
-                        #[allow(unused_imports)]
-                        use #types_mod::object::*;
-                        Object::#debug
+                        use object::{ArmIRQ, ArmIRQExtraInfo};
+                        Object::ArmIRQ(#toks)
+                    }
+                }
+            }
+            obj => {
+                let obj = to_tokens_via_debug(obj);
+                quote! {
+                    {
+                        use object::*;
+                        Object::#obj
                     }
                 }
             }
         }
     }
 
-    fn embed_objects(&self) -> TokenStream {
-        let mut toks = quote!();
-        for NamedObject { name, object } in self.spec.named_objects() {
-            let object = self.embed_object(object);
-            let name = if self.include_names {
-                let name = name.to_owned();
-                quote! { #name }
-            } else {
-                quote! { Unnamed }
-            };
-            toks.extend(quote! {
-                NamedObject {
-                    name: #name,
-                    object: #object,
-                },
-            })
-        }
-        // TODO(nspin)
-        // This const declaration + type signature are just to appease the borrow checker.
-        // There must be a more elegant way.
-        let name_type = if self.include_names {
-            quote!(&str)
+    fn qualification_prefix(&self, qualify: bool) -> TokenStream {
+        if qualify {
+            let types_mod = self.types_mod();
+            quote!(#types_mod::)
         } else {
-            quote!(Unnamed)
-        };
-        let fill_type = if self.deflate_fill {
+            quote!()
+        }
+    }
+
+    fn name_type(&self, qualify: bool) -> TokenStream {
+        let prefix = self.qualification_prefix(qualify);
+        match self.config.include_object_names {
+            IncludeObjectNamesConfig::All => quote!(&str),
+            IncludeObjectNamesConfig::JustTCBs => quote!(Option<&str>),
+            IncludeObjectNamesConfig::None => quote!(#prefix Unnamed),
+        }
+    }
+
+    fn name_value(&self, name: &str) -> TokenStream {
+        match self.config.include_object_names {
+            IncludeObjectNamesConfig::All => quote!(#name),
+            IncludeObjectNamesConfig::JustTCBs => quote!(Some(#name)),
+            IncludeObjectNamesConfig::None => quote!(Unnamed),
+        }
+    }
+
+    fn fill_type(&self, qualify: bool) -> TokenStream {
+        let prefix = self.qualification_prefix(qualify);
+        let ty = if self.config.deflate_fill {
             quote!(FillEntryContentDeflatedBytes)
         } else {
             quote!(FillEntryContentBytes)
         };
+        quote!(#prefix #ty)
+    }
+
+    fn fill_value(&self, field_value: impl ToTokens) -> TokenStream {
+        let constructor = self.fill_type(false);
+        let field_name = if self.config.deflate_fill {
+            quote!(deflated_bytes)
+        } else {
+            quote!(bytes)
+        };
         quote! {
-            Indirect::from_borrowed({
-                const NAMED_OBJECTS: &[NamedObject<#name_type, #fill_type>] = &[#toks];
-                NAMED_OBJECTS
-            })
+            #constructor {
+                #field_name: #field_value
+            }
+        }
+    }
+
+    fn pack_fill(&self, bytes: &[u8]) -> Vec<u8> {
+        (if self.config.deflate_fill {
+            FillEntryContentDeflatedBytes::pack
+        } else {
+            FillEntryContentBytes::pack
+        })(bytes)
+    }
+
+    fn embed_objects(&self) -> TokenStream {
+        let toks = self
+            .spec
+            .named_objects()
+            .map(|NamedObject { name, object }| {
+                let name = self.name_value(name);
+                let object = self.embed_object(object);
+                quote! {
+                    NamedObject {
+                        name: #name,
+                        object: #object,
+                    }
+                }
+            });
+        quote! {
+            [#(#toks,)*]
         }
     }
 
     fn embed_irqs(&self) -> TokenStream {
-        let toks = format!("{:?}", self.spec.irqs)
-            .parse::<TokenStream>()
-            .unwrap();
+        let toks = to_tokens_via_debug(&self.spec.irqs);
         quote! {
             Indirect::from_borrowed(#toks.as_slice())
         }
     }
 
     fn embed_asid_slots(&self) -> TokenStream {
-        let toks = format!("{:?}", self.spec.asid_slots)
-            .parse::<TokenStream>()
-            .unwrap();
+        let toks = to_tokens_via_debug(&self.spec.asid_slots);
         quote! {
             Indirect::from_borrowed(#toks.as_slice())
         }
@@ -289,14 +350,12 @@ impl<'a> State<'a> {
     }
 
     fn embedded_file_fname_from_id(&self, id: &FillEntryContentId) -> String {
-        format!("{}.bin", id)
+        format!("fragment.{}.bin", id)
     }
 
     // NOTE
     // I would prefer this to return just the rhs, but rustfmt wouldn't be able to format that
     fn embed(&self) -> (TokenStream, Vec<(String, Vec<u8>)>) {
-        let types_mod = self.types_mod();
-
         let mut file_definition_toks = quote!();
         let mut fills = BTreeMap::<FillEntryContentId, Vec<u8>>::new();
         self.spec
@@ -310,38 +369,33 @@ impl<'a> State<'a> {
                         #[allow(non_upper_case_globals)]
                         const #ident: &[u8] = include_bytes!(concat!(env!("OUT_DIR"), "/", #fname));
                     });
-                    let content = (if self.deflate_fill {
-                        FillEntryContentDeflatedBytes::pack
-                    } else {
-                        FillEntryContentBytes::pack
-                    })(&content_bytes.bytes);
+                    let content = self.pack_fill(&content_bytes.bytes);
                     fills.insert(id, content);
                 }
                 Ok::<(), !>(())
             })
             .into_ok();
 
-        let name_type = if self.include_names {
-            quote! { &'static str }
-        } else {
-            quote! { #types_mod::Unnamed }
-        };
+        let types_mod = self.types_mod();
+        let name_type = self.name_type(true);
+        let fill_type = self.fill_type(true);
+
         let objects = self.embed_objects();
         let irqs = self.embed_irqs();
         let asid_slots = self.embed_asid_slots();
-        let fill_type = if self.deflate_fill {
-            quote!(#types_mod::FillEntryContentDeflatedBytes)
-        } else {
-            quote!(#types_mod::FillEntryContentBytes)
-        };
+
         let toks = quote! {
+            #[allow(unused_imports)]
             pub const SPEC: #types_mod::Spec<'static, #name_type, #fill_type> = {
+
                 use #types_mod::*;
 
                 #file_definition_toks
 
+                const NAMED_OBJECTS: &[NamedObject<#name_type, #fill_type>] = &#objects;
+
                 Spec {
-                    objects: #objects,
+                    objects: Indirect::from_borrowed(NAMED_OBJECTS),
                     irqs: #irqs,
                     asid_slots: #asid_slots,
                 }

@@ -48,20 +48,19 @@ fn main() {
     })
     .into_ok();
 
-    let mut toks = quote!();
-    for file in &files {
-        let encoded = format!("file.{}", hex::encode(file));
+    let toks = files.iter().map(|file| {
+        let encoded = format!("file.{}.bin", hex::encode(file));
         io::copy(
             &mut File::open(PathBuf::from(&fill_dir_path).join(file)).unwrap(),
             &mut File::create(PathBuf::from(&out_dir).join(&encoded)).unwrap(),
         )
         .unwrap();
-        toks.extend(quote! {
-            (#file, include_bytes!(concat!(env!("OUT_DIR"), concat!("/", #encoded)))),
-        })
-    }
+        quote! {
+            (#file, include_bytes!(concat!(env!("OUT_DIR"), concat!("/", #encoded))))
+        }
+    });
     let toks = quote! {
-        &[#toks]
+        &[#(#toks,)*]
     };
 
     fs::write(

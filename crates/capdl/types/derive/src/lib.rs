@@ -55,3 +55,22 @@ fn derive_object_impl(ast: &syn::DeriveInput) -> TokenStream {
     };
     gen.into()
 }
+
+#[proc_macro_derive(IsObjectWithCapTable)]
+pub fn derive_object_with_cap_table(input: TokenStream) -> TokenStream {
+    let ast = syn::parse(input).unwrap();
+    derive_object_with_cap_table_impl(&ast)
+}
+
+fn derive_object_with_cap_table_impl(ast: &syn::DeriveInput) -> TokenStream {
+    let name = &ast.ident;
+    let generics = &ast.generics;
+    let gen = quote! {
+        impl #generics HasCapTable for #name #generics {
+            fn slots(&self) -> &[CapTableEntry] {
+                &*self.slots
+            }
+        }
+    };
+    gen.into()
+}

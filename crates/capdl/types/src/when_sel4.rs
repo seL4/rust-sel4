@@ -1,6 +1,6 @@
 use sel4::{ObjectBlueprint, ObjectBlueprintAArch64, ObjectBlueprintArm, VMAttributes};
 
-use crate::{cap, FillEntryContentBootInfoId, Object, Rights};
+use crate::{cap, Badge, Cap, FillEntryContentBootInfoId, Object, Rights};
 
 impl<'a, F> Object<'a, F> {
     pub fn blueprint(&self) -> Option<ObjectBlueprint> {
@@ -22,6 +22,29 @@ impl<'a, F> Object<'a, F> {
             Object::PUD(_) => ObjectBlueprintAArch64::PUD.into(),
             Object::PGD(_) => ObjectBlueprintAArch64::PGD.into(),
             Object::ASIDPool(_) => ObjectBlueprint::asid_pool(),
+            _ => return None,
+        })
+    }
+}
+
+impl Cap {
+    pub fn rights(&self) -> Option<&Rights> {
+        Some(match self {
+            Cap::Endpoint(cap) => &cap.rights,
+            Cap::Notification(cap) => &cap.rights,
+            Cap::SmallPage(cap) => &cap.rights,
+            Cap::LargePage(cap) => &cap.rights,
+            _ => return None,
+        })
+    }
+
+    pub fn badge(&self) -> Option<Badge> {
+        Some(match self {
+            Cap::Endpoint(cap) => cap.badge,
+            Cap::Notification(cap) => cap.badge,
+            Cap::CNode(cap) => {
+                sel4::CNodeCapData::new(cap.guard, cap.guard_size.try_into().unwrap()).into_word()
+            }
             _ => return None,
         })
     }

@@ -7,7 +7,6 @@
 #![feature(int_roundings)]
 #![feature(never_type)]
 #![feature(const_trait_impl)]
-#![allow(unused_variables)]
 
 use core::array;
 use core::borrow::BorrowMut;
@@ -40,7 +39,7 @@ pub use error::CapDLLoaderError;
 use hold_slots::HoldSlots;
 use memory::init_copy_addrs;
 
-// TODO see seL4_ARM_Page_CleanInvalidate_Data/seL4_ARM_Page_Unify_Instruction in upstream
+// TODO see note about seL4_ARM_Page_CleanInvalidate_Data/seL4_ARM_Page_Unify_Instruction in upstream
 
 type Result<T> = result::Result<T, CapDLLoaderError>;
 
@@ -388,8 +387,7 @@ impl<
             CapRights::read_write(),
             VMAttributes::default() & !VMAttributes::PAGE_CACHEABLE,
         )?;
-        atomic::fence(Ordering::SeqCst);
-        // atomic::compiler_fence(Ordering::SeqCst);
+        atomic::fence(Ordering::SeqCst); // lazy
         for entry in fill.iter() {
             let offset = entry.range.start;
             let length = entry.range.end - entry.range.start;
@@ -420,8 +418,7 @@ impl<
                 }
             }
         }
-        atomic::fence(Ordering::SeqCst);
-        // atomic::compiler_fence(Ordering::SeqCst);
+        atomic::fence(Ordering::SeqCst); // lazy
         frame.frame_unmap()?;
         Ok(())
     }
@@ -564,35 +561,14 @@ impl<
                 // TODO
                 // parse-capDL uses badge=0 to mean no badge. Is that good
                 // enough, or do we ever need to actually use the badge value '0'?
-                let mut badge = 0;
-                let mut rights = CapRights::all();
-                match cap {
-                    Cap::Endpoint(cap) => {
-                        badge = cap.badge;
-                        rights = (&cap.rights).into();
-                    }
-                    Cap::Notification(cap) => {
-                        badge = cap.badge;
-                        rights = (&cap.rights).into();
-                    }
-                    Cap::CNode(cap) => {
-                        badge = CNodeCapData::new(cap.guard, cap.guard_size.try_into().unwrap())
-                            .into_word();
-                    }
-                    Cap::SmallPage(cap) => {
-                        rights = (&cap.rights).into();
-                    }
-                    Cap::LargePage(cap) => {
-                        rights = (&cap.rights).into();
-                    }
-                    _ => {}
-                };
+                let badge = cap.badge();
+                let rights = cap.rights().map(From::from).unwrap_or(CapRights::all());
                 let src = BootInfo::init_thread_cnode()
                     .relative(self.orig_local_cptr::<cap_type::Unspecified>(cap.obj()));
                 let dst = cnode.relative_bits_with_depth((*i).try_into().unwrap(), obj.size_bits);
                 match badge {
-                    0 => dst.copy(&src, rights),
-                    _ => dst.mint(&src, rights, badge),
+                    None => dst.copy(&src, rights),
+                    Some(badge) => dst.mint(&src, rights, badge),
                 }?;
             }
         }

@@ -4,59 +4,11 @@ use core::ops::Range;
 #[cfg(feature = "deflate")]
 use core::iter;
 
-cfg_if::cfg_if! {
-    if #[cfg(feature = "alloc")] {
-        use alloc::string::String;
-        use alloc::vec::Vec;
-    }
-}
+#[cfg(feature = "alloc")]
+use alloc::{string::String, vec::Vec};
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
-
-#[derive(Clone, Eq, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub struct FillEntryContentBytes<'a> {
-    pub bytes: &'a [u8],
-}
-
-impl<'a> fmt::Debug for FillEntryContentBytes<'a> {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_struct("FillEntryContentBytes")
-            .field("bytes", &"&[...]")
-            .finish()
-    }
-}
-
-#[cfg(feature = "alloc")]
-impl<'a> FillEntryContentBytes<'a> {
-    pub fn pack(content: &[u8]) -> Vec<u8> {
-        content.to_vec()
-    }
-}
-
-#[cfg(feature = "deflate")]
-#[derive(Clone, Eq, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub struct FillEntryContentDeflatedBytes<'a> {
-    pub deflated_bytes: &'a [u8],
-}
-
-#[cfg(feature = "deflate")]
-impl<'a> fmt::Debug for FillEntryContentDeflatedBytes<'a> {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_struct("FillEntryContentDeflatedBytes")
-            .field("deflated_bytes", &"&[...]")
-            .finish()
-    }
-}
-
-#[cfg(all(feature = "alloc", feature = "deflate"))]
-impl<'a> FillEntryContentDeflatedBytes<'a> {
-    pub fn pack(content: &[u8]) -> Vec<u8> {
-        miniz_oxide::deflate::compress_to_vec(content, 10)
-    }
-}
 
 #[cfg(feature = "alloc")]
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -72,9 +24,44 @@ pub trait AvailableFillEntryContent {
     fn copy_out(&self, dst: &mut [u8]);
 }
 
+#[derive(Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct FillEntryContentBytes<'a> {
+    pub bytes: &'a [u8],
+}
+
+#[cfg(feature = "alloc")]
+impl<'a> FillEntryContentBytes<'a> {
+    pub fn pack(content: &[u8]) -> Vec<u8> {
+        content.to_vec()
+    }
+}
+
 impl<'a> AvailableFillEntryContent for FillEntryContentBytes<'a> {
     fn copy_out(&self, dst: &mut [u8]) {
         dst.copy_from_slice(self.bytes)
+    }
+}
+
+impl<'a> fmt::Debug for FillEntryContentBytes<'a> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("FillEntryContentBytes")
+            .field("bytes", &"&[...]")
+            .finish()
+    }
+}
+
+#[cfg(feature = "deflate")]
+#[derive(Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct FillEntryContentDeflatedBytes<'a> {
+    pub deflated_bytes: &'a [u8],
+}
+
+#[cfg(all(feature = "alloc", feature = "deflate"))]
+impl<'a> FillEntryContentDeflatedBytes<'a> {
+    pub fn pack(content: &[u8]) -> Vec<u8> {
+        miniz_oxide::deflate::compress_to_vec(content, 10)
     }
 }
 
@@ -89,6 +76,15 @@ impl<'a> AvailableFillEntryContent for FillEntryContentDeflatedBytes<'a> {
         )
         .unwrap();
         assert_eq!(n, dst.len())
+    }
+}
+
+#[cfg(feature = "deflate")]
+impl<'a> fmt::Debug for FillEntryContentDeflatedBytes<'a> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("FillEntryContentDeflatedBytes")
+            .field("deflated_bytes", &"&[...]")
+            .finish()
     }
 }
 

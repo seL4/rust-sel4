@@ -5,7 +5,7 @@ use crate::{object, FillEntry, FillEntryContent, Indirect, NamedObject, Object, 
 impl<'a, N, F> Spec<'a, N, F> {
     pub fn traverse<N1, F1, E>(
         &self,
-        mut f: impl FnMut(&N) -> Result<N1, E>,
+        mut f: impl FnMut(&Object<'a, F>, &N) -> Result<N1, E>,
         mut g: impl FnMut(usize, &F) -> Result<F1, E>,
     ) -> Result<Spec<'a, N1, F1>, E> {
         Ok(Spec {
@@ -21,11 +21,11 @@ impl<'a, N, F> Spec<'a, N, F> {
 impl<'a, N, F> NamedObject<'a, N, F> {
     pub fn traverse<N1, F1, E>(
         &self,
-        f: impl FnOnce(&N) -> Result<N1, E>,
+        f: impl FnOnce(&Object<'a, F>, &N) -> Result<N1, E>,
         g: impl FnMut(usize, &F) -> Result<F1, E>,
     ) -> Result<NamedObject<'a, N1, F1>, E> {
         Ok(NamedObject {
-            name: f(&self.name)?,
+            name: f(&self.object, &self.name)?,
             object: self.object.traverse(g)?,
         })
     }
@@ -93,10 +93,9 @@ fn traverse_fill_entires<'a, F, F1, E>(
                     FillEntryContent::BootInfo(content_bootinfo) => {
                         FillEntryContent::BootInfo(content_bootinfo.clone())
                     }
-                    FillEntryContent::Data(content_data) => FillEntryContent::Data(f(
-                        entry.range.end - entry.range.start,
-                        &content_data,
-                    )?),
+                    FillEntryContent::Data(content_data) => {
+                        FillEntryContent::Data(f(entry.range.len(), &content_data)?)
+                    }
                 },
             })
         })
@@ -118,22 +117,29 @@ impl<'a, N: Clone, F> Spec<'a, N, F> {
         &self,
         f: impl FnMut(usize, &F) -> Result<F1, E>,
     ) -> Result<Spec<'a, N, F1>, E> {
-        self.traverse(|name| Ok(name.clone()), f)
+        self.traverse(|_object, name| Ok(name.clone()), f)
     }
 
     pub fn traverse_fill<F1, E>(
         &self,
         mut f: impl FnMut(&F) -> Result<F1, E>,
     ) -> Result<Spec<'a, N, F1>, E> {
-        self.traverse_fill_with_context(|_, entry| f(entry))
+        self.traverse_fill_with_context(|_length, entry| f(entry))
     }
 }
 
 impl<'a, N, F: Clone> Spec<'a, N, F> {
+    pub fn traverse_names_with_context<N1, E>(
+        &self,
+        f: impl FnMut(&Object<'a, F>, &N) -> Result<N1, E>,
+    ) -> Result<Spec<'a, N1, F>, E> {
+        self.traverse(f, |_length, entry| Ok(entry.clone()))
+    }
+
     pub fn traverse_names<N1, E>(
         &self,
-        f: impl FnMut(&N) -> Result<N1, E>,
+        mut f: impl FnMut(&N) -> Result<N1, E>,
     ) -> Result<Spec<'a, N1, F>, E> {
-        self.traverse(f, |_, entry| Ok(entry.clone()))
+        self.traverse_names_with_context(|_object, name| f(name))
     }
 }

@@ -1,13 +1,9 @@
-#![allow(unused_imports)]
-
 use core::borrow::Borrow;
-use core::cmp;
 use core::fmt;
-use core::iter;
-use core::marker::PhantomData;
 use core::ops::Deref;
-use core::ops::Index;
-use core::slice;
+
+#[cfg(feature = "alloc")]
+use core::marker::PhantomData;
 
 #[cfg(feature = "alloc")]
 use alloc::boxed::Box;

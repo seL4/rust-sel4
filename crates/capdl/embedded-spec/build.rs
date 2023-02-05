@@ -3,21 +3,33 @@
 use std::env;
 use std::fs;
 use std::path::PathBuf;
-use std::process::Command;
 use std::str;
 
-use which::which;
+use capdl_embed_spec::IncludeObjectNamesConfig;
+use sel4_rustfmt_helper::Rustfmt;
 
 const CAPDL_EMBED_NAMES_ENV: &str = "CAPDL_EMBED_NAMES";
 
 fn main() {
-    let embed_names = env::var(CAPDL_EMBED_NAMES_ENV)
+    let include_object_names = match env::var(CAPDL_EMBED_NAMES_ENV)
         .map(|x| x.parse::<i32>().unwrap())
         .unwrap_or(1)
-        == 1;
+    {
+        0 => IncludeObjectNamesConfig::None,
+        1 => IncludeObjectNamesConfig::JustTCBs,
+        2 => IncludeObjectNamesConfig::All,
+        n => panic!("unexpected value for {}: {}", CAPDL_EMBED_NAMES_ENV, n),
+    };
+
     let deflate_fill = cfg!(feature = "deflate");
+
     let spec = capdl_embedded_spec_serialized::get();
-    let (embedded_spec, aux_files) = capdl_embed_spec::embed(&spec, embed_names, deflate_fill);
+
+    let (embedded_spec, aux_files) = capdl_embed_spec::Config {
+        include_object_names,
+        deflate_fill,
+    }
+    .embed(&spec);
 
     let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
     let spec_out_path = out_dir.join("spec.rs");
@@ -28,15 +40,5 @@ fn main() {
 
     println!("cargo:rerun-if-env-changed={}", CAPDL_EMBED_NAMES_ENV);
 
-    // HACK
-    // TODO not formatting entire file
-    if let Some(rustfmt) = env::var("RUSTFMT")
-        .map(PathBuf::from)
-        .ok()
-        .or_else(|| which("rustfmt").ok())
-    {
-        let output = Command::new(rustfmt).arg(&spec_out_path).output().unwrap();
-        eprint!("{}", str::from_utf8(&output.stderr).unwrap());
-        output.status.exit_ok().unwrap();
-    }
+    Rustfmt::detect().format(&spec_out_path);
 }

@@ -1,9 +1,11 @@
-use core::borrow::Borrow;
 use core::fmt;
 use core::iter;
 use core::slice;
 
 use crate::{cap, object, Cap, CapSlot, CapTableEntry, TryFromCapError};
+
+// NOTE
+// Magic constants must be kept in sync with capDL-tool.
 
 pub trait HasCapTable {
     fn slots(&self) -> &[CapTableEntry];
@@ -41,23 +43,13 @@ pub trait HasCapTable {
     }
 }
 
-impl<'a> HasCapTable for object::TCB<'a> {
-    fn slots(&self) -> &[CapTableEntry] {
-        self.slots.borrow()
-    }
-}
-
 impl<'a> object::TCB<'a> {
-    // NOTE
-    // magic consts must be kept in sync with capDL-tool
     pub const SLOT_CSPACE: CapSlot = 0;
     pub const SLOT_VSPACE: CapSlot = 1;
     pub const SLOT_IPC_BUFFER: CapSlot = 4;
     pub const SLOT_BOUND_NOTIFICATION: CapSlot = 8;
     pub const SLOT_VCPU: CapSlot = 9;
-}
 
-impl<'a> object::TCB<'a> {
     pub fn cspace(&self) -> &cap::CNode {
         self.slot_as(Self::SLOT_CSPACE)
     }
@@ -79,78 +71,23 @@ impl<'a> object::TCB<'a> {
     }
 }
 
-impl<'a> HasCapTable for object::CNode<'a> {
-    fn slots(&self) -> &[CapTableEntry] {
-        self.slots.borrow()
-    }
-}
-
-impl<'a> HasCapTable for object::IRQ<'a> {
-    fn slots(&self) -> &[CapTableEntry] {
-        self.slots.borrow()
-    }
-}
-
 impl<'a> object::IRQ<'a> {
-    // NOTE
-    // magic consts must be kept in sync with capDL-tool
     pub const SLOT_NOTIFICATION: CapSlot = 0;
-}
 
-impl<'a> object::IRQ<'a> {
     pub fn notification(&self) -> Option<&cap::Notification> {
         self.maybe_slot_as(Self::SLOT_NOTIFICATION)
     }
 }
 
-impl<'a> HasCapTable for object::PGD<'a> {
-    fn slots(&self) -> &[CapTableEntry] {
-        self.slots.borrow()
-    }
-}
-
-impl<'a> HasCapTable for object::PUD<'a> {
-    fn slots(&self) -> &[CapTableEntry] {
-        self.slots.borrow()
-    }
-}
-
-impl<'a> HasCapTable for object::PD<'a> {
-    fn slots(&self) -> &[CapTableEntry] {
-        self.slots.borrow()
-    }
-}
-
-impl<'a> HasCapTable for object::PT<'a> {
-    fn slots(&self) -> &[CapTableEntry] {
-        self.slots.borrow()
-    }
-}
-
-impl<'a> HasCapTable for object::ArmIRQ<'a> {
-    fn slots(&self) -> &[CapTableEntry] {
-        self.slots.borrow()
-    }
-}
-
 impl<'a> object::ArmIRQ<'a> {
-    // NOTE
-    // magic consts must be kept in sync with capDL-tool
     pub const SLOT_NOTIFICATION: CapSlot = 0;
-}
 
-impl<'a> object::ArmIRQ<'a> {
     pub fn notification(&self) -> Option<&cap::Notification> {
         self.maybe_slot_as(Self::SLOT_NOTIFICATION)
     }
 }
 
 // // //
-
-// TODO duplicate using something like:
-// pub trait TranslationStructure: HasCapTable {
-//     type Entry;
-// }
 
 impl<'a> object::PGD<'a> {
     pub fn entries(&self) -> impl Iterator<Item = (CapSlot, &cap::PUD)> {

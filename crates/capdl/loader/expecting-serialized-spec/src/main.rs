@@ -52,7 +52,6 @@ fn get_serialized_spec<'a>() -> (
 
 extern "C" {
     static __executable_start: u64;
-    static _end: u64;
 }
 
 fn user_image_bounds() -> Range<usize> {

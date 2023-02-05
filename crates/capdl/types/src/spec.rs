@@ -4,9 +4,15 @@ use core::ops::Range;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use capdl_types_derive::{IsCap, IsObject};
+use capdl_types_derive::{IsCap, IsObject, IsObjectWithCapTable};
 
-use crate::Indirect;
+use crate::{HasCapTable, Indirect};
+
+// TODO
+// Prepare for broader platform support:
+// - Eliminate use of `usize`.
+// - Parameterize with token `Arch` type?
+// - Use generic `Frame` object variant with `size_bits` field.
 
 pub type Word = u64;
 pub type Badge = Word;
@@ -161,8 +167,7 @@ pub enum FillEntryContentBootInfoId {
     Fdt,
 }
 
-// TODO
-// Decrease memory overhead of Object enum using coarser indirection
+// // //
 
 pub mod object {
     use super::*;
@@ -174,14 +179,14 @@ pub mod object {
         pub paddr: Option<usize>,
     }
 
-    #[derive(Debug, Clone, Eq, PartialEq, IsObject)]
+    #[derive(Debug, Clone, Eq, PartialEq, IsObject, IsObjectWithCapTable)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
     pub struct CNode<'a> {
         pub size_bits: usize,
         pub slots: Indirect<'a, [CapTableEntry]>,
     }
 
-    #[derive(Debug, Clone, Eq, PartialEq, IsObject)]
+    #[derive(Debug, Clone, Eq, PartialEq, IsObject, IsObjectWithCapTable)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
     pub struct TCB<'a> {
         pub slots: Indirect<'a, [CapTableEntry]>,
@@ -205,7 +210,7 @@ pub mod object {
         pub gprs: Indirect<'a, [Word]>,
     }
 
-    #[derive(Debug, Clone, Eq, PartialEq, IsObject)]
+    #[derive(Debug, Clone, Eq, PartialEq, IsObject, IsObjectWithCapTable)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
     pub struct IRQ<'a> {
         pub slots: Indirect<'a, [CapTableEntry]>,
@@ -225,25 +230,25 @@ pub mod object {
         pub fill: Indirect<'a, [FillEntry<F>]>,
     }
 
-    #[derive(Debug, Clone, Eq, PartialEq, IsObject)]
+    #[derive(Debug, Clone, Eq, PartialEq, IsObject, IsObjectWithCapTable)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
     pub struct PT<'a> {
         pub slots: Indirect<'a, [CapTableEntry]>,
     }
 
-    #[derive(Debug, Clone, Eq, PartialEq, IsObject)]
+    #[derive(Debug, Clone, Eq, PartialEq, IsObject, IsObjectWithCapTable)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
     pub struct PD<'a> {
         pub slots: Indirect<'a, [CapTableEntry]>,
     }
 
-    #[derive(Debug, Clone, Eq, PartialEq, IsObject)]
+    #[derive(Debug, Clone, Eq, PartialEq, IsObject, IsObjectWithCapTable)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
     pub struct PUD<'a> {
         pub slots: Indirect<'a, [CapTableEntry]>,
     }
 
-    #[derive(Debug, Clone, Eq, PartialEq, IsObject)]
+    #[derive(Debug, Clone, Eq, PartialEq, IsObject, IsObjectWithCapTable)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
     pub struct PGD<'a> {
         pub slots: Indirect<'a, [CapTableEntry]>,
@@ -255,7 +260,7 @@ pub mod object {
         pub high: Word,
     }
 
-    #[derive(Debug, Clone, Eq, PartialEq, IsObject)]
+    #[derive(Debug, Clone, Eq, PartialEq, IsObject, IsObjectWithCapTable)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
     pub struct ArmIRQ<'a> {
         pub slots: Indirect<'a, [CapTableEntry]>,

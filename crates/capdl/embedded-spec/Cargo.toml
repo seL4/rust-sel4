@@ -15,5 +15,5 @@ capdl-types = { path = "../types", features = ["borrowed-indirect"] }
 capdl-embed-spec = { path = "../embed-spec" }
 capdl-embedded-spec-serialized = { path = "./serialized" }
 capdl-types = { path = "../types" }
+sel4-rustfmt-helper = { path = "../../sel4/rustfmt-helper" }
 serde_json = "*"
-which = "*"

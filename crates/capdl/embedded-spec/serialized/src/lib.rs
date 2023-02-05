@@ -17,8 +17,7 @@ pub fn get<'a>() -> Spec<'a, String, (FillEntryContentFile, FillEntryContentByte
                     .iter()
                     .find_map(|(name, bytes)| {
                         if name == &content.file {
-                            let i = content.file_offset;
-                            Some(&bytes[i..i + length])
+                            Some(&bytes[content.file_offset..][..length])
                         } else {
                             None
                         }
