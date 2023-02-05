@@ -13,7 +13,7 @@ struct CurrentException {
 }
 
 #[cfg(not(target_thread_local))]
-compile_error!();
+compile_error!("");
 
 #[thread_local]
 static CURRENT_PAYLOAD: RefCell<Option<Payload>> = RefCell::new(None);

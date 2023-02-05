@@ -13,7 +13,7 @@ use sel4_runtime_building_blocks_termination::Termination;
 pub use sel4_minimal_root_task_runtime_macros::main;
 
 #[cfg(panic = "unwind")]
-compile_error!();
+compile_error!("");
 
 #[macro_export]
 macro_rules! declare_main {

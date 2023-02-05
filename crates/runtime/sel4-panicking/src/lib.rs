@@ -82,7 +82,7 @@ pub fn catch_unwind<R, F: FnOnce() -> R>(f: F) -> Result<R, Payload> {
 }
 
 #[cfg(not(target_thread_local))]
-compile_error!();
+compile_error!("");
 
 // TODO consider supporting nested panics
 #[thread_local]

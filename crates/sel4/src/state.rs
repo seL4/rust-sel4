@@ -7,7 +7,7 @@ const IPC_BUFFER_INIT: RefCell<Option<IPCBuffer>> = RefCell::new(None);
 cfg_if::cfg_if! {
     if #[cfg(not(feature = "single-threaded"))] {
         #[cfg(not(target_thread_local))]
-        compile_error!();
+        compile_error!("");
 
         #[thread_local]
         static IPC_BUFFER: RefCell<Option<IPCBuffer>> = IPC_BUFFER_INIT;
