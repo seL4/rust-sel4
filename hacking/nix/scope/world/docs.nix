@@ -8,6 +8,7 @@
 , vendorLockfile, pruneLockfile
 , crates
 , buildSysroot
+, seL4RustTargetInfoWithConfig
 
 , topLevelLockfile
 , vendoredTopLevelLockfile
@@ -17,24 +18,24 @@
 
 let
   rustToolchain = defaultRustToolchain;
-  rustTargetInfo = defaultRustTargetInfo;
-  rustTargetName = rustTargetInfo.name;
-  rustTargetPath = rustTargetInfo.path;
 
   runtimes = [
-    { name = "none"; features = []; }
+    { name = "none"; features = []; rustTargetInfo = seL4RustTargetInfoWithConfig { minimal = true; }; }
   ] ++ lib.optionals (hostPlatform.isAarch64 || hostPlatform.isx86_64) [
-    (rec { name = "minimal-root-task-runtime"; features = [ name ]; })
+    (rec { name = "minimal-root-task-runtime"; features = [ name ]; rustTargetInfo = seL4RustTargetInfoWithConfig { minimal = true; }; })
   ] ++ lib.optionals hostPlatform.isAarch64 [
-    (rec { name = "full-root-task-runtime"; features = [ name ]; })
+    (rec { name = "full-root-task-runtime"; features = [ name ]; rustTargetInfo = seL4RustTargetInfoWithConfig { minimal = false; }; })
   ];
 
   rootCrate = crates.meta-for-docs;
 
   # TODO try using build-std
 
-  mk = { name, features }:
+  mk = { name, features, rustTargetInfo }:
     let
+      rustTargetName = rustTargetInfo.name;
+      rustTargetPath = rustTargetInfo.path;
+
       lockfile = builtins.toFile "Cargo.lock" lockfileContents;
       lockfileContents = builtins.readFile lockfileDrv;
       lockfileDrv = pruneLockfile {
@@ -132,7 +133,7 @@ let
       '';
 
 in
-  lib.forEach runtimes ({ name, features }@runtime: {
+  lib.forEach runtimes ({ name, ... }@runtime: {
     inherit name;
     drv = mk runtime;
   })
