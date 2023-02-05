@@ -115,6 +115,7 @@ impl Cap {
     }
 }
 
+// TODO Would packing have an actual effect on memory footprint?
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Rights {
@@ -160,6 +161,9 @@ pub enum FillEntryContentBootInfoId {
     Fdt,
 }
 
+// TODO
+// Decrease memory overhead of Object enum using coarser indirection
+
 pub mod object {
     use super::*;
 
@@ -181,18 +185,14 @@ pub mod object {
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
     pub struct TCB<'a> {
         pub slots: Indirect<'a, [CapTableEntry]>,
-        pub fault_ep: CPtr,
-        pub extra_info: TCBExtraInfo,
-        pub init_args: [Option<Word>; TCB_NUM_INIT_ARGS],
+        pub extra: Indirect<'a, TCBExtraInfo<'a>>,
     }
-
-    // TODO associate with object::TCB once #[feature(generic_const_exprs)] is complete
-    const TCB_NUM_INIT_ARGS: usize = 4;
 
     #[derive(Debug, Clone, Eq, PartialEq)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-    pub struct TCBExtraInfo {
+    pub struct TCBExtraInfo<'a> {
         pub ipc_buffer_addr: Word,
+        pub fault_ep: CPtr,
 
         pub affinity: Word,
         pub prio: u8,
@@ -202,6 +202,7 @@ pub mod object {
         pub ip: Word,
         pub sp: Word,
         pub spsr: Word,
+        pub gprs: Indirect<'a, [Word]>,
     }
 
     #[derive(Debug, Clone, Eq, PartialEq, IsObject)]
@@ -258,6 +259,12 @@ pub mod object {
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
     pub struct ArmIRQ<'a> {
         pub slots: Indirect<'a, [CapTableEntry]>,
+        pub extra: Indirect<'a, ArmIRQExtraInfo>,
+    }
+
+    #[derive(Debug, Clone, Eq, PartialEq)]
+    #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+    pub struct ArmIRQExtraInfo {
         pub trigger: Word,
         pub target: Word,
     }

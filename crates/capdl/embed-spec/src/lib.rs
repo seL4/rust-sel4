@@ -112,21 +112,13 @@ impl<'a> State<'a> {
             Object::TCB(obj) => {
                 let types_mod = self.types_mod();
                 let slots = self.embed_cap_table(&obj.slots);
-                let fault_ep = obj.fault_ep;
-                let extra_info = format!("{:?}", obj.extra_info)
-                    .parse::<TokenStream>()
-                    .unwrap();
-                let init_args = format!("{:?}", obj.init_args)
-                    .parse::<TokenStream>()
-                    .unwrap();
+                let extra = format!("{:?}", obj.extra).parse::<TokenStream>().unwrap();
                 quote! {
                     {
                         use #types_mod::object::TCBExtraInfo;
                         Object::TCB(object::TCB {
                             slots: #slots,
-                            fault_ep: #fault_ep,
-                            extra_info: #extra_info,
-                            init_args: #init_args,
+                            extra: Indirect::from_borrowed(&#extra),
                         })
                     }
                 }
@@ -201,13 +193,11 @@ impl<'a> State<'a> {
             }
             Object::ArmIRQ(obj) => {
                 let toks = self.embed_cap_table(&obj.slots);
-                let trigger = obj.trigger;
-                let target = obj.target;
+                let extra = format!("{:?}", obj.extra).parse::<TokenStream>().unwrap();
                 quote! {
                     Object::ArmIRQ(object::ArmIRQ {
                         slots: #toks,
-                        trigger: #trigger,
-                        target: #target,
+                        extra: #extra,
                     })
                 }
             }

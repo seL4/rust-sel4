@@ -296,14 +296,14 @@ impl<
                             if #[cfg(MAX_NUM_NODES = "1")] {
                                 BootInfo::irq_control().irq_control_get_trigger(
                                     *irq,
-                                    obj.trigger,
+                                    obj.extra.trigger,
                                     &cslot_relative_cptr(slot),
                                 )?;
                             } else {
                                 BootInfo::irq_control().irq_control_get_trigger_core(
                                     *irq,
-                                    obj.trigger,
-                                    obj.target,
+                                    obj.extra.trigger,
+                                    obj.extra.target,
                                     &cslot_relative_cptr(slot),
                                 )?;
                             }
@@ -506,14 +506,14 @@ impl<
             }
 
             {
-                let fault_ep = CPtr::from_bits(obj.fault_ep);
+                let fault_ep = CPtr::from_bits(obj.extra.fault_ep);
                 let cspace = self.orig_local_cptr(obj.cspace().object);
                 let cspace_root_data = CNodeCapData::new(
                     obj.cspace().guard,
                     obj.cspace().guard_size.try_into().unwrap(),
                 );
                 let vspace = self.orig_local_cptr(obj.vspace().object);
-                let ipc_buffer_addr = obj.extra_info.ipc_buffer_addr;
+                let ipc_buffer_addr = obj.extra.ipc_buffer_addr;
                 let ipc_buffer_frame = self.orig_local_cptr(obj.ipc_buffer().object);
 
                 tcb.tcb_configure(
@@ -528,22 +528,20 @@ impl<
 
             tcb.tcb_set_sched_params(
                 BootInfo::init_thread_tcb(),
-                obj.extra_info.max_prio.try_into()?,
-                obj.extra_info.prio.try_into()?,
+                obj.extra.max_prio.try_into()?,
+                obj.extra.prio.try_into()?,
             )?;
 
             #[sel4::sel4_cfg(not(MAX_NUM_NODES = "1"))]
-            tcb.tcb_set_affinity(obj.extra_info.affinity)?;
+            tcb.tcb_set_affinity(obj.extra.affinity)?;
 
             {
                 let mut regs = UserContext::default();
-                *regs.pc_mut() = obj.extra_info.ip;
-                *regs.sp_mut() = obj.extra_info.sp;
-                *regs.spsr_mut() = obj.extra_info.spsr;
-                for (i, value) in obj.init_args.iter().enumerate() {
-                    if let Some(value) = value {
-                        *regs.gpr_mut(i.try_into()?) = *value;
-                    }
+                *regs.pc_mut() = obj.extra.ip;
+                *regs.sp_mut() = obj.extra.sp;
+                *regs.spsr_mut() = obj.extra.spsr;
+                for (i, value) in obj.extra.gprs.iter().enumerate() {
+                    *regs.gpr_mut(i.try_into()?) = *value;
                 }
                 tcb.tcb_write_all_registers(false, &mut regs)?;
             }
@@ -605,7 +603,7 @@ impl<
         debug!("Starting threads");
         for (obj_id, obj) in self.spec.filter_objects::<&object::TCB>() {
             let tcb = self.orig_local_cptr::<cap_type::TCB>(obj_id);
-            if obj.extra_info.resume {
+            if obj.extra.resume {
                 tcb.tcb_resume()?;
             }
         }

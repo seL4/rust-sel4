@@ -35,13 +35,6 @@ impl<'a> FillEntryContentBytes<'a> {
     }
 }
 
-#[cfg(all(feature = "alloc", feature = "deflate"))]
-impl<'a> FillEntryContentDeflatedBytes<'a> {
-    pub fn pack(content: &[u8]) -> Vec<u8> {
-        miniz_oxide::deflate::compress_to_vec(content, 10)
-    }
-}
-
 #[cfg(feature = "deflate")]
 #[derive(Clone, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
@@ -58,11 +51,11 @@ impl<'a> fmt::Debug for FillEntryContentDeflatedBytes<'a> {
     }
 }
 
-#[cfg(feature = "alloc")]
-#[derive(Debug, Clone, Eq, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub struct FillEntryContentDigest {
-    pub content_digest: Vec<u8>,
+#[cfg(all(feature = "alloc", feature = "deflate"))]
+impl<'a> FillEntryContentDeflatedBytes<'a> {
+    pub fn pack(content: &[u8]) -> Vec<u8> {
+        miniz_oxide::deflate::compress_to_vec(content, 10)
+    }
 }
 
 #[cfg(feature = "alloc")]
@@ -76,20 +69,12 @@ pub struct FillEntryContentFile {
 // // //
 
 pub trait AvailableFillEntryContent {
-    // TODO(nspin) error handling
     fn copy_out(&self, dst: &mut [u8]);
 }
 
 impl<'a> AvailableFillEntryContent for FillEntryContentBytes<'a> {
     fn copy_out(&self, dst: &mut [u8]) {
         dst.copy_from_slice(self.bytes)
-        // unsafe {
-        //     core::intrinsics::volatile_copy_nonoverlapping_memory(
-        //         dst.as_mut_ptr(),
-        //         self.bytes.as_ptr(),
-        //         dst.len(),
-        //     )
-        // }
     }
 }
 

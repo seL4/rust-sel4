@@ -137,17 +137,3 @@ where
         Deserialize::deserialize(deserializer).map(Indirect::from_owned)
     }
 }
-
-// #[cfg(feature = "serde")]
-// impl<'de, T: Deserialize<'de>> Deserialize<'de> for Indirect<'_, T> {
-//     fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
-//         Deserialize::deserialize(deserializer).map(Indirect::from_owned)
-//     }
-// }
-
-// #[cfg(feature = "serde")]
-// impl<'de, T: Deserialize<'de>> Deserialize<'de> for Indirect<'_, [T]> {
-//     fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
-//         Deserialize::deserialize(deserializer).map(Indirect::from_owned)
-//     }
-// }
