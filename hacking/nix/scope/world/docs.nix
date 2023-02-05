@@ -20,7 +20,7 @@ let
   rustToolchain = defaultRustToolchain;
 
   runtimes = [
-    { name = "none"; features = []; rustTargetInfo = seL4RustTargetInfoWithConfig { minimal = true; }; }
+    { name = "none"; features = []; rustTargetInfo = seL4RustTargetInfoWithConfig { minimal = false; }; }
   ] ++ lib.optionals (hostPlatform.isAarch64 || hostPlatform.isx86_64) [
     (rec { name = "minimal-root-task-runtime"; features = [ name ]; rustTargetInfo = seL4RustTargetInfoWithConfig { minimal = true; }; })
   ] ++ lib.optionals hostPlatform.isAarch64 [
