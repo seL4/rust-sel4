@@ -1,5 +1,5 @@
 [package]
-name = "sel4-runtime-building-blocks-abort"
+name = "sel4-panicking-env"
 version = "0.1.0"
 authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
 edition = "2021"

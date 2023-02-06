@@ -8,7 +8,7 @@ extern crate sel4_runtime_simple_static_heap;
 
 use core::fmt;
 
-use sel4_runtime_building_blocks_termination::Termination;
+use sel4_runtime_simple_termination::Termination;
 
 pub use sel4_minimal_root_task_runtime_macros::main;
 

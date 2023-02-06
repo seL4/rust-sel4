@@ -1396,10 +1396,10 @@ dependencies = [
  "sel4-runtime-building-blocks-elf",
  "sel4-runtime-building-blocks-embedded-phdrs",
  "sel4-runtime-building-blocks-reserve-tls-on-stack",
- "sel4-runtime-building-blocks-termination",
  "sel4-runtime-building-blocks-unwinding-support",
  "sel4-runtime-simple-entry",
  "sel4-runtime-simple-static-heap",
+ "sel4-runtime-simple-termination",
  "sel4-sync",
 ]
 
@@ -1438,9 +1438,9 @@ version = "0.1.0"
 dependencies = [
  "sel4",
  "sel4-minimal-root-task-runtime-macros",
- "sel4-runtime-building-blocks-termination",
  "sel4-runtime-simple-entry",
  "sel4-runtime-simple-static-heap",
+ "sel4-runtime-simple-termination",
 ]
 
 [[package]]
@@ -1514,10 +1514,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "sel4-runtime-building-blocks-termination"
-version = "0.1.0"
-
-[[package]]
 name = "sel4-runtime-building-blocks-unwinding-support"
 version = "0.1.0"
 dependencies = [
@@ -1541,6 +1537,10 @@ dependencies = [
  "sel4-env-literal-helper",
  "sel4-sync",
 ]
+
+[[package]]
+name = "sel4-runtime-simple-termination"
+version = "0.1.0"
 
 [[package]]
 name = "sel4-rustfmt-helper"

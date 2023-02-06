@@ -10,4 +10,4 @@ alloc = ["sel4-backtrace/alloc"]
 
 [dependencies]
 sel4-backtrace = { path = "..", features = ["postcard", "unwinding"] }
-sel4-runtime-building-blocks-abort = { path = "../../sel4-runtime-building-blocks/abort" }
+sel4-panicking-env = { path = "../../sel4-panicking/env" }

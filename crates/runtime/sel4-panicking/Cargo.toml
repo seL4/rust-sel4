@@ -15,7 +15,7 @@ full = ["alloc", "allow-panic-unwind"]
 [dependencies]
 cfg-if = "*"
 sel4-immediate-sync-once-cell = { path = "../sel4-immediate-sync-once-cell" }
-sel4-runtime-building-blocks-abort = { path = "../sel4-runtime-building-blocks/abort" }
+sel4-panicking-env = { path = "./env" }
 
 [dependencies.unwinding]
 git = "https://github.com/nspin/unwinding.git"

@@ -16,7 +16,7 @@ use core::panic::Location;
 use core::panic::PanicInfo;
 
 use sel4_immediate_sync_once_cell::ImmediateSyncOnceCell;
-use sel4_runtime_building_blocks_abort::{abort, debug_println};
+use sel4_panicking_env::{abort, debug_println};
 
 mod strategy;
 mod whether_alloc;

@@ -1,4 +1,4 @@
-use sel4_runtime_building_blocks_abort::abort;
+use sel4_panicking_env::abort;
 
 use crate::Payload;
 

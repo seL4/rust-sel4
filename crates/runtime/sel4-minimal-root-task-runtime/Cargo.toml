@@ -14,6 +14,6 @@ state = ["sel4/state"]
 [dependencies]
 sel4 = { path = "../../sel4", default-features = false, features = ["single-threaded"] }
 sel4-minimal-root-task-runtime-macros = { path = "./macros" }
-sel4-runtime-building-blocks-termination = { path = "../sel4-runtime-building-blocks/termination" }
 sel4-runtime-simple-entry = { path = "../sel4-runtime-simple-entry" }
 sel4-runtime-simple-static-heap = { path = "../sel4-runtime-simple-static-heap", optional = true }
+sel4-runtime-simple-termination = { path = "../sel4-runtime-simple-termination" }

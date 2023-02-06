@@ -2,11 +2,11 @@ use core::ffi::c_void;
 use core::fmt;
 
 use sel4_panicking::catch_unwind;
-use sel4_runtime_building_blocks_abort::abort;
+use sel4_panicking_env::abort;
+use sel4_reserve_tls_on_stack::TlsImage;
 use sel4_runtime_building_blocks_elf::PT_TLS;
 use sel4_runtime_building_blocks_embedded_phdrs::get_phdrs;
-use sel4_runtime_building_blocks_reserve_tls_on_stack::TlsImage;
-use sel4_runtime_building_blocks_termination::Termination;
+use sel4_runtime_simple_termination::Termination;
 
 #[no_mangle]
 pub unsafe extern "C" fn __rust_entry(bootinfo: *const sel4::sys::seL4_BootInfo) -> ! {
