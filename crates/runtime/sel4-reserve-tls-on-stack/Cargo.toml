@@ -7,4 +7,3 @@ license = "BSD-2-Clause"
 
 [dependencies]
 cfg-if = "*"
-sel4-runtime-building-blocks-elf = { path = "../sel4-runtime-building-blocks/elf" }

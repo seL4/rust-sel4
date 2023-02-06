@@ -1,5 +1,3 @@
-#![no_std]
-
 use zerocopy::{AsBytes, FromBytes};
 
 #[cfg(target_pointer_width = "64")]

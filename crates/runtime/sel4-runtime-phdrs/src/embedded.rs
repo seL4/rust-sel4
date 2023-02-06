@@ -1,6 +1,4 @@
-#![no_std]
-
-use sel4_runtime_building_blocks_elf::*;
+use crate::elf::*;
 
 extern "C" {
     static __ehdr_start: ElfHeader;

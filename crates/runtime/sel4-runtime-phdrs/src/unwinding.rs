@@ -1,10 +1,8 @@
-#![no_std]
-
 pub use unwinding::custom_eh_frame_finder::{
     set_custom_eh_frame_finder, EhFrameFinder, FrameInfo, FrameInfoKind,
 };
 
-use sel4_runtime_building_blocks_elf::{ProgramHeader, PT_GNU_EH_FRAME, PT_LOAD};
+use crate::elf::{ProgramHeader, PT_GNU_EH_FRAME, PT_LOAD};
 
 pub struct ProgramHeadersEhFrameFinder<T> {
     phdrs: T,

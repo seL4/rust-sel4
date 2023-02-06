@@ -7,8 +7,6 @@ use core::ffi::c_void;
 use core::ptr;
 use core::slice;
 
-use sel4_runtime_building_blocks_elf::{ProgramHeader, Word, PT_TLS};
-
 // NOTE
 // This is enforced by AArch64
 const STACK_ALIGNMENT: usize = 16;
@@ -58,20 +56,6 @@ impl TlsImage {
 
     unsafe fn data(&self) -> &'static [u8] {
         slice::from_raw_parts(ptr::from_exposed_addr_mut(self.vaddr), self.filesz)
-    }
-}
-
-impl TryFrom<&ProgramHeader> for TlsImage {
-    type Error = <usize as TryFrom<Word>>::Error;
-
-    fn try_from(phdr: &ProgramHeader) -> Result<Self, Self::Error> {
-        assert_eq!(phdr.p_type, PT_TLS);
-        Ok(Self {
-            vaddr: phdr.p_vaddr.try_into()?,
-            filesz: phdr.p_filesz.try_into()?,
-            memsz: phdr.p_memsz.try_into()?,
-            align: phdr.p_align.try_into()?,
-        })
     }
 }
 

@@ -1,8 +1,6 @@
-#![no_std]
-
 use core::mem;
 
-use sel4_runtime_building_blocks_elf::ProgramHeader;
+use crate::elf::ProgramHeader;
 
 const MAX_NUM_PHDRS: usize = 16;
 
