@@ -10,6 +10,22 @@ use dlmalloc::{Allocator as DlmallocAllocator, Dlmalloc};
 
 use sel4_sync::{GenericMutex, MutexSyncOps};
 
+// TODO
+// Is this alignment necessary?
+// If so, it should depend on configuration.
+#[repr(C, align(4096))]
+pub struct StaticHeap<const N: usize>([u8; N]);
+
+impl<const N: usize> StaticHeap<N> {
+    pub const fn new() -> Self {
+        Self([0; N])
+    }
+
+    pub fn bounds(&mut self) -> Range<*mut u8> {
+        self.0.as_mut_ptr_range()
+    }
+}
+
 pub type StaticDlmallocGlobalAlloc<O, T> = DlmallocGlobalAlloc<O, StaticDlmallocAllocator<T>>;
 
 impl<O, T> StaticDlmallocGlobalAlloc<O, T> {
@@ -20,6 +36,10 @@ impl<O, T> StaticDlmallocGlobalAlloc<O, T> {
                 Dlmalloc::new_with_allocator(StaticDlmallocAllocator::new(get_bounds)),
             ),
         }
+    }
+
+    pub const fn mutex(&self) -> &GenericMutex<O, Dlmalloc<StaticDlmallocAllocator<T>>> {
+        &self.dlmalloc
     }
 }
 
@@ -57,9 +77,11 @@ pub struct StaticDlmallocAllocator<T> {
     state: RefCell<StaticDlmallocAllocatorState<T>>,
 }
 
+unsafe impl<T: Send> Send for StaticDlmallocAllocatorState<T> {}
+
 enum StaticDlmallocAllocatorState<T> {
     Uninitialized { get_initial_bounds: T },
-    Initialized { free: Range<usize> },
+    Initialized { free: Range<*mut u8> },
 }
 
 impl<T> StaticDlmallocAllocator<T> {
@@ -70,8 +92,8 @@ impl<T> StaticDlmallocAllocator<T> {
     }
 }
 
-impl<T: Fn() -> Range<usize>> StaticDlmallocAllocatorState<T> {
-    fn as_free(&mut self) -> &mut Range<usize> {
+impl<T: Fn() -> Range<*mut u8>> StaticDlmallocAllocatorState<T> {
+    fn as_free(&mut self) -> &mut Range<*mut u8> {
         if let StaticDlmallocAllocatorState::Uninitialized { get_initial_bounds } = self {
             *self = StaticDlmallocAllocatorState::Initialized {
                 free: (get_initial_bounds)(),
@@ -85,17 +107,17 @@ impl<T: Fn() -> Range<usize>> StaticDlmallocAllocatorState<T> {
     }
 }
 
-unsafe impl<T: Fn() -> Range<usize> + Send> DlmallocAllocator for StaticDlmallocAllocator<T> {
+unsafe impl<T: Fn() -> Range<*mut u8> + Send> DlmallocAllocator for StaticDlmallocAllocator<T> {
     fn alloc(&self, size: usize) -> (*mut u8, usize, u32) {
         let mut state = self.state.borrow_mut();
         let free = state.as_free();
         let start = free.start;
-        let end = start + size;
+        let end = start.wrapping_offset(size.try_into().unwrap());
         if end > free.end {
             (ptr::null_mut(), 0, 0)
         } else {
             free.start = end;
-            (ptr::from_exposed_addr_mut(start), size, 0)
+            (start, size, 0)
         }
     }
 
@@ -120,6 +142,7 @@ unsafe impl<T: Fn() -> Range<usize> + Send> DlmallocAllocator for StaticDlmalloc
     }
 
     fn page_size(&self) -> usize {
+        // TODO depend on configuration
         4096
     }
 }
