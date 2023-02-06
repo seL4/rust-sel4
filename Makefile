@@ -43,4 +43,4 @@ update-lockfile:
 
 .PHONY: generate-target-specs
 generate-target-specs:
-	cargo run -p generate-target-specs --profile dev-unwind -- support/targets/
+	cargo run -p generate-target-specs -- support/targets/
