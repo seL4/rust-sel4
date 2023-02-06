@@ -1,3 +1,5 @@
+#![allow(unused_imports)]
+
 use lazy_static::lazy_static;
 
 pub use sel4_config_generic_types::{Configuration, Key, Value};

@@ -1,9 +1,7 @@
 #![no_std]
 #![no_main]
-#![feature(core_intrinsics)]
-#![feature(ptr_to_from_bits)]
-#![feature(pointer_byte_offsets)]
 #![feature(const_pointer_byte_offsets)]
+#![feature(pointer_byte_offsets)]
 
 use core::ops::Range;
 

@@ -1,5 +1,4 @@
 #![no_std]
-#![feature(core_intrinsics)]
 #![feature(const_option_ext)]
 #![feature(exclusive_wrapper)]
 

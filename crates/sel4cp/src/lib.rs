@@ -1,10 +1,8 @@
 #![no_std]
-#![feature(cstr_from_bytes_until_nul)]
 #![feature(core_intrinsics)]
-#![feature(exclusive_wrapper)]
-#![feature(unwrap_infallible)]
+#![feature(cstr_from_bytes_until_nul)]
 #![feature(never_type)]
-#![feature(strict_provenance)]
+#![feature(unwrap_infallible)]
 
 extern crate sel4_runtime_simple_entry;
 

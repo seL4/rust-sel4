@@ -1,12 +1,10 @@
 #![no_std]
 #![feature(array_try_from_fn)]
-#![feature(core_intrinsics)]
-#![feature(ptr_to_from_bits)]
-#![feature(strict_provenance)]
-#![feature(proc_macro_hygiene)]
+#![feature(const_trait_impl)]
 #![feature(int_roundings)]
 #![feature(never_type)]
-#![feature(const_trait_impl)]
+#![feature(proc_macro_hygiene)]
+#![feature(strict_provenance)]
 
 use core::array;
 use core::borrow::BorrowMut;

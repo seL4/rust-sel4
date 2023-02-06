@@ -1,6 +1,5 @@
 #![no_std]
 #![no_main]
-#![feature(proc_macro_hygiene)]
 
 use sel4_full_root_task_runtime::{debug_println, main};
 

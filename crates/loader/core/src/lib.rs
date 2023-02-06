@@ -1,13 +1,13 @@
 #![no_std]
 #![no_main]
 #![feature(atomic_from_mut)]
-#![feature(exclusive_wrapper)]
-#![feature(strict_provenance)]
-#![feature(pointer_byte_offsets)]
 #![feature(const_pointer_byte_offsets)]
 #![feature(const_trait_impl)]
-#![allow(unreachable_code)]
+#![feature(exclusive_wrapper)]
+#![feature(pointer_byte_offsets)]
+#![feature(strict_provenance)]
 #![allow(dead_code)]
+#![allow(unreachable_code)]
 
 use core::arch::asm;
 use core::ops::Range;

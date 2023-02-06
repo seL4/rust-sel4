@@ -1,6 +1,5 @@
 #![no_std]
 #![feature(const_option_ext)]
-#![feature(strict_provenance)]
 
 use core::ops::Range;
 

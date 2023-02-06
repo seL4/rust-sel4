@@ -1,6 +1,6 @@
 #![no_std]
-#![feature(linkage)]
 #![feature(core_intrinsics)]
+#![feature(linkage)]
 
 use core::ffi::c_char;
 use core::fmt;

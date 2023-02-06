@@ -1,6 +1,3 @@
-#![feature(drain_filter)]
-#![feature(int_roundings)]
-
 use std::env;
 use std::fs;
 use std::ops::Range;

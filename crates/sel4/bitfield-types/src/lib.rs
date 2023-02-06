@@ -1,6 +1,6 @@
 #![no_std]
-#![feature(const_trait_impl)]
 #![feature(const_convert)]
+#![feature(const_trait_impl)]
 
 use core::mem;
 use core::ops::{BitAnd, BitAndAssign, BitOr, BitOrAssign, Not, Range, Shl, Shr};

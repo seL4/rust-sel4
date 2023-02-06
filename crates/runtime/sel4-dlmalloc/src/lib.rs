@@ -1,5 +1,4 @@
 #![no_std]
-#![feature(strict_provenance)]
 
 use core::alloc::{GlobalAlloc, Layout};
 use core::cell::RefCell;

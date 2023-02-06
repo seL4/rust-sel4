@@ -1,8 +1,8 @@
 #![no_std]
 #![no_main]
-#![feature(thread_local)]
 #![feature(is_sorted)]
 #![feature(iter_intersperse)]
+#![feature(thread_local)]
 
 use sel4_full_root_task_runtime::{debug_print, debug_println, main};
 use sel4_platform_info::PLATFORM_INFO;

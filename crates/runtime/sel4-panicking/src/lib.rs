@@ -1,7 +1,4 @@
 #![no_std]
-#![feature(lang_items)]
-#![feature(never_type)]
-#![feature(panic_info_message)]
 #![feature(cfg_target_thread_local)]
 #![feature(core_intrinsics)]
 #![feature(thread_local)]
