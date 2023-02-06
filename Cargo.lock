@@ -1375,6 +1375,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "sel4-env-literal-helper"
+version = "0.1.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "sel4-full-root-task-runtime"
 version = "0.1.0"
 dependencies = [
@@ -1509,6 +1518,7 @@ name = "sel4-runtime-building-blocks-root-task-head"
 version = "0.1.0"
 dependencies = [
  "cfg-if",
+ "sel4-env-literal-helper",
 ]
 
 [[package]]
@@ -1516,6 +1526,7 @@ name = "sel4-runtime-building-blocks-root-task-static-heap"
 version = "0.1.0"
 dependencies = [
  "sel4-dlmalloc",
+ "sel4-env-literal-helper",
  "sel4-sync",
 ]
 

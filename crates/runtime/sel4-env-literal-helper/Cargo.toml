@@ -1,10 +1,14 @@
 [package]
-name = "sel4-runtime-building-blocks-root-task-head"
+name = "sel4-env-literal-helper"
 version = "0.1.0"
 authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
 edition = "2021"
 license = "BSD-2-Clause"
 
+[lib]
+proc-macro = true
+
 [dependencies]
-cfg-if = "*"
-sel4-env-literal-helper = { path = "../../sel4-env-literal-helper" }
+proc-macro2 = "1"
+quote = "1"
+syn = { version = "1", features = ["full"] }

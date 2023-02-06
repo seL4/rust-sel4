@@ -1,11 +1,14 @@
 #![no_std]
 #![feature(core_intrinsics)]
+#![feature(const_option_ext)]
 #![feature(exclusive_wrapper)]
 
 use core::arch::global_asm;
 use core::sync::Exclusive;
 
-const STACK_SIZE: usize = include!(concat!(env!("OUT_DIR"), "/stack_size.fragment.rs"));
+use sel4_env_literal_helper::env_literal;
+
+const STACK_SIZE: usize = env_literal!("SEL4_RUNTIME_ROOT_TASK_STACK_SIZE").unwrap_or(4096 * 4);
 
 #[repr(C, align(16))]
 struct Stack([u8; STACK_SIZE]);
