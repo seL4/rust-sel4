@@ -80,7 +80,7 @@ Here is a list of environment variables and the crates which use them:
       Contains the stack size, in bytes, of the root task stack.
       Used by the `sel4-minimal-root-task-runtime` and `sel4-full-root-task-runtime` crates.
       See the `sel4-runtime-simple-entry` crate for implementation details.
-    - `$SEL4_RUNTIME_HEAP_SIZE_SIZE`, defaulting to `0`:
+    - `$SEL4_RUNTIME_HEAP_SIZE`, defaulting to `0`:
       Contains the stack size, in bytes, of the root task static heap.
       Used by the `sel4-runtime-simple-static-heap` crate.
 

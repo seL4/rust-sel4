@@ -66,7 +66,7 @@ let
     modifyDerivation = drv: drv.overrideAttrs (self: super: {
       SEL4_PREFIX = seL4ForUserspace;
       SEL4_RUNTIME_STACK_SIZE = rootTaskStackSize;
-      SEL4_RUNTIME_HEAP_SIZE_SIZE = rootTaskHeapSize;
+      SEL4_RUNTIME_HEAP_SIZE = rootTaskHeapSize;
 
       passthru = (super.passthru or {}) // {
         elf = maybeInjectPhdrs "${self.finalPackage}/bin/${args.rootCrate.name}.elf";
