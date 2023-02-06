@@ -70,7 +70,7 @@ impl syn::parse::Parse for BranchWithCondition {
 
 type Condition = syn::NestedMeta;
 
-const CFG: &'static str = "cfg";
+const CFG: &str = "cfg";
 
 fn parse_condition(input: syn::parse::ParseStream) -> syn::Result<Condition> {
     input.parse::<Token![if]>()?;

@@ -145,9 +145,9 @@ impl<'a> Helper<'a> {
     }
 
     fn process_attrs(&mut self, attrs: &mut Vec<syn::Attribute>) -> bool /* keep */ {
-        let inner_attr = self.inner_attr.clone();
+        let inner_attr = self.inner_attr;
         let keep = attrs
-            .drain_filter(|attr| attr.path.is_ident(&format_ident!("{}", &inner_attr)))
+            .drain_filter(|attr| attr.path.is_ident(&format_ident!("{}", inner_attr)))
             .all(|attr| match attr.parse_args::<syn::NestedMeta>() {
                 Ok(expr) => {
                     let r = self.evaluator.eval_nested_meta(&expr);

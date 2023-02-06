@@ -128,6 +128,6 @@ impl<'a> VarType for PathsVarType<'a> {
     }
 
     fn from_raw_value(raw_value: &str) -> Self::Value {
-        raw_value.split(":").map(PathBuf::from).collect()
+        raw_value.split(':').map(PathBuf::from).collect()
     }
 }

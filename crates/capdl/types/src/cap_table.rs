@@ -31,6 +31,7 @@ pub trait HasCapTable {
         self.maybe_slot_as(slot).unwrap()
     }
 
+    #[allow(clippy::type_complexity)]
     fn slots_as<'a, T: TryFrom<&'a Cap>>(
         &'a self,
     ) -> iter::Map<slice::Iter<'_, (usize, Cap)>, fn(&'a (usize, Cap)) -> (usize, T)>
