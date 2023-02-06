@@ -1,6 +1,6 @@
 use core::mem;
 
-use crate::elf::ProgramHeader;
+use crate::{elf::ProgramHeader, InnerProgramHeadersFinder, ProgramHeadersFinder};
 
 const MAX_NUM_PHDRS: usize = 16;
 
@@ -19,9 +19,24 @@ static mut __num_phdrs: usize = 0;
 #[link_section = ".data"]
 static mut __phdrs: [ProgramHeader; MAX_NUM_PHDRS] = [PLACEHOLDER_PHDR; MAX_NUM_PHDRS];
 
-pub fn get_phdrs() -> &'static [ProgramHeader] {
-    let phdrs = unsafe { &__phdrs[..] };
-    let num_phdrs = unsafe { __num_phdrs };
-    assert_ne!(num_phdrs, 0);
-    &phdrs[..num_phdrs]
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
+pub struct InjectedProgramHeaders(());
+
+impl InjectedProgramHeaders {
+    pub const fn new() -> Self {
+        Self(())
+    }
+
+    pub const fn finder() -> ProgramHeadersFinder<Self> {
+        ProgramHeadersFinder::new(Self::new())
+    }
+}
+
+impl InnerProgramHeadersFinder for InjectedProgramHeaders {
+    fn find_phdrs(&self) -> &[ProgramHeader] {
+        let phdrs = unsafe { &__phdrs[..] };
+        let num_phdrs = unsafe { __num_phdrs };
+        assert_ne!(num_phdrs, 0);
+        &phdrs[..num_phdrs]
+    }
 }

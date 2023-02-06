@@ -2,12 +2,13 @@
 #![no_main]
 
 use sel4_full_root_task_runtime::{debug_println, main};
+use sel4_runtime_phdrs::{EmbeddedProgramHeaders, InjectedProgramHeaders};
 
 #[main]
 fn main(_: &sel4::BootInfo) -> ! {
     assert_eq!(
-        sel4_runtime_phdrs::injected::get_phdrs(),
-        sel4_runtime_phdrs::embedded::get_phdrs()
+        EmbeddedProgramHeaders::finder().find_phdrs(),
+        InjectedProgramHeaders::finder().find_phdrs(),
     );
     debug_println!("TEST_PASS");
     sel4::BootInfo::init_thread_tcb().tcb_suspend().unwrap();

@@ -62,7 +62,3 @@ pub const PT_NULL: u32 = 0;
 pub const PT_LOAD: u32 = 1;
 pub const PT_TLS: u32 = 7;
 pub const PT_GNU_EH_FRAME: u32 = 0x6474_e550;
-
-pub const PF_X: u32 = 1 << 0;
-pub const PF_W: u32 = 1 << 1;
-pub const PF_R: u32 = 1 << 2;

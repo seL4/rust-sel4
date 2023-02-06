@@ -3,21 +3,15 @@ use core::fmt;
 
 use sel4_panicking::catch_unwind;
 use sel4_panicking_env::abort;
-use sel4_reserve_tls_on_stack::TlsImage;
-use sel4_runtime_phdrs::elf::PT_TLS;
-use sel4_runtime_phdrs::embedded::get_phdrs;
+use sel4_runtime_phdrs::EmbeddedProgramHeaders;
 use sel4_runtime_simple_termination::Termination;
 
 #[no_mangle]
 pub unsafe extern "C" fn __rust_entry(bootinfo: *const sel4::sys::seL4_BootInfo) -> ! {
     let cont_arg = bootinfo.cast::<c_void>().cast_mut();
-    let tls_image: TlsImage = get_phdrs()
-        .iter()
-        .find(|phdr| phdr.p_type == PT_TLS)
-        .expect("PT_TLS not found")
-        .try_into()
-        .unwrap();
-    tls_image.reserve_on_stack_and_continue(cont_fn, cont_arg)
+    EmbeddedProgramHeaders::finder()
+        .find_tls_image()
+        .reserve_on_stack_and_continue(cont_fn, cont_arg)
 }
 
 pub unsafe extern "C" fn cont_fn(cont_arg: *mut c_void) -> ! {
