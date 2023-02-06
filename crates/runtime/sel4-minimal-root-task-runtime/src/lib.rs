@@ -12,8 +12,8 @@ use sel4_runtime_simple_termination::Termination;
 
 pub use sel4_minimal_root_task_runtime_macros::main;
 
-#[cfg(panic = "unwind")]
-compile_error!("");
+#[cfg(feature = "global-allocator")]
+pub use sel4_runtime_simple_static_heap::set_mutex_notification as set_heap_mutex_notification;
 
 #[macro_export]
 macro_rules! declare_main {
@@ -42,6 +42,9 @@ where
     sel4::debug_println!("Terminated with error: {:?}", err);
     abort()
 }
+
+#[cfg(panic = "unwind")]
+compile_error!("");
 
 #[cfg(feature = "panic-handler")]
 #[panic_handler]
