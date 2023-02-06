@@ -10,7 +10,7 @@ alloc = ["sel4-panicking/alloc"]
 allow-panic-unwind = ["sel4-panicking/allow-panic-unwind"]
 full = ["full-less-alloc", "alloc", "global-allocator"]
 full-less-alloc = ["unwinding", "allow-panic-unwind"]
-global-allocator = ["sel4-runtime-building-blocks-root-task-static-heap"]
+global-allocator = ["sel4-runtime-simple-static-heap"]
 unwinding = ["sel4-panicking/unwinding"]
 
 [dependencies]
@@ -22,6 +22,8 @@ sel4-panicking = { path = "../sel4-panicking" }
 sel4-runtime-building-blocks-abort = { path = "../sel4-runtime-building-blocks/abort" }
 sel4-runtime-building-blocks-elf = { path = "../sel4-runtime-building-blocks/elf" }
 sel4-runtime-building-blocks-termination = { path = "../sel4-runtime-building-blocks/termination" }
+sel4-runtime-simple-entry = { path = "../sel4-runtime-simple-entry" }
+sel4-runtime-simple-static-heap = { path = "../sel4-runtime-simple-static-heap", optional = true }
 sel4-sync = { path = "../sel4-sync" }
 
 [dependencies.sel4-runtime-building-blocks-embedded-phdrs]
@@ -29,13 +31,6 @@ path = "../sel4-runtime-building-blocks/embedded-phdrs"
 
 [dependencies.sel4-runtime-building-blocks-reserve-tls-on-stack]
 path = "../sel4-runtime-building-blocks/reserve-tls-on-stack"
-
-[dependencies.sel4-runtime-building-blocks-root-task-head]
-path = "../sel4-runtime-building-blocks/root-task-head"
-
-[dependencies.sel4-runtime-building-blocks-root-task-static-heap]
-path = "../sel4-runtime-building-blocks/root-task-static-heap"
-optional = true
 
 [dependencies.sel4-runtime-building-blocks-unwinding-support]
 path = "../sel4-runtime-building-blocks/unwinding-support"

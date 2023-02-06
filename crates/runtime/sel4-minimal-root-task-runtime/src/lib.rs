@@ -1,10 +1,10 @@
 #![no_std]
 #![feature(core_intrinsics)]
 
-extern crate sel4_runtime_building_blocks_root_task_head;
+extern crate sel4_runtime_simple_entry;
 
 #[cfg(feature = "global-allocator")]
-extern crate sel4_runtime_building_blocks_root_task_static_heap;
+extern crate sel4_runtime_simple_static_heap;
 
 use core::fmt;
 
