@@ -39,6 +39,7 @@ members = [
     "crates/meta/for-docs",
     "crates/runtime/sel4-backtrace",
     "crates/runtime/sel4-backtrace/cli/sel4-symbolize-backtrace",
+    "crates/runtime/sel4-backtrace/simple",
     "crates/runtime/sel4-backtrace/types",
     "crates/runtime/sel4-dlmalloc",
     "crates/runtime/sel4-full-root-task-runtime",

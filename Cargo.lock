@@ -1257,6 +1257,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "sel4-backtrace-simple"
+version = "0.1.0"
+dependencies = [
+ "sel4-backtrace",
+ "sel4-runtime-building-blocks-abort",
+]
+
+[[package]]
 name = "sel4-backtrace-types"
 version = "0.1.0"
 dependencies = [
@@ -1766,6 +1774,7 @@ version = "0.1.0"
 dependencies = [
  "sel4",
  "sel4-backtrace",
+ "sel4-backtrace-simple",
  "sel4-full-root-task-runtime",
 ]
 

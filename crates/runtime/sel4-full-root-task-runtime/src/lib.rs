@@ -19,9 +19,6 @@ mod start;
 #[cfg(feature = "unwinding")]
 mod unwinding;
 
-#[cfg(all(feature = "unwinding", feature = "postcard"))]
-pub mod backtrace;
-
 pub mod _private {
     pub use crate::start::_private as start;
 }
@@ -34,11 +31,6 @@ pub use sel4_runtime_building_blocks_abort::{abort, debug_print, debug_println};
 pub use sel4_runtime_building_blocks_termination::Termination;
 
 //
-
-fn panic_hook() {
-    #[cfg(all(feature = "unwinding", feature = "postcard"))]
-    backtrace::collect_and_send();
-}
 
 #[no_mangle]
 fn sel4_runtime_debug_put_char(c: c_char) {

@@ -8,6 +8,7 @@ license = "BSD-2-Clause"
 [dependencies]
 sel4 = { path = "../../../sel4" }
 sel4-backtrace = { path = "../../../runtime/sel4-backtrace" }
+sel4-backtrace-simple = { path = "../../../runtime/sel4-backtrace/simple", features = ["alloc"] }
 
 [dependencies.sel4-full-root-task-runtime]
 path = "../../../runtime/sel4-full-root-task-runtime"

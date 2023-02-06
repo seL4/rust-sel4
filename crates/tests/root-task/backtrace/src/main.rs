@@ -1,7 +1,8 @@
 #![no_std]
 #![no_main]
 
-use sel4_full_root_task_runtime::{backtrace, catch_unwind, debug_println, main};
+use sel4_backtrace_simple::SimpleBacktracing;
+use sel4_full_root_task_runtime::{catch_unwind, debug_println, main};
 
 #[main]
 fn main(_: &sel4::BootInfo) -> ! {
@@ -19,8 +20,9 @@ pub fn f() {
 }
 
 fn g(_: &()) -> () {
-    let bt = backtrace::collect();
-    backtrace::send(&bt);
+    let simple = SimpleBacktracing::new(None);
+    let bt = simple.collect();
+    simple.send(&bt);
     assert!(bt.postamble.error.is_none());
     assert_eq!(bt.entries.len(), 25);
 }

@@ -1,0 +1,13 @@
+[package]
+name = "sel4-backtrace-simple"
+version = "0.1.0"
+authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
+edition = "2021"
+license = "BSD-2-Clause"
+
+[features]
+alloc = ["sel4-backtrace/alloc"]
+
+[dependencies]
+sel4-backtrace = { path = "..", features = ["postcard", "unwinding"] }
+sel4-runtime-building-blocks-abort = { path = "../../sel4-runtime-building-blocks/abort" }

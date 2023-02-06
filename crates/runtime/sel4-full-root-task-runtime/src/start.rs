@@ -8,8 +8,6 @@ use sel4_runtime_building_blocks_embedded_phdrs::get_phdrs;
 use sel4_runtime_building_blocks_reserve_tls_on_stack::TlsImage;
 use sel4_runtime_building_blocks_termination::Termination;
 
-use crate::panic_hook;
-
 #[no_mangle]
 pub unsafe extern "C" fn __rust_entry(bootinfo: *const sel4::sys::seL4_BootInfo) -> ! {
     let cont_arg = bootinfo.cast::<c_void>().cast_mut();
@@ -31,7 +29,6 @@ pub unsafe extern "C" fn cont_fn(cont_arg: *mut c_void) -> ! {
     }
 
     sel4::set_ipc_buffer(sel4::BootInfo::from_ptr(bootinfo).ipc_buffer());
-    sel4_panicking::set_hook(&panic_hook);
     __sel4_for_simple_root_task_main(bootinfo);
     abort()
 }
