@@ -10,7 +10,6 @@ use sel4_backtrace::Backtrace;
 
 // TODO
 // Improve flexibility by adding lifetime logic to upstream traits.
-
 pub struct SimpleBacktracing(SimpleBacktraceSend);
 
 impl SimpleBacktracing {
