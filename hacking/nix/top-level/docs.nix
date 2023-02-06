@@ -99,7 +99,7 @@ let
                           ${lib.concatStrings
                             (lib.forEach world.byRuntime (runtime: ''
                               <li>
-                                <a href="./worlds/${world.name}/runtimes/${runtime.name}/${world.name}/doc/${metaCrateName}/index.html">${runtime.name}</a>
+                                <a href="./worlds/${world.name}/runtimes/${runtime.name}/${runtime.rustTargetInfo.name}/doc/${metaCrateName}/index.html">${runtime.name}</a>
                               </li>
                             ''))
                           }

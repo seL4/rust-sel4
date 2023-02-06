@@ -133,7 +133,7 @@ let
       '';
 
 in
-  lib.forEach runtimes ({ name, ... }@runtime: {
-    inherit name;
+  lib.forEach runtimes ({ name, rustTargetInfo, ... }@runtime: {
+    inherit name rustTargetInfo;
     drv = mk runtime;
   })
