@@ -6,7 +6,7 @@ const DEFAULT_STACK_SIZE: usize = 4096 * 4;
 const DEFAULT_HEAP_SIZE: usize = 0;
 
 const STACK_SIZE_ENV: &str = "SEL4CP_PD_STACK_SIZE";
-const HEAP_SIZE_ENV: &str = "SEL4_RUNTIME_ROOT_TASK_HEAP_SIZE";
+const HEAP_SIZE_ENV: &str = "SEL4_RUNTIME_HEAP_SIZE_SIZE";
 
 fn main() {
     let stack_size = env::var(STACK_SIZE_ENV)

@@ -76,13 +76,13 @@ Here is a list of environment variables and the crates which use them:
       Note that configuration for the loader isn't actually implemented yet!
       This configuration should be an empty JSON object.
 - For crates in [`./crates/runtime`](./crates/runtime).
-    - `$SEL4_RUNTIME_ROOT_TASK_STACK_SIZE`, defaulting to `0x4000`:
+    - `$SEL4_RUNTIME_STACK_SIZE`, defaulting to `0x4000`:
       Contains the stack size, in bytes, of the root task stack.
       Used by the `sel4-minimal-root-task-runtime` and `sel4-full-root-task-runtime` crates.
-      See the `sel4-runtime-building-blocks-root-task-head` crate for implementation details.
-    - `$SEL4_RUNTIME_ROOT_TASK_HEAP_SIZE`, defaulting to `0`:
+      See the `sel4-runtime-simple-entry` crate for implementation details.
+    - `$SEL4_RUNTIME_HEAP_SIZE_SIZE`, defaulting to `0`:
       Contains the stack size, in bytes, of the root task static heap.
-      Used by the `sel4-full-root-task-runtime` crate.
+      Used by the `sel4-runtime-simple-static-heap` crate.
 
 ### Running the tests in this repository (quick start)
 
