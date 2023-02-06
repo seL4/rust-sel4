@@ -7,4 +7,4 @@ license = "BSD-2-Clause"
 
 [dependencies]
 log = "*"
-rsa = "0.8.1"
+rsa = { version = "0.8.1", default-features = false, features = ["pem"] }

@@ -7,5 +7,5 @@ license = "BSD-2-Clause"
 
 [dependencies]
 sel4 = { path = "../../../../../sel4" }
-sel4cp = { path = "../../../../../sel4cp" }
+sel4cp = { path = "../../../../../sel4cp", features = ["full"] }
 tock-registers = "*"

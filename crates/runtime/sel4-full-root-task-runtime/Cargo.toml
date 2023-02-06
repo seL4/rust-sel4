@@ -15,8 +15,6 @@ unwinding = ["sel4-panicking/unwinding"]
 
 [dependencies]
 sel4 = { path = "../../sel4" }
-sel4-backtrace = { path = "../sel4-backtrace" }
-sel4-dlmalloc = { path = "../sel4-dlmalloc" }
 sel4-full-root-task-runtime-macros = { path = "./macros" }
 sel4-panicking = { path = "../sel4-panicking" }
 sel4-panicking-env = { path = "../sel4-panicking/env" }
@@ -24,7 +22,6 @@ sel4-reserve-tls-on-stack = { path = "../sel4-reserve-tls-on-stack" }
 sel4-runtime-simple-entry = { path = "../sel4-runtime-simple-entry" }
 sel4-runtime-simple-static-heap = { path = "../sel4-runtime-simple-static-heap", optional = true }
 sel4-runtime-simple-termination = { path = "../sel4-runtime-simple-termination" }
-sel4-sync = { path = "../sel4-sync" }
 
 [dependencies.sel4-runtime-phdrs]
 path = "../sel4-runtime-phdrs"

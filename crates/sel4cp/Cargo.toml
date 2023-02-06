@@ -5,9 +5,16 @@ authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
 edition = "2021"
 license = "BSD-2-Clause"
 
+[features]
+full = ["global-allocator"]
+global-allocator = ["sel4-runtime-simple-static-heap"]
+
 [dependencies]
 cfg-if = "*"
 sel4 = { path = "../sel4", default-features = false, features = ["single-threaded"] }
-sel4-dlmalloc = { path = "../runtime/sel4-dlmalloc" }
-sel4-sync = { path = "../runtime/sel4-sync" }
+sel4-runtime-simple-entry = { path = "../runtime/sel4-runtime-simple-entry" }
 sel4cp-macros = { path = "./macros" }
+
+[dependencies.sel4-runtime-simple-static-heap]
+path = "../runtime/sel4-runtime-simple-static-heap"
+optional = true

@@ -528,17 +528,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "getrandom"
-version = "0.2.8"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c05aeb6a22b8f62540c194aac980f2115af067bfe15a0734d7277a768d396b31"
-dependencies = [
- "cfg-if",
- "libc",
- "wasi",
-]
-
-[[package]]
 name = "gimli"
 version = "0.26.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1112,9 +1101,6 @@ name = "rand_core"
 version = "0.6.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ec0be4795e2f6a28069bec0b5ff3e2ac9bafc99e6a9a7dc3547996c5c816922c"
-dependencies = [
- "getrandom",
-]
 
 [[package]]
 name = "regex"
@@ -1388,8 +1374,6 @@ name = "sel4-full-root-task-runtime"
 version = "0.1.0"
 dependencies = [
  "sel4",
- "sel4-backtrace",
- "sel4-dlmalloc",
  "sel4-full-root-task-runtime-macros",
  "sel4-panicking",
  "sel4-panicking-env",
@@ -1398,7 +1382,6 @@ dependencies = [
  "sel4-runtime-simple-entry",
  "sel4-runtime-simple-static-heap",
  "sel4-runtime-simple-termination",
- "sel4-sync",
 ]
 
 [[package]]
@@ -1580,8 +1563,8 @@ version = "0.1.0"
 dependencies = [
  "cfg-if",
  "sel4",
- "sel4-dlmalloc",
- "sel4-sync",
+ "sel4-runtime-simple-entry",
+ "sel4-runtime-simple-static-heap",
  "sel4cp-macros",
 ]
 
@@ -1910,12 +1893,6 @@ name = "version_check"
 version = "0.9.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "49874b5167b65d7193b8aba1567f5c7d93d001cafc34600cee003eda787e483f"
-
-[[package]]
-name = "wasi"
-version = "0.11.0+wasi-snapshot-preview1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9c8d87e72b64a3b4db28d11ce29237c246188f4f51057d65a7eab63b7987e423"
 
 [[package]]
 name = "wasmparser"

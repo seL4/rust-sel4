@@ -6,14 +6,20 @@
 #![feature(never_type)]
 #![feature(strict_provenance)]
 
+extern crate sel4_runtime_simple_entry;
+
+#[cfg(feature = "global-allocator")]
+extern crate sel4_runtime_simple_static_heap;
+
 use core::fmt;
 
 pub use sel4cp_macros::main;
 
+#[cfg(feature = "global-allocator")]
+pub use sel4_runtime_simple_static_heap::set_mutex_notification as set_heap_mutex_notification;
+
 mod channel;
-mod global_allocator;
 mod handler;
-mod head;
 mod ipc_buffer;
 mod pd_name;
 
@@ -48,6 +54,9 @@ where
     abort()
 }
 
+#[cfg(panic = "unwind")]
+compile_error!("");
+
 #[panic_handler]
 fn panic(info: &core::panic::PanicInfo<'_>) -> ! {
     sel4::debug_println!("({}) {}", get_pd_name(), info);
@@ -62,5 +71,4 @@ fn abort() -> ! {
 #[doc(hidden)]
 pub mod _private {
     pub use crate::run_main;
-    pub use sel4::sys::seL4_BootInfo;
 }

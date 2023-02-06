@@ -1,6 +1,5 @@
 #![no_std]
 #![no_main]
-#![feature(never_type)]
 
 use sel4cp::{main, NullHandler};
 
