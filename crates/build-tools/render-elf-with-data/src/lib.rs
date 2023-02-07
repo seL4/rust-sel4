@@ -22,7 +22,7 @@ pub use injection::{SymbolicInjection, DEFAULT_ALIGN};
 pub fn main() -> Result<()> {
     let args = Args::parse()?;
     if args.verbose {
-        eprintln!("{:#?}", args);
+        eprintln!("{args:#?}");
     }
     let injections = args
         .injections
@@ -143,7 +143,7 @@ pub fn inject(
 
     let mut recorded: Vec<(String, u64)> = vec![];
     {
-        let image_start = first_vaddr(orig_obj)?.try_into()?;
+        let image_start = first_vaddr(orig_obj)?;
         let image_end = new_segments
             .iter()
             .map(|(injection, _offset)| injection.vaddr() + injection.size())

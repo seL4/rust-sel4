@@ -11,7 +11,7 @@ global-allocator = ["sel4-runtime-simple-static-heap"]
 
 [dependencies]
 cfg-if = "*"
-sel4 = { path = "../sel4", default-features = false, features = ["single-threaded"] }
+sel4 = { path = "../sel4", default-features = false, features = ["state", "single-threaded"] }
 sel4-runtime-simple-entry = { path = "../runtime/sel4-runtime-simple-entry" }
 sel4cp-macros = { path = "./macros" }
 

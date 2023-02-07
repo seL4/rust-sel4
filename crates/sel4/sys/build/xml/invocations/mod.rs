@@ -144,7 +144,7 @@ impl<'a> InvocationGenerator<'a> {
         };
         if use_ret_struct {
             // Add C name for this struct to blocklist
-            self.blocklist_for_bindgen.push(fn_name.clone())
+            self.blocklist_for_bindgen.push(fn_name)
         }
 
         let (marshalling_toks, num_msg_regs, num_caps) = self.generate_marshalling(in_params);

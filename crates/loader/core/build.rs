@@ -57,7 +57,7 @@ fn mk_translation_tables() -> String {
 
     let mut regions = Regions::new();
     for range in PLATFORM_INFO.memory.iter() {
-        let range = range.start.try_into().unwrap()..range.end.try_into().unwrap();
+        let range = range.start..range.end;
         regions = regions.insert(Region::valid(range, mk_normal_entry));
     }
     for range in get_device_regions() {
@@ -65,7 +65,7 @@ fn mk_translation_tables() -> String {
     }
 
     let toks = regions.construct_and_embed_table(format_ident!("loader_level_0_table"));
-    format!("{}", toks)
+    format!("{toks}")
 }
 
 // HACK

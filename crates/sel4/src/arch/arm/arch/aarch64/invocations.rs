@@ -26,7 +26,7 @@ impl<C: InvocationContext> VCPU<C> {
                 .inner_mut()
                 .seL4_ARM_VCPU_ReadRegs(cptr.bits(), field.into_sys().try_into().unwrap())
         });
-        Error::or(res.error.try_into().unwrap(), res.value)
+        Error::or(res.error, res.value)
     }
 
     /// Corresponds to `seL4_ARM_VCPU_WriteRegs`.
@@ -95,7 +95,7 @@ impl<T: FrameType, C: InvocationContext> LocalCPtr<T, C> {
         let ret = self.invoke(|cptr, ipc_buffer| {
             ipc_buffer.inner_mut().seL4_ARM_Page_GetAddress(cptr.bits())
         });
-        match Error::from_sys(ret.error.try_into().unwrap()) {
+        match Error::from_sys(ret.error) {
             None => Ok(ret.paddr.try_into().unwrap()),
             Some(err) => Err(err),
         }

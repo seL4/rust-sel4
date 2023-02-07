@@ -20,16 +20,16 @@ fn main() {
     let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
     fs::write(
         out_dir.join("stack_size.fragment.rs"),
-        format!("{}", stack_size),
+        format!("{stack_size}"),
     )
     .unwrap();
 
     fs::write(
         out_dir.join("heap_size.fragment.rs"),
-        format!("{}", heap_size),
+        format!("{heap_size}"),
     )
     .unwrap();
 
-    println!("cargo:rerun-if-env-changed={}", STACK_SIZE_ENV);
-    println!("cargo:rerun-if-env-changed={}", HEAP_SIZE_ENV);
+    println!("cargo:rerun-if-env-changed={STACK_SIZE_ENV}");
+    println!("cargo:rerun-if-env-changed={HEAP_SIZE_ENV}");
 }

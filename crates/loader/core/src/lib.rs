@@ -40,7 +40,7 @@ const NUM_SECONDARY_CORES: usize = MAX_NUM_NODES - 1;
 
 static KERNEL_ENTRY_BARRIER: Barrier = Barrier::new(MAX_NUM_NODES);
 
-pub fn main<'a>(payload: &Payload<'a>, own_footprint: &Range<usize>) -> ! {
+pub fn main(payload: &Payload, own_footprint: &Range<usize>) -> ! {
     debug::init();
 
     logging::set_logger();

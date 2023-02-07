@@ -40,7 +40,7 @@ impl BootInfo {
         unsafe { slice::from_raw_parts(self.extra_ptr(), self.extra_len()) }
     }
 
-    pub fn extra<'a>(&'a self) -> BootInfoExtraIter<'a> {
+    pub fn extra(&self) -> BootInfoExtraIter {
         BootInfoExtraIter::new(self)
     }
 
@@ -66,7 +66,7 @@ impl BootInfo {
     }
 
     pub fn num_untyped(&self) -> usize {
-        usize::try_from(self.untyped().end - self.untyped().start).unwrap()
+        self.untyped().end - self.untyped().start
     }
 
     fn untyped_list_inner(&self) -> &[sys::seL4_UntypedDesc] {

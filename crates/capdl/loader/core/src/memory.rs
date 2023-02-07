@@ -15,9 +15,7 @@ pub(crate) fn init_copy_addrs(
     let small_frame_copy_addr = {
         let addr = addr_of_ref(&SMALL_PAGE_PLACEHOLDER);
         assert_eq!(addr % FrameSize::Small.bytes(), 0);
-        let num_user_frames =
-            usize::try_from(bootinfo.user_image_frames().end - bootinfo.user_image_frames().start)
-                .unwrap();
+        let num_user_frames = bootinfo.user_image_frames().end - bootinfo.user_image_frames().start;
         let user_image_footprint = coarsen_footprint(user_image_bounds, FrameSize::Small.bytes());
         assert_eq!(
             user_image_footprint.len(),

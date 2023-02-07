@@ -54,6 +54,7 @@
 #![feature(strict_provenance)]
 #![feature(variant_count)]
 #![cfg_attr(not(feature = "single-threaded"), feature(thread_local))]
+#![allow(clippy::unit_arg)]
 
 pub use sel4_config::{
     self as config, sel4_cfg, sel4_cfg_bool, sel4_cfg_if, sel4_cfg_str, sel4_cfg_usize,

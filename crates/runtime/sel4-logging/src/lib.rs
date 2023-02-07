@@ -76,7 +76,8 @@ struct WriteWrapper(fn(&str));
 
 impl fmt::Write for WriteWrapper {
     fn write_str(&mut self, s: &str) -> fmt::Result {
-        Ok((self.0)(s))
+        (self.0)(s);
+        Ok(())
     }
 }
 

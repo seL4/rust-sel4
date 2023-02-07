@@ -23,7 +23,7 @@ unsafe extern "C" fn exception_handler(vector_table_index: usize) {
         esr,
         far,
         tpidr_el1,
-        registers: unsafe { exception_register_state.clone() },
+        registers: unsafe { exception_register_state },
     };
     debug_println_without_synchronization!("!!! Exception:\n{}", exception);
     idle()
@@ -54,7 +54,7 @@ impl fmt::Display for Exception {
         writeln!(f, "FSR: 0x{:016x}", self.far)?;
         writeln!(f, "TPIDR_EL1: 0x{:016x}", self.tpidr_el1)?;
         for (i, value) in self.registers.iter().enumerate() {
-            writeln!(f, "X{}: 0x{:016x}", i, value)?;
+            writeln!(f, "X{i}: 0x{value:016x}")?;
         }
         Ok(())
     }

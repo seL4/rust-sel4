@@ -76,19 +76,19 @@ impl MessageInfo {
 pub type MessageValue = sel4::Word;
 
 pub fn with_msg_regs<T>(f: impl FnOnce(&[MessageValue]) -> T) -> T {
-    sel4::with_borrow_ipc_buffer(|ipc_buffer| f(&ipc_buffer.msg_regs()))
+    sel4::with_borrow_ipc_buffer(|ipc_buffer| f(ipc_buffer.msg_regs()))
 }
 
 pub fn with_msg_regs_mut<T>(f: impl FnOnce(&mut [MessageValue]) -> T) -> T {
-    sel4::with_borrow_ipc_buffer_mut(|ipc_buffer| f(&mut ipc_buffer.msg_regs_mut()))
+    sel4::with_borrow_ipc_buffer_mut(|ipc_buffer| f(ipc_buffer.msg_regs_mut()))
 }
 
 pub fn with_msg_bytes<T>(f: impl FnOnce(&[u8]) -> T) -> T {
-    sel4::with_borrow_ipc_buffer(|ipc_buffer| f(&ipc_buffer.msg_bytes()))
+    sel4::with_borrow_ipc_buffer(|ipc_buffer| f(ipc_buffer.msg_bytes()))
 }
 
 pub fn with_msg_bytes_mut<T>(f: impl FnOnce(&mut [u8]) -> T) -> T {
-    sel4::with_borrow_ipc_buffer_mut(|ipc_buffer| f(&mut ipc_buffer.msg_bytes_mut()))
+    sel4::with_borrow_ipc_buffer_mut(|ipc_buffer| f(ipc_buffer.msg_bytes_mut()))
 }
 
 pub fn set_mr(i: usize, value: MessageValue) {
