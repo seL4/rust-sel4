@@ -59,7 +59,7 @@ impl<'a> object::TCB<'a> {
         self.slot_as(Self::SLOT_VSPACE)
     }
 
-    pub fn ipc_buffer(&self) -> &cap::SmallPage {
+    pub fn ipc_buffer(&self) -> &cap::Frame {
         self.slot_as(Self::SLOT_IPC_BUFFER)
     }
 
@@ -109,7 +109,7 @@ impl<'a> object::PD<'a> {
 }
 
 impl<'a> object::PT<'a> {
-    pub fn entries(&self) -> impl Iterator<Item = (CapSlot, &cap::SmallPage)> {
+    pub fn entries(&self) -> impl Iterator<Item = (CapSlot, &cap::Frame)> {
         self.slots_as()
     }
 }
@@ -117,7 +117,7 @@ impl<'a> object::PT<'a> {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum PDEntry<'a> {
     PT(&'a cap::PT),
-    LargePage(&'a cap::LargePage),
+    Frame(&'a cap::Frame),
 }
 
 impl<'a> TryFrom<&'a Cap> for PDEntry<'a> {
@@ -126,7 +126,7 @@ impl<'a> TryFrom<&'a Cap> for PDEntry<'a> {
     fn try_from(cap: &'a Cap) -> Result<Self, Self::Error> {
         Ok(match cap {
             Cap::PT(cap) => PDEntry::PT(cap),
-            Cap::LargePage(cap) => PDEntry::LargePage(cap),
+            Cap::Frame(cap) => PDEntry::Frame(cap),
             _ => return Err(TryFromCapError),
         })
     }

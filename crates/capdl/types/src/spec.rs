@@ -57,8 +57,7 @@ pub enum Object<'a, F> {
     TCB(object::TCB<'a>),
     IRQ(object::IRQ<'a>),
     VCPU,
-    SmallPage(object::SmallPage<'a, F>),
-    LargePage(object::LargePage<'a, F>),
+    Frame(object::Frame<'a, F>),
     PT(object::PT<'a>),
     PD(object::PD<'a>),
     PUD(object::PUD<'a>),
@@ -71,8 +70,7 @@ impl<'a, F> Object<'a, F> {
     pub fn paddr(&self) -> Option<usize> {
         match self {
             Object::Untyped(obj) => obj.paddr,
-            Object::SmallPage(obj) => obj.paddr,
-            Object::LargePage(obj) => obj.paddr,
+            Object::Frame(obj) => obj.paddr,
             _ => None,
         }
     }
@@ -89,8 +87,7 @@ pub enum Cap {
     TCB(cap::TCB),
     IRQHandler(cap::IRQHandler),
     VCPU(cap::VCPU),
-    SmallPage(cap::SmallPage),
-    LargePage(cap::LargePage),
+    Frame(cap::Frame),
     PT(cap::PT),
     PD(cap::PD),
     PUD(cap::PUD),
@@ -106,8 +103,7 @@ impl Cap {
             Cap::Endpoint(cap) => cap.object,
             Cap::Notification(cap) => cap.object,
             Cap::CNode(cap) => cap.object,
-            Cap::SmallPage(cap) => cap.object,
-            Cap::LargePage(cap) => cap.object,
+            Cap::Frame(cap) => cap.object,
             Cap::TCB(cap) => cap.object,
             Cap::IRQHandler(cap) => cap.object,
             Cap::VCPU(cap) => cap.object,
@@ -218,14 +214,8 @@ pub mod object {
 
     #[derive(Debug, Clone, Eq, PartialEq, IsObject)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-    pub struct SmallPage<'a, F> {
-        pub paddr: Option<usize>,
-        pub fill: Indirect<'a, [FillEntry<F>]>,
-    }
-
-    #[derive(Debug, Clone, Eq, PartialEq, IsObject)]
-    #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-    pub struct LargePage<'a, F> {
+    pub struct Frame<'a, F> {
+        pub size_bits: usize,
         pub paddr: Option<usize>,
         pub fill: Indirect<'a, [FillEntry<F>]>,
     }
@@ -328,15 +318,7 @@ pub mod cap {
 
     #[derive(Debug, Clone, Eq, PartialEq, IsCap)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-    pub struct SmallPage {
-        pub object: ObjectId,
-        pub rights: Rights,
-        pub cached: bool,
-    }
-
-    #[derive(Debug, Clone, Eq, PartialEq, IsCap)]
-    #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-    pub struct LargePage {
+    pub struct Frame {
         pub object: ObjectId,
         pub rights: Rights,
         pub cached: bool,

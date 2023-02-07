@@ -181,13 +181,9 @@ impl<'a> Embedding<'a> {
                 let toks = self.embed_object_with_cap_table(obj);
                 quote!(Object::IRQ(object::#toks))
             }
-            Object::SmallPage(obj) => {
+            Object::Frame(obj) => {
                 let toks = self.embed_object_with_fill(obj, &obj.fill);
-                quote!(Object::SmallPage(object::#toks))
-            }
-            Object::LargePage(obj) => {
-                let toks = self.embed_object_with_fill(obj, &obj.fill);
-                quote!(Object::LargePage(object::#toks))
+                quote!(Object::Frame(object::#toks))
             }
             Object::PT(obj) => {
                 let toks = self.embed_object_with_cap_table(obj);

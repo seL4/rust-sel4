@@ -14,11 +14,16 @@ pub enum FrameSize {
 impl FrameSize {
     pub const fn blueprint(self) -> ObjectBlueprint {
         match self {
-            FrameSize::Small => ObjectBlueprintArm::SmallPage.into(),
-            FrameSize::Large => ObjectBlueprintArm::LargePage.into(),
-            FrameSize::Huge => ObjectBlueprintAArch64::HugePage.into(),
+            Self::Small => ObjectBlueprintArm::SmallPage.into(),
+            Self::Large => ObjectBlueprintArm::LargePage.into(),
+            Self::Huge => ObjectBlueprintAArch64::HugePage.into(),
         }
     }
+
+    // For match arm LHS's, as we can't call const fn's
+    pub const SMALL_BITS: usize = Self::Small.bits();
+    pub const LARGE_BITS: usize = Self::Large.bits();
+    pub const HUGE_BITS: usize = Self::Huge.bits();
 }
 
 impl FrameType for cap_type::SmallPage {

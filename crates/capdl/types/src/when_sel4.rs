@@ -15,8 +15,11 @@ impl<'a, F> Object<'a, F> {
             },
             Object::TCB(_) => ObjectBlueprint::TCB,
             Object::VCPU => ObjectBlueprintArm::VCPU.into(),
-            Object::SmallPage(_) => ObjectBlueprintArm::SmallPage.into(),
-            Object::LargePage(_) => ObjectBlueprintArm::LargePage.into(),
+            Object::Frame(obj) => match obj.size_bits {
+                sel4::FrameSize::SMALL_BITS => ObjectBlueprintArm::SmallPage.into(),
+                sel4::FrameSize::LARGE_BITS => ObjectBlueprintArm::LargePage.into(),
+                _ => panic!(),
+            },
             Object::PT(_) => ObjectBlueprintArm::PT.into(),
             Object::PD(_) => ObjectBlueprintArm::PD.into(),
             Object::PUD(_) => ObjectBlueprintAArch64::PUD.into(),
@@ -32,8 +35,7 @@ impl Cap {
         Some(match self {
             Cap::Endpoint(cap) => &cap.rights,
             Cap::Notification(cap) => &cap.rights,
-            Cap::SmallPage(cap) => &cap.rights,
-            Cap::LargePage(cap) => &cap.rights,
+            Cap::Frame(cap) => &cap.rights,
             _ => return None,
         })
     }
@@ -68,13 +70,7 @@ pub trait HasVMAttributes {
     fn vm_attributes(&self) -> VMAttributes;
 }
 
-impl HasVMAttributes for cap::SmallPage {
-    fn vm_attributes(&self) -> VMAttributes {
-        vm_attributes_from_whether_cached(self.cached)
-    }
-}
-
-impl HasVMAttributes for cap::LargePage {
+impl HasVMAttributes for cap::Frame {
     fn vm_attributes(&self) -> VMAttributes {
         vm_attributes_from_whether_cached(self.cached)
     }

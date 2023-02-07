@@ -355,13 +355,21 @@ impl<
 
     fn init_frames(&mut self) -> Result<()> {
         debug!("Initializing Frames");
-        for (obj_id, obj) in self.spec.filter_objects::<&object::SmallPage<F>>() {
-            let frame = self.orig_local_cptr::<cap_type::SmallPage>(obj_id);
-            self.fill_frame(frame, &obj.fill)?;
-        }
-        for (obj_id, obj) in self.spec.filter_objects::<&object::LargePage<F>>() {
-            let frame = self.orig_local_cptr::<cap_type::LargePage>(obj_id);
-            self.fill_frame(frame, &obj.fill)?;
+        for (obj_id, obj) in self.spec.filter_objects::<&object::Frame<F>>() {
+            // TODO make more platform-agnostic
+            match obj.size_bits {
+                FrameSize::SMALL_BITS => {
+                    let frame = self.orig_local_cptr::<cap_type::SmallPage>(obj_id);
+                    self.fill_frame(frame, &obj.fill)?;
+                }
+                FrameSize::LARGE_BITS => {
+                    let frame = self.orig_local_cptr::<cap_type::LargePage>(obj_id);
+                    self.fill_frame(frame, &obj.fill)?;
+                }
+                _ => {
+                    panic!()
+                }
+            }
         }
         Ok(())
     }
@@ -441,7 +449,7 @@ impl<
                     {
                         let vaddr = vaddr + (i << cap_type::PT::SPAN_BITS);
                         match cap {
-                            PDEntry::LargePage(cap) => {
+                            PDEntry::Frame(cap) => {
                                 let frame = self.orig_local_cptr::<cap_type::LargePage>(cap.object);
                                 let rights = (&cap.rights).into();
                                 self.copy(frame)?.frame_map(
@@ -580,7 +588,7 @@ impl<
         Ok(())
     }
 
-    ///
+    //
 
     fn copy_addr<U: FrameType>(&self) -> usize {
         match U::FRAME_SIZE {
@@ -590,7 +598,7 @@ impl<
         }
     }
 
-    ///
+    //
 
     fn copy<U: CapType>(&mut self, cap: LocalCPtr<U>) -> Result<LocalCPtr<U>> {
         let slot = self.cslot_alloc_or_panic();
@@ -599,7 +607,7 @@ impl<
         Ok(cslot_local_cptr(slot))
     }
 
-    ///
+    //
 
     fn cslot_alloc_or_panic(&mut self) -> InitCSpaceSlot {
         self.cslot_allocator.alloc_or_panic()

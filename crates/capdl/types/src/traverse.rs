@@ -44,8 +44,7 @@ impl<'a, F> Object<'a, F> {
             Object::TCB(obj) => Object::TCB(obj.clone()),
             Object::IRQ(obj) => Object::IRQ(obj.clone()),
             Object::VCPU => Object::VCPU,
-            Object::SmallPage(obj) => Object::SmallPage(obj.traverse(f)?),
-            Object::LargePage(obj) => Object::LargePage(obj.traverse(f)?),
+            Object::Frame(obj) => Object::Frame(obj.traverse(f)?),
             Object::PT(obj) => Object::PT(obj.clone()),
             Object::PD(obj) => Object::PD(obj.clone()),
             Object::PUD(obj) => Object::PUD(obj.clone()),
@@ -56,24 +55,13 @@ impl<'a, F> Object<'a, F> {
     }
 }
 
-impl<'a, F> object::SmallPage<'a, F> {
+impl<'a, F> object::Frame<'a, F> {
     pub fn traverse<F1, E>(
         &self,
         f: impl FnMut(usize, &F) -> Result<F1, E>,
-    ) -> Result<object::SmallPage<'a, F1>, E> {
-        Ok(object::SmallPage {
-            paddr: self.paddr,
-            fill: traverse_fill_entires(&self.fill, f)?,
-        })
-    }
-}
-
-impl<'a, F> object::LargePage<'a, F> {
-    pub fn traverse<F1, E>(
-        &self,
-        f: impl FnMut(usize, &F) -> Result<F1, E>,
-    ) -> Result<object::LargePage<'a, F1>, E> {
-        Ok(object::LargePage {
+    ) -> Result<object::Frame<'a, F1>, E> {
+        Ok(object::Frame {
+            size_bits: self.size_bits,
             paddr: self.paddr,
             fill: traverse_fill_entires(&self.fill, f)?,
         })
