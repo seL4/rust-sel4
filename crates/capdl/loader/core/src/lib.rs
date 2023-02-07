@@ -157,7 +157,7 @@ impl<
         // least one reference to an object allocated from an untyped, or else
         // its watermark will reset. This juggling approach is an easy way to
         // ensure that we are always holding such a reference.
-        let mut hold_slots = HoldSlots::new(&mut self.cslot_allocator, cslot_relative_cptr)?;
+        let mut hold_slots = HoldSlots::new(self.cslot_allocator, cslot_relative_cptr)?;
 
         // Create objects
 
@@ -394,7 +394,7 @@ impl<
             let dst = unsafe { slice::from_raw_parts_mut(dst_frame.add(offset), length) };
             match &entry.content {
                 FillEntryContent::Data(content_data) => {
-                    content_data.copy_out_via(&self.fill, dst);
+                    content_data.copy_out_via(self.fill, dst);
                 }
                 FillEntryContent::BootInfo(content_bootinfo) => {
                     for extra in self.bootinfo.extra() {

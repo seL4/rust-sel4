@@ -19,7 +19,7 @@ pub fn generate_rust(
     let mut structs = vec![];
     let mut interfaces = vec![];
     for f in interface_xml_paths {
-        let api = API::parse(&parse_xml(&f));
+        let api = Api::parse(&parse_xml(f));
         structs.extend(api.structs.into_iter());
         interfaces.extend(api.interfaces.into_iter());
     }
@@ -147,7 +147,7 @@ impl<'a> InvocationGenerator<'a> {
             self.blocklist_for_bindgen.push(fn_name.clone())
         }
 
-        let (marshalling_toks, num_msg_regs, num_caps) = self.generate_marshalling(&in_params);
+        let (marshalling_toks, num_msg_regs, num_caps) = self.generate_marshalling(in_params);
         let num_msg_regs = u64::try_from(num_msg_regs).unwrap();
         let num_caps = u64::try_from(num_caps).unwrap();
 
@@ -165,7 +165,7 @@ impl<'a> InvocationGenerator<'a> {
             quote!()
         };
 
-        let unmarshalling_toks = self.generate_unmarshalling(&out_params);
+        let unmarshalling_toks = self.generate_unmarshalling(out_params);
 
         let ret_expr = if use_ret_struct {
             quote!(ret)

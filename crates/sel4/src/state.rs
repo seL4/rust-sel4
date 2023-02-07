@@ -2,7 +2,9 @@ use core::cell::RefCell;
 
 use crate::{IPCBuffer, InvocationContext};
 
-const IPC_BUFFER_INIT: RefCell<Option<IPCBuffer>> = RefCell::new(None);
+const fn ipc_buffer_init() -> RefCell<Option<IPCBuffer>> {
+    RefCell::new(None)
+}
 
 cfg_if::cfg_if! {
     if #[cfg(not(feature = "single-threaded"))] {
@@ -10,7 +12,7 @@ cfg_if::cfg_if! {
         compile_error!("");
 
         #[thread_local]
-        static IPC_BUFFER: RefCell<Option<IPCBuffer>> = IPC_BUFFER_INIT;
+        static IPC_BUFFER: RefCell<Option<IPCBuffer>> = ipc_buffer_init();
 
         fn with_ipc_buffer_internal<F, T>(f: F) -> T
         where
@@ -19,7 +21,7 @@ cfg_if::cfg_if! {
             f(&IPC_BUFFER)
         }
     } else {
-        static IPC_BUFFER: SingleThreaded<RefCell<Option<IPCBuffer>>> = SingleThreaded(IPC_BUFFER_INIT);
+        static IPC_BUFFER: SingleThreaded<RefCell<Option<IPCBuffer>>> = SingleThreaded(ipc_buffer_init());
 
         struct SingleThreaded<T>(T);
 
@@ -53,6 +55,7 @@ where
 /// This function is a convenience wrapper around [`with_ipc_buffer`].
 ///
 /// Requires the `"state"` feature to be enabled.
+#[allow(clippy::missing_safety_doc)]
 pub unsafe fn set_ipc_buffer(ipc_buffer: IPCBuffer) {
     with_ipc_buffer(|buf| {
         let _ = buf.replace(Some(ipc_buffer));

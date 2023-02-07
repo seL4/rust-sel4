@@ -32,7 +32,7 @@ impl<'a, T: VarType> SimpleVar<'a, T> {
 
     pub fn try_get(&self) -> Option<T::Value> {
         self.declare_as_dependency();
-        env::var(&self.var)
+        env::var(self.var)
             .ok()
             .map(|raw_value| T::from_raw_value(&raw_value))
     }
@@ -73,7 +73,7 @@ impl<'a, T: VarType> Var<'a, T> {
 
     pub fn try_get(&self) -> Option<T::Value> {
         self.declare_as_dependency();
-        env::var(&self.var)
+        env::var(self.var)
             .ok()
             .map(|raw_value| T::from_raw_value(&raw_value))
             .or_else(|| self.try_get_default())

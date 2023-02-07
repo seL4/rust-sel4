@@ -26,6 +26,7 @@ pub struct TlsImage {
 }
 
 impl TlsImage {
+    #[allow(clippy::missing_safety_doc)]
     pub unsafe fn reserve_on_stack_and_continue(&self, cont_fn: ContFn, cont_arg: ContArg) -> ! {
         let args = InternalContArgs {
             tls_image: self as *const TlsImage,

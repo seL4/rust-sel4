@@ -3,7 +3,7 @@ use xmltree::{Element, XMLNode};
 use crate::xml::Condition;
 
 #[derive(Debug)]
-pub struct API {
+pub struct Api {
     pub name: Option<String>,
     pub structs: Vec<Struct>,
     pub interfaces: Vec<Interface>,
@@ -53,7 +53,7 @@ impl Method {
 
 // // //
 
-impl API {
+impl Api {
     pub fn parse(e: &Element) -> Self {
         let mut structs = vec![];
         let mut interfaces = vec![];
@@ -100,11 +100,8 @@ impl Interface {
     fn parse(e: &Element) -> Self {
         let mut methods = vec![];
         for child in e.children.iter().filter_map(XMLNode::as_element) {
-            match child.name.as_str() {
-                "method" => {
-                    methods.push(Method::parse(child));
-                }
-                _ => {}
+            if child.name.as_str() == "method" {
+                methods.push(Method::parse(child));
             }
         }
         Self {

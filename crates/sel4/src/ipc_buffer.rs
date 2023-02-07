@@ -10,6 +10,7 @@ pub struct IPCBuffer {
 }
 
 impl IPCBuffer {
+    #[allow(clippy::missing_safety_doc)]
     pub unsafe fn from_ptr(ptr: *mut sys::seL4_IPCBuffer) -> Self {
         assert_eq!(ptr.addr() % GRANULE_SIZE.bytes(), 0); // sanity check
         Self { ptr }

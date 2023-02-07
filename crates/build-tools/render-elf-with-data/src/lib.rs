@@ -31,7 +31,7 @@ pub fn main() -> Result<()> {
         .collect::<Result<Vec<SymbolicInjection>>>()?;
     let in_file = fs::read(args.in_file_path)?;
     let out_buf = inject(in_file.as_slice(), injections, &args.image_bounds_symbols)?;
-    fs::write(args.out_file_path, &out_buf)?;
+    fs::write(args.out_file_path, out_buf)?;
     Ok(())
 }
 

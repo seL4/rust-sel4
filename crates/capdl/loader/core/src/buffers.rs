@@ -11,6 +11,7 @@ pub struct PerObjectBuffer {
     pub(crate) orig_slot: Option<InitCSpaceSlot>,
 }
 
+#[allow(clippy::derivable_impls)] // until #![feature(derive_const)]
 impl const Default for PerObjectBuffer {
     fn default() -> Self {
         Self { orig_slot: None }

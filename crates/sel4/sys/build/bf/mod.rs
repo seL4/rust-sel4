@@ -20,7 +20,7 @@ pub fn generate_rust(
         generator.generate_block(&block.name, &block.backing_type, &block.fields, None);
     }
     for tagged_union in file.tagged_unions.iter() {
-        generator.generate_tagged_union(&tagged_union);
+        generator.generate_tagged_union(tagged_union);
     }
     (generator.native_toks, generator.wrapper_toks)
 }
@@ -49,7 +49,7 @@ impl<'a> BitfieldGenerator<'a> {
     ) {
         let name_ident = match tag_info.as_ref() {
             Some(tag_info) => {
-                mk_tagged_union_variant_block_type_ident(&tag_info.tagged_union_name, &name)
+                mk_tagged_union_variant_block_type_ident(&tag_info.tagged_union_name, name)
             }
             None => format_ident!("{}", name),
         };
@@ -86,7 +86,7 @@ impl<'a> BitfieldGenerator<'a> {
                     mk_tag_values_module_ident(&tag_info_for_this_field.tagged_union_name);
                 let tag_value_ident = mk_tagged_union_variant_block_type_ident(
                     &tag_info_for_this_field.tagged_union_name,
-                    &name,
+                    name,
                 );
                 new_body.extend(quote! {
                     this.#set_method_ident(#tag_values_module_ident::#tag_value_ident);

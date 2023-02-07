@@ -62,11 +62,11 @@ pub fn main<'a>(payload: &Payload<'a>, own_footprint: &Range<usize>) -> ! {
     {
         let own_footprint =
             own_footprint.start.try_into().unwrap()..own_footprint.end.try_into().unwrap();
-        sanity_check::sanity_check(&own_footprint, &payload.data);
+        sanity_check::sanity_check(&own_footprint, payload.data);
     }
 
     log::debug!("Copying payload data");
-    copy_payload_data::copy_payload_data(&payload.data);
+    copy_payload_data::copy_payload_data(payload.data);
 
     smp::start_secondary_cores(&payload.info);
 
@@ -84,7 +84,7 @@ fn common_epilogue(core_id: usize, payload_info: &PayloadInfo) -> ! {
     KERNEL_ENTRY_BARRIER.wait();
     init_platform_state::init_platform_state_per_core(core_id);
     init_platform_state::init_platform_state_per_core_after_which_no_syncronization(core_id);
-    enter_kernel::enter_kernel(&payload_info);
+    enter_kernel::enter_kernel(payload_info);
     fmt::debug_println_without_synchronization!("Core {}: failed to enter kernel", core_id);
     idle()
 }

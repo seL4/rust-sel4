@@ -58,7 +58,7 @@ impl<T: Clone> AbstractRegions<T> {
 
     #[allow(dead_code)]
     fn check(&self) {
-        assert!(self.regions.len() > 0);
+        assert!(!self.regions.is_empty());
         for region in self.regions.iter() {
             assert!(region.range.start < region.range.end);
         }

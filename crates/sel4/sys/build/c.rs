@@ -1,7 +1,7 @@
 use std::path::Path;
 
 #[rustfmt::skip]
-const BLOCKLIST: &[&'static str] = &[
+const BLOCKLIST: &[&str] = &[
     "CONFIG_.*",
     "LIBSEL4_MCS_REPLY",
     "__sel4_ipc_buffer",
@@ -20,7 +20,7 @@ const BLOCKLIST: &[&'static str] = &[
     "__type_.*_size_incorrect",
 ];
 
-const HEADER_CONTENTS: &'static str = r#"
+const HEADER_CONTENTS: &str = r#"
     // HACK for upstream Docker container toolchain issue (very temporary)
     #define __thread
 

@@ -82,7 +82,7 @@ fn traverse_fill_entires<'a, F, F1, E>(
                         FillEntryContent::BootInfo(*content_bootinfo)
                     }
                     FillEntryContent::Data(content_data) => {
-                        FillEntryContent::Data(f(entry.range.len(), &content_data)?)
+                        FillEntryContent::Data(f(entry.range.len(), content_data)?)
                     }
                 },
             })

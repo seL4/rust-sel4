@@ -144,7 +144,7 @@ pub enum FillEntryContent<F> {
 impl<F> FillEntryContent<F> {
     pub fn as_data(&self) -> Option<&F> {
         match self {
-            Self::Data(data) => Some(&data),
+            Self::Data(data) => Some(data),
             _ => None,
         }
     }

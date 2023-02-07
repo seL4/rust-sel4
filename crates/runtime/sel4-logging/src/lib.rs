@@ -1,6 +1,7 @@
 #![no_std]
 #![feature(const_mut_refs)]
 #![feature(const_trait_impl)]
+#![allow(clippy::write_with_newline)]
 
 use core::default::Default;
 use core::fmt::{self, Write};
@@ -95,6 +96,7 @@ impl<'a> fmt::Display for DisplayWrapper<'a> {
 
 pub struct LoggerBuilder(Logger);
 
+#[allow(clippy::derivable_impls)] // until #![feature(derive_const)]
 impl const Default for LoggerBuilder {
     fn default() -> Self {
         Self(Default::default())
@@ -135,7 +137,7 @@ impl LoggerBuilder {
 //
 
 pub fn fmt_with_module(record: &Record, f: &mut fmt::Formatter) -> fmt::Result {
-    let target = if record.target().len() > 0 {
+    let target = if !record.target().is_empty() {
         record.target()
     } else {
         record.module_path().unwrap_or_default()

@@ -28,7 +28,7 @@ fn main(bootinfo: &BootInfo) -> ! {
     LOGGER.set().unwrap();
     let (spec, fill) = get_serialized_spec();
     let mut buffers = LoaderBuffers::new(vec![PerObjectBuffer::default(); spec.objects.len()]);
-    Loader::load(&bootinfo, user_image_bounds(), &spec, fill, &mut buffers)
+    Loader::load(bootinfo, user_image_bounds(), &spec, fill, &mut buffers)
         .unwrap_or_else(|err| panic!("Error: {}", err))
 }
 

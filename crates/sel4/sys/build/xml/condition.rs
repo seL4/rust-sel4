@@ -42,7 +42,7 @@ impl Condition {
     fn parse_var(var: &str) -> String {
         Regex::new(r"^CONFIG_(.+)$")
             .unwrap()
-            .captures(&var)
+            .captures(var)
             .unwrap()
             .get(1)
             .unwrap()

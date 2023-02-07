@@ -19,7 +19,6 @@ sel4_cfg_if! {
 
         impl ReplyAuthority {
             pub(crate) fn into_sys_reply_authority(self) -> sys::ReplyAuthority {
-                ()
             }
         }
 

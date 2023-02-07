@@ -54,7 +54,7 @@ impl Value {
 
     pub fn as_string(&self) -> Option<&str> {
         match self {
-            Self::String(v) => Some(&v),
+            Self::String(v) => Some(v),
             _ => None,
         }
     }

@@ -292,7 +292,7 @@ impl seL4_IPCBuffer {
 
         empty_mrs_to_ipc_buffer!(self, mr0, mr1, mr2, mr3);
 
-        return out_msg_info;
+        out_msg_info
     }
 
     pub fn seL4_CallWithMRs(
@@ -583,7 +583,7 @@ pub fn seL4_CallWithMRsWithoutIPCBuffer(
 
     empty_mrs_to_args!(mr0, mr1, mr2, mr3, msg0, msg1, msg2, msg3,);
 
-    return out_msg_info;
+    out_msg_info
 }
 
 #[sel4_cfg(KERNEL_MCS)]

@@ -51,23 +51,23 @@ impl<'a> Evaluator<'a> {
             syn::Meta::Path(node) => {
                 match self.lookup_path(node)? {
                     Value::Bool(v) => *v,
-                    _ => return err(node, format!("config key does not correspond to a boolean")),
+                    _ => return err(node, "config key does not correspond to a boolean"),
                 }
             }
             syn::Meta::NameValue(node) => {
                 match (&node.lit, self.lookup_path(&node.path)?) {
                     (syn::Lit::Str(l), Value::String(v)) => &l.value() == v,
                     (syn::Lit::Bool(l), Value::Bool(v)) => &l.value() == v,
-                    _ => return err(node, format!("the type of the value corresponding to config key does not match the type of the value to which it is being compared")),
+                    _ => return err(node, "the type of the value corresponding to config key does not match the type of the value to which it is being compared"),
                 }
             }
             syn::Meta::List(node) => {
                 match node.path.get_ident() {
-                    None => return err(&node.path, format!("unknown operation")),
+                    None => return err(&node.path, "unknown operation"),
                     Some(ident) => match ident.to_string().as_str() {
                         "not" => {
                             if node.nested.len() != 1 {
-                                return err(&node.nested, format!("expected 1 argument"))
+                                return err(&node.nested, "expected 1 argument")
                             }
                             !self.eval_nested_meta(node.nested.first().unwrap())?
                         }
@@ -82,7 +82,7 @@ impl<'a> Evaluator<'a> {
                             })?
                         }
                         _ => {
-                            return err(&node.path, format!("unknown operation"))
+                            return err(&node.path, "unknown operation")
                         }
                     }
                 }
@@ -96,7 +96,7 @@ impl<'a> Evaluator<'a> {
             Some(ident) => {
                 let k = ident.to_string();
                 match self.config.get(&k) {
-                    None => return err(node, &format!("unknown config key '{}'", k)),
+                    None => return err(node, format!("unknown config key '{}'", k)),
                     Some(v) => v,
                 }
             }

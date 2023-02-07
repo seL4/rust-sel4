@@ -76,7 +76,7 @@ impl Embedding {
                     }
                 }
                 Some(ptr) => {
-                    let child_index = self.embed_inner(&ptr);
+                    let child_index = self.embed_inner(ptr);
                     let ident = &self.ident;
                     quote! {
                         (&#ident[#child_index] as *const Table as *const ()).byte_add(#offset as usize)

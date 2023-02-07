@@ -28,6 +28,7 @@ macro_rules! declare_main {
     };
 }
 
+#[allow(clippy::missing_safety_doc)]
 pub unsafe fn run_main<T>(
     f: impl Fn(&sel4::BootInfo) -> T,
     bootinfo: *const sel4::sys::seL4_BootInfo,

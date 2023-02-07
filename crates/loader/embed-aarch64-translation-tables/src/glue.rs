@@ -19,6 +19,7 @@ pub type Region = AbstractRegion<RegionContent<Option<BlockDescriptor>>>;
 pub type Regions = AbstractRegions<RegionContent<Option<BlockDescriptor>>>;
 
 impl Regions {
+    #[allow(clippy::new_without_default)]
     pub fn new() -> Self {
         Self::new_with(Region::invalid(PHYS_BOUNDS))
     }

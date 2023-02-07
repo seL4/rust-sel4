@@ -154,12 +154,12 @@ impl Block {
 
 fn simplify_base(base: &ast::Base) -> usize {
     assert_eq!(base.base_bits, base.base);
-    assert_eq!(base.sign_extend, false);
+    assert!(!base.sign_extend);
     base.base
 }
 
 fn unified<T: Eq>(mut it: impl Iterator<Item = T>) -> T {
     let first = it.next().unwrap();
-    assert!(it.all(|subsequent| &subsequent == &first));
+    assert!(it.all(|subsequent| subsequent == first));
     first
 }

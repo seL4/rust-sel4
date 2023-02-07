@@ -14,6 +14,7 @@ pub struct BootInfo {
 }
 
 impl BootInfo {
+    #[allow(clippy::missing_safety_doc)]
     pub unsafe fn from_ptr(ptr: *const sys::seL4_BootInfo) -> Self {
         assert_eq!(ptr.addr() % GRANULE_SIZE.bytes(), 0); // sanity check
         Self { ptr }
@@ -47,6 +48,7 @@ impl BootInfo {
         self.inner().extraLen.try_into().unwrap()
     }
 
+    #[allow(clippy::missing_safety_doc)]
     pub unsafe fn ipc_buffer(&self) -> IPCBuffer {
         IPCBuffer::from_ptr(self.inner().ipcBuffer)
     }

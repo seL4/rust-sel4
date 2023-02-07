@@ -23,6 +23,7 @@ pub use sel4_runtime_simple_termination::Termination;
 pub use sel4_runtime_simple_static_heap::set_mutex_notification as set_heap_mutex_notification;
 
 #[no_mangle]
+#[allow(clippy::missing_safety_doc)]
 pub unsafe extern "C" fn __rust_entry(bootinfo: *const sel4::sys::seL4_BootInfo) -> ! {
     let cont_arg = bootinfo.cast::<c_void>().cast_mut();
     EmbeddedProgramHeaders::finder()
@@ -30,6 +31,7 @@ pub unsafe extern "C" fn __rust_entry(bootinfo: *const sel4::sys::seL4_BootInfo)
         .reserve_on_stack_and_continue(cont_fn, cont_arg)
 }
 
+#[allow(clippy::missing_safety_doc)]
 pub unsafe extern "C" fn cont_fn(cont_arg: *mut c_void) -> ! {
     let bootinfo = cont_arg.cast_const().cast::<sel4::sys::seL4_BootInfo>();
 
@@ -59,6 +61,7 @@ macro_rules! declare_main {
     };
 }
 
+#[allow(clippy::missing_safety_doc)]
 pub unsafe fn run_main<T>(
     f: impl Fn(&sel4::BootInfo) -> T,
     bootinfo: *const sel4::sys::seL4_BootInfo,

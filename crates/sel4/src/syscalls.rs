@@ -239,6 +239,7 @@ impl<const N: usize> FastMessagesUnchecked for [Word; N] {
 
 #[allow(dead_code)]
 #[allow(non_upper_case_globals)]
+#[allow(clippy::assertions_on_constants)]
 mod __assertions {
     use super::*;
 
