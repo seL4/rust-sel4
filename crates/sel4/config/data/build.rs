@@ -14,7 +14,7 @@ fn main() {
     let fragment = config.generate_data_fragment(quote! { mk }, quote! { crate::helpers });
     let out_dir = env::var("OUT_DIR").unwrap();
     let out_path = PathBuf::from(&out_dir).join("gen.rs");
-    fs::write(&out_path, format!("{}", fragment)).unwrap();
+    fs::write(&out_path, format!("{fragment}")).unwrap();
     Rustfmt::detect().format(&out_path);
 
     println!("cargo:rerun-if-changed={}", config_path.display());

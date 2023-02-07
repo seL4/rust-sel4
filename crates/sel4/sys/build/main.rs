@@ -111,7 +111,7 @@ impl OutDir {
 
     fn write_file(&self, fragment: TokenStream, filename: impl AsRef<Path>) {
         let out_path = self.path.join(filename);
-        fs::write(&out_path, format!("{}", fragment)).unwrap();
+        fs::write(&out_path, format!("{fragment}")).unwrap();
         self.rustfmt.format(&out_path);
     }
 }

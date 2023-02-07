@@ -1,7 +1,6 @@
 #![no_std]
 #![feature(const_mut_refs)]
 #![feature(const_trait_impl)]
-#![allow(clippy::write_with_newline)]
 
 use core::default::Default;
 use core::fmt::{self, Write};
@@ -48,7 +47,7 @@ impl Log for Logger {
                 fmt: self.fmt,
                 record,
             };
-            write!(writer, "{}\n", wrapped).unwrap()
+            writeln!(writer, "{wrapped}").unwrap()
         }
     }
 
@@ -148,15 +147,15 @@ pub fn fmt_with_module(record: &Record, f: &mut fmt::Formatter) -> fmt::Result {
 pub fn fmt_with_line(record: &Record, f: &mut fmt::Formatter) -> fmt::Result {
     write!(f, "{:<5} [", record.level())?;
     if let Some(file) = record.file() {
-        write!(f, "{}", file)?;
+        write!(f, "{file}")?;
     } else if let Some(file) = record.file_static() {
-        write!(f, "{}", file)?;
+        write!(f, "{file}")?;
     } else {
         write!(f, "(?)")?;
     }
     write!(f, ":")?;
     if let Some(line) = record.line() {
-        write!(f, "{}", line)?;
+        write!(f, "{line}")?;
     } else {
         write!(f, "(?)")?;
     }

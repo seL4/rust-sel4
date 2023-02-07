@@ -96,7 +96,7 @@ impl<'a> Evaluator<'a> {
             Some(ident) => {
                 let k = ident.to_string();
                 match self.config.get(&k) {
-                    None => return err(node, format!("unknown config key '{}'", k)),
+                    None => return err(node, format!("unknown config key '{k}'")),
                     Some(v) => v,
                 }
             }

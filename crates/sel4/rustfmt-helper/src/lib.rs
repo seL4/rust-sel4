@@ -30,7 +30,7 @@ impl Rustfmt {
                 .unwrap();
             output.status.exit_ok().unwrap_or_else(|err| {
                 eprint!("{}", str::from_utf8(&output.stderr).unwrap());
-                panic!("{:?}", err)
+                panic!("{err:?}")
             });
         }
     }

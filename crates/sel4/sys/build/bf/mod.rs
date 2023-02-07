@@ -205,8 +205,8 @@ impl<'a> BitfieldGenerator<'a> {
             }
         });
 
-        let wrapper_new_prefix = mk_wrapper_prefix(format!("{}_new", name_ident));
-        let wrapper_ptr_new_prefix = mk_wrapper_prefix(format!("{}_ptr_new", name_ident));
+        let wrapper_new_prefix = mk_wrapper_prefix(format!("{name_ident}_new"));
+        let wrapper_ptr_new_prefix = mk_wrapper_prefix(format!("{name_ident}_ptr_new"));
 
         self.wrapper_toks.extend(quote! {
             #wrapper_new_prefix(#(#non_tag_fields_with_types,)*) -> #qualified_name {

@@ -20,10 +20,10 @@ where
     T: ToTokens,
 {
     let ident = parse_or_return!(key_toks as syn::Ident);
-    let key = format!("{}", ident);
+    let key = format!("{ident}");
     match config.get(&key) {
         Some(value) => f((&key, value)).map(|to_tokens| quote!(#to_tokens)),
-        None => Err(format!("unknown config key '{}'", key)),
+        None => Err(format!("unknown config key '{key}'")),
     }
     .unwrap_or_else(|message| {
         quote_spanned! {
@@ -36,8 +36,7 @@ pub fn cfg_bool_impl(config: &Configuration, key_toks: TokenStream) -> TokenStre
     cfg_generic_impl(config, key_toks, |(key, value)| match value {
         Value::Bool(value) => Ok(*value),
         _ => Err(format!(
-            "value corresponding to config key '{}' is not boolean",
-            key
+            "value corresponding to config key '{key}' is not boolean"
         )),
     })
 }
@@ -61,8 +60,7 @@ where
             )
         }),
         _ => Err(format!(
-            "value corresponding to config key '{}' is not string",
-            key
+            "value corresponding to config key '{key}' is not string"
         )),
     })
 }

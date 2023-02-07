@@ -16,7 +16,7 @@ fn main() {
     let fragment = platform_info.embed();
     let out_dir = env::var("OUT_DIR").unwrap();
     let out_path = PathBuf::from(&out_dir).join("gen.rs");
-    fs::write(out_path, format!("{}", fragment)).unwrap();
+    fs::write(out_path, format!("{fragment}")).unwrap();
 
     println!("cargo:rerun-if-changed={}", platform_info_path.display());
 }
@@ -43,7 +43,7 @@ impl PlatformInfoForBuildSystem {
 }
 
 fn embed_ranges(ranges: &Ranges) -> TokenStream {
-    let toks = format!("{:?}", ranges).parse::<TokenStream>().unwrap();
+    let toks = format!("{ranges:?}").parse::<TokenStream>().unwrap();
     quote! {
         &#toks
     }

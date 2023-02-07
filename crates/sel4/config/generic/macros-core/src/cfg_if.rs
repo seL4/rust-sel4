@@ -86,7 +86,7 @@ fn parse_condition(input: syn::parse::ParseStream) -> syn::Result<Condition> {
         }
     };
     if !attr.path.is_ident(&format_ident!("{}", CFG)) {
-        return Err(syn::Error::new(attr.span(), format!("expected '{}'", CFG)));
+        return Err(syn::Error::new(attr.span(), format!("expected '{CFG}'")));
     }
     attr.parse_args()
 }

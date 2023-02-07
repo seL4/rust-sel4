@@ -112,7 +112,7 @@ impl<'a> InvocationGenerator<'a> {
         in_params: &[Parameter],
         out_params: &[Parameter],
     ) {
-        let fn_name = format!("{}_{}", interface_name, method_name);
+        let fn_name = format!("{interface_name}_{method_name}");
         let fn_ident = format_ident!("{}", fn_name);
         let interface_ident = format_ident!("{}", interface_name);
         let ret_struct_ident = format_ident!("{}_ret", fn_name);
