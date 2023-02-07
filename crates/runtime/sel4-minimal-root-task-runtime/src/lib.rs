@@ -19,23 +19,26 @@ pub use sel4_runtime_simple_static_heap::set_mutex_notification as set_heap_mute
 macro_rules! declare_main {
     ($main:path) => {
         #[no_mangle]
-        pub extern "C" fn __rust_entry(bootinfo: *const $crate::_private::seL4_BootInfo) -> ! {
+        pub unsafe extern "C" fn __rust_entry(
+            bootinfo: *const $crate::_private::seL4_BootInfo,
+        ) -> ! {
             $crate::_private::run_main($main, bootinfo)
         }
     };
 }
 
-pub fn run_main<T>(f: impl Fn(&sel4::BootInfo) -> T, bootinfo: *const sel4::sys::seL4_BootInfo) -> !
+pub unsafe fn run_main<T>(
+    f: impl Fn(&sel4::BootInfo) -> T,
+    bootinfo: *const sel4::sys::seL4_BootInfo,
+) -> !
 where
     T: Termination,
     T::Error: fmt::Debug,
 {
-    let bootinfo = unsafe { sel4::BootInfo::from_ptr(bootinfo) };
+    let bootinfo = sel4::BootInfo::from_ptr(bootinfo);
 
     #[cfg(feature = "state")]
-    unsafe {
-        sel4::set_ipc_buffer(bootinfo.ipc_buffer());
-    }
+    sel4::set_ipc_buffer(bootinfo.ipc_buffer());
 
     let err = f(&bootinfo).report();
 

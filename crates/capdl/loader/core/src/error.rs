@@ -3,7 +3,6 @@ use capdl_types::*;
 use core::convert::Infallible;
 use core::fmt;
 use core::num::TryFromIntError;
-use sel4;
 
 #[derive(Debug)]
 pub enum CapDLLoaderError {
