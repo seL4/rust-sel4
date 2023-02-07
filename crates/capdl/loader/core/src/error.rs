@@ -52,6 +52,6 @@ impl From<TryFromIntError> for CapDLLoaderError {
 impl fmt::Display for CapDLLoaderError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         // TODO
-        write!(f, "{:?}", self)
+        write!(f, "{self:?}")
     }
 }
