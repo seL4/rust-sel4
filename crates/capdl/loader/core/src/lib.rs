@@ -39,56 +39,50 @@ use memory::init_copy_addrs;
 
 type Result<T> = result::Result<T, CapDLLoaderError>;
 
-pub fn load<
-    'a,
-    'b,
-    F: AvailableFillEntryContentVia,
-    N: ObjectName + fmt::Debug,
-    B: BorrowMut<[PerObjectBuffer]>,
->(
-    spec: &'b Spec<'b, N, F>,
-    via: &'b F::Via,
-    bootinfo: &'a BootInfo,
-    buffers: &'a mut LoaderBuffers<B>,
-    own_footprint: Range<usize>,
-) -> Result<!> {
-    info!("Starting CapDL Loader");
-
-    let (small_frame_copy_addr, large_frame_copy_addr) = init_copy_addrs(bootinfo, &own_footprint)?;
-
-    let mut cslot_allocator = CSlotAllocator::new(bootinfo.empty());
-
-    Loader {
-        spec,
-        via,
-        bootinfo,
-        small_frame_copy_addr,
-        large_frame_copy_addr,
-        cslot_allocator: &mut cslot_allocator,
-        buffers,
-    }
-    .load()
-}
-
-struct Loader<'a, 'b, F: AvailableFillEntryContentVia, N, B: BorrowMut<[PerObjectBuffer]>> {
-    spec: &'b Spec<'b, N, F>,
-    via: &'b F::Via,
+pub struct Loader<'a, F: AvailableFillEntryContentVia, N, B> {
     bootinfo: &'a BootInfo,
     small_frame_copy_addr: usize,
     large_frame_copy_addr: usize,
+    spec: &'a Spec<'a, N, F>,
+    fill: &'a F::Via,
     cslot_allocator: &'a mut CSlotAllocator,
     buffers: &'a mut LoaderBuffers<B>,
 }
 
 impl<
         'a,
-        'b,
         F: AvailableFillEntryContentVia,
         N: ObjectName + fmt::Debug,
         B: BorrowMut<[PerObjectBuffer]>,
-    > Loader<'a, 'b, F, N, B>
+    > Loader<'a, F, N, B>
 {
-    pub fn load(&mut self) -> Result<!> {
+    pub fn load(
+        bootinfo: &BootInfo,
+        own_footprint: Range<usize>,
+        spec: &Spec<N, F>,
+        fill: &F::Via,
+        buffers: &mut LoaderBuffers<B>,
+    ) -> Result<!> {
+        info!("Starting CapDL Loader");
+
+        let (small_frame_copy_addr, large_frame_copy_addr) =
+            init_copy_addrs(bootinfo, &own_footprint)?;
+
+        let mut cslot_allocator = CSlotAllocator::new(bootinfo.empty());
+
+        Loader {
+            bootinfo,
+            small_frame_copy_addr,
+            large_frame_copy_addr,
+            spec,
+            fill,
+            cslot_allocator: &mut cslot_allocator,
+            buffers,
+        }
+        .run()
+    }
+
+    fn run(&mut self) -> Result<!> {
         self.create_objects()?;
 
         self.init_irqs()?;
@@ -392,7 +386,7 @@ impl<
             let dst = unsafe { slice::from_raw_parts_mut(dst_frame.add(offset), length) };
             match &entry.content {
                 FillEntryContent::Data(content_data) => {
-                    content_data.copy_out_via(&self.via, dst);
+                    content_data.copy_out_via(&self.fill, dst);
                 }
                 FillEntryContent::BootInfo(content_bootinfo) => {
                     for extra in self.bootinfo.extra() {
