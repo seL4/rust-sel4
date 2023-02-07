@@ -545,10 +545,8 @@ impl<
                 tcb.tcb_write_all_registers(false, &mut regs)?;
             }
 
-            {
-                if let Some(name) = self.spec.name(obj_id).object_name() {
-                    tcb.debug_name(name.as_bytes());
-                }
+            if let Some(name) = self.spec.name(obj_id).object_name() {
+                tcb.debug_name(name.as_bytes());
             }
         }
         Ok(())

@@ -1,5 +1,6 @@
 #![no_std]
 #![feature(core_intrinsics)]
+#![feature(lang_items)]
 
 extern crate sel4_runtime_simple_entry;
 

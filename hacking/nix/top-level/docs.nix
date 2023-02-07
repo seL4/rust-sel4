@@ -1,26 +1,39 @@
 { lib, pkgs }:
 
 let
-  metaCrateName = "meta_for_docs";
+  metaCrateName = "meta";
 
   worlds = [
     (
       let
         pkgSet = pkgs.host.aarch64.none;
         world = pkgSet.this.worlds.default;
+        arch = pkgSet.hostPlatform.parsed.cpu.name;
       in rec {
-        name = pkgSet.this.defaultRustTargetInfo.name;
-        description = "${name} (qemu-virt-arm)";
+        name = arch;
+        description = "${arch} (qemu-virt-arm)";
         byRuntime = world.docs;
+      }
+    )
+    (
+      let
+        pkgSet = pkgs.host.aarch64.none;
+        world = pkgSet.this.worlds.qemu-arm-virt.sel4cp;
+        arch = pkgSet.hostPlatform.parsed.cpu.name;
+      in rec {
+        name = "${arch}-mcs";
+        description = "${arch} with MCS (qemu-virt-arm)";
+        byRuntime = lib.filter (runtime: runtime.name == "sel4cp") world.docs;
       }
     )
     (
       let
         pkgSet = pkgs.host.riscv64.none;
         world = pkgSet.this.worlds.default;
+        arch = pkgSet.hostPlatform.parsed.cpu.name;
       in rec {
-        name = pkgSet.this.defaultRustTargetInfo.name;
-        description = "${name} (spike)";
+        name = arch;
+        description = "${arch} (spike)";
         byRuntime = world.docs;
       }
     )
@@ -29,7 +42,7 @@ let
         pkgSet = pkgs.host.x86_64.none;
         world = pkgSet.this.worlds.default;
       in rec {
-        name = pkgSet.this.defaultRustTargetInfo.name;
+        name = pkgSet.hostPlatform.parsed.cpu.name;
         description = "${name} (pc99)";
         byRuntime = world.docs;
       }

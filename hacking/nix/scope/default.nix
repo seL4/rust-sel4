@@ -116,11 +116,13 @@ superCallPackage ../rust-utils {} self //
     { kernelConfig, loaderConfig
     , mkQemuCmd ? null
     , qemuCmdRequiresLoader ? true
+    , forCP ? false
     }:
     { inherit
         kernelConfig loaderConfig
         mkQemuCmd
         qemuCmdRequiresLoader
+        forCP
       ;
     };
 

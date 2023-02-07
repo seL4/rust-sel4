@@ -36,7 +36,7 @@ members = [
     "crates/loader/payload/at-build-time",
     "crates/loader/payload/at-build-time/types",
     "crates/loader/payload/types",
-    "crates/meta/for-docs",
+    "crates/meta",
     "crates/runtime/sel4-backtrace",
     "crates/runtime/sel4-backtrace/cli/sel4-symbolize-backtrace",
     "crates/runtime/sel4-backtrace/simple",

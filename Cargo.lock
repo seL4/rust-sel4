@@ -833,10 +833,17 @@ dependencies = [
 ]
 
 [[package]]
-name = "meta-for-docs"
+name = "meta"
 version = "0.1.0"
 dependencies = [
+ "capdl-embedded-spec",
+ "capdl-loader-core",
+ "capdl-loader-expecting-serialized-spec",
+ "capdl-loader-with-embedded-spec",
+ "cfg-if",
+ "loader-core",
  "log",
+ "render-elf-with-data",
  "sel4",
  "sel4-config",
  "sel4-full-root-task-runtime",
@@ -845,6 +852,7 @@ dependencies = [
  "sel4-platform-info",
  "sel4-sync",
  "sel4-sys",
+ "sel4cp",
 ]
 
 [[package]]

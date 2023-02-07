@@ -25,6 +25,7 @@ in rec {
             in
               mkWorld {
                 inherit loaderConfig;
+                inherit forCP;
                 kernelConfig = kernelConfigCommon // {
                   ARM_CPU = mkString cpu;
                   KernelArch = mkString "arm";

@@ -14,6 +14,8 @@
 , vendoredTopLevelLockfile
 
 , seL4ForUserspace
+
+, worldConfig
 }:
 
 let
@@ -22,12 +24,14 @@ let
   runtimes = [
     { name = "none"; features = []; rustTargetInfo = seL4RustTargetInfoWithConfig { minimal = false; }; }
   ] ++ lib.optionals (hostPlatform.isAarch64 || hostPlatform.isx86_64) [
-    (rec { name = "minimal-root-task-runtime"; features = [ name ]; rustTargetInfo = seL4RustTargetInfoWithConfig { minimal = true; }; })
+    { name = "minimal-root-task-runtime"; features = [ "root-task-minimal" ]; rustTargetInfo = seL4RustTargetInfoWithConfig { minimal = true; }; }
   ] ++ lib.optionals hostPlatform.isAarch64 [
-    (rec { name = "full-root-task-runtime"; features = [ name ]; rustTargetInfo = seL4RustTargetInfoWithConfig { minimal = false; }; })
+    { name = "full-root-task-runtime"; features = [ "root-task-full" ]; rustTargetInfo = seL4RustTargetInfoWithConfig { minimal = false; }; }
+  ] ++ lib.optionals (worldConfig.forCP or false) [
+    { name = "sel4cp"; features = [ "sel4cp" ]; rustTargetInfo = seL4RustTargetInfoWithConfig { minimal = true; cp = true; }; }
   ];
 
-  rootCrate = crates.meta-for-docs;
+  rootCrate = crates.meta;
 
   # TODO try using build-std
 
@@ -83,11 +87,13 @@ let
         (crateUtils.baseConfig { inherit rustToolchain rustTargetName; })
         (vendorLockfile { inherit lockfileContents; }).configFragment
         {
+          unstable.unstable-options = true;
+          unstable.bindeps = true;
+
           target.${rustTargetName}.rustflags = [
             "--sysroot" sysroot
           ];
-        }
-        {
+
           # TODO
           # target.${rustTargetName}.rustdocflags = [
           build.rustdocflags = [
