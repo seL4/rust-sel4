@@ -8,11 +8,7 @@ with configHelpers;
 let
   loaderConfig = {};
 
-  # smp = false;
-  smp = true;
-
   kernelConfigCommon = {
-    KernelIsMCS = on;
     KernelVerificationBuild = off;
   };
 
@@ -23,7 +19,7 @@ in rec {
       default = qemu-arm-virt.el2;
       qemu-arm-virt =
         let
-          mk = { smp ? false, hypervisor ? false, cpu ? "cortex-a57", forCP ? false }:
+          mk = { smp ? false, mcs ? off, hypervisor ? false, cpu ? "cortex-a57", forCP ? false }:
             let
               numCores = if smp then "2" else "1";
             in
@@ -35,6 +31,7 @@ in rec {
                   KernelSel4Arch = mkString "aarch64";
                   KernelPlatform = mkString "qemu-arm-virt";
                   KernelMaxNumNodes = mkString numCores;
+                  KernelIsMCS = mcs;
                 } // lib.optionalAttrs hypervisor {
                   KernelArmHypervisorSupport = on;
                 };
@@ -53,7 +50,7 @@ in rec {
           default = el2;
           el1 = mk { smp = true; };
           el2 = mk { smp = true; hypervisor = true; };
-          sel4cp = mk { forCP = true; cpu = "cortex-a53"; };
+          sel4cp = mk { mcs = on; forCP = true; cpu = "cortex-a53"; };
         };
 
       bcm2711 = mkWorld {
