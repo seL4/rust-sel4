@@ -37,8 +37,6 @@ pub use error::CapDLLoaderError;
 use hold_slots::HoldSlots;
 use memory::init_copy_addrs;
 
-// TODO see note about seL4_ARM_Page_CleanInvalidate_Data/seL4_ARM_Page_Unify_Instruction in upstream
-
 type Result<T> = result::Result<T, CapDLLoaderError>;
 
 pub fn load<
@@ -423,6 +421,10 @@ impl<
 
     fn init_vspaces(&mut self) -> Result<()> {
         debug!("Initializing VSpaces");
+
+        // TODO
+        // Add support for uncached non-device mappings.
+        // See note about seL4_ARM_Page_CleanInvalidate_Data/seL4_ARM_Page_Unify_Instruction in upstream.
 
         for (obj_id, obj) in self.spec.filter_objects::<&object::PGD>() {
             let pgd = self.orig_local_cptr::<cap_type::PGD>(obj_id);
