@@ -11,6 +11,13 @@ mod reserialize_spec;
 
 use args::Args;
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum ObjectNamesLevel {
+    All,
+    JustTCBs,
+    None,
+}
+
 fn main() -> Result<()> {
     let args = Args::parse()?;
     if args.verbose {
@@ -21,8 +28,10 @@ fn main() -> Result<()> {
     let spec_json = fs::read(&args.spec_json_path)?;
     let fill_dir_path = &args.fill_dir_path;
     let out_file_path = &args.out_file_path;
+    let object_names_level = &args.object_names_level;
 
-    let serialized_spec = reserialize_spec::reserialize_spec(&spec_json, fill_dir_path);
+    let serialized_spec =
+        reserialize_spec::reserialize_spec(&spec_json, fill_dir_path, object_names_level);
     let armed_loader_elf = render_elf::render_elf(
         &loader_elf,
         &serialized_spec,

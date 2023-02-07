@@ -43,7 +43,7 @@ static mut capdl_spec_start: *const u8 = ptr::null();
 static mut capdl_spec_size: usize = 0;
 
 fn get_serialized_spec<'a>() -> (
-    Spec<'a, String, FillEntryContentDeflatedBytesVia>,
+    Spec<'a, Option<String>, FillEntryContentDeflatedBytesVia>,
     &'static [u8],
 ) {
     let blob = unsafe { slice::from_raw_parts(capdl_spec_start, capdl_spec_size) };

@@ -19,12 +19,12 @@ type FillEntryContentFileAndBytes = (FillEntryContentFile, FillEntryContentBytes
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Config {
-    pub include_object_names: IncludeObjectNamesConfig,
+    pub object_names_level: ObjectNamesLevel,
     pub deflate_fill: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub enum IncludeObjectNamesConfig {
+pub enum ObjectNamesLevel {
     All,
     JustTCBs,
     None,
@@ -249,18 +249,21 @@ impl<'a> Embedding<'a> {
 
     fn name_type(&self, qualify: bool) -> TokenStream {
         let prefix = self.qualification_prefix(qualify);
-        match self.config.include_object_names {
-            IncludeObjectNamesConfig::All => quote!(&str),
-            IncludeObjectNamesConfig::JustTCBs => quote!(Option<&str>),
-            IncludeObjectNamesConfig::None => quote!(#prefix Unnamed),
+        match self.config.object_names_level {
+            ObjectNamesLevel::All => quote!(&str),
+            ObjectNamesLevel::JustTCBs => quote!(Option<&str>),
+            ObjectNamesLevel::None => quote!(#prefix Unnamed),
         }
     }
 
-    fn name_value(&self, name: &str) -> TokenStream {
-        match self.config.include_object_names {
-            IncludeObjectNamesConfig::All => quote!(#name),
-            IncludeObjectNamesConfig::JustTCBs => quote!(Some(#name)),
-            IncludeObjectNamesConfig::None => quote!(Unnamed),
+    fn name_value<F>(&self, obj: &Object<'a, F>, name: &str) -> TokenStream {
+        match self.config.object_names_level {
+            ObjectNamesLevel::All => quote!(#name),
+            ObjectNamesLevel::JustTCBs => match obj {
+                Object::TCB(_) => quote!(Some(#name)),
+                _ => quote!(None),
+            },
+            ObjectNamesLevel::None => quote!(Unnamed),
         }
     }
 
@@ -301,7 +304,7 @@ impl<'a> Embedding<'a> {
             .spec
             .named_objects()
             .map(|NamedObject { name, object }| {
-                let name = self.name_value(name);
+                let name = self.name_value(object, name);
                 let object = self.embed_object(object);
                 quote! {
                     NamedObject {

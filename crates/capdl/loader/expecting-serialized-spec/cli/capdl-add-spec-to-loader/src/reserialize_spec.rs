@@ -5,7 +5,13 @@ use std::path::{Path, PathBuf};
 
 use capdl_types::*;
 
-pub fn reserialize_spec(spec_json: &[u8], fill_dir_path: impl AsRef<Path>) -> Vec<u8> {
+use crate::ObjectNamesLevel;
+
+pub fn reserialize_spec(
+    spec_json: &[u8],
+    fill_dir_path: impl AsRef<Path>,
+    object_names_level: &ObjectNamesLevel,
+) -> Vec<u8> {
     let input_spec: Spec<String, FillEntryContentFile> =
         serde_json::from_reader(spec_json).unwrap();
 
@@ -23,7 +29,18 @@ pub fn reserialize_spec(spec_json: &[u8], fill_dir_path: impl AsRef<Path>) -> Ve
         .into_ok();
 
     let mut fill = vec![];
-    let final_spec: Spec<String, FillEntryContentDeflatedBytesVia> = input_spec
+    let final_spec: Spec<Option<String>, FillEntryContentDeflatedBytesVia> = input_spec
+        .traverse_names_with_context(|obj, name| {
+            Ok::<_, !>(match object_names_level {
+                ObjectNamesLevel::All => Some(name.clone()),
+                ObjectNamesLevel::JustTCBs => match obj {
+                    Object::TCB(_) => Some(name.clone()),
+                    _ => None,
+                },
+                ObjectNamesLevel::None => None,
+            })
+        })
+        .into_ok()
         .traverse_fill_with_context(|length, entry| {
             let mut uncompressed = vec![0; length];
             open_files

@@ -3,28 +3,30 @@ use std::fs;
 use std::path::PathBuf;
 use std::str;
 
-use capdl_embed_spec::IncludeObjectNamesConfig;
+use capdl_embed_spec::ObjectNamesLevel;
 use sel4_rustfmt_helper::Rustfmt;
 
-const CAPDL_EMBED_NAMES_ENV: &str = "CAPDL_EMBED_NAMES";
+const CAPDL_OBJECT_NAMES_LEVEL_ENV: &str = "CAPDL_OBJECT_NAMES_LEVEL";
 
 fn main() {
-    let include_object_names = match env::var(CAPDL_EMBED_NAMES_ENV)
-        .map(|x| x.parse::<i32>().unwrap())
-        .unwrap_or(1)
-    {
-        0 => IncludeObjectNamesConfig::None,
-        1 => IncludeObjectNamesConfig::JustTCBs,
-        2 => IncludeObjectNamesConfig::All,
-        n => panic!("unexpected value for {}: {}", CAPDL_EMBED_NAMES_ENV, n),
-    };
+    let object_names_level = env::var(CAPDL_OBJECT_NAMES_LEVEL_ENV)
+        .map(|val| match val.parse::<usize>().unwrap() {
+            0 => ObjectNamesLevel::None,
+            1 => ObjectNamesLevel::JustTCBs,
+            2 => ObjectNamesLevel::All,
+            n => panic!(
+                "unexpected value for {}: {}",
+                CAPDL_OBJECT_NAMES_LEVEL_ENV, n
+            ),
+        })
+        .unwrap_or(ObjectNamesLevel::JustTCBs);
 
     let deflate_fill = cfg!(feature = "deflate");
 
     let spec = capdl_embedded_spec_serialized::get();
 
     let (embedded_spec, aux_files) = capdl_embed_spec::Config {
-        include_object_names,
+        object_names_level,
         deflate_fill,
     }
     .embed(&spec);
@@ -36,7 +38,10 @@ fn main() {
         fs::write(out_dir.join(fname), content).unwrap();
     }
 
-    println!("cargo:rerun-if-env-changed={}", CAPDL_EMBED_NAMES_ENV);
+    println!(
+        "cargo:rerun-if-env-changed={}",
+        CAPDL_OBJECT_NAMES_LEVEL_ENV
+    );
 
     Rustfmt::detect().format(&spec_out_path);
 }
