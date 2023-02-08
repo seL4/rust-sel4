@@ -7,6 +7,7 @@ use core::ops::Range;
 
 use capdl_embedded_spec::SPEC;
 use capdl_loader_core::{Loader, LoaderBuffers, PerObjectBuffer};
+use capdl_types::SpecWithSources;
 use sel4::BootInfo;
 use sel4_logging::{LevelFilter, Logger, LoggerBuilder};
 
@@ -23,7 +24,13 @@ static mut BUFFERS: LoaderBuffers<[PerObjectBuffer; SPEC.objects.len()]> =
 #[sel4_minimal_root_task_runtime::main]
 fn main(bootinfo: &BootInfo) -> ! {
     LOGGER.set().unwrap();
-    Loader::load(&bootinfo, user_image_bounds(), &SPEC, &(), unsafe {
+    let trivial_source = ();
+    let spec_with_sources = SpecWithSources {
+        spec: SPEC,
+        object_name_source: &trivial_source,
+        content_source: &trivial_source,
+    };
+    Loader::load(&bootinfo, user_image_bounds(), &spec_with_sources, unsafe {
         &mut BUFFERS
     })
     .unwrap_or_else(|err| panic!("Error: {}", err))

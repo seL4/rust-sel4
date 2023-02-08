@@ -11,7 +11,7 @@ use core::ptr;
 use core::slice;
 
 use capdl_loader_core::{Loader, LoaderBuffers, PerObjectBuffer};
-use capdl_loader_expecting_serialized_spec_types::SerializedSpec;
+use capdl_loader_expecting_serialized_spec_types::SpecWithSourcesForSerialization;
 use sel4::BootInfo;
 use sel4_logging::{LevelFilter, Logger, LoggerBuilder};
 
@@ -25,10 +25,18 @@ static LOGGER: Logger = LoggerBuilder::default()
 #[sel4_minimal_root_task_runtime::main]
 fn main(bootinfo: &BootInfo) -> ! {
     LOGGER.set().unwrap();
-    let (spec, fill) = get_serialized_spec();
-    let mut buffers = LoaderBuffers::new(vec![PerObjectBuffer::default(); spec.objects.len()]);
-    Loader::load(bootinfo, user_image_bounds(), &spec, fill, &mut buffers)
-        .unwrap_or_else(|err| panic!("Error: {}", err))
+    let spec_with_sources = get_spec_with_sources();
+    let mut buffers = LoaderBuffers::new(vec![
+        PerObjectBuffer::default();
+        spec_with_sources.spec.objects.len()
+    ]);
+    Loader::load(
+        bootinfo,
+        user_image_bounds(),
+        &spec_with_sources,
+        &mut buffers,
+    )
+    .unwrap_or_else(|err| panic!("Error: {}", err))
 }
 
 #[used]
@@ -41,9 +49,14 @@ static mut capdl_spec_start: *const u8 = ptr::null();
 #[link_section = ".data"]
 static mut capdl_spec_size: usize = 0;
 
-fn get_serialized_spec<'a>() -> (SerializedSpec<'a>, &'static [u8]) {
+fn get_spec_with_sources<'a>() -> SpecWithSourcesForSerialization<'a> {
     let blob = unsafe { slice::from_raw_parts(capdl_spec_start, capdl_spec_size) };
-    postcard::take_from_bytes(blob).unwrap()
+    let (spec, source) = postcard::take_from_bytes(blob).unwrap();
+    SpecWithSourcesForSerialization {
+        spec,
+        object_name_source: source,
+        content_source: source,
+    }
 }
 
 extern "C" {

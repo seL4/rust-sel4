@@ -1,9 +1,9 @@
-use capdl_loader_expecting_serialized_spec_types::SerializedSpec;
 use std::collections::BTreeMap;
 use std::fs::File;
 use std::os::unix::fs::FileExt;
 use std::path::{Path, PathBuf};
 
+use capdl_loader_expecting_serialized_spec_types::SpecForSerialization;
 use capdl_types::*;
 
 use crate::ObjectNamesLevel;
@@ -13,8 +13,7 @@ pub fn reserialize_spec(
     fill_dir_path: impl AsRef<Path>,
     object_names_level: &ObjectNamesLevel,
 ) -> Vec<u8> {
-    let input_spec: Spec<String, FillEntryContentFile> =
-        serde_json::from_reader(spec_json).unwrap();
+    let input_spec: Spec<String, FileContent> = serde_json::from_reader(spec_json).unwrap();
 
     let mut open_files = BTreeMap::new();
     input_spec
@@ -30,16 +29,23 @@ pub fn reserialize_spec(
         .into_ok();
 
     let mut fill = vec![];
-    let final_spec: SerializedSpec = input_spec
+    let final_spec: SpecForSerialization = input_spec
         .traverse_names_with_context(|obj, name| {
-            Ok::<_, !>(match object_names_level {
+            let name = match object_names_level {
                 ObjectNamesLevel::All => Some(name.clone()),
                 ObjectNamesLevel::JustTCBs => match obj {
                     Object::TCB(_) => Some(name.clone()),
                     _ => None,
                 },
                 ObjectNamesLevel::None => None,
-            })
+            };
+            let indirect_name = name.map(|s| {
+                let start = fill.len();
+                fill.extend(s.bytes());
+                let end = fill.len();
+                IndirectObjectName { range: start..end }
+            });
+            Ok::<_, !>(indirect_name)
         })
         .into_ok()
         .traverse_fill_with_context(|length, entry| {
@@ -49,11 +55,11 @@ pub fn reserialize_spec(
                 .unwrap()
                 .read_exact_at(&mut uncompressed, entry.file_offset.try_into().unwrap())
                 .unwrap();
-            let compressed = FillEntryContentDeflatedBytes::pack(&uncompressed);
+            let compressed = DeflatedBytesContent::pack(&uncompressed);
             let start = fill.len();
             fill.extend(compressed);
             let end = fill.len();
-            Ok::<_, !>(FillEntryContentDeflatedBytesVia {
+            Ok::<_, !>(IndirectDeflatedBytesContent {
                 deflated_bytes_range: start..end,
             })
         })

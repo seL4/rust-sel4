@@ -14,9 +14,9 @@ pub fn run() {
     )
 }
 
-fn compare<'a, N: ObjectNameForComparison, F: AvailableFillEntryContent>(
-    serialized: &Spec<'a, String, (FillEntryContentFile, FillEntryContentBytes<'static>)>,
-    embedded: &Spec<'a, N, F>,
+fn compare<'a, N: ObjectNameForComparison, F: SelfContainedContent>(
+    serialized: &Spec<'a, String, (FileContent, BytesContent<'static>)>,
+    embedded: &Spec<'a, SelfContained<N>, SelfContained<F>>,
 ) where
     N::ComparisonPoint: fmt::Debug,
 {
@@ -30,14 +30,14 @@ fn compare<'a, N: ObjectNameForComparison, F: AvailableFillEntryContent>(
     }
 }
 
-fn adapt_embedded<'a, N: ObjectNameForComparison, F: AvailableFillEntryContent>(
-    spec: &Spec<'a, N, F>,
+fn adapt_embedded<'a, N: ObjectNameForComparison, F: SelfContainedContent>(
+    spec: &Spec<'a, SelfContained<N>, SelfContained<F>>,
 ) -> SpecCommon<'a, N::ComparisonPoint> {
     spec.traverse(
-        |_object, name| Ok(name.us()),
+        |_object, name| Ok(name.inner().us()),
         |length, content| {
             let mut v = vec![0; length];
-            content.copy_out(&mut v);
+            content.inner().self_contained_copy_out(&mut v);
             Ok::<_, !>(v)
         },
     )
@@ -45,7 +45,7 @@ fn adapt_embedded<'a, N: ObjectNameForComparison, F: AvailableFillEntryContent>(
 }
 
 fn adapt_serialized<'a, N: ObjectNameForComparison>(
-    spec: &Spec<'a, String, (FillEntryContentFile, FillEntryContentBytes<'static>)>,
+    spec: &Spec<'a, String, (FileContent, BytesContent<'static>)>,
 ) -> SpecCommon<'a, N::ComparisonPoint> {
     spec.traverse(
         |_object, name| Ok(N::them(name)),

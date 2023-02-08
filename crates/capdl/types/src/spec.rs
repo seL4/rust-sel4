@@ -25,8 +25,8 @@ pub type CapTableEntry = (CapSlot, Cap);
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub struct Spec<'a, F, N> {
-    pub objects: Indirect<'a, [NamedObject<'a, F, N>]>,
+pub struct Spec<'a, N, F> {
+    pub objects: Indirect<'a, [NamedObject<'a, N, F>]>,
     pub irqs: Indirect<'a, [IRQEntry]>,
     pub asid_slots: Indirect<'a, [ASIDSlotEntry]>,
 }

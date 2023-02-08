@@ -8,7 +8,6 @@
 
 use core::array;
 use core::borrow::BorrowMut;
-use core::fmt;
 use core::ops::Range;
 use core::ptr;
 use core::result;
@@ -39,28 +38,20 @@ use memory::init_copy_addrs;
 
 type Result<T> = result::Result<T, CapDLLoaderError>;
 
-pub struct Loader<'a, F: AvailableFillEntryContentVia, N, B> {
+pub struct Loader<'a, N: ObjectName, F: Content, B> {
     bootinfo: &'a BootInfo,
     small_frame_copy_addr: usize,
     large_frame_copy_addr: usize,
-    spec: &'a Spec<'a, N, F>,
-    fill: &'a F::Via,
+    spec_with_sources: &'a SpecWithSources<'a, N, F>,
     cslot_allocator: &'a mut CSlotAllocator,
     buffers: &'a mut LoaderBuffers<B>,
 }
 
-impl<
-        'a,
-        F: AvailableFillEntryContentVia,
-        N: ObjectName + fmt::Debug,
-        B: BorrowMut<[PerObjectBuffer]>,
-    > Loader<'a, F, N, B>
-{
+impl<'a, N: ObjectName, F: Content, B: BorrowMut<[PerObjectBuffer]>> Loader<'a, N, F, B> {
     pub fn load(
         bootinfo: &BootInfo,
         own_footprint: Range<usize>,
-        spec: &Spec<N, F>,
-        fill: &F::Via,
+        spec_with_sources: &SpecWithSources<N, F>,
         buffers: &mut LoaderBuffers<B>,
     ) -> Result<!> {
         info!("Starting CapDL Loader");
@@ -74,13 +65,22 @@ impl<
             bootinfo,
             small_frame_copy_addr,
             large_frame_copy_addr,
-            spec,
-            fill,
+            spec_with_sources,
             cslot_allocator: &mut cslot_allocator,
             buffers,
         }
         .run()
     }
+
+    fn spec(&self) -> &'a Spec<'a, N, F> {
+        &self.spec_with_sources.spec
+    }
+
+    fn object_name(&self, indirect: &'a N) -> Option<&'a str> {
+        indirect.object_name(self.spec_with_sources.object_name_source)
+    }
+
+    // // //
 
     fn run(&mut self) -> Result<!> {
         self.create_objects()?;
@@ -110,7 +110,7 @@ impl<
 
         // Allocate CSlots
         {
-            for obj_id in 0..self.spec.num_objects() {
+            for obj_id in 0..self.spec().num_objects() {
                 let slot = self.cslot_alloc_or_panic();
                 self.set_orig_cslot(obj_id, slot);
             }
@@ -130,7 +130,7 @@ impl<
         // Index objects
 
         let first_obj_without_paddr = self
-            .spec
+            .spec()
             .objects
             .partition_point(|named_obj| named_obj.object.paddr().is_some());
         let num_objs_with_paddr = first_obj_without_paddr;
@@ -138,8 +138,8 @@ impl<
         let mut by_size_start: [usize; sel4::WORD_SIZE] = array::from_fn(|_| 0);
         let mut by_size_end: [usize; sel4::WORD_SIZE] = array::from_fn(|_| 0);
         {
-            for obj_id in first_obj_without_paddr..self.spec.num_objects() {
-                let obj = &self.spec.object(obj_id);
+            for obj_id in first_obj_without_paddr..self.spec().num_objects() {
+                let obj = &self.spec().object(obj_id);
                 if let Some(blueprint) = obj.blueprint() {
                     by_size_end[blueprint.physical_size_bits()] += 1;
                 }
@@ -171,7 +171,7 @@ impl<
             let mut cur_paddr = ut_paddr_start;
             loop {
                 let target = if next_obj_with_paddr < num_objs_with_paddr {
-                    ut_paddr_end.min(self.spec.object(next_obj_with_paddr).paddr().unwrap())
+                    ut_paddr_end.min(self.spec().object(next_obj_with_paddr).paddr().unwrap())
                 } else {
                     ut_paddr_end
                 };
@@ -184,14 +184,14 @@ impl<
                         for size_bits in (0..=max_size_bits).rev() {
                             let obj_id = &mut by_size_start[size_bits];
                             if *obj_id < by_size_end[size_bits] {
-                                let named_obj = &self.spec.named_object(*obj_id);
+                                let named_obj = &self.spec().named_object(*obj_id);
                                 let blueprint = named_obj.object.blueprint().unwrap();
                                 assert_eq!(blueprint.physical_size_bits(), size_bits);
                                 trace!(
                                     "Creating kernel object: paddr=0x{:x}, size_bits={} name='{:?}'",
                                     cur_paddr,
                                     blueprint.physical_size_bits(),
-                                    named_obj.name
+                                    self.object_name(&named_obj.name)
                                 );
                                 self.ut_local_cptr(*i_ut).untyped_retype(
                                     &blueprint,
@@ -208,7 +208,7 @@ impl<
                     }
                     if !created {
                         if next_obj_with_paddr < num_objs_with_paddr
-                            && cur_paddr < self.spec.object(next_obj_with_paddr).paddr().unwrap()
+                            && cur_paddr < self.spec().object(next_obj_with_paddr).paddr().unwrap()
                         {
                             let hold_slot = hold_slots.get_slot()?;
                             trace!(
@@ -232,17 +232,17 @@ impl<
                     }
                 }
                 if next_obj_with_paddr < num_objs_with_paddr
-                    && cur_paddr == self.spec.object(next_obj_with_paddr).paddr().unwrap()
+                    && cur_paddr == self.spec().object(next_obj_with_paddr).paddr().unwrap()
                     && cur_paddr < ut_paddr_end
                 {
                     let obj_id = next_obj_with_paddr;
-                    let named_obj = &self.spec.named_object(obj_id);
+                    let named_obj = &self.spec().named_object(obj_id);
                     let blueprint = named_obj.object.blueprint().unwrap();
                     trace!(
                         "Creating device object: paddr=0x{:x}, size_bits={} name='{:?}'",
                         cur_paddr,
                         blueprint.physical_size_bits(),
-                        named_obj.name
+                        self.object_name(&named_obj.name)
                     );
                     self.ut_local_cptr(*i_ut).untyped_retype(
                         &blueprint,
@@ -267,7 +267,7 @@ impl<
         // this in order of obj.asid_high, for verification reasons (see
         // upstream C CapDL loader).
         {
-            for obj_id in self.spec.asid_slots.iter() {
+            for obj_id in self.spec().asid_slots.iter() {
                 let ut = self.orig_local_cptr(*obj_id);
                 let slot = self.cslot_alloc_or_panic();
                 BootInfo::asid_control().asid_control_make_pool(ut, &cslot_relative_cptr(slot))?;
@@ -277,9 +277,9 @@ impl<
 
         // Create IRQHandler caps
         {
-            for IRQEntry { irq, handler } in self.spec.irqs.iter() {
+            for IRQEntry { irq, handler } in self.spec().irqs.iter() {
                 let slot = self.cslot_alloc_or_panic();
-                match self.spec.object(*handler) {
+                match self.spec().object(*handler) {
                     Object::ArmIRQ(obj) => {
                         sel4::sel4_cfg_if! {
                             if #[cfg(MAX_NUM_NODES = "1")] {
@@ -317,11 +317,11 @@ impl<
         debug!("Initializing IRQs");
 
         let irq_notifications = self
-            .spec
+            .spec()
             .filter_objects::<&object::IRQ>()
             .map(|(obj_id, obj)| (obj_id, obj.notification()));
         let arm_irq_notifications = self
-            .spec
+            .spec()
             .filter_objects::<&object::ArmIRQ>()
             .map(|(obj_id, obj)| (obj_id, obj.notification()));
 
@@ -346,7 +346,7 @@ impl<
 
     fn init_asids(&self) -> Result<()> {
         debug!("Initializing ASIDs");
-        for (obj_id, _obj) in self.spec.filter_objects::<&object::PGD>() {
+        for (obj_id, _obj) in self.spec().filter_objects::<&object::PGD>() {
             let pgd = self.orig_local_cptr::<cap_type::PGD>(obj_id);
             BootInfo::init_thread_asid_pool().asid_pool_assign(pgd)?;
         }
@@ -355,7 +355,7 @@ impl<
 
     fn init_frames(&mut self) -> Result<()> {
         debug!("Initializing Frames");
-        for (obj_id, obj) in self.spec.filter_objects::<&object::Frame<F>>() {
+        for (obj_id, obj) in self.spec().filter_objects::<&object::Frame<F>>() {
             // TODO make more platform-agnostic
             match obj.size_bits {
                 FrameSize::SMALL_BITS => {
@@ -394,7 +394,7 @@ impl<
             let dst = unsafe { slice::from_raw_parts_mut(dst_frame.add(offset), length) };
             match &entry.content {
                 FillEntryContent::Data(content_data) => {
-                    content_data.copy_out_via(self.fill, dst);
+                    content_data.copy_out(self.spec_with_sources.content_source, dst);
                 }
                 FillEntryContent::BootInfo(content_bootinfo) => {
                     for extra in self.bootinfo.extra() {
@@ -428,14 +428,14 @@ impl<
         // Add support for uncached non-device mappings.
         // See note about seL4_ARM_Page_CleanInvalidate_Data/seL4_ARM_Page_Unify_Instruction in upstream.
 
-        for (obj_id, obj) in self.spec.filter_objects::<&object::PGD>() {
+        for (obj_id, obj) in self.spec().filter_objects::<&object::PGD>() {
             let pgd = self.orig_local_cptr::<cap_type::PGD>(obj_id);
             for (i, cap) in obj.entries() {
                 let pud = self.orig_local_cptr::<cap_type::PUD>(cap.object);
                 let vaddr = i << cap_type::PUD::SPAN_BITS;
                 pud.translation_table_map(pgd, vaddr, cap.vm_attributes())?;
                 for (i, cap) in self
-                    .spec
+                    .spec()
                     .lookup_object::<&object::PUD>(cap.object)?
                     .entries()
                 {
@@ -443,7 +443,7 @@ impl<
                     let vaddr = vaddr + (i << cap_type::PD::SPAN_BITS);
                     pd.translation_table_map(pgd, vaddr, cap.vm_attributes())?;
                     for (i, cap) in self
-                        .spec
+                        .spec()
                         .lookup_object::<&object::PD>(cap.object)?
                         .entries()
                     {
@@ -463,7 +463,7 @@ impl<
                                 let pt = self.orig_local_cptr::<cap_type::PT>(cap.object);
                                 pt.translation_table_map(pgd, vaddr, cap.vm_attributes())?;
                                 for (i, cap) in self
-                                    .spec
+                                    .spec()
                                     .lookup_object::<&object::PT>(cap.object)?
                                     .entries()
                                 {
@@ -490,7 +490,7 @@ impl<
     fn init_tcbs(&self) -> Result<()> {
         debug!("Initializing TCBs");
 
-        for (obj_id, obj) in self.spec.filter_objects::<&object::TCB>() {
+        for (obj_id, obj) in self.spec().filter_objects::<&object::TCB>() {
             let tcb = self.orig_local_cptr::<cap_type::TCB>(obj_id);
 
             if let Some(bound_notification) = obj.bound_notification() {
@@ -545,7 +545,7 @@ impl<
                 tcb.tcb_write_all_registers(false, &mut regs)?;
             }
 
-            if let Some(name) = self.spec.name(obj_id).object_name() {
+            if let Some(name) = self.object_name(self.spec().name(obj_id)) {
                 tcb.debug_name(name.as_bytes());
             }
         }
@@ -555,7 +555,7 @@ impl<
     fn init_cspaces(&self) -> Result<()> {
         debug!("Initializing CSpaces");
 
-        for (obj_id, obj) in self.spec.filter_objects::<&object::CNode>() {
+        for (obj_id, obj) in self.spec().filter_objects::<&object::CNode>() {
             let cnode = self.orig_local_cptr::<cap_type::CNode>(obj_id);
             for (i, cap) in obj.slots() {
                 // TODO
@@ -577,7 +577,7 @@ impl<
 
     fn start_threads(&self) -> Result<()> {
         debug!("Starting threads");
-        for (obj_id, obj) in self.spec.filter_objects::<&object::TCB>() {
+        for (obj_id, obj) in self.spec().filter_objects::<&object::TCB>() {
             let tcb = self.orig_local_cptr::<cap_type::TCB>(obj_id);
             if obj.extra.resume {
                 tcb.tcb_resume()?;

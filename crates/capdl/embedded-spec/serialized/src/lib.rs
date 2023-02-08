@@ -7,12 +7,12 @@ const SPEC: &str = include_str!(concat!(env!("OUT_DIR"), "/spec.json"));
 
 const FILL: &[(&str, &[u8])] = include!(concat!(env!("OUT_DIR"), "/files.rs"));
 
-pub fn get<'a>() -> Spec<'a, String, (FillEntryContentFile, FillEntryContentBytes<'static>)> {
-    let spec: Spec<String, FillEntryContentFile> = serde_json::from_str(SPEC).unwrap();
+pub fn get<'a>() -> Spec<'a, String, (FileContent, BytesContent<'static>)> {
+    let spec: Spec<String, FileContent> = serde_json::from_str(SPEC).unwrap();
     spec.traverse_fill_with_context(|length, content| {
         Ok::<_, !>((
             content.clone(),
-            FillEntryContentBytes {
+            BytesContent {
                 bytes: FILL
                     .iter()
                     .find_map(|(name, bytes)| {

@@ -14,8 +14,8 @@ use capdl_types::*;
 // In a few cases, we use a local const declaration to appease the borrow checker.
 // Using an exposed constructor of `Indirect` would be one way around this.
 
-type InputSpec<'a> = Spec<'a, String, FillEntryContentFileAndBytes>;
-type FillEntryContentFileAndBytes = (FillEntryContentFile, FillEntryContentBytes<'static>);
+type InputSpec<'a> = Spec<'a, String, FileAndBytesContent>;
+type FileAndBytesContent = (FileContent, BytesContent<'static>);
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Config {
@@ -67,7 +67,7 @@ impl<'a> Embedding<'a> {
         }
     }
 
-    fn embed_fill(&self, fill: &[FillEntry<FillEntryContentFileAndBytes>]) -> TokenStream {
+    fn embed_fill(&self, fill: &[FillEntry<FileAndBytesContent>]) -> TokenStream {
         let entries = fill.iter().map(|entry| {
             let range = to_tokens_via_debug(&entry.range);
             let content = match &entry.content {
@@ -119,7 +119,7 @@ impl<'a> Embedding<'a> {
     fn embed_object_with_fill(
         &self,
         obj: impl fmt::Debug,
-        fill: &[FillEntry<FillEntryContentFileAndBytes>],
+        fill: &[FillEntry<FileAndBytesContent>],
     ) -> TokenStream {
         let mut expr_struct = syn::parse2::<syn::ExprStruct>(to_tokens_via_debug(&obj)).unwrap();
         self.patch_field(
@@ -130,7 +130,7 @@ impl<'a> Embedding<'a> {
         expr_struct.to_token_stream()
     }
 
-    fn embed_object(&self, obj: &Object<FillEntryContentFileAndBytes>) -> TokenStream {
+    fn embed_object(&self, obj: &Object<FileAndBytesContent>) -> TokenStream {
         match obj {
             Object::CNode(obj) => {
                 let toks = self.embed_object_with_cap_table(obj);
@@ -249,53 +249,61 @@ impl<'a> Embedding<'a> {
 
     fn name_type(&self, qualify: bool) -> TokenStream {
         let prefix = self.qualification_prefix(qualify);
-        match self.config.object_names_level {
+        let inner = match self.config.object_names_level {
             ObjectNamesLevel::All => quote!(&str),
             ObjectNamesLevel::JustTCBs => quote!(Option<&str>),
             ObjectNamesLevel::None => quote!(#prefix Unnamed),
-        }
+        };
+        quote!(#prefix SelfContained<#inner>)
     }
 
     fn name_value<F>(&self, obj: &Object<'a, F>, name: &str) -> TokenStream {
-        match self.config.object_names_level {
+        let inner = match self.config.object_names_level {
             ObjectNamesLevel::All => quote!(#name),
             ObjectNamesLevel::JustTCBs => match obj {
                 Object::TCB(_) => quote!(Some(#name)),
                 _ => quote!(None),
             },
             ObjectNamesLevel::None => quote!(Unnamed),
-        }
+        };
+        quote!(SelfContained::new(#inner))
     }
 
-    fn fill_type(&self, qualify: bool) -> TokenStream {
+    fn fill_type_inner(&self, qualify: bool) -> TokenStream {
         let prefix = self.qualification_prefix(qualify);
         let ty = if self.config.deflate_fill {
-            quote!(FillEntryContentDeflatedBytes)
+            quote!(DeflatedBytesContent)
         } else {
-            quote!(FillEntryContentBytes)
+            quote!(BytesContent)
         };
         quote!(#prefix #ty)
     }
 
+    fn fill_type(&self, qualify: bool) -> TokenStream {
+        let prefix = self.qualification_prefix(qualify);
+        let inner = self.fill_type_inner(qualify);
+        quote!(#prefix SelfContained<#inner>)
+    }
+
     fn fill_value(&self, field_value: impl ToTokens) -> TokenStream {
-        let constructor = self.fill_type(false);
+        let constructor = self.fill_type_inner(false);
         let field_name = if self.config.deflate_fill {
             quote!(deflated_bytes)
         } else {
             quote!(bytes)
         };
         quote! {
-            #constructor {
+            SelfContained::new(#constructor {
                 #field_name: #field_value
-            }
+            })
         }
     }
 
     fn pack_fill(&self, bytes: &[u8]) -> Vec<u8> {
         (if self.config.deflate_fill {
-            FillEntryContentDeflatedBytes::pack
+            DeflatedBytesContent::pack
         } else {
-            FillEntryContentBytes::pack
+            BytesContent::pack
         })(bytes)
     }
 
@@ -335,7 +343,7 @@ impl<'a> Embedding<'a> {
     fn encode_fill_entry_to_id(
         &self,
         length: usize,
-        fill_entry: &FillEntryContentFileAndBytes,
+        fill_entry: &FileAndBytesContent,
     ) -> FillEntryContentId {
         let (content_file, _) = &fill_entry;
         hex::encode(format!(

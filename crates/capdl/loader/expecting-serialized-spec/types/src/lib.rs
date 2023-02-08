@@ -2,8 +2,10 @@
 
 extern crate alloc;
 
-use alloc::string::String;
-
 use capdl_types::*;
 
-pub type SerializedSpec<'a> = Spec<'a, Option<String>, FillEntryContentDeflatedBytesVia>;
+pub type SpecForSerialization<'a> =
+    Spec<'a, Option<IndirectObjectName>, IndirectDeflatedBytesContent>;
+
+pub type SpecWithSourcesForSerialization<'a> =
+    SpecWithSources<'a, Option<IndirectObjectName>, IndirectDeflatedBytesContent>;
