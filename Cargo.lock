@@ -200,6 +200,7 @@ name = "capdl-add-spec-to-loader"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "capdl-loader-expecting-serialized-spec-types",
  "capdl-types",
  "clap",
  "fallible-iterator",
@@ -269,12 +270,22 @@ name = "capdl-loader-expecting-serialized-spec"
 version = "0.1.0"
 dependencies = [
  "capdl-loader-core",
+ "capdl-loader-expecting-serialized-spec-types",
  "capdl-types",
  "log",
  "postcard",
  "sel4",
  "sel4-logging",
  "sel4-minimal-root-task-runtime",
+]
+
+[[package]]
+name = "capdl-loader-expecting-serialized-spec-types"
+version = "0.1.0"
+dependencies = [
+ "capdl-types",
+ "postcard",
+ "serde",
 ]
 
 [[package]]

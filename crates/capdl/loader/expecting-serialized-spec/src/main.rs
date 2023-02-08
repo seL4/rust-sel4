@@ -5,14 +5,13 @@
 
 extern crate alloc;
 
-use alloc::string::String;
 use alloc::vec;
 use core::ops::Range;
 use core::ptr;
 use core::slice;
 
 use capdl_loader_core::{Loader, LoaderBuffers, PerObjectBuffer};
-use capdl_types::*;
+use capdl_loader_expecting_serialized_spec_types::SerializedSpec;
 use sel4::BootInfo;
 use sel4_logging::{LevelFilter, Logger, LoggerBuilder};
 
@@ -42,10 +41,7 @@ static mut capdl_spec_start: *const u8 = ptr::null();
 #[link_section = ".data"]
 static mut capdl_spec_size: usize = 0;
 
-fn get_serialized_spec<'a>() -> (
-    Spec<'a, Option<String>, FillEntryContentDeflatedBytesVia>,
-    &'static [u8],
-) {
+fn get_serialized_spec<'a>() -> (SerializedSpec<'a>, &'static [u8]) {
     let blob = unsafe { slice::from_raw_parts(capdl_spec_start, capdl_spec_size) };
     postcard::take_from_bytes(blob).unwrap()
 }

@@ -1,3 +1,4 @@
+use capdl_loader_expecting_serialized_spec_types::SerializedSpec;
 use std::collections::BTreeMap;
 use std::fs::File;
 use std::os::unix::fs::FileExt;
@@ -29,7 +30,7 @@ pub fn reserialize_spec(
         .into_ok();
 
     let mut fill = vec![];
-    let final_spec: Spec<Option<String>, FillEntryContentDeflatedBytesVia> = input_spec
+    let final_spec: SerializedSpec = input_spec
         .traverse_names_with_context(|obj, name| {
             Ok::<_, !>(match object_names_level {
                 ObjectNamesLevel::All => Some(name.clone()),

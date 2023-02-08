@@ -11,6 +11,7 @@ members = [
     "crates/capdl/loader/core",
     "crates/capdl/loader/expecting-serialized-spec",
     "crates/capdl/loader/expecting-serialized-spec/cli/capdl-add-spec-to-loader",
+    "crates/capdl/loader/expecting-serialized-spec/types",
     "crates/capdl/loader/with-embedded-spec",
     "crates/capdl/types",
     "crates/capdl/types/derive",

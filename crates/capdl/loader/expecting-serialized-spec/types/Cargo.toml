@@ -1,0 +1,11 @@
+[package]
+name = "capdl-loader-expecting-serialized-spec-types"
+version = "0.1.0"
+authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
+edition = "2021"
+license = "BSD-2-Clause"
+
+[dependencies]
+capdl-types = { path = "../../../types", features = ["alloc", "serde", "deflate"] }
+postcard = { version = "*", default-features = false, features = ["alloc"] }
+serde = { version = "*", default-features = false, features = ["alloc"] }
