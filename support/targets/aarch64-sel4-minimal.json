@@ -11,6 +11,12 @@
   "llvm-target": "aarch64-none-elf",
   "max-atomic-width": 128,
   "panic-strategy": "abort",
+  "pre-link-args": {
+    "ld.lld": [
+      "-z",
+      "max-page-size=4096"
+    ]
+  },
   "relocation-model": "static",
   "supported-sanitizers": [
     "kcfi"

@@ -3,10 +3,14 @@
 extern crate rustc_driver;
 extern crate rustc_target;
 
+use std::collections::BTreeMap;
 use std::fs;
 use std::path::Path;
 
 use rustc_target::json::ToJson;
+use rustc_target::spec::Cc;
+use rustc_target::spec::LinkerFlavor;
+use rustc_target::spec::Lld;
 use rustc_target::spec::PanicStrategy;
 use rustc_target::spec::Target;
 use rustc_target::spec::TargetTriple;
@@ -33,6 +37,17 @@ impl Config {
             Arch::AArch64 => {
                 let mut target = builtin("aarch64-unknown-none");
                 target.llvm_target = "aarch64-none-elf".into();
+                let options = &mut target.options;
+                options.pre_link_args = BTreeMap::from_iter([(
+                    LinkerFlavor::Gnu(Cc::No, Lld::Yes),
+                    vec![
+                        // Determines p_align. Default is 64K, which results in wasted space when
+                        // the ELF file is loaded as a single contiguous region as it is in the case
+                        // of a root task.
+                        "-z".into(),
+                        "max-page-size=4096".into(),
+                    ],
+                )]);
                 target
             }
             Arch::Riscv64 => builtin("riscv64imac-unknown-none-elf"),

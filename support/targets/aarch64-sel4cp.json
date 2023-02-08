@@ -11,6 +11,12 @@
   "linker-flavor": "ld.lld",
   "llvm-target": "aarch64-none-elf",
   "max-atomic-width": 128,
+  "pre-link-args": {
+    "ld.lld": [
+      "-z",
+      "max-page-size=4096"
+    ]
+  },
   "relocation-model": "static",
   "supported-sanitizers": [
     "kcfi"
