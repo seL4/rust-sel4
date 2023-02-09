@@ -1,3 +1,4 @@
 fn main() {
-    println!("cargo:rustc-link-arg=--omagic");
+    // TODO
+    // println!("cargo:rustc-link-arg=--omagic");
 }
