@@ -46,6 +46,10 @@ impl Config {
                         // of a root task.
                         "-z".into(),
                         "max-page-size=4096".into(),
+                        // TODO
+                        // Consider a configuration with --omagic or similar to further reduce
+                        // wasted space in cases where segments are mapped without regards for
+                        // permissions.
                     ],
                 )]);
                 target
