@@ -26,7 +26,20 @@ fn main() {
         Rustfmt::detect().format(&out_path);
     }
 
-    println!("cargo:rustc-link-arg=-Ttext=0x{:x}", loader_phys_start);
+    // Note that -Ttext={} is incompatible with --no-rosegment (no error),
+    // just bad output. See the "Default program headers" section of:
+    // https://maskray.me/blog/2020-12-19-lld-and-gnu-linker-incompatibilities
+    println!(
+        "cargo:rustc-link-arg=--image-base=0x{:x}",
+        loader_phys_start
+    );
+
+    println!("cargo:rustc-link-arg=-z");
+    println!("cargo:rustc-link-arg=max-page-size=4096");
+
+    // No use in loader.
+    // Remove unnecessary alignment gap between segments.
+    println!("cargo:rustc-link-arg=--no-rosegment");
 
     // println!("cargo:rustc-link-arg=--verbose");
     // println!("cargo:rustc-env=RUSTC_LOG=rustc_codegen_ssa::back::link=info");

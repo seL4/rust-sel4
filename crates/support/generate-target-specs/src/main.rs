@@ -49,7 +49,7 @@ impl Config {
                         // TODO
                         // Consider a configuration with --omagic or similar to further reduce
                         // wasted space in cases where segments are mapped without regards for
-                        // permissions.
+                        // permissions. --no-rosegment could be a good place to start.
                     ],
                 )]);
                 target
