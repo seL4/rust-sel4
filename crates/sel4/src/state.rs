@@ -7,10 +7,7 @@ const fn ipc_buffer_init() -> RefCell<Option<IPCBuffer>> {
 }
 
 cfg_if::cfg_if! {
-    if #[cfg(not(feature = "single-threaded"))] {
-        #[cfg(not(target_thread_local))]
-        compile_error!("");
-
+    if #[cfg(target_thread_local)] {
         #[thread_local]
         static IPC_BUFFER: RefCell<Option<IPCBuffer>> = ipc_buffer_init();
 
@@ -20,7 +17,7 @@ cfg_if::cfg_if! {
         {
             f(&IPC_BUFFER)
         }
-    } else {
+    } else if #[cfg(feature = "single-threaded")] {
         static IPC_BUFFER: SingleThreaded<RefCell<Option<IPCBuffer>>> = SingleThreaded(ipc_buffer_init());
 
         struct SingleThreaded<T>(T);
@@ -33,6 +30,8 @@ cfg_if::cfg_if! {
         {
             f(&IPC_BUFFER.0)
         }
+    } else {
+        compile_error!(r#"when #[cfg(feature = "state")], at least one of #[cfg(target_thread_local)] or #[cfg(feature = "single-threaded")] is required"#);
     }
 }
 
