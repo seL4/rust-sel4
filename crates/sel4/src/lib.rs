@@ -52,8 +52,8 @@
 #![feature(proc_macro_hygiene)]
 #![feature(stmt_expr_attributes)]
 #![feature(strict_provenance)]
+#![feature(thread_local)]
 #![feature(variant_count)]
-#![cfg_attr(not(feature = "single-threaded"), feature(thread_local))]
 #![allow(clippy::unit_arg)]
 
 pub use sel4_config::{

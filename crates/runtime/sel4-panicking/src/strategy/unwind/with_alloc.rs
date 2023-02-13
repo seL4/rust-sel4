@@ -3,9 +3,8 @@ use core::mem;
 
 use unwinding::abi::*;
 
-use crate::{drop_panic, foreign_exception, Payload};
-
-use crate::strategy::unwind::RUST_EXCEPTION_CLASS;
+use super::{drop_panic, foreign_exception, RUST_EXCEPTION_CLASS};
+use crate::Payload;
 
 #[repr(C)]
 struct ExceptionWithPayload {

@@ -3,9 +3,8 @@ use core::mem::{self, MaybeUninit};
 
 use unwinding::abi::*;
 
-use crate::{drop_panic, foreign_exception, Payload};
-
-use crate::strategy::unwind::RUST_EXCEPTION_CLASS;
+use super::{drop_panic, foreign_exception, RUST_EXCEPTION_CLASS};
+use crate::Payload;
 
 struct CurrentException {
     exception_present: bool,

@@ -7,10 +7,6 @@ license = "BSD-2-Clause"
 
 [features]
 alloc = []
-allow-panic-unwind = ["unwinding"]
-force-abort = []
-force-unwind = ["allow-panic-unwind"]
-full = ["alloc", "allow-panic-unwind"]
 
 [dependencies]
 cfg-if = "*"

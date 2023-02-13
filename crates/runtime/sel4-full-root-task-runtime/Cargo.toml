@@ -7,9 +7,8 @@ license = "BSD-2-Clause"
 
 [features]
 alloc = ["sel4-panicking/alloc"]
-allow-panic-unwind = ["sel4-panicking/allow-panic-unwind"]
 full = ["full-less-alloc", "alloc", "global-allocator"]
-full-less-alloc = ["unwinding", "allow-panic-unwind"]
+full-less-alloc = ["unwinding"]
 global-allocator = ["sel4-runtime-simple-static-heap"]
 unwinding = ["sel4-panicking/unwinding"]
 

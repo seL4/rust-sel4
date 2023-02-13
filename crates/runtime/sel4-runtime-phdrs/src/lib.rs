@@ -1,8 +1,9 @@
 #![no_std]
+#![feature(cfg_target_thread_local)]
 
 pub mod elf;
 
-#[cfg(feature = "tls")]
+#[cfg(all(feature = "tls", target_thread_local))]
 mod tls;
 
 #[cfg(feature = "unwinding")]

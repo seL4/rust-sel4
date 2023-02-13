@@ -47,18 +47,38 @@ cfg_if::cfg_if! {
 
         fn whether_alloc() {
             let r = catch_unwind(|| {
-                sel4_panicking::panic_any("foo".to_owned());
+                sel4_panicking::panic_any::<String>("foo".to_owned());
             });
-            assert_eq!(r.err().unwrap().0.unwrap().downcast_ref::<String>().unwrap().as_str(), "foo");
+            assert_eq!(r.err().unwrap().inner().downcast_ref::<String>().unwrap().as_str(), "foo");
         }
     } else {
-        use sel4_panicking::Region;
+        use core::mem;
+
+        use sel4_panicking::{FromPayloadValue, IntoPayloadValue, PayloadValue, TryFromPayload, PAYLOAD_VALUE_SIZE};
 
         fn whether_alloc() {
             let r = catch_unwind(|| {
-                sel4_panicking::panic_val(1337);
+                sel4_panicking::panic_any(Foo(1337));
             });
-            assert!(matches!(r.err().unwrap().0.unwrap(), Region::Val(1337)));
+            assert!(matches!(Foo::try_from_payload(&r.err().unwrap()).unwrap(), Foo(1337)));
+        }
+
+        #[derive(Copy, Clone)]
+        struct Foo(usize);
+
+        unsafe impl IntoPayloadValue for Foo {
+            fn into_payload_value(self) -> PayloadValue {
+                let mut outer = [0; PAYLOAD_VALUE_SIZE];
+                let inner = self.0.to_ne_bytes();
+                outer[..inner.len()].copy_from_slice(&inner);
+                outer
+            }
+        }
+
+        unsafe impl FromPayloadValue for Foo {
+            fn from_payload_value(payload_value: &PayloadValue) -> Self {
+                Foo(usize::from_ne_bytes(payload_value[..mem::size_of::<usize>()].try_into().unwrap()))
+            }
         }
     }
 }

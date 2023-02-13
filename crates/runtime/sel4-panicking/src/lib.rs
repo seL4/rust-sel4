@@ -6,35 +6,47 @@
 #[cfg(feature = "alloc")]
 extern crate alloc;
 
-use core::any::Any;
-use core::cell::Cell;
 use core::mem::ManuallyDrop;
-use core::panic::Location;
 use core::panic::PanicInfo;
 
-use sel4_immediate_sync_once_cell::ImmediateSyncOnceCell;
-use sel4_panicking_env::{abort, debug_println};
+use sel4_panicking_env::abort;
 
+mod count;
+mod hook;
+mod payload;
 mod strategy;
-mod whether_alloc;
 
+use count::{count_panic, count_panic_caught};
+use hook::get_hook;
 use strategy::{panic_cleanup, start_panic};
-pub use whether_alloc::Payload;
+
+pub use hook::{set_hook, PanicHook};
+pub use payload::{IntoPayload, Payload, TryFromPayload};
 
 #[cfg(not(feature = "alloc"))]
-pub use whether_alloc::Region;
+pub use payload::{FromPayloadValue, IntoPayloadValue, PayloadValue, PAYLOAD_VALUE_SIZE};
 
-#[cfg_attr(not(panic = "unwind"), allow(dead_code))]
-pub(crate) fn drop_panic() -> ! {
-    debug_println!("Rust panics must be rethrown");
-    core::intrinsics::abort()
+// // //
+
+#[panic_handler]
+fn panic(info: &PanicInfo<'_>) -> ! {
+    do_panic(Some(info), None)
 }
 
-#[cfg_attr(not(panic = "unwind"), allow(dead_code))]
-pub(crate) fn foreign_exception() -> ! {
-    debug_println!("Rust cannot catch foreign exceptions");
-    core::intrinsics::abort()
+#[track_caller]
+pub fn panic_any<M: IntoPayload>(msg: M) -> ! {
+    // TODO pass location
+    do_panic(None, Some(msg.into_payload()))
 }
+
+fn do_panic(info: Option<&PanicInfo<'_>>, payload: Option<Payload>) -> ! {
+    count_panic();
+    (get_hook())(info);
+    let code = start_panic(payload.unwrap_or(().into_payload()));
+    abort!("failed to initiate panic, error {}", code)
+}
+
+// // //
 
 pub fn catch_unwind<R, F: FnOnce() -> R>(f: F) -> Result<R, Payload> {
     union Data<F, R> {
@@ -72,76 +84,8 @@ pub fn catch_unwind<R, F: FnOnce() -> R>(f: F) -> Result<R, Payload> {
             let data = data as *mut Data<F, R>;
             let data = &mut (*data);
             let payload = panic_cleanup(exception);
-            panic_caught();
+            count_panic_caught();
             data.p = ManuallyDrop::new(payload);
-        }
-    }
-}
-
-#[cfg(not(target_thread_local))]
-compile_error!("");
-
-// TODO consider supporting nested panics
-#[thread_local]
-static PANIC_COUNT: Cell<usize> = Cell::new(0);
-
-pub(crate) fn panic_caught() {
-    PANIC_COUNT.set(0);
-}
-
-pub type PanicHook = &'static (dyn Fn() + Send + Sync);
-
-static PANIC_HOOK: ImmediateSyncOnceCell<PanicHook> = ImmediateSyncOnceCell::new();
-
-pub fn set_hook(hook: PanicHook) {
-    PANIC_HOOK.set(hook).unwrap_or_else(|_| panic!())
-}
-
-fn default_hook() {}
-
-fn get_hook() -> &'static PanicHook {
-    const DEFAULT_HOOK: PanicHook = &default_hook;
-    PANIC_HOOK.get().unwrap_or(&DEFAULT_HOOK)
-}
-
-fn do_panic(payload: Payload) -> ! {
-    if PANIC_COUNT.get() >= 1 {
-        debug_println!("thread panicked while processing panic. aborting.");
-        abort();
-    }
-    PANIC_COUNT.set(1);
-    (get_hook())();
-    let code = start_panic(payload);
-    debug_println!("failed to initiate panic, error {}", code);
-    abort();
-}
-
-#[panic_handler]
-fn panic(info: &PanicInfo<'_>) -> ! {
-    debug_println!("{}", info);
-    do_panic(Payload::empty())
-}
-
-cfg_if::cfg_if! {
-    if #[cfg(feature = "alloc")] {
-        use alloc::boxed::Box;
-
-        #[track_caller]
-        pub fn panic_any<M: 'static + Any + Send>(msg: M) -> ! {
-            debug_println!("panicked at {}", Location::caller());
-            do_panic(Payload(Some(Box::new(msg))))
-        }
-    } else {
-        #[track_caller]
-        pub fn panic_any<M: 'static + Any + Send>(msg: &'static M) -> ! {
-            debug_println!("panicked at {}", Location::caller());
-            do_panic(Payload(Some(Region::Ref(msg))))
-        }
-
-        #[track_caller]
-        pub fn panic_val(msg: usize) -> ! {
-            debug_println!("panicked at {}", Location::caller());
-            do_panic(Payload(Some(Region::Val(msg))))
         }
     }
 }
