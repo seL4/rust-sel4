@@ -8,7 +8,7 @@ license = "BSD-2-Clause"
 [features]
 alloc = ["sel4-full-root-task-runtime/alloc", "sel4-full-root-task-runtime/global-allocator"]
 panic-abort = []
-panic-unwind = ["sel4-full-root-task-runtime/full-less-alloc"]
+panic-unwind = []
 
 [dependencies]
 cfg-if = "*"
