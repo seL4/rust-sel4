@@ -14,7 +14,11 @@ capdl-loader-core = { path = "../core" }
 capdl-types = { path = "../../types" }
 sel4 = { path = "../../../sel4" }
 sel4-logging = { path = "../../../runtime/sel4-logging" }
-sel4-minimal-root-task-runtime = { path = "../../../runtime/sel4-minimal-root-task-runtime" }
+
+[dependencies.sel4-root-task-runtime]
+path = "../../../runtime/sel4-root-task-runtime"
+default-features = false
+features = ["single-threaded"]
 
 [build-dependencies]
 capdl-embedded-spec-validate = { path = "../../embedded-spec/validate" }

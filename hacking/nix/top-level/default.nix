@@ -62,6 +62,6 @@ self: with self; {
       (arch: lib.nameValuePair arch (pkgs.host.${arch}.none.this.worlds)))
   );
 
-  example = worlds.default.instances.examples.root-task.with-full-runtime.simulate;
+  example = worlds.default.instances.examples.root-task.example-root-task.simulate;
 
 }

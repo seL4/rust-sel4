@@ -1,12 +1,22 @@
 #![no_std]
 #![no_main]
+#![feature(core_intrinsics)]
 #![feature(never_type)]
+#![feature(unwrap_infallible)]
 
-use sel4_minimal_root_task_runtime::main;
+extern crate sel4_runtime_simple_entry;
 
-#[main]
+#[no_mangle]
+unsafe extern "C" fn __rust_entry(bootinfo: *const sel4::sys::seL4_BootInfo) -> ! {
+    let bootinfo = sel4::BootInfo::from_ptr(bootinfo);
+    let err = main(&bootinfo).into_err();
+    panic!("Error: {}", err)
+}
+
 fn main(bootinfo: &sel4::BootInfo) -> sel4::Result<!> {
     sel4::debug_println!("Hello, World!");
+
+    let mut ipc_buffer = unsafe { bootinfo.ipc_buffer() };
 
     let blueprint = sel4::ObjectBlueprint::Notification;
 
@@ -34,7 +44,7 @@ fn main(bootinfo: &sel4::BootInfo) -> sel4::Result<!> {
 
     let cnode = sel4::BootInfo::init_thread_cnode();
 
-    untyped.untyped_retype(
+    untyped.with(&mut ipc_buffer).untyped_retype(
         &blueprint,
         &cnode.relative_self(),
         unbadged_notification_slot,
@@ -43,21 +53,32 @@ fn main(bootinfo: &sel4::BootInfo) -> sel4::Result<!> {
 
     let badge = 0x1337;
 
-    cnode.relative(badged_notification).mint(
-        &cnode.relative(unbadged_notification),
-        sel4::CapRights::write_only(),
-        badge,
-    )?;
+    cnode
+        .relative(badged_notification)
+        .with(&mut ipc_buffer)
+        .mint(
+            &cnode.relative(unbadged_notification),
+            sel4::CapRights::write_only(),
+            badge,
+        )?;
 
-    badged_notification.signal();
+    badged_notification.with(&mut ipc_buffer).signal();
 
-    let (_, observed_badge) = unbadged_notification.wait();
+    let (_, observed_badge) = unbadged_notification.with(&mut ipc_buffer).wait();
 
     sel4::debug_println!("badge = {:#x}", badge);
     assert_eq!(observed_badge, badge);
 
     sel4::debug_println!("TEST_PASS");
 
-    sel4::BootInfo::init_thread_tcb().tcb_suspend()?;
+    sel4::BootInfo::init_thread_tcb()
+        .with(&mut ipc_buffer)
+        .tcb_suspend()?;
     unreachable!()
+}
+
+#[panic_handler]
+fn panic(info: &core::panic::PanicInfo<'_>) -> ! {
+    sel4::debug_println!("{}", info);
+    core::intrinsics::abort()
 }

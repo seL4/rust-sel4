@@ -6,10 +6,9 @@ edition = "2021"
 license = "BSD-2-Clause"
 
 [features]
-capdl-spec = ["root-task-minimal", "capdl-loader-with-embedded-spec", "capdl-embedded-spec"]
-root-task-full = ["sel4-root-task-runtime"]
-root-task-minimal = [
-    "sel4-minimal-root-task-runtime",
+capdl-spec = ["root-task", "capdl-loader-with-embedded-spec", "capdl-embedded-spec"]
+root-task = [
+    "sel4-root-task-runtime",
     "capdl-loader-expecting-serialized-spec",
     "capdl-loader-core"
 ]
@@ -49,10 +48,6 @@ sel4-logging = { path = "../runtime/sel4-logging" }
 sel4-sync = { path = "../runtime/sel4-sync" }
 sel4-sys = { path = "../sel4/sys" }
 sel4cp = { path = "../sel4cp", features = ["full"], optional = true }
-
-[target."cfg(target_env = \"sel4\")".dependencies.sel4-minimal-root-task-runtime]
-path = "../runtime/sel4-minimal-root-task-runtime"
-optional = true
 
 [target."cfg(target_env = \"sel4\")".dependencies.sel4-root-task-runtime]
 path = "../runtime/sel4-root-task-runtime"

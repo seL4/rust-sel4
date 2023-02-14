@@ -24,9 +24,7 @@ let
   runtimes = [
     { name = "none"; features = []; rustTargetInfo = seL4RustTargetInfoWithConfig { minimal = false; }; }
   ] ++ lib.optionals (hostPlatform.isAarch64 || hostPlatform.isx86_64) [
-    { name = "minimal-root-task-runtime"; features = [ "root-task-minimal" ]; rustTargetInfo = seL4RustTargetInfoWithConfig { minimal = true; }; }
-  ] ++ lib.optionals hostPlatform.isAarch64 [
-    { name = "full-root-task-runtime"; features = [ "root-task-full" ]; rustTargetInfo = seL4RustTargetInfoWithConfig { minimal = false; }; }
+    { name = "root-task"; features = [ "root-task" ]; rustTargetInfo = seL4RustTargetInfoWithConfig { minimal = false; }; }
   ] ++ lib.optionals (worldConfig.forCP or false) [
     { name = "sel4cp"; features = [ "sel4cp" ]; rustTargetInfo = seL4RustTargetInfoWithConfig { minimal = true; cp = true; }; }
   ];

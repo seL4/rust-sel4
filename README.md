@@ -24,10 +24,9 @@ Note that, for now, these crates depend on some patches to libsel4 which can be 
 - [`sel4-sync`](./crates/runtime/sel4-sync): Synchronization constructs using seL4 IPC. Currently only supports notification-based mutexes.
 - [`sel4-logging`](./crates/runtime/sel4-logging): Log implementation for the [`log`](https://crates.io/crates/log) crate.
 
-##### Example root task runtimes
+##### Root task runtime
 
-- [`sel4-minimal-root-task-runtime`](./crates/runtime/sel4-minimal-root-task-runtime): A minimal runtime which only supports a single thread without unwinding and without a global allocator.
-- [`sel4-full-root-task-runtime`](./crates/runtime/sel4-full-root-task-runtime): A featureful runtime which supports thread-local storage and unwinding, and provides a global allocator. 
+- [`sel4-root-task-runtime`](./crates/runtime/sel4-root-task-runtime): A featureful runtime which supports thread-local storage and unwinding, and provides a global allocator. 
 
 ##### Build system-facing crates
 
@@ -78,7 +77,7 @@ Here is a list of environment variables and the crates which use them:
 - For crates in [`./crates/runtime`](./crates/runtime).
     - `$SEL4_RUNTIME_STACK_SIZE`, defaulting to `0x4000`:
       Contains the stack size, in bytes, of the root task stack.
-      Used by the `sel4-minimal-root-task-runtime` and `sel4-full-root-task-runtime` crates.
+      Used by the `sel4-root-task-runtime` crate.
       See the `sel4-runtime-simple-entry` crate for implementation details.
     - `$SEL4_RUNTIME_HEAP_SIZE`, defaulting to `0`:
       Contains the stack size, in bytes, of the root task static heap.

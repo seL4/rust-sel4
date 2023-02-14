@@ -276,7 +276,7 @@ dependencies = [
  "postcard",
  "sel4",
  "sel4-logging",
- "sel4-minimal-root-task-runtime",
+ "sel4-root-task-runtime",
 ]
 
 [[package]]
@@ -298,7 +298,7 @@ dependencies = [
  "capdl-types",
  "sel4",
  "sel4-logging",
- "sel4-minimal-root-task-runtime",
+ "sel4-root-task-runtime",
 ]
 
 [[package]]
@@ -496,6 +496,22 @@ checksum = "aa68f1b12764fab894d2755d2518754e71b4fd80ecfb822714a1206c2aab39bf"
 dependencies = [
  "cc",
  "libc",
+]
+
+[[package]]
+name = "example-root-task"
+version = "0.1.0"
+dependencies = [
+ "sel4",
+ "sel4-root-task-runtime",
+]
+
+[[package]]
+name = "example-root-task-without-runtime"
+version = "0.1.0"
+dependencies = [
+ "sel4",
+ "sel4-runtime-simple-entry",
 ]
 
 [[package]]
@@ -858,7 +874,6 @@ dependencies = [
  "sel4",
  "sel4-config",
  "sel4-logging",
- "sel4-minimal-root-task-runtime",
  "sel4-platform-info",
  "sel4-root-task-runtime",
  "sel4-sync",
@@ -1149,30 +1164,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "root-task-with-full-runtime"
-version = "0.1.0"
-dependencies = [
- "sel4",
- "sel4-root-task-runtime",
-]
-
-[[package]]
-name = "root-task-with-minimal-runtime-with-state"
-version = "0.1.0"
-dependencies = [
- "sel4",
- "sel4-minimal-root-task-runtime",
-]
-
-[[package]]
-name = "root-task-with-minimal-runtime-without-state"
-version = "0.1.0"
-dependencies = [
- "sel4",
- "sel4-minimal-root-task-runtime",
-]
-
-[[package]]
 name = "rsa"
 version = "0.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1409,26 +1400,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "sel4-minimal-root-task-runtime"
-version = "0.1.0"
-dependencies = [
- "sel4",
- "sel4-minimal-root-task-runtime-macros",
- "sel4-runtime-simple-entry",
- "sel4-runtime-simple-static-heap",
- "sel4-runtime-simple-termination",
-]
-
-[[package]]
-name = "sel4-minimal-root-task-runtime-macros"
-version = "0.1.0"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn",
-]
-
-[[package]]
 name = "sel4-panicking"
 version = "0.1.0"
 dependencies = [
@@ -1580,8 +1551,11 @@ dependencies = [
 name = "sel4cp"
 version = "0.1.0"
 dependencies = [
- "cfg-if",
  "sel4",
+ "sel4-panicking",
+ "sel4-panicking-env",
+ "sel4-reserve-tls-on-stack",
+ "sel4-runtime-phdrs",
  "sel4-runtime-simple-entry",
  "sel4-runtime-simple-static-heap",
  "sel4cp-macros",

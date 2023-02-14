@@ -1,5 +1,5 @@
 [package]
-name = "root-task-with-full-runtime"
+name = "example-root-task"
 version = "0.1.0"
 authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
 edition = "2021"

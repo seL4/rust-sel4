@@ -7,12 +7,12 @@ extern crate sel4_runtime_simple_entry;
 extern crate sel4_runtime_simple_static_heap;
 
 use core::ffi::c_char;
-use core::ffi::c_void;
 use core::fmt;
 
-#[cfg(feature = "unwinding")]
-mod unwinding;
+#[cfg(target_thread_local)]
+use core::ffi::c_void;
 
+#[cfg(target_thread_local)]
 use sel4_runtime_phdrs::EmbeddedProgramHeaders;
 
 pub use sel4_panicking as panicking;
@@ -23,16 +23,19 @@ pub use sel4_runtime_simple_termination::Termination;
 #[cfg(feature = "global-allocator")]
 pub use sel4_runtime_simple_static_heap::GLOBAL_ALLOCATOR;
 
+#[cfg(feature = "unwinding")]
+mod unwinding;
+
 #[cfg(target_thread_local)]
 #[no_mangle]
 unsafe extern "C" fn __rust_entry(bootinfo: *const sel4::sys::seL4_BootInfo) -> ! {
-    #[allow(clippy::missing_safety_doc)]
     unsafe extern "C" fn cont_fn(cont_arg: *mut c_void) -> ! {
         let bootinfo = cont_arg.cast_const().cast::<sel4::sys::seL4_BootInfo>();
         inner_entry(bootinfo)
     }
 
     let cont_arg = bootinfo.cast::<c_void>().cast_mut();
+
     EmbeddedProgramHeaders::finder()
         .find_tls_image()
         .reserve_on_stack_and_continue(cont_fn, cont_arg)
@@ -44,8 +47,7 @@ unsafe extern "C" fn __rust_entry(bootinfo: *const sel4::sys::seL4_BootInfo) -> 
     inner_entry(bootinfo)
 }
 
-#[allow(clippy::missing_safety_doc)]
-pub unsafe extern "C" fn inner_entry(bootinfo: *const sel4::sys::seL4_BootInfo) -> ! {
+unsafe extern "C" fn inner_entry(bootinfo: *const sel4::sys::seL4_BootInfo) -> ! {
     #[cfg(feature = "unwinding")]
     {
         crate::unwinding::init();

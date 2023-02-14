@@ -14,6 +14,7 @@ postcard = { version = "*", default-features = false, features = ["alloc"] }
 sel4 = { path = "../../../sel4" }
 sel4-logging = { path = "../../../runtime/sel4-logging" }
 
-[dependencies.sel4-minimal-root-task-runtime]
-path = "../../../runtime/sel4-minimal-root-task-runtime"
-features = ["global-allocator"]
+[dependencies.sel4-root-task-runtime]
+path = "../../../runtime/sel4-root-task-runtime"
+default-features = false
+features = ["global-allocator", "single-threaded"]

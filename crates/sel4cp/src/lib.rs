@@ -1,5 +1,5 @@
 #![no_std]
-#![feature(core_intrinsics)]
+#![feature(cfg_target_thread_local)]
 #![feature(cstr_from_bytes_until_nul)]
 #![feature(never_type)]
 #![feature(unwrap_infallible)]
@@ -9,64 +9,113 @@ extern crate sel4_runtime_simple_entry;
 #[cfg(feature = "global-allocator")]
 extern crate sel4_runtime_simple_static_heap;
 
+use core::ffi::c_char;
 use core::fmt;
+use core::panic::PanicInfo;
 
+#[cfg(target_thread_local)]
+use core::ffi::c_void;
+
+#[cfg(target_thread_local)]
+use core::ptr;
+
+#[cfg(target_thread_local)]
+use sel4_runtime_phdrs::EmbeddedProgramHeaders;
+
+pub use sel4_panicking as panicking;
+pub use sel4_panicking_env::{abort, debug_print, debug_println};
 pub use sel4cp_macros::main;
 
 #[cfg(feature = "global-allocator")]
-pub use sel4_runtime_simple_static_heap::set_mutex_notification as set_heap_mutex_notification;
+pub use sel4_runtime_simple_static_heap::GLOBAL_ALLOCATOR;
 
 mod channel;
 mod handler;
 mod ipc_buffer;
 mod pd_name;
 
-pub use channel::*;
-pub use handler::*;
+#[cfg(feature = "unwinding")]
+mod unwinding;
 
 use ipc_buffer::get_ipc_buffer;
+
+pub use channel::*;
+pub use handler::*;
 pub use pd_name::get_pd_name;
+
+#[cfg(target_thread_local)]
+#[no_mangle]
+unsafe extern "C" fn __rust_entry() -> ! {
+    unsafe extern "C" fn cont_fn(_cont_arg: *mut c_void) -> ! {
+        inner_entry()
+    }
+
+    let cont_arg = ptr::null_mut();
+
+    EmbeddedProgramHeaders::finder()
+        .find_tls_image()
+        .reserve_on_stack_and_continue(cont_fn, cont_arg)
+}
+
+#[cfg(not(target_thread_local))]
+#[no_mangle]
+unsafe extern "C" fn __rust_entry() -> ! {
+    inner_entry()
+}
+
+unsafe extern "C" fn inner_entry() -> ! {
+    panicking::set_hook(&panic_hook);
+
+    #[cfg(feature = "unwinding")]
+    {
+        crate::unwinding::init();
+    }
+
+    sel4::set_ipc_buffer(get_ipc_buffer());
+    __sel4cp_main();
+    abort()
+}
+
+fn panic_hook(info: Option<&PanicInfo>) {
+    if let Some(info) = info {
+        debug_println!("{}: {}", get_pd_name(), info);
+    }
+}
+
+extern "C" {
+    fn __sel4cp_main();
+}
 
 #[macro_export]
 macro_rules! declare_main {
     ($main:path) => {
         #[no_mangle]
-        pub extern "C" fn __rust_entry() -> ! {
-            $crate::_private::run_main($main)
+        pub unsafe extern "C" fn __sel4cp_main() {
+            $crate::_private::run_main($main);
         }
     };
 }
 
-pub fn run_main<T>(f: impl FnOnce() -> T) -> !
+#[allow(clippy::missing_safety_doc)]
+pub unsafe fn run_main<T>(f: impl FnOnce() -> T)
 where
     T: Handler,
     T::Error: fmt::Debug,
 {
-    unsafe {
-        sel4::set_ipc_buffer(get_ipc_buffer());
-    }
-
-    let err = f().run().into_err();
-
-    sel4::debug_println!("Terminated with error: {:?}", err);
-    abort()
+    let _ = panicking::catch_unwind(|| {
+        let err = f().run().into_err();
+        debug_println!("Terminated with error: {:?}", err);
+    });
 }
 
-#[cfg(panic = "unwind")]
-compile_error!("");
-
-#[panic_handler]
-fn panic(info: &core::panic::PanicInfo<'_>) -> ! {
-    sel4::debug_println!("({}) {}", get_pd_name(), info);
-    abort()
+#[no_mangle]
+fn sel4_runtime_debug_put_char(c: c_char) {
+    sel4::debug_put_char(c)
 }
 
-fn abort() -> ! {
-    sel4::debug_println!("(aborting)");
-    core::intrinsics::abort()
-}
-
+// For macros
 #[doc(hidden)]
 pub mod _private {
-    pub use crate::run_main;
+    pub use super::run_main;
+    pub use sel4::sys::seL4_BootInfo;
 }

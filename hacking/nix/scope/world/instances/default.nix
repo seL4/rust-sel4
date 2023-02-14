@@ -79,9 +79,8 @@ let
 in rec {
 
   all = [
-    examples.root-task.with-full-runtime
-    examples.root-task.with-minimal-runtime-with-state
-    examples.root-task.with-minimal-runtime-without-state
+    examples.root-task.example-root-task
+    examples.root-task.example-root-task-without-runtime
     tests.loader
     tests.core-libs
     tests.config
@@ -98,9 +97,9 @@ in rec {
 
   examples = {
     root-task = {
-      with-minimal-runtime-with-state = mk {
+      example-root-task-without-runtime = mk {
         rootTask = mkTask {
-          rootCrate = crates.root-task-with-minimal-runtime-with-state;
+          rootCrate = crates.example-root-task-without-runtime;
           release = false;
           rustTargetInfo = seL4RustTargetInfoWithConfig { minimal = true; };
         };
@@ -108,19 +107,9 @@ in rec {
         canAutomate = true;
       };
 
-      with-minimal-runtime-without-state = mk {
+      example-root-task = mk {
         rootTask = mkTask {
-          rootCrate = crates.root-task-with-minimal-runtime-without-state;
-          release = false;
-          rustTargetInfo = seL4RustTargetInfoWithConfig { minimal = true; };
-        };
-        isSupported = haveMinimalRuntime;
-        canAutomate = true;
-      };
-
-      with-full-runtime = mk {
-        rootTask = mkTask {
-          rootCrate = crates.root-task-with-full-runtime;
+          rootCrate = crates.example-root-task;
           release = false;
         };
         isSupported = haveFullRuntime;

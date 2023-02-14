@@ -22,7 +22,7 @@ static LOGGER: Logger = LoggerBuilder::default()
     .write(|s| sel4::debug_print!("{}", s))
     .build();
 
-#[sel4_minimal_root_task_runtime::main]
+#[sel4_root_task_runtime::main]
 fn main(bootinfo: &BootInfo) -> ! {
     LOGGER.set().unwrap();
     let spec_with_sources = get_spec_with_sources();
