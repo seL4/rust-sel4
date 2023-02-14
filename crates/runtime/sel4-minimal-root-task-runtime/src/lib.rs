@@ -13,9 +13,6 @@ use sel4_runtime_simple_termination::Termination;
 
 pub use sel4_minimal_root_task_runtime_macros::main;
 
-#[cfg(feature = "global-allocator")]
-pub use sel4_runtime_simple_static_heap::set_mutex_notification as set_heap_mutex_notification;
-
 #[macro_export]
 macro_rules! declare_main {
     ($main:path) => {

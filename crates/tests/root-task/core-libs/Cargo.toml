@@ -8,8 +8,5 @@ license = "BSD-2-Clause"
 [dependencies]
 sel4 = { path = "../../../sel4" }
 sel4-config = { path = "../../../sel4/config" }
+sel4-root-task-runtime = { path = "../../../runtime/sel4-root-task-runtime", features = ["full"] }
 sel4-sys = { path = "../../../sel4/sys" }
-
-[dependencies.sel4-full-root-task-runtime]
-path = "../../../runtime/sel4-full-root-task-runtime"
-features = ["full"]

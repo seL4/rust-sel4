@@ -3,13 +3,13 @@
 
 use core::sync::atomic::{AtomicBool, Ordering};
 
-use sel4_full_root_task_runtime::{catch_unwind, debug_println, main};
+use sel4_root_task_runtime::{debug_println, main, panicking};
 
 static F1_DROPPED: AtomicBool = AtomicBool::new(false);
 
 #[main]
 fn main(_: &sel4::BootInfo) -> ! {
-    let _ = catch_unwind(|| {
+    let _ = panicking::catch_unwind(|| {
         f1();
     });
     assert!(F1_DROPPED.load(Ordering::SeqCst));
@@ -46,19 +46,19 @@ cfg_if::cfg_if! {
         use alloc::string::String;
 
         fn whether_alloc() {
-            let r = catch_unwind(|| {
-                sel4_panicking::panic_any::<String>("foo".to_owned());
+            let r = panicking::catch_unwind(|| {
+                panicking::panic_any::<String>("foo".to_owned());
             });
             assert_eq!(r.err().unwrap().inner().downcast_ref::<String>().unwrap().as_str(), "foo");
         }
     } else {
         use core::mem;
 
-        use sel4_panicking::{FromPayloadValue, IntoPayloadValue, PayloadValue, TryFromPayload, PAYLOAD_VALUE_SIZE};
+        use panicking::{FromPayloadValue, IntoPayloadValue, PayloadValue, TryFromPayload, PAYLOAD_VALUE_SIZE};
 
         fn whether_alloc() {
-            let r = catch_unwind(|| {
-                sel4_panicking::panic_any(Foo(1337));
+            let r = panicking::catch_unwind(|| {
+                panicking::panic_any(Foo(1337));
             });
             assert!(matches!(Foo::try_from_payload(&r.err().unwrap()).unwrap(), Foo(1337)));
         }

@@ -4,8 +4,8 @@
 #![feature(iter_intersperse)]
 #![feature(thread_local)]
 
-use sel4_full_root_task_runtime::{debug_print, debug_println, main};
 use sel4_platform_info::PLATFORM_INFO;
+use sel4_root_task_runtime::{debug_print, debug_println, main};
 
 #[repr(C, align(8192))]
 struct Y(i32);

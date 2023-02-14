@@ -1,7 +1,7 @@
 #![no_std]
 #![no_main]
 
-use sel4_full_root_task_runtime::{debug_println, main};
+use sel4_root_task_runtime::{debug_println, main};
 use sel4_runtime_phdrs::{EmbeddedProgramHeaders, InjectedProgramHeaders};
 
 #[main]

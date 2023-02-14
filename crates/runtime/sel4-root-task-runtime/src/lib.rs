@@ -15,9 +15,9 @@ mod unwinding;
 
 use sel4_runtime_phdrs::EmbeddedProgramHeaders;
 
-pub use sel4_full_root_task_runtime_macros::main;
 pub use sel4_panicking as panicking;
 pub use sel4_panicking_env::{abort, debug_print, debug_println};
+pub use sel4_root_task_runtime_macros::main;
 pub use sel4_runtime_simple_termination::Termination;
 
 #[cfg(feature = "global-allocator")]

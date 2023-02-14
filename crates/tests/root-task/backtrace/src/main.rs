@@ -2,11 +2,11 @@
 #![no_main]
 
 use sel4_backtrace_simple::SimpleBacktracing;
-use sel4_full_root_task_runtime::{catch_unwind, debug_println, main};
+use sel4_root_task_runtime::{debug_println, main, panicking};
 
 #[main]
 fn main(_: &sel4::BootInfo) -> ! {
-    let _ = catch_unwind(|| {
+    let _ = panicking::catch_unwind(|| {
         f();
     });
     debug_println!("TEST_PASS");

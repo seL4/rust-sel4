@@ -857,10 +857,10 @@ dependencies = [
  "render-elf-with-data",
  "sel4",
  "sel4-config",
- "sel4-full-root-task-runtime",
  "sel4-logging",
  "sel4-minimal-root-task-runtime",
  "sel4-platform-info",
+ "sel4-root-task-runtime",
  "sel4-sync",
  "sel4-sys",
  "sel4cp",
@@ -1153,7 +1153,7 @@ name = "root-task-with-full-runtime"
 version = "0.1.0"
 dependencies = [
  "sel4",
- "sel4-full-root-task-runtime",
+ "sel4-root-task-runtime",
 ]
 
 [[package]]
@@ -1389,30 +1389,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "sel4-full-root-task-runtime"
-version = "0.1.0"
-dependencies = [
- "sel4",
- "sel4-full-root-task-runtime-macros",
- "sel4-panicking",
- "sel4-panicking-env",
- "sel4-reserve-tls-on-stack",
- "sel4-runtime-phdrs",
- "sel4-runtime-simple-entry",
- "sel4-runtime-simple-static-heap",
- "sel4-runtime-simple-termination",
-]
-
-[[package]]
-name = "sel4-full-root-task-runtime-macros"
-version = "0.1.0"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn",
-]
-
-[[package]]
 name = "sel4-immediate-sync-once-cell"
 version = "0.1.0"
 
@@ -1487,6 +1463,30 @@ name = "sel4-reserve-tls-on-stack"
 version = "0.1.0"
 dependencies = [
  "cfg-if",
+]
+
+[[package]]
+name = "sel4-root-task-runtime"
+version = "0.1.0"
+dependencies = [
+ "sel4",
+ "sel4-panicking",
+ "sel4-panicking-env",
+ "sel4-reserve-tls-on-stack",
+ "sel4-root-task-runtime-macros",
+ "sel4-runtime-phdrs",
+ "sel4-runtime-simple-entry",
+ "sel4-runtime-simple-static-heap",
+ "sel4-runtime-simple-termination",
+]
+
+[[package]]
+name = "sel4-root-task-runtime-macros"
+version = "0.1.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
 ]
 
 [[package]]
@@ -1763,7 +1763,7 @@ dependencies = [
  "sel4",
  "sel4-backtrace",
  "sel4-backtrace-simple",
- "sel4-full-root-task-runtime",
+ "sel4-root-task-runtime",
 ]
 
 [[package]]
@@ -1773,7 +1773,7 @@ dependencies = [
  "cc",
  "glob",
  "sel4",
- "sel4-full-root-task-runtime",
+ "sel4-root-task-runtime",
 ]
 
 [[package]]
@@ -1781,7 +1781,7 @@ name = "tests-root-task-config"
 version = "0.1.0"
 dependencies = [
  "sel4",
- "sel4-full-root-task-runtime",
+ "sel4-root-task-runtime",
 ]
 
 [[package]]
@@ -1790,7 +1790,7 @@ version = "0.1.0"
 dependencies = [
  "sel4",
  "sel4-config",
- "sel4-full-root-task-runtime",
+ "sel4-root-task-runtime",
  "sel4-sys",
 ]
 
@@ -1799,7 +1799,7 @@ name = "tests-root-task-injected-phdrs"
 version = "0.1.0"
 dependencies = [
  "sel4",
- "sel4-full-root-task-runtime",
+ "sel4-root-task-runtime",
  "sel4-runtime-phdrs",
 ]
 
@@ -1809,8 +1809,8 @@ version = "0.1.0"
 dependencies = [
  "fdt",
  "sel4",
- "sel4-full-root-task-runtime",
  "sel4-platform-info",
+ "sel4-root-task-runtime",
 ]
 
 [[package]]
@@ -1819,8 +1819,7 @@ version = "0.1.0"
 dependencies = [
  "cfg-if",
  "sel4",
- "sel4-full-root-task-runtime",
- "sel4-panicking",
+ "sel4-root-task-runtime",
 ]
 
 [[package]]
@@ -1828,7 +1827,7 @@ name = "tests-root-task-tls"
 version = "0.1.0"
 dependencies = [
  "sel4",
- "sel4-full-root-task-runtime",
+ "sel4-root-task-runtime",
 ]
 
 [[package]]

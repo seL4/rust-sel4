@@ -14,7 +14,7 @@
 //! ### Example root task runtime (if configured)
 //!
 //! - [`sel4_minimal_root_task_runtime`]: A minimal runtime which only supports a single thread without unwinding and without a global allocator.
-//! - [`sel4_full_root_task_runtime`]: A featureful runtime which supports thread-local storage and unwinding, and provides a global allocator.
+//! - [`sel4_root_task_runtime`]: A featureful runtime which supports thread-local storage and unwinding, and provides a global allocator.
 //!
 //! ### Other crates of interest
 //!
@@ -64,6 +64,6 @@ maybe!(
 );
 maybe!(
     all(target_env = "sel4", feature = "root-task-full"),
-    sel4_full_root_task_runtime
+    sel4_root_task_runtime
 );
 maybe!(all(target_env = "sel4", feature = "sel4cp"), sel4cp);

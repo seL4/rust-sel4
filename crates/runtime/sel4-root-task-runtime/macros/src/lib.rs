@@ -6,7 +6,7 @@ use syn::parse_macro_input;
 
 #[proc_macro_attribute]
 pub fn main(_attr: TokenStream, item: TokenStream) -> TokenStream {
-    let crate_ = quote!(sel4_full_root_task_runtime);
+    let crate_ = quote!(sel4_root_task_runtime);
     let module_path = quote!(declare_main);
     let item = parse_macro_input!(item as syn::ItemFn);
     let ident = &item.sig.ident;
