@@ -53,7 +53,7 @@ unsafe extern "C" fn inner_entry(bootinfo: *const sel4::sys::seL4_BootInfo) -> !
     let ipc_buffer = sel4::BootInfo::from_ptr(bootinfo).ipc_buffer();
     sel4::set_ipc_buffer(ipc_buffer);
     __sel4_root_task_runtime_main(bootinfo);
-    abort()
+    abort!("main thread returned")
 }
 
 extern "C" {
@@ -80,11 +80,13 @@ pub unsafe fn run_main<T>(
     T: Termination,
     T::Error: fmt::Debug,
 {
-    let _ = panicking::catch_unwind(|| {
+    match panicking::catch_unwind(|| {
         let bootinfo = sel4::BootInfo::from_ptr(bootinfo);
-        let err = f(&bootinfo).report();
-        debug_println!("Terminated with error: {:?}", err);
-    });
+        f(&bootinfo).report()
+    }) {
+        Ok(err) => abort!("main thread terminated with error: {err:?}"),
+        Err(_) => abort!("main thread panicked"),
+    }
 }
 
 #[no_mangle]

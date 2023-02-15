@@ -11,7 +11,6 @@ extern crate sel4_runtime_simple_static_heap;
 
 use core::ffi::c_char;
 use core::fmt;
-use core::panic::PanicInfo;
 
 #[cfg(target_thread_local)]
 use core::ffi::c_void;
@@ -69,13 +68,11 @@ unsafe extern "C" fn inner_entry() -> ! {
     panicking::set_hook(&panic_hook);
     sel4::set_ipc_buffer(get_ipc_buffer());
     __sel4cp_main();
-    abort()
+    abort!("main thread returned")
 }
 
-fn panic_hook(info: Option<&PanicInfo>) {
-    if let Some(info) = info {
-        debug_println!("{}: {}", get_pd_name(), info);
-    }
+fn panic_hook(info: &panicking::ExternalPanicInfo) {
+    debug_println!("{}: {}", get_pd_name(), info);
 }
 
 extern "C" {
@@ -98,10 +95,10 @@ where
     T: Handler,
     T::Error: fmt::Debug,
 {
-    let _ = panicking::catch_unwind(|| {
-        let err = f().run().into_err();
-        debug_println!("Terminated with error: {:?}", err);
-    });
+    match panicking::catch_unwind(|| f().run().into_err()) {
+        Ok(err) => abort!("main thread terminated with error: {err:?}"),
+        Err(_) => abort!("main thread panicked"),
+    }
 }
 
 #[no_mangle]

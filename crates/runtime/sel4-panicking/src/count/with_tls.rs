@@ -6,13 +6,15 @@ use sel4_panicking_env::abort;
 #[thread_local]
 static PANIC_COUNT: Cell<usize> = Cell::new(0);
 
+const MAX_PANIC_LEVEL: usize = 2;
+
 pub(crate) fn count_panic() {
-    if PANIC_COUNT.get() >= 1 {
-        abort!("thread panicked while processing panic. aborting.");
+    if PANIC_COUNT.get() >= MAX_PANIC_LEVEL {
+        abort!("maximum panic depth of {MAX_PANIC_LEVEL} reached");
     }
-    PANIC_COUNT.set(1);
+    PANIC_COUNT.update(|count| count + 1);
 }
 
 pub(crate) fn count_panic_caught() {
-    PANIC_COUNT.set(0);
+    PANIC_COUNT.update(|count| count - 1);
 }

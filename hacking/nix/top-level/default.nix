@@ -1,8 +1,8 @@
 self: with self; {
 
   worldsForEverythingInstances = [
-    pkgs.host.aarch64.none.this.worlds.default
     pkgs.host.x86_64.none.this.worlds.default
+    pkgs.host.aarch64.none.this.worlds.default
   ];
 
   everythingList = lib.flatten [

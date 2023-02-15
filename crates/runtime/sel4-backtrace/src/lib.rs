@@ -20,7 +20,7 @@ cfg_if::cfg_if! {
             }
 
             extern "C" fn callback<F1: FnMut(Entry) -> Result<(), E1>, E1>(
-                unwind_ctx: &mut UnwindContext<'_>,
+                unwind_ctx: &mut UnwindContext,
                 arg: *mut c_void,
             ) -> UnwindReasonCode {
                 let data = unsafe { &mut *(arg as *mut CallbackData<F1>) };

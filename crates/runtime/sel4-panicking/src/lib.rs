@@ -1,13 +1,18 @@
 #![no_std]
+#![feature(cell_update)]
 #![feature(cfg_target_thread_local)]
 #![feature(core_intrinsics)]
 #![feature(lang_items)]
 #![feature(thread_local)]
+#![feature(panic_can_unwind)]
+#![feature(panic_info_message)]
 
 #[cfg(feature = "alloc")]
 extern crate alloc;
 
+use core::fmt;
 use core::mem::ManuallyDrop;
+use core::panic::Location;
 use core::panic::PanicInfo;
 
 use sel4_panicking_env::abort;
@@ -19,6 +24,7 @@ mod strategy;
 
 use count::{count_panic, count_panic_caught};
 use hook::get_hook;
+use payload::NoPayload;
 use strategy::{panic_cleanup, start_panic};
 
 pub use hook::{set_hook, PanicHook};
@@ -29,22 +35,75 @@ pub use payload::{FromPayloadValue, IntoPayloadValue, PayloadValue, PAYLOAD_VALU
 
 // // //
 
+pub struct ExternalPanicInfo<'a> {
+    payload: Payload,
+    message: Option<&'a fmt::Arguments<'a>>,
+    location: Option<&'a Location<'a>>,
+    can_unwind: bool,
+}
+
+impl<'a> ExternalPanicInfo<'a> {
+    pub fn payload(&self) -> &Payload {
+        &self.payload
+    }
+
+    pub fn message(&self) -> Option<&fmt::Arguments> {
+        self.message
+    }
+
+    pub fn location(&self) -> Option<&Location> {
+        self.location
+    }
+
+    pub fn can_unwind(&self) -> bool {
+        self.can_unwind
+    }
+}
+
+impl fmt::Display for ExternalPanicInfo<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        f.write_str("panicked at ")?;
+        if let Some(message) = self.message {
+            write!(f, "'{message}', ")?;
+        }
+        if let Some(location) = self.location {
+            location.fmt(f)?;
+        } else {
+            write!(f, "unknown location")?;
+        }
+        Ok(())
+    }
+}
+
 #[panic_handler]
-fn panic(info: &PanicInfo<'_>) -> ! {
-    do_panic(Some(info), None)
+fn panic(info: &PanicInfo) -> ! {
+    do_panic(ExternalPanicInfo {
+        payload: NoPayload.into_payload(),
+        message: info.message(),
+        location: info.location(),
+        can_unwind: info.can_unwind(),
+    })
 }
 
 #[track_caller]
 pub fn panic_any<M: IntoPayload>(msg: M) -> ! {
-    // TODO pass location
-    do_panic(None, Some(msg.into_payload()))
+    do_panic(ExternalPanicInfo {
+        payload: msg.into_payload(),
+        message: None,
+        location: Some(Location::caller()),
+        can_unwind: true,
+    })
 }
 
-fn do_panic(info: Option<&PanicInfo<'_>>, payload: Option<Payload>) -> ! {
+fn do_panic<'a>(info: ExternalPanicInfo<'a>) -> ! {
     count_panic();
-    (get_hook())(info);
-    let code = start_panic(payload.unwrap_or(().into_payload()));
-    abort!("failed to initiate panic, error {}", code)
+    (get_hook())(&info);
+    if info.can_unwind() {
+        let code = start_panic(info.payload);
+        abort!("failed to initiate panic, error {}", code)
+    } else {
+        abort!("can't unwind this panic")
+    }
 }
 
 // // //

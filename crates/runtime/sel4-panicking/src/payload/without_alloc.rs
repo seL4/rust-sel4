@@ -1,5 +1,7 @@
 use core::any::{Any, TypeId};
 
+use super::NoPayload;
+
 pub struct Payload {
     type_id: TypeId,
     value: PayloadValue,
@@ -45,14 +47,14 @@ pub unsafe trait FromPayloadValue: Copy {
     fn from_payload_value(payload_value: &PayloadValue) -> Self;
 }
 
-unsafe impl IntoPayloadValue for () {
+unsafe impl IntoPayloadValue for NoPayload {
     fn into_payload_value(self) -> PayloadValue {
         Default::default()
     }
 }
 
-unsafe impl FromPayloadValue for () {
+unsafe impl FromPayloadValue for NoPayload {
     fn from_payload_value(_payload_value: &PayloadValue) -> Self {
-        Default::default()
+        NoPayload
     }
 }

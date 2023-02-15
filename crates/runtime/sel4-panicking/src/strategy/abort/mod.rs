@@ -1,3 +1,6 @@
+use sel4_panicking_env::abort_without_info;
+
+#[cfg(panic = "unwind")]
 use sel4_panicking_env::abort;
 
 use crate::Payload;
@@ -7,7 +10,7 @@ pub(crate) fn panic_cleanup(_exception: *mut u8) -> Payload {
 }
 
 pub(crate) fn start_panic(_payload: Payload) -> i32 {
-    abort()
+    abort_without_info()
 }
 
 #[cfg(panic = "unwind")]

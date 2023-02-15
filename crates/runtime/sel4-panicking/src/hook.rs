@@ -1,9 +1,9 @@
-use core::panic::PanicInfo;
-
 use sel4_immediate_sync_once_cell::ImmediateSyncOnceCell;
 use sel4_panicking_env::debug_println;
 
-pub type PanicHook = &'static (dyn Fn(Option<&PanicInfo>) + Send + Sync);
+use crate::ExternalPanicInfo;
+
+pub type PanicHook = &'static (dyn Fn(&ExternalPanicInfo) + Send + Sync);
 
 static PANIC_HOOK: ImmediateSyncOnceCell<PanicHook> = ImmediateSyncOnceCell::new();
 
@@ -16,8 +16,6 @@ pub(crate) fn get_hook() -> &'static PanicHook {
     PANIC_HOOK.get().unwrap_or(&DEFAULT_HOOK)
 }
 
-fn default_hook(info: Option<&PanicInfo>) {
-    if let Some(info) = info {
-        debug_println!("{}", info);
-    }
+fn default_hook(info: &ExternalPanicInfo) {
+    debug_println!("{}", info);
 }

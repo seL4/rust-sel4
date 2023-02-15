@@ -24,5 +24,5 @@ fn g(_: &()) -> () {
     let bt = simple.collect();
     simple.send(&bt);
     assert!(bt.postamble.error.is_none());
-    assert_eq!(bt.entries.len(), 25);
+    assert_eq!(bt.entries.len(), 26);
 }

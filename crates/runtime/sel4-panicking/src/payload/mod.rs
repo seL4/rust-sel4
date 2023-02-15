@@ -9,3 +9,6 @@ cfg_if::cfg_if! {
 }
 
 pub use whether_alloc::*;
+
+#[derive(Clone, Copy)]
+pub(crate) struct NoPayload;
