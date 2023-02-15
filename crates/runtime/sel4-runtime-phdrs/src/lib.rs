@@ -12,14 +12,8 @@ pub mod unwinding;
 #[cfg(feature = "embedded-phdrs")]
 mod embedded;
 
-#[cfg(feature = "injected-phdrs")]
-mod injected;
-
 #[cfg(feature = "embedded-phdrs")]
 pub use embedded::EmbeddedProgramHeaders;
-
-#[cfg(feature = "injected-phdrs")]
-pub use injected::InjectedProgramHeaders;
 
 use elf::ProgramHeader;
 

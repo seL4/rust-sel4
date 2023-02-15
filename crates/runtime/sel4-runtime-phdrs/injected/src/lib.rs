@@ -1,13 +1,12 @@
+#![no_std]
+#![feature(cfg_target_thread_local)]
 use core::mem;
 
-use crate::{elf::ProgramHeader, InnerProgramHeadersFinder, ProgramHeadersFinder};
+use sel4_runtime_phdrs::{elf::ProgramHeader, InnerProgramHeadersFinder, ProgramHeadersFinder};
 
 const MAX_NUM_PHDRS: usize = 16;
 
-// [HACK]
-// Until zerocopy::new_zeroed works in const.
-// [SAFETY]
-// Safe because ProgramHeader implements FromBytes.
+// HACK until core::mem::zeroed is const
 const PLACEHOLDER_PHDR: ProgramHeader =
     unsafe { mem::transmute([0u8; mem::size_of::<ProgramHeader>()]) };
 

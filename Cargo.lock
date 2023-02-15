@@ -1515,6 +1515,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "sel4-runtime-phdrs-injected"
+version = "0.1.0"
+dependencies = [
+ "sel4-runtime-phdrs",
+]
+
+[[package]]
 name = "sel4-runtime-simple-entry"
 version = "0.1.0"
 dependencies = [
@@ -1825,6 +1832,7 @@ dependencies = [
  "sel4",
  "sel4-root-task-runtime",
  "sel4-runtime-phdrs",
+ "sel4-runtime-phdrs-injected",
 ]
 
 [[package]]

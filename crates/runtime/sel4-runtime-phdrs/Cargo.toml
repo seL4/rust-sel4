@@ -7,7 +7,6 @@ license = "BSD-2-Clause"
 
 [features]
 embedded-phdrs = []
-injected-phdrs = []
 tls = ["dep:sel4-reserve-tls-on-stack"]
 
 [dependencies]

@@ -8,7 +8,5 @@ license = "BSD-2-Clause"
 [dependencies]
 sel4 = { path = "../../../sel4" }
 sel4-root-task-runtime = { path = "../../../runtime/sel4-root-task-runtime", features = ["full"] }
-
-[dependencies.sel4-runtime-phdrs]
-path = "../../../runtime/sel4-runtime-phdrs"
-features = ["injected-phdrs", "embedded-phdrs"]
+sel4-runtime-phdrs = { path = "../../../runtime/sel4-runtime-phdrs", features = ["embedded-phdrs"] }
+sel4-runtime-phdrs-injected = { path = "../../../runtime/sel4-runtime-phdrs/injected" }

@@ -2,7 +2,8 @@
 #![no_main]
 
 use sel4_root_task_runtime::{debug_println, main};
-use sel4_runtime_phdrs::{EmbeddedProgramHeaders, InjectedProgramHeaders};
+use sel4_runtime_phdrs::EmbeddedProgramHeaders;
+use sel4_runtime_phdrs_injected::InjectedProgramHeaders;
 
 #[main]
 fn main(_: &sel4::BootInfo) -> ! {
