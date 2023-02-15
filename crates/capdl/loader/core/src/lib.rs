@@ -374,11 +374,7 @@ impl<'a, N: ObjectName, F: Content, B: BorrowMut<[PerObjectBuffer]>> Loader<'a, 
         Ok(())
     }
 
-    fn fill_frame<U: FrameType>(
-        &self,
-        frame: LocalCPtr<U>,
-        fill: &[FillEntry<F>],
-    ) -> Result<()> {
+    fn fill_frame<U: FrameType>(&self, frame: LocalCPtr<U>, fill: &[FillEntry<F>]) -> Result<()> {
         frame.frame_map(
             BootInfo::init_thread_vspace(),
             self.copy_addr::<U>(),
