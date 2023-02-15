@@ -1512,7 +1512,6 @@ version = "0.1.0"
 dependencies = [
  "sel4-reserve-tls-on-stack",
  "unwinding",
- "zerocopy",
 ]
 
 [[package]]
@@ -2055,27 +2054,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d7d8a75eaf6557bb84a65ace8609883db44a29951042ada9b393151532e41fcb"
 dependencies = [
  "xml-rs",
-]
-
-[[package]]
-name = "zerocopy"
-version = "0.6.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "332f188cc1bcf1fe1064b8c58d150f497e697f49774aa846f2dc949d9a25f236"
-dependencies = [
- "byteorder",
- "zerocopy-derive",
-]
-
-[[package]]
-name = "zerocopy-derive"
-version = "0.3.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6505e6815af7de1746a08f69c69606bb45695a17149517680f3b2149713b19a3"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn",
 ]
 
 [[package]]

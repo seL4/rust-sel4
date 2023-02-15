@@ -1,5 +1,3 @@
-use zerocopy::{AsBytes, FromBytes};
-
 #[cfg(target_pointer_width = "64")]
 pub type Word = u64;
 
@@ -7,7 +5,7 @@ pub type Word = u64;
 pub type Word = u32;
 
 #[repr(C)]
-#[derive(Debug, Clone, Copy, PartialEq, Eq, AsBytes, FromBytes, Default)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct ElfHeader {
     pub e_ident: ElfHeaderIdent,
     pub e_type: u16,
@@ -26,7 +24,7 @@ pub struct ElfHeader {
 }
 
 #[repr(C)]
-#[derive(Debug, Clone, Copy, PartialEq, Eq, AsBytes, FromBytes, Default)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct ElfHeaderIdent {
     pub magic: [u8; 4],
     pub class: u8,
@@ -46,7 +44,7 @@ impl ElfHeader {
 }
 
 #[repr(C)]
-#[derive(Debug, Clone, Copy, PartialEq, Eq, AsBytes, FromBytes, Default)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct ProgramHeader {
     pub p_type: u32,
     pub p_flags: u32,

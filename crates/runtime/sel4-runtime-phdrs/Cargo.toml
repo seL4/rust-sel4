@@ -12,7 +12,6 @@ tls = ["dep:sel4-reserve-tls-on-stack"]
 
 [dependencies]
 sel4-reserve-tls-on-stack = { path = "../sel4-reserve-tls-on-stack", optional = true }
-zerocopy = "*"
 
 [dependencies.unwinding]
 git = "https://github.com/nspin/unwinding.git"
