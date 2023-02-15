@@ -40,7 +40,8 @@ impl fmt::Write for DebugWrite {
     }
 }
 
-// [TODO] Report location with #[track_caller]
+// TODO
+// Report location with #[track_caller]
 #[doc(hidden)]
 pub fn abort_helper(args: fmt::Arguments) -> ! {
     debug_println!("{}", args);
@@ -55,12 +56,12 @@ macro_rules! abort {
 #[doc(hidden)]
 pub fn debug_print_helper(args: fmt::Arguments) {
     fmt::write(&mut DebugWrite, args).unwrap_or_else(|err| {
-        // NOTE(nspin)
-        // If a runtime's #[panic_handler] uses this debug_print{ln}, then this
-        // would result in a panic-within-panic. I think it is best to rely
-        // on any downstream #[panic_handler]'s panic-within-panic handling
-        // rather than making an opinionated choice of a lower-level abort
-        // mechanism here.
+        // NOTE
+        // Possibility of panic-in-panic. I think it is best to rely on any downstream
+        // #[panic_handler]'s panic-within-panic handling rather than making an opinionated choice
+        // of a lower-level abort mechanism here.
+        // TODO
+        // Add try_debug_print{,ln} alternatives.
         panic!("write error: {:?}", err)
     })
 }
@@ -74,9 +75,6 @@ macro_rules! debug_print {
 macro_rules! debug_println {
     () => ($crate::debug_print!("\n"));
     ($($arg:tt)*) => ({
-        // NOTE
-        // If #[feature(format_args_nl)] is ever stabilized, replace with:
-        // $crate::debug_print_helper(format_args_nl!($($arg)*));
         $crate::debug_print!($($arg)*);
         $crate::debug_print!("\n");
     })

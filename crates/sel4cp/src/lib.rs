@@ -34,9 +34,6 @@ mod handler;
 mod ipc_buffer;
 mod pd_name;
 
-#[cfg(feature = "unwinding")]
-mod unwinding;
-
 use ipc_buffer::get_ipc_buffer;
 
 pub use channel::*;
@@ -45,7 +42,7 @@ pub use pd_name::get_pd_name;
 
 #[cfg(target_thread_local)]
 #[no_mangle]
-unsafe extern "C" fn __rust_entry() -> ! {
+unsafe extern "C" fn sel4_runtime_rust_entry() -> ! {
     unsafe extern "C" fn cont_fn(_cont_arg: *mut c_void) -> ! {
         inner_entry()
     }
@@ -59,18 +56,17 @@ unsafe extern "C" fn __rust_entry() -> ! {
 
 #[cfg(not(target_thread_local))]
 #[no_mangle]
-unsafe extern "C" fn __rust_entry() -> ! {
+unsafe extern "C" fn sel4_runtime_rust_entry() -> ! {
     inner_entry()
 }
 
 unsafe extern "C" fn inner_entry() -> ! {
-    panicking::set_hook(&panic_hook);
-
     #[cfg(feature = "unwinding")]
     {
-        crate::unwinding::init();
+        sel4_runtime_phdrs::unwinding::set_custom_eh_frame_finder_using_embedded_phdrs().unwrap();
     }
 
+    panicking::set_hook(&panic_hook);
     sel4::set_ipc_buffer(get_ipc_buffer());
     __sel4cp_main();
     abort()

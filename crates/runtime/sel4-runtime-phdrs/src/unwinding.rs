@@ -1,5 +1,6 @@
-pub use unwinding::custom_eh_frame_finder::{
+use unwinding::custom_eh_frame_finder::{
     set_custom_eh_frame_finder, EhFrameFinder, FrameInfo, FrameInfoKind,
+    SetCustomEhFrameFinderError,
 };
 
 use crate::elf::{PT_GNU_EH_FRAME, PT_LOAD};
@@ -32,4 +33,11 @@ unsafe impl<T: InnerProgramHeadersFinder> EhFrameFinder for ProgramHeadersFinder
             kind: FrameInfoKind::EhFrameHdr(eh_frame_hdr),
         })
     }
+}
+
+#[cfg(feature = "embedded-phdrs")]
+pub fn set_custom_eh_frame_finder_using_embedded_phdrs() -> Result<(), SetCustomEhFrameFinderError>
+{
+    static EH_FRAME_FINDER: &(dyn EhFrameFinder + Sync) = &crate::EmbeddedProgramHeaders::finder();
+    set_custom_eh_frame_finder(EH_FRAME_FINDER)
 }

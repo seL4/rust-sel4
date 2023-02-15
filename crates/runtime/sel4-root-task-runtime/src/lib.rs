@@ -23,12 +23,9 @@ pub use sel4_runtime_simple_termination::Termination;
 #[cfg(feature = "global-allocator")]
 pub use sel4_runtime_simple_static_heap::GLOBAL_ALLOCATOR;
 
-#[cfg(feature = "unwinding")]
-mod unwinding;
-
 #[cfg(target_thread_local)]
 #[no_mangle]
-unsafe extern "C" fn __rust_entry(bootinfo: *const sel4::sys::seL4_BootInfo) -> ! {
+unsafe extern "C" fn sel4_runtime_rust_entry(bootinfo: *const sel4::sys::seL4_BootInfo) -> ! {
     unsafe extern "C" fn cont_fn(cont_arg: *mut c_void) -> ! {
         let bootinfo = cont_arg.cast_const().cast::<sel4::sys::seL4_BootInfo>();
         inner_entry(bootinfo)
@@ -43,17 +40,18 @@ unsafe extern "C" fn __rust_entry(bootinfo: *const sel4::sys::seL4_BootInfo) -> 
 
 #[cfg(not(target_thread_local))]
 #[no_mangle]
-unsafe extern "C" fn __rust_entry(bootinfo: *const sel4::sys::seL4_BootInfo) -> ! {
+unsafe extern "C" fn sel4_runtime_rust_entry(bootinfo: *const sel4::sys::seL4_BootInfo) -> ! {
     inner_entry(bootinfo)
 }
 
 unsafe extern "C" fn inner_entry(bootinfo: *const sel4::sys::seL4_BootInfo) -> ! {
     #[cfg(feature = "unwinding")]
     {
-        crate::unwinding::init();
+        sel4_runtime_phdrs::unwinding::set_custom_eh_frame_finder_using_embedded_phdrs().unwrap();
     }
 
-    sel4::set_ipc_buffer(sel4::BootInfo::from_ptr(bootinfo).ipc_buffer());
+    let ipc_buffer = sel4::BootInfo::from_ptr(bootinfo).ipc_buffer();
+    sel4::set_ipc_buffer(ipc_buffer);
     __sel4_root_task_runtime_main(bootinfo);
     abort()
 }

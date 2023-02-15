@@ -21,7 +21,7 @@ cfg_if::cfg_if! {
     if #[cfg(target_arch = "aarch64")] {
         global_asm! {
             r#"
-                .extern __rust_entry
+                .extern sel4_runtime_rust_entry
                 .extern __stack_top
 
                 .section .text
@@ -31,13 +31,13 @@ cfg_if::cfg_if! {
                     ldr x9, =__stack_top
                     ldr x9, [x9]
                     mov sp, x9
-                    b __rust_entry
+                    b sel4_runtime_rust_entry
             "#
         }
     } else if #[cfg(target_arch = "x86_64")] {
         global_asm! {
             r#"
-                .extern __rust_entry
+                .extern sel4_runtime_rust_entry
                 .extern __stack_top
 
                 .section .text
@@ -48,7 +48,7 @@ cfg_if::cfg_if! {
                     mov rbp, rsp
                     sub rsp, 0x8 // Stack must be 16-byte aligned before call
                     push rbp
-                    call __rust_entry
+                    call sel4_runtime_rust_entry
             "#
         }
     } else {

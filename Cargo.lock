@@ -154,9 +154,9 @@ checksum = "b645a089122eccb6111b4f81cbc1a49f5900ac4666bb93ac027feaecf15607bf"
 
 [[package]]
 name = "bindgen"
-version = "0.63.0"
+version = "0.64.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "36d860121800b2a9a94f9b5604b332d5cffb234ce17609ea479d723dbc9d3885"
+checksum = "c4243e6031260db77ede97ad86c27e501d646a27ab57b59a574f725d98ab1fb4"
 dependencies = [
  "bitflags",
  "cexpr",
@@ -1443,7 +1443,6 @@ dependencies = [
  "sel4",
  "sel4-panicking",
  "sel4-panicking-env",
- "sel4-reserve-tls-on-stack",
  "sel4-root-task-runtime-macros",
  "sel4-runtime-phdrs",
  "sel4-runtime-simple-entry",
@@ -1554,7 +1553,6 @@ dependencies = [
  "sel4",
  "sel4-panicking",
  "sel4-panicking-env",
- "sel4-reserve-tls-on-stack",
  "sel4-runtime-phdrs",
  "sel4-runtime-simple-entry",
  "sel4-runtime-simple-static-heap",

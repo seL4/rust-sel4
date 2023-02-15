@@ -17,7 +17,6 @@ unwinding = ["sel4-panicking/unwinding"]
 sel4 = { path = "../../sel4" }
 sel4-panicking = { path = "../sel4-panicking" }
 sel4-panicking-env = { path = "../sel4-panicking/env" }
-sel4-reserve-tls-on-stack = { path = "../sel4-reserve-tls-on-stack" }
 sel4-root-task-runtime-macros = { path = "./macros" }
 sel4-runtime-simple-entry = { path = "../sel4-runtime-simple-entry" }
 sel4-runtime-simple-static-heap = { path = "../sel4-runtime-simple-static-heap", optional = true }

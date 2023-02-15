@@ -7,7 +7,7 @@
 extern crate sel4_runtime_simple_entry;
 
 #[no_mangle]
-unsafe extern "C" fn __rust_entry(bootinfo: *const sel4::sys::seL4_BootInfo) -> ! {
+unsafe extern "C" fn sel4_runtime_rust_entry(bootinfo: *const sel4::sys::seL4_BootInfo) -> ! {
     let bootinfo = sel4::BootInfo::from_ptr(bootinfo);
     let err = main(&bootinfo).into_err();
     panic!("Error: {}", err)

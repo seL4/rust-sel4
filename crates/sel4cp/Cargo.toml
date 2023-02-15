@@ -17,7 +17,6 @@ unwinding = ["sel4-panicking/unwinding"]
 sel4 = { path = "../sel4", features = ["single-threaded"] }
 sel4-panicking = { path = "../runtime/sel4-panicking" }
 sel4-panicking-env = { path = "../runtime/sel4-panicking/env" }
-sel4-reserve-tls-on-stack = { path = "../runtime/sel4-reserve-tls-on-stack" }
 sel4-runtime-simple-entry = { path = "../runtime/sel4-runtime-simple-entry" }
 sel4cp-macros = { path = "./macros" }
 
