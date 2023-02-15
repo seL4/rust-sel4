@@ -6,6 +6,7 @@ edition = "2021"
 license = "BSD-2-Clause"
 
 [dependencies]
+heapless = "*"
 sel4 = { path = "../../../../../sel4" }
 sel4cp = { path = "../../../../../sel4cp", default-features = false }
 tock-registers = "*"

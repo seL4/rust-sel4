@@ -15,7 +15,7 @@ let
 
   sel4cpSource =
     let
-      rev = "8e4c0d3719c490bf0955f9207abdab210af5b2a6";
+      rev = "680b8407bd7d9b46159beea4e510fb9c9b6c633d";
       ref = "refs/tags/keep/${builtins.substring 0 32 rev}";
     in
       builtins.fetchGit {

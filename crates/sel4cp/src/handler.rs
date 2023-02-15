@@ -7,15 +7,15 @@ pub trait Handler {
     type Error;
 
     fn notified(&mut self, channel: Channel) -> Result<(), Self::Error> {
-        panic!("unexpected notification from {:?}", channel)
+        panic!("unexpected notification from channel {channel:?}")
     }
 
     fn protected(
         &mut self,
         channel: Channel,
-        _msg_info: MessageInfo,
+        msg_info: MessageInfo,
     ) -> Result<MessageInfo, Self::Error> {
-        panic!("unexpected protected procedure call from {:?}", channel)
+        panic!("unexpected protected procedure call from channel {channel:?} with msg_info={msg_info:?}")
     }
 
     fn run(&mut self) -> Result<!, Self::Error> {
@@ -34,7 +34,7 @@ pub trait Handler {
             } else {
                 let mut badge_bits = badge;
                 while badge_bits != 0 {
-                    let i = badge_bits.leading_zeros();
+                    let i = badge_bits.trailing_zeros();
                     self.notified(Channel::new(i.try_into().unwrap()))?;
                     badge_bits &= !(1 << i);
                 }

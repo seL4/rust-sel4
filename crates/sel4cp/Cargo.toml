@@ -10,7 +10,6 @@ alloc = ["sel4-panicking/alloc"]
 default = ["unwinding"]
 full = ["default", "global-allocator"]
 global-allocator = ["alloc", "sel4-runtime-simple-static-heap"]
-single-threaded = ["sel4/single-threaded"]
 unwinding = ["sel4-panicking/unwinding"]
 
 [dependencies]

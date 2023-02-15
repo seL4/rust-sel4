@@ -43,7 +43,6 @@ impl Pl011Device {
     }
 
     pub fn put_char(&self, c: u8) {
-        // TODO queue rather than wait
         loop {
             if self.FR.get() & PL011_UARTFR_TXFF == 0 {
                 break;

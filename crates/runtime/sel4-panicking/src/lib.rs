@@ -1,6 +1,7 @@
 #![no_std]
 #![feature(cfg_target_thread_local)]
 #![feature(core_intrinsics)]
+#![feature(lang_items)]
 #![feature(thread_local)]
 
 #[cfg(feature = "alloc")]

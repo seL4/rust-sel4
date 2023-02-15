@@ -18,7 +18,7 @@ pub struct Channel {
 }
 
 impl Channel {
-    pub fn new(index: usize) -> Self {
+    pub const fn new(index: usize) -> Self {
         Self { index }
     }
 
@@ -31,10 +31,10 @@ impl Channel {
             .signal()
     }
 
-    pub fn irq_ack(&self) {
-        self.local_cptr::<sel4::cap_type::IRQHandler>(BASE_OUTPUT_NOTIFICATION_CAP)
+    // TODO don't expose sel4::Error
+    pub fn irq_ack(&self) -> Result<(), sel4::Error> {
+        self.local_cptr::<sel4::cap_type::IRQHandler>(BASE_IRQ_CAP)
             .irq_handler_ack()
-            .unwrap()
     }
 
     pub fn pp_call(&self, msg_info: MessageInfo) -> MessageInfo {
@@ -45,6 +45,7 @@ impl Channel {
     }
 }
 
+#[derive(Debug)]
 pub struct MessageInfo {
     inner: sel4::MessageInfo,
 }

@@ -12,7 +12,7 @@
 }:
 
 let
-  mkPD = args: mkTask (args // rec {
+  mkPD = args: mkTask (rec {
     layers = [
       crateUtils.defaultIntermediateLayer
       {
@@ -25,7 +25,7 @@ let
       }
     ];
     rustTargetInfo = seL4RustTargetInfoWithConfig { cp = true; minimal = true; };
-  });
+  } // args);
 
 in {
   hello = rec {
@@ -49,6 +49,11 @@ in {
       };
       assistant = mkPD rec {
         rootCrate = crates.banscii-assistant;
+        rustTargetInfo = seL4RustTargetInfoWithConfig { cp = true; minimal = false; };
+        release = false;
+      };
+      talent = mkPD rec {
+        rootCrate = crates.banscii-talent;
         release = false;
       };
     };
@@ -56,8 +61,9 @@ in {
       searchPath = symlinkJoin {
         name = "x";
         paths = [
-          "${pds.assistant}/bin"
           "${pds.pl011-driver}/bin"
+          "${pds.assistant}/bin"
+          "${pds.talent}/bin"
         ];
       };
       systemXML = srcRoot + "/crates/examples/sel4cp/banscii/banscii.system";
