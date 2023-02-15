@@ -374,7 +374,7 @@ impl<'a, N: ObjectName, F: Content, B: BorrowMut<[PerObjectBuffer]>> Loader<'a, 
         Ok(())
     }
 
-    pub fn fill_frame<U: FrameType>(
+    fn fill_frame<U: FrameType>(
         &self,
         frame: LocalCPtr<U>,
         fill: &[FillEntry<F>],
