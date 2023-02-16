@@ -4,8 +4,8 @@ use num_enum::{IntoPrimitive, TryFromPrimitive};
 use zerocopy::{AsBytes, FromBytes};
 
 #[derive(Clone, Copy, PartialEq, Eq, IntoPrimitive, TryFromPrimitive)]
-#[cfg_attr(target_pointer_width = "64", repr(u64))]
 #[cfg_attr(target_pointer_width = "32", repr(u32))]
+#[cfg_attr(target_pointer_width = "64", repr(u64))]
 pub enum RequestTag {
     PutChar,
     GetChar,
@@ -18,8 +18,8 @@ pub struct PutCharRequest {
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, IntoPrimitive, TryFromPrimitive)]
-#[cfg_attr(target_pointer_width = "64", repr(u64))]
 #[cfg_attr(target_pointer_width = "32", repr(u32))]
+#[cfg_attr(target_pointer_width = "64", repr(u64))]
 pub enum GetCharResponseTag {
     None,
     Some,

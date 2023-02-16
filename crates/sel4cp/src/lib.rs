@@ -32,12 +32,14 @@ pub use sel4_runtime_simple_static_heap::GLOBAL_ALLOCATOR;
 mod channel;
 mod handler;
 mod ipc_buffer;
+mod message;
 mod pd_name;
 
 use ipc_buffer::get_ipc_buffer;
 
 pub use channel::*;
 pub use handler::*;
+pub use message::*;
 pub use pd_name::get_pd_name;
 
 #[cfg(target_thread_local)]

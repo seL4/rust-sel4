@@ -1,8 +1,8 @@
-#[cfg(target_pointer_width = "64")]
-pub type Word = u64;
-
 #[cfg(target_pointer_width = "32")]
 pub type Word = u32;
+
+#[cfg(target_pointer_width = "64")]
+pub type Word = u64;
 
 #[repr(C)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
