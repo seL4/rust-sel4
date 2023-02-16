@@ -7,6 +7,8 @@ license = "BSD-2-Clause"
 
 [dependencies]
 banscii-assistant-core = { path = "./core" }
+banscii-pl011-driver-interface-types = { path = "../pl011-driver/interface-types" }
+banscii-talent-interface-types = { path = "../talent/interface-types" }
 sel4 = { path = "../../../../../sel4" }
 
 [dependencies.sel4cp]

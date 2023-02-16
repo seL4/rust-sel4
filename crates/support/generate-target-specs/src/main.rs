@@ -47,7 +47,7 @@ impl Config {
                         "-z".into(),
                         "max-page-size=4096".into(),
                         // TODO
-                        // Consider a configuration with --omagic or similar to further reduce
+                        // Consider a configuration with --omagic/--nmagic/similar to further reduce
                         // wasted space in cases where segments are mapped without regards for
                         // permissions. --no-rosegment could be a good place to start.
                     ],

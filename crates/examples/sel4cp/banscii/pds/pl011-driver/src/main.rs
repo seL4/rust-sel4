@@ -6,6 +6,8 @@ use heapless::Deque;
 
 use sel4cp::*;
 
+use banscii_pl011_driver_interface_types::*;
+
 mod device;
 
 use device::Pl011Device;
@@ -46,8 +48,8 @@ impl Handler for ThisHandler {
                         break;
                     }
                 }
-                DEVICE.irq_ack().unwrap();
                 self.device.handle_interrupt();
+                DEVICE.irq_ack().unwrap();
                 if self.notify {
                     ASSISTANT.notify();
                 }
@@ -65,29 +67,24 @@ impl Handler for ThisHandler {
         msg_info: MessageInfo,
     ) -> Result<MessageInfo, Self::Error> {
         Ok(match channel {
-            ASSISTANT => match msg_info.label() {
-                0 => {
-                    assert_eq!(msg_info.count(), 1);
-                    let c = get_mr(0) as u8;
-                    self.device.put_char(c);
-                    MessageInfo::new(0, 0)
-                }
-                1 => {
-                    assert_eq!(msg_info.count(), 0);
-                    match self.buffer.pop_front() {
-                        None => {
-                            self.notify = true;
-                            MessageInfo::new(0, 0)
-                        }
-                        Some(c) => {
-                            set_mr(0, c as MessageValue);
-                            MessageInfo::new(1, 1)
-                        }
+            ASSISTANT => match msg_info.label_try_into().ok() {
+                Some(RequestTag::PutChar) => match msg_info.recv() {
+                    Ok(PutCharRequest { val }) => {
+                        self.device.put_char(val);
+                        MessageInfo::send(StatusMessageLabel::Ok, NoMessageValue)
                     }
-                }
-                _ => {
-                    panic!()
-                }
+                    Err(_) => MessageInfo::send(StatusMessageLabel::Error, NoMessageValue),
+                },
+                Some(RequestTag::GetChar) => match self.buffer.pop_front() {
+                    Some(val) => {
+                        MessageInfo::send(GetCharResponseTag::Some, GetCharSomeResponse { val })
+                    }
+                    None => {
+                        self.notify = true;
+                        MessageInfo::send(GetCharResponseTag::None, NoMessageValue)
+                    }
+                },
+                None => MessageInfo::send(StatusMessageLabel::Error, NoMessageValue),
             },
             _ => {
                 unreachable!()

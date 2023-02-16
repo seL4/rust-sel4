@@ -1,0 +1,10 @@
+[package]
+name = "banscii-talent-interface-types"
+version = "0.1.0"
+authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
+edition = "2021"
+license = "BSD-2-Clause"
+
+[dependencies]
+num_enum = { version = "*", default-features = false }
+zerocopy = "*"

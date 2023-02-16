@@ -11,6 +11,7 @@ use alloc::vec::Vec;
 use sel4cp::*;
 
 use banscii_assistant_core::Draft;
+use banscii_pl011_driver_interface_types as driver;
 
 const PL011_DRIVER: Channel = Channel::new(0);
 
@@ -37,7 +38,7 @@ impl Handler for ThisHandler {
                             self.buffer.clear();
                         }
                     } else {
-                        let c: char = b.into();
+                        let c = char::from(b);
                         if c.is_ascii() && !c.is_ascii_control() {
                             put_char(b);
                             self.buffer.push(b);
@@ -68,24 +69,27 @@ fn create(input: &[u8]) {
     }
 }
 
-fn put_char(c: u8) {
-    set_mr(0, c as MessageValue);
-    let msg_info = PL011_DRIVER.pp_call(MessageInfo::new(0, 1));
-    assert_eq!(msg_info.label(), 0);
-    assert_eq!(msg_info.count(), 0);
+fn put_char(val: u8) {
+    let msg_info = PL011_DRIVER.pp_call(MessageInfo::send(
+        driver::RequestTag::PutChar,
+        driver::PutCharRequest { val },
+    ));
+    assert_eq!(msg_info.label_try_into(), Ok(StatusMessageLabel::Ok));
 }
 
 fn get_char() -> Option<u8> {
-    let msg_info = PL011_DRIVER.pp_call(MessageInfo::new(1, 0));
-    match msg_info.label() {
-        0 => {
-            assert_eq!(msg_info.count(), 0);
-            None
-        }
-        1 => {
-            assert_eq!(msg_info.count(), 1);
-            Some(get_mr(0) as u8)
-        }
+    let msg_info = PL011_DRIVER.pp_call(MessageInfo::send(
+        driver::RequestTag::GetChar,
+        NoMessageValue,
+    ));
+    match msg_info.label_try_into().ok() {
+        Some(driver::GetCharResponseTag::Some) => match msg_info.recv() {
+            Ok(driver::GetCharSomeResponse { val }) => Some(val),
+            Err(_) => {
+                panic!()
+            }
+        },
+        Some(driver::GetCharResponseTag::None) => None,
         _ => {
             panic!()
         }

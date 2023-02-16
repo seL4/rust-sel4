@@ -97,6 +97,8 @@ name = "banscii-assistant"
 version = "0.1.0"
 dependencies = [
  "banscii-assistant-core",
+ "banscii-pl011-driver-interface-types",
+ "banscii-talent-interface-types",
  "sel4",
  "sel4cp",
 ]
@@ -124,6 +126,7 @@ dependencies = [
 name = "banscii-pl011-driver"
 version = "0.1.0"
 dependencies = [
+ "banscii-pl011-driver-interface-types",
  "heapless",
  "sel4",
  "sel4cp",
@@ -131,10 +134,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "banscii-pl011-driver-interface-types"
+version = "0.1.0"
+dependencies = [
+ "num_enum",
+ "zerocopy",
+]
+
+[[package]]
 name = "banscii-talent"
 version = "0.1.0"
 dependencies = [
  "banscii-talent-core",
+ "banscii-talent-interface-types",
  "sel4",
  "sel4cp",
 ]
@@ -154,6 +166,14 @@ dependencies = [
  "banscii-talent-core",
  "env_logger",
  "log",
+]
+
+[[package]]
+name = "banscii-talent-interface-types"
+version = "0.1.0"
+dependencies = [
+ "num_enum",
+ "zerocopy",
 ]
 
 [[package]]
@@ -993,6 +1013,26 @@ dependencies = [
 ]
 
 [[package]]
+name = "num_enum"
+version = "0.5.9"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8d829733185c1ca374f17e52b762f24f535ec625d2cc1f070e34c8a9068f341b"
+dependencies = [
+ "num_enum_derive",
+]
+
+[[package]]
+name = "num_enum_derive"
+version = "0.5.9"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2be1598bf1c313dcdd12092e3f1920f463462525a21b7b4e11b4168353d0123e"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "object"
 version = "0.30.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1603,6 +1643,7 @@ dependencies = [
 name = "sel4cp"
 version = "0.1.0"
 dependencies = [
+ "num_enum",
  "sel4",
  "sel4-panicking",
  "sel4-panicking-env",
@@ -1610,6 +1651,7 @@ dependencies = [
  "sel4-runtime-simple-entry",
  "sel4-runtime-simple-static-heap",
  "sel4cp-macros",
+ "zerocopy",
 ]
 
 [[package]]
@@ -2062,6 +2104,27 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d7d8a75eaf6557bb84a65ace8609883db44a29951042ada9b393151532e41fcb"
 dependencies = [
  "xml-rs",
+]
+
+[[package]]
+name = "zerocopy"
+version = "0.6.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "332f188cc1bcf1fe1064b8c58d150f497e697f49774aa846f2dc949d9a25f236"
+dependencies = [
+ "byteorder",
+ "zerocopy-derive",
+]
+
+[[package]]
+name = "zerocopy-derive"
+version = "0.3.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6505e6815af7de1746a08f69c69606bb45695a17149517680f3b2149713b19a3"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
 ]
 
 [[package]]

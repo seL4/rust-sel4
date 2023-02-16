@@ -1,6 +1,7 @@
 #![no_std]
 #![feature(cfg_target_thread_local)]
 #![feature(cstr_from_bytes_until_nul)]
+#![feature(int_roundings)]
 #![feature(never_type)]
 #![feature(unwrap_infallible)]
 

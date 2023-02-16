@@ -10,6 +10,9 @@ use crate::{
 #[sel4_cfg(not(KERNEL_MCS))]
 use crate::IPCBuffer;
 
+/// Number of message registers in the IPC buffer.
+pub const NUM_MESSAGE_REGISTERS: usize = sys::seL4_MsgMaxLength.try_into().ok().unwrap();
+
 /// A capability badge.
 pub type Badge = Word;
 
