@@ -12,6 +12,7 @@ root-task = [
     "capdl-loader-expecting-serialized-spec",
     "capdl-loader-core"
 ]
+sel4cp = ["dep:sel4cp", "sel4cp-postcard"]
 
 [dependencies]
 cfg-if = "*"
@@ -48,6 +49,7 @@ sel4-logging = { path = "../runtime/sel4-logging" }
 sel4-sync = { path = "../runtime/sel4-sync" }
 sel4-sys = { path = "../sel4/sys" }
 sel4cp = { path = "../sel4cp", features = ["full"], optional = true }
+sel4cp-postcard = { path = "../sel4cp/postcard", optional = true }
 
 [target."cfg(target_env = \"sel4\")".dependencies.sel4-root-task-runtime]
 path = "../runtime/sel4-root-task-runtime"
