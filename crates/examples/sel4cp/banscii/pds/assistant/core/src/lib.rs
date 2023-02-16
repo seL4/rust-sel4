@@ -20,6 +20,8 @@ pub struct Draft {
 }
 
 impl Draft {
+    // Derived from:
+    // https://github.com/redox-os/rusttype/blob/master/dev/examples/ascii.rs
     pub fn new(subject: &str) -> Self {
         let font_data = include_bytes!("../assets/fonts/rock-salt/RockSalt-Regular.ttf");
         let font = Font::try_from_bytes(font_data as &[u8]).unwrap();
