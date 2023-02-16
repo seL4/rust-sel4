@@ -15,8 +15,11 @@ use banscii_pl011_driver_interface_types as driver;
 
 const PL011_DRIVER: Channel = Channel::new(0);
 
+const MAX_SUBJECT_LEN: usize = 16;
+
 #[main]
 fn main() -> ThisHandler {
+    prompt();
     ThisHandler { buffer: Vec::new() }
 }
 
@@ -34,12 +37,17 @@ impl Handler for ThisHandler {
                     if let b'\n' | b'\r' = b {
                         put_char(b'\n');
                         if !self.buffer.is_empty() {
-                            create(&self.buffer);
-                            self.buffer.clear();
+                            self.create();
                         }
+                        prompt();
                     } else {
                         let c = char::from(b);
                         if c.is_ascii() && !c.is_ascii_control() {
+                            if self.buffer.len() == MAX_SUBJECT_LEN {
+                                put_chars(b"\n(char limit reached)\n");
+                                self.create();
+                                prompt();
+                            }
                             put_char(b);
                             self.buffer.push(b);
                         }
@@ -51,6 +59,13 @@ impl Handler for ThisHandler {
             }
         }
         Ok(())
+    }
+}
+
+impl ThisHandler {
+    fn create(&mut self) {
+        create(&self.buffer);
+        self.buffer.clear();
     }
 }
 
@@ -69,12 +84,22 @@ fn create(input: &[u8]) {
     }
 }
 
+fn prompt() {
+    put_chars(b"banscii> ")
+}
+
+fn put_chars(vals: &[u8]) {
+    for val in vals {
+        put_char(*val);
+    }
+}
+
 fn put_char(val: u8) {
     let msg_info = PL011_DRIVER.pp_call(MessageInfo::send(
         driver::RequestTag::PutChar,
         driver::PutCharRequest { val },
     ));
-    assert_eq!(msg_info.label_try_into(), Ok(StatusMessageLabel::Ok));
+    assert_eq!(msg_info.label().try_into(), Ok(StatusMessageLabel::Ok));
 }
 
 fn get_char() -> Option<u8> {
@@ -82,7 +107,7 @@ fn get_char() -> Option<u8> {
         driver::RequestTag::GetChar,
         NoMessageValue,
     ));
-    match msg_info.label_try_into().ok() {
+    match msg_info.label().try_into().ok() {
         Some(driver::GetCharResponseTag::Some) => match msg_info.recv() {
             Ok(driver::GetCharSomeResponse { val }) => Some(val),
             Err(_) => {

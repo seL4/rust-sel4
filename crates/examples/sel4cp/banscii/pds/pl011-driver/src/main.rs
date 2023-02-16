@@ -67,7 +67,7 @@ impl Handler for ThisHandler {
         msg_info: MessageInfo,
     ) -> Result<MessageInfo, Self::Error> {
         Ok(match channel {
-            ASSISTANT => match msg_info.label_try_into().ok() {
+            ASSISTANT => match msg_info.label().try_into().ok() {
                 Some(RequestTag::PutChar) => match msg_info.recv() {
                     Ok(PutCharRequest { val }) => {
                         self.device.put_char(val);

@@ -73,10 +73,6 @@ impl MessageInfo {
         self.inner.label()
     }
 
-    pub fn label_try_into<T: TryFrom<MessageLabel>>(&self) -> Result<T, T::Error> {
-        self.label().try_into()
-    }
-
     pub fn count(&self) -> usize {
         self.inner.length()
     }
