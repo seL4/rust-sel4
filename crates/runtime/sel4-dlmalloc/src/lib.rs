@@ -1,4 +1,5 @@
 #![no_std]
+#![feature(const_mut_refs)]
 
 use core::alloc::{GlobalAlloc, Layout};
 use core::cell::RefCell;
@@ -20,8 +21,19 @@ impl<const N: usize> StaticHeap<N> {
         Self([0; N])
     }
 
-    pub fn bounds(&mut self) -> Range<*mut u8> {
-        self.0.as_mut_ptr_range()
+    pub const fn bounds(&mut self) -> ConstantStaticHeapBounds {
+        ConstantStaticHeapBounds::new(self.0.as_mut_ptr_range())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ConstantStaticHeapBounds(Range<*mut u8>);
+
+unsafe impl Send for ConstantStaticHeapBounds {}
+
+impl ConstantStaticHeapBounds {
+    pub const fn new(inner: Range<*mut u8>) -> Self {
+        Self(inner)
     }
 }
 
@@ -72,6 +84,22 @@ unsafe impl<O: MutexSyncOps, T: DlmallocAllocator> GlobalAlloc for DlmallocGloba
     }
 }
 
+pub trait StaticHeapBounds {
+    fn bounds(&self) -> Range<*mut u8>;
+}
+
+impl StaticHeapBounds for ConstantStaticHeapBounds {
+    fn bounds(&self) -> Range<*mut u8> {
+        self.0.clone()
+    }
+}
+
+impl<T: Fn() -> Range<*mut u8>> StaticHeapBounds for T {
+    fn bounds(&self) -> Range<*mut u8> {
+        (self)()
+    }
+}
+
 pub struct StaticDlmallocAllocator<T> {
     state: RefCell<StaticDlmallocAllocatorState<T>>,
 }
@@ -91,11 +119,11 @@ impl<T> StaticDlmallocAllocator<T> {
     }
 }
 
-impl<T: Fn() -> Range<*mut u8>> StaticDlmallocAllocatorState<T> {
+impl<T: StaticHeapBounds> StaticDlmallocAllocatorState<T> {
     fn as_free(&mut self) -> &mut Range<*mut u8> {
         if let StaticDlmallocAllocatorState::Uninitialized { get_initial_bounds } = self {
             *self = StaticDlmallocAllocatorState::Initialized {
-                free: (get_initial_bounds)(),
+                free: get_initial_bounds.bounds(),
             };
         }
         if let StaticDlmallocAllocatorState::Initialized { free } = self {
@@ -106,7 +134,7 @@ impl<T: Fn() -> Range<*mut u8>> StaticDlmallocAllocatorState<T> {
     }
 }
 
-unsafe impl<T: Fn() -> Range<*mut u8> + Send> DlmallocAllocator for StaticDlmallocAllocator<T> {
+unsafe impl<T: StaticHeapBounds + Send> DlmallocAllocator for StaticDlmallocAllocator<T> {
     fn alloc(&self, size: usize) -> (*mut u8, usize, u32) {
         let mut state = self.state.borrow_mut();
         let free = state.as_free();

@@ -1,20 +1,36 @@
 #![no_std]
 #![feature(const_option_ext)]
+#![feature(const_mut_refs)]
 
-use core::ops::Range;
-
-use sel4_dlmalloc::{StaticDlmallocGlobalAlloc, StaticHeap};
-use sel4_env_literal_helper::env_literal;
+use sel4_dlmalloc::{ConstantStaticHeapBounds, StaticDlmallocGlobalAlloc};
 use sel4_sync::DeferredNotificationMutexSyncOps;
 
-const STATIC_HEAP_SIZE: usize = env_literal!("SEL4_RUNTIME_HEAP_SIZE").unwrap_or(0);
+pub use sel4_dlmalloc::StaticHeap;
 
-static mut STATIC_HEAP: StaticHeap<STATIC_HEAP_SIZE> = StaticHeap::new();
+pub type GlobalAllocator =
+    StaticDlmallocGlobalAlloc<DeferredNotificationMutexSyncOps, ConstantStaticHeapBounds>;
 
-#[global_allocator]
-pub static GLOBAL_ALLOCATOR: StaticDlmallocGlobalAlloc<
-    DeferredNotificationMutexSyncOps,
-    fn() -> Range<*mut u8>,
-> = StaticDlmallocGlobalAlloc::new(DeferredNotificationMutexSyncOps::new(), || unsafe {
-    STATIC_HEAP.bounds()
-});
+pub const fn new_global_allocator(bounds: ConstantStaticHeapBounds) -> GlobalAllocator {
+    StaticDlmallocGlobalAlloc::new(DeferredNotificationMutexSyncOps::new(), bounds)
+}
+
+macro_rules! declare_static_heap {
+    {
+        $vis:vis $ident:ident: $size:expr;
+    } => {
+        #[global_allocator]
+        $vis static $ident: $crate::GlobalAllocator = {
+            static mut STATIC_HEAP: $crate::StaticHeap<$size> = $crate::StaticHeap::new();
+            $crate::new_global_allocator(unsafe { STATIC_HEAP.bounds() })
+        };
+    }
+}
+
+// // //
+
+const STATIC_HEAP_SIZE: usize =
+    sel4_env_literal_helper::env_literal!("SEL4_RUNTIME_HEAP_SIZE").unwrap_or(0);
+
+declare_static_heap! {
+    pub GLOBAL_ALLOCATOR: STATIC_HEAP_SIZE;
+}
