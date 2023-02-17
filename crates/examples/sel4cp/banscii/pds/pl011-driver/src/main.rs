@@ -52,6 +52,7 @@ impl Handler for ThisHandler {
                 DEVICE.irq_ack().unwrap();
                 if self.notify {
                     ASSISTANT.notify();
+                    self.notify = false;
                 }
             }
             _ => {
