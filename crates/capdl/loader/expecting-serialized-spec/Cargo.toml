@@ -17,4 +17,4 @@ sel4-logging = { path = "../../../runtime/sel4-logging" }
 [dependencies.sel4-root-task-runtime]
 path = "../../../runtime/sel4-root-task-runtime"
 default-features = false
-features = ["global-allocator", "single-threaded"]
+features = ["alloc", "single-threaded"]

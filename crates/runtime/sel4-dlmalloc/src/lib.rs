@@ -21,8 +21,13 @@ impl<const N: usize> StaticHeap<N> {
         Self([0; N])
     }
 
-    pub const fn bounds(&mut self) -> ConstantStaticHeapBounds {
-        ConstantStaticHeapBounds::new(self.0.as_mut_ptr_range())
+    // NOTE
+    // Should be &mut self, but that would cause #![feature(const_mut_refs)] to be required for
+    // crates using the macro in this crate.
+    pub const fn bounds(&self) -> ConstantStaticHeapBounds {
+        // HACK see above
+        let range = self.0.as_ptr_range();
+        ConstantStaticHeapBounds::new(range.start.cast_mut()..range.end.cast_mut())
     }
 }
 

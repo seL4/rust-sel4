@@ -1,5 +1,3 @@
-extern crate proc_macro;
-
 use std::marker::PhantomData;
 
 use proc_macro::TokenStream;

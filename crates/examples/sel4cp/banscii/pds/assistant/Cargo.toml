@@ -10,8 +10,4 @@ banscii-assistant-core = { path = "./core" }
 banscii-pl011-driver-interface-types = { path = "../pl011-driver/interface-types" }
 banscii-talent-interface-types = { path = "../talent/interface-types" }
 sel4 = { path = "../../../../../sel4" }
-
-[dependencies.sel4cp]
-path = "../../../../../sel4cp"
-default-features = false
-features = ["global-allocator"]
+sel4cp = { path = "../../../../../sel4cp", default-features = false, features = ["alloc"] }

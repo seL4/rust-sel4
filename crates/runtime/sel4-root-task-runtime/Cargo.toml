@@ -8,8 +8,7 @@ license = "BSD-2-Clause"
 [features]
 alloc = ["sel4-panicking/alloc"]
 default = ["unwinding"]
-full = ["default", "global-allocator"]
-global-allocator = ["alloc", "sel4-runtime-simple-static-heap"]
+full = ["default", "alloc"]
 single-threaded = ["sel4/single-threaded"]
 unwinding = ["sel4-panicking/unwinding"]
 
@@ -19,7 +18,7 @@ sel4-panicking = { path = "../sel4-panicking" }
 sel4-panicking-env = { path = "../sel4-panicking/env" }
 sel4-root-task-runtime-macros = { path = "./macros" }
 sel4-runtime-simple-entry = { path = "../sel4-runtime-simple-entry" }
-sel4-runtime-simple-static-heap = { path = "../sel4-runtime-simple-static-heap", optional = true }
+sel4-runtime-simple-static-heap = { path = "../sel4-runtime-simple-static-heap" }
 sel4-runtime-simple-termination = { path = "../sel4-runtime-simple-termination" }
 
 [dependencies.sel4-runtime-phdrs]

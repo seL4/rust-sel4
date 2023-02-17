@@ -3,7 +3,7 @@
 
 use sel4cp::{main, NullHandler};
 
-#[main]
+#[main(heap_size = 0x10000)]
 fn main() -> NullHandler {
     NullHandler::new()
 }

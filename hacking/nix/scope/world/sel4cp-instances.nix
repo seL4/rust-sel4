@@ -13,17 +13,17 @@
 
 let
   mkPD = args: mkTask (rec {
-    layers = [
-      crateUtils.defaultIntermediateLayer
-      {
-        crates = [ "sel4" ];
-        modifications = {
-          modifyDerivation = drv: drv.overrideAttrs (self: super: {
-            SEL4_PREFIX = seL4ForUserspace;
-          });
-        };
-      }
-    ];
+    # layers = [
+    #   crateUtils.defaultIntermediateLayer
+    #   {
+    #     crates = [ "sel4" ];
+    #     modifications = {
+    #       modifyDerivation = drv: drv.overrideAttrs (self: super: {
+    #         SEL4_PREFIX = seL4ForUserspace;
+    #       });
+    #     };
+    #   }
+    # ];
     rustTargetInfo = seL4RustTargetInfoWithConfig { cp = true; minimal = true; };
   } // args);
 

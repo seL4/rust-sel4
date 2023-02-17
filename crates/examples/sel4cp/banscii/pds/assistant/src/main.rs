@@ -17,7 +17,7 @@ const PL011_DRIVER: Channel = Channel::new(0);
 
 const MAX_SUBJECT_LEN: usize = 16;
 
-#[main]
+#[main(heap_size = 0x10000)]
 fn main() -> ThisHandler {
     prompt();
     ThisHandler { buffer: Vec::new() }

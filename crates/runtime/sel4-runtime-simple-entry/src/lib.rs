@@ -1,6 +1,4 @@
 #![no_std]
-#![feature(const_mut_refs)]
-#![feature(const_option_ext)]
 #![feature(exclusive_wrapper)]
 
 use core::arch::global_asm;
@@ -14,19 +12,24 @@ impl<const N: usize> Stack<N> {
         Self([0; N])
     }
 
-    pub const fn top(&mut self) -> StackTop {
-        StackTop(Exclusive::new(self.0.as_mut_ptr_range().end))
+    // NOTE
+    // Should be &mut self, but that would cause #![feature(const_mut_refs)] to be required for
+    // crates using the macro in this crate.
+    pub const fn top(&self) -> StackTop {
+        // HACK see above
+        StackTop(Exclusive::new(self.0.as_ptr_range().end.cast_mut()))
     }
 }
 
 #[repr(transparent)]
 pub struct StackTop(Exclusive<*mut u8>);
 
+#[macro_export]
 macro_rules! declare_stack {
     ($size:expr) => {
         #[no_mangle]
         static __sel4_runtime_stack_top: $crate::StackTop = {
-            static mut STACK: $crate::Stack<STACK_SIZE> = $crate::Stack::new();
+            static mut STACK: $crate::Stack<{ $size }> = $crate::Stack::new();
             unsafe { STACK.top() }
         };
     };
@@ -70,10 +73,3 @@ cfg_if::cfg_if! {
         compile_error!("unsupported architecture");
     }
 }
-
-// // //
-
-const STACK_SIZE: usize =
-    sel4_env_literal_helper::env_literal!("SEL4_RUNTIME_STACK_SIZE").unwrap_or(4096 * 4);
-
-declare_stack!(STACK_SIZE);

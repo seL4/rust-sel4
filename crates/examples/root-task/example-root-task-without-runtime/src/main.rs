@@ -4,7 +4,9 @@
 #![feature(never_type)]
 #![feature(unwrap_infallible)]
 
-extern crate sel4_runtime_simple_entry;
+use sel4_runtime_simple_entry::declare_stack;
+
+declare_stack!(0x4000);
 
 #[no_mangle]
 unsafe extern "C" fn sel4_runtime_rust_entry(bootinfo: *const sel4::sys::seL4_BootInfo) -> ! {

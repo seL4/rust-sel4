@@ -14,6 +14,7 @@ use capdl_loader_core::{Loader, LoaderBuffers, PerObjectBuffer};
 use capdl_loader_expecting_serialized_spec_types::SpecWithSourcesForSerialization;
 use sel4::BootInfo;
 use sel4_logging::{LevelFilter, Logger, LoggerBuilder};
+use sel4_root_task_runtime::main;
 
 const LOG_LEVEL: LevelFilter = LevelFilter::Info;
 
@@ -22,7 +23,7 @@ static LOGGER: Logger = LoggerBuilder::default()
     .write(|s| sel4::debug_print!("{}", s))
     .build();
 
-#[sel4_root_task_runtime::main]
+#[main(heap_size = 4096 * 128)] // TODO append heap in second build phase
 fn main(bootinfo: &BootInfo) -> ! {
     LOGGER.set().unwrap();
     let spec_with_sources = get_spec_with_sources();

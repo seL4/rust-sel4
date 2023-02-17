@@ -169,7 +169,6 @@ in rec {
       rootTask = mkTask {
         rootCrate = crates.tests-root-task-backtrace;
         release = false;
-        rootTaskStackSize = 4096 * 64; # TODO
       };
       isSupported = haveFullRuntime;
       canAutomate = true;
@@ -197,7 +196,6 @@ in rec {
                   extraProfile = {
                     panic = panicStrategyName;
                   };
-                  rootTaskStackSize = 4096 * 64; # TODO
                 };
                 isSupported = haveFullRuntime;
                 canAutomate = panicStrategyName == "unwind";

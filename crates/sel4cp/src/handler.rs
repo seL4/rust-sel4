@@ -25,6 +25,7 @@ pub trait Handler {
                 Some(tag) => INPUT_CAP.reply_recv(tag.into_sel4(), REPLY_CAP),
                 None => INPUT_CAP.recv(REPLY_CAP),
             };
+
             let tag = MessageInfo::from_sel4(tag);
 
             let is_endpoint = badge >> 63 != 0;

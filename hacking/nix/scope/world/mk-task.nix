@@ -8,9 +8,6 @@
 { commonModifications ? {}
 , lastLayerModifications ? {}
 
-, rootTaskStackSize ? 4096 * 8
-, rootTaskHeapSize ? 4096 * 16
-
 , extraProfile ? {}
 , replaceSysroot ? null
 , injectPhdrs ? false
@@ -65,8 +62,6 @@ let
   theseLastLayerModifications = crateUtils.elaborateModifications {
     modifyDerivation = drv: drv.overrideAttrs (self: super: {
       SEL4_PREFIX = seL4ForUserspace;
-      SEL4_RUNTIME_STACK_SIZE = rootTaskStackSize;
-      SEL4_RUNTIME_HEAP_SIZE = rootTaskHeapSize;
 
       passthru = (super.passthru or {}) // {
         elf = maybeInjectPhdrs "${self.finalPackage}/bin/${args.rootCrate.name}.elf";
@@ -78,8 +73,6 @@ let
     "extraProfile"
     "replaceSysroot"
     "injectPhdrs"
-    "rootTaskStackSize"
-    "rootTaskHeapSize"
   ];
 
 in

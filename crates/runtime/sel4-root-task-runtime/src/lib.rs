@@ -1,11 +1,6 @@
 #![no_std]
 #![feature(cfg_target_thread_local)]
 
-extern crate sel4_runtime_simple_entry;
-
-#[cfg(feature = "global-allocator")]
-extern crate sel4_runtime_simple_static_heap;
-
 use core::ffi::c_char;
 use core::fmt;
 
@@ -19,9 +14,6 @@ pub use sel4_panicking as panicking;
 pub use sel4_panicking_env::{abort, debug_print, debug_println};
 pub use sel4_root_task_runtime_macros::main;
 pub use sel4_runtime_simple_termination::Termination;
-
-#[cfg(feature = "global-allocator")]
-pub use sel4_runtime_simple_static_heap::GLOBAL_ALLOCATOR;
 
 #[cfg(target_thread_local)]
 #[no_mangle]
@@ -52,19 +44,39 @@ unsafe extern "C" fn inner_entry(bootinfo: *const sel4::sys::seL4_BootInfo) -> !
 
     let ipc_buffer = sel4::BootInfo::from_ptr(bootinfo).ipc_buffer();
     sel4::set_ipc_buffer(ipc_buffer);
-    __sel4_root_task_runtime_main(bootinfo);
+    __sel4_root_task_main(bootinfo);
     abort!("main thread returned")
 }
 
 extern "C" {
-    fn __sel4_root_task_runtime_main(bootinfo: *const sel4::sys::seL4_BootInfo);
+    fn __sel4_root_task_main(bootinfo: *const sel4::sys::seL4_BootInfo);
+}
+
+// TODO decrease
+pub const DEFAULT_STACK_SIZE: usize = 0x10000;
+
+#[macro_export]
+macro_rules! declare_root_task {
+    ($main:path, $(stack_size = $stack_size:expr,)? heap_size = $heap_size:expr) => {
+        $crate::_private::declare_static_heap! {
+            __GLOBAL_ALLOCATOR: $heap_size;
+        }
+        $crate::_private::declare_root_task!($main $(, stack_size = $stack_size)?);
+    };
+    ($main:path) => {
+        $crate::_private::declare_root_task!($main, stack_size = $crate::_private::DEFAULT_STACK_SIZE);
+    };
+    ($main:path, stack_size = $stack_size:expr) => {
+        $crate::_private::declare_main!($main);
+        $crate::_private::declare_stack!($stack_size);
+    };
 }
 
 #[macro_export]
 macro_rules! declare_main {
     ($main:path) => {
         #[no_mangle]
-        pub unsafe extern "C" fn __sel4_root_task_runtime_main(
+        pub unsafe extern "C" fn __sel4_root_task_main(
             bootinfo: *const $crate::_private::seL4_BootInfo,
         ) {
             $crate::_private::run_main($main, bootinfo);
@@ -90,13 +102,16 @@ pub unsafe fn run_main<T>(
 }
 
 #[no_mangle]
-fn sel4_runtime_debug_put_char(c: c_char) {
-    sel4::debug_put_char(c)
+fn sel4_runtime_debug_put_char(c: u8) {
+    sel4::debug_put_char(c as c_char)
 }
 
 // For macros
 #[doc(hidden)]
 pub mod _private {
-    pub use super::run_main;
+    pub use super::{declare_main, declare_root_task, run_main, DEFAULT_STACK_SIZE};
+
     pub use sel4::sys::seL4_BootInfo;
+    pub use sel4_runtime_simple_entry::declare_stack;
+    pub use sel4_runtime_simple_static_heap::declare_static_heap;
 }

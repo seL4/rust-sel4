@@ -6,7 +6,7 @@ edition = "2021"
 license = "BSD-2-Clause"
 
 [features]
-alloc = ["sel4-root-task-runtime/alloc", "sel4-root-task-runtime/global-allocator"]
+alloc = ["sel4-root-task-runtime/alloc"]
 panic-abort = []
 panic-unwind = []
 

@@ -5,11 +5,6 @@
 #![feature(never_type)]
 #![feature(unwrap_infallible)]
 
-extern crate sel4_runtime_simple_entry;
-
-#[cfg(feature = "global-allocator")]
-extern crate sel4_runtime_simple_static_heap;
-
 use core::ffi::c_char;
 use core::fmt;
 
@@ -25,9 +20,6 @@ use sel4_runtime_phdrs::EmbeddedProgramHeaders;
 pub use sel4_panicking as panicking;
 pub use sel4_panicking_env::{abort, debug_print, debug_println};
 pub use sel4cp_macros::main;
-
-#[cfg(feature = "global-allocator")]
-pub use sel4_runtime_simple_static_heap::GLOBAL_ALLOCATOR;
 
 mod channel;
 mod handler;
@@ -82,6 +74,26 @@ extern "C" {
     fn __sel4cp_main();
 }
 
+// TODO decrease
+pub const DEFAULT_STACK_SIZE: usize = 0x10000;
+
+#[macro_export]
+macro_rules! declare_protection_domain {
+    ($main:path, $(stack_size = $stack_size:expr,)? heap_size = $heap_size:expr) => {
+        $crate::_private::declare_static_heap! {
+            __GLOBAL_ALLOCATOR: $heap_size;
+        }
+        $crate::_private::declare_protection_domain!($main $(, stack_size = $stack_size)?);
+    };
+    ($main:path) => {
+        $crate::_private::declare_protection_domain!($main, stack_size = $crate::_private::DEFAULT_STACK_SIZE);
+    };
+    ($main:path, stack_size = $stack_size:expr) => {
+        $crate::_private::declare_main!($main);
+        $crate::_private::declare_stack!($stack_size);
+    };
+}
+
 #[macro_export]
 macro_rules! declare_main {
     ($main:path) => {
@@ -105,13 +117,16 @@ where
 }
 
 #[no_mangle]
-fn sel4_runtime_debug_put_char(c: c_char) {
-    sel4::debug_put_char(c)
+fn sel4_runtime_debug_put_char(c: u8) {
+    sel4::debug_put_char(c as c_char)
 }
 
 // For macros
 #[doc(hidden)]
 pub mod _private {
-    pub use super::run_main;
+    pub use super::{declare_main, declare_protection_domain, run_main, DEFAULT_STACK_SIZE};
+
     pub use sel4::sys::seL4_BootInfo;
+    pub use sel4_runtime_simple_entry::declare_stack;
+    pub use sel4_runtime_simple_static_heap::declare_static_heap;
 }
