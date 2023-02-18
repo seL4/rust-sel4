@@ -206,7 +206,14 @@ impl<T: Fn(), U: Fn()> MutexSyncOps for AbstractMutexSyncOps<T, U> {
     }
 }
 
-pub struct PanickingMutexSyncOps;
+#[derive_const(Default)]
+pub struct PanickingMutexSyncOps(());
+
+impl PanickingMutexSyncOps {
+    pub const fn new() -> Self {
+        Self::default()
+    }
+}
 
 impl MutexSyncOps for PanickingMutexSyncOps {
     fn signal(&self) {

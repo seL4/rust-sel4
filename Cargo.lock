@@ -305,8 +305,10 @@ dependencies = [
  "log",
  "postcard",
  "sel4",
+ "sel4-dlmalloc",
  "sel4-logging",
  "sel4-root-task-runtime",
+ "sel4-sync",
 ]
 
 [[package]]

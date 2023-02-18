@@ -1,3 +1,4 @@
+#![feature(int_roundings)]
 #![feature(never_type)]
 #![feature(unwrap_infallible)]
 
@@ -32,12 +33,8 @@ fn main() -> Result<()> {
 
     let serialized_spec =
         reserialize_spec::reserialize_spec(&spec_json, fill_dir_path, object_names_level);
-    let armed_loader_elf = render_elf::render_elf(
-        &loader_elf,
-        &serialized_spec,
-        "capdl_spec_start",
-        "capdl_spec_size",
-    );
+
+    let armed_loader_elf = render_elf::render_elf(&loader_elf, &serialized_spec, 128 * 4096);
 
     fs::write(out_file_path, &armed_loader_elf)?;
     Ok(())

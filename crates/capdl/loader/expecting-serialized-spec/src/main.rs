@@ -1,6 +1,8 @@
 #![no_std]
 #![no_main]
 #![feature(const_trait_impl)]
+#![feature(int_roundings)]
+#![feature(pointer_byte_offsets)]
 #![feature(strict_provenance)]
 
 extern crate alloc;
@@ -23,7 +25,7 @@ static LOGGER: Logger = LoggerBuilder::default()
     .write(|s| sel4::debug_print!("{}", s))
     .build();
 
-#[main(heap_size = 4096 * 128)] // TODO append heap in second build phase
+#[main]
 fn main(bootinfo: &BootInfo) -> ! {
     LOGGER.set().unwrap();
     let spec_with_sources = get_spec_with_sources();
@@ -40,18 +42,37 @@ fn main(bootinfo: &BootInfo) -> ! {
     .unwrap_or_else(|err| panic!("Error: {}", err))
 }
 
-#[used]
 #[no_mangle]
 #[link_section = ".data"]
-static mut capdl_spec_start: *const u8 = ptr::null();
+static mut capdl_loader_serialized_spec_start: *mut u8 = ptr::null_mut();
 
-#[used]
 #[no_mangle]
 #[link_section = ".data"]
-static mut capdl_spec_size: usize = 0;
+static mut capdl_loader_serialized_spec_size: usize = 0;
+
+#[no_mangle]
+#[link_section = ".data"]
+static mut capdl_loader_heap_start: *mut u8 = ptr::null_mut();
+
+#[no_mangle]
+#[link_section = ".data"]
+static mut capdl_loader_heap_size: usize = 0;
+
+#[no_mangle]
+#[link_section = ".data"]
+static mut capdl_loader_image_start: *mut u8 = ptr::null_mut();
+
+#[no_mangle]
+#[link_section = ".data"]
+static mut capdl_loader_image_end: *mut u8 = ptr::null_mut();
 
 fn get_spec_with_sources<'a>() -> SpecWithSourcesForSerialization<'a> {
-    let blob = unsafe { slice::from_raw_parts(capdl_spec_start, capdl_spec_size) };
+    let blob = unsafe {
+        slice::from_raw_parts(
+            capdl_loader_serialized_spec_start,
+            capdl_loader_serialized_spec_size,
+        )
+    };
     let (spec, source) = postcard::take_from_bytes(blob).unwrap();
     SpecWithSourcesForSerialization {
         spec,
@@ -60,14 +81,28 @@ fn get_spec_with_sources<'a>() -> SpecWithSourcesForSerialization<'a> {
     }
 }
 
-extern "C" {
-    static __executable_start: u64;
-}
-
 fn user_image_bounds() -> Range<usize> {
-    unsafe { addr_of_ref(&__executable_start)..(capdl_spec_start.addr() + capdl_spec_size) }
+    unsafe { capdl_loader_image_start.expose_addr()..capdl_loader_image_end.expose_addr() }
 }
 
-fn addr_of_ref<T>(x: &T) -> usize {
-    (x as *const T).addr()
+fn static_heap_bounds() -> Range<*mut u8> {
+    unsafe {
+        capdl_loader_heap_start
+            ..capdl_loader_heap_start.byte_offset(capdl_loader_heap_size.try_into().unwrap())
+    }
+}
+
+mod heap {
+    use core::ops::Range;
+
+    use sel4_dlmalloc::StaticDlmallocGlobalAlloc;
+    use sel4_sync::PanickingMutexSyncOps;
+
+    use super::static_heap_bounds;
+
+    #[global_allocator]
+    static GLOBAL_ALLOCATOR: StaticDlmallocGlobalAlloc<
+        PanickingMutexSyncOps,
+        fn() -> Range<*mut u8>,
+    > = StaticDlmallocGlobalAlloc::new(Default::default(), static_heap_bounds);
 }

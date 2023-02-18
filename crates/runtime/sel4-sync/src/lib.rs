@@ -1,4 +1,7 @@
 #![no_std]
+#![feature(const_default_impls)]
+#![feature(const_trait_impl)]
+#![feature(derive_const)]
 
 mod mutex;
 

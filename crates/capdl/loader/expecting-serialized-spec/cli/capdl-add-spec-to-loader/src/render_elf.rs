@@ -1,16 +1,41 @@
-use render_elf_with_data::{inject, BoundsSymbolArgs, SymbolicInjection, DEFAULT_ALIGN};
+use render_elf_with_data::{Input, SymbolicInjection, SymbolicValue};
 
-pub fn render_elf(orig_elf: &[u8], data: &[u8], start_symbol: &str, size_symbol: &str) -> Vec<u8> {
-    let image_bounds_symbols = BoundsSymbolArgs {
-        start: vec![],
-        end: vec![],
-        size: vec![],
-    };
-    let injection_bounds_symbols = BoundsSymbolArgs {
-        start: vec![start_symbol.to_owned()],
-        end: vec![],
-        size: vec![size_symbol.to_owned()],
-    };
-    let injection = SymbolicInjection::new(DEFAULT_ALIGN, data.to_vec(), &injection_bounds_symbols);
-    inject(orig_elf, vec![injection], &image_bounds_symbols).unwrap()
+pub fn render_elf(orig_elf: &[u8], data: &[u8], heap_size: usize) -> Vec<u8> {
+    let align_modulus = 4096;
+    let align_residue = (align_modulus - data.len() % align_modulus) % align_modulus;
+    let memsz = data.len() + heap_size;
+    let mut input = Input::default();
+    input.symbolic_injections.push(SymbolicInjection {
+        align_modulus,
+        align_residue,
+        content: data,
+        memsz,
+        patches: vec![
+            (
+                "capdl_loader_serialized_spec_start".to_owned(),
+                SymbolicValue { addend: 0 },
+            ),
+            (
+                "capdl_loader_heap_start".to_owned(),
+                SymbolicValue {
+                    addend: data.len().try_into().unwrap(),
+                },
+            ),
+        ],
+    });
+    input
+        .image_start_patches
+        .push("capdl_loader_image_start".to_owned());
+    input
+        .image_end_patches
+        .push("capdl_loader_image_end".to_owned());
+    input.concrete_patches.push((
+        "capdl_loader_serialized_spec_size".to_owned(),
+        data.len().try_into().unwrap(),
+    ));
+    input.concrete_patches.push((
+        "capdl_loader_heap_size".to_owned(),
+        heap_size.try_into().unwrap(),
+    ));
+    input.render_with_data(orig_elf).unwrap()
 }
