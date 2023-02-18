@@ -10,6 +10,8 @@ The [./hacking](./hacking) directory contains code for building and testing thes
 
 Note that, for now, these crates depend on some patches to libsel4 which can be found at [coliasgroup/seL4:rust](https://gitlab.com/coliasgroup/seL4/-/tree/rust).
 
+This work is funded by the [seL4 Foundation](https://sel4.systems/Foundation/home.pml).
+
 ### Rendered rustdoc
 
 [https://coliasgroup.gitlab.io/rust-seL4-html/](https://coliasgroup.gitlab.io/rust-seL4-html/)
