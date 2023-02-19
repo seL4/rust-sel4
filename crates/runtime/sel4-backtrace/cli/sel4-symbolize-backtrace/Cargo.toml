@@ -8,6 +8,7 @@ license = "BSD-2-Clause"
 [dependencies]
 addr2line = "0"
 clap = "3"
+hex = "0"
 memmap = "0"
 object = "0"
 sel4-backtrace-types = { path = "../../types", features = ["full"] }

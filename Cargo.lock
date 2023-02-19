@@ -1635,6 +1635,7 @@ version = "0.1.0"
 dependencies = [
  "addr2line",
  "clap",
+ "hex",
  "memmap",
  "object",
  "sel4-backtrace-types",
