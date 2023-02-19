@@ -1,0 +1,11 @@
+[package]
+name = "sel4-backtrace-embedded-debug-info"
+version = "0.1.0"
+authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
+edition = "2021"
+license = "BSD-2-Clause"
+
+[dependencies]
+addr2line = { version = "0.19", default-features = false }
+object = { version = "*", default-features = false, features = ["read"] }
+sel4-backtrace-addr2line-context-helper = { path = "../addr2line-context-helper" }

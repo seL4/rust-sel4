@@ -28,7 +28,7 @@ checksum = "a76fd60b23679b7d19bd066031410fb7e458ccc5e958eb5c325888ce4baedc97"
 dependencies = [
  "cpp_demangle",
  "fallible-iterator",
- "gimli 0.27.0",
+ "gimli 0.27.2",
  "object",
  "rustc-demangle",
  "smallvec",
@@ -600,12 +600,11 @@ checksum = "22030e2c5a68ec659fde1e949a745124b48e6fa8b045b7ed5bd1fe4ccc5c4e5d"
 
 [[package]]
 name = "gimli"
-version = "0.27.0"
+version = "0.27.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dec7af912d60cdbd3677c1af9352ebae6fb8394d165568a2234df0fa00f87793"
+checksum = "ad0a93d233ebf96623465aad4046a8d3aa4da22d4f4beba5388838c8a434bbb4"
 dependencies = [
  "fallible-iterator",
- "indexmap",
  "stable_deref_trait",
 ]
 
@@ -1343,6 +1342,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "sel4-backtrace-addr2line-context-helper"
+version = "0.1.0"
+dependencies = [
+ "addr2line",
+ "gimli 0.27.2",
+ "stable_deref_trait",
+]
+
+[[package]]
+name = "sel4-backtrace-embedded-debug-info"
+version = "0.1.0"
+dependencies = [
+ "addr2line",
+ "object",
+ "sel4-backtrace-addr2line-context-helper",
+]
+
+[[package]]
 name = "sel4-backtrace-simple"
 version = "0.1.0"
 dependencies = [
@@ -1354,7 +1371,9 @@ dependencies = [
 name = "sel4-backtrace-types"
 version = "0.1.0"
 dependencies = [
+ "addr2line",
  "cfg-if",
+ "fallible-iterator",
  "postcard",
  "serde",
 ]
@@ -1458,6 +1477,14 @@ version = "0.1.0"
 dependencies = [
  "dlmalloc",
  "sel4-sync",
+]
+
+[[package]]
+name = "sel4-embed-debug-info"
+version = "0.1.0"
+dependencies = [
+ "clap",
+ "render-elf-with-data",
 ]
 
 [[package]]
@@ -1598,12 +1625,8 @@ version = "0.1.0"
 dependencies = [
  "addr2line",
  "clap",
- "fallible-iterator",
- "gimli 0.27.0",
- "hex",
  "memmap",
  "object",
- "postcard",
  "sel4-backtrace-types",
 ]
 
@@ -1848,7 +1871,9 @@ version = "0.1.0"
 dependencies = [
  "sel4",
  "sel4-backtrace",
+ "sel4-backtrace-embedded-debug-info",
  "sel4-backtrace-simple",
+ "sel4-backtrace-types",
  "sel4-root-task-runtime",
 ]
 

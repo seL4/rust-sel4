@@ -14,11 +14,11 @@ cfg_if::cfg_if! {
     }
 }
 
-cfg_if::cfg_if! {
-    if #[cfg(feature = "postcard")] {
-        mod with_postcard;
-    }
-}
+#[cfg(feature = "postcard")]
+mod with_postcard;
+
+#[cfg(feature = "symbolize")]
+mod with_symbolize;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]

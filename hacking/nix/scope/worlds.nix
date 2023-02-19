@@ -10,6 +10,7 @@ let
 
   kernelConfigCommon = {
     KernelVerificationBuild = off;
+    KernelRootCNodeSizeBits = mkString "14"; # For backtrace test with embedded debug info
   };
 
 in rec {

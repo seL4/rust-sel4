@@ -1,0 +1,15 @@
+[package]
+name = "sel4-backtrace-addr2line-context-helper"
+version = "0.1.0"
+authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
+edition = "2021"
+license = "BSD-2-Clause"
+
+[dependencies]
+gimli = { version = "0.27", default-features = false, features = ["endian-reader"] }
+stable_deref_trait = { version = "*", default-features = false, features = ["alloc"] }
+
+[dependencies.addr2line]
+version = "0.19"
+default-features = false
+features = ["rustc-demangle", "cpp_demangle", "fallible-iterator", "smallvec", "object"]

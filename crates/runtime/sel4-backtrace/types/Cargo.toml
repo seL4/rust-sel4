@@ -7,11 +7,19 @@ license = "BSD-2-Clause"
 
 [features]
 alloc = ["serde?/alloc"]
-full = ["alloc", "serde", "postcard"]
+full = ["alloc", "serde", "postcard", "symbolize"]
 postcard = ["serde", "dep:postcard"]
 serde = ["dep:serde"]
+symbolize = ["addr2line", "fallible-iterator", "alloc"]
 
 [dependencies]
 cfg-if = "*"
+fallible-iterator = { version = "0", default-features = false, optional = true }
 postcard = { version = "*", default-features = false, features = [], optional = true }
 serde = { version = "*", default-features = false, features = ["derive"], optional = true }
+
+[dependencies.addr2line]
+version = "0"
+default-features = false
+features = ["rustc-demangle", "cpp_demangle", "fallible-iterator", "smallvec"]
+optional = true

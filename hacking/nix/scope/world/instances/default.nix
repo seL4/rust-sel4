@@ -2,6 +2,7 @@
 , writeScript, linkFarm
 , crates
 , mkTask, mkLoader
+, embedDebugInfo
 , seL4RustTargetInfoWithConfig
 , worldConfig
 , callPackage
@@ -166,10 +167,16 @@ in rec {
     };
 
     backtrace = mk {
-      rootTask = mkTask {
-        rootCrate = crates.tests-root-task-backtrace;
-        release = false;
-      };
+      rootTask =
+        let
+          orig = mkTask {
+            rootCrate = crates.tests-root-task-backtrace;
+            release = false;
+          };
+        in {
+          elf = embedDebugInfo orig.elf;
+          inherit orig;
+        };
       isSupported = haveFullRuntime;
       canAutomate = true;
     };

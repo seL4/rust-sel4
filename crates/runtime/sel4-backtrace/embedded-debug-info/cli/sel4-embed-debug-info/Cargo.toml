@@ -1,13 +1,10 @@
 [package]
-name = "sel4-symbolize-backtrace"
+name = "sel4-embed-debug-info"
 version = "0.1.0"
 authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
 edition = "2021"
 license = "BSD-2-Clause"
 
 [dependencies]
-addr2line = "0"
 clap = "3"
-memmap = "0"
-object = "0"
-sel4-backtrace-types = { path = "../../types", features = ["full"] }
+render-elf-with-data = { path = "../../../../../build-tools/render-elf-with-data" }

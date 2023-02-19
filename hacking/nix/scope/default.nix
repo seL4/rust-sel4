@@ -106,9 +106,12 @@ superCallPackage ../rust-utils {} self //
   };
 
   sel4-inject-phdrs = mkTool crates.sel4-inject-phdrs;
+  sel4-embed-debug-info = mkTool crates.sel4-embed-debug-info;
   sel4-symbolize-backtrace = mkTool crates.sel4-symbolize-backtrace;
 
   injectPhdrs = callPackage ./inject-phdrs.nix {};
+
+  embedDebugInfo = callPackage ./embed-debug-info.nix {};
 
   configHelpers = callPackage ./config-helpers.nix {};
 
