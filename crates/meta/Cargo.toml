@@ -42,8 +42,24 @@ loader-core = { path = "../loader/core" }
 [target."cfg(not(target_os = \"none\"))".dependencies]
 render-elf-with-data = { path = "../build-tools/render-elf-with-data" }
 
+[target."cfg(not(target_os = \"none\"))".dependencies.capdl-add-spec-to-loader]
+path = "../capdl/loader/expecting-serialized-spec/cli/capdl-add-spec-to-loader"
+artifact = ["bin"]
+
+[target."cfg(not(target_os = \"none\"))".dependencies.sel4-embed-debug-info]
+path = "../runtime/sel4-backtrace/embedded-debug-info/cli/sel4-embed-debug-info"
+artifact = ["bin"]
+
+[target."cfg(not(target_os = \"none\"))".dependencies.sel4-symbolize-backtrace]
+path = "../runtime/sel4-backtrace/cli/sel4-symbolize-backtrace"
+artifact = ["bin"]
+
 [target."cfg(target_env = \"sel4\")".dependencies]
 sel4 = { path = "../sel4" }
+sel4-backtrace = { path = "../runtime/sel4-backtrace", features = ["full"] }
+sel4-backtrace-embedded-debug-info = { path = "../runtime/sel4-backtrace/embedded-debug-info" }
+sel4-backtrace-simple = { path = "../runtime/sel4-backtrace/simple", features = ["alloc"] }
+sel4-backtrace-types = { path = "../runtime/sel4-backtrace/types", features = ["full"] }
 sel4-config = { path = "../sel4/config" }
 sel4-logging = { path = "../runtime/sel4-logging" }
 sel4-sync = { path = "../runtime/sel4-sync" }
