@@ -3,6 +3,9 @@
 
     <memory_region name="pl011_mmio" size="0x1000" phys_addr="0x9000000" />
 
+    <memory_region name="assistant_to_talent" size="0x4_000" />
+    <memory_region name="talent_to_assistant" size="0x4_000" />
+
     <protection_domain name="pl011_driver" priority="254" pp="true">
         <program_image path="banscii-pl011-driver.elf" />
         <map mr="pl011_mmio" vaddr="0x2000000" perms="rw" setvar_vaddr="pl011_mmio_base" />
@@ -11,10 +14,14 @@
 
     <protection_domain name="assistant" priority="252">
         <program_image path="banscii-assistant.elf" />
+        <map mr="talent_to_assistant" vaddr="0x2_004_000" perms="r" cached="true" setvar_vaddr="region_in_start" />
+        <map mr="assistant_to_talent" vaddr="0x2_000_000" perms="rw" cached="true" setvar_vaddr="region_out_start" />
     </protection_domain>
 
     <protection_domain name="talent" priority="253" pp="true">
         <program_image path="banscii-talent.elf" />
+        <map mr="assistant_to_talent" vaddr="0x2_004_000" perms="r" cached="true" setvar_vaddr="region_in_start" />
+        <map mr="talent_to_assistant" vaddr="0x2_000_000" perms="rw" cached="true" setvar_vaddr="region_out_start" />
     </protection_domain>
 
     <channel>

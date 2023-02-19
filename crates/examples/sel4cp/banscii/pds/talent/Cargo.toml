@@ -10,3 +10,4 @@ banscii-talent-core = { path = "./core" }
 banscii-talent-interface-types = { path = "./interface-types" }
 sel4 = { path = "../../../../../sel4" }
 sel4cp = { path = "../../../../../sel4cp", default-features = false, features = ["alloc"] }
+volatile = "*"

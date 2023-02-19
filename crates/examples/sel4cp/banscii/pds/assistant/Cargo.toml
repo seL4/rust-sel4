@@ -9,5 +9,7 @@ license = "BSD-2-Clause"
 banscii-assistant-core = { path = "./core" }
 banscii-pl011-driver-interface-types = { path = "../pl011-driver/interface-types" }
 banscii-talent-interface-types = { path = "../talent/interface-types" }
+pem-rfc7468 = { version = "*", features = ["alloc"] }
 sel4 = { path = "../../../../../sel4" }
 sel4cp = { path = "../../../../../sel4cp", default-features = false, features = ["alloc"] }
+volatile = "*"

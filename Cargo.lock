@@ -99,8 +99,10 @@ dependencies = [
  "banscii-assistant-core",
  "banscii-pl011-driver-interface-types",
  "banscii-talent-interface-types",
+ "pem-rfc7468",
  "sel4",
  "sel4cp",
+ "volatile",
 ]
 
 [[package]]
@@ -149,6 +151,7 @@ dependencies = [
  "banscii-talent-interface-types",
  "sel4",
  "sel4cp",
+ "volatile",
 ]
 
 [[package]]
@@ -2030,6 +2033,12 @@ name = "version_check"
 version = "0.9.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "49874b5167b65d7193b8aba1567f5c7d93d001cafc34600cee003eda787e483f"
+
+[[package]]
+name = "volatile"
+version = "0.4.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "442887c63f2c839b346c192d047a7c87e73d0689c9157b00b53dcc27dd5ea793"
 
 [[package]]
 name = "wasmparser"
