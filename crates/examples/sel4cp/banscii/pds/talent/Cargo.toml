@@ -8,6 +8,11 @@ license = "BSD-2-Clause"
 [dependencies]
 banscii-talent-core = { path = "./core" }
 banscii-talent-interface-types = { path = "./interface-types" }
+log = "*"
+rsa = { version = "0.8.1", default-features = false, features = ["pem"] }
 sel4 = { path = "../../../../../sel4" }
 sel4cp = { path = "../../../../../sel4cp", default-features = false, features = ["alloc"] }
-volatile = "*"
+volatile = { version = "*", features = ["unstable"] }
+
+[build-dependencies]
+rsa = "0.8.1"

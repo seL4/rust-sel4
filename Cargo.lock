@@ -99,6 +99,7 @@ dependencies = [
  "banscii-assistant-core",
  "banscii-pl011-driver-interface-types",
  "banscii-talent-interface-types",
+ "hex",
  "pem-rfc7468",
  "sel4",
  "sel4cp",
@@ -149,6 +150,8 @@ version = "0.1.0"
 dependencies = [
  "banscii-talent-core",
  "banscii-talent-interface-types",
+ "log",
+ "rsa",
  "sel4",
  "sel4cp",
  "volatile",
@@ -593,6 +596,17 @@ checksum = "bff49e947297f3312447abdca79f45f4738097cc82b06e72054d2223f601f1b9"
 dependencies = [
  "typenum",
  "version_check",
+]
+
+[[package]]
+name = "getrandom"
+version = "0.2.8"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c05aeb6a22b8f62540c194aac980f2115af067bfe15a0734d7277a768d396b31"
+dependencies = [
+ "cfg-if",
+ "libc",
+ "wasi",
 ]
 
 [[package]]
@@ -1225,6 +1239,9 @@ name = "rand_core"
 version = "0.6.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ec0be4795e2f6a28069bec0b5ff3e2ac9bafc99e6a9a7dc3547996c5c816922c"
+dependencies = [
+ "getrandom",
+]
 
 [[package]]
 name = "regex"
@@ -1688,6 +1705,7 @@ dependencies = [
  "sel4-runtime-simple-entry",
  "sel4-runtime-simple-static-heap",
  "sel4cp-macros",
+ "volatile",
  "zerocopy",
 ]
 
@@ -2040,6 +2058,12 @@ name = "volatile"
 version = "0.4.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "442887c63f2c839b346c192d047a7c87e73d0689c9157b00b53dcc27dd5ea793"
+
+[[package]]
+name = "wasi"
+version = "0.11.0+wasi-snapshot-preview1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9c8d87e72b64a3b4db28d11ce29237c246188f4f51057d65a7eab63b7987e423"
 
 [[package]]
 name = "wasmparser"

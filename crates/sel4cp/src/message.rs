@@ -74,6 +74,12 @@ pub type MessageLabel = sel4::Word;
 #[derive(Debug, Copy, Clone, Default, PartialEq, Eq)]
 pub struct NoMessageLabel;
 
+impl From<NoMessageLabel> for MessageLabel {
+    fn from(_: NoMessageLabel) -> Self {
+        Self::default()
+    }
+}
+
 impl TryFrom<MessageLabel> for NoMessageLabel {
     type Error = TryFromNoMessageLabelError;
 
@@ -99,6 +105,16 @@ impl fmt::Display for TryFromNoMessageLabelError {
 pub enum StatusMessageLabel {
     Ok,
     Error,
+}
+
+impl StatusMessageLabel {
+    pub fn is_ok(&self) -> bool {
+        *self == StatusMessageLabel::Ok
+    }
+
+    pub fn is_error(&self) -> bool {
+        *self == StatusMessageLabel::Error
+    }
 }
 
 // // //

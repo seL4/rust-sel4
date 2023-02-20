@@ -4,6 +4,7 @@
 
 extern crate alloc;
 
+use alloc::vec;
 use alloc::vec::Vec;
 use core::ptr;
 use core::slice;
@@ -15,8 +16,10 @@ use sel4cp::*;
 
 use banscii_assistant_core::Draft;
 use banscii_pl011_driver_interface_types as driver;
+use banscii_talent_interface_types as talent;
 
 const PL011_DRIVER: Channel = Channel::new(0);
+const TALENT: Channel = Channel::new(1);
 
 const MAX_SUBJECT_LEN: usize = 16;
 
@@ -42,10 +45,6 @@ fn get_region_out() -> Volatile<&'static mut [u8]> {
 
 #[main(heap_size = 0x10000)]
 fn main() -> ThisHandler {
-    unsafe {
-        assert!(!region_in_start.is_null());
-        assert!(!region_out_start.is_null());
-    }
     prompt();
     ThisHandler { buffer: Vec::new() }
 }
@@ -99,16 +98,58 @@ impl ThisHandler {
 fn create(input: &[u8]) {
     let subject = str::from_utf8(input).unwrap();
     let draft = Draft::new(subject);
-    let palette = b"@%#x+=:-. ";
-    for row in 0..draft.height {
-        for col in 0..draft.width {
-            let i = row * draft.width + col;
-            let v = draft.pixel_data[i];
-            let c = palette[usize::from(v / 26)];
-            put_char(c);
+
+    let draft_start = 0;
+    let draft_size = draft.pixel_data.len();
+
+    get_region_out()
+        .index_mut(draft_start..draft_size)
+        .copy_from_slice(&draft.pixel_data);
+
+    let msg_info = TALENT.pp_call(MessageInfo::send(
+        NoMessageLabel,
+        talent::Request {
+            height: draft.height,
+            width: draft.width,
+            draft_start,
+            draft_size,
+        },
+    ));
+
+    assert_eq!(msg_info.label().try_into(), Ok(StatusMessageLabel::Ok));
+
+    let msg = msg_info.recv::<talent::Response>().unwrap();
+
+    let height = msg.height;
+    let width = msg.width;
+    let pixel_data = {
+        let mut this = vec![0; msg.masterpiece_size];
+        get_region_in()
+            .index(msg.masterpiece_start..msg.masterpiece_start + msg.masterpiece_size)
+            .copy_into_slice(&mut this);
+        this
+    };
+
+    let signature = {
+        let mut this = vec![0; msg.signature_size];
+        get_region_in()
+            .index(msg.signature_start..msg.signature_start + msg.signature_size)
+            .copy_into_slice(&mut this);
+        this
+    };
+
+    for row in 0..height {
+        for col in 0..width {
+            let i = row * width + col;
+            let b = pixel_data[i];
+            put_char(b);
         }
         put_char(b'\n');
     }
+
+    put_chars(b"Signature: ");
+    put_chars(hex::encode(&signature).as_bytes());
+    put_char(b'\n');
 }
 
 fn prompt() {

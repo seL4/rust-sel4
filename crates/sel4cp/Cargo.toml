@@ -6,7 +6,7 @@ edition = "2021"
 license = "BSD-2-Clause"
 
 [features]
-alloc = ["sel4-panicking/alloc"]
+alloc = ["zerocopy/alloc", "sel4-panicking/alloc"]
 default = ["unwinding"]
 full = ["default", "alloc"]
 unwinding = ["sel4-panicking/unwinding"]
@@ -19,6 +19,7 @@ sel4-panicking-env = { path = "../runtime/sel4-panicking/env" }
 sel4-runtime-simple-entry = { path = "../runtime/sel4-runtime-simple-entry" }
 sel4-runtime-simple-static-heap = { path = "../runtime/sel4-runtime-simple-static-heap" }
 sel4cp-macros = { path = "./macros" }
+volatile = { version = "*", features = ["unstable"] }
 zerocopy = "*"
 
 [dependencies.sel4-runtime-phdrs]
