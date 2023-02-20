@@ -6,7 +6,6 @@ edition = "2021"
 license = "BSD-2-Clause"
 
 [dependencies]
-banscii-talent-core = { path = "./core" }
 banscii-talent-interface-types = { path = "./interface-types" }
 log = "*"
 rsa = { version = "0.8.1", default-features = false, features = ["pem", "sha2"] }

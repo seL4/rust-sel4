@@ -148,30 +148,12 @@ dependencies = [
 name = "banscii-talent"
 version = "0.1.0"
 dependencies = [
- "banscii-talent-core",
  "banscii-talent-interface-types",
  "log",
  "rsa",
  "sel4",
  "sel4cp",
  "volatile",
-]
-
-[[package]]
-name = "banscii-talent-core"
-version = "0.1.0"
-dependencies = [
- "log",
- "rsa",
-]
-
-[[package]]
-name = "banscii-talent-core-test"
-version = "0.1.0"
-dependencies = [
- "banscii-talent-core",
- "env_logger",
- "log",
 ]
 
 [[package]]
