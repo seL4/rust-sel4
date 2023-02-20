@@ -1,10 +1,13 @@
-use crate::MessageInfo;
+use crate::message::MessageInfo;
 
 pub(crate) type Slot = usize;
 
+pub(crate) const INPUT_CAP: sel4::Endpoint = slot_to_local_cptr(1);
+pub(crate) const REPLY_CAP: sel4::Reply = slot_to_local_cptr(4);
+
 const BASE_OUTPUT_NOTIFICATION_CAP: Slot = 10;
-const BASE_ENDPOINT_CAP: Slot = 74;
-const BASE_IRQ_CAP: Slot = 138;
+const BASE_ENDPOINT_CAP: Slot = BASE_OUTPUT_NOTIFICATION_CAP + 64;
+const BASE_IRQ_CAP: Slot = BASE_ENDPOINT_CAP + 64;
 
 const MAX_CHANNELS: Slot = 63;
 

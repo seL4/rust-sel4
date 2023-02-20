@@ -8,7 +8,7 @@
 
     <protection_domain name="pl011_driver" priority="254" pp="true">
         <program_image path="banscii-pl011-driver.elf" />
-        <map mr="pl011_mmio" vaddr="0x2000000" perms="rw" setvar_vaddr="pl011_mmio_base" />
+        <map mr="pl011_mmio" vaddr="0x2000000" perms="rw" setvar_vaddr="pl011_register_block" />
         <irq irq="33" id="0" />
     </protection_domain>
 

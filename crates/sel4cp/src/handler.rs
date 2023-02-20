@@ -1,7 +1,5 @@
-use crate::{slot_to_local_cptr, Channel, MessageInfo};
-
-const INPUT_CAP: sel4::Endpoint = slot_to_local_cptr(1);
-const REPLY_CAP: sel4::Reply = slot_to_local_cptr(4);
+use crate::cspace::{Channel, INPUT_CAP, REPLY_CAP};
+use crate::message::MessageInfo;
 
 pub trait Handler {
     type Error;

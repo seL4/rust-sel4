@@ -25,8 +25,16 @@ macro_rules! declare_memory_region {
         {
             #[no_mangle]
             #[link_section = ".data"]
-            static mut $symbol: <$access as $crate::memory_region::MemoryRegionAccess>::Ptr::<<$target as MemoryRegionTarget>::Element> =
-                <$access as $crate::memory_region::MemoryRegionAccess>::Ptr::<<$target as MemoryRegionTarget>::Element>::null();
+            static mut $symbol:
+                <$access as $crate::memory_region::MemoryRegionAccess>::Ptr::<
+                    <$target as $crate::memory_region::MemoryRegionTarget>::Element
+                > =
+                <
+                    <$access as $crate::memory_region::MemoryRegionAccess>::Ptr::<
+                        <$target as $crate::memory_region::MemoryRegionTarget>::Element
+                    >
+                    as $crate::memory_region::MemoryRegionPointer
+                >::null();
 
             $crate::memory_region::new_memory_region::<$target, $access>(
                 unsafe { $symbol },
@@ -35,6 +43,8 @@ macro_rules! declare_memory_region {
         }
     }
 }
+
+pub use declare_memory_region;
 
 // // //
 
@@ -189,13 +199,22 @@ macro_rules! declare_deferred_memory_region {
         $crate::memory_region::DeferredMemoryRegion::new($size_in_bytes, || {
             #[no_mangle]
             #[link_section = ".data"]
-            static mut $symbol: <$access as $crate::memory_region::MemoryRegionAccess>::Ptr::<<$target as MemoryRegionTarget>::Element> =
-                <$access as $crate::memory_region::MemoryRegionAccess>::Ptr::<<$target as MemoryRegionTarget>::Element>::null();
+            static mut $symbol:
+                <$access as $crate::memory_region::MemoryRegionAccess>::Ptr::<
+                    <$target as $crate::memory_region::MemoryRegionTarget>::Element
+                > =
+                <
+                    <$access as $crate::memory_region::MemoryRegionAccess>::Ptr::<
+                        <$target as $crate::memory_region::MemoryRegionTarget>::Element
+                    > as $crate::memory_region::MemoryRegionPointer
+                >::null();
 
             unsafe { $symbol }
         })
     }
 }
+
+pub use declare_deferred_memory_region;
 
 // // //
 

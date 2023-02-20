@@ -5,38 +5,46 @@
 
 extern crate alloc;
 
-use sel4cp::{memory_region::*, *};
+use sel4cp::memory_region::{
+    declare_memory_region, MemoryRegion, ReadOnly, ReadWrite, VolatileSliceExt,
+};
+use sel4cp::message::{MessageInfo, NoMessageValue, StatusMessageLabel};
+use sel4cp::{main, Channel, Handler};
 
 use banscii_talent_interface_types::*;
 
+mod artistic_secrets;
 mod cryptographic_secrets;
+
+use artistic_secrets::Masterpiece;
 
 const ASSISTANT: Channel = Channel::new(0);
 
 const REGION_SIZE: usize = 0x4_000;
 
-fn get_region_in() -> MemoryRegion<[u8], ReadOnly> {
-    unsafe {
+#[main(heap_size = 0x10000)]
+fn main() -> ThisHandler {
+    let region_in = unsafe {
         declare_memory_region! {
             <[u8], ReadOnly>(region_in_start, REGION_SIZE)
         }
-    }
-}
-
-fn get_region_out() -> MemoryRegion<[u8], ReadWrite> {
-    unsafe {
+    };
+    let region_out = unsafe {
         declare_memory_region! {
             <[u8], ReadWrite>(region_out_start, REGION_SIZE)
         }
+    };
+
+    ThisHandler {
+        region_in,
+        region_out,
     }
 }
 
-#[main(heap_size = 0x10000)]
-fn main() -> ThisHandler {
-    ThisHandler {}
+struct ThisHandler {
+    region_in: MemoryRegion<[u8], ReadOnly>,
+    region_out: MemoryRegion<[u8], ReadWrite>,
 }
-
-struct ThisHandler {}
 
 impl Handler for ThisHandler {
     type Error = !;
@@ -49,49 +57,39 @@ impl Handler for ThisHandler {
         Ok(match channel {
             ASSISTANT => match msg_info.recv::<Request>() {
                 Ok(msg) => {
-                    let height = msg.height;
-                    let width = msg.width;
-
-                    let draft = get_region_in()
+                    let draft_height = msg.height;
+                    let draft_width = msg.width;
+                    let draft = self
+                        .region_in
                         .index(msg.draft_start..msg.draft_start + msg.draft_size)
                         .copy_to_vec();
 
-                    let masterpiece = {
-                        let mut this = draft.clone();
-                        let palette = b"@%#x+=:-. ";
-                        for row in 0..height {
-                            for col in 0..width {
-                                let i = row * width + col;
-                                let v = draft[i];
-                                let c = palette[usize::from(v / 26)];
-                                this[i] = c;
-                            }
-                        }
-                        this
-                    };
+                    let masterpiece = Masterpiece::complete(draft_height, draft_width, &draft);
 
                     let masterpiece_start = 0;
-                    let masterpiece_size = masterpiece.len();
+                    let masterpiece_size = masterpiece.pixel_data.len();
                     let masterpiece_end = masterpiece_start + masterpiece_size;
-                    get_region_out()
-                        .index_mut(masterpiece_start..masterpiece_end)
-                        .copy_from_slice(&masterpiece);
 
-                    let signature = cryptographic_secrets::sign(&masterpiece);
+                    self.region_out
+                        .index_mut(masterpiece_start..masterpiece_end)
+                        .copy_from_slice(&masterpiece.pixel_data);
+
+                    let signature = cryptographic_secrets::sign(&masterpiece.pixel_data);
                     let signature = signature.as_ref();
 
                     let signature_start = masterpiece_end;
                     let signature_size = signature.len();
                     let signature_end = signature_start + signature_size;
-                    get_region_out()
+
+                    self.region_out
                         .index_mut(signature_start..signature_end)
                         .copy_from_slice(&signature);
 
                     MessageInfo::send(
                         StatusMessageLabel::Ok,
                         Response {
-                            height,
-                            width,
+                            height: masterpiece.height,
+                            width: masterpiece.width,
                             masterpiece_start,
                             masterpiece_size,
                             signature_start,

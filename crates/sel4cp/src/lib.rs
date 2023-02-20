@@ -16,32 +16,30 @@ extern crate alloc;
 use core::ffi::c_char;
 use core::fmt;
 
-#[cfg(target_thread_local)]
-use core::ffi::c_void;
-
-#[cfg(target_thread_local)]
-use core::ptr;
-
-#[cfg(target_thread_local)]
-use sel4_runtime_phdrs::EmbeddedProgramHeaders;
+cfg_if::cfg_if! {
+    if #[cfg(target_thread_local)] {
+        use core::ffi::c_void;
+        use core::ptr;
+        use sel4_runtime_phdrs::EmbeddedProgramHeaders;
+    }
+}
 
 pub use sel4_panicking as panicking;
 pub use sel4_panicking_env::{abort, debug_print, debug_println};
 pub use sel4cp_macros::main;
 
-mod channel;
+mod cspace;
 mod handler;
 mod ipc_buffer;
-mod message;
 mod pd_name;
 
 pub mod memory_region;
+pub mod message;
 
 use ipc_buffer::get_ipc_buffer;
 
-pub use channel::*;
-pub use handler::*;
-pub use message::*;
+pub use cspace::Channel;
+pub use handler::{Handler, NullHandler};
 pub use pd_name::get_pd_name;
 
 #[cfg(target_thread_local)]
@@ -89,18 +87,18 @@ pub const DEFAULT_STACK_SIZE: usize = 0x10000;
 
 #[macro_export]
 macro_rules! declare_protection_domain {
-    ($main:path, $(stack_size = $stack_size:expr,)? heap_size = $heap_size:expr) => {
-        $crate::_private::declare_static_heap! {
-            __GLOBAL_ALLOCATOR: $heap_size;
-        }
-        $crate::_private::declare_protection_domain!($main $(, stack_size = $stack_size)?);
-    };
     ($main:path) => {
         $crate::_private::declare_protection_domain!($main, stack_size = $crate::_private::DEFAULT_STACK_SIZE);
     };
     ($main:path, stack_size = $stack_size:expr) => {
         $crate::_private::declare_main!($main);
         $crate::_private::declare_stack!($stack_size);
+    };
+    ($main:path, $(stack_size = $stack_size:expr,)? heap_size = $heap_size:expr) => {
+        $crate::_private::declare_static_heap! {
+            __GLOBAL_ALLOCATOR: $heap_size;
+        }
+        $crate::_private::declare_protection_domain!($main $(, stack_size = $stack_size)?);
     };
 }
 

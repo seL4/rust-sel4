@@ -100,10 +100,10 @@ dependencies = [
  "banscii-pl011-driver-interface-types",
  "banscii-talent-interface-types",
  "hex",
- "pem-rfc7468",
+ "log",
  "sel4",
+ "sel4-logging",
  "sel4cp",
- "volatile",
 ]
 
 [[package]]
@@ -149,11 +149,9 @@ name = "banscii-talent"
 version = "0.1.0"
 dependencies = [
  "banscii-talent-interface-types",
- "log",
  "rsa",
  "sel4",
  "sel4cp",
- "volatile",
 ]
 
 [[package]]

@@ -2,27 +2,29 @@
 #![no_main]
 #![feature(never_type)]
 
+use core::ptr;
+
 use heapless::Deque;
 
-use sel4cp::*;
+use sel4cp::message::{MessageInfo, NoMessageValue, StatusMessageLabel};
+use sel4cp::{main, Channel, Handler};
 
 use banscii_pl011_driver_interface_types::*;
 
 mod device;
 
-use device::Pl011Device;
-
-#[used]
-#[no_mangle]
-#[link_section = ".data"]
-static mut pl011_mmio_base: usize = 0;
+use device::{Pl011Device, Pl011RegisterBlock};
 
 const DEVICE: Channel = Channel::new(0);
 const ASSISTANT: Channel = Channel::new(1);
 
+#[no_mangle]
+#[link_section = ".data"]
+static mut pl011_register_block: *const Pl011RegisterBlock = ptr::null();
+
 #[main]
 fn main() -> ThisHandler {
-    let device = Pl011Device::new(unsafe { pl011_mmio_base });
+    let device = unsafe { Pl011Device::new(pl011_register_block) };
     device.init();
     ThisHandler {
         device,
@@ -48,7 +50,7 @@ impl Handler for ThisHandler {
                         break;
                     }
                 }
-                self.device.handle_interrupt();
+                self.device.handle_irq();
                 DEVICE.irq_ack().unwrap();
                 if self.notify {
                     ASSISTANT.notify();
