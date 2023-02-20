@@ -14,6 +14,8 @@ use sel4cp::*;
 
 use banscii_talent_interface_types::*;
 
+mod cryptographic_secrets;
+
 const ASSISTANT: Channel = Channel::new(0);
 
 const REGION_SIZE: usize = 0x4_000;
@@ -86,7 +88,8 @@ impl Handler for ThisHandler {
                         .index_mut(masterpiece_start..masterpiece_end)
                         .copy_from_slice(&masterpiece);
 
-                    let signature = vec![1, 2, 3];
+                    let signature = cryptographic_secrets::sign(&masterpiece);
+                    let signature = signature.as_ref();
 
                     let signature_start = masterpiece_end;
                     let signature_size = signature.len();

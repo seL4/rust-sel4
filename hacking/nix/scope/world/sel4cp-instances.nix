@@ -55,6 +55,12 @@ in {
       talent = mkPD rec {
         rootCrate = crates.banscii-talent;
         release = false;
+        extraProfile = {
+          # For RSA key generation
+          build-override = {
+            opt-level = 2;
+          };
+        };
       };
     };
     system = sel4cp.mkSystem {
