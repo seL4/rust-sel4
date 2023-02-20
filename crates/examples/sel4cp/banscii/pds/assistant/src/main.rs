@@ -1,18 +1,14 @@
 #![no_std]
 #![no_main]
+#![feature(const_trait_impl)]
 #![feature(never_type)]
 
 extern crate alloc;
 
-use alloc::vec;
 use alloc::vec::Vec;
-use core::ptr;
-use core::slice;
 use core::str;
 
-use volatile::{access::ReadOnly, Volatile};
-
-use sel4cp::*;
+use sel4cp::{memory_region::*, *};
 
 use banscii_assistant_core::Draft;
 use banscii_pl011_driver_interface_types as driver;
@@ -25,22 +21,20 @@ const MAX_SUBJECT_LEN: usize = 16;
 
 const REGION_SIZE: usize = 0x4_000;
 
-#[used]
-#[no_mangle]
-#[link_section = ".data"]
-static mut region_in_start: *mut u8 = ptr::null_mut();
-
-#[used]
-#[no_mangle]
-#[link_section = ".data"]
-static mut region_out_start: *mut u8 = ptr::null_mut();
-
-fn get_region_in() -> Volatile<&'static mut [u8], ReadOnly> {
-    Volatile::new_read_only(unsafe { slice::from_raw_parts_mut(region_in_start, REGION_SIZE) })
+fn get_region_in() -> MemoryRegion<[u8], ReadOnly> {
+    unsafe {
+        declare_memory_region! {
+            <[u8], ReadOnly>(region_in_start, REGION_SIZE)
+        }
+    }
 }
 
-fn get_region_out() -> Volatile<&'static mut [u8]> {
-    Volatile::new(unsafe { slice::from_raw_parts_mut(region_out_start, REGION_SIZE) })
+fn get_region_out() -> MemoryRegion<[u8], ReadWrite> {
+    unsafe {
+        declare_memory_region! {
+            <[u8], ReadWrite>(region_out_start, REGION_SIZE)
+        }
+    }
 }
 
 #[main(heap_size = 0x10000)]
@@ -122,21 +116,13 @@ fn create(input: &[u8]) {
 
     let height = msg.height;
     let width = msg.width;
-    let pixel_data = {
-        let mut this = vec![0; msg.masterpiece_size];
-        get_region_in()
-            .index(msg.masterpiece_start..msg.masterpiece_start + msg.masterpiece_size)
-            .copy_into_slice(&mut this);
-        this
-    };
+    let pixel_data = get_region_in()
+        .index(msg.masterpiece_start..msg.masterpiece_start + msg.masterpiece_size)
+        .copy_to_vec();
 
-    let signature = {
-        let mut this = vec![0; msg.signature_size];
-        get_region_in()
-            .index(msg.signature_start..msg.signature_start + msg.signature_size)
-            .copy_into_slice(&mut this);
-        this
-    };
+    let signature = get_region_in()
+        .index(msg.signature_start..msg.signature_start + msg.signature_size)
+        .copy_to_vec();
 
     for row in 0..height {
         for col in 0..width {

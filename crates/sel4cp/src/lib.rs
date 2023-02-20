@@ -1,9 +1,17 @@
 #![no_std]
 #![feature(cfg_target_thread_local)]
+#![feature(const_pointer_is_aligned)]
+#![feature(const_ptr_is_null)]
+#![feature(const_trait_impl)]
 #![feature(cstr_from_bytes_until_nul)]
 #![feature(int_roundings)]
+#![feature(maybe_uninit_slice)]
 #![feature(never_type)]
+#![feature(pointer_is_aligned)]
 #![feature(unwrap_infallible)]
+
+#[cfg(feature = "alloc")]
+extern crate alloc;
 
 use core::ffi::c_char;
 use core::fmt;
@@ -26,6 +34,8 @@ mod handler;
 mod ipc_buffer;
 mod message;
 mod pd_name;
+
+pub mod memory_region;
 
 use ipc_buffer::get_ipc_buffer;
 

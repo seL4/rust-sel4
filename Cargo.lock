@@ -1698,6 +1698,7 @@ dependencies = [
 name = "sel4cp"
 version = "0.1.0"
 dependencies = [
+ "cfg-if",
  "num_enum",
  "sel4",
  "sel4-panicking",

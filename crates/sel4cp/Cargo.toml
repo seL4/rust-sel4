@@ -12,6 +12,7 @@ full = ["default", "alloc"]
 unwinding = ["sel4-panicking/unwinding"]
 
 [dependencies]
+cfg-if = "*"
 num_enum = { version = "*", default-features = false }
 sel4 = { path = "../sel4", features = ["single-threaded"] }
 sel4-panicking = { path = "../runtime/sel4-panicking" }
