@@ -31,7 +31,7 @@ register_bitfields! {
     ],
 
     ICR [
-        ALL OFFSET(0) NUMBITS(11) []
+        ALL OFFSET(0) NUMBITS(11) [],
     ],
 }
 
