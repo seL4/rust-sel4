@@ -10,23 +10,22 @@
 }:
 
 let
+  mkKeepRef = rev: "refs/tags/keep/${builtins.substring 0 32 rev}";
 
   # sel4cpSource = lib.cleanSource ../../../../../../../../x/sel4cp;
 
-  sel4cpSource =
-    let
-      rev = "680b8407bd7d9b46159beea4e510fb9c9b6c633d";
-      ref = "refs/tags/keep/${builtins.substring 0 32 rev}";
-    in
-      builtins.fetchGit {
-        url = "https://gitlab.com/coliasgroup/sel4cp.git";
-        inherit rev ref;
-      };
+  sel4cpSource = builtins.fetchGit rec {
+    url = "https://gitlab.com/coliasgroup/sel4cp.git";
+    rev = "e55891080f408f8fa29ae3ab674a04c56adbbb01";
+    ref = mkKeepRef rev;
+  };
 
-  kernelSource = builtins.fetchGit {
-    url = "https://github.com/BreakawayConsulting/seL4.git";
-    rev = "92f0f3ab28f00c97851512216c855f4180534a60";
-    ref = "sel4cp-core-support";
+  # kernelSource = lib.cleanSource ../../../../../../../../x/seL4;
+
+  kernelSource = builtins.fetchGit rec {
+    url = "https://gitlab.com/coliasgroup/seL4.git";
+    rev = "f23b954d43782f2d83a77580fded50088a8dec00";
+    ref = mkKeepRef rev;
   };
 
   kernelSourcePatched = stdenv.mkDerivation {
