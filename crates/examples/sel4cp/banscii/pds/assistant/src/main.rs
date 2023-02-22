@@ -17,9 +17,9 @@ use sel4cp::memory_region::{
 use sel4cp::message::{MessageInfo, NoMessageLabel, NoMessageValue, StatusMessageLabel};
 use sel4cp::{main, Channel, Handler};
 
+use banscii_artist_interface_types as artist;
 use banscii_assistant_core::Draft;
 use banscii_pl011_driver_interface_types as driver;
-use banscii_artist_interface_types as artist;
 
 const PL011_DRIVER: Channel = Channel::new(0);
 const TALENT: Channel = Channel::new(1);
