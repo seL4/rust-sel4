@@ -1,5 +1,5 @@
 [package]
-name = "banscii-talent-interface-types"
+name = "banscii-artist-interface-types"
 version = "0.1.0"
 authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
 edition = "2021"

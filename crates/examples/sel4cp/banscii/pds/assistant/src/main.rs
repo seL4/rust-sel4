@@ -19,7 +19,7 @@ use sel4cp::{main, Channel, Handler};
 
 use banscii_assistant_core::Draft;
 use banscii_pl011_driver_interface_types as driver;
-use banscii_talent_interface_types as talent;
+use banscii_artist_interface_types as artist;
 
 const PL011_DRIVER: Channel = Channel::new(0);
 const TALENT: Channel = Channel::new(1);
@@ -119,7 +119,7 @@ impl ThisHandler {
 
         let msg_info = TALENT.pp_call(MessageInfo::send(
             NoMessageLabel,
-            talent::Request {
+            artist::Request {
                 height: draft.height,
                 width: draft.width,
                 draft_start,
@@ -129,7 +129,7 @@ impl ThisHandler {
 
         assert_eq!(msg_info.label().try_into(), Ok(StatusMessageLabel::Ok));
 
-        let msg = msg_info.recv::<talent::Response>().unwrap();
+        let msg = msg_info.recv::<artist::Response>().unwrap();
 
         let height = msg.height;
         let width = msg.width;

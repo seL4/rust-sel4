@@ -12,7 +12,7 @@ use sel4cp::memory_region::{
 use sel4cp::message::{MessageInfo, NoMessageValue, StatusMessageLabel};
 use sel4cp::{main, Channel, Handler};
 
-use banscii_talent_interface_types::*;
+use banscii_artist_interface_types::*;
 
 mod artistic_secrets;
 mod cryptographic_secrets;

@@ -93,12 +93,29 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d468802bab17cbc0cc575e9b053f41e72aa36bfa6b7f55e3529ffa43161b97fa"
 
 [[package]]
+name = "banscii-artist"
+version = "0.1.0"
+dependencies = [
+ "banscii-artist-interface-types",
+ "rsa",
+ "sel4cp",
+]
+
+[[package]]
+name = "banscii-artist-interface-types"
+version = "0.1.0"
+dependencies = [
+ "num_enum",
+ "zerocopy",
+]
+
+[[package]]
 name = "banscii-assistant"
 version = "0.1.0"
 dependencies = [
+ "banscii-artist-interface-types",
  "banscii-assistant-core",
  "banscii-pl011-driver-interface-types",
- "banscii-talent-interface-types",
  "hex",
  "sel4cp",
 ]
@@ -133,23 +150,6 @@ dependencies = [
 
 [[package]]
 name = "banscii-pl011-driver-interface-types"
-version = "0.1.0"
-dependencies = [
- "num_enum",
- "zerocopy",
-]
-
-[[package]]
-name = "banscii-talent"
-version = "0.1.0"
-dependencies = [
- "banscii-talent-interface-types",
- "rsa",
- "sel4cp",
-]
-
-[[package]]
-name = "banscii-talent-interface-types"
 version = "0.1.0"
 dependencies = [
  "num_enum",

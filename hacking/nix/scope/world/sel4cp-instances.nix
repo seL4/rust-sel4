@@ -50,8 +50,8 @@ in {
         rootCrate = crates.banscii-assistant;
         rustTargetInfo = seL4RustTargetInfoWithConfig { cp = true; minimal = false; };
       };
-      talent = mkPD rec {
-        rootCrate = crates.banscii-talent;
+      artist = mkPD rec {
+        rootCrate = crates.banscii-artist;
         extraProfile = {
           # For RSA key generation
           build-override = {
@@ -66,7 +66,7 @@ in {
         paths = [
           "${pds.pl011-driver}/bin"
           "${pds.assistant}/bin"
-          "${pds.talent}/bin"
+          "${pds.artist}/bin"
         ];
       };
       systemXML = srcRoot + "/crates/examples/sel4cp/banscii/banscii.system";

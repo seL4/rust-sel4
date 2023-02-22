@@ -6,8 +6,8 @@ edition = "2021"
 license = "BSD-2-Clause"
 
 [dependencies]
+banscii-artist-interface-types = { path = "../artist/interface-types" }
 banscii-assistant-core = { path = "./core" }
 banscii-pl011-driver-interface-types = { path = "../pl011-driver/interface-types" }
-banscii-talent-interface-types = { path = "../talent/interface-types" }
 hex = { version = "*", default-features = false, features = ["alloc"] }
 sel4cp = { path = "../../../../../sel4cp", default-features = false, features = ["alloc"] }
