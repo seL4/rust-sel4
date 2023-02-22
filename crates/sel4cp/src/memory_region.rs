@@ -219,56 +219,61 @@ pub use declare_deferred_memory_region;
 // // //
 
 // HACK
-cfg_if::cfg_if! {
-    if #[cfg(feature = "alloc")] {
-        use alloc::vec::Vec;
-        use core::mem::MaybeUninit;
-        use core::ops::Deref;
 
-        pub trait VolatileSliceExt<T, R, A>
+#[cfg(feature = "alloc")]
+pub use volatile_slice_ext::VolatileSliceExt;
+
+#[cfg(feature = "alloc")]
+mod volatile_slice_ext {
+    use alloc::vec::Vec;
+    use core::mem::MaybeUninit;
+    use core::ops::Deref;
+
+    use volatile::Volatile;
+
+    pub trait VolatileSliceExt<T, R, A>
+    where
+        R: Deref<Target = [T]>,
+    {
+        fn volatile_slice_ext_inner(&self) -> &Volatile<R, A>;
+
+        fn len(&self) -> usize {
+            // HACK HACK HACK
+            // TODO upstream proper `len` method
+            let mut len = None;
+            self.volatile_slice_ext_inner().map(|x| {
+                len = Some(x.len());
+                x
+            });
+            len.unwrap()
+        }
+
+        fn copy_to_vec(&self) -> Vec<T>
         where
-            R: Deref<Target = [T]>,
+            T: Copy,
         {
-            fn volatile_slice_ext_inner(&self) -> &Volatile<R, A>;
-
-            fn len(&self) -> usize {
-                // HACK HACK HACK
-                // TODO upstream proper `len` method
-                let mut len = None;
-                self.volatile_slice_ext_inner().map(|x| {
-                    len = Some(x.len());
-                    x
-                });
-                len.unwrap()
-            }
-
-            fn copy_to_vec(&self) -> Vec<T>
-            where
-                T: Copy,
-            {
-                vec_from_write_only_init(self.len(), |buf| {
-                    self.volatile_slice_ext_inner().copy_into_slice(buf);
-                })
-            }
+            vec_from_write_only_init(self.len(), |buf| {
+                self.volatile_slice_ext_inner().copy_into_slice(buf);
+            })
         }
+    }
 
-        impl<T, R, A> VolatileSliceExt<T, R, A> for Volatile<R, A>
-        where
-            R: Deref<Target = [T]>,
-        {
-            fn volatile_slice_ext_inner(&self) -> &Volatile<R, A> {
-                self
-            }
+    impl<T, R, A> VolatileSliceExt<T, R, A> for Volatile<R, A>
+    where
+        R: Deref<Target = [T]>,
+    {
+        fn volatile_slice_ext_inner(&self) -> &Volatile<R, A> {
+            self
         }
+    }
 
-        fn vec_from_write_only_init<T>(n: usize, f: impl FnOnce(&mut [T])) -> Vec<T> {
-            let mut v = Vec::with_capacity(n);
-            let uninit = v.spare_capacity_mut();
-            unsafe {
-                f(MaybeUninit::slice_assume_init_mut(uninit));
-                v.set_len(n);
-            }
-            v
+    fn vec_from_write_only_init<T>(n: usize, f: impl FnOnce(&mut [T])) -> Vec<T> {
+        let mut v = Vec::with_capacity(n);
+        let uninit = v.spare_capacity_mut();
+        unsafe {
+            f(MaybeUninit::slice_assume_init_mut(uninit));
+            v.set_len(n);
         }
+        v
     }
 }
