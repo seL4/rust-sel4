@@ -1,3 +1,5 @@
+use core::fmt;
+
 use crate::message::MessageInfo;
 
 pub(crate) type Slot = usize;
@@ -11,7 +13,7 @@ const BASE_IRQ_CAP: Slot = BASE_ENDPOINT_CAP + 64;
 
 const MAX_CHANNELS: Slot = 63;
 
-pub(crate) const fn slot_to_local_cptr<T: sel4::CapType>(slot: Slot) -> sel4::LocalCPtr<T> {
+const fn slot_to_local_cptr<T: sel4::CapType>(slot: Slot) -> sel4::LocalCPtr<T> {
     sel4::LocalCPtr::from_bits(slot as sel4::CPtrBits)
 }
 
@@ -35,7 +37,6 @@ impl Channel {
             .signal()
     }
 
-    // TODO don't expose sel4::Error
     pub fn irq_ack(&self) -> Result<(), sel4::Error> {
         self.local_cptr::<sel4::cap_type::IRQHandler>(BASE_IRQ_CAP)
             .irq_handler_ack()
@@ -46,6 +47,23 @@ impl Channel {
             self.local_cptr::<sel4::cap_type::Endpoint>(BASE_ENDPOINT_CAP)
                 .call(msg_info.into_sel4()),
         )
+    }
+}
+
+#[derive(Debug, PartialEq, Eq)]
+pub struct IrqAckError {
+    sel4_error: sel4::Error,
+}
+
+impl IrqAckError {
+    fn as_sel4_error(&self) -> &sel4::Error {
+        &self.sel4_error
+    }
+}
+
+impl fmt::Display for IrqAckError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "irq ack error: {:?}", self.as_sel4_error())
     }
 }
 

@@ -100,9 +100,6 @@ dependencies = [
  "banscii-pl011-driver-interface-types",
  "banscii-talent-interface-types",
  "hex",
- "log",
- "sel4",
- "sel4-logging",
  "sel4cp",
 ]
 
@@ -112,7 +109,6 @@ version = "0.1.0"
 dependencies = [
  "libm",
  "log",
- "rsa",
  "rusttype",
 ]
 
@@ -131,7 +127,6 @@ version = "0.1.0"
 dependencies = [
  "banscii-pl011-driver-interface-types",
  "heapless",
- "sel4",
  "sel4cp",
  "tock-registers",
 ]
@@ -150,7 +145,6 @@ version = "0.1.0"
 dependencies = [
  "banscii-talent-interface-types",
  "rsa",
- "sel4",
  "sel4cp",
 ]
 
@@ -1681,6 +1675,7 @@ dependencies = [
  "cfg-if",
  "num_enum",
  "sel4",
+ "sel4-immediate-sync-once-cell",
  "sel4-panicking",
  "sel4-panicking-env",
  "sel4-runtime-phdrs",

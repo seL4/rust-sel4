@@ -1,7 +1,5 @@
 use alloc::vec::Vec;
 
-const PALETTE: &[u8] = b"@%#x+=:-. ";
-
 pub(crate) struct Masterpiece {
     pub(crate) height: usize,
     pub(crate) width: usize,
@@ -23,8 +21,7 @@ impl Masterpiece {
             for col in 0..width {
                 let i = row * width + col;
                 let grey = draft_pixel_data[i];
-                let color = PALETTE[usize::from(grey / 26)];
-                pixel_data[i] = color;
+                pixel_data[i] = colorize(grey);
             }
         }
 
@@ -34,4 +31,11 @@ impl Masterpiece {
             pixel_data,
         }
     }
+}
+
+const PALETTE: &[u8] = b"@%#x+=:-. ";
+
+fn colorize(grey: u8) -> u8 {
+    PALETTE
+        [usize::from(grey) / (usize::from(u8::MAX).next_multiple_of(PALETTE.len()) / PALETTE.len())]
 }

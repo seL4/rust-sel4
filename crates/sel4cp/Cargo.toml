@@ -15,6 +15,7 @@ unwinding = ["sel4-panicking/unwinding"]
 cfg-if = "*"
 num_enum = { version = "*", default-features = false }
 sel4 = { path = "../sel4", features = ["single-threaded"] }
+sel4-immediate-sync-once-cell = { path = "../runtime/sel4-immediate-sync-once-cell" }
 sel4-panicking = { path = "../runtime/sel4-panicking" }
 sel4-panicking-env = { path = "../runtime/sel4-panicking/env" }
 sel4-runtime-simple-entry = { path = "../runtime/sel4-runtime-simple-entry" }

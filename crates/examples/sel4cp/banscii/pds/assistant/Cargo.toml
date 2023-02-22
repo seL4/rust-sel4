@@ -10,7 +10,4 @@ banscii-assistant-core = { path = "./core" }
 banscii-pl011-driver-interface-types = { path = "../pl011-driver/interface-types" }
 banscii-talent-interface-types = { path = "../talent/interface-types" }
 hex = { version = "*", default-features = false, features = ["alloc"] }
-log = "*"
-sel4 = { path = "../../../../../sel4" }
-sel4-logging = { path = "../../../../../runtime/sel4-logging" }
 sel4cp = { path = "../../../../../sel4cp", default-features = false, features = ["alloc"] }

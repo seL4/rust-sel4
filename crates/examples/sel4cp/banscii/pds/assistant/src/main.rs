@@ -64,7 +64,7 @@ impl Handler for ThisHandler {
             PL011_DRIVER => {
                 while let Some(b) = get_char() {
                     if let b'\n' | b'\r' = b {
-                        put_char(b'\n');
+                        newline();
                         if !self.buffer.is_empty() {
                             self.try_create();
                         }
@@ -73,7 +73,7 @@ impl Handler for ThisHandler {
                         let c = char::from(b);
                         if c.is_ascii() && !c.is_ascii_control() {
                             if self.buffer.len() == MAX_SUBJECT_LEN {
-                                writeln!(&mut PutCharWrite, "\n(char limit reached)").unwrap();
+                                writeln!(PutCharWrite, "\n(char limit reached)").unwrap();
                                 self.try_create();
                                 prompt();
                             }
@@ -100,7 +100,7 @@ impl ThisHandler {
                 self.create(&subject);
             }
             Err(_) => {
-                writeln!(&mut PutCharWrite, "error: input is not valid utf-8").unwrap();
+                writeln!(PutCharWrite, "error: input is not valid utf-8").unwrap();
             }
         };
         self.buffer.clear();
@@ -144,21 +144,34 @@ impl ThisHandler {
             .index(msg.signature_start..msg.signature_start + msg.signature_size)
             .copy_to_vec();
 
+        newline();
+
         for row in 0..height {
             for col in 0..width {
                 let i = row * width + col;
                 let b = pixel_data[i];
                 put_char(b);
             }
-            put_char(b'\n');
+            newline();
         }
 
-        writeln!(&mut PutCharWrite, "Signature: {}", hex::encode(&signature)).unwrap();
+        newline();
+
+        writeln!(PutCharWrite, "Signature:").unwrap();
+        for line in signature.chunks(32) {
+            writeln!(PutCharWrite, "{}", hex::encode(line)).unwrap();
+        }
+
+        newline();
     }
 }
 
 fn prompt() {
     write!(PutCharWrite, "banscii> ").unwrap();
+}
+
+fn newline() {
+    writeln!(PutCharWrite, "").unwrap();
 }
 
 fn get_char() -> Option<u8> {
@@ -188,15 +201,15 @@ fn put_char(val: u8) {
     assert_eq!(msg_info.label().try_into(), Ok(StatusMessageLabel::Ok));
 }
 
-fn put_chars(vals: &[u8]) {
-    vals.iter().copied().for_each(put_char)
+fn put_str(s: &str) {
+    s.as_bytes().iter().copied().for_each(put_char)
 }
 
 struct PutCharWrite;
 
 impl fmt::Write for PutCharWrite {
     fn write_str(&mut self, s: &str) -> fmt::Result {
-        put_chars(s.as_bytes());
+        put_str(s);
         Ok(())
     }
 }

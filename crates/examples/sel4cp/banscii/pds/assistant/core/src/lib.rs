@@ -7,10 +7,8 @@ use alloc::vec::Vec;
 
 use rusttype::{point, Font, Scale};
 
-#[cfg(target_os = "none")]
 mod nostd_float;
 
-#[cfg(target_os = "none")]
 use nostd_float::FloatExt;
 
 pub struct Draft {
@@ -44,7 +42,7 @@ impl Draft {
         let v_metrics = font.v_metrics(scale);
         let offset = point(0.0, v_metrics.ascent);
 
-        let glyphs: Vec<_> = font.layout(subject, scale, offset).collect();
+        let glyphs = font.layout(subject, scale, offset).collect::<Vec<_>>();
 
         // Find the most visually pleasing width to display
         let width = glyphs
@@ -54,8 +52,6 @@ impl Draft {
             .next()
             .unwrap_or(0.0)
             .ceil() as usize;
-
-        log::info!("width: {}, height: {}", width, pixel_height);
 
         // Rasterise to greyscale
         let mut pixel_data = vec![0; width * pixel_height];

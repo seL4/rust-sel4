@@ -8,6 +8,5 @@ license = "BSD-2-Clause"
 [dependencies]
 banscii-pl011-driver-interface-types = { path = "./interface-types" }
 heapless = "*"
-sel4 = { path = "../../../../../sel4" }
 sel4cp = { path = "../../../../../sel4cp", default-features = false }
 tock-registers = "*"

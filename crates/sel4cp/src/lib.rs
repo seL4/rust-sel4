@@ -13,74 +13,22 @@
 #[cfg(feature = "alloc")]
 extern crate alloc;
 
-use core::ffi::c_char;
-use core::fmt;
-
-cfg_if::cfg_if! {
-    if #[cfg(target_thread_local)] {
-        use core::ffi::c_void;
-        use core::ptr;
-        use sel4_runtime_phdrs::EmbeddedProgramHeaders;
-    }
-}
-
-pub use sel4_panicking as panicking;
 pub use sel4_panicking_env::{abort, debug_print, debug_println};
 pub use sel4cp_macros::main;
 
 mod cspace;
+mod entry;
 mod handler;
 mod ipc_buffer;
 mod pd_name;
 
 pub mod memory_region;
 pub mod message;
+pub mod panicking;
 
-use ipc_buffer::get_ipc_buffer;
-
-pub use cspace::Channel;
+pub use cspace::{Channel, IrqAckError};
 pub use handler::{Handler, NullHandler};
 pub use pd_name::get_pd_name;
-
-#[cfg(target_thread_local)]
-#[no_mangle]
-unsafe extern "C" fn sel4_runtime_rust_entry() -> ! {
-    unsafe extern "C" fn cont_fn(_cont_arg: *mut c_void) -> ! {
-        inner_entry()
-    }
-
-    let cont_arg = ptr::null_mut();
-
-    EmbeddedProgramHeaders::finder()
-        .find_tls_image()
-        .reserve_on_stack_and_continue(cont_fn, cont_arg)
-}
-
-#[cfg(not(target_thread_local))]
-#[no_mangle]
-unsafe extern "C" fn sel4_runtime_rust_entry() -> ! {
-    inner_entry()
-}
-
-unsafe extern "C" fn inner_entry() -> ! {
-    #[cfg(feature = "unwinding")]
-    {
-        sel4_runtime_phdrs::unwinding::set_custom_eh_frame_finder_using_embedded_phdrs().unwrap();
-    }
-
-    panicking::set_hook(&panic_hook);
-    sel4::set_ipc_buffer(get_ipc_buffer());
-    __sel4cp_main();
-    abort!("main thread returned")
-}
-
-fn panic_hook(info: &panicking::ExternalPanicInfo) {
-    debug_println!("{}: {}", get_pd_name(), info);
-}
-
-extern "C" {
-    fn __sel4cp_main();
-}
 
 // TODO decrease
 pub const DEFAULT_STACK_SIZE: usize = 0x10000;
@@ -102,37 +50,10 @@ macro_rules! declare_protection_domain {
     };
 }
 
-#[macro_export]
-macro_rules! declare_main {
-    ($main:path) => {
-        #[no_mangle]
-        pub unsafe extern "C" fn __sel4cp_main() {
-            $crate::_private::run_main($main);
-        }
-    };
-}
-
-#[allow(clippy::missing_safety_doc)]
-pub unsafe fn run_main<T>(f: impl FnOnce() -> T)
-where
-    T: Handler,
-    T::Error: fmt::Debug,
-{
-    match panicking::catch_unwind(|| f().run().into_err()) {
-        Ok(err) => abort!("main thread terminated with error: {err:?}"),
-        Err(_) => abort!("main thread panicked"),
-    }
-}
-
-#[no_mangle]
-fn sel4_runtime_debug_put_char(c: u8) {
-    sel4::debug_put_char(c as c_char)
-}
-
 // For macros
 #[doc(hidden)]
 pub mod _private {
-    pub use super::{declare_main, declare_protection_domain, run_main, DEFAULT_STACK_SIZE};
+    pub use crate::{declare_main, declare_protection_domain, entry::run_main, DEFAULT_STACK_SIZE};
 
     pub use sel4::sys::seL4_BootInfo;
     pub use sel4_runtime_simple_entry::declare_stack;
