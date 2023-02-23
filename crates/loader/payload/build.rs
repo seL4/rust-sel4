@@ -55,7 +55,7 @@ fn main() {
     let toks = quote! {
         #actual_content_toks
 
-        pub const PAYLOAD: Payload<'static> = Payload {
+        pub const PAYLOAD: Payload<&'static [Region<&'static [u8]>]> = Payload {
             info: #payload_info_toks,
             data: &[#(#regions,)*],
         };

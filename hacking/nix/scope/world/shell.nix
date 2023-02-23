@@ -30,6 +30,7 @@ mkShell rec {
 
   SEL4_PREFIX = kernel;
   SEL4_LOADER_CONFIG = loaderConfigJSON;
+  SEL4_APP = "${kernel}/bin/kernel.elf";
 
   hardeningDisable = [ "all" ];
 

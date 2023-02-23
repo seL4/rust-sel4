@@ -1,10 +1,12 @@
+use core::borrow::Borrow;
 use core::ptr;
 use core::slice;
 
-use loader_payload_types::Region;
+use loader_payload_types::Regions;
 
-pub fn copy_payload_data(regions: &[Region<&[u8]>]) {
-    for region in regions {
+pub fn copy_payload_data<T: Regions>(regions: &T) {
+    for region in regions.iter_regions() {
+        let region = region.borrow();
         let dst = unsafe {
             slice::from_raw_parts_mut(
                 ptr::from_exposed_addr_mut(region.phys_addr_range.start.try_into().unwrap()),
@@ -13,9 +15,9 @@ pub fn copy_payload_data(regions: &[Region<&[u8]>]) {
                     .unwrap(),
             )
         };
-        match region.content {
+        match &region.content {
             Some(src) => {
-                dst.copy_from_slice(src);
+                dst.copy_from_slice(src.borrow());
             }
             None => {
                 // NOTE slice::fill is too slow

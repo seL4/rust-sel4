@@ -10,10 +10,11 @@
 #![allow(unreachable_code)]
 
 use core::arch::asm;
+use core::borrow::Borrow;
 use core::ops::Range;
 use core::panic::PanicInfo;
 
-use loader_payload_types::{Payload, PayloadInfo};
+use loader_payload_types::{Payload, PayloadInfo, Regions};
 use sel4_logging::LevelFilter;
 use sel4_platform_info::PLATFORM_INFO;
 
@@ -40,7 +41,7 @@ const NUM_SECONDARY_CORES: usize = MAX_NUM_NODES - 1;
 
 static KERNEL_ENTRY_BARRIER: Barrier = Barrier::new(MAX_NUM_NODES);
 
-pub fn main(payload: &Payload, own_footprint: &Range<usize>) -> ! {
+pub fn main<T: Regions>(payload: &Payload<T>, own_footprint: &Range<usize>) -> ! {
     debug::init();
 
     logging::set_logger();
@@ -51,22 +52,23 @@ pub fn main(payload: &Payload, own_footprint: &Range<usize>) -> ! {
     log::debug!("Loader footprint: {:#x?}", own_footprint);
     log::debug!("Payload info: {:#x?}", payload.info);
     log::debug!("Payload regions:");
-    for content in payload.data.iter() {
+    for region in payload.data() {
+        let region = region.borrow();
         log::debug!(
             "    0x{:x?} {:?}",
-            content.phys_addr_range,
-            content.content.is_some()
+            region.phys_addr_range,
+            region.content.is_some()
         );
     }
 
     {
         let own_footprint =
             own_footprint.start.try_into().unwrap()..own_footprint.end.try_into().unwrap();
-        sanity_check::sanity_check(&own_footprint, payload.data);
+        sanity_check::sanity_check(&own_footprint, &payload.data);
     }
 
     log::debug!("Copying payload data");
-    copy_payload_data::copy_payload_data(payload.data);
+    copy_payload_data::copy_payload_data(&payload.data);
 
     smp::start_secondary_cores(&payload.info);
 

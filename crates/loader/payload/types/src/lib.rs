@@ -1,14 +1,40 @@
 #![no_std]
+#![feature(associated_type_bounds)]
 
+use core::borrow::Borrow;
 use core::ops::Range;
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Payload<'a> {
+pub struct Payload<T> {
     pub info: PayloadInfo,
-    pub data: &'a [Region<&'a [u8]>],
+    pub data: T,
+}
+
+pub trait Regions {
+    type RegionContent: Borrow<[u8]>;
+    type RegionsIterItem: Borrow<Region<Self::RegionContent>>;
+    type RegionsIter: Iterator<Item = Self::RegionsIterItem>;
+
+    fn iter_regions(&self) -> Self::RegionsIter;
+}
+
+impl<'a, T: Clone + IntoIterator<Item = &'a Region<&'a [u8]>>> Regions for T {
+    type RegionContent = &'a [u8];
+    type RegionsIterItem = &'a Region<Self::RegionContent>;
+    type RegionsIter = T::IntoIter;
+
+    fn iter_regions(&self) -> Self::RegionsIter {
+        self.clone().into_iter()
+    }
+}
+
+impl<T: Regions> Payload<T> {
+    pub fn data(&self) -> T::RegionsIter {
+        self.data.iter_regions()
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
