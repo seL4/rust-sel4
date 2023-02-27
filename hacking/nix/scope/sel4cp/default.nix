@@ -7,16 +7,15 @@
 , python3Packages
 , qemu
 , newlib
+, mkKeepRef
 }:
 
 let
-  mkKeepRef = rev: "refs/tags/keep/${builtins.substring 0 32 rev}";
-
   # sel4cpSource = lib.cleanSource ../../../../../../../../x/sel4cp;
 
   sel4cpSource = builtins.fetchGit rec {
     url = "https://gitlab.com/coliasgroup/sel4cp.git";
-    rev = "e55891080f408f8fa29ae3ab674a04c56adbbb01";
+    rev = "28a5498439515560276ddd3238ed616374faa632";
     ref = mkKeepRef rev;
   };
 
@@ -24,7 +23,7 @@ let
 
   kernelSource = builtins.fetchGit rec {
     url = "https://gitlab.com/coliasgroup/seL4.git";
-    rev = "f23b954d43782f2d83a77580fded50088a8dec00";
+    rev = "eb093f5a57abb957a77ba5393af407312ce3bf57";
     ref = mkKeepRef rev;
   };
 

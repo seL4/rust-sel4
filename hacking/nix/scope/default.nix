@@ -137,4 +137,8 @@ superCallPackage ../rust-utils {} self //
 
   sel4cp = callPackage ./sel4cp {};
 
+  ###
+
+  mkKeepRef = rev: "refs/tags/keep/${builtins.substring 0 32 rev}";
+
 })

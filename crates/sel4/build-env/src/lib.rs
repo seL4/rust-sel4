@@ -2,50 +2,19 @@ use std::env;
 use std::marker::PhantomData;
 use std::path::{Path, PathBuf};
 
-pub const SEL4_CONFIG: Var<PathVarType<'static>> =
-    Var::new("SEL4_CONFIG", SEL4_PREFIX_ENV, "support/config.json");
+pub const SEL4_PREFIX_ENV: &str = "SEL4_PREFIX";
+
 pub const SEL4_PLATFORM_INFO: Var<PathVarType<'static>> = Var::new(
     "SEL4_PLATFORM_INFO",
     SEL4_PREFIX_ENV,
-    "support/platform-info.yaml",
+    "support/platform_gen.yaml",
 );
+
 pub const SEL4_INCLUDE_DIRS: Var<PathsVarType<'static>> = Var::new(
     "SEL4_INCLUDE_DIRS",
     SEL4_PREFIX_ENV,
     ["libsel4/include"].as_slice(),
 );
-
-pub const SEL4_PREFIX_ENV: &str = "SEL4_PREFIX";
-
-pub struct SimpleVar<'a, T: VarType> {
-    var: &'a str,
-    phantom: PhantomData<T>,
-}
-
-impl<'a, T: VarType> SimpleVar<'a, T> {
-    pub const fn new(var: &'a str) -> Self {
-        Self {
-            var,
-            phantom: PhantomData,
-        }
-    }
-
-    pub fn try_get(&self) -> Option<T::Value> {
-        self.declare_as_dependency();
-        env::var(self.var)
-            .ok()
-            .map(|raw_value| T::from_raw_value(&raw_value))
-    }
-
-    pub fn get(&self) -> T::Value {
-        self.try_get()
-            .unwrap_or_else(|| panic!("{} must be set", &self.var))
-    }
-
-    pub fn declare_as_dependency(&self) {
-        println!("cargo:rerun-if-env-changed={}", &self.var);
-    }
-}
 
 pub struct Var<'a, T: VarType> {
     var: &'a str,
@@ -96,6 +65,36 @@ pub trait VarType {
 
     fn from_suffix(prefix: &Path, suffix: &Self::Suffix) -> Self::Value;
     fn from_raw_value(raw_value: &str) -> Self::Value;
+}
+
+pub struct SimpleVar<'a, T: VarType> {
+    var: &'a str,
+    phantom: PhantomData<T>,
+}
+
+impl<'a, T: VarType> SimpleVar<'a, T> {
+    pub const fn new(var: &'a str) -> Self {
+        Self {
+            var,
+            phantom: PhantomData,
+        }
+    }
+
+    pub fn try_get(&self) -> Option<T::Value> {
+        self.declare_as_dependency();
+        env::var(self.var)
+            .ok()
+            .map(|raw_value| T::from_raw_value(&raw_value))
+    }
+
+    pub fn get(&self) -> T::Value {
+        self.try_get()
+            .unwrap_or_else(|| panic!("{} must be set", &self.var))
+    }
+
+    pub fn declare_as_dependency(&self) {
+        println!("cargo:rerun-if-env-changed={}", &self.var);
+    }
 }
 
 pub struct PathVarType<'a> {

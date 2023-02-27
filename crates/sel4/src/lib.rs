@@ -28,13 +28,11 @@
 //!
 //! ### Building
 //!
-//! This crate and its dependencies depend, at build time, on a JSON representation of a seL4 kernel
-//! configuration, and a corresponding set of libsel4 headers. The locations of these dependencies
-//! are provided to this crate at build time by environment variables. If `SEL4_CONFIG` is set, then
-//! its value is interpreted as the path for the JSON seL4 kernel configuration file. Otherwise, if
-//! `SEL4_PREFIX` is set, then `$SEL4_PREFIX/support/config.json` is used. If `SEL4_INCLUDE_DIRS` is
-//! set, then its value is interpreted as a colon-separated list of include paths for the libsel4
-//! headers. Otherwise, if `SEL4_PREFIX` is set, then `$SEL4_PREFIX/libsel4/include` is used.
+//! This crate and its dependencies depend, at build time, on the libsel4 headers. The location of
+//! these headers is provided to this crate at build time by environment variables. If
+//! `SEL4_INCLUDE_DIRS` is set, then its value is interpreted as a colon-separated list of include
+//! paths for the libsel4 headers. Otherwise, if `SEL4_PREFIX` is set, then
+//! `$SEL4_PREFIX/libsel4/include` is used.
 //!
 //! #### Note
 //!

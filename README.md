@@ -57,12 +57,9 @@ Here is a list of environment variables and the crates which use them:
 - For crates in [`./crates/sel4`](./crates/sel4).
   See the rustdoc for the `sel4` crate for more information.
   See the `sel4-build-env` crate and its dependants for implementation details.
-    - `$SEL4_CONFIG`, defaulting to `$SEL4_PREFIX/support/config.json` if `$SEL4_PREFIX` is set:
-      Must contain the path of a JSON representation of a seL4 kernel configuration.
-      Required by the `sel4-config`, whose dependencies include the `sel4-sys` and `sel4` crates.
     - `$SEL4_INCLUDE_DIRS`, defaulting to `$SEL4_PREFIX/libsel4/include` if `$SEL4_PREFIX` is set:
       Must contain a colon-separated list of include paths for the libsel4 headers.
-      Required by the `sel4-sys` crate , whose dependencies include the `sel4` crate.
+      Required by the `sel4-config` and `sel4-sys` crates, whose dependencies include the `sel4` crate.
     - `$SEL4_PLATFORM_INFO`, defaulting to `$SEL4_PREFIX/support/platform-info.yaml` if `$SEL4_PREFIX` is set:
       Must contain the path of a `platform-info.yaml` file from the seL4 kernel build system.
       Required by the `sel4-platform-info` crate, whose dependencies include the `loader` crate.

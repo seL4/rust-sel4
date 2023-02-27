@@ -42,6 +42,10 @@ impl Configuration {
     pub fn insert(&mut self, key: Key, value: Value) -> Option<Value> {
         self.0.insert(key, value)
     }
+
+    pub fn append(&mut self, mut other: Self) {
+        self.0.append(&mut other.0)
+    }
 }
 
 impl Value {

@@ -4,18 +4,17 @@
 , python3Packages
 , qemu
 , kernelConfig
+, mkKeepRef
 }:
 
 let
-  src =
-    let
-      rev = "0c9a1980867f715c1d06e53b5fbb6bac4a88845e";
-      ref = "refs/tags/keep/${builtins.substring 0 32 rev}";
-    in
-      builtins.fetchGit {
-        url = "https://gitlab.com/coliasgroup/seL4.git";
-        inherit rev ref;
-      };
+  # src = lib.cleanSource ../../../../../../../../x/seL4;
+
+  src = builtins.fetchGit rec {
+    url = "https://gitlab.com/coliasgroup/seL4.git";
+    rev = "50bad1a4e7e7083e92255b20d3e76b9ad8c83e22";
+    ref = mkKeepRef rev;
+  };
 
   settings = writeText "settings.cmake" ''
     ${lib.concatStrings (lib.mapAttrsToList (k: v: ''
@@ -66,21 +65,7 @@ stdenv.mkDerivation {
   '';  
 
   installPhase = ''
-    cp_if_exists() {
-      src=$1
-      dst=$2
-      if [ -e $src ]; then 
-        cp $src $dst
-      fi
-    }
-
     ninja -C $build install
-
-    mkdir $out/support
-
-    cp $build/gen_config/kernel/gen_config.json $out/support/config.json
-    cp_if_exists $build/kernel.dtb $out/support/kernel.dtb
-    cp_if_exists $build/gen_headers/plat/machine/platform_gen.yaml $out/support/platform-info.yaml
   '';
 
   dontFixup = true;
