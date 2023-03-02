@@ -43,15 +43,20 @@ let
         guard = config: if config == this.pkgs.build.hostPlatform.config then null else { inherit config; };
       in {
         aarch64 = {
-          linuxGNU = mkLeaf (guard "aarch64-unknown-linux-gnu");
-          linuxMusl = mkLeaf (guard "aarch64-unknown-linux-musl");
           none = mkLeaf (guard "aarch64-none-elf");
+          linux = mkLeaf (guard "aarch64-unknown-linux-gnu");
+          linuxMusl = mkLeaf (guard "aarch64-unknown-linux-musl");
         };
         riscv64 = {
           none = mkLeaf (guard "riscv64-none-elf");
+          noneWithLibc = mkLeaf (guard "riscv64-none-elf" // {
+            this.noneWithLibc = true;
+          });
+          linux = mkLeaf (guard "riscv64-unknown-linux-gnu");
         };
         x86_64 = {
           none = mkLeaf (guard "x86_64-elf");
+          linux = mkLeaf (guard "x86_64-unknown-linux-gnu");
         };
       };
   };
