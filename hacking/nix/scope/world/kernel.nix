@@ -12,7 +12,7 @@ let
 
   src = builtins.fetchGit rec {
     url = "https://gitlab.com/coliasgroup/seL4.git";
-    rev = "50bad1a4e7e7083e92255b20d3e76b9ad8c83e22";
+    rev = "c7f53af3de8dc1e2fd7243aea0e6f85a75bd8fbf"; # branch "rust"
     ref = mkKeepRef rev;
   };
 

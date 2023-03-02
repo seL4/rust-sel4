@@ -23,7 +23,7 @@ let
 
   kernelSource = builtins.fetchGit rec {
     url = "https://gitlab.com/coliasgroup/seL4.git";
-    rev = "eb093f5a57abb957a77ba5393af407312ce3bf57";
+    rev = "b62383c0a2111a58e192792cb330d98e204a8ae3"; # branch "rust-sel4cp"
     ref = mkKeepRef rev;
   };
 
