@@ -10,6 +10,13 @@ self: with self; {
       map (instance: instance.links) world.instances.supported
     ))
     pkgs.host.riscv64.none.this.worlds.default.kernel
+    pkgs.host.riscv64.noneWithLibc.gccMultiStdenvGeneric
+    pkgs.host.aarch64.none.this.worlds.qemu-arm-virt.sel4cp.sel4cpInstances.banscii.system.links
+    (map (x: x.this.sel4test) [
+      pkgs.host.aarch64.linux
+      pkgs.host.x86_64.linux
+      pkgs.host.riscv64.noneWithLibc
+    ])
   ];
 
   everythingWithExcessList = lib.flatten [

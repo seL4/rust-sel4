@@ -35,8 +35,13 @@ assert !(super ? scopeName);
     (callPackage ./python-overrides.nix {})
   ];
 
-  gccMultiStdenvGeneric = overrideCC stdenv (buildPackages.wrapCC (stdenv.cc.cc.override {
-    enableMultilib = true;
-  }));
+  gccMultiStdenvGeneric =
+    let
+      # stdenv = super.gcc8Stdenv;
+      # stdenv = super.gcc10Stdenv;
+    in
+      overrideCC stdenv (buildPackages.wrapCC (stdenv.cc.cc.override {
+        enableMultilib = true;
+      }));
 
 }

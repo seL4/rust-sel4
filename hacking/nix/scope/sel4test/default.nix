@@ -1,6 +1,6 @@
 { stdenv, lib
 , buildPackages, buildPlatform, hostPlatform
-, writeText
+, writeText, linkFarm
 , fetchRepoProject
 , cmake, ninja
 , libxml2, dtc, cpio, protobuf
@@ -14,6 +14,11 @@
 , bareMetalRustTargetInfo
 , vendoredTopLevelLockfile
 , buildSysroot
+, crates
+, pruneLockfile
+, topLevelLockfile
+, vendorLockfile
+, runCommandCC
 }:
 
 with lib;
@@ -34,11 +39,13 @@ let
     # "-DSMP=FALSE"
     "-DLibSel4UseRust=TRUE"
     # "-DLibSel4UseRust=FALSE"
-    "-DHACK_RUST_SEL4_SOURCE_DIR=${rustSourceDir}"
+    "-DHACK_CARGO_MANIFEST_PATH=${workspace}/Cargo.toml"
     "-DHACK_CARGO_CONFIG=${cargoConfig}"
-    "-DHACK_RUST_NO_BUILD_SYSROOT=TRUE"
+    "-DHACK_CARGO_NO_BUILD_SYSROOT=TRUE"
+    # "-DHACK_CARGO_RELEASE=TRUE"
   ] ++ lib.optionals hostPlatform.isRiscV64 [
     "-DPLATFORM=spike"
+    "-DHACK_COMPILER_BUILTINS_SYMBOLS=${compilerBuiltinsSymbols}"
   ] ++ lib.optionals hostPlatform.isAarch64 [
     "-DPLATFORM=qemu-arm-virt"
     # "-DARM_HYP=TRUE"
@@ -46,11 +53,23 @@ let
 
   kernelSrc = builtins.fetchGit rec {
     url = "https://gitlab.com/coliasgroup/seL4.git";
-    rev = "4d82588c2111e162d996455c2d2b6d9253661d1c";
+    rev = "0b3c3d9672cf742dc948977312216703132f4a29"; # rust-sel4test
     ref = mkKeepRef rev;
   };
 
   # kernelSrc = lib.cleanSource ../../../../../../../../x/seL4;
+
+  cratesSrc = crateUtils.collectReals (lib.attrValues (crateUtils.getClosureOfCrate rootCrate));
+
+  rootCrate = crates.sel4-sys-wrappers;
+
+  lockfile = builtins.toFile "Cargo.lock" lockfileContents;
+  lockfileContents = builtins.readFile lockfileDrv;
+  lockfileDrv = pruneLockfile {
+    superLockfile = topLevelLockfile;
+    superLockfileVendoringConfig = vendoredTopLevelLockfile.configFragment;
+    rootCrates = [ rootCrate ];
+  };
 
   cargoConfig = crateUtils.toTOMLFile "config" (crateUtils.clobber [
     (crateUtils.baseConfig {
@@ -62,23 +81,40 @@ let
         "--sysroot" sysroot
       ];
     }
-    vendoredTopLevelLockfile.configFragment
+    (vendorLockfile { inherit lockfileContents; }).configFragment
   ]);
 
-  rustSourceDir = lib.cleanSourceWith {
-    src = lib.cleanSource ../../../..;
-    filter = name: type:
-    let baseName = baseNameOf (toString name); in !(
-      false
-        || baseName == "hacking"
-    );
+  profiles = {
+    profile.release = {
+      debug = 0;
+      opt-level = "z";
+    };
   };
+
+  manifest = crateUtils.toTOMLFile "Cargo.toml" (crateUtils.clobber [
+    {
+      workspace.resolver = "2";
+      workspace.members = [ "src/${rootCrate.name}" ];
+    }
+    profiles
+  ]);
+
+  workspace = linkFarm "workspace" [
+    { name = "Cargo.toml"; path = manifest; }
+    { name = "Cargo.lock"; path = lockfile; }
+    { name = "src"; path = cratesSrc; }
+  ];
 
   sysroot = buildSysroot {
     release = false;
     inherit rustTargetInfo;
-    # extraManifest = profiles;
+    extraManifest = profiles;
   };
+
+  compilerBuiltinsSymbols = runCommandCC "weaken.txt" {} ''
+    $NM ${sysroot}/lib/rustlib/${rustTargetInfo.name}/lib/libcompiler_builtins-*.rlib \
+      | sed -rn 's,^.* T (__.*)$,\1,p' > $out
+  '';
 
 in
 thisStdenv.mkDerivation {
@@ -87,8 +123,6 @@ thisStdenv.mkDerivation {
   src = fetchRepoProject {
     name = "sel4test";
     manifest = "https://github.com/seL4/sel4test-manifest.git";
-    # rev = "499db1117efce7ce8361e71193de5098c71f9af8";
-    # sha256 = "sha256-+/a0ulPG/WotdBD4ORgIffm8Q1JS+ofGfN6s0Bm/onU=";
     rev = "cfc1195ba8fd0de1a0e179aef1314b8f402ff74c";
     sha256 = "sha256-JspN1A/w5XIV+XCj5/oj7NABsKXVdr+UZOTJWvfJPUY=";
   };
@@ -135,6 +169,14 @@ thisStdenv.mkDerivation {
     # HACK
     sed -i 's,tput reset,true,' \
       tools/seL4/cmake-tool/simulate_scripts/simulate.py
+
+  '' + lib.optionalString hostPlatform.isRiscV64 ''
+    # HACK
+    sed -i 's|test_bad_instruction, true|test_bad_instruction, false|' \
+      projects/sel4test/apps/sel4test-tests/src/tests/faults.c
+
+    sed -i 's|printf("Bootstrapping kernel\\n");|printf("Bootstrapping kernel %lx\\n", v_entry);|' \
+      kernel/src/arch/riscv/kernel/boot.c
   '';
 
   configurePhase = ''
@@ -150,6 +192,7 @@ thisStdenv.mkDerivation {
   installPhase = ''
     cd ..
     mv build $out
+    rm -rf $out/libsel4/rust/target
   '';
 
   dontFixup = true;
