@@ -346,7 +346,10 @@ impl<'a, N: ObjectName, F: Content, B: BorrowMut<[PerObjectBuffer]>> Loader<'a, 
 
     fn init_asids(&self) -> Result<()> {
         debug!("Initializing ASIDs");
-        for (obj_id, _obj) in self.spec().filter_objects::<&object::PGD>() {
+        for (obj_id, _obj) in self
+            .spec()
+            .filter_objects_with::<&object::PageTable>(|obj| obj.is_root)
+        {
             let pgd = self.orig_local_cptr::<cap_type::PGD>(obj_id);
             BootInfo::init_thread_asid_pool().asid_pool_assign(pgd)?;
         }
@@ -424,28 +427,31 @@ impl<'a, N: ObjectName, F: Content, B: BorrowMut<[PerObjectBuffer]>> Loader<'a, 
         // Add support for uncached non-device mappings.
         // See note about seL4_ARM_Page_CleanInvalidate_Data/seL4_ARM_Page_Unify_Instruction in upstream.
 
-        for (obj_id, obj) in self.spec().filter_objects::<&object::PGD>() {
+        for (obj_id, obj) in self
+            .spec()
+            .filter_objects_with::<&object::PageTable>(|obj| obj.is_root)
+        {
             let pgd = self.orig_local_cptr::<cap_type::PGD>(obj_id);
-            for (i, cap) in obj.entries() {
+            for (i, cap) in obj.page_tables() {
                 let pud = self.orig_local_cptr::<cap_type::PUD>(cap.object);
                 let vaddr = i << cap_type::PUD::SPAN_BITS;
                 pud.translation_table_map(pgd, vaddr, cap.vm_attributes())?;
                 for (i, cap) in self
                     .spec()
-                    .lookup_object::<&object::PUD>(cap.object)?
-                    .entries()
+                    .lookup_object::<&object::PageTable>(cap.object)?
+                    .page_tables()
                 {
                     let pd = self.orig_local_cptr::<cap_type::PD>(cap.object);
                     let vaddr = vaddr + (i << cap_type::PD::SPAN_BITS);
                     pd.translation_table_map(pgd, vaddr, cap.vm_attributes())?;
                     for (i, cap) in self
                         .spec()
-                        .lookup_object::<&object::PD>(cap.object)?
+                        .lookup_object::<&object::PageTable>(cap.object)?
                         .entries()
                     {
                         let vaddr = vaddr + (i << cap_type::PT::SPAN_BITS);
                         match cap {
-                            PDEntry::Frame(cap) => {
+                            PageTableEntry::Frame(cap) => {
                                 let frame = self.orig_local_cptr::<cap_type::LargePage>(cap.object);
                                 let rights = (&cap.rights).into();
                                 self.copy(frame)?.frame_map(
@@ -455,13 +461,13 @@ impl<'a, N: ObjectName, F: Content, B: BorrowMut<[PerObjectBuffer]>> Loader<'a, 
                                     cap.vm_attributes(),
                                 )?;
                             }
-                            PDEntry::PT(cap) => {
+                            PageTableEntry::PageTable(cap) => {
                                 let pt = self.orig_local_cptr::<cap_type::PT>(cap.object);
                                 pt.translation_table_map(pgd, vaddr, cap.vm_attributes())?;
                                 for (i, cap) in self
                                     .spec()
-                                    .lookup_object::<&object::PT>(cap.object)?
-                                    .entries()
+                                    .lookup_object::<&object::PageTable>(cap.object)?
+                                    .frames()
                                 {
                                     let frame =
                                         self.orig_local_cptr::<cap_type::SmallPage>(cap.object);

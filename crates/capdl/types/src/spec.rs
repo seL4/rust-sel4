@@ -58,10 +58,7 @@ pub enum Object<'a, F> {
     IRQ(object::IRQ<'a>),
     VCPU,
     Frame(object::Frame<'a, F>),
-    PT(object::PT<'a>),
-    PD(object::PD<'a>),
-    PUD(object::PUD<'a>),
-    PGD(object::PGD<'a>),
+    PageTable(object::PageTable<'a>),
     ASIDPool(object::ASIDPool),
     ArmIRQ(object::ArmIRQ<'a>),
 }
@@ -88,10 +85,7 @@ pub enum Cap {
     IRQHandler(cap::IRQHandler),
     VCPU(cap::VCPU),
     Frame(cap::Frame),
-    PT(cap::PT),
-    PD(cap::PD),
-    PUD(cap::PUD),
-    PGD(cap::PGD),
+    PageTable(cap::PageTable),
     ASIDPool(cap::ASIDPool),
     ArmIRQHandler(cap::ArmIRQHandler),
 }
@@ -107,10 +101,7 @@ impl Cap {
             Cap::TCB(cap) => cap.object,
             Cap::IRQHandler(cap) => cap.object,
             Cap::VCPU(cap) => cap.object,
-            Cap::PT(cap) => cap.object,
-            Cap::PD(cap) => cap.object,
-            Cap::PUD(cap) => cap.object,
-            Cap::PGD(cap) => cap.object,
+            Cap::PageTable(cap) => cap.object,
             Cap::ASIDPool(cap) => cap.object,
             Cap::ArmIRQHandler(cap) => cap.object,
         }
@@ -222,25 +213,9 @@ pub mod object {
 
     #[derive(Debug, Clone, Eq, PartialEq, IsObject, IsObjectWithCapTable)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-    pub struct PT<'a> {
-        pub slots: Indirect<'a, [CapTableEntry]>,
-    }
-
-    #[derive(Debug, Clone, Eq, PartialEq, IsObject, IsObjectWithCapTable)]
-    #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-    pub struct PD<'a> {
-        pub slots: Indirect<'a, [CapTableEntry]>,
-    }
-
-    #[derive(Debug, Clone, Eq, PartialEq, IsObject, IsObjectWithCapTable)]
-    #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-    pub struct PUD<'a> {
-        pub slots: Indirect<'a, [CapTableEntry]>,
-    }
-
-    #[derive(Debug, Clone, Eq, PartialEq, IsObject, IsObjectWithCapTable)]
-    #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-    pub struct PGD<'a> {
+    pub struct PageTable<'a> {
+        pub is_root: bool,
+        pub level: Option<u8>,
         pub slots: Indirect<'a, [CapTableEntry]>,
     }
 
@@ -326,25 +301,7 @@ pub mod cap {
 
     #[derive(Debug, Clone, Eq, PartialEq, IsCap)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-    pub struct PT {
-        pub object: ObjectId,
-    }
-
-    #[derive(Debug, Clone, Eq, PartialEq, IsCap)]
-    #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-    pub struct PD {
-        pub object: ObjectId,
-    }
-
-    #[derive(Debug, Clone, Eq, PartialEq, IsCap)]
-    #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-    pub struct PUD {
-        pub object: ObjectId,
-    }
-
-    #[derive(Debug, Clone, Eq, PartialEq, IsCap)]
-    #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-    pub struct PGD {
+    pub struct PageTable {
         pub object: ObjectId,
     }
 

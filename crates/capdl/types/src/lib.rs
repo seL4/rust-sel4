@@ -22,7 +22,7 @@ mod traverse;
 #[cfg(feature = "sel4")]
 mod when_sel4;
 
-pub use cap_table::{HasCapTable, PDEntry};
+pub use cap_table::{HasCapTable, PageTableEntry};
 pub use fill::{BytesContent, Content, IndirectBytesContent, SelfContainedContent};
 pub use indirect::Indirect;
 pub use object_name::{IndirectObjectName, ObjectName, SelfContainedObjectName, Unnamed};

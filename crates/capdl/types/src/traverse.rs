@@ -45,10 +45,7 @@ impl<'a, F> Object<'a, F> {
             Object::IRQ(obj) => Object::IRQ(obj.clone()),
             Object::VCPU => Object::VCPU,
             Object::Frame(obj) => Object::Frame(obj.traverse(f)?),
-            Object::PT(obj) => Object::PT(obj.clone()),
-            Object::PD(obj) => Object::PD(obj.clone()),
-            Object::PUD(obj) => Object::PUD(obj.clone()),
-            Object::PGD(obj) => Object::PGD(obj.clone()),
+            Object::PageTable(obj) => Object::PageTable(obj.clone()),
             Object::ASIDPool(obj) => Object::ASIDPool(obj.clone()),
             Object::ArmIRQ(obj) => Object::ArmIRQ(obj.clone()),
         })

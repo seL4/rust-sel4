@@ -185,21 +185,9 @@ impl<'a> Embedding<'a> {
                 let toks = self.embed_object_with_fill(obj, &obj.fill);
                 quote!(Object::Frame(object::#toks))
             }
-            Object::PT(obj) => {
+            Object::PageTable(obj) => {
                 let toks = self.embed_object_with_cap_table(obj);
-                quote!(Object::PT(object::#toks))
-            }
-            Object::PD(obj) => {
-                let toks = self.embed_object_with_cap_table(obj);
-                quote!(Object::PD(object::#toks))
-            }
-            Object::PUD(obj) => {
-                let toks = self.embed_object_with_cap_table(obj);
-                quote!(Object::PUD(object::#toks))
-            }
-            Object::PGD(obj) => {
-                let toks = self.embed_object_with_cap_table(obj);
-                quote!(Object::PGD(object::#toks))
+                quote!(Object::PageTable(object::#toks))
             }
             Object::ArmIRQ(obj) => {
                 let mut expr_struct =

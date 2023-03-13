@@ -20,10 +20,17 @@ impl<'a, F> Object<'a, F> {
                 sel4::FrameSize::LARGE_BITS => ObjectBlueprintArm::LargePage.into(),
                 _ => panic!(),
             },
-            Object::PT(_) => ObjectBlueprintArm::PT.into(),
-            Object::PD(_) => ObjectBlueprintArm::PD.into(),
-            Object::PUD(_) => ObjectBlueprintAArch64::PUD.into(),
-            Object::PGD(_) => ObjectBlueprintAArch64::PGD.into(),
+            Object::PageTable(obj) => {
+                let level = obj.level.unwrap();
+                assert_eq!(obj.is_root, level == 0); // sanity check
+                match level {
+                    0 => ObjectBlueprintAArch64::PGD.into(),
+                    1 => ObjectBlueprintAArch64::PUD.into(),
+                    2 => ObjectBlueprintArm::PD.into(),
+                    3 => ObjectBlueprintArm::PT.into(),
+                    _ => panic!(),
+                }
+            }
             Object::ASIDPool(_) => ObjectBlueprint::asid_pool(),
             _ => return None,
         })
@@ -76,27 +83,9 @@ impl HasVMAttributes for cap::Frame {
     }
 }
 
-impl HasVMAttributes for cap::PGD {
+impl HasVMAttributes for cap::PageTable {
     fn vm_attributes(&self) -> VMAttributes {
-        default_vm_attributes_for_translation_structure()
-    }
-}
-
-impl HasVMAttributes for cap::PUD {
-    fn vm_attributes(&self) -> VMAttributes {
-        default_vm_attributes_for_translation_structure()
-    }
-}
-
-impl HasVMAttributes for cap::PD {
-    fn vm_attributes(&self) -> VMAttributes {
-        default_vm_attributes_for_translation_structure()
-    }
-}
-
-impl HasVMAttributes for cap::PT {
-    fn vm_attributes(&self) -> VMAttributes {
-        default_vm_attributes_for_translation_structure()
+        default_vm_attributes_for_page_table()
     }
 }
 
@@ -109,6 +98,6 @@ fn vm_attributes_from_whether_cached(cached: bool) -> VMAttributes {
         })
 }
 
-fn default_vm_attributes_for_translation_structure() -> VMAttributes {
+fn default_vm_attributes_for_page_table() -> VMAttributes {
     VMAttributes::default()
 }

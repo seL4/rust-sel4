@@ -34,6 +34,13 @@ impl<'a, N, F> Spec<'a, N, F> {
             .filter_map(|(obj_id, obj)| Some((obj_id, O::try_from(obj).ok()?)))
     }
 
+    pub fn filter_objects_with<'b: 'a, O: TryFrom<&'a Object<'a, F>>>(
+        &'b self,
+        f: impl 'a + Fn(&O) -> bool,
+    ) -> impl Iterator<Item = (ObjectId, O)> + 'b {
+        self.filter_objects().filter(move |(_, obj)| (&f)(obj))
+    }
+
     pub fn lookup_object<'b: 'a, O: TryFrom<&'b Object<'a, F>>>(
         &'b self,
         obj_id: ObjectId,

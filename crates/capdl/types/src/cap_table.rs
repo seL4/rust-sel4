@@ -55,7 +55,7 @@ impl<'a> object::TCB<'a> {
         self.slot_as(Self::SLOT_CSPACE)
     }
 
-    pub fn vspace(&self) -> &cap::PGD {
+    pub fn vspace(&self) -> &cap::PageTable {
         self.slot_as(Self::SLOT_VSPACE)
     }
 
@@ -90,43 +90,49 @@ impl<'a> object::ArmIRQ<'a> {
 
 // // //
 
-impl<'a> object::PGD<'a> {
-    pub fn entries(&self) -> impl Iterator<Item = (CapSlot, &cap::PUD)> {
+impl<'a> object::PageTable<'a> {
+    pub fn entries(&self) -> impl Iterator<Item = (CapSlot, PageTableEntry)> {
         self.slots_as()
     }
-}
 
-impl<'a> object::PUD<'a> {
-    pub fn entries(&self) -> impl Iterator<Item = (CapSlot, &cap::PD)> {
+    pub fn frames(&self) -> impl Iterator<Item = (CapSlot, &cap::Frame)> {
         self.slots_as()
     }
-}
 
-impl<'a> object::PD<'a> {
-    pub fn entries(&self) -> impl Iterator<Item = (CapSlot, PDEntry)> {
-        self.slots_as()
-    }
-}
-
-impl<'a> object::PT<'a> {
-    pub fn entries(&self) -> impl Iterator<Item = (CapSlot, &cap::Frame)> {
+    pub fn page_tables(&self) -> impl Iterator<Item = (CapSlot, &cap::PageTable)> {
         self.slots_as()
     }
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub enum PDEntry<'a> {
-    PT(&'a cap::PT),
+pub enum PageTableEntry<'a> {
+    PageTable(&'a cap::PageTable),
     Frame(&'a cap::Frame),
 }
 
-impl<'a> TryFrom<&'a Cap> for PDEntry<'a> {
+impl<'a> PageTableEntry<'a> {
+    pub fn page_table(&self) -> Option<&'a cap::PageTable> {
+        match self {
+            Self::PageTable(cap) => Some(cap),
+            _ => None,
+        }
+    }
+
+    pub fn frame(&self) -> Option<&'a cap::Frame> {
+        match self {
+            Self::Frame(cap) => Some(cap),
+            _ => None,
+        }
+    }
+}
+
+impl<'a> TryFrom<&'a Cap> for PageTableEntry<'a> {
     type Error = TryFromCapError;
 
     fn try_from(cap: &'a Cap) -> Result<Self, Self::Error> {
         Ok(match cap {
-            Cap::PT(cap) => PDEntry::PT(cap),
-            Cap::Frame(cap) => PDEntry::Frame(cap),
+            Cap::PageTable(cap) => PageTableEntry::PageTable(cap),
+            Cap::Frame(cap) => PageTableEntry::Frame(cap),
             _ => return Err(TryFromCapError),
         })
     }
