@@ -4,6 +4,7 @@
 #![feature(int_roundings)]
 #![feature(never_type)]
 #![feature(proc_macro_hygiene)]
+#![feature(stmt_expr_attributes)]
 #![feature(strict_provenance)]
 
 use core::array;
@@ -493,9 +494,12 @@ impl<'a, N: ObjectName, F: Content, B: BorrowMut<[PerObjectBuffer]>> Loader<'a, 
                 tcb.tcb_bind_notification(bound_notification)?;
             }
 
-            if let Some(vcpu) = obj.vcpu() {
-                let vcpu = self.orig_local_cptr::<cap_type::VCPU>(vcpu.object);
-                vcpu.vcpu_set_tcb(tcb)?;
+            #[sel4::sel4_cfg(ARM_HYPERVISOR_SUPPORT)]
+            {
+                if let Some(vcpu) = obj.vcpu() {
+                    let vcpu = self.orig_local_cptr::<cap_type::VCPU>(vcpu.object);
+                    vcpu.vcpu_set_tcb(tcb)?;
+                }
             }
 
             {

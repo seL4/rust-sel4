@@ -4,35 +4,39 @@ use crate::{cap, Badge, Cap, FillEntryContentBootInfoId, Object, Rights};
 
 impl<'a, F> Object<'a, F> {
     pub fn blueprint(&self) -> Option<ObjectBlueprint> {
-        Some(match self {
-            Object::Untyped(obj) => ObjectBlueprint::Untyped {
-                size_bits: obj.size_bits,
-            },
-            Object::Endpoint => ObjectBlueprint::Endpoint,
-            Object::Notification => ObjectBlueprint::Notification,
-            Object::CNode(obj) => ObjectBlueprint::CNode {
-                size_bits: obj.size_bits,
-            },
-            Object::TCB(_) => ObjectBlueprint::TCB,
-            Object::VCPU => ObjectBlueprintArm::VCPU.into(),
-            Object::Frame(obj) => match obj.size_bits {
-                sel4::FrameSize::SMALL_BITS => ObjectBlueprintArm::SmallPage.into(),
-                sel4::FrameSize::LARGE_BITS => ObjectBlueprintArm::LargePage.into(),
-                _ => panic!(),
-            },
-            Object::PageTable(obj) => {
-                let level = obj.level.unwrap();
-                assert_eq!(obj.is_root, level == 0); // sanity check
-                match level {
-                    0 => ObjectBlueprintAArch64::PGD.into(),
-                    1 => ObjectBlueprintAArch64::PUD.into(),
-                    2 => ObjectBlueprintArm::PD.into(),
-                    3 => ObjectBlueprintArm::PT.into(),
+        Some({
+            #[sel4::sel4_cfg_match]
+            match self {
+                Object::Untyped(obj) => ObjectBlueprint::Untyped {
+                    size_bits: obj.size_bits,
+                },
+                Object::Endpoint => ObjectBlueprint::Endpoint,
+                Object::Notification => ObjectBlueprint::Notification,
+                Object::CNode(obj) => ObjectBlueprint::CNode {
+                    size_bits: obj.size_bits,
+                },
+                Object::TCB(_) => ObjectBlueprint::TCB,
+                #[sel4_cfg(ARM_HYPERVISOR_SUPPORT)]
+                Object::VCPU => ObjectBlueprintArm::VCPU.into(),
+                Object::Frame(obj) => match obj.size_bits {
+                    sel4::FrameSize::SMALL_BITS => ObjectBlueprintArm::SmallPage.into(),
+                    sel4::FrameSize::LARGE_BITS => ObjectBlueprintArm::LargePage.into(),
                     _ => panic!(),
+                },
+                Object::PageTable(obj) => {
+                    let level = obj.level.unwrap();
+                    assert_eq!(obj.is_root, level == 0); // sanity check
+                    match level {
+                        0 => ObjectBlueprintAArch64::PGD.into(),
+                        1 => ObjectBlueprintAArch64::PUD.into(),
+                        2 => ObjectBlueprintArm::PD.into(),
+                        3 => ObjectBlueprintArm::PT.into(),
+                        _ => panic!(),
+                    }
                 }
+                Object::ASIDPool(_) => ObjectBlueprint::asid_pool(),
+                _ => return None,
             }
-            Object::ASIDPool(_) => ObjectBlueprint::asid_pool(),
-            _ => return None,
         })
     }
 }
