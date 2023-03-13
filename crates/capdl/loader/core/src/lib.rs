@@ -108,14 +108,6 @@ impl<'a, N: ObjectName, F: Content, B: BorrowMut<[PerObjectBuffer]>> Loader<'a, 
 
         debug!("Creating objects");
 
-        // Allocate CSlots
-        {
-            for obj_id in 0..self.spec().num_objects() {
-                let slot = self.cslot_alloc_or_panic();
-                self.set_orig_cslot(obj_id, slot);
-            }
-        }
-
         // Sort untypeds by paddr, not taking isDevice into account.
         // The kernel provides them sorted first by isDevice.
         let mut _uts_by_paddr_backing: [usize;
@@ -196,7 +188,7 @@ impl<'a, N: ObjectName, F: Content, B: BorrowMut<[PerObjectBuffer]>> Loader<'a, 
                                 self.ut_local_cptr(*i_ut).untyped_retype(
                                     &blueprint,
                                     &init_thread_cnode_relative_cptr(),
-                                    self.orig_cslot(*obj_id),
+                                    self.alloc_orig_cslot(*obj_id),
                                     1,
                                 )?;
                                 cur_paddr += 1 << size_bits;
@@ -247,7 +239,7 @@ impl<'a, N: ObjectName, F: Content, B: BorrowMut<[PerObjectBuffer]>> Loader<'a, 
                     self.ut_local_cptr(*i_ut).untyped_retype(
                         &blueprint,
                         &init_thread_cnode_relative_cptr(),
-                        self.orig_cslot(obj_id),
+                        self.alloc_orig_cslot(obj_id),
                         1,
                     )?;
                     cur_paddr += 1 << blueprint.physical_size_bits();
@@ -619,6 +611,12 @@ impl<'a, N: ObjectName, F: Content, B: BorrowMut<[PerObjectBuffer]>> Loader<'a, 
 
     fn orig_cslot(&self, obj_id: ObjectId) -> InitCSpaceSlot {
         self.buffers.per_obj()[obj_id].orig_slot.unwrap()
+    }
+
+    fn alloc_orig_cslot(&mut self, obj_id: ObjectId) -> InitCSpaceSlot {
+        let slot = self.cslot_alloc_or_panic();
+        self.set_orig_cslot(obj_id, slot);
+        slot
     }
 
     fn orig_local_cptr<U: CapType>(&self, obj_id: ObjectId) -> LocalCPtr<U> {
