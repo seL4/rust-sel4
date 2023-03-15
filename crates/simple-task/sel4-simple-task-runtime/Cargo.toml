@@ -1,0 +1,37 @@
+[package]
+name = "sel4-simple-task-runtime"
+version = "0.1.0"
+authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
+edition = "2021"
+license = "BSD-2-Clause"
+
+[features]
+alloc = [
+    "sel4-backtrace/alloc",
+    "sel4-backtrace-simple/alloc",
+    "sel4-simple-task-threading/alloc",
+    "serde_json?/alloc"
+]
+default = ["serde_json", "alloc"]
+serde_json = ["dep:serde_json"]
+
+[dependencies]
+postcard = { version = "*", default-features = false, features = [] }
+sel4 = { path = "../../sel4" }
+sel4-backtrace = { path = "../../runtime/sel4-backtrace", features = ["unwinding", "postcard"] }
+sel4-backtrace-simple = { path = "../../runtime/sel4-backtrace/simple" }
+sel4-dlmalloc = { path = "../../runtime/sel4-dlmalloc" }
+sel4-immediate-sync-once-cell = { path = "../../runtime/sel4-immediate-sync-once-cell" }
+sel4-panicking = { path = "../../runtime/sel4-panicking" }
+sel4-panicking-env = { path = "../../runtime/sel4-panicking/env" }
+sel4-reserve-tls-on-stack = { path = "../../runtime/sel4-reserve-tls-on-stack" }
+sel4-simple-task-runtime-config-types = { path = "./config/types" }
+sel4-simple-task-runtime-macros = { path = "./macros" }
+sel4-simple-task-threading = { path = "../sel4-simple-task-threading" }
+sel4-sync = { path = "../../runtime/sel4-sync" }
+serde = { version = "*", default-features = false, features = [] }
+serde_json = { version = "*", default-features = false, optional = true }
+
+[dependencies.sel4-runtime-phdrs]
+path = "../../runtime/sel4-runtime-phdrs"
+features = ["tls", "unwinding", "embedded-phdrs"]

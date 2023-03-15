@@ -1,0 +1,10 @@
+[package]
+name = "sel4-simple-task-serialize-runtime-config"
+version = "0.1.0"
+authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
+edition = "2021"
+license = "BSD-2-Clause"
+
+[dependencies]
+sel4-simple-task-runtime-config-types = { path = "../../types", features = ["serde", "alloc"] }
+serde_json = "*"

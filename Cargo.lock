@@ -1639,6 +1639,80 @@ dependencies = [
 ]
 
 [[package]]
+name = "sel4-simple-task-config-types"
+version = "0.1.0"
+dependencies = [
+ "cfg-if",
+ "sel4",
+ "sel4-simple-task-threading",
+ "serde",
+]
+
+[[package]]
+name = "sel4-simple-task-rpc"
+version = "0.1.0"
+dependencies = [
+ "postcard",
+ "sel4",
+ "serde",
+]
+
+[[package]]
+name = "sel4-simple-task-runtime"
+version = "0.1.0"
+dependencies = [
+ "postcard",
+ "sel4",
+ "sel4-backtrace",
+ "sel4-backtrace-simple",
+ "sel4-dlmalloc",
+ "sel4-immediate-sync-once-cell",
+ "sel4-panicking",
+ "sel4-panicking-env",
+ "sel4-reserve-tls-on-stack",
+ "sel4-runtime-phdrs",
+ "sel4-simple-task-runtime-config-types",
+ "sel4-simple-task-runtime-macros",
+ "sel4-simple-task-threading",
+ "sel4-sync",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "sel4-simple-task-runtime-config-types"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "zerocopy",
+]
+
+[[package]]
+name = "sel4-simple-task-runtime-macros"
+version = "0.1.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "sel4-simple-task-serialize-runtime-config"
+version = "0.1.0"
+dependencies = [
+ "sel4-simple-task-runtime-config-types",
+ "serde_json",
+]
+
+[[package]]
+name = "sel4-simple-task-threading"
+version = "0.1.0"
+dependencies = [
+ "sel4",
+ "sel4-panicking",
+]
+
+[[package]]
 name = "sel4-symbolize-backtrace"
 version = "0.1.0"
 dependencies = [

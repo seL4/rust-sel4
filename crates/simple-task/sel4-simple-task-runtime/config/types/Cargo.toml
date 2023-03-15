@@ -1,0 +1,14 @@
+[package]
+name = "sel4-simple-task-runtime-config-types"
+version = "0.1.0"
+authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
+edition = "2021"
+license = "BSD-2-Clause"
+
+[features]
+alloc = ["serde?/alloc"]
+serde = ["dep:serde"]
+
+[dependencies]
+serde = { version = "*", default-features = false, features = ["derive"], optional = true }
+zerocopy = "*"
