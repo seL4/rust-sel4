@@ -139,4 +139,8 @@ superCallPackage ../rust-utils {} self //
 
   sel4test = callPackage ./sel4test {};
 
+  sources = callPackage ./sources.nix {};
+
+  capdl-tool = callPackage ./capdl-tool {};
+
 })
