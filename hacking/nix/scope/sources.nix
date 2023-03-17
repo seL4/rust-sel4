@@ -40,4 +40,8 @@ in rec {
   pythonCapDLTool = fetchGitOrLocalAndThen (capdlCommon // {
     andThen = "/python-capdl-tool";
   });
+
+  objectSizes = fetchGitOrLocalAndThen (capdlCommon // {
+    andThen = "/object_sizes";
+  });
 }

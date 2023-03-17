@@ -108,6 +108,8 @@ superCallPackage ../rust-utils {} self //
   sel4-inject-phdrs = mkTool crates.sel4-inject-phdrs;
   sel4-embed-debug-info = mkTool crates.sel4-embed-debug-info;
   sel4-symbolize-backtrace = mkTool crates.sel4-symbolize-backtrace;
+  capdl-add-spec-to-loader = mkTool crates.capdl-add-spec-to-loader;
+  sel4-simple-task-serialize-runtime-config = mkTool crates.sel4-simple-task-serialize-runtime-config;
 
   injectPhdrs = callPackage ./inject-phdrs.nix {};
 

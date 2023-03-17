@@ -22,7 +22,7 @@ use sel4::Endpoint;
 use sel4_backtrace_simple::SimpleBacktracing;
 use sel4_immediate_sync_once_cell::ImmediateSyncOnceCell;
 use sel4_panicking::ExternalPanicInfo;
-use sel4_panicking_env::{abort, debug_println, AbortInfo};
+use sel4_panicking_env::{abort, AbortInfo};
 use sel4_runtime_phdrs::EmbeddedProgramHeaders;
 use sel4_simple_task_runtime_config_types::RuntimeConfig;
 use sel4_simple_task_threading::StaticThread;
@@ -33,6 +33,7 @@ mod termination;
 #[cfg(feature = "alloc")]
 mod global_allocator;
 
+pub use sel4_panicking_env::{debug_print, debug_println};
 pub use sel4_simple_task_runtime_macros::{main, main_json, main_postcard};
 
 extern "Rust" {

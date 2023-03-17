@@ -6,6 +6,10 @@
 , seL4RustTargetInfoWithConfig
 , worldConfig
 , callPackage
+
+, mkCapDLLoader
+, mkSmallCapDLLoader
+, mkCapDLSpec
 }:
 
 let
@@ -24,8 +28,8 @@ let
     '';
 
     symbolizeRootTaskBacktrace = writeScript "x.sh" ''
-        #!${buildPackages.runtimeShell}
-        exec ${buildPackages.this.sel4-symbolize-backtrace}/bin/sel4-symbolize-backtrace -f ${rootTask.elf} "$@"
+      #!${buildPackages.runtimeShell}
+      exec ${buildPackages.this.sel4-symbolize-backtrace}/bin/sel4-symbolize-backtrace -f ${rootTask.elf} "$@"
     '';
 
     links = linkFarm "links" ([
@@ -45,6 +49,30 @@ let
         timeout = automateTimeout;
       };
   };
+
+  mkCapDLRootTask =
+    { script
+    , config
+    , passthru
+    , small ? false
+    }:
+    let
+    in lib.fix (self: with self;
+      {
+        inherit script config;
+        spec = mkCapDLSpec {
+          inherit script config;
+        };
+      }
+      // (if small then {
+        loader = mkSmallCapDLLoader spec.cdl;
+        elf = loader.elf;
+      } else {
+        loader = mkCapDLLoader spec.cdl;
+        elf = loader;
+      })
+      // passthru
+    );
 
   haveFullRuntime = hostPlatform.isAarch64;
   haveMinimalRuntime = haveFullRuntime || hostPlatform.isx86_64;
@@ -210,6 +238,26 @@ in rec {
 
     c = callPackage ./c.nix {
       inherit mk;
+    };
+
+    capdl = {
+      threads = mk {
+        rootTask = mkCapDLRootTask rec {
+          script = ../../../../../crates/tests/capdl/threads/cdl.py;
+          config = {
+            components = {
+              example_component.image = passthru.test.elf;
+            };
+          };
+          passthru = {
+            test = mkTask {
+              rootCrate = crates.tests-capdl-threads-components-test;
+            };
+          };
+        };
+        isSupported = haveFullRuntime;
+        canAutomate = true;
+      };
     };
   };
 

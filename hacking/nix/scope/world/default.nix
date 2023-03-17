@@ -26,6 +26,8 @@ self: with self;
     # src = lib.cleanSource ../../../../../../../../x/seL4;
   });
 
+  libsel4 = "${seL4ForUserspace}/libsel4";
+
   mkLoader = callPackage ./mk-loader.nix {};
 
   mkTask = callPackage ./mk-task.nix {};
@@ -36,4 +38,12 @@ self: with self;
   docs = callPackage ./docs.nix {};
 
   shell = callPackage ./shell.nix {};
+
+  serializeCapDLSpec = callPackage ./capdl/serialize-capdl-spec.nix {};
+  mkCapDLSpec = callPackage ./capdl/mk-capdl-spec.nix {};
+  mkSmallCapDLLoader = callPackage ./capdl/mk-capdl-loader.nix {};
+  dummyCapDLSpec = callPackage ./capdl/dummy-spec.nix {};
+  objectSizes = callPackage ./capdl/object-sizes.nix {};
+  capdl-loader-expecting-serialized-spec = callPackage ./capdl/capdl-loader-expecting-serialized-spec.nix {};
+  mkCapDLLoader = callPackage ./capdl/mk-capdl-loader-with-serialization.nix {};
 }
