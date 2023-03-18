@@ -2,7 +2,7 @@
 
 use core::mem;
 
-use sel4::{Endpoint, RecvWithMRs};
+use sel4::{Endpoint, RecvWithMRs, ReplyAuthority};
 
 #[cfg(feature = "alloc")]
 extern crate alloc;
@@ -17,11 +17,11 @@ impl StaticThread {
         Self(endpoint)
     }
 
-    pub unsafe fn recv_and_run(endpoint: Endpoint) {
+    pub unsafe fn recv_and_run(endpoint: Endpoint, reply_authority: ReplyAuthority) {
         let RecvWithMRs {
             msg: [entry_vaddr, entry_arg0, entry_arg1, ..],
             ..
-        } = endpoint.recv_with_mrs(());
+        } = endpoint.recv_with_mrs(reply_authority);
         let entry_fn: StaticThreadEntryFn = mem::transmute(entry_vaddr);
         (entry_fn)(entry_arg0, entry_arg1);
     }

@@ -52,6 +52,7 @@ in rec {
           default = el2;
           el1 = mk { smp = true; };
           el2 = mk { smp = true; hypervisor = true; };
+          el2MCS = mk { smp = true; hypervisor = true; mcs = on; };
           sel4cp = mk { mcs = on; forCP = true; cpu = "cortex-a53"; };
         };
 

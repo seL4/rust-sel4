@@ -42,6 +42,7 @@ struct Head {
 struct Thread {
     ipc_buffer_addr: ZerocopyWord,
     endpoint: ZerocopyOptionWord,
+    reply_authority: ZerocopyOptionWord,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -110,5 +111,9 @@ impl RuntimeThreadConfig {
 
     pub fn endpoint(&self) -> Option<CPtrBits> {
         self.inner.endpoint.try_into_native().unwrap()
+    }
+
+    pub fn reply_authority(&self) -> Option<CPtrBits> {
+        self.inner.reply_authority.try_into_native().unwrap()
     }
 }

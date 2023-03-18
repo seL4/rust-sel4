@@ -86,7 +86,16 @@ pub unsafe extern "C" fn cont_fn(cont_arg: *mut c_void) -> ! {
         sel4_panicking::set_hook(&panic_hook);
         __sel4_simple_task_main(config.arg());
     } else {
-        StaticThread::recv_and_run(Endpoint::from_bits(thread_config.endpoint().unwrap()));
+        let endpoint = Endpoint::from_bits(thread_config.endpoint().unwrap());
+        let reply_authority = sel4::sel4_cfg_if! {
+            if #[cfg(KERNEL_MCS)] {
+                sel4::Reply::from_bits(thread_config.reply_authority().unwrap())
+            } else {
+                assert!(thread_config.reply_authority().is_none())
+                sel4::ImplicitReplyAuthority
+            }
+        };
+        StaticThread::recv_and_run(endpoint, reply_authority);
     }
 
     idle()

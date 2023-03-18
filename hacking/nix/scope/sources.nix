@@ -28,10 +28,11 @@ let
   };
 
   # TODO
-  localRoot =../../../../../../../../x;
+  localRoot =../../../../../../../x;
 
 in rec {
   inherit mkKeepRef;
+  inherit localRoot;
 
   capdlTool = fetchGitOrLocalAndThen (capdlCommon // {
     andThen = "/capDL-tool";
