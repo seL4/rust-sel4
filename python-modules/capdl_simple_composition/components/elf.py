@@ -21,6 +21,7 @@ class ElfComponent(BaseComponent):
             update_guard_size=True,
             prio=DEFAULT_PRIO, max_prio=DEFAULT_MAX_PRIO,
             affinity=DEFAULT_AFFINITY,
+            sched_context=None,
             **kwargs,
             ):
 
@@ -40,6 +41,7 @@ class ElfComponent(BaseComponent):
         self.primary_thread = self.thread(
             'primary',
             affinity=affinity,
+            sched_context=sched_context,
             prio=prio, max_prio=max_prio,
             alloc_endpoint=False,
             )
@@ -90,6 +92,11 @@ class ElfComponent(BaseComponent):
 
     def register_thread(self, thread):
         pass
+
+    def new_sched_context(self, name, **kwargs):
+        if not self.composition.kernel_config.is_mcs():
+            return None
+        return Cap(self.alloc(ObjectType.seL4_SchedContextObject, name, **kwargs))
 
     def static_heap_size(self):
         return self.config().get('heap_size', DEFAULT_STATIC_HEAP_SIZE)
@@ -183,6 +190,7 @@ class ElfThread:
             stack_size=DEFAULT_STACK_SIZE,
             prio=DEFAULT_PRIO, max_prio=DEFAULT_MAX_PRIO,
             affinity=DEFAULT_AFFINITY,
+            sched_context=None,
             alloc_endpoint=True,
             ):
 
@@ -209,6 +217,7 @@ class ElfThread:
         tcb['cspace'] = self.component.cnode_cap(update_guard_size=self.component.update_guard_size)
         tcb['vspace'] = Cap(self.component.pd())
         tcb['ipc_buffer_slot'] = ipc_buffer_cap
+        tcb['sc_slot'] = sched_context
 
         if alloc_endpoint:
             endpoint = self.component.cspace().alloc(
@@ -226,9 +235,17 @@ class ElfThread:
         return '{}_thread_{}'.format(self.component.name, self.name)
 
     def get_thread_runtime_config(self):
+        if self.component.composition.kernel_config.is_mcs():
+            reply_authority = self.component.cspace().alloc(
+                self.component.alloc(ObjectType.seL4_RTReplyObject, name='{}_reply'.format(self.name)),
+                )
+        else:
+            reply_authority = None
+
         return {
             'ipc_buffer_addr': self.ipc_buffer_vaddr,
             'endpoint': self.endpoint,
+            'reply_authority': reply_authority,
             }
 
     def set_component_runtime_config(self, config_vaddr, config_size, thread_index):

@@ -35,6 +35,12 @@ impl<'a, F> Object<'a, F> {
                     }
                 }
                 Object::ASIDPool(_) => ObjectBlueprint::asid_pool(),
+                #[sel4_cfg(KERNEL_MCS)]
+                Object::SchedContext(obj) => ObjectBlueprint::SchedContext {
+                    size_bits: obj.size_bits,
+                },
+                #[sel4_cfg(KERNEL_MCS)]
+                Object::Reply => ObjectBlueprint::Reply,
                 _ => return None,
             }
         })

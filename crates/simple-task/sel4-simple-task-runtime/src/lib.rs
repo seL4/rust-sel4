@@ -87,12 +87,14 @@ pub unsafe extern "C" fn cont_fn(cont_arg: *mut c_void) -> ! {
         __sel4_simple_task_main(config.arg());
     } else {
         let endpoint = Endpoint::from_bits(thread_config.endpoint().unwrap());
-        let reply_authority = sel4::sel4_cfg_if! {
-            if #[cfg(KERNEL_MCS)] {
-                sel4::Reply::from_bits(thread_config.reply_authority().unwrap())
-            } else {
-                assert!(thread_config.reply_authority().is_none())
-                sel4::ImplicitReplyAuthority
+        let reply_authority = {
+            sel4::sel4_cfg_if! {
+                if #[cfg(KERNEL_MCS)] {
+                    sel4::Reply::from_bits(thread_config.reply_authority().unwrap())
+                } else {
+                    assert!(thread_config.reply_authority().is_none());
+                    sel4::ImplicitReplyAuthority
+                }
             }
         };
         StaticThread::recv_and_run(endpoint, reply_authority);
@@ -101,15 +103,16 @@ pub unsafe extern "C" fn cont_fn(cont_arg: *mut c_void) -> ! {
     idle()
 }
 
-pub fn idle() -> ! {
-    if let Some(nfn) = CONFIG
+pub fn try_idle() -> () {
+    CONFIG
         .get()
-        .unwrap()
-        .idle_notification()
+        .and_then(RuntimeConfig::idle_notification)
         .map(sel4::Notification::from_bits)
-    {
-        nfn.wait();
-    }
+        .map(sel4::Notification::wait);
+}
+
+pub fn idle() -> ! {
+    try_idle();
     abort!("idle failed")
 }
 
@@ -119,7 +122,7 @@ fn sel4_runtime_abort_hook(info: Option<&AbortInfo>) {
         Some(info) => debug_println!("{}", info),
         None => debug_println!("(aborted)"),
     }
-    idle()
+    try_idle()
 }
 
 #[no_mangle]

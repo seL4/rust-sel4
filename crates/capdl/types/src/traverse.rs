@@ -36,18 +36,22 @@ impl<'a, F> Object<'a, F> {
         &self,
         f: impl FnMut(usize, &F) -> Result<F1, E>,
     ) -> Result<Object<'a, F1>, E> {
-        Ok(match self {
-            Object::Untyped(obj) => Object::Untyped(obj.clone()),
-            Object::Endpoint => Object::Endpoint,
-            Object::Notification => Object::Notification,
-            Object::CNode(obj) => Object::CNode(obj.clone()),
-            Object::TCB(obj) => Object::TCB(obj.clone()),
-            Object::IRQ(obj) => Object::IRQ(obj.clone()),
-            Object::VCPU => Object::VCPU,
-            Object::Frame(obj) => Object::Frame(obj.traverse(f)?),
-            Object::PageTable(obj) => Object::PageTable(obj.clone()),
-            Object::ASIDPool(obj) => Object::ASIDPool(obj.clone()),
-            Object::ArmIRQ(obj) => Object::ArmIRQ(obj.clone()),
+        Ok({
+            match self {
+                Object::Untyped(obj) => Object::Untyped(obj.clone()),
+                Object::Endpoint => Object::Endpoint,
+                Object::Notification => Object::Notification,
+                Object::CNode(obj) => Object::CNode(obj.clone()),
+                Object::TCB(obj) => Object::TCB(obj.clone()),
+                Object::IRQ(obj) => Object::IRQ(obj.clone()),
+                Object::VCPU => Object::VCPU,
+                Object::Frame(obj) => Object::Frame(obj.traverse(f)?),
+                Object::PageTable(obj) => Object::PageTable(obj.clone()),
+                Object::ASIDPool(obj) => Object::ASIDPool(obj.clone()),
+                Object::ArmIRQ(obj) => Object::ArmIRQ(obj.clone()),
+                Object::SchedContext(obj) => Object::SchedContext(obj.clone()),
+                Object::Reply => Object::Reply,
+            }
         })
     }
 }

@@ -1,4 +1,4 @@
-from capdl import ObjectType
+from capdl import ObjectType, Cap
 from capdl_simple_composition import BaseComposition, ElfComponent
 
 class TestComponent(ElfComponent):
@@ -6,7 +6,9 @@ class TestComponent(ElfComponent):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        secondary_thread = self.secondary_thread('secondary_thread')
+        self.primary_thread.tcb['sc_slot'] = self.new_sched_context("primary")
+
+        secondary_thread = self.secondary_thread('secondary_thread', sched_context=self.new_sched_context("secondary"))
         lock_nfn = self.alloc(ObjectType.seL4_NotificationObject, name='lock_nfn')
         barrier_nfn = self.alloc(ObjectType.seL4_NotificationObject, name='barrier_nfn')
 

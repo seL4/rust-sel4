@@ -61,6 +61,8 @@ pub enum Object<'a, F> {
     PageTable(object::PageTable<'a>),
     ASIDPool(object::ASIDPool),
     ArmIRQ(object::ArmIRQ<'a>),
+    SchedContext(object::SchedContext),
+    Reply,
 }
 
 impl<'a, F> Object<'a, F> {
@@ -73,7 +75,6 @@ impl<'a, F> Object<'a, F> {
     }
 }
 
-// TODO restructure by unifiying .object to outer level?
 #[derive(Debug, Clone, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum Cap {
@@ -88,6 +89,8 @@ pub enum Cap {
     PageTable(cap::PageTable),
     ASIDPool(cap::ASIDPool),
     ArmIRQHandler(cap::ArmIRQHandler),
+    SchedContext(cap::SchedContext),
+    Reply(cap::Reply),
 }
 
 impl Cap {
@@ -104,6 +107,8 @@ impl Cap {
             Cap::PageTable(cap) => cap.object,
             Cap::ASIDPool(cap) => cap.object,
             Cap::ArmIRQHandler(cap) => cap.object,
+            Cap::SchedContext(cap) => cap.object,
+            Cap::Reply(cap) => cap.object,
         }
     }
 }
@@ -184,7 +189,6 @@ pub mod object {
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
     pub struct TCBExtraInfo<'a> {
         pub ipc_buffer_addr: Word,
-        pub fault_ep: CPtr,
 
         pub affinity: Word,
         pub prio: u8,
@@ -195,6 +199,8 @@ pub mod object {
         pub sp: Word,
         pub spsr: Word,
         pub gprs: Indirect<'a, [Word]>,
+
+        pub master_fault_ep: Option<CPtr>,
     }
 
     #[derive(Debug, Clone, Eq, PartialEq, IsObject, IsObjectWithCapTable)]
@@ -237,6 +243,21 @@ pub mod object {
     pub struct ArmIRQExtraInfo {
         pub trigger: Word,
         pub target: Word,
+    }
+
+    #[derive(Debug, Clone, Eq, PartialEq, IsObject)]
+    #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+    pub struct SchedContext {
+        pub size_bits: usize,
+        pub extra: SchedContextExtraInfo,
+    }
+
+    #[derive(Debug, Clone, Eq, PartialEq)]
+    #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+    pub struct SchedContextExtraInfo {
+        pub period: u64,
+        pub budget: u64,
+        pub badge: Badge,
     }
 }
 
@@ -314,6 +335,18 @@ pub mod cap {
     #[derive(Debug, Clone, Eq, PartialEq, IsCap)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
     pub struct ArmIRQHandler {
+        pub object: ObjectId,
+    }
+
+    #[derive(Debug, Clone, Eq, PartialEq, IsCap)]
+    #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+    pub struct SchedContext {
+        pub object: ObjectId,
+    }
+
+    #[derive(Debug, Clone, Eq, PartialEq, IsCap)]
+    #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+    pub struct Reply {
         pub object: ObjectId,
     }
 }

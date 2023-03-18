@@ -3,9 +3,18 @@ use core::mem;
 use sel4_config::{sel4_cfg, sel4_cfg_if};
 
 use crate::{
-    local_cptr::*, sys, AbsoluteCPtr, CNodeCapData, CPtr, CapRights, Error, InvocationContext,
+    local_cptr::*, sys, AbsoluteCPtr, CNodeCapData, CapRights, Error, InvocationContext,
     ObjectBlueprint, Result, UserContext, Word,
 };
+
+#[sel4_cfg(KERNEL_MCS)]
+use crate::Badge;
+
+#[sel4_cfg(not(KERNEL_MCS))]
+use crate::CPtr;
+
+#[sel4_cfg(KERNEL_MCS)]
+pub type Time = u64;
 
 impl<C: InvocationContext> Untyped<C> {
     /// Corresponds to `seL4_Untyped_Retype`.
@@ -150,7 +159,7 @@ impl<C: InvocationContext> TCB<C> {
                 mcp: Word,
                 priority: Word,
                 sched_context: SchedContext,
-                fault_ep: CPtr,
+                fault_ep: Endpoint,
             ) -> Result<()> {
                 Error::wrap(self.invoke(|cptr, ipc_buffer| {
                     ipc_buffer.inner_mut().seL4_TCB_SetSchedParams(
@@ -178,6 +187,15 @@ impl<C: InvocationContext> TCB<C> {
         }
     }
 
+    #[sel4_cfg(KERNEL_MCS)]
+    pub fn tcb_set_timeout_endpoint(self, timeout_endpoint: Endpoint) -> Result<()> {
+        Error::wrap(self.invoke(|cptr, ipc_buffer| {
+            ipc_buffer
+                .inner_mut()
+                .seL4_TCB_SetTimeoutEndpoint(cptr.bits(), timeout_endpoint.bits())
+        }))
+    }
+
     /// Corresponds to `seL4_TCB_SetAffinity`.
     #[sel4_cfg(all(not(KERNEL_MCS), not(MAX_NUM_NODES = "1")))]
     pub fn tcb_set_affinity(self, affinity: Word) -> Result<()> {
@@ -203,6 +221,32 @@ impl<C: InvocationContext> TCB<C> {
             ipc_buffer
                 .inner_mut()
                 .seL4_TCB_BindNotification(cptr.bits(), notification.bits())
+        }))
+    }
+}
+
+#[sel4_cfg(KERNEL_MCS)]
+impl<C: InvocationContext> SchedControl<C> {
+    /// Corresponds to `seL4_SchedControl_ConfigureFlags`.
+    pub fn sched_control_configure_flags(
+        self,
+        sched_context: SchedContext,
+        budget: Time,
+        period: Time,
+        extra_refills: Word,
+        badge: Badge,
+        flags: Word,
+    ) -> Result<()> {
+        Error::wrap(self.invoke(|cptr, ipc_buffer| {
+            ipc_buffer.inner_mut().seL4_SchedControl_ConfigureFlags(
+                cptr.bits(),
+                sched_context.bits(),
+                budget,
+                period,
+                extra_refills,
+                badge,
+                flags,
+            )
         }))
     }
 }

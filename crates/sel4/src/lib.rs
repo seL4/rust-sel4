@@ -98,7 +98,9 @@ pub use syscalls::{r#yield, Badge, CallWithMRs, FastMessages, RecvWithMRs, NUM_M
 pub use vspace::{FrameType, GRANULE_SIZE};
 
 sel4_cfg_if! {
-    if #[cfg(not(KERNEL_MCS))] {
+    if #[cfg(KERNEL_MCS)] {
+        pub use invocations::Time;
+    } else {
         pub use syscalls::reply;
         pub use reply_authority::ImplicitReplyAuthority;
     }

@@ -90,6 +90,10 @@ impl<'a, N: ObjectName, F: Content, B: BorrowMut<[PerObjectBuffer]>> Loader<'a, 
         self.init_asids()?;
         self.init_frames()?;
         self.init_vspaces()?;
+
+        #[sel4::sel4_cfg(KERNEL_MCS)]
+        self.init_sched_contexts()?;
+
         self.init_tcbs()?;
         self.init_cspaces()?;
 
@@ -482,6 +486,32 @@ impl<'a, N: ObjectName, F: Content, B: BorrowMut<[PerObjectBuffer]>> Loader<'a, 
         Ok(())
     }
 
+    #[sel4::sel4_cfg(KERNEL_MCS)]
+    fn init_sched_contexts(&self) -> Result<()> {
+        debug!("Initializing scheduling contexts");
+        for (obj_id, _obj) in self.spec().filter_objects::<&object::SchedContext>() {
+            self.init_sched_context(obj_id, 0)?;
+        }
+        Ok(())
+    }
+
+    #[sel4::sel4_cfg(KERNEL_MCS)]
+    fn init_sched_context(&self, obj_id: ObjectId, affinity: usize) -> Result<()> {
+        let obj = self.spec().lookup_object::<&object::SchedContext>(obj_id)?;
+        let sched_context = self.orig_local_cptr::<cap_type::SchedContext>(obj_id);
+        self.bootinfo
+            .sched_control(affinity)
+            .sched_control_configure_flags(
+                sched_context,
+                obj.extra.budget,
+                obj.extra.period,
+                0,
+                obj.extra.badge,
+                0,
+            )?;
+        Ok(())
+    }
+
     fn init_tcbs(&self) -> Result<()> {
         debug!("Initializing TCBs");
 
@@ -503,7 +533,6 @@ impl<'a, N: ObjectName, F: Content, B: BorrowMut<[PerObjectBuffer]>> Loader<'a, 
             }
 
             {
-                let fault_ep = CPtr::from_bits(obj.extra.fault_ep);
                 let cspace = self.orig_local_cptr(obj.cspace().object);
                 let cspace_root_data = CNodeCapData::new(
                     obj.cspace().guard,
@@ -513,24 +542,70 @@ impl<'a, N: ObjectName, F: Content, B: BorrowMut<[PerObjectBuffer]>> Loader<'a, 
                 let ipc_buffer_addr = obj.extra.ipc_buffer_addr;
                 let ipc_buffer_frame = self.orig_local_cptr(obj.ipc_buffer().object);
 
-                tcb.tcb_configure(
-                    fault_ep,
-                    cspace,
-                    cspace_root_data,
-                    vspace,
-                    ipc_buffer_addr,
-                    ipc_buffer_frame,
-                )?;
+                let authority = BootInfo::init_thread_tcb();
+                let max_prio = obj.extra.max_prio.try_into()?;
+                let prio = obj.extra.prio.try_into()?;
+
+                #[allow(unused_variables)]
+                let affinity: usize = obj.extra.affinity.try_into()?;
+
+                sel4::sel4_cfg_if! {
+                    if #[cfg(KERNEL_MCS)] {
+                        if let Some(sched_context_cap) = obj.sc() {
+                            self.init_sched_context(sched_context_cap.object, affinity)?;
+                        }
+
+                        tcb.tcb_configure(
+                            cspace,
+                            cspace_root_data,
+                            vspace,
+                            ipc_buffer_addr,
+                            ipc_buffer_frame,
+                        )?;
+
+                        let sc = match obj.sc() {
+                            Some(cap) => self.orig_local_cptr::<cap_type::SchedContext>(cap.object),
+                            None => BootInfo::null().cast::<cap_type::SchedContext>(),
+                        };
+                        let temp_fault_ep = match obj.temp_fault_ep() {
+                            Some(cap) => self.orig_local_cptr::<cap_type::Endpoint>(cap.object),
+                            None => BootInfo::null().cast::<cap_type::Endpoint>(),
+                        };
+
+                        tcb.tcb_set_sched_params(
+                            authority,
+                            max_prio,
+                            prio,
+                            sc,
+                            temp_fault_ep,
+                        )?;
+
+                        tcb.tcb_set_timeout_endpoint(temp_fault_ep)?;
+                    } else {
+                        let fault_ep = CPtr::from_bits(obj.extra.master_fault_ep.unwrap());
+
+                        tcb.tcb_configure(
+                            fault_ep,
+                            cspace,
+                            cspace_root_data,
+                            vspace,
+                            ipc_buffer_addr,
+                            ipc_buffer_frame,
+                        )?;
+
+                        tcb.tcb_set_sched_params(
+                            authority,
+                            max_prio,
+                            prio,
+                        )?;
+
+                        #[sel4::sel4_cfg(not(MAX_NUM_NODES = "1"))]
+                        {
+                            tcb.tcb_set_affinity(affinity.try_into().unwrap())?;
+                        }
+                    }
+                }
             }
-
-            tcb.tcb_set_sched_params(
-                BootInfo::init_thread_tcb(),
-                obj.extra.max_prio.try_into()?,
-                obj.extra.prio.try_into()?,
-            )?;
-
-            #[sel4::sel4_cfg(not(MAX_NUM_NODES = "1"))]
-            tcb.tcb_set_affinity(obj.extra.affinity)?;
 
             {
                 let mut regs = UserContext::default();

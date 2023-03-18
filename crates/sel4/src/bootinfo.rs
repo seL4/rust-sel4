@@ -3,9 +3,12 @@ use core::ops::Range;
 use core::slice;
 
 use crate::{
-    newtype_methods, sys, ASIDControl, ASIDPool, CNode, CPtr, CapType, IPCBuffer, IRQControl,
-    LocalCPtr, VSpace, GRANULE_SIZE, TCB,
+    newtype_methods, sel4_cfg, sys, ASIDControl, ASIDPool, CNode, CPtr, CapType, IPCBuffer,
+    IRQControl, LocalCPtr, Null, VSpace, GRANULE_SIZE, TCB,
 };
+
+#[sel4_cfg(KERNEL_MCS)]
+use crate::SchedControl;
 
 /// Corresponds to `seL4_BootInfo`.
 #[derive(Debug)]
@@ -59,6 +62,18 @@ impl BootInfo {
 
     pub fn user_image_frames(&self) -> Range<InitCSpaceSlot> {
         region_to_range(self.inner().userImageFrames)
+    }
+
+    #[sel4_cfg(KERNEL_MCS)]
+    pub fn sched_control_slot(&self, node: usize) -> InitCSpaceSlot {
+        let range = region_to_range(self.inner().schedcontrol);
+        assert!(node < range.len());
+        range.start + node
+    }
+
+    #[sel4_cfg(KERNEL_MCS)]
+    pub fn sched_control(&self, node: usize) -> SchedControl {
+        Self::init_cspace_local_cptr(self.sched_control_slot(node))
     }
 
     pub fn untyped(&self) -> Range<InitCSpaceSlot> {
@@ -149,6 +164,10 @@ impl BootInfo {
 
     pub fn init_cspace_local_cptr<T: CapType>(slot: InitCSpaceSlot) -> LocalCPtr<T> {
         Self::init_cspace_cptr(slot).cast()
+    }
+
+    pub fn null() -> Null {
+        Null::from_bits(0)
     }
 }
 

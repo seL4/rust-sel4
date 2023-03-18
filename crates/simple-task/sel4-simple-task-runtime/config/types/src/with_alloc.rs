@@ -34,6 +34,7 @@ pub struct RuntimeConfigForPacking<T> {
 pub struct RuntimeThreadConfigForPacking {
     ipc_buffer_addr: Address,
     endpoint: Option<CPtrBits>,
+    reply_authority: Option<CPtrBits>,
 }
 
 impl<T> RuntimeConfigForPacking<T> {
@@ -114,6 +115,9 @@ impl RuntimeThreadConfigForPacking {
             inner: Thread {
                 ipc_buffer_addr: self.ipc_buffer_addr.into(),
                 endpoint: ZerocopyOptionWord::from(self.endpoint.map(ZerocopyWord::new).as_ref()),
+                reply_authority: ZerocopyOptionWord::from(
+                    self.reply_authority.map(ZerocopyWord::new).as_ref(),
+                ),
             },
         }
     }
@@ -122,6 +126,7 @@ impl RuntimeThreadConfigForPacking {
         RuntimeThreadConfigForPacking {
             ipc_buffer_addr: config.ipc_buffer_addr(),
             endpoint: config.endpoint(),
+            reply_authority: config.reply_authority(),
         }
     }
 }

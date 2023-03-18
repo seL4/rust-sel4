@@ -26,6 +26,9 @@ class KernelConfig:
     def word_size(self):
         return int(self['WORD_SIZE'])
 
+    def is_mcs(self):
+        return self['KERNEL_MCS']
+
     def page_sizes_in_bits(self):
         if self.arch() == 'arm':
             return [12, 21]

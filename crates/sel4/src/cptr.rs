@@ -224,6 +224,11 @@ pub mod cap_type {
                 /// Corresponds to the scheduling context capability type (MCS only).
                 SchedContext
             }
+
+            declare_cap_type! {
+                /// Corresponds to `seL4_SchedControl`.
+                SchedControl
+            }
         }
     }
 }
@@ -261,6 +266,7 @@ pub mod local_cptr {
         if #[cfg(KERNEL_MCS)] {
             declare_local_cptr_alias!(Reply);
             declare_local_cptr_alias!(SchedContext);
+            declare_local_cptr_alias!(SchedControl);
         }
     }
 }
