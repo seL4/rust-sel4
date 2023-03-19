@@ -13,6 +13,7 @@ use serde::{Deserialize, Serialize};
 
 mod cap_table;
 mod fill;
+mod footprint;
 mod indirect;
 mod inspect;
 mod object_name;
@@ -26,6 +27,7 @@ mod when_sel4;
 
 pub use cap_table::{HasCapTable, PageTableEntry};
 pub use fill::{BytesContent, Content, IndirectBytesContent, SelfContainedContent};
+pub use footprint::Footprint;
 pub use indirect::Indirect;
 pub use object_name::{IndirectObjectName, ObjectName, SelfContainedObjectName, Unnamed};
 pub use spec::{

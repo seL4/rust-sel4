@@ -48,7 +48,7 @@ impl<'a, T: ?Sized> Indirect<'a, T> {
         })
     }
 
-    const fn inner(&self) -> &T {
+    pub(crate) const fn inner(&self) -> &T {
         match self.0 {
             #[cfg(feature = "borrowed-indirect")]
             IndirectImpl::Borrowed { borrowed } => borrowed,

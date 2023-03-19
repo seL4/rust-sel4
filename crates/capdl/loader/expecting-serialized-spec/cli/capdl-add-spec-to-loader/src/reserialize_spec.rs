@@ -8,13 +8,11 @@ use capdl_types::*;
 
 use crate::ObjectNamesLevel;
 
-pub fn reserialize_spec(
-    spec_json: &[u8],
+pub fn reserialize_spec<'a>(
+    input_spec: &Spec<'a, String, FileContent>,
     fill_dir_path: impl AsRef<Path>,
     object_names_level: &ObjectNamesLevel,
-) -> Vec<u8> {
-    let input_spec: Spec<String, FileContent> = serde_json::from_reader(spec_json).unwrap();
-
+) -> (SpecForSerialization<'a>, Vec<u8>) {
     let mut open_files = BTreeMap::new();
     input_spec
         .traverse_fill(|content| {
@@ -29,7 +27,7 @@ pub fn reserialize_spec(
         .into_ok();
 
     let mut fill = vec![];
-    let final_spec: SpecForSerialization = input_spec
+    let final_spec: SpecForSerialization<'a> = input_spec
         .traverse_names_with_context(|obj, name| {
             let name = match object_names_level {
                 ObjectNamesLevel::All => Some(name.clone()),
@@ -67,5 +65,5 @@ pub fn reserialize_spec(
 
     let mut blob = postcard::to_allocvec(&final_spec).unwrap();
     blob.extend(fill);
-    blob
+    (final_spec, blob)
 }
