@@ -5,6 +5,7 @@
 , bareMetalRustTargetInfo
 , kernel, loaderConfig
 , srcRoot
+, dummyCapDLSpec, serializeCapDLSpec
 }:
 
 let
@@ -31,6 +32,9 @@ mkShell rec {
   SEL4_PREFIX = kernel;
   SEL4_LOADER_CONFIG = loaderConfigJSON;
   SEL4_APP = "${kernel}/bin/kernel.elf";
+
+  CAPDL_SPEC_FILE = serializeCapDLSpec { inherit (dummyCapDLSpec.passthru) spec; };
+  CAPDL_FILL_DIR = dummyCapDLSpec.passthru.fill;
 
   hardeningDisable = [ "all" ];
 

@@ -243,6 +243,7 @@ in rec {
     capdl = {
       threads = mk {
         rootTask = mkCapDLRootTask rec {
+          # small = true;
           script = ../../../../../crates/tests/capdl/threads/cdl.py;
           config = {
             components = {
