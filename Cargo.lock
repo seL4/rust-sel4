@@ -272,7 +272,6 @@ dependencies = [
  "capdl-types",
  "log",
  "sel4",
- "sel4-platform-info",
 ]
 
 [[package]]
@@ -1570,6 +1569,7 @@ name = "sel4-reserve-tls-on-stack"
 version = "0.1.0"
 dependencies = [
  "cfg-if",
+ "sel4",
 ]
 
 [[package]]

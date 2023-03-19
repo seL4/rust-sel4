@@ -93,7 +93,7 @@ class BaseComposition:
         ASIDTableAllocator().allocate(self.render_state.obj_space.spec)
         if self.compute_ut_covers:
             self.allocate_untyped()
-    
+
     # TODO
     def allocate_untyped(self):
         ut_allocator = BestFitAllocator()

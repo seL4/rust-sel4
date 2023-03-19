@@ -21,8 +21,7 @@ use log::{debug, info, trace};
 use capdl_types::*;
 use sel4::{
     cap_type, AbsoluteCPtr, BootInfo, CNodeCapData, CPtr, CapRights, CapType, FrameSize, FrameType,
-    InitCSpaceSlot, LocalCPtr, ObjectBlueprint, TranslationTableType, Untyped, UserContext,
-    VMAttributes,
+    InitCSpaceSlot, LocalCPtr, ObjectBlueprint, Untyped, UserContext, VMAttributes,
 };
 
 mod buffers;
@@ -347,7 +346,7 @@ impl<'a, N: ObjectName, F: Content, B: BorrowMut<[PerObjectBuffer]>> Loader<'a, 
             .spec()
             .filter_objects_with::<&object::PageTable>(|obj| obj.is_root)
         {
-            let pgd = self.orig_local_cptr::<cap_type::PGD>(obj_id);
+            let pgd = self.orig_local_cptr::<cap_type::VSpace>(obj_id);
             BootInfo::init_thread_asid_pool().asid_pool_assign(pgd)?;
         }
         Ok(())
@@ -419,7 +418,11 @@ impl<'a, N: ObjectName, F: Content, B: BorrowMut<[PerObjectBuffer]>> Loader<'a, 
 
     fn init_vspaces(&mut self) -> Result<()> {
         debug!("Initializing VSpaces");
+        self.init_vspaces_arch()
+    }
 
+    #[sel4::sel4_cfg(ARCH_AARCH64)]
+    fn init_vspaces_arch(&mut self) -> Result<()> {
         // TODO
         // Add support for uncached non-device mappings.
         // See note about seL4_ARM_Page_CleanInvalidate_Data/seL4_ARM_Page_Unify_Instruction in upstream.
@@ -432,7 +435,7 @@ impl<'a, N: ObjectName, F: Content, B: BorrowMut<[PerObjectBuffer]>> Loader<'a, 
             for (i, cap) in obj.page_tables() {
                 let pud = self.orig_local_cptr::<cap_type::PUD>(cap.object);
                 let vaddr = i << cap_type::PUD::SPAN_BITS;
-                pud.translation_table_map(pgd, vaddr, cap.vm_attributes())?;
+                pud.pud_map(pgd, vaddr, cap.vm_attributes())?;
                 for (i, cap) in self
                     .spec()
                     .lookup_object::<&object::PageTable>(cap.object)?
@@ -440,7 +443,7 @@ impl<'a, N: ObjectName, F: Content, B: BorrowMut<[PerObjectBuffer]>> Loader<'a, 
                 {
                     let pd = self.orig_local_cptr::<cap_type::PD>(cap.object);
                     let vaddr = vaddr + (i << cap_type::PD::SPAN_BITS);
-                    pd.translation_table_map(pgd, vaddr, cap.vm_attributes())?;
+                    pd.pd_map(pgd, vaddr, cap.vm_attributes())?;
                     for (i, cap) in self
                         .spec()
                         .lookup_object::<&object::PageTable>(cap.object)?
@@ -460,7 +463,7 @@ impl<'a, N: ObjectName, F: Content, B: BorrowMut<[PerObjectBuffer]>> Loader<'a, 
                             }
                             PageTableEntry::PageTable(cap) => {
                                 let pt = self.orig_local_cptr::<cap_type::PT>(cap.object);
-                                pt.translation_table_map(pgd, vaddr, cap.vm_attributes())?;
+                                pt.pt_map(pgd, vaddr, cap.vm_attributes())?;
                                 for (i, cap) in self
                                     .spec()
                                     .lookup_object::<&object::PageTable>(cap.object)?
@@ -484,6 +487,11 @@ impl<'a, N: ObjectName, F: Content, B: BorrowMut<[PerObjectBuffer]>> Loader<'a, 
             }
         }
         Ok(())
+    }
+
+    #[sel4::sel4_cfg(ARCH_X86_64)]
+    fn init_vspaces_arch(&mut self) -> Result<()> {
+        todo!()
     }
 
     #[sel4::sel4_cfg(KERNEL_MCS)]
@@ -512,7 +520,7 @@ impl<'a, N: ObjectName, F: Content, B: BorrowMut<[PerObjectBuffer]>> Loader<'a, 
         Ok(())
     }
 
-    fn init_tcbs(&self) -> Result<()> {
+    fn init_tcbs(&mut self) -> Result<()> {
         debug!("Initializing TCBs");
 
         for (obj_id, obj) in self.spec().filter_objects::<&object::TCB>() {
@@ -524,7 +532,7 @@ impl<'a, N: ObjectName, F: Content, B: BorrowMut<[PerObjectBuffer]>> Loader<'a, 
                 tcb.tcb_bind_notification(bound_notification)?;
             }
 
-            #[sel4::sel4_cfg(ARM_HYPERVISOR_SUPPORT)]
+            #[sel4::sel4_cfg(all(ARCH_AARCH64, ARM_HYPERVISOR_SUPPORT))]
             {
                 if let Some(vcpu) = obj.vcpu() {
                     let vcpu = self.orig_local_cptr::<cap_type::VCPU>(vcpu.object);
@@ -564,12 +572,34 @@ impl<'a, N: ObjectName, F: Content, B: BorrowMut<[PerObjectBuffer]>> Loader<'a, 
                         )?;
 
                         let sc = match obj.sc() {
-                            Some(cap) => self.orig_local_cptr::<cap_type::SchedContext>(cap.object),
                             None => BootInfo::null().cast::<cap_type::SchedContext>(),
+                            Some(cap) => self.orig_local_cptr::<cap_type::SchedContext>(cap.object),
                         };
-                        let temp_fault_ep = match obj.temp_fault_ep() {
-                            Some(cap) => self.orig_local_cptr::<cap_type::Endpoint>(cap.object),
+
+                        let fault_ep = match obj.temp_fault_ep() {
                             None => BootInfo::null().cast::<cap_type::Endpoint>(),
+                            Some(cap) => {
+                                let orig = self.orig_local_cptr::<cap_type::Endpoint>(cap.object);
+                                let badge = cap.badge;
+                                let rights = (&cap.rights).into();
+                                if badge == 0 || rights == CapRights::all() {
+                                    orig
+                                } else {
+                                    let src = BootInfo::init_thread_cnode().relative(orig);
+                                    let new = BootInfo::init_cspace_local_cptr::<cap_type::Endpoint>(self.cslot_alloc_or_panic());
+                                    let dst = BootInfo::init_thread_cnode().relative(new);
+                                    dst.mint(&src, rights, badge)?;
+                                    new
+                                }
+                            },
+                        };
+
+                        let temp_fault_ep = match obj.temp_fault_ep() {
+                            None => BootInfo::null().cast::<cap_type::Endpoint>(),
+                            Some(cap) => {
+                                assert_eq!(cap.badge, 0); // HACK
+                                self.orig_local_cptr::<cap_type::Endpoint>(cap.object)
+                            },
                         };
 
                         tcb.tcb_set_sched_params(
@@ -577,7 +607,7 @@ impl<'a, N: ObjectName, F: Content, B: BorrowMut<[PerObjectBuffer]>> Loader<'a, 
                             max_prio,
                             prio,
                             sc,
-                            temp_fault_ep,
+                            fault_ep,
                         )?;
 
                         tcb.tcb_set_timeout_endpoint(temp_fault_ep)?;
@@ -631,9 +661,6 @@ impl<'a, N: ObjectName, F: Content, B: BorrowMut<[PerObjectBuffer]>> Loader<'a, 
         for (obj_id, obj) in self.spec().filter_objects::<&object::CNode>() {
             let cnode = self.orig_local_cptr::<cap_type::CNode>(obj_id);
             for (i, cap) in obj.slots() {
-                // TODO
-                // parse-capDL uses badge=0 to mean no badge. Is that good
-                // enough, or do we ever need to actually use the badge value '0'?
                 let badge = cap.badge();
                 let rights = cap.rights().map(From::from).unwrap_or(CapRights::all());
                 let src = BootInfo::init_thread_cnode()

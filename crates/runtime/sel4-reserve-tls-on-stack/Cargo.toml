@@ -7,3 +7,4 @@ license = "BSD-2-Clause"
 
 [dependencies]
 cfg-if = "*"
+sel4 = { path = "../../sel4" }

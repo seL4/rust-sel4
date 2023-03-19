@@ -274,6 +274,11 @@ pub mod cap {
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
     pub struct Endpoint {
         pub object: ObjectId,
+        // TODO
+        //   parse-capDL uses badge=0 to mean no badge. Is that good
+        //   enough, or do we ever need to actually use the badge value '0'?
+        // TODO
+        //   Is it correct that these are ignored in the case of TCB::SLOT_TEMP_FAULT_EP?
         pub badge: Badge,
         pub rights: Rights,
     }

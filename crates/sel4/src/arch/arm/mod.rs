@@ -2,6 +2,7 @@ use crate::sys;
 
 mod arch;
 mod object;
+mod vm_attributes;
 
 pub(crate) mod fault;
 
@@ -9,6 +10,7 @@ pub(crate) mod top_level {
     pub use super::{
         arch::top_level::*,
         object::{ObjectBlueprintArch, ObjectBlueprintArm, ObjectTypeArch, ObjectTypeArm},
+        vm_attributes::VMAttributes,
         NUM_FAST_MESSAGE_REGISTERS,
     };
 }

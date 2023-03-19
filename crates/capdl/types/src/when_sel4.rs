@@ -1,4 +1,4 @@
-use sel4::{ObjectBlueprint, ObjectBlueprintAArch64, ObjectBlueprintArm, VMAttributes};
+use sel4::{ObjectBlueprint, ObjectBlueprintArch, ObjectBlueprintSeL4Arch, VMAttributes};
 
 use crate::{cap, Badge, Cap, FillEntryContentBootInfoId, Object, Rights};
 
@@ -16,21 +16,23 @@ impl<'a, F> Object<'a, F> {
                     size_bits: obj.size_bits,
                 },
                 Object::TCB(_) => ObjectBlueprint::TCB,
-                #[sel4_cfg(ARM_HYPERVISOR_SUPPORT)]
-                Object::VCPU => ObjectBlueprintArm::VCPU.into(),
+                #[sel4_cfg(all(ARCH_AARCH64, ARM_HYPERVISOR_SUPPORT))]
+                Object::VCPU => ObjectBlueprintArch::VCPU.into(),
+                #[sel4_cfg(ARCH_AARCH64)]
                 Object::Frame(obj) => match obj.size_bits {
-                    sel4::FrameSize::SMALL_BITS => ObjectBlueprintArm::SmallPage.into(),
-                    sel4::FrameSize::LARGE_BITS => ObjectBlueprintArm::LargePage.into(),
+                    sel4::FrameSize::SMALL_BITS => ObjectBlueprintArch::SmallPage.into(),
+                    sel4::FrameSize::LARGE_BITS => ObjectBlueprintArch::LargePage.into(),
                     _ => panic!(),
                 },
+                #[sel4_cfg(ARCH_AARCH64)]
                 Object::PageTable(obj) => {
                     let level = obj.level.unwrap();
                     assert_eq!(obj.is_root, level == 0); // sanity check
                     match level {
-                        0 => ObjectBlueprintAArch64::PGD.into(),
-                        1 => ObjectBlueprintAArch64::PUD.into(),
-                        2 => ObjectBlueprintArm::PD.into(),
-                        3 => ObjectBlueprintArm::PT.into(),
+                        0 => ObjectBlueprintSeL4Arch::PGD.into(),
+                        1 => ObjectBlueprintSeL4Arch::PUD.into(),
+                        2 => ObjectBlueprintArch::PD.into(),
+                        3 => ObjectBlueprintArch::PT.into(),
                         _ => panic!(),
                     }
                 }
@@ -99,13 +101,22 @@ impl HasVMAttributes for cap::PageTable {
     }
 }
 
+sel4::sel4_cfg_if! {
+    if #[cfg(ARCH_AARCH64)] {
+        const CACHED: VMAttributes = VMAttributes::PAGE_CACHEABLE;
+        const UNCACHED: VMAttributes = VMAttributes::DEFAULT;
+    } else if #[cfg(ARCH_X86_64)] {
+        const CACHED: VMAttributes = VMAttributes::DEFAULT;
+        const UNCACHED: VMAttributes = VMAttributes::CACHE_DISABLED;
+    }
+}
+
 fn vm_attributes_from_whether_cached(cached: bool) -> VMAttributes {
-    VMAttributes::default()
-        & !(if !cached {
-            VMAttributes::PAGE_CACHEABLE
-        } else {
-            VMAttributes::NONE
-        })
+    if cached {
+        CACHED
+    } else {
+        UNCACHED
+    }
 }
 
 fn default_vm_attributes_for_page_table() -> VMAttributes {

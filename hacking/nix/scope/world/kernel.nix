@@ -62,7 +62,7 @@ stdenv.mkDerivation {
 
   buildPhase = ''
     ninja -C $build all
-  '';  
+  '';
 
   installPhase = ''
     ninja -C $build install

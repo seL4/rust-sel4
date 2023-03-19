@@ -152,7 +152,7 @@ class ElfComponent(BaseComponent):
 
         for i, thread in enumerate(self.threads()):
             thread.set_component_runtime_config(config_vaddr, config_size, i)
-    
+
     def arg(self):
         path_base = self.composition.out_dir / '{}_arg'.format(self.name)
         path_bin = path_base.with_suffix('.bin')

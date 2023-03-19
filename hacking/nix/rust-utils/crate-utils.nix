@@ -20,7 +20,7 @@ rec {
   dummyMainWithStdInSrc = dummyInSrc "main.rs" dummyMainWithStd;
   dummyMainWithOrWithoutStdInSrc = dummyInSrc "main.rs" dummyMainWithOrWithoutStdInSrc;
 
-  dummyInSrc = name: path: 
+  dummyInSrc = name: path:
     let
       src = linkFarm "dummy-src" [
         {
@@ -228,7 +228,7 @@ rec {
       ;
 
       traverseTargets = traverseAttrs fForTargets;
-    
+
       step = traverseTarget [] manifest state0;
     in
       traverseTargets step.attrs step.state;
@@ -281,7 +281,7 @@ rec {
       manifestWithPatchedPathDependencies = extractedAndPatched.patchedManifest;
 
       realPatchedManifest = manifestWithPatchedPathDependencies;
-  
+
       dummyPatchedManifest = clobber [
         manifestWithPatchedPathDependencies
         {

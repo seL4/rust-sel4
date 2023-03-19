@@ -2,7 +2,6 @@ mod fault;
 mod invocations;
 mod object;
 mod user_context;
-mod vm_attributes;
 mod vspace;
 
 #[sel4_config::sel4_cfg(ARM_HYPERVISOR_SUPPORT)]
@@ -14,8 +13,7 @@ pub(crate) mod top_level {
             ObjectBlueprintAArch64, ObjectBlueprintSeL4Arch, ObjectTypeAArch64, ObjectTypeSeL4Arch,
         },
         user_context::UserContext,
-        vm_attributes::VMAttributes,
-        vspace::{FrameSize, TranslationTableType},
+        vspace::FrameSize,
     };
 
     #[sel4_config::sel4_cfg(ARM_HYPERVISOR_SUPPORT)]
