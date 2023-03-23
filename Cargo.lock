@@ -1974,6 +1974,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "tests-capdl-utcover-components-test"
+version = "0.1.0"
+dependencies = [
+ "sel4",
+ "sel4-simple-task-config-types",
+ "sel4-simple-task-runtime",
+ "sel4-sync",
+ "serde",
+]
+
+[[package]]
 name = "tests-root-task-backtrace"
 version = "0.1.0"
 dependencies = [

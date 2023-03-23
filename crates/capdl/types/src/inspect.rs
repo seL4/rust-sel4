@@ -17,6 +17,10 @@ impl<'a, N, F> Spec<'a, N, F> {
         &self.named_object(obj_id).object
     }
 
+    pub fn root_objects(&self) -> &[NamedObject<'a, N, F>] {
+        &self.objects[self.root_objects.clone()]
+    }
+
     pub fn named_objects(&self) -> impl Iterator<Item = &NamedObject<'a, N, F>> {
         self.objects.iter()
     }

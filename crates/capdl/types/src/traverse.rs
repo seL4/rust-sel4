@@ -14,6 +14,8 @@ impl<'a, N, F> Spec<'a, N, F> {
                 .traverse(|named_object| named_object.traverse(&mut f, &mut g))?,
             irqs: self.irqs.clone(),
             asid_slots: self.asid_slots.clone(),
+            root_objects: self.root_objects.clone(),
+            untyped_covers: self.untyped_covers.clone(),
         })
     }
 }

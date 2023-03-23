@@ -29,6 +29,8 @@ pub struct Spec<'a, N, F> {
     pub objects: Indirect<'a, [NamedObject<'a, N, F>]>,
     pub irqs: Indirect<'a, [IRQEntry]>,
     pub asid_slots: Indirect<'a, [ASIDSlotEntry]>,
+    pub root_objects: Range<ObjectId>,
+    pub untyped_covers: Indirect<'a, [UntypedCover]>,
 }
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
@@ -39,6 +41,13 @@ pub struct IRQEntry {
 }
 
 pub type ASIDSlotEntry = ObjectId;
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct UntypedCover {
+    pub parent: ObjectId,
+    pub children: Range<ObjectId>,
+}
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]

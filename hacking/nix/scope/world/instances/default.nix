@@ -259,6 +259,24 @@ in rec {
         isSupported = haveFullRuntime;
         canAutomate = true;
       };
+      utcover = mk {
+        rootTask = mkCapDLRootTask rec {
+          # small = true;
+          script = ../../../../../crates/tests/capdl/utcover/cdl.py;
+          config = {
+            components = {
+              example_component.image = passthru.test.elf;
+            };
+          };
+          passthru = {
+            test = mkTask {
+              rootCrate = crates.tests-capdl-utcover-components-test;
+            };
+          };
+        };
+        isSupported = haveFullRuntime;
+        canAutomate = true;
+      };
     };
   };
 

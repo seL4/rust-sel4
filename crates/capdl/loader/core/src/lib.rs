@@ -123,18 +123,18 @@ impl<'a, N: ObjectName, F: Content, B: BorrowMut<[PerObjectBuffer]>> Loader<'a, 
             arr
         };
 
-        // Index objects
+        // Index root objects
 
         let first_obj_without_paddr = self
             .spec()
-            .objects
+            .root_objects()
             .partition_point(|named_obj| named_obj.object.paddr().is_some());
         let num_objs_with_paddr = first_obj_without_paddr;
 
         let mut by_size_start: [usize; sel4::WORD_SIZE] = array::from_fn(|_| 0);
         let mut by_size_end: [usize; sel4::WORD_SIZE] = array::from_fn(|_| 0);
         {
-            for obj_id in first_obj_without_paddr..self.spec().num_objects() {
+            for obj_id in first_obj_without_paddr..self.spec().root_objects().len() {
                 let obj = &self.spec().object(obj_id);
                 if let Some(blueprint) = obj.blueprint() {
                     by_size_end[blueprint.physical_size_bits()] += 1;
@@ -148,6 +148,18 @@ impl<'a, N: ObjectName, F: Content, B: BorrowMut<[PerObjectBuffer]>> Loader<'a, 
             }
         }
 
+        // trace!("num_objs_with_paddr: {}", num_objs_with_paddr);
+
+        // for i in 0..sel4::WORD_SIZE {
+        //     trace!(
+        //         "by_size[{}]: {}..{} (n = {})",
+        //         i,
+        //         by_size_start[i],
+        //         by_size_end[i],
+        //         by_size_end[i] - by_size_start[i]
+        //     );
+        // }
+
         // In order to allocate objects which specify paddrs, we may have to
         // allocate dummies to manipulate watermarks. We must always retain at
         // least one reference to an object allocated from an untyped, or else
@@ -155,7 +167,7 @@ impl<'a, N: ObjectName, F: Content, B: BorrowMut<[PerObjectBuffer]>> Loader<'a, 
         // ensure that we are always holding such a reference.
         let mut hold_slots = HoldSlots::new(self.cslot_allocator, cslot_relative_cptr)?;
 
-        // Create objects
+        // Create root objects
 
         let mut next_obj_with_paddr = 0;
         for i_ut in uts_by_paddr.iter() {
@@ -165,12 +177,20 @@ impl<'a, N: ObjectName, F: Content, B: BorrowMut<[PerObjectBuffer]>> Loader<'a, 
             let ut_paddr_start = ut.paddr();
             let ut_paddr_end = ut_paddr_start + ut_size_bytes;
             let mut cur_paddr = ut_paddr_start;
+            trace!(
+                "Allocating from untyped: {:#x}..{:#x} (size_bits = {}, device = {:?})",
+                ut_paddr_start,
+                ut_paddr_end,
+                ut_size_bits,
+                ut.is_device()
+            );
             loop {
                 let target = if next_obj_with_paddr < num_objs_with_paddr {
                     ut_paddr_end.min(self.spec().object(next_obj_with_paddr).paddr().unwrap())
                 } else {
                     ut_paddr_end
                 };
+                let target_is_obj_with_paddr = target < ut_paddr_end;
                 while cur_paddr < target {
                     let max_size_bits = usize::try_from(cur_paddr.trailing_zeros())
                         .unwrap()
@@ -184,10 +204,10 @@ impl<'a, N: ObjectName, F: Content, B: BorrowMut<[PerObjectBuffer]>> Loader<'a, 
                                 let blueprint = named_obj.object.blueprint().unwrap();
                                 assert_eq!(blueprint.physical_size_bits(), size_bits);
                                 trace!(
-                                    "Creating kernel object: paddr=0x{:x}, size_bits={} name='{:?}'",
+                                    "Creating kernel object: paddr=0x{:x}, size_bits={} name={:?}",
                                     cur_paddr,
                                     blueprint.physical_size_bits(),
-                                    self.object_name(&named_obj.name)
+                                    self.object_name(&named_obj.name).unwrap_or("<none>")
                                 );
                                 self.ut_local_cptr(*i_ut).untyped_retype(
                                     &blueprint,
@@ -203,9 +223,7 @@ impl<'a, N: ObjectName, F: Content, B: BorrowMut<[PerObjectBuffer]>> Loader<'a, 
                         }
                     }
                     if !created {
-                        if next_obj_with_paddr < num_objs_with_paddr
-                            && cur_paddr < self.spec().object(next_obj_with_paddr).paddr().unwrap()
-                        {
+                        if target_is_obj_with_paddr {
                             let hold_slot = hold_slots.get_slot()?;
                             trace!(
                                 "Creating dummy: paddr=0x{:x}, size_bits={}",
@@ -223,22 +241,19 @@ impl<'a, N: ObjectName, F: Content, B: BorrowMut<[PerObjectBuffer]>> Loader<'a, 
                             hold_slots.report_used();
                             cur_paddr += 1 << max_size_bits;
                         } else {
-                            cur_paddr = ut_paddr_end;
+                            cur_paddr = target;
                         }
                     }
                 }
-                if next_obj_with_paddr < num_objs_with_paddr
-                    && cur_paddr == self.spec().object(next_obj_with_paddr).paddr().unwrap()
-                    && cur_paddr < ut_paddr_end
-                {
+                if target_is_obj_with_paddr {
                     let obj_id = next_obj_with_paddr;
                     let named_obj = &self.spec().named_object(obj_id);
                     let blueprint = named_obj.object.blueprint().unwrap();
                     trace!(
-                        "Creating device object: paddr=0x{:x}, size_bits={} name='{:?}'",
+                        "Creating device object: paddr=0x{:x}, size_bits={} name={:?}",
                         cur_paddr,
                         blueprint.physical_size_bits(),
-                        self.object_name(&named_obj.name)
+                        self.object_name(&named_obj.name).unwrap_or("<none>")
                     );
                     self.ut_local_cptr(*i_ut).untyped_retype(
                         &blueprint,
@@ -254,9 +269,31 @@ impl<'a, N: ObjectName, F: Content, B: BorrowMut<[PerObjectBuffer]>> Loader<'a, 
             }
         }
 
-        // Ensure that we've created every object
+        // Ensure that we've created every root object
         for bits in 0..sel4::WORD_SIZE {
-            assert_eq!(by_size_start[bits], by_size_end[bits]);
+            assert_eq!(by_size_start[bits], by_size_end[bits], "!!! {}", bits);
+        }
+
+        // Create child objects
+
+        for cover in self.spec().untyped_covers.iter() {
+            let parent_obj_id = cover.parent;
+            let parent = self.spec().named_object(parent_obj_id);
+            let parent_cptr = self.orig_local_cptr::<cap_type::Untyped>(parent_obj_id);
+            for child_obj_id in cover.children.clone() {
+                let child = &self.spec().objects[child_obj_id];
+                trace!(
+                    "Creating kernel object: name={:?} from {:?}",
+                    self.object_name(&child.name).unwrap_or("<none>"),
+                    self.object_name(&parent.name).unwrap_or("<none>"),
+                );
+                parent_cptr.untyped_retype(
+                    &child.object.blueprint().unwrap(),
+                    &init_thread_cnode_relative_cptr(),
+                    self.alloc_orig_cslot(child_obj_id),
+                    1,
+                )?;
+            }
         }
 
         // Actually make the ASID pools. With the help of parse-capDL, we do

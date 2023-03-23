@@ -31,5 +31,11 @@ in lib.fix (self: runCommand "armed-capdl-loader" {
   };
 
 } ''
-  capdl-add-spec-to-loader -v -e ${capdl-loader-expecting-serialized-spec.elf} -f ${json} -d ${fill} -o $out
+  capdl-add-spec-to-loader \
+    -v \
+    -e ${capdl-loader-expecting-serialized-spec.elf} \
+    -f ${json} \
+    -d ${fill} \
+    --object-names-level 2 \
+    -o $out
 '')

@@ -44,7 +44,8 @@ impl Args {
                 Arg::new("object_names_level")
                     .long("object-names-level")
                     .short('n')
-                    .value_name("OBJECT_NAMES_LEVEL"),
+                    .value_name("OBJECT_NAMES_LEVEL")
+                    .value_parser(clap::value_parser!(u32).range(..=2)),
             )
             .arg(Arg::new("verbose").short('v').action(ArgAction::SetTrue))
             .get_matches();
@@ -55,7 +56,7 @@ impl Args {
         let out_file_path = matches.get_one::<String>("out_file").unwrap().to_owned();
 
         let object_names_level = matches
-            .get_one::<usize>("object_names_level")
+            .get_one::<u32>("object_names_level")
             .map(|val| match val {
                 0 => ObjectNamesLevel::None,
                 1 => ObjectNamesLevel::JustTCBs,

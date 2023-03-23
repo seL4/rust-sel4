@@ -90,6 +90,7 @@ members = [
     "crates/simple-task/sel4-simple-task-threading",
     "crates/support/generate-target-specs",
     "crates/tests/capdl/threads/components/test",
+    "crates/tests/capdl/utcover/components/test",
     "crates/tests/root-task/backtrace",
     "crates/tests/root-task/c",
     "crates/tests/root-task/config",

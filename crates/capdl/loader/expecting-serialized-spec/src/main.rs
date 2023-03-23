@@ -22,6 +22,7 @@ const LOG_LEVEL: LevelFilter = LevelFilter::Info;
 
 static LOGGER: Logger = LoggerBuilder::default()
     .level_filter(LOG_LEVEL)
+    .filter(|meta| meta.target() == "capdl_loader_core")
     .write(|s| sel4::debug_print!("{}", s))
     .build();
 
