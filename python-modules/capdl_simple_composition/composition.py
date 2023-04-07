@@ -26,7 +26,9 @@ class BaseComposition:
         self.config = config
 
         self.kernel_config = KernelConfig(config['kernel_config'])
-        self.device_tree = DeviceTree(config['device_tree'])
+
+        config_device_tree = config.get('device_tree')
+        self.device_tree = None if config_device_tree is None else DeviceTree(config_device_tree)
 
         platform_info = config.get('platform_info', None)
         if platform_info is not None:

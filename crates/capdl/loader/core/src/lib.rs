@@ -24,12 +24,14 @@ use sel4::{
     InitCSpaceSlot, LocalCPtr, ObjectBlueprint, Untyped, UserContext, VMAttributes,
 };
 
+mod arch;
 mod buffers;
 mod cslot_allocator;
 mod error;
 mod hold_slots;
 mod memory;
 
+use arch::frame_types;
 pub use buffers::{LoaderBuffers, PerObjectBuffer};
 use cslot_allocator::{CSlotAllocator, CSlotAllocatorError};
 pub use error::CapDLLoaderError;
@@ -201,6 +203,7 @@ impl<'a, N: ObjectName, F: Content, B: BorrowMut<[PerObjectBuffer]>> Loader<'a, 
                             let obj_id = &mut by_size_start[size_bits];
                             if *obj_id < by_size_end[size_bits] {
                                 let named_obj = &self.spec().named_object(*obj_id);
+                                info!("{}", self.object_name(&named_obj.name).unwrap_or("<none>"));
                                 let blueprint = named_obj.object.blueprint().unwrap();
                                 assert_eq!(blueprint.physical_size_bits(), size_bits);
                                 trace!(
@@ -312,7 +315,13 @@ impl<'a, N: ObjectName, F: Content, B: BorrowMut<[PerObjectBuffer]>> Loader<'a, 
         {
             for IRQEntry { irq, handler } in self.spec().irqs.iter() {
                 let slot = self.cslot_alloc_or_panic();
+                #[sel4::sel4_cfg_match]
                 match self.spec().object(*handler) {
+                    Object::IRQ(_) => {
+                        BootInfo::irq_control()
+                            .irq_control_get(*irq, &cslot_relative_cptr(slot))?;
+                    }
+                    #[sel4_cfg(any(ARCH_AARCH32, ARCH_AARCH64))]
                     Object::ArmIRQ(obj) => {
                         sel4::sel4_cfg_if! {
                             if #[cfg(MAX_NUM_NODES = "1")] {
@@ -330,10 +339,6 @@ impl<'a, N: ObjectName, F: Content, B: BorrowMut<[PerObjectBuffer]>> Loader<'a, 
                                 )?;
                             }
                         }
-                    }
-                    Object::IRQ(_) => {
-                        BootInfo::irq_control()
-                            .irq_control_get(*irq, &cslot_relative_cptr(slot))?;
                     }
                     _ => {
                         panic!();
@@ -394,12 +399,12 @@ impl<'a, N: ObjectName, F: Content, B: BorrowMut<[PerObjectBuffer]>> Loader<'a, 
         for (obj_id, obj) in self.spec().filter_objects::<&object::Frame<F>>() {
             // TODO make more platform-agnostic
             match obj.size_bits {
-                FrameSize::SMALL_BITS => {
-                    let frame = self.orig_local_cptr::<cap_type::SmallPage>(obj_id);
+                frame_types::FRAME_SIZE_0_BITS => {
+                    let frame = self.orig_local_cptr::<frame_types::FrameType0>(obj_id);
                     self.fill_frame(frame, &obj.fill)?;
                 }
-                FrameSize::LARGE_BITS => {
-                    let frame = self.orig_local_cptr::<cap_type::LargePage>(obj_id);
+                frame_types::FRAME_SIZE_1_BITS => {
+                    let frame = self.orig_local_cptr::<frame_types::FrameType1>(obj_id);
                     self.fill_frame(frame, &obj.fill)?;
                 }
                 _ => {
@@ -415,7 +420,7 @@ impl<'a, N: ObjectName, F: Content, B: BorrowMut<[PerObjectBuffer]>> Loader<'a, 
             BootInfo::init_thread_vspace(),
             self.copy_addr::<U>(),
             CapRights::read_write(),
-            VMAttributes::default() & !VMAttributes::PAGE_CACHEABLE,
+            arch::vm_attributes_from_whether_cached(false),
         )?;
         atomic::fence(Ordering::SeqCst); // lazy
         for entry in fill.iter() {
@@ -468,11 +473,11 @@ impl<'a, N: ObjectName, F: Content, B: BorrowMut<[PerObjectBuffer]>> Loader<'a, 
             .spec()
             .filter_objects_with::<&object::PageTable>(|obj| obj.is_root)
         {
-            let pgd = self.orig_local_cptr::<cap_type::PGD>(obj_id);
+            let vspace = self.orig_local_cptr::<cap_type::VSpace>(obj_id);
             for (i, cap) in obj.page_tables() {
                 let pud = self.orig_local_cptr::<cap_type::PUD>(cap.object);
                 let vaddr = i << cap_type::PUD::SPAN_BITS;
-                pud.pud_map(pgd, vaddr, cap.vm_attributes())?;
+                pud.pud_map(vspace, vaddr, cap.vm_attributes())?;
                 for (i, cap) in self
                     .spec()
                     .lookup_object::<&object::PageTable>(cap.object)?
@@ -480,7 +485,7 @@ impl<'a, N: ObjectName, F: Content, B: BorrowMut<[PerObjectBuffer]>> Loader<'a, 
                 {
                     let pd = self.orig_local_cptr::<cap_type::PD>(cap.object);
                     let vaddr = vaddr + (i << cap_type::PD::SPAN_BITS);
-                    pd.pd_map(pgd, vaddr, cap.vm_attributes())?;
+                    pd.pd_map(vspace, vaddr, cap.vm_attributes())?;
                     for (i, cap) in self
                         .spec()
                         .lookup_object::<&object::PageTable>(cap.object)?
@@ -492,7 +497,7 @@ impl<'a, N: ObjectName, F: Content, B: BorrowMut<[PerObjectBuffer]>> Loader<'a, 
                                 let frame = self.orig_local_cptr::<cap_type::LargePage>(cap.object);
                                 let rights = (&cap.rights).into();
                                 self.copy(frame)?.frame_map(
-                                    pgd,
+                                    vspace,
                                     vaddr,
                                     rights,
                                     cap.vm_attributes(),
@@ -500,7 +505,7 @@ impl<'a, N: ObjectName, F: Content, B: BorrowMut<[PerObjectBuffer]>> Loader<'a, 
                             }
                             PageTableEntry::PageTable(cap) => {
                                 let pt = self.orig_local_cptr::<cap_type::PT>(cap.object);
-                                pt.pt_map(pgd, vaddr, cap.vm_attributes())?;
+                                pt.pt_map(vspace, vaddr, cap.vm_attributes())?;
                                 for (i, cap) in self
                                     .spec()
                                     .lookup_object::<&object::PageTable>(cap.object)?
@@ -511,7 +516,7 @@ impl<'a, N: ObjectName, F: Content, B: BorrowMut<[PerObjectBuffer]>> Loader<'a, 
                                     let vaddr = vaddr + (i << FrameSize::Small.bits());
                                     let rights = (&cap.rights).into();
                                     self.copy(frame)?.frame_map(
-                                        pgd,
+                                        vspace,
                                         vaddr,
                                         rights,
                                         cap.vm_attributes(),
@@ -528,7 +533,67 @@ impl<'a, N: ObjectName, F: Content, B: BorrowMut<[PerObjectBuffer]>> Loader<'a, 
 
     #[sel4::sel4_cfg(ARCH_X86_64)]
     fn init_vspaces_arch(&mut self) -> Result<()> {
-        todo!()
+        for (obj_id, obj) in self
+            .spec()
+            .filter_objects_with::<&object::PageTable>(|obj| obj.is_root)
+        {
+            let vspace = self.orig_local_cptr::<cap_type::VSpace>(obj_id);
+            for (i, cap) in obj.page_tables() {
+                let pdpt = self.orig_local_cptr::<cap_type::PDPT>(cap.object);
+                let vaddr = i << cap_type::PDPT::SPAN_BITS;
+                pdpt.pdpt_map(vspace, vaddr, cap.vm_attributes())?;
+                for (i, cap) in self
+                    .spec()
+                    .lookup_object::<&object::PageTable>(cap.object)?
+                    .page_tables()
+                {
+                    let page_directory =
+                        self.orig_local_cptr::<cap_type::PageDirectory>(cap.object);
+                    let vaddr = vaddr + (i << cap_type::PageDirectory::SPAN_BITS);
+                    page_directory.page_directory_map(vspace, vaddr, cap.vm_attributes())?;
+                    for (i, cap) in self
+                        .spec()
+                        .lookup_object::<&object::PageTable>(cap.object)?
+                        .entries()
+                    {
+                        let vaddr = vaddr + (i << cap_type::PageTable::SPAN_BITS);
+                        match cap {
+                            PageTableEntry::Frame(cap) => {
+                                let frame = self.orig_local_cptr::<cap_type::LargePage>(cap.object);
+                                let rights = (&cap.rights).into();
+                                self.copy(frame)?.frame_map(
+                                    vspace,
+                                    vaddr,
+                                    rights,
+                                    cap.vm_attributes(),
+                                )?;
+                            }
+                            PageTableEntry::PageTable(cap) => {
+                                let page_table =
+                                    self.orig_local_cptr::<cap_type::PageTable>(cap.object);
+                                page_table.page_table_map(vspace, vaddr, cap.vm_attributes())?;
+                                for (i, cap) in self
+                                    .spec()
+                                    .lookup_object::<&object::PageTable>(cap.object)?
+                                    .frames()
+                                {
+                                    let frame = self.orig_local_cptr::<cap_type::_4K>(cap.object);
+                                    let vaddr = vaddr + (i << FrameSize::_4K.bits());
+                                    let rights = (&cap.rights).into();
+                                    self.copy(frame)?.frame_map(
+                                        vspace,
+                                        vaddr,
+                                        rights,
+                                        cap.vm_attributes(),
+                                    )?;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        Ok(())
     }
 
     #[sel4::sel4_cfg(KERNEL_MCS)]
@@ -676,12 +741,7 @@ impl<'a, N: ObjectName, F: Content, B: BorrowMut<[PerObjectBuffer]>> Loader<'a, 
 
             {
                 let mut regs = UserContext::default();
-                *regs.pc_mut() = obj.extra.ip;
-                *regs.sp_mut() = obj.extra.sp;
-                *regs.spsr_mut() = obj.extra.spsr;
-                for (i, value) in obj.extra.gprs.iter().enumerate() {
-                    *regs.gpr_mut(i.try_into()?) = *value;
-                }
+                arch::init_user_context(&mut regs, &obj.extra);
                 tcb.tcb_write_all_registers(false, &mut regs)?;
             }
 
@@ -727,8 +787,8 @@ impl<'a, N: ObjectName, F: Content, B: BorrowMut<[PerObjectBuffer]>> Loader<'a, 
 
     fn copy_addr<U: FrameType>(&self) -> usize {
         match U::FRAME_SIZE {
-            FrameSize::Small => self.small_frame_copy_addr,
-            FrameSize::Large => self.large_frame_copy_addr,
+            frame_types::FrameType0::FRAME_SIZE => self.small_frame_copy_addr,
+            frame_types::FrameType1::FRAME_SIZE => self.large_frame_copy_addr,
             _ => unimplemented!(),
         }
     }

@@ -1,12 +1,14 @@
 use core::ops::Range;
 
-use sel4::{cap_type, BootInfo, FrameSize};
+use sel4::{cap_type, BootInfo, FrameSize, FrameType};
+
+use super::frame_types;
 
 #[repr(align(4096))]
-struct SmallPagePlaceHolder([u8; FrameSize::Small.bytes()]);
+struct SmallPagePlaceHolder([u8; frame_types::FrameType0::FRAME_SIZE.bytes()]);
 
 static SMALL_PAGE_PLACEHOLDER: SmallPagePlaceHolder =
-    SmallPagePlaceHolder([0; FrameSize::Small.bytes()]);
+    SmallPagePlaceHolder([0; frame_types::FrameType0::FRAME_SIZE.bytes()]);
 
 pub(crate) fn init_copy_addrs(
     bootinfo: &BootInfo,
@@ -14,15 +16,18 @@ pub(crate) fn init_copy_addrs(
 ) -> Result<(usize, usize), sel4::Error> {
     let small_frame_copy_addr = {
         let addr = addr_of_ref(&SMALL_PAGE_PLACEHOLDER);
-        assert_eq!(addr % FrameSize::Small.bytes(), 0);
+        assert_eq!(addr % frame_types::FrameType0::FRAME_SIZE.bytes(), 0);
         let num_user_frames = bootinfo.user_image_frames().end - bootinfo.user_image_frames().start;
-        let user_image_footprint = coarsen_footprint(user_image_bounds, FrameSize::Small.bytes());
+        let user_image_footprint = coarsen_footprint(
+            user_image_bounds,
+            frame_types::FrameType0::FRAME_SIZE.bytes(),
+        );
         assert_eq!(
             user_image_footprint.len(),
-            num_user_frames * FrameSize::Small.bytes()
+            num_user_frames * frame_types::FrameType0::FRAME_SIZE.bytes()
         );
-        let ix = (addr - user_image_footprint.start) / FrameSize::Small.bytes();
-        let cap = BootInfo::init_cspace_local_cptr::<cap_type::SmallPage>(
+        let ix = (addr - user_image_footprint.start) / frame_types::FrameType0::FRAME_SIZE.bytes();
+        let cap = BootInfo::init_cspace_local_cptr::<frame_types::FrameType0>(
             bootinfo.user_image_frames().start + ix,
         );
         cap.frame_unmap()?;
@@ -31,20 +36,22 @@ pub(crate) fn init_copy_addrs(
     let large_frame_copy_addr = {
         let addr_space_footprint = coarsen_footprint(
             &(user_image_bounds.start..bootinfo.footprint().end),
-            FrameSize::Large.bytes(),
+            frame_types::FrameType1::FRAME_SIZE.bytes(),
         );
         match (
-            addr_space_footprint.start % FrameSize::Huge.bytes(),
-            addr_space_footprint.end % FrameSize::Huge.bytes(),
+            addr_space_footprint.start % frame_types::FrameType2::FRAME_SIZE.bytes(),
+            addr_space_footprint.end % frame_types::FrameType2::FRAME_SIZE.bytes(),
         ) {
             (0, 0) => panic!(), // absurd
             (_, 0) => {
-                round_down(addr_space_footprint.start, FrameSize::Large.bytes())
-                    - FrameSize::Large.bytes()
+                round_down(
+                    addr_space_footprint.start,
+                    frame_types::FrameType1::FRAME_SIZE.bytes(),
+                ) - frame_types::FrameType1::FRAME_SIZE.bytes()
             }
             (_, _) => addr_space_footprint
                 .end
-                .next_multiple_of(FrameSize::Large.bytes()),
+                .next_multiple_of(frame_types::FrameType1::FRAME_SIZE.bytes()),
         }
     };
     Ok((small_frame_copy_addr, large_frame_copy_addr))

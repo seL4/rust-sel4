@@ -1,6 +1,6 @@
 use crate::{cap_type, sys, FrameType, ObjectBlueprint, ObjectBlueprintX64, ObjectBlueprintX86};
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum FrameSize {
     _4K,
     Large,
@@ -15,6 +15,11 @@ impl FrameSize {
             Self::Huge => ObjectBlueprintX64::HugePage.into(),
         }
     }
+
+    // For match arm LHS's, as we can't call const fn's
+    pub const _4K_BITS: usize = Self::_4K.bits();
+    pub const LARGE_BITS: usize = Self::Large.bits();
+    pub const HUGE_BITS: usize = Self::Huge.bits();
 }
 
 impl FrameType for cap_type::_4K {

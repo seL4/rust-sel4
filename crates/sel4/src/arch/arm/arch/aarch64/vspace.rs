@@ -3,7 +3,7 @@ use crate::{
 };
 
 /// Frame sizes for AArch64.
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum FrameSize {
     Small,
     Large,

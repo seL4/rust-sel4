@@ -10,6 +10,8 @@ pub type ObjectBlueprintArch = ObjectBlueprintX86;
 pub enum ObjectTypeX86 {
     _4K,
     LargePage,
+    PageTable,
+    PageDirectory,
     SeL4Arch(ObjectTypeSeL4Arch),
 }
 
@@ -18,6 +20,8 @@ impl ObjectTypeX86 {
         match self {
             Self::_4K => sys::_object::seL4_X86_4K,
             Self::LargePage => sys::_object::seL4_X86_LargePageObject,
+            Self::PageTable => sys::_object::seL4_X86_PageTableObject,
+            Self::PageDirectory => sys::_object::seL4_X86_PageDirectoryObject,
             Self::SeL4Arch(sel4_arch) => sel4_arch.into_sys(),
         }
     }
@@ -39,6 +43,8 @@ impl const From<ObjectTypeSeL4Arch> for ObjectType {
 pub enum ObjectBlueprintX86 {
     _4K,
     LargePage,
+    PageTable,
+    PageDirectory,
     SeL4Arch(ObjectBlueprintSeL4Arch),
 }
 
@@ -47,6 +53,8 @@ impl ObjectBlueprintX86 {
         match self {
             Self::_4K => ObjectTypeX86::_4K.into(),
             Self::LargePage => ObjectTypeX86::LargePage.into(),
+            Self::PageTable => ObjectTypeX86::PageTable.into(),
+            Self::PageDirectory => ObjectTypeX86::PageDirectory.into(),
             Self::SeL4Arch(sel4_arch) => sel4_arch.ty(),
         }
     }
@@ -55,6 +63,8 @@ impl ObjectBlueprintX86 {
         match self {
             Self::_4K => sys::seL4_PageBits.try_into().ok().unwrap(),
             Self::LargePage => sys::seL4_LargePageBits.try_into().ok().unwrap(),
+            Self::PageTable => sys::seL4_PageTableBits.try_into().ok().unwrap(),
+            Self::PageDirectory => sys::seL4_PageDirBits.try_into().ok().unwrap(),
             Self::SeL4Arch(sel4_arch) => sel4_arch.physical_size_bits(),
         }
     }

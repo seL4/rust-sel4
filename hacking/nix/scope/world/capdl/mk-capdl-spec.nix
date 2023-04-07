@@ -1,4 +1,5 @@
 { lib, buildPackages, runCommand, writeText
+, hostPlatform
 , python3Packages
 
 , sources
@@ -19,8 +20,8 @@
 let
   augmentedConfig = config // {
     kernel_config = "${seL4ForUserspace}/libsel4/include/kernel/gen_config.json";
-    device_tree = "${seL4ForUserspace}/support/kernel.dtb";
-    platform_info = "${seL4ForUserspace}/support/platform_gen.yaml";
+    device_tree = if hostPlatform.isx86 then null else "${seL4ForUserspace}/support/kernel.dtb";
+    platform_info =  if hostPlatform.isx86 then null else "${seL4ForUserspace}/support/platform_gen.yaml";
     object_sizes = objectSizes;
     compute_ut_covers = computeUtCovers;
   };

@@ -24,6 +24,12 @@ impl<'a, F> Object<'a, F> {
                     sel4::FrameSize::LARGE_BITS => ObjectBlueprintArch::LargePage.into(),
                     _ => panic!(),
                 },
+                #[sel4_cfg(ARCH_X86_64)]
+                Object::Frame(obj) => match obj.size_bits {
+                    sel4::FrameSize::_4K_BITS => ObjectBlueprintArch::_4K.into(),
+                    sel4::FrameSize::LARGE_BITS => ObjectBlueprintArch::LargePage.into(),
+                    _ => panic!(),
+                },
                 #[sel4_cfg(ARCH_AARCH64)]
                 Object::PageTable(obj) => {
                     let level = obj.level.unwrap();
@@ -33,6 +39,18 @@ impl<'a, F> Object<'a, F> {
                         1 => ObjectBlueprintSeL4Arch::PUD.into(),
                         2 => ObjectBlueprintArch::PD.into(),
                         3 => ObjectBlueprintArch::PT.into(),
+                        _ => panic!(),
+                    }
+                }
+                #[sel4_cfg(ARCH_X86_64)]
+                Object::PageTable(obj) => {
+                    let level = obj.level.unwrap();
+                    assert_eq!(obj.is_root, level == 0); // sanity check
+                    match level {
+                        0 => ObjectBlueprintSeL4Arch::PML4.into(),
+                        1 => ObjectBlueprintSeL4Arch::PDPT.into(),
+                        2 => ObjectBlueprintArch::PageDirectory.into(),
+                        3 => ObjectBlueprintArch::PageTable.into(),
                         _ => panic!(),
                     }
                 }

@@ -10,7 +10,7 @@ use sel4_simple_task_runtime::{debug_println, main_json};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Config {
-    pub frame: ConfigCPtr<SmallPage>,
+    pub frame: ConfigCPtr<Granule>,
 }
 
 #[main_json]
