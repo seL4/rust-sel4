@@ -6,6 +6,7 @@
 , seL4RustTargetInfoWithConfig
 , worldConfig
 , callPackage
+, seL4ForBoot
 
 , mkCapDLLoader
 , mkSmallCapDLLoader
@@ -13,7 +14,7 @@
 }:
 
 let
-  mk = { rootTask, isSupported, canAutomate ? false, automateTimeout ? defaultTimeout }: rec {
+  mk = { rootTask, isSupported, canAutomate ? false, automateTimeout ? defaultTimeout, extraLinks ? [] }: rec {
     inherit rootTask isSupported canAutomate;
 
     loader = mkLoader {
@@ -24,7 +25,7 @@ let
 
     simulate = writeScript "run.sh" ''
       #!${buildPackages.runtimeShell}
-      exec ${lib.concatStringsSep " " qemuCmd}
+      exec ${lib.concatStringsSep " " qemuCmd} "$@"
     '';
 
     symbolizeRootTaskBacktrace = writeScript "x.sh" ''
@@ -37,9 +38,11 @@ let
     ] ++ lib.optionals worldConfig.qemuCmdRequiresLoader [
       { name = "loader.elf"; path = loader.elf; }
     ] ++ [
+      { name = "kernel.elf"; path = "${seL4ForBoot}/bin/kernel.elf"; }
       { name = "root-task.elf"; path = rootTask.elf; }
       { name = "symbolize-root-task-backtrace"; path = symbolizeRootTaskBacktrace; }
-    ]);
+    ] ++ extraLinks ++ (rootTask.extraLinks or []));
+    # ]);
 
     automate =
       assert canAutomate;
@@ -63,6 +66,12 @@ let
         spec = mkCapDLSpec {
           inherit script config;
         };
+        extraLinks = [
+          { name = "cdl"; path = spec; }
+        ] ++ lib.optionals (!small) [
+          # { name = "x.elf"; path = self.loader.split.full; }
+          { name = "x.elf"; path = self.loader.split.full; }
+        ];
       }
       // (if small then {
         loader = mkSmallCapDLLoader spec.cdl;
@@ -271,6 +280,7 @@ in rec {
           passthru = {
             test = mkTask {
               rootCrate = crates.tests-capdl-utcover-components-test;
+              release = false;
             };
           };
         };

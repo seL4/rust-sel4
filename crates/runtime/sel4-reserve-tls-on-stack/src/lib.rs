@@ -8,7 +8,7 @@ use core::ptr;
 use core::slice;
 
 // NOTE
-// This is enforced by AArch64
+// This is enforced by AArch64 and x86_64
 const STACK_ALIGNMENT: usize = 16;
 
 // NOTE
@@ -47,8 +47,20 @@ impl TlsImage {
         )
     }
 
+    fn base_addr(&self, tpidr: usize) -> usize {
+        cfg_if::cfg_if! {
+            if #[cfg(target_arch = "aarch64")] {
+                (tpidr + RESERVED_ABOVE_TPIDR).next_multiple_of(self.align)
+            } else if #[cfg(target_arch = "x86_64")] {
+                (tpidr - self.memsz) & !(self.align - 1)
+            } else {
+                compile_error!("unsupported architecture")
+            }
+        }
+    }
+
     unsafe fn init(&self, tpidr: usize) {
-        let addr = (tpidr + RESERVED_ABOVE_TPIDR).next_multiple_of(self.align);
+        let addr = self.base_addr(tpidr);
         let window = slice::from_raw_parts_mut(ptr::from_exposed_addr_mut(addr), self.memsz);
         let (tdata, tbss) = window.split_at_mut(self.filesz);
         tdata.copy_from_slice(self.data());
@@ -111,6 +123,19 @@ cfg_if::cfg_if! {
             .section .text
 
             __sel4_runtime_reserve_tls_and_continue:
+                mov r10, rsp
+                sub r10, 0x8 // space for thread structure
+                and r10, rdx // rdx: segment_align_down_mask
+                mov r11, r10 // save tpidr for later
+                sub r10, rsi // rsi: segment_size
+                and r10, rdx // rdx: segment_align_down_mask
+                and r10, r8  // r8: stack_align_down_mask
+                mov rsp, r10
+                mov rsi, r11 // pass tpidr to continuation
+                mov rbp, rsp
+                sub rsp, 0x8 // stack must be 16-byte aligned before call
+                push rbp
+                call r9
             "#
         }
     } else {
@@ -124,6 +149,10 @@ unsafe extern "C" fn continue_with(args: *const InternalContArgs, tpidr: usize) 
     tls_image.init(tpidr);
 
     set_tls_base(tpidr);
+
+    if cfg!(target_arch = "x86_64") {
+        ptr::from_exposed_addr_mut::<usize>(tpidr).write(tpidr);
+    }
 
     (args.cont_fn)(args.cont_arg)
 }
@@ -179,7 +208,7 @@ cfg_if::cfg_if! {
                 #[inline(never)] // issues with optimizer
                 unsafe fn get_tls_base() -> usize {
                     let mut val;
-                    asm!("mov %fs:0,{val}", val = out(reg) val);
+                    asm!("mov {val}, fs:0", val = out(reg) val);
                     val
                 }
 

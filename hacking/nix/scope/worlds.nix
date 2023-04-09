@@ -98,6 +98,7 @@ in rec {
 
           # for the sake of simulation (see seL4_tools/cmake-tool/helpers/application_settings.cmake)
           KernelFSGSBase = mkString "msr";
+          # KernelFSGSBase = mkString "inst";
           KernelSupportPCID = off;
           KernelIOMMU = off;
           KernelFPU = mkString "FXSAVE";
@@ -114,6 +115,7 @@ in rec {
               (disable "xsaveopt")
               (disable "xsavec")
               (disable "fsgsbase")
+              # (enable "fsgsbase")
               (disable "invpcid")
               (enable "syscall")
               (enable "lm")

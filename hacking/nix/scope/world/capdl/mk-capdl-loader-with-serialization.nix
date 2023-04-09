@@ -25,7 +25,7 @@ in lib.fix (self: runCommand "armed-capdl-loader" {
   passthru = {
     inherit spec json fill;
     split = {
-      full = capdl-loader-expecting-serialized-spec.split.full;
+      full = capdl-loader-expecting-serialized-spec.elf;
       min = self;
     };
   };

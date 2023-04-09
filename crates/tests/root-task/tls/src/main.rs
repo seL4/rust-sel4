@@ -4,7 +4,7 @@
 
 use sel4_root_task_runtime::{debug_println, main};
 
-#[repr(C, align(8192))]
+#[repr(C, align(4096))]
 struct Y(i32);
 
 #[no_mangle]

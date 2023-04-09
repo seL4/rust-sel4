@@ -17,7 +17,7 @@ self: with self;
   kernel = callPackage ./kernel.nix {};
 
   kernel32Bit = assert hostPlatform.isx86_64; runCommandCC "kernel32.elf" {} ''
-    $OBJCOPY -O elf32-i386 ${kernel}/bin/kernel.elf $out
+    $OBJCOPY -O elf32-i386 ${seL4ForBoot}/bin/kernel.elf $out
   '';
 
   seL4ForUserspace = kernel;
