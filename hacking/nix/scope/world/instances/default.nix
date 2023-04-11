@@ -83,8 +83,9 @@ let
       // passthru
     );
 
-  haveFullRuntime = hostPlatform.isAarch64;
-  haveMinimalRuntime = haveFullRuntime || hostPlatform.isx86_64;
+  haveFullRuntime = hostPlatform.isAarch64 || hostPlatform.isx86_64;
+  haveMinimalRuntime = haveFullRuntime;
+  haveKernelLoader = hostPlatform.isAarch64;
 
   automateQemuBasic = { simulate, timeout }:
     writeScript "automate-qemu" ''
@@ -162,7 +163,7 @@ in rec {
         rootCrate = crates.tests-root-task-loader;
         release = false;
       };
-      isSupported = haveFullRuntime;
+      isSupported = haveKernelLoader && haveFullRuntime;
       canAutomate = true;
     };
 
