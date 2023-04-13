@@ -4,7 +4,7 @@
 , python3Packages
 , qemu
 , kernelConfig
-, mkKeepRef
+, sources
 }:
 
 let
@@ -13,7 +13,7 @@ let
   src = builtins.fetchGit rec {
     url = "https://gitlab.com/coliasgroup/seL4.git";
     rev = "c7f53af3de8dc1e2fd7243aea0e6f85a75bd8fbf"; # branch "rust"
-    ref = mkKeepRef rev;
+    ref = sources.mkKeepRef rev;
   };
 
   settings = writeText "settings.cmake" ''

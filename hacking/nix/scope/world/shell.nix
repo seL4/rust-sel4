@@ -4,7 +4,7 @@
 , defaultRustTargetInfo
 , bareMetalRustTargetInfo
 , kernel, loaderConfig
-, srcRoot
+, sources
 , dummyCapDLSpec, serializeCapDLSpec
 }:
 
@@ -13,7 +13,7 @@ let
 
 in
 mkShell rec {
-  RUST_TARGET_PATH = toString (srcRoot + "/support/targets");
+  RUST_TARGET_PATH = toString (sources.srcRoot + "/support/targets");
 
   # TODO
   RUST_SEL4_TARGET = defaultRustTargetInfo.name;

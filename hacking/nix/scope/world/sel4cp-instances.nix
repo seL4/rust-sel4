@@ -4,7 +4,7 @@
 , callPackage
 , sel4cp
 , mkTask
-, srcRoot
+, sources
 , crates
 , seL4ForUserspace
 , crateUtils
@@ -37,7 +37,7 @@ in {
     };
     system = sel4cp.mkSystem {
       searchPath = "${pds.hello}/bin";
-      systemXML = srcRoot + "/crates/examples/sel4cp/hello/hello.system";
+      systemXML = sources.srcRoot + "/crates/examples/sel4cp/hello/hello.system";
     };
   };
 
@@ -69,7 +69,7 @@ in {
           "${pds.artist}/bin"
         ];
       };
-      systemXML = srcRoot + "/crates/examples/sel4cp/banscii/banscii.system";
+      systemXML = sources.srcRoot + "/crates/examples/sel4cp/banscii/banscii.system";
     };
   };
 }

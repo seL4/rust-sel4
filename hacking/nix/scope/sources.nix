@@ -1,5 +1,4 @@
 { lib
-, mkKeepRef
 }:
 
 let
@@ -27,12 +26,16 @@ let
     local = localRoot + "/capdl";
   };
 
+  srcRoot = ../../..;
+
   # TODO
-  localRoot =../../../../../../../x;
+  localRoot = srcRoot + "/../../../../x";
+
+  mkKeepRef = rev: "refs/tags/keep/${builtins.substring 0 32 rev}";
 
 in rec {
+  inherit srcRoot localRoot;
   inherit mkKeepRef;
-  inherit localRoot;
 
   capdlTool = fetchGitOrLocalAndThen (capdlCommon // {
     andThen = "/capDL-tool";

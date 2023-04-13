@@ -1,10 +1,10 @@
 { lib
 , crateUtils
-, srcRoot
+, sources
 }:
 
 let
-  workspaceDir = srcRoot;
+  workspaceDir = sources.srcRoot;
 
   workspaceManifest = builtins.fromTOML (builtins.readFile workspaceManifestPath);
   workspaceManifestPath = workspaceDir + "/Cargo.toml";

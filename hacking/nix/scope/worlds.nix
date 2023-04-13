@@ -148,9 +148,9 @@ in rec {
     };
 
   x86_64 = x86 true;
-  i686 = x86 false;
+  ia32 = x86 false;
 
-  arm =
+  aarch32 =
     let
     in rec {
       default = qemu-arm-virt.default;

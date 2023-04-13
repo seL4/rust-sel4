@@ -26,22 +26,19 @@ assert !(super ? scopeName);
 
   stdenv =
     if super.stdenv.hostPlatform.isNone && !(super.stdenv.hostPlatform.this.noneWithLibc or false)
-    # Use toolchain without newlib. This is equivalent to crossLibcStdenv.
-    then super.overrideCC super.stdenv super.crossLibcStdenv.cc
-    else super.stdenv;
+    then
+      # Use toolchain without newlib. This is equivalent to crossLibcStdenv.
+      super.overrideCC super.stdenv super.crossLibcStdenv.cc
+    else
+      super.stdenv;
 
   # Add Python packages needed by the seL4 ecosystem
   pythonPackagesExtensions = super.pythonPackagesExtensions ++ [
     (callPackage ./python-overrides.nix {})
   ];
 
-  gccMultiStdenvGeneric =
-    let
-      # stdenv = super.gcc8Stdenv;
-      # stdenv = super.gcc10Stdenv;
-    in
-      overrideCC stdenv (buildPackages.wrapCC (stdenv.cc.cc.override {
-        enableMultilib = true;
-      }));
+  gccMultiStdenvGeneric = overrideCC stdenv (buildPackages.wrapCC (stdenv.cc.cc.override {
+    enableMultilib = true;
+  }));
 
 }

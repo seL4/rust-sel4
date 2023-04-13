@@ -7,7 +7,7 @@
 , python3Packages
 , qemu
 , newlib
-, mkKeepRef
+, sources
 }:
 
 let
@@ -16,7 +16,7 @@ let
   sel4cpSource = builtins.fetchGit rec {
     url = "https://gitlab.com/coliasgroup/sel4cp.git";
     rev = "28a5498439515560276ddd3238ed616374faa632";
-    ref = mkKeepRef rev;
+    ref = sources.mkKeepRef rev;
   };
 
   # kernelSource = lib.cleanSource ../../../../../../../../x/seL4;
@@ -24,7 +24,7 @@ let
   kernelSource = builtins.fetchGit rec {
     url = "https://gitlab.com/coliasgroup/seL4.git";
     rev = "b62383c0a2111a58e192792cb330d98e204a8ae3"; # branch "rust-sel4cp"
-    ref = mkKeepRef rev;
+    ref = sources.mkKeepRef rev;
   };
 
   kernelSourcePatched = stdenv.mkDerivation {

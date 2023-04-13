@@ -45,22 +45,35 @@ superCallPackage ../rust-utils {} self //
 
 (with self; {
 
-  srcRoot = ../../..;
+  sources = callPackage ./sources.nix {};
 
-  topLevelLockfile = srcRoot + "/Cargo.lock";
+  seL4Arch =
+    lib.head
+      (map
+        (x: lib.elemAt x 1)
+        (lib.filter
+          (x: lib.elemAt x 0)
+          (with hostPlatform; [
+            [ isAarch64 "aarch64" ]
+            [ isAarch32 "aarch32" ]
+            [ isRiscV64 "riscv64" ]
+            [ isRiscV32 "riscv32" ]
+            [ isx86_64 "x86_64" ]
+            [ isx86_32 "ia32" ]
+          ])));
 
-  vendoredTopLevelLockfile = vendorLockfile { lockfile = topLevelLockfile; };
+  ### rust
 
   defaultRustToolchain = rustToolchain;
 
   rustTargetArchName = {
     aarch64 = "aarch64";
+    aarch32 = "armv7a";
     riscv64 = "riscv64imac";
     riscv32 = "riscv32imac";
     x86_64 = "x86_64";
-    armv7l = "armv7";
-    i686 = "i686";
-  }."${hostPlatform.parsed.cpu.name}";
+    ia32 = "i686";
+  }."${seL4Arch}";
 
   defaultRustTargetInfo =
     if !hostPlatform.isNone
@@ -71,12 +84,12 @@ superCallPackage ../rust-utils {} self //
 
   bareMetalRustTargetInfo = mkBuiltinRustTargetInfo {
     aarch64 = "aarch64-unknown-none";
-    riscv64 = "riscv64imac-unknown-none-elf";
-    riscv32 = "riscv32imac-unknown-none-elf";
+    aarch32 = "armv7a-none-eabi"; # armv7a-none-eabihf?
+    riscv64 = "riscv64imac-unknown-none-elf"; # gc?
+    riscv32 = "riscv32imac-unknown-none-elf"; # gc?
     x86_64 = "x86_64-unknown-none";
-    armv7l = "armv7a-none-eabi"; # armv7a-none-eabihf?
-    i686 = "i686-unknown-linux-gnu";
-  }."${hostPlatform.parsed.cpu.name}";
+    ia32 = "i686-unknown-linux-gnu";
+  }."${seL4Arch}";
 
   mkBuiltinRustTargetInfo = name: {
     inherit name;
@@ -90,7 +103,7 @@ superCallPackage ../rust-utils {} self //
         fname = "${name}.json";
       in
         linkFarm "targets" [
-          { name = fname; path = srcRoot + "/support/targets/${fname}"; }
+          { name = fname; path = sources.srcRoot + "/support/targets/${fname}"; }
         ];
   };
 
@@ -106,6 +119,16 @@ superCallPackage ../rust-utils {} self //
     superLockfile = topLevelLockfile;
   };
 
+  topLevelLockfile = sources.srcRoot + "/Cargo.lock";
+
+  vendoredTopLevelLockfile = vendorLockfile { lockfile = topLevelLockfile; };
+
+  ### upstream tools
+
+  capdl-tool = callPackage ./capdl-tool {};
+
+  ### local tools
+
   mkTool = rootCrate: buildCrateInLayersHere {
     inherit rootCrate;
     release = false;
@@ -117,9 +140,10 @@ superCallPackage ../rust-utils {} self //
   capdl-add-spec-to-loader = mkTool crates.capdl-add-spec-to-loader;
   sel4-simple-task-serialize-runtime-config = mkTool crates.sel4-simple-task-serialize-runtime-config;
 
+  embedDebugInfo = callPackage ./embed-debug-info.nix {};
   injectPhdrs = callPackage ./inject-phdrs.nix {};
 
-  embedDebugInfo = callPackage ./embed-debug-info.nix {};
+  ### worlds
 
   configHelpers = callPackage ./config-helpers.nix {};
 
@@ -139,16 +163,12 @@ superCallPackage ../rust-utils {} self //
 
   mkWorld = worldConfig: lib.makeScope newScope (callPackage ./world {} (elaborateWorldConfig worldConfig));
 
-  worlds = (callPackage ./worlds.nix {})."${hostPlatform.parsed.cpu.name}";
+  worlds = (callPackage ./worlds.nix {})."${seL4Arch}";
+
+  ###
 
   sel4cp = callPackage ./sel4cp {};
 
-  mkKeepRef = rev: "refs/tags/keep/${builtins.substring 0 32 rev}";
-
   sel4test = callPackage ./sel4test {};
-
-  sources = callPackage ./sources.nix {};
-
-  capdl-tool = callPackage ./capdl-tool {};
 
 })

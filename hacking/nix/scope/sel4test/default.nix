@@ -8,7 +8,7 @@
 , qemu
 , git
 , gccMultiStdenvGeneric
-, mkKeepRef
+, sources
 , crateUtils
 , defaultRustToolchain
 , bareMetalRustTargetInfo
@@ -19,6 +19,7 @@
 , topLevelLockfile
 , vendorLockfile
 , runCommandCC
+, seL4Arch
 }:
 
 with lib;
@@ -30,14 +31,6 @@ in
 let
   rustToolchain = defaultRustToolchain;
   rustTargetInfo = bareMetalRustTargetInfo;
-
-  seL4Arch =
-    let
-      raw = hostPlatform.parsed.cpu.name;
-    in {
-      armv7l = "aarch32";
-      i686 = "ia32";
-    }.${raw} or raw;
 
   useRust = hostPlatform.is64bit;
 
@@ -67,7 +60,7 @@ let
   kernelSrc = builtins.fetchGit rec {
     url = "https://gitlab.com/coliasgroup/seL4.git";
     rev = "0b3c3d9672cf742dc948977312216703132f4a29"; # rust-sel4test
-    ref = mkKeepRef rev;
+    ref = sources.mkKeepRef rev;
   };
 
   # kernelSrc = lib.cleanSource ../../../../../../../../x/seL4;

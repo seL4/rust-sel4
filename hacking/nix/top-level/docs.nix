@@ -8,7 +8,7 @@ let
       let
         pkgSet = pkgs.host.aarch64.none;
         world = pkgSet.this.worlds.default;
-        arch = pkgSet.hostPlatform.parsed.cpu.name;
+        arch = pkgSet.this.seL4Arch;
       in rec {
         name = arch;
         description = "${arch} (qemu-virt-arm)";
@@ -19,7 +19,7 @@ let
       let
         pkgSet = pkgs.host.aarch64.none;
         world = pkgSet.this.worlds.qemu-arm-virt.sel4cp;
-        arch = pkgSet.hostPlatform.parsed.cpu.name;
+        arch = pkgSet.this.seL4Arch;
       in rec {
         name = "${arch}-mcs";
         description = "${arch} with MCS (qemu-virt-arm)";
@@ -30,7 +30,7 @@ let
       let
         pkgSet = pkgs.host.riscv64.none;
         world = pkgSet.this.worlds.default;
-        arch = pkgSet.hostPlatform.parsed.cpu.name;
+        arch = pkgSet.this.seL4Arch;
       in rec {
         name = arch;
         description = "${arch} (spike)";
@@ -42,7 +42,7 @@ let
         pkgSet = pkgs.host.x86_64.none;
         world = pkgSet.this.worlds.default;
       in rec {
-        name = pkgSet.hostPlatform.parsed.cpu.name;
+        name = pkgSet.this.seL4Arch;
         description = "${name} (pc99)";
         byRuntime = world.docs;
       }
