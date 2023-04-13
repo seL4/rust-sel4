@@ -47,6 +47,10 @@ let
           linux = mkLeaf (guard "aarch64-unknown-linux-gnu");
           linuxMusl = mkLeaf (guard "aarch64-unknown-linux-musl");
         };
+        aarch32 = {
+          none = mkLeaf (guard "arm-none-eabi");
+          linux = mkLeaf (guard "armv7l-unknown-linux-gnueabihf");
+        };
         riscv64 = {
           none = mkLeaf (guard "riscv64-none-elf");
           noneWithLibc = mkLeaf (guard "riscv64-none-elf" // {
@@ -54,9 +58,20 @@ let
           });
           linux = mkLeaf (guard "riscv64-unknown-linux-gnu");
         };
+        riscv32 = {
+          none = mkLeaf (guard "riscv32-none-elf");
+          noneWithLibc = mkLeaf (guard "riscv32-none-elf" // {
+            this.noneWithLibc = true;
+          });
+          linux = mkLeaf (guard "riscv32-unknown-linux-gnu");
+        };
         x86_64 = {
           none = mkLeaf (guard "x86_64-elf");
           linux = mkLeaf (guard "x86_64-unknown-linux-gnu");
+        };
+        ia32 = {
+          none = mkLeaf (guard "i686-elf");
+          linux = mkLeaf (guard "i686-unknown-linux-gnu");
         };
       };
   };

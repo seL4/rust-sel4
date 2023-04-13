@@ -24,31 +24,44 @@
 with lib;
 
 let
-  thisStdenv = if hostPlatform.isRiscV64 then gccMultiStdenvGeneric else stdenv;
+  thisStdenv = if hostPlatform.isRiscV then gccMultiStdenvGeneric else stdenv;
 in
 
 let
   rustToolchain = defaultRustToolchain;
   rustTargetInfo = bareMetalRustTargetInfo;
 
+  seL4Arch =
+    let
+      raw = hostPlatform.parsed.cpu.name;
+    in {
+      armv7l = "aarch32";
+      i686 = "ia32";
+    }.${raw} or raw;
+
+  useRust = hostPlatform.is64bit;
+
   initBuildArgs = [
     "-DSIMULATION=TRUE"
-    "-DKernelSel4Arch=${hostPlatform.parsed.cpu.name}"
+    "-DKernelSel4Arch=${seL4Arch}"
     "-DCROSS_COMPILER_PREFIX=${thisStdenv.cc.targetPrefix}"
     # "-DMCS=FALSE"
     # "-DSMP=FALSE"
-    "-DLibSel4UseRust=TRUE"
-    # "-DLibSel4UseRust=FALSE"
+    "-DLibSel4UseRust=${if useRust then "TRUE" else "FALSE"}"
     "-DHACK_CARGO_MANIFEST_PATH=${workspace}/Cargo.toml"
     "-DHACK_CARGO_CONFIG=${cargoConfig}"
     "-DHACK_CARGO_NO_BUILD_SYSROOT=TRUE"
     # "-DHACK_CARGO_RELEASE=TRUE"
-  ] ++ lib.optionals hostPlatform.isRiscV64 [
+  ] ++ lib.optionals hostPlatform.isi686 [
+    "-DPLATFORM=pc99"
+  ] ++ lib.optionals hostPlatform.isRiscV [
     "-DPLATFORM=spike"
     "-DHACK_COMPILER_BUILTINS_SYMBOLS=${compilerBuiltinsSymbols}"
-  ] ++ lib.optionals hostPlatform.isAarch64 [
+  ] ++ lib.optionals hostPlatform.isAarch [
     "-DPLATFORM=qemu-arm-virt"
     # "-DARM_HYP=TRUE"
+  ] ++ lib.optionals hostPlatform.isAarch32 [
+    "-DARM_CPU=cortex-a15"
   ];
 
   kernelSrc = builtins.fetchGit rec {

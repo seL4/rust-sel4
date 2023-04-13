@@ -56,7 +56,10 @@ superCallPackage ../rust-utils {} self //
   rustTargetArchName = {
     aarch64 = "aarch64";
     riscv64 = "riscv64imac";
+    riscv32 = "riscv32imac";
     x86_64 = "x86_64";
+    armv7l = "armv7";
+    i686 = "i686";
   }."${hostPlatform.parsed.cpu.name}";
 
   defaultRustTargetInfo =
@@ -69,7 +72,10 @@ superCallPackage ../rust-utils {} self //
   bareMetalRustTargetInfo = mkBuiltinRustTargetInfo {
     aarch64 = "aarch64-unknown-none";
     riscv64 = "riscv64imac-unknown-none-elf";
+    riscv32 = "riscv32imac-unknown-none-elf";
     x86_64 = "x86_64-unknown-none";
+    armv7l = "armv7a-none-eabi"; # armv7a-none-eabihf?
+    i686 = "i686-unknown-linux-gnu";
   }."${hostPlatform.parsed.cpu.name}";
 
   mkBuiltinRustTargetInfo = name: {

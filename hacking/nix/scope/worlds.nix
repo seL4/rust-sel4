@@ -84,7 +84,22 @@ in rec {
       };
     };
 
-  x86_64 =
+  riscv32 =
+    let
+    in rec {
+      default = spike;
+
+      spike = mkWorld {
+        inherit loaderConfig;
+        kernelConfig = kernelConfigCommon // {
+          KernelArch = mkString "riscv";
+          KernelSel4Arch = mkString "riscv32";
+          KernelPlatform = mkString "spike";
+        };
+      };
+    };
+
+  x86 = is64bit:
     let
     in rec {
       default = pc99;
@@ -93,7 +108,7 @@ in rec {
         inherit loaderConfig;
         kernelConfig = kernelConfigCommon // {
           KernelArch = mkString "x86";
-          KernelSel4Arch = mkString "x86_64";
+          KernelSel4Arch = mkString (if is64bit then "x86_64" else "ia32");
           KernelPlatform = mkString "pc99";
 
           # for the sake of simulation (see seL4_tools/cmake-tool/helpers/application_settings.cmake)
@@ -121,7 +136,7 @@ in rec {
               (enable "lm")
             ];
           in task: [
-            "${pkgsBuildBuild.qemu}/bin/qemu-system-x86_64"
+            "${pkgsBuildBuild.qemu}/bin/qemu-system-${if is64bit then "x86_64" else "i386"}"
               "-cpu" "Nehalem,${opts},enforce"
               "-m" "size=512M"
               "-nographic"
@@ -131,4 +146,45 @@ in rec {
           ];
       });
     };
+
+  x86_64 = x86 true;
+  i686 = x86 false;
+
+  arm =
+    let
+    in rec {
+      default = qemu-arm-virt.default;
+      qemu-arm-virt =
+        let
+          mk = { smp ? false, mcs ? off, cpu ? "cortex-a15" }:
+            let
+              numCores = if smp then "2" else "1";
+            in
+              mkWorld {
+                inherit loaderConfig;
+                inherit forCP;
+                kernelConfig = kernelConfigCommon // {
+                  ARM_CPU = mkString cpu;
+                  KernelArch = mkString "arm";
+                  KernelSel4Arch = mkString "aarch32";
+                  KernelPlatform = mkString "qemu-arm-virt";
+                  KernelMaxNumNodes = mkString numCores;
+                  KernelIsMCS = mcs;
+                };
+                mkQemuCmd = loader: [
+                  # NOTE
+                  # virtualization=on even when hypervisor to test loader dropping exception level
+                  "${pkgsBuildBuild.qemu}/bin/qemu-system-aarch32"
+                    "-machine" "virt"
+                    "-cpu" cpu "-smp" numCores "-m" "1024"
+                    "-nographic"
+                    "-serial" "mon:stdio"
+                    "-kernel" loader
+                ];
+              };
+        in rec {
+          default = mk {};
+        };
+    };
+
 }

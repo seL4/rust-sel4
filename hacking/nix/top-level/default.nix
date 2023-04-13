@@ -16,7 +16,13 @@ self: with self; {
       pkgs.host.aarch64.linux
       pkgs.host.x86_64.linux
       pkgs.host.riscv64.noneWithLibc
+      pkgs.host.aarch32.linux
+      pkgs.host.ia32.linux
+      pkgs.host.riscv32.noneWithLibc
     ])
+    pkgs.host.aarch32.none.this.worlds.default.kernel
+    pkgs.host.riscv32.none.this.worlds.default.kernel
+    pkgs.host.ia32.none.this.worlds.default.kernel
   ];
 
   everythingWithExcessList = lib.flatten [
