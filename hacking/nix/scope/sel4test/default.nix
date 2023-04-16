@@ -22,6 +22,13 @@
 , seL4Arch
 }:
 
+{ rust ? true
+, release ? false
+, mcs ? false
+, smp ? false
+, virtualization ? false
+}:
+
 with lib;
 
 let
@@ -32,38 +39,37 @@ let
   rustToolchain = defaultRustToolchain;
   rustTargetInfo = bareMetalRustTargetInfo;
 
-  useRust = hostPlatform.is64bit;
+  initBuildArgs =
+    let
+      bool = v: if v then "TRUE" else "FALSE";
+    in [
+      "-DCROSS_COMPILER_PREFIX=${thisStdenv.cc.targetPrefix}"
+      "-DKernelSel4Arch=${seL4Arch}"
+      "-DMCS=${bool mcs}"
+      "-DSMP=${bool smp}"
+      "-DSIMULATION=TRUE"
+      "-DLibSel4UseRust=${bool rust}"
+    ] ++ lib.optionals rust [
+      "-DHACK_CARGO_MANIFEST_PATH=${workspace}/Cargo.toml"
+      "-DHACK_CARGO_CONFIG=${cargoConfig}"
+      "-DHACK_CARGO_NO_BUILD_SYSROOT=TRUE"
+      "-DHACK_CARGO_RELEASE=${bool release}"
+    ] ++ lib.optionals hostPlatform.isi686 [
+      "-DPLATFORM=pc99"
+    ] ++ lib.optionals hostPlatform.isRiscV [
+      "-DPLATFORM=spike"
+      "-DHACK_COMPILER_BUILTINS_SYMBOLS=${compilerBuiltinsSymbols}"
+    ] ++ lib.optionals hostPlatform.isAarch [
+      "-DPLATFORM=qemu-arm-virt"
+      "-DARM_HYP=${bool virtualization}"
+    ] ++ lib.optionals hostPlatform.isAarch32 [
+      "-DARM_CPU=cortex-a15"
+    ];
 
-  initBuildArgs = [
-    "-DSIMULATION=TRUE"
-    "-DKernelSel4Arch=${seL4Arch}"
-    "-DCROSS_COMPILER_PREFIX=${thisStdenv.cc.targetPrefix}"
-    # "-DMCS=FALSE"
-    # "-DSMP=FALSE"
-    "-DLibSel4UseRust=${if useRust then "TRUE" else "FALSE"}"
-    "-DHACK_CARGO_MANIFEST_PATH=${workspace}/Cargo.toml"
-    "-DHACK_CARGO_CONFIG=${cargoConfig}"
-    "-DHACK_CARGO_NO_BUILD_SYSROOT=TRUE"
-    # "-DHACK_CARGO_RELEASE=TRUE"
-  ] ++ lib.optionals hostPlatform.isi686 [
-    "-DPLATFORM=pc99"
-  ] ++ lib.optionals hostPlatform.isRiscV [
-    "-DPLATFORM=spike"
-    "-DHACK_COMPILER_BUILTINS_SYMBOLS=${compilerBuiltinsSymbols}"
-  ] ++ lib.optionals hostPlatform.isAarch [
-    "-DPLATFORM=qemu-arm-virt"
-    # "-DARM_HYP=TRUE"
-  ] ++ lib.optionals hostPlatform.isAarch32 [
-    "-DARM_CPU=cortex-a15"
-  ];
-
-  kernelSrc = builtins.fetchGit rec {
+  kernelSrc = sources.fetchGit rec {
     url = "https://gitlab.com/coliasgroup/seL4.git";
     rev = "0b3c3d9672cf742dc948977312216703132f4a29"; # rust-sel4test
-    ref = sources.mkKeepRef rev;
   };
-
-  # kernelSrc = lib.cleanSource ../../../../../../../../x/seL4;
 
   cratesSrc = crateUtils.collectReals (lib.attrValues (crateUtils.getClosureOfCrate rootCrate));
 

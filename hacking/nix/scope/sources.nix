@@ -2,7 +2,7 @@
 }:
 
 let
-  fetchGitOrLocalAndThen =
+  fetchGit =
     { url, rev
     , local ? null
     , useLocal ? false
@@ -35,18 +35,18 @@ let
 
 in rec {
   inherit srcRoot localRoot;
-  inherit mkKeepRef;
+  inherit fetchGit mkKeepRef;
 
-  capdlTool = fetchGitOrLocalAndThen (capdlCommon // {
+  capdlTool = fetchGit (capdlCommon // {
     andThen = "/capDL-tool";
   });
 
-  pythonCapDLTool = fetchGitOrLocalAndThen (capdlCommon // {
+  pythonCapDLTool = fetchGit (capdlCommon // {
     andThen = "/python-capdl-tool";
     useLocal = true;
   });
 
-  objectSizes = fetchGitOrLocalAndThen (capdlCommon // {
+  objectSizes = fetchGit (capdlCommon // {
     andThen = "/object_sizes";
   });
 }

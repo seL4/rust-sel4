@@ -1,9 +1,9 @@
 { lib, pkgsBuildBuild
-, configHelpers
+, cmakeConfigHelpers
 , mkWorld
 }:
 
-with configHelpers;
+with cmakeConfigHelpers;
 
 let
   loaderConfig = {};
@@ -20,13 +20,13 @@ in rec {
       default = qemu-arm-virt.el2;
       qemu-arm-virt =
         let
-          mk = { smp ? false, mcs ? off, hypervisor ? false, cpu ? "cortex-a57", forCP ? false }:
+          mk = { smp ? false, mcs ? off, hypervisor ? false, cpu ? "cortex-a57", isCorePlatform ? false }:
             let
               numCores = if smp then "2" else "1";
             in
               mkWorld {
                 inherit loaderConfig;
-                inherit forCP;
+                inherit isCorePlatform;
                 kernelConfig = kernelConfigCommon // {
                   ARM_CPU = mkString cpu;
                   KernelArch = mkString "arm";
@@ -53,7 +53,7 @@ in rec {
           el1 = mk { smp = true; };
           el2 = mk { smp = true; hypervisor = true; };
           el2MCS = mk { smp = true; hypervisor = true; mcs = on; };
-          sel4cp = mk { mcs = on; forCP = true; cpu = "cortex-a53"; };
+          sel4cp = mk { mcs = on; isCorePlatform = true; cpu = "cortex-a53"; };
         };
 
       bcm2711 = mkWorld {
@@ -162,7 +162,7 @@ in rec {
             in
               mkWorld {
                 inherit loaderConfig;
-                inherit forCP;
+                inherit isCorePlatform;
                 kernelConfig = kernelConfigCommon // {
                   ARM_CPU = mkString cpu;
                   KernelArch = mkString "arm";

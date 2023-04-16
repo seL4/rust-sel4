@@ -1,6 +1,7 @@
 { lib, stdenv, buildPlatform, hostPlatform, targetPlatform
 , callPackage
 , linkFarm
+, treeHelpers
 }:
 
 let
@@ -145,19 +146,22 @@ superCallPackage ../rust-utils {} self //
 
   ### worlds
 
-  configHelpers = callPackage ./config-helpers.nix {};
+  cmakeConfigHelpers = callPackage ./cmake-config-helpers.nix {};
 
   elaborateWorldConfig =
-    { kernelConfig, loaderConfig
+    { isCorePlatform ? false
+    , kernelConfig ? {}
+    , loaderConfig ? {}
+    # , mkPlatformInstanceLinks
     , mkQemuCmd ? null
     , qemuCmdRequiresLoader ? true
-    , forCP ? false
     }:
     { inherit
-        kernelConfig loaderConfig
+        isCorePlatform
+        kernelConfig
+        loaderConfig
         mkQemuCmd
         qemuCmdRequiresLoader
-        forCP
       ;
     };
 
@@ -165,10 +169,33 @@ superCallPackage ../rust-utils {} self //
 
   worlds = (callPackage ./worlds.nix {})."${seL4Arch}";
 
-  ###
-
   sel4cp = callPackage ./sel4cp {};
 
-  sel4test = callPackage ./sel4test {};
+  ### sel4test
+
+  mkSeL4Test = callPackage ./sel4test {};
+
+  # TODO name more configurations
+  sel4test = makeOverridable' mkSeL4Test {
+    rust = hostPlatform.is64bit;
+  };
+
+  ### helpers
+
+  # Like to `lib.callPackageWith`, except without `lib.makeOverridable`.
+  callWith = autoArgs: fn: args:
+    let
+      f = if lib.isFunction fn then fn else import fn;
+      auto = builtins.intersectAttrs (lib.functionArgs f) autoArgs;
+    in f (auto // args);
+
+  # Like `lib.makeOverridable`, except it adds an orthogonal dimension of overrideablility
+  # accessible at `.override'`.
+  makeOverridable' = f: origArgs:
+    let
+      overrideWith = newArgs: origArgs // (if lib.isFunction newArgs then newArgs origArgs else newArgs);
+    in f origArgs // {
+      override' = newArgs: makeOverridable' f (overrideWith newArgs);
+    };
 
 })
