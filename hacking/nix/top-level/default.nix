@@ -9,7 +9,7 @@ self: with self; {
     (lib.forEach worldsForEverythingInstances (world:
       map (instance: instance.links) world.instances.supported
     ))
-    pkgs.host.riscv64.none.this.worlds.default.kernel
+    pkgs.host.riscv64.none.this.worlds.default.seL4
     pkgs.host.riscv64.noneWithLibc.gccMultiStdenvGeneric
     pkgs.host.aarch64.none.this.worlds.qemu-arm-virt.sel4cp.sel4cpInstances.banscii.system.links
     (map (x: x.this.sel4test) [
@@ -20,9 +20,9 @@ self: with self; {
       pkgs.host.ia32.linux
       pkgs.host.riscv32.noneWithLibc
     ])
-    pkgs.host.aarch32.none.this.worlds.default.kernel
-    pkgs.host.riscv32.none.this.worlds.default.kernel
-    pkgs.host.ia32.none.this.worlds.default.kernel
+    pkgs.host.aarch32.none.this.worlds.default.seL4
+    pkgs.host.riscv32.none.this.worlds.default.seL4
+    pkgs.host.ia32.none.this.worlds.default.seL4
   ];
 
   everythingWithExcessList = lib.flatten [

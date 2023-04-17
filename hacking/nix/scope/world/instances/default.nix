@@ -10,48 +10,50 @@
 
 , mkCapDLLoader
 , mkSmallCapDLLoader
-, mkCapDLSpec
+, mkSimpleCompositionCapDLSpec
 }:
 
 let
-  mk = { rootTask, isSupported, canAutomate ? false, automateTimeout ? defaultTimeout, extraLinks ? [] }: rec {
-    inherit rootTask isSupported canAutomate;
+  mk = { rootTask, isSupported, canAutomate ? false, automateTimeout ? defaultTimeout, extraLinks ? [] }:
+    let
 
-    loader = mkLoader {
-      appELF = rootTask.elf;
-    };
-
-    qemuCmd = worldConfig.mkQemuCmd (if worldConfig.qemuCmdRequiresLoader then loader.elf else rootTask.elf);
-
-    simulate = writeScript "run.sh" ''
-      #!${buildPackages.runtimeShell}
-      exec ${lib.concatStringsSep " " qemuCmd} "$@"
-    '';
-
-    symbolizeRootTaskBacktrace = writeScript "x.sh" ''
-      #!${buildPackages.runtimeShell}
-      exec ${buildPackages.this.sel4-symbolize-backtrace}/bin/sel4-symbolize-backtrace -f ${rootTask.elf} "$@"
-    '';
-
-    links = linkFarm "links" ([
-      { name = "simulate"; path = simulate; }
-    ] ++ lib.optionals worldConfig.qemuCmdRequiresLoader [
-      { name = "loader.elf"; path = loader.elf; }
-    ] ++ [
-      { name = "kernel.elf"; path = "${seL4ForBoot}/bin/kernel.elf"; }
-      { name = "root-task.elf"; path = rootTask.elf; }
-      { name = "symbolize-root-task-backtrace"; path = symbolizeRootTaskBacktrace; }
-    ] ++ extraLinks ++ (rootTask.extraLinks or []));
-    # ]);
-
-    automate =
-      assert canAutomate;
-      assert automateTimeout != null;
-      automateQemuBasic {
-        inherit simulate;
-        timeout = automateTimeout;
+      loader = mkLoader {
+        appELF = rootTask.elf;
       };
-  };
+
+      instanceForPlatform = worldConfig.mkInstanceForPlatform {
+        rootTask = rootTask.elf;
+        loader = loader.elf;
+      };
+
+    in rec {
+      inherit rootTask isSupported canAutomate;
+      inherit loader instanceForPlatform;
+
+      symbolizeRootTaskBacktrace = writeScript "x.sh" ''
+        #!${buildPackages.runtimeShell}
+        exec ${buildPackages.this.sel4-symbolize-backtrace}/bin/sel4-symbolize-backtrace -f ${rootTask.elf} "$@"
+      '';
+
+      links = linkFarm "links" (
+        instanceForPlatform.links
+        ++ lib.optionals worldConfig.platformRequiresLoader [
+        { name = "loader.elf"; path = loader.elf; }
+      ] ++ [
+        { name = "kernel.elf"; path = "${seL4ForBoot}/bin/kernel.elf"; }
+        { name = "root-task.elf"; path = rootTask.elf; }
+        { name = "symbolize-root-task-backtrace"; path = symbolizeRootTaskBacktrace; }
+      ] ++ extraLinks ++ (rootTask.extraLinks or []));
+      # ]);
+
+      automate =
+        assert canAutomate;
+        assert automateTimeout != null;
+        automateQemuBasic {
+          inherit (instanceForPlatform.attrs) simulate;
+          timeout = automateTimeout;
+        };
+    } // instanceForPlatform.attrs;
 
   mkCapDLRootTask =
     { script
@@ -63,7 +65,7 @@ let
     in lib.fix (self: with self;
       {
         inherit script config;
-        spec = mkCapDLSpec {
+        spec = mkSimpleCompositionCapDLSpec {
           inherit script config;
         };
         extraLinks = [

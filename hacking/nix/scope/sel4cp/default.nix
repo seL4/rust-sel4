@@ -10,17 +10,16 @@
 , sources
 }:
 
-let
-  # sel4cpSource = lib.cleanSource ../../../../../../../../x/sel4cp;
+# no configuration yet
+{}:
 
+let
   sel4cpSource = sources.fetchGit {
     url = "https://gitlab.com/coliasgroup/sel4cp.git";
     rev = "e8d3350fb1f06c5ad3a436be1f09de89d97370e8"; # branch "rust-seL4-nix"
     # useLocal = true;
     # local = sources.localRoot + "/sel4cp";
   };
-
-  # kernelSource = lib.cleanSource ../../../../../../../../x/seL4;
 
   kernelSource = sources.fetchGit {
     url = "https://gitlab.com/coliasgroup/seL4.git";
@@ -182,14 +181,10 @@ let
       "$@"
   '';
 
-  pyoxidizer = callPackage ./pyoxidizer.nix {};
-  pyoxidizerBroken = callPackage ./pyoxidizer-broken.nix {};
-
 in rec {
   inherit
     sdk tool
     mkSystem mkSimulate
-    pyoxidizer pyoxidizerBroken
     example
   ;
 }

@@ -6,7 +6,6 @@
 , mkTask
 , sources
 , crates
-, seL4ForUserspace
 , crateUtils
 , seL4RustTargetInfoWithConfig
 }:

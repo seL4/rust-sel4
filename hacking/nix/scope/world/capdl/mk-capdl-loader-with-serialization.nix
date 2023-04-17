@@ -4,7 +4,6 @@
 , objectSizes
 , serializeCapDLSpec
 , crateUtils
-, seL4ForUserspace
 , capdl-add-spec-to-loader
 , capdl-loader-expecting-serialized-spec
 }:

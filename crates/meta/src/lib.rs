@@ -54,7 +54,7 @@ maybe!(target_env = "sel4", sel4_logging);
 maybe!(target_env = "sel4", sel4_sync);
 maybe!(target_env = "sel4", sel4_sys);
 maybe!(
-    all(target_env = "sel4", not(target_arch = "x86_64")),
+    all(target_env = "sel4", feature = "sel4_platform_info", not(target_arch = "x86_64")),
     sel4_platform_info
 );
 maybe!(

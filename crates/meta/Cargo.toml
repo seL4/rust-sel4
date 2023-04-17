@@ -19,7 +19,7 @@ cfg-if = "*"
 log = "*"
 
 [target."cfg(all(target_env = \"sel4\", not(target_arch = \"x86_64\")))".dependencies]
-sel4-platform-info = { path = "../sel4/platform-info" }
+sel4-platform-info = { path = "../sel4/platform-info", optional = true }
 
 [target."cfg(all(target_env = \"sel4\", target_arch = \"aarch64\"))".dependencies]
 capdl-embedded-spec = { path = "../capdl/embedded-spec", features = ["deflate"], optional = true }

@@ -1,0 +1,5 @@
+{ callPackage }:
+
+{
+  qemu = callPackage ./qemu {};
+}

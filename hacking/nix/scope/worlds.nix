@@ -1,6 +1,7 @@
 { lib, pkgsBuildBuild
 , cmakeConfigHelpers
 , mkWorld
+, platUtils
 }:
 
 with cmakeConfigHelpers;
@@ -26,6 +27,7 @@ in rec {
             in
               mkWorld {
                 inherit loaderConfig;
+                corePlatformConfig = {};
                 inherit isCorePlatform;
                 kernelConfig = kernelConfigCommon // {
                   ARM_CPU = mkString cpu;
@@ -37,16 +39,18 @@ in rec {
                 } // lib.optionalAttrs hypervisor {
                   KernelArmHypervisorSupport = on;
                 };
-                mkQemuCmd = loader: [
-                  # NOTE
-                  # virtualization=on even when hypervisor to test loader dropping exception level
-                  "${pkgsBuildBuild.qemu}/bin/qemu-system-aarch64"
-                    "-machine" "virt,virtualization=on"
-                    "-cpu" cpu "-smp" numCores "-m" "1024"
-                    "-nographic"
-                    "-serial" "mon:stdio"
-                    "-kernel" loader
-                ];
+                mkInstanceForPlatform = platUtils.qemu.mkMkInstanceForPlatform {
+                  mkQemuCmd = loader: [
+                    # NOTE
+                    # virtualization=on even when hypervisor to test loader dropping exception level
+                    "${pkgsBuildBuild.qemu}/bin/qemu-system-aarch64"
+                      "-machine" "virt,virtualization=on"
+                      "-cpu" cpu "-smp" numCores "-m" "1024"
+                      "-nographic"
+                      "-serial" "mon:stdio"
+                      "-kernel" loader
+                  ];
+                };
               };
         in rec {
           default = el2;
@@ -106,6 +110,7 @@ in rec {
 
       pc99 = lib.fix (self: mkWorld {
         inherit loaderConfig;
+        platformRequiresLoader = false;
         kernelConfig = kernelConfigCommon // {
           KernelArch = mkString "x86";
           KernelSel4Arch = mkString (if is64bit then "x86_64" else "ia32");
@@ -118,32 +123,34 @@ in rec {
           KernelIOMMU = off;
           KernelFPU = mkString "FXSAVE";
         };
-        qemuCmdRequiresLoader = false;
-        mkQemuCmd =
-          let
-            enable = opt: "+${opt}";
-            disable = opt: "-${opt}";
-            opts = lib.concatStringsSep "," [
-              (disable "vme")
-              (enable "pdpe1gb")
-              (disable "xsave")
-              (disable "xsaveopt")
-              (disable "xsavec")
-              (disable "fsgsbase")
-              # (enable "fsgsbase")
-              (disable "invpcid")
-              (enable "syscall")
-              (enable "lm")
+        mkInstanceForPlatform = platUtils.qemu.mkMkInstanceForPlatform {
+          platformRequiresLoader = false;
+          mkQemuCmd =
+            let
+              enable = opt: "+${opt}";
+              disable = opt: "-${opt}";
+              opts = lib.concatStringsSep "," [
+                (disable "vme")
+                (enable "pdpe1gb")
+                (disable "xsave")
+                (disable "xsaveopt")
+                (disable "xsavec")
+                (disable "fsgsbase")
+                # (enable "fsgsbase")
+                (disable "invpcid")
+                (enable "syscall")
+                (enable "lm")
+              ];
+            in task: [
+              "${pkgsBuildBuild.qemu}/bin/qemu-system-${if is64bit then "x86_64" else "i386"}"
+                "-cpu" "Nehalem,${opts},enforce"
+                "-m" "size=512M"
+                "-nographic"
+                "-serial" "mon:stdio"
+                "-kernel" self.kernelBinary32Bit
+                "-initrd" task
             ];
-          in task: [
-            "${pkgsBuildBuild.qemu}/bin/qemu-system-${if is64bit then "x86_64" else "i386"}"
-              "-cpu" "Nehalem,${opts},enforce"
-              "-m" "size=512M"
-              "-nographic"
-              "-serial" "mon:stdio"
-              "-kernel" self.kernel32Bit
-              "-initrd" task
-          ];
+        };
       });
     };
 
@@ -162,7 +169,7 @@ in rec {
             in
               mkWorld {
                 inherit loaderConfig;
-                inherit isCorePlatform;
+                isCorePlatform = false;
                 kernelConfig = kernelConfigCommon // {
                   ARM_CPU = mkString cpu;
                   KernelArch = mkString "arm";
@@ -171,16 +178,18 @@ in rec {
                   KernelMaxNumNodes = mkString numCores;
                   KernelIsMCS = mcs;
                 };
-                mkQemuCmd = loader: [
-                  # NOTE
-                  # virtualization=on even when hypervisor to test loader dropping exception level
-                  "${pkgsBuildBuild.qemu}/bin/qemu-system-aarch32"
-                    "-machine" "virt"
-                    "-cpu" cpu "-smp" numCores "-m" "1024"
-                    "-nographic"
-                    "-serial" "mon:stdio"
-                    "-kernel" loader
-                ];
+                mkInstanceForPlatform = platUtils.qemu.mkMkInstanceForPlatform {
+                  mkQemuCmd = loader: [
+                    # NOTE
+                    # virtualization=on even when hypervisor to test loader dropping exception level
+                    "${pkgsBuildBuild.qemu}/bin/qemu-system-aarch32"
+                      "-machine" "virt"
+                      "-cpu" cpu "-smp" numCores "-m" "1024"
+                      "-nographic"
+                      "-serial" "mon:stdio"
+                      "-kernel" loader
+                  ];
+                };
               };
         in rec {
           default = mk {};

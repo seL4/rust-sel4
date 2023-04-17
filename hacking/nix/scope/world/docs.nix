@@ -13,7 +13,7 @@
 , topLevelLockfile
 , vendoredTopLevelLockfile
 
-, seL4ForUserspace
+, seL4RustEnvVars
 
 , worldConfig
 }:
@@ -22,11 +22,20 @@ let
   rustToolchain = defaultRustToolchain;
 
   runtimes = [
-    { name = "none"; features = []; rustTargetInfo = seL4RustTargetInfoWithConfig { minimal = false; }; }
+    { name = "none";
+      features = [];
+      rustTargetInfo = seL4RustTargetInfoWithConfig { minimal = false; };
+    }
   ] ++ lib.optionals (hostPlatform.isAarch64 || hostPlatform.isx86_64) [
-    { name = "root-task"; features = [ "root-task" ]; rustTargetInfo = seL4RustTargetInfoWithConfig { minimal = false; }; }
+    { name = "root-task";
+      features = [ "root-task" ] ++ lib.optionals (!worldConfig.isCorePlatform) [ "sel4-platform-info" ];
+      rustTargetInfo = seL4RustTargetInfoWithConfig { minimal = false; };
+    }
   ] ++ lib.optionals (worldConfig.isCorePlatform or false) [
-    { name = "sel4cp"; features = [ "sel4cp" ]; rustTargetInfo = seL4RustTargetInfoWithConfig { minimal = true; cp = true; }; }
+    { name = "sel4cp";
+      features = [ "sel4cp" ];
+      rustTargetInfo = seL4RustTargetInfoWithConfig { minimal = true; cp = true; };
+    }
   ];
 
   rootCrate = crates.meta;
@@ -111,15 +120,13 @@ let
       ]);
 
     in
-      runCommandCC "docs-${name}" {
+      runCommandCC "docs-${name}" ({
         depsBuildBuild = [ buildPackages.stdenv.cc ];
         nativeBuildInputs = [ rsync rustToolchain ];
 
         RUST_TARGET_PATH = rustTargetPath;
         LIBCLANG_PATH = "${lib.getLib buildPackages.llvmPackages.libclang}/lib";
-        SEL4_PREFIX = seL4ForUserspace;
-
-      } ''
+      } // seL4RustEnvVars)  ''
         target_dir=$(pwd)/target
 
         cargo doc \

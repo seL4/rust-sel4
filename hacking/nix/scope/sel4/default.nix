@@ -3,13 +3,12 @@
 , dtc, libxml2
 , python3Packages
 , qemu
-, kernelConfig
 , sources
 }:
 
-let
-  # src = lib.cleanSource ../../../../../../../../x/seL4;
+kernelConfig:
 
+let
   src = sources.fetchGit {
     url = "https://gitlab.com/coliasgroup/seL4.git";
     rev = "862b34791e2e3720bdafc74395469c1b4b97807b"; # branch "rust"
@@ -32,7 +31,6 @@ stdenv.mkDerivation {
     dtc libxml2
     python3Packages.sel4-deps
   ];
-
   depsBuildBuild = [
     # NOTE: cause drv.__spliced.buildBuild to be used to work around splicing issue
     qemu

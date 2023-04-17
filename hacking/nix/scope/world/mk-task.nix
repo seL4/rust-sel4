@@ -2,7 +2,7 @@
 , buildCrateInLayersHere, buildSysroot, crateUtils
 , crates, injectPhdrs
 , defaultRustTargetInfo
-, seL4ForUserspace
+, seL4RustEnvVars
 } @ scopeArgs:
 
 { commonModifications ? {}
@@ -60,9 +60,7 @@ let
   };
 
   theseLastLayerModifications = crateUtils.elaborateModifications {
-    modifyDerivation = drv: drv.overrideAttrs (self: super: {
-      SEL4_PREFIX = seL4ForUserspace;
-
+    modifyDerivation = drv: drv.overrideAttrs (self: super: seL4RustEnvVars // {
       passthru = (super.passthru or {}) // {
         elf = maybeInjectPhdrs "${self.finalPackage}/bin/${args.rootCrate.name}.elf";
       };

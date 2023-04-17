@@ -4,7 +4,7 @@
 , mkTask, crates
 , serializeCapDLSpec
 , crateUtils
-, seL4ForUserspace
+, seL4RustEnvVars
 , seL4RustTargetInfoWithConfig
 }:
 
@@ -16,9 +16,7 @@ let
   };
 
   seL4Modifications = crateUtils.elaborateModifications {
-    modifyDerivation = drv: drv.overrideAttrs (self: super: {
-      SEL4_PREFIX = seL4ForUserspace;
-    });
+    modifyDerivation = drv: drv.overrideAttrs (self: super: seL4RustEnvVars);
   };
 
 in mkTask {

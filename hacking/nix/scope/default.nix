@@ -128,6 +128,11 @@ superCallPackage ../rust-utils {} self //
 
   capdl-tool = callPackage ./capdl-tool {};
 
+  ### misc tools
+
+  pyoxidizer = callPackage ./pyoxidizer/pyoxidizer.nix {};
+  pyoxidizerBroken = callPackage ./pyoxidizer/pyoxidizer-broken.nix {};
+
   ### local tools
 
   mkTool = rootCrate: buildCrateInLayersHere {
@@ -144,32 +149,21 @@ superCallPackage ../rust-utils {} self //
   embedDebugInfo = callPackage ./embed-debug-info.nix {};
   injectPhdrs = callPackage ./inject-phdrs.nix {};
 
-  ### worlds
+  ### kernel
+
+  mkSeL4 = callPackage ./sel4 {};
+
+  mkSeL4CorePlatform = callPackage ./sel4cp {};
 
   cmakeConfigHelpers = callPackage ./cmake-config-helpers.nix {};
 
-  elaborateWorldConfig =
-    { isCorePlatform ? false
-    , kernelConfig ? {}
-    , loaderConfig ? {}
-    # , mkPlatformInstanceLinks
-    , mkQemuCmd ? null
-    , qemuCmdRequiresLoader ? true
-    }:
-    { inherit
-        isCorePlatform
-        kernelConfig
-        loaderConfig
-        mkQemuCmd
-        qemuCmdRequiresLoader
-      ;
-    };
+  ### worlds
 
-  mkWorld = worldConfig: lib.makeScope newScope (callPackage ./world {} (elaborateWorldConfig worldConfig));
+  mkWorld = unelaboratedWorldConfig: lib.makeScope newScope (callPackage ./world {} unelaboratedWorldConfig);
 
   worlds = (callPackage ./worlds.nix {})."${seL4Arch}";
 
-  sel4cp = callPackage ./sel4cp {};
+  platUtils = callPackage ./plat-utils {};
 
   ### sel4test
 
