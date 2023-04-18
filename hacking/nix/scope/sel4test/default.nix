@@ -66,7 +66,7 @@ let
       "-DARM_CPU=cortex-a15"
     ];
 
-  kernelSrc = sources.fetchGit rec {
+  kernelSrc = sources.fetchGit {
     url = "https://gitlab.com/coliasgroup/seL4.git";
     rev = "0b3c3d9672cf742dc948977312216703132f4a29"; # rust-sel4test
   };

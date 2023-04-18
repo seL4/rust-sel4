@@ -13,18 +13,20 @@
 let
   # sel4cpSource = lib.cleanSource ../../../../../../../../x/sel4cp;
 
-  sel4cpSource = builtins.fetchGit rec {
+  sel4cpSource = sources.fetchGit {
     url = "https://gitlab.com/coliasgroup/sel4cp.git";
-    rev = "28a5498439515560276ddd3238ed616374faa632";
-    ref = sources.mkKeepRef rev;
+    rev = "e8d3350fb1f06c5ad3a436be1f09de89d97370e8"; # branch "rust-seL4-nix"
+    # useLocal = true;
+    # local = sources.localRoot + "/sel4cp";
   };
 
   # kernelSource = lib.cleanSource ../../../../../../../../x/seL4;
 
-  kernelSource = builtins.fetchGit rec {
+  kernelSource = sources.fetchGit {
     url = "https://gitlab.com/coliasgroup/seL4.git";
-    rev = "b62383c0a2111a58e192792cb330d98e204a8ae3"; # branch "rust-sel4cp"
-    ref = sources.mkKeepRef rev;
+    rev = "791d1965fbced4250bdeba41b7454f8e72c19345"; # branch "rust-sel4cp"
+    # useLocal = true;
+    # local = sources.localRoot + "/seL4";
   };
 
   kernelSourcePatched = stdenv.mkDerivation {

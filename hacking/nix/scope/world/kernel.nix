@@ -10,10 +10,9 @@
 let
   # src = lib.cleanSource ../../../../../../../../x/seL4;
 
-  src = builtins.fetchGit rec {
+  src = sources.fetchGit {
     url = "https://gitlab.com/coliasgroup/seL4.git";
-    rev = "c7f53af3de8dc1e2fd7243aea0e6f85a75bd8fbf"; # branch "rust"
-    ref = sources.mkKeepRef rev;
+    rev = "862b34791e2e3720bdafc74395469c1b4b97807b"; # branch "rust"
   };
 
   settings = writeText "settings.cmake" ''

@@ -20,6 +20,7 @@ mod cspace;
 mod entry;
 mod handler;
 mod ipc_buffer;
+mod passivity;
 mod pd_name;
 
 pub mod memory_region;
@@ -28,6 +29,7 @@ pub mod panicking;
 
 pub use cspace::{Channel, IrqAckError};
 pub use handler::{Handler, NullHandler};
+pub use passivity::is_passive;
 pub use pd_name::get_pd_name;
 
 // TODO decrease

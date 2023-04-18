@@ -1,4 +1,5 @@
 use crate::cspace::{Channel, INPUT_CAP, REPLY_CAP};
+use crate::is_passive;
 use crate::message::MessageInfo;
 
 pub trait Handler {
@@ -17,6 +18,7 @@ pub trait Handler {
     }
 
     fn run(&mut self) -> Result<!, Self::Error> {
+        assert!(!is_passive());
         let mut reply_tag: Option<MessageInfo> = None;
         loop {
             let (tag, badge) = match reply_tag {
