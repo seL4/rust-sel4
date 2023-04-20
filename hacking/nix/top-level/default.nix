@@ -11,7 +11,7 @@ self: with self; {
     ))
     pkgs.host.riscv64.none.this.worlds.default.seL4
     pkgs.host.riscv64.noneWithLibc.gccMultiStdenvGeneric
-    pkgs.host.aarch64.none.this.worlds.qemu-arm-virt.sel4cp.sel4cpInstances.banscii.system.links
+    pkgs.host.aarch64.none.this.worlds.qemu-arm-virt.sel4cp.instances.sel4cp.banscii.system.links
     (map (x: x.this.sel4test) [
       pkgs.host.aarch64.linux
       pkgs.host.x86_64.linux

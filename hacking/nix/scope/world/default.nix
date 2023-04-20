@@ -79,6 +79,10 @@ self: with self;
 
   mkTask = callPackage ./mk-task.nix {};
 
+  inherit (callPackage ./mk-instance.nix {})
+    mkInstance mkCapDLRootTask
+  ;
+
   capdl-loader-expecting-serialized-spec = callPackage ./capdl/capdl-loader-expecting-serialized-spec.nix {};
   objectSizes = callPackage ./capdl/object-sizes.nix {};
   mkSmallCapDLLoader = callPackage ./capdl/mk-capdl-loader.nix {};
@@ -98,5 +102,4 @@ self: with self;
   ###
 
   instances = callPackage ./instances {};
-  sel4cpInstances = callPackage ./sel4cp-instances.nix {};
 }

@@ -11,111 +11,15 @@
 , mkCapDLLoader
 , mkSmallCapDLLoader
 , mkSimpleCompositionCapDLSpec
+
+, mkInstance
+, mkCapDLRootTask
 }:
 
 let
-  mk = { rootTask, isSupported, canAutomate ? false, automateTimeout ? defaultTimeout, extraLinks ? [] }:
-    let
-
-      loader = mkLoader {
-        appELF = rootTask.elf;
-      };
-
-      instanceForPlatform = worldConfig.mkInstanceForPlatform {
-        rootTask = rootTask.elf;
-        loader = loader.elf;
-      };
-
-    in rec {
-      inherit rootTask isSupported canAutomate;
-      inherit loader instanceForPlatform;
-
-      symbolizeRootTaskBacktrace = writeScript "x.sh" ''
-        #!${buildPackages.runtimeShell}
-        exec ${buildPackages.this.sel4-symbolize-backtrace}/bin/sel4-symbolize-backtrace -f ${rootTask.elf} "$@"
-      '';
-
-      links = linkFarm "links" (
-        instanceForPlatform.links
-        ++ lib.optionals worldConfig.platformRequiresLoader [
-        { name = "loader.elf"; path = loader.elf; }
-      ] ++ [
-        { name = "kernel.elf"; path = "${seL4ForBoot}/bin/kernel.elf"; }
-        { name = "root-task.elf"; path = rootTask.elf; }
-        { name = "symbolize-root-task-backtrace"; path = symbolizeRootTaskBacktrace; }
-      ] ++ extraLinks ++ (rootTask.extraLinks or []));
-      # ]);
-
-      automate =
-        assert canAutomate;
-        assert automateTimeout != null;
-        automateQemuBasic {
-          inherit (instanceForPlatform.attrs) simulate;
-          timeout = automateTimeout;
-        };
-    } // instanceForPlatform.attrs;
-
-  mkCapDLRootTask =
-    { script
-    , config
-    , passthru
-    , small ? false
-    }:
-    let
-    in lib.fix (self: with self;
-      {
-        inherit script config;
-        spec = mkSimpleCompositionCapDLSpec {
-          inherit script config;
-        };
-        extraLinks = [
-          { name = "cdl"; path = spec; }
-        ] ++ lib.optionals (!small) [
-          # { name = "x.elf"; path = self.loader.split.full; }
-          { name = "x.elf"; path = self.loader.split.full; }
-        ];
-      }
-      // (if small then {
-        loader = mkSmallCapDLLoader spec.cdl;
-        elf = loader.elf;
-      } else {
-        loader = mkCapDLLoader spec.cdl;
-        elf = loader;
-      })
-      // passthru
-    );
-
   haveFullRuntime = hostPlatform.isAarch64 || hostPlatform.isx86_64;
   haveMinimalRuntime = haveFullRuntime;
   haveKernelLoader = hostPlatform.isAarch64;
-
-  automateQemuBasic = { simulate, timeout }:
-    writeScript "automate-qemu" ''
-      #!${buildPackages.runtimeShell}
-      set -eu
-
-      script=${simulate}
-      timeout_=${toString timeout}
-
-      echo "running '$script' with timeout ''${timeout_}s"
-
-      # the odd structure of this next part is due to bash's limitations on
-      # pipes, process substition, and coprocesses.
-
-      coproc $script < /dev/null
-      result=$( \
-        timeout $timeout_ bash -c \
-          'head -n1 <(bash -c "tee >(cat >&2)" | grep -E -a --line-buffered --only-matching "TEST_(PASS|FAIL)")' \
-          <&''${COPROC[0]} \
-          || true
-      )
-      kill $COPROC_PID
-
-      echo "result: '$result'"
-      [ "$result" == "TEST_PASS" ]
-    '';
-
-  defaultTimeout = 30;
 
 in rec {
 
@@ -138,7 +42,7 @@ in rec {
 
   examples = {
     root-task = {
-      example-root-task-without-runtime = mk {
+      example-root-task-without-runtime = mkInstance {
         rootTask = mkTask {
           rootCrate = crates.example-root-task-without-runtime;
           release = false;
@@ -148,7 +52,7 @@ in rec {
         canAutomate = true;
       };
 
-      example-root-task = mk {
+      example-root-task = mkInstance {
         rootTask = mkTask {
           rootCrate = crates.example-root-task;
           release = false;
@@ -160,7 +64,7 @@ in rec {
   };
 
   tests = {
-    loader = mk {
+    loader = mkInstance {
       rootTask = mkTask {
         rootCrate = crates.tests-root-task-loader;
         release = false;
@@ -169,7 +73,7 @@ in rec {
       canAutomate = true;
     };
 
-    core-libs = mk {
+    core-libs = mkInstance {
       rootTask = mkTask {
         rootCrate = crates.tests-root-task-core-libs;
         release = false;
@@ -178,7 +82,7 @@ in rec {
       canAutomate = true;
     };
 
-    config = mk {
+    config = mkInstance {
       rootTask = mkTask {
         rootCrate = crates.tests-root-task-config;
         release = false;
@@ -187,7 +91,7 @@ in rec {
       canAutomate = true;
     };
 
-    tls = mk {
+    tls = mkInstance {
       rootTask = mkTask {
         rootCrate = crates.tests-root-task-tls;
         release = false;
@@ -196,7 +100,7 @@ in rec {
       canAutomate = true;
     };
 
-    injected-phdrs = mk {
+    injected-phdrs = mkInstance {
       rootTask = mkTask {
         rootCrate = crates.tests-root-task-injected-phdrs;
         release = true;
@@ -206,7 +110,7 @@ in rec {
       canAutomate = true;
     };
 
-    backtrace = mk {
+    backtrace = mkInstance {
       rootTask =
         let
           orig = mkTask {
@@ -235,7 +139,7 @@ in rec {
         lib.flip lib.mapAttrs panicStrategy
           (panicStrategyName: _:
             lib.flip lib.mapAttrs alloc
-              (_: allocFeatures: mk {
+              (_: allocFeatures: mkInstance {
                 rootTask = mkTask {
                   rootCrate = crates.tests-root-task-panicking;
                   release = false;
@@ -249,11 +153,11 @@ in rec {
               }));
 
     c = callPackage ./c.nix {
-      inherit mk;
+      inherit mkInstance;
     };
 
     capdl = {
-      threads = mk {
+      threads = mkInstance {
         rootTask = mkCapDLRootTask rec {
           # small = true;
           script = ../../../../../crates/tests/capdl/threads/cdl.py;
@@ -271,7 +175,7 @@ in rec {
         isSupported = haveFullRuntime;
         canAutomate = true;
       };
-      utcover = mk {
+      utcover = mkInstance {
         rootTask = mkCapDLRootTask rec {
           # small = true;
           script = ../../../../../crates/tests/capdl/utcover/cdl.py;
@@ -292,5 +196,7 @@ in rec {
       };
     };
   };
+
+  sel4cp = callPackage ./sel4cp.nix {};
 
 }

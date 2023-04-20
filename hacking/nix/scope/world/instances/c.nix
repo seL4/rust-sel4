@@ -8,7 +8,7 @@
 , mkTask
 , defaultRustTargetInfo
 
-, mk
+, mkInstance
 }:
 
 let
@@ -39,7 +39,7 @@ let
     exec strace -f -e trace=file ${stdenvWithLld.cc.targetPrefix}cc $@
   '';
 
-  instance = mk {
+  instance = mkInstancemk {
     rootTask = mkTask rec {
       rootCrate = crates.tests-root-task-c;
       release = false;
