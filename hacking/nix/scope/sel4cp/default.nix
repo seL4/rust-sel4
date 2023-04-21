@@ -14,19 +14,9 @@
 {}:
 
 let
-  sel4cpSource = sources.fetchGit {
-    url = "https://gitlab.com/coliasgroup/sel4cp.git";
-    rev = "e8d3350fb1f06c5ad3a436be1f09de89d97370e8"; # branch "rust-seL4-nix"
-    # useLocal = true;
-    # local = sources.localRoot + "/sel4cp";
-  };
+  sel4cpSource = sources.sel4cp;
 
-  kernelSource = sources.fetchGit {
-    url = "https://gitlab.com/coliasgroup/seL4.git";
-    rev = "791d1965fbced4250bdeba41b7454f8e72c19345"; # branch "rust-sel4cp"
-    # useLocal = true;
-    # local = sources.localRoot + "/seL4";
-  };
+  kernelSource = sources.seL4.rust-sel4cp;
 
   kernelSourcePatched = stdenv.mkDerivation {
     name = "kernel-source-for-sel4cp";

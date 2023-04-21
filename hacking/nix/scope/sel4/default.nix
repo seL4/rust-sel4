@@ -9,10 +9,7 @@
 kernelConfig:
 
 let
-  src = sources.fetchGit {
-    url = "https://gitlab.com/coliasgroup/seL4.git";
-    rev = "862b34791e2e3720bdafc74395469c1b4b97807b"; # branch "rust"
-  };
+  src = sources.seL4.rust;
 
   settings = writeText "settings.cmake" ''
     ${lib.concatStrings (lib.mapAttrsToList (k: v: ''

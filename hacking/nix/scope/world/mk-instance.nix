@@ -80,7 +80,6 @@ let
         extraLinks = [
           { name = "cdl"; path = spec; }
         ] ++ lib.optionals (!small) [
-          # { name = "x.elf"; path = self.loader.split.full; }
           { name = "x.elf"; path = self.loader.split.full; }
         ];
       }
