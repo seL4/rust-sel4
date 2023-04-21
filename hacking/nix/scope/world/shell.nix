@@ -3,16 +3,21 @@
 , defaultRustToolchain
 , defaultRustTargetInfo
 , bareMetalRustTargetInfo
-, kernel, loaderConfig
 , sources
 , dummyCapDLSpec, serializeCapDLSpec
+, seL4RustEnvVars
+, worldConfig
+, seL4ForBoot
 }:
 
 let
-  loaderConfigJSON = writeText "loader-config.json" (builtins.toJSON loaderConfig);
+  loaderConfigEnvVars = lib.optionalAttrs (worldConfig.loaderConfig != null) {
+    SEL4_LOADER_CONFIG = writeText "loader-config.json" (builtins.toJSON worldConfig.loaderConfig);
+    SEL4_APP = "${seL4ForBoot}/bin/kernel.elf"; # HACK
+  };
 
 in
-mkShell rec {
+mkShell (seL4RustEnvVars // loaderConfigEnvVars // {
   RUST_TARGET_PATH = toString (sources.srcRoot + "/support/targets");
 
   # TODO
@@ -28,10 +33,6 @@ mkShell rec {
   ];
 
   LIBCLANG_PATH = "${lib.getLib buildPackages.llvmPackages.libclang}/lib";
-
-  SEL4_PREFIX = kernel;
-  SEL4_LOADER_CONFIG = loaderConfigJSON;
-  SEL4_APP = "${kernel}/bin/kernel.elf";
 
   CAPDL_SPEC_FILE = serializeCapDLSpec { inherit (dummyCapDLSpec.passthru) spec; };
   CAPDL_FILL_DIR = dummyCapDLSpec.passthru.fill;
@@ -50,4 +51,4 @@ mkShell rec {
     # abbreviation
     export h=$HOST_CARGO_FLAGS
   '';
-}
+})
