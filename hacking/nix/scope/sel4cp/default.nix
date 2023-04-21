@@ -144,9 +144,7 @@ let
 
       passthru = rec {
         loader = "${self}/loader.img";
-        simulate = mkSimulate loader;
-        links = linkFarm "links" [
-          { name = "simulate"; path = simulate; }
+        links = [
           { name = "pds"; path = searchPath; }
           { name = "loader.elf"; path = loader; }
           { name = "report.txt"; path = "${self}/report.txt"; }
@@ -170,21 +168,10 @@ let
     systemXML = exampleSource + "/hello.system";
   };
 
-  mkSimulate = loader: writeScript "x.sh" ''
-    #!${buildPackages.runtimeShell}
-    exec ${pkgsBuildBuild.qemu}/bin/qemu-system-aarch64 \
-      -machine virt \
-      -cpu cortex-a53 -m size=1G \
-      -device loader,file=${loader},addr=0x70000000,cpu-num=0 \
-      -serial mon:stdio \
-      -nographic \
-      "$@"
-  '';
-
 in rec {
   inherit
     sdk tool
-    mkSystem mkSimulate
+    mkSystem
     example
   ;
 }

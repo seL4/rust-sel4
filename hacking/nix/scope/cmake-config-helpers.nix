@@ -10,4 +10,6 @@ in rec {
   mkBool = mkType "BOOL";
   on = mkBool "ON";
   off = mkBool "OFF";
+
+  fromBool = x: if x then on else off;
 }

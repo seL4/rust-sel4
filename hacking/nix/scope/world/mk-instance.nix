@@ -47,6 +47,23 @@ let
 
     } // instanceForPlatform.attrs;
 
+  mkCorePlatformInstance = { system, extraLinks ? [] }:
+    let
+
+      inherit (system) loader;
+
+      instanceForPlatform = worldConfig.mkInstanceForPlatform {
+        inherit loader;
+      };
+
+    in rec {
+      inherit system;
+
+      links = linkFarm "links" (
+        instanceForPlatform.links ++ extraLinks ++ system.links);
+
+    } // instanceForPlatform.attrs;
+
   mkCapDLRootTask =
     { script
     , config
@@ -77,5 +94,5 @@ let
       // passthru
     );
 in {
-  inherit mkInstance mkCapDLRootTask;
+  inherit mkInstance mkCorePlatformInstance mkCapDLRootTask;
 }

@@ -8,6 +8,7 @@
 , crates
 , crateUtils
 , seL4RustTargetInfoWithConfig
+, mkCorePlatformInstance
 }:
 
 let
@@ -34,9 +35,11 @@ in {
         release = false;
       };
     };
-    system = sel4cp.mkSystem {
-      searchPath = "${pds.hello}/bin";
-      systemXML = sources.srcRoot + "/crates/examples/sel4cp/hello/hello.system";
+    system = mkCorePlatformInstance {
+      system = sel4cp.mkSystem {
+        searchPath = "${pds.hello}/bin";
+        systemXML = sources.srcRoot + "/crates/examples/sel4cp/hello/hello.system";
+      };
     };
   };
 
@@ -59,16 +62,18 @@ in {
         };
       };
     };
-    system = sel4cp.mkSystem {
-      searchPath = symlinkJoin {
-        name = "x";
-        paths = [
-          "${pds.pl011-driver}/bin"
-          "${pds.assistant}/bin"
-          "${pds.artist}/bin"
-        ];
+    system = mkCorePlatformInstance {
+      system = sel4cp.mkSystem {
+        searchPath = symlinkJoin {
+          name = "x";
+          paths = [
+            "${pds.pl011-driver}/bin"
+            "${pds.assistant}/bin"
+            "${pds.artist}/bin"
+          ];
+        };
+        systemXML = sources.srcRoot + "/crates/examples/sel4cp/banscii/banscii.system";
       };
-      systemXML = sources.srcRoot + "/crates/examples/sel4cp/banscii/banscii.system";
     };
   };
 }

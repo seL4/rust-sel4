@@ -7,12 +7,14 @@
 with cmakeConfigHelpers;
 
 let
-  loaderConfig = {};
-
   kernelConfigCommon = {
     KernelVerificationBuild = off;
     KernelRootCNodeSizeBits = mkString "14"; # For backtrace test with embedded debug info
   };
+
+  loaderConfig = {};
+
+  corePlatformConfig = {};
 
 in rec {
   aarch64 =
@@ -21,13 +23,20 @@ in rec {
       default = qemu-arm-virt.el2;
       qemu-arm-virt =
         let
-          mk = { smp ? false, mcs ? off, hypervisor ? false, cpu ? "cortex-a57", isCorePlatform ? false }:
+          mk =
+            { smp ? false
+            , mcs ? false
+            , el2 ? true
+            , hypervisor ? false
+            , cpu ? "cortex-a57"
+            , isCorePlatform ? false
+            , mkLoaderArgs ? loader: [ "-kernel" loader ]
+            }:
             let
               numCores = if smp then "2" else "1";
             in
               mkWorld {
-                inherit loaderConfig;
-                corePlatformConfig = {};
+                inherit loaderConfig corePlatformConfig;
                 inherit isCorePlatform;
                 kernelConfig = kernelConfigCommon // {
                   ARM_CPU = mkString cpu;
@@ -35,7 +44,7 @@ in rec {
                   KernelSel4Arch = mkString "aarch64";
                   KernelPlatform = mkString "qemu-arm-virt";
                   KernelMaxNumNodes = mkString numCores;
-                  KernelIsMCS = mcs;
+                  KernelIsMCS = fromBool mcs;
                 } // lib.optionalAttrs hypervisor {
                   KernelArmHypervisorSupport = on;
                 };
@@ -44,20 +53,25 @@ in rec {
                     # NOTE
                     # virtualization=on even when hypervisor to test loader dropping exception level
                     "${pkgsBuildBuild.qemu}/bin/qemu-system-aarch64"
-                      "-machine" "virt,virtualization=on"
+                      "-machine" "virt${lib.optionalString el2 ",virtualization=on"}"
                       "-cpu" cpu "-smp" numCores "-m" "1024"
                       "-nographic"
                       "-serial" "mon:stdio"
-                      "-kernel" loader
-                  ];
+                  ] ++ mkLoaderArgs loader;
                 };
               };
         in rec {
           default = el2;
           el1 = mk { smp = true; };
           el2 = mk { smp = true; hypervisor = true; };
-          el2MCS = mk { smp = true; hypervisor = true; mcs = on; };
-          sel4cp = mk { mcs = on; isCorePlatform = true; cpu = "cortex-a53"; };
+          el2MCS = mk { smp = true; hypervisor = true; mcs = true; };
+          sel4cp = mk {
+            el2 = false;
+            mcs = true;
+            isCorePlatform = true;
+            cpu = "cortex-a53";
+            mkLoaderArgs = loader: [ "-device" "loader,file=${loader},addr=0x70000000,cpu-num=0" ];
+          };
         };
 
       bcm2711 = mkWorld {

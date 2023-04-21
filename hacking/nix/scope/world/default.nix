@@ -80,7 +80,7 @@ self: with self;
   mkTask = callPackage ./mk-task.nix {};
 
   inherit (callPackage ./mk-instance.nix {})
-    mkInstance mkCapDLRootTask
+    mkInstance mkCorePlatformInstance mkCapDLRootTask
   ;
 
   capdl-loader-expecting-serialized-spec = callPackage ./capdl/capdl-loader-expecting-serialized-spec.nix {};
