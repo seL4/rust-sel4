@@ -95,7 +95,6 @@ let
         (vendorLockfile { inherit lockfileContents; }).configFragment
         {
           unstable.unstable-options = true;
-          unstable.bindeps = true;
 
           target.${rustTargetName}.rustflags = [
             "--sysroot" sysroot

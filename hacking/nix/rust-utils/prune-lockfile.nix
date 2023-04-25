@@ -25,7 +25,6 @@ let
   config = crateUtils.toTOMLFile "config" (crateUtils.clobber [
     {
       unstable.unstable-options = true;
-      unstable.bindeps = true;
     }
     superLockfileVendoringConfig
     extraConfig

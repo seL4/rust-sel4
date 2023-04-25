@@ -929,13 +929,8 @@ dependencies = [
 name = "meta"
 version = "0.1.0"
 dependencies = [
- "capdl-add-spec-to-loader",
- "capdl-embedded-spec",
- "capdl-loader-core",
- "capdl-loader-expecting-serialized-spec",
- "capdl-loader-with-embedded-spec",
+ "capdl-types",
  "cfg-if",
- "loader-core",
  "log",
  "render-elf-with-data",
  "sel4",
@@ -944,11 +939,9 @@ dependencies = [
  "sel4-backtrace-simple",
  "sel4-backtrace-types",
  "sel4-config",
- "sel4-embed-debug-info",
  "sel4-logging",
  "sel4-platform-info",
  "sel4-root-task-runtime",
- "sel4-symbolize-backtrace",
  "sel4-sync",
  "sel4-sys",
  "sel4cp",

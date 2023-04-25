@@ -24,6 +24,7 @@ macro_rules! maybe {
     ($condition:meta, $i:ident) => {
         #[cfg(not($condition))]
         use unsupported as $i;
+        #[doc(hidden)]
         #[cfg($condition)]
         pub use $i;
     };

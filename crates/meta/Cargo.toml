@@ -6,53 +6,19 @@ edition = "2021"
 license = "BSD-2-Clause"
 
 [features]
-capdl-spec = ["root-task", "capdl-loader-with-embedded-spec", "capdl-embedded-spec"]
-root-task = [
-    "sel4-root-task-runtime",
-    "capdl-loader-expecting-serialized-spec",
-    "capdl-loader-core"
-]
+root-task = ["sel4-root-task-runtime"]
 sel4cp = ["dep:sel4cp", "sel4cp-postcard"]
 
 [dependencies]
+capdl-types = { path = "../capdl/types", features = ["alloc"] }
 cfg-if = "*"
 log = "*"
 
 [target."cfg(all(target_env = \"sel4\", not(target_arch = \"x86_64\")))".dependencies]
 sel4-platform-info = { path = "../sel4/platform-info", optional = true }
 
-[target."cfg(all(target_env = \"sel4\", target_arch = \"aarch64\"))".dependencies]
-capdl-embedded-spec = { path = "../capdl/embedded-spec", features = ["deflate"], optional = true }
-capdl-loader-core = { path = "../capdl/loader/core", optional = true }
-
-[target."cfg(all(target_env = \"sel4\", target_arch = \"aarch64\"))".dependencies.capdl-loader-expecting-serialized-spec]
-path = "../capdl/loader/expecting-serialized-spec"
-artifact = ["bin"]
-optional = true
-
-[target."cfg(all(target_env = \"sel4\", target_arch = \"aarch64\"))".dependencies.capdl-loader-with-embedded-spec]
-path = "../capdl/loader/with-embedded-spec"
-artifact = ["bin"]
-features = ["deflate"]
-optional = true
-
-[target."cfg(all(target_os = \"none\", not(target_env = \"sel4\")))".dependencies]
-loader-core = { path = "../loader/core" }
-
 [target."cfg(not(target_os = \"none\"))".dependencies]
 render-elf-with-data = { path = "../build-tools/render-elf-with-data" }
-
-[target."cfg(not(target_os = \"none\"))".dependencies.capdl-add-spec-to-loader]
-path = "../capdl/loader/expecting-serialized-spec/cli/capdl-add-spec-to-loader"
-artifact = ["bin"]
-
-[target."cfg(not(target_os = \"none\"))".dependencies.sel4-embed-debug-info]
-path = "../runtime/sel4-backtrace/embedded-debug-info/cli/sel4-embed-debug-info"
-artifact = ["bin"]
-
-[target."cfg(not(target_os = \"none\"))".dependencies.sel4-symbolize-backtrace]
-path = "../runtime/sel4-backtrace/cli/sel4-symbolize-backtrace"
-artifact = ["bin"]
 
 [target."cfg(target_env = \"sel4\")".dependencies]
 sel4 = { path = "../sel4" }

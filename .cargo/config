@@ -1,3 +1,2 @@
 [unstable]
 unstable-options = true
-bindeps = true
