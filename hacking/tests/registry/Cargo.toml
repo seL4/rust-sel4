@@ -1,0 +1,10 @@
+[package]
+name = "registry-test"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+sel4 = { version = "0.1.0", registry = "sel4" }
+
+# Exclude from top-level workspace
+[workspace]

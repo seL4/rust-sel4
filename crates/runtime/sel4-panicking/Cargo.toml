@@ -14,8 +14,7 @@ sel4-immediate-sync-once-cell = { path = "../sel4-immediate-sync-once-cell" }
 sel4-panicking-env = { path = "./env" }
 
 [dependencies.unwinding]
-git = "https://github.com/nspin/unwinding.git"
-rev = "02b5c86f8937edbbe8bbe79fedbab374156b4134"
+version = "0.1.6"
 default-features = false
 features = ["unwinder", "fde-custom", "hide-trace", "personality"]
 optional = true

@@ -1,0 +1,3 @@
+[source.sel4-dummy]
+registry = "file:///var/empty/sel4-dummy/index"
+replace-with = "sel4"

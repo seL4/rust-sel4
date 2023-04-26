@@ -113,7 +113,9 @@ superCallPackage ../rust-utils {} self //
     then "${rustToolchain}/lib/rustlib/${buildPlatform.config}/bin/rust-lld"
     else null;
 
-  crates = callPackage ./crates.nix {};
+  inherit (callPackage ./crates.nix {}) crates;
+
+  registry = callPackage ./registry.nix {};
 
   buildCrateInLayersHere = buildCrateInLayers {
     # TODO pass vendored lockfile instead
@@ -130,8 +132,9 @@ superCallPackage ../rust-utils {} self //
 
   ### misc tools
 
-  pyoxidizer = callPackage ./pyoxidizer/pyoxidizer.nix {};
-  pyoxidizerBroken = callPackage ./pyoxidizer/pyoxidizer-broken.nix {};
+  cargo-index = callPackage ./tools/cargo-index.nix {};
+  pyoxidizer = callPackage ./tools/pyoxidizer/pyoxidizer.nix {};
+  pyoxidizerBroken = callPackage ./tools/pyoxidizer/pyoxidizer-broken.nix {};
 
   ### local tools
 
@@ -148,6 +151,10 @@ superCallPackage ../rust-utils {} self //
 
   embedDebugInfo = callPackage ./embed-debug-info.nix {};
   injectPhdrs = callPackage ./inject-phdrs.nix {};
+
+  cargo-helpers = callPackage ./tools/cargo-helpers.nix {};
+
+  shell = callPackage ./shell.nix {};
 
   ### kernel
 

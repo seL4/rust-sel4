@@ -18,8 +18,7 @@ sel4-backtrace-types = { path = "./types" }
 serde = { version = "*", default-features = false, features = [], optional = true }
 
 [dependencies.unwinding]
-git = "https://github.com/nspin/unwinding.git"
-rev = "02b5c86f8937edbbe8bbe79fedbab374156b4134"
+version = "0.1.6"
 default-features = false
 features = ["unwinder", "fde-custom", "hide-trace"]
 optional = true

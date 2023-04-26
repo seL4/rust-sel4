@@ -160,8 +160,8 @@ rec {
       inherit (final) state;
     };
 
-  # f :: (attrPath :: [String]) -> (dependencyName :: String) -> (pathValue :: String) -> (state :: a) -> { pathValue :: String, state :: a }
-  traversePathDependencies = f: manifest: state0:
+  # f :: (attrPath :: [String]) -> (depName :: String) -> (depAttrs :: { ... }) -> (state :: a) -> { value :: { ... }, state :: a }
+  traverseDependencies = f: manifest: state0:
     let
       dependencyAttributes = [
         "dependencies"
@@ -171,19 +171,12 @@ rec {
 
       traverseTheseDependencies = attrPath: dependencies:
         let
-        in lib.flip traverseAttrs dependencies (name: value: state':
-          if value ? "path"
-          then
-            let step = f attrPath name value.path state';
-            in {
-              value = value // { path = step.pathValue; };
-              inherit (step) state;
-            }
-          else {
-            inherit value;
-            state = state';
-          }
-        );
+        in
+          lib.flip traverseAttrs dependencies (name: value: state':
+            let
+            in
+              f attrPath name value state'
+          );
 
       fForTarget = attrPath: name: value: state':
         if lib.elem name dependencyAttributes
@@ -235,15 +228,26 @@ rec {
 
   extractAndPatchPathDependencies = patch: manifest:
     let
-      step = traversePathDependencies
-        (attrPath: dependencyName: pathValue: state':
-          let
-            consistent = if state' ? dependencyName then state'.dependencyName == pathValue else true;
-          in
-            assert consistent;
+      step = traverseDependencies
+        (attrPath: depName: depAttrs: state':
+          if depAttrs ? path
+          then
+            let
+              consistent = if state' ? depName then state'.depName == depAttrs.path else true;
+            in
+              assert consistent;
+              {
+                value = depAttrs // {
+                  path = patch depName depAttrs.path;
+                };
+                state = state' // {
+                  "${depName}" = depAttrs.path;
+                };
+              }
+          else
             {
-              pathValue = patch dependencyName pathValue;
-              state = state' // { "${dependencyName}" = pathValue; };
+              value = depAttrs;
+              state = state';
             }
         )
         manifest
@@ -270,13 +274,13 @@ rec {
     let
       manifest = crateManifest cratePath;
 
-      inherit (manifest.package) name;
+      inherit (manifest.package) name version;
 
       hasImplicitBuildScript = builtins.pathExists (cratePath + "/build.rs");
       hasExplicitBuildScript = manifest.package ? "build";
       hasAnyBuildScript = hasImplicitBuildScript || hasExplicitBuildScript;
 
-      extractedAndPatched = extractAndPatchPathDependencies (dependencyName: pathValue: "../${dependencyName}") manifest;
+      extractedAndPatched = extractAndPatchPathDependencies (depName: pathValue: "../${depName}") manifest;
       pathDependencies = extractedAndPatched.pathDependencies;
       manifestWithPatchedPathDependencies = extractedAndPatched.patchedManifest;
 
@@ -326,13 +330,13 @@ rec {
       ];
 
     in {
-      inherit name real dummy pathDependencies;
+      inherit name version manifest real dummy pathDependencies;
     };
 
   augmentCrates = crates: lib.fix (selfCrates:
     lib.flip lib.mapAttrs crates (_: crate:
       let
-        pathDependenciesList = lib.mapAttrsToList (dependencyName: _: selfCrates.${dependencyName}) crate.pathDependencies;
+        pathDependenciesList = lib.mapAttrsToList (depName: _: selfCrates.${depName}) crate.pathDependencies;
       in
         lib.fix (selfCrate: crate // {
           closure = {

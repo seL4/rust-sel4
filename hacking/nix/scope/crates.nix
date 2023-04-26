@@ -46,5 +46,6 @@ let
 
   augmentedCrates = crateUtils.augmentCrates crates;
 
-in
-  augmentedCrates
+in {
+  crates = augmentedCrates;
+}
