@@ -203,7 +203,6 @@ impl<'a, N: ObjectName, F: Content, B: BorrowMut<[PerObjectBuffer]>> Loader<'a, 
                             let obj_id = &mut by_size_start[size_bits];
                             if *obj_id < by_size_end[size_bits] {
                                 let named_obj = &self.spec().named_object(*obj_id);
-                                info!("{}", self.object_name(&named_obj.name).unwrap_or("<none>"));
                                 let blueprint = named_obj.object.blueprint().unwrap();
                                 assert_eq!(blueprint.physical_size_bits(), size_bits);
                                 trace!(
