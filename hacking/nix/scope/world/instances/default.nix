@@ -36,6 +36,8 @@ in rec {
     tests.panicking.abort.withoutAlloc
     tests.panicking.unwind.withAlloc
     tests.panicking.unwind.withoutAlloc
+    tests.capdl.threads
+    tests.capdl.utcover
   ];
 
   supported = lib.filter (instance: instance.isSupported) all;

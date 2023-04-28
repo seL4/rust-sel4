@@ -1,4 +1,4 @@
-{ lib, buildPackages, runCommand, writeText
+{ lib, buildPackages, runCommand, writeText, linkFarm
 , hostPlatform
 , python3Packages
 
@@ -29,7 +29,15 @@ let
   augmentedConfigJSON = writeText "config.json" (builtins.toJSON augmentedConfig);
 
   capdlSrc = sources.pythonCapDLTool;
-  capdlSimpleCompositionSrc = lib.cleanSource ../../../../../python-modules;
+
+  capdlSimpleCompositionSrc =
+    let
+      name = "capdl_simple_composition";
+      path = sources.srcRoot + "/hacking/src/python/${name}";
+    in
+      linkFarm name [
+        { inherit name path; }
+      ];
 
   # TODO
   pythonPathForShell = "";
