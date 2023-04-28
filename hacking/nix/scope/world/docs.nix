@@ -21,22 +21,25 @@
 let
   rustToolchain = defaultRustToolchain;
 
-  runtimes = [
-    { name = "none";
-      features = [];
-      rustTargetInfo = seL4RustTargetInfoWithConfig { minimal = false; };
-    }
-  ] ++ lib.optionals (hostPlatform.isAarch64 || hostPlatform.isx86_64) [
-    { name = "root-task";
-      features = [ "root-task" ] ++ lib.optionals (!worldConfig.isCorePlatform) [ "sel4-platform-info" ];
-      rustTargetInfo = seL4RustTargetInfoWithConfig { minimal = false; };
-    }
-  ] ++ lib.optionals (worldConfig.isCorePlatform or false) [
-    { name = "sel4cp";
-      features = [ "sel4cp" ];
-      rustTargetInfo = seL4RustTargetInfoWithConfig { minimal = true; cp = true; };
-    }
-  ];
+  runtimes =
+    let
+      common = lib.optionals (!worldConfig.isCorePlatform) [ "sel4-platform-info" ];
+    in [
+      { name = "none";
+        features = common ++ [];
+        rustTargetInfo = seL4RustTargetInfoWithConfig { minimal = false; };
+      }
+    ] ++ lib.optionals (hostPlatform.isAarch64 || hostPlatform.isx86_64) [
+      { name = "root-task";
+        features = common ++ [ "root-task" ];
+        rustTargetInfo = seL4RustTargetInfoWithConfig { minimal = false; };
+      }
+    ] ++ lib.optionals (worldConfig.isCorePlatform or false) [
+      { name = "sel4cp";
+        features = common ++ [ "sel4cp" ];
+        rustTargetInfo = seL4RustTargetInfoWithConfig { minimal = true; cp = true; };
+      }
+    ];
 
   rootCrate = crates.meta;
 

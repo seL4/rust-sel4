@@ -57,7 +57,7 @@ maybe!(target_env = "sel4", sel4_sys);
 maybe!(
     all(
         target_env = "sel4",
-        feature = "sel4_platform_info",
+        feature = "sel4-platform-info",
         not(target_arch = "x86_64")
     ),
     sel4_platform_info
