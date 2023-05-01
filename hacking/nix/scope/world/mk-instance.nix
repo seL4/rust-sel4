@@ -12,7 +12,12 @@
 let
   defaultTimeout = 30;
 
-  mkInstance = { rootTask, isSupported, canAutomate ? false, automateTimeout ? defaultTimeout, extraLinks ? [] }:
+  mkInstance =
+    { rootTask
+    , isSupported, canAutomate ? false, automateTimeout ? defaultTimeout
+    , extraLinks ? []
+    }:
+
     let
 
       loader = mkLoader {
@@ -47,17 +52,25 @@ let
 
     } // instanceForPlatform.attrs;
 
-  mkCorePlatformInstance = { system, extraLinks ? [] }:
+  mkCorePlatformInstance =
+    { system
+    , isSupported, canAutomate ? false, automateTimeout ? defaultTimeout
+    , extraLinks ? []
+    }:
+
     let
 
       inherit (system) loader;
 
-      instanceForPlatform = worldConfig.mkInstanceForPlatform {
+      instanceForPlatform = worldConfig.mkInstanceForPlatform ({
         inherit loader;
-      };
+      } // lib.optionalAttrs canAutomate {
+        simpleAutomationParams.timeout = automateTimeout;
+      });
 
     in rec {
-      inherit system;
+      inherit system instanceForPlatform;
+      inherit isSupported canAutomate;
 
       links = linkFarm "links" (
         instanceForPlatform.links ++ extraLinks ++ system.links);

@@ -3,26 +3,29 @@ self: with self; {
   worldsForEverythingInstances = [
     pkgs.host.x86_64.none.this.worlds.default
     pkgs.host.aarch64.none.this.worlds.default
+    pkgs.host.aarch64.none.this.worlds.qemu-arm-virt.sel4cp
   ];
 
   everythingList = lib.flatten [
     (lib.forEach worldsForEverythingInstances (world:
-      map (instance: instance.links) world.instances.supported
+      map (instance: instance.links) world.instances.subsets.supported
     ))
-    pkgs.host.riscv64.none.this.worlds.default.seL4
-    pkgs.host.riscv64.noneWithLibc.gccMultiStdenvGeneric
-    pkgs.host.aarch64.none.this.worlds.qemu-arm-virt.sel4cp.instances.sel4cp.banscii.system.links
+
     (map (x: x.this.sel4test) [
       pkgs.host.aarch64.linux
-      pkgs.host.x86_64.linux
-      pkgs.host.riscv64.noneWithLibc
       pkgs.host.aarch32.linux
-      pkgs.host.ia32.linux
+      pkgs.host.riscv64.noneWithLibc
       pkgs.host.riscv32.noneWithLibc
+      pkgs.host.x86_64.linux
+      pkgs.host.ia32.linux
     ])
+
     pkgs.host.aarch32.none.this.worlds.default.seL4
+    pkgs.host.riscv64.none.this.worlds.default.seL4
     pkgs.host.riscv32.none.this.worlds.default.seL4
     pkgs.host.ia32.none.this.worlds.default.seL4
+
+    pkgs.host.riscv64.noneWithLibc.gccMultiStdenvGeneric
   ];
 
   everythingWithExcessList = lib.flatten [
@@ -36,7 +39,7 @@ self: with self; {
   runAutomatedTests = mkRunAutomatedTests
     (lib.flatten
       (lib.forEach worldsForEverythingInstances (world:
-        lib.forEach (lib.filter (instance: instance.canAutomate) world.instances.supported) (instance: {
+        lib.forEach world.instances.subsets.canAutomate (instance: {
           name = "unnamed"; # TODO
           script = instance.automate;
         })

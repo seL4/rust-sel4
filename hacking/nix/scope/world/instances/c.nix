@@ -39,7 +39,7 @@ let
     exec strace -f -e trace=file ${stdenvWithLld.cc.targetPrefix}cc $@
   '';
 
-  instance = mkInstancemk {
+  instance = mkInstance {
     rootTask = mkTask rec {
       rootCrate = crates.tests-root-task-c;
       release = false;
@@ -79,6 +79,7 @@ let
       };
     };
     isSupported = false;
+    canAutomate = true;
   };
 
 in {

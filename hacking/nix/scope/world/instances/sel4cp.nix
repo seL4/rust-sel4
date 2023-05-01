@@ -9,6 +9,7 @@
 , crateUtils
 , seL4RustTargetInfoWithConfig
 , mkCorePlatformInstance
+, worldConfig
 }:
 
 let
@@ -27,6 +28,8 @@ let
     rustTargetInfo = seL4RustTargetInfoWithConfig { cp = true; minimal = true; };
   } // args);
 
+  inherit (worldConfig) isCorePlatform;
+
 in {
   hello = rec {
     pds = {
@@ -40,6 +43,7 @@ in {
         searchPath = "${pds.hello}/bin";
         systemXML = sources.srcRoot + "/crates/examples/sel4cp/hello/hello.system";
       };
+      isSupported = isCorePlatform;
     };
   };
 
@@ -74,6 +78,7 @@ in {
         };
         systemXML = sources.srcRoot + "/crates/examples/sel4cp/banscii/banscii.system";
       };
+      isSupported = isCorePlatform;
     };
   };
 }
