@@ -1,40 +1,21 @@
 #![no_std]
-#![feature(associated_type_bounds)]
 
-use core::borrow::Borrow;
 use core::ops::Range;
+
+use heapless::Vec;
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
+pub const MAX_NUM_REGIONS: usize = 16;
+
+pub type PayloadForX = Payload<IndirectRegionContent, MAX_NUM_REGIONS>;
+
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Payload<T> {
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct Payload<T, const N: usize> {
     pub info: PayloadInfo,
-    pub data: T,
-}
-
-pub trait Regions {
-    type RegionContent: Borrow<[u8]>;
-    type RegionsIterItem: Borrow<Region<Self::RegionContent>>;
-    type RegionsIter: Iterator<Item = Self::RegionsIterItem>;
-
-    fn iter_regions(&self) -> Self::RegionsIter;
-}
-
-impl<'a, T: Clone + IntoIterator<Item = &'a Region<&'a [u8]>>> Regions for T {
-    type RegionContent = &'a [u8];
-    type RegionsIterItem = &'a Region<Self::RegionContent>;
-    type RegionsIter = T::IntoIter;
-
-    fn iter_regions(&self) -> Self::RegionsIter {
-        self.clone().into_iter()
-    }
-}
-
-impl<T: Regions> Payload<T> {
-    pub fn data(&self) -> T::RegionsIter {
-        self.data.iter_regions()
-    }
+    pub data: Vec<Region<T>, N>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -76,5 +57,49 @@ impl<T> Region<T> {
             phys_addr_range: self.phys_addr_range.clone(),
             content: self.content.as_ref().map(&mut f).transpose()?,
         })
+    }
+}
+
+pub trait RegionContent {
+    type Source: ?Sized;
+
+    fn len(&self) -> usize;
+
+    fn copy_out(&self, source: &Self::Source, dst: &mut [u8]);
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct IndirectRegionContent {
+    pub content_range: Range<usize>,
+}
+
+impl RegionContent for IndirectRegionContent {
+    type Source = [u8];
+
+    fn len(&self) -> usize {
+        self.content_range.end - self.content_range.start
+    }
+
+    fn copy_out(&self, source: &Self::Source, dst: &mut [u8]) {
+        dst.copy_from_slice(&source[self.content_range.clone()])
+    }
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct DirectRegionContent<'a> {
+    pub content: &'a [u8],
+}
+
+impl<'a> RegionContent for DirectRegionContent<'a> {
+    type Source = ();
+
+    fn len(&self) -> usize {
+        self.content.len()
+    }
+
+    fn copy_out(&self, _source: &Self::Source, dst: &mut [u8]) {
+        dst.copy_from_slice(self.content)
     }
 }

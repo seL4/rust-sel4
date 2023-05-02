@@ -8,15 +8,17 @@ license = "BSD-2-Clause"
 [dependencies]
 heapless = { version = "*", features = ["serde"] }
 loader-core = { path = "../core" }
-loader-payload-types = { path = "../payload/types" }
+loader-payload-types = { path = "../payload/types", features = ["serde"] }
+log = "*"
 postcard = { version = "*", default-features = false, features = [] }
 
 [build-dependencies]
-loader-build-env = { path = "../build-env" }
 loader-embed-aarch64-translation-tables = { path = "../embed-aarch64-translation-tables" }
 loader-payload-types = { path = "../payload/types" }
+object = "*"
 postcard = { version = "*", default-features = false, features = ["alloc"] }
 quote = "1"
+sel4-build-env = { path = "../../sel4/build-env" }
 sel4-config = { path = "../../sel4/config" }
 sel4-platform-info = { path = "../../sel4/platform-info" }
 sel4-rustfmt-helper = { path = "../../sel4/rustfmt-helper" }

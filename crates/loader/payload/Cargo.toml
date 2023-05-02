@@ -6,6 +6,7 @@ edition = "2021"
 license = "BSD-2-Clause"
 
 [dependencies]
+heapless = { version = "*", features = ["serde"] }
 loader-payload-types = { path = "./types" }
 
 [build-dependencies]

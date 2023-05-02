@@ -33,6 +33,7 @@ members = [
     "crates/loader/core",
     "crates/loader/embed-aarch64-translation-tables",
     "crates/loader/expecting-appended-payload",
+    "crates/loader/expecting-appended-payload/cli/add-payload-to-loader",
     "crates/loader/payload",
     "crates/loader/payload/at-build-time",
     "crates/loader/payload/at-build-time/types",

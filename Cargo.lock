@@ -21,6 +21,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "add-payload-to-loader"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "clap 3.2.23",
+ "fallible-iterator",
+ "heapless",
+ "loader-payload-types",
+ "object",
+ "postcard",
+ "render-elf-with-data",
+ "serde",
+ "serde_json",
+ "serde_yaml",
+]
+
+[[package]]
 name = "addr2line"
 version = "0.19.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1543,12 +1560,14 @@ name = "loader-expecting-appended-payload"
 version = "0.1.0"
 dependencies = [
  "heapless",
- "loader-build-env",
  "loader-core",
  "loader-embed-aarch64-translation-tables",
  "loader-payload-types",
+ "log",
+ "object",
  "postcard",
  "quote",
+ "sel4-build-env",
  "sel4-config",
  "sel4-platform-info",
  "sel4-rustfmt-helper",
@@ -1558,6 +1577,7 @@ dependencies = [
 name = "loader-payload"
 version = "0.1.0"
 dependencies = [
+ "heapless",
  "loader-config",
  "loader-payload-at-build-time",
  "loader-payload-types",
@@ -1592,6 +1612,7 @@ dependencies = [
 name = "loader-payload-types"
 version = "0.1.0"
 dependencies = [
+ "heapless",
  "serde",
 ]
 

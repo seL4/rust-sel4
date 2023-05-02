@@ -2,38 +2,45 @@
 #![no_main]
 #![feature(const_pointer_byte_offsets)]
 #![feature(pointer_byte_offsets)]
+#![feature(strict_provenance)]
 
 use core::ops::Range;
-
-use heapless::Vec;
+use core::ptr;
+use core::slice;
 
 use loader_payload_types::*;
 
 #[no_mangle]
 extern "C" fn main() -> ! {
-    let payload = get_payload();
-    let payload = Payload {
-        info: payload.info,
-        data: payload.data.as_slice(),
-    };
-    loader_core::main(&payload, &get_own_footprint())
-}
-
-fn get_own_footprint() -> Range<usize> {
-    unsafe { (&__executable_start as *const i32 as usize)..(&_end as *const i32 as usize) }
-}
-
-extern "C" {
-    static __executable_start: i32;
-    static _end: i32;
+    loader_core::main(get_payload, &user_image_bounds())
 }
 
 mod translation_tables {
     include!(concat!(env!("OUT_DIR"), "/translation_tables.rs"));
 }
 
-const MAX_NUM_REGIONS: usize = 16;
+fn get_payload() -> (PayloadForX, &'static [u8]) {
+    let blob = unsafe { slice::from_raw_parts(loader_payload_start, loader_payload_size) };
+    let (payload, source) = postcard::take_from_bytes(blob).unwrap();
+    (payload, source)
+}
 
-fn get_payload() -> Payload<Vec<Region<&'static [u8]>, MAX_NUM_REGIONS>> {
-    todo!()
+#[no_mangle]
+#[link_section = ".data"]
+static mut loader_payload_start: *mut u8 = ptr::null_mut();
+
+#[no_mangle]
+#[link_section = ".data"]
+static mut loader_payload_size: usize = 0;
+
+#[no_mangle]
+#[link_section = ".data"]
+static mut loader_image_start: *mut u8 = ptr::null_mut();
+
+#[no_mangle]
+#[link_section = ".data"]
+static mut loader_image_end: *mut u8 = ptr::null_mut();
+
+fn user_image_bounds() -> Range<usize> {
+    unsafe { loader_image_start.expose_addr()..loader_image_end.expose_addr() }
 }

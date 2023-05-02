@@ -10,11 +10,10 @@
 #![allow(unreachable_code)]
 
 use core::arch::asm;
-use core::borrow::Borrow;
 use core::ops::Range;
 use core::panic::PanicInfo;
 
-use loader_payload_types::{Payload, PayloadInfo, Regions};
+use loader_payload_types::{Payload, PayloadInfo, RegionContent};
 use sel4_logging::LevelFilter;
 use sel4_platform_info::PLATFORM_INFO;
 
@@ -41,19 +40,26 @@ const NUM_SECONDARY_CORES: usize = MAX_NUM_NODES - 1;
 
 static KERNEL_ENTRY_BARRIER: Barrier = Barrier::new(MAX_NUM_NODES);
 
-pub fn main<T: Regions>(payload: &Payload<T>, own_footprint: &Range<usize>) -> ! {
+pub fn main<T: RegionContent, const N: usize>(
+    get_payload: impl FnOnce() -> (Payload<T, N>, &'static T::Source),
+    own_footprint: &Range<usize>,
+) -> !
+where
+    <T as RegionContent>::Source: 'static,
+{
     debug::init();
 
     logging::set_logger();
 
     log::info!("Starting loader");
 
+    let (payload, region_content_source) = get_payload();
+
     log::debug!("Platform info: {:#x?}", PLATFORM_INFO);
     log::debug!("Loader footprint: {:#x?}", own_footprint);
     log::debug!("Payload info: {:#x?}", payload.info);
     log::debug!("Payload regions:");
-    for region in payload.data() {
-        let region = region.borrow();
+    for region in payload.data.iter() {
         log::debug!(
             "    0x{:x?} {:?}",
             region.phys_addr_range,
@@ -68,7 +74,7 @@ pub fn main<T: Regions>(payload: &Payload<T>, own_footprint: &Range<usize>) -> !
     }
 
     log::debug!("Copying payload data");
-    copy_payload_data::copy_payload_data(&payload.data);
+    copy_payload_data::copy_payload_data(&payload.data, region_content_source);
 
     smp::start_secondary_cores(&payload.info);
 

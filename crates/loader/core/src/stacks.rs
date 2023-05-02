@@ -5,7 +5,7 @@ use crate::NUM_SECONDARY_CORES;
 #[repr(C, align(16))]
 struct Stack<const N: usize>([u8; N]);
 
-const PRIMARY_STACK_SIZE: usize = 4096 * 3;
+const PRIMARY_STACK_SIZE: usize = 4096 * 8; // TODO this is excessive
 
 static mut PRIMARY_STACK: Stack<PRIMARY_STACK_SIZE> = Stack([0; PRIMARY_STACK_SIZE]);
 

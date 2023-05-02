@@ -1,0 +1,19 @@
+[package]
+name = "add-payload-to-loader"
+version = "0.1.0"
+authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
+edition = "2021"
+license = "BSD-2-Clause"
+
+[dependencies]
+anyhow = "*"
+clap = "3.2"
+fallible-iterator = "*"
+heapless = "*"
+loader-payload-types = { path = "../../../payload/types", features = ["serde"] }
+object = { version = "*", features = ["all"] }
+postcard = { version = "*", default-features = false, features = ["alloc"] }
+render-elf-with-data = { path = "../../../../build-tools/render-elf-with-data" }
+serde = { version = "*", default-features = false, features = ["alloc", "derive"] }
+serde_json = "*"
+serde_yaml = "*"

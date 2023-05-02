@@ -38,7 +38,9 @@ fn main() {
         let content_toks = match content.content {
             Some(i) => {
                 let ident = content_const_ident(i);
-                quote!(Some(#ident))
+                quote!(Some(DirectRegionContent {
+                    content: #ident,
+                }))
             }
             None => {
                 quote!(None)
@@ -52,14 +54,21 @@ fn main() {
         });
     }
 
+    let num_regions = regions.len();
+
     let toks = quote! {
         #actual_content_toks
 
-        pub const PAYLOAD: Payload<&'static [Region<&'static [u8]>]> = Payload {
-            info: #payload_info_toks,
-            data: &[#(#regions,)*],
-        };
+        pub fn payload() -> Payload<DirectRegionContent<'static>, #num_regions> {
+            let mut data = Vec::new();
+            #(data.push(#regions).unwrap();)*
+            Payload {
+                info: #payload_info_toks,
+                data,
+            }
+        }
     };
+
     let out_path = PathBuf::from(&out_dir).join("gen.rs");
     fs::write(out_path, format!("{}", toks)).unwrap();
 }

@@ -73,15 +73,25 @@ self: with self;
 
   ###
 
-  mkLoader = callPackage ./mk-loader.nix {
-    inherit (worldConfig) loaderConfig;
+  # mkLoader = callPackage ./mk-loader.nix {
+  #   inherit (worldConfig) loaderConfig;
+  # };
+
+  mkLoader = { appELF }: mkLoaderWithSerialization {
+    app = appELF;
   };
+
+  mkLoaderWithSerialization = callPackage ./mk-loader-with-serialization.nix {};
 
   mkTask = callPackage ./mk-task.nix {};
 
   inherit (callPackage ./mk-instance.nix {})
     mkInstance mkCorePlatformInstance mkCapDLRootTask
   ;
+
+  loader-expecting-appended-payload = callPackage ./loader-expecting-appended-payload.nix {
+    inherit (worldConfig) loaderConfig;
+  };
 
   capdl-loader-expecting-serialized-spec = callPackage ./capdl/capdl-loader-expecting-serialized-spec.nix {};
   objectSizes = callPackage ./capdl/object-sizes.nix {};

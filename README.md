@@ -60,8 +60,8 @@ Here is a list of environment variables and the crates which use them:
     - `$SEL4_INCLUDE_DIRS`, defaulting to `$SEL4_PREFIX/libsel4/include` if `$SEL4_PREFIX` is set:
       Must contain a colon-separated list of include paths for the libsel4 headers.
       Required by the `sel4-config` and `sel4-sys` crates, whose dependencies include the `sel4` crate.
-    - `$SEL4_PLATFORM_INFO`, defaulting to `$SEL4_PREFIX/support/platform-info.yaml` if `$SEL4_PREFIX` is set:
-      Must contain the path of a `platform-info.yaml` file from the seL4 kernel build system.
+    - `$SEL4_PLATFORM_INFO`, defaulting to `$SEL4_PREFIX/support/platform_gen.yaml` if `$SEL4_PREFIX` is set:
+      Must contain the path of a `platform_gen.yaml` file from the seL4 kernel build system.
       Required by the `sel4-platform-info` crate, whose dependencies include the `loader` crate.
 - For crates in [`./crates/loader`](./crates/loader). See the `loader-build-env` crate and its dependants for implementation details.
     - `$SEL4_KERNEL`, defaulting to `$SEL4_PREFIX/bin/kernel.elf` if `$SEL4_PREFIX` is set:

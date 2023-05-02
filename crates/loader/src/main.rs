@@ -5,11 +5,11 @@
 
 use core::ops::Range;
 
-use loader_payload::PAYLOAD;
+use loader_payload::payload;
 
 #[no_mangle]
 extern "C" fn main() -> ! {
-    loader_core::main(&PAYLOAD, &get_own_footprint())
+    loader_core::main(|| (payload().clone(), &()), &get_own_footprint())
 }
 
 fn get_own_footprint() -> Range<usize> {
