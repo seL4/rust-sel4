@@ -10,6 +10,8 @@ let
   rustTargetName = rustTargetInfo.name;
   rustTargetPath = rustTargetInfo.path;
 
+  rootCrate = crates.loader-expecting-appended-payload;
+
   release = false;
 
   profile = if release then "release" else "dev";
@@ -33,19 +35,11 @@ let
     extraManifest = profiles;
   };
 
-  rootCrate = crates.loader-expecting-appended-payload;
-
-  intermediateModifications = crateUtils.elaborateModifications {
-    modifyDerivation = drv: drv.overrideAttrs (self: super: seL4RustEnvVars // {
-      SEL4_LOADER_CONFIG = writeText "loader-config.json" (builtins.toJSON loaderConfig);
-    });
-  };
-
 in
 buildCrateInLayersHere {
 
-  inherit release;
   inherit rootCrate;
+  inherit release;
 
   rustTargetInfo = bareMetalRustTargetInfo;
 
@@ -66,15 +60,16 @@ buildCrateInLayersHere {
     });
   };
 
-  lastLayerModifications = crateUtils.composeModifications intermediateModifications (crateUtils.elaborateModifications {
-    modifyDerivation = drv: drv.overrideAttrs (self: super: {
+  lastLayerModifications = crateUtils.elaborateModifications {
+    modifyDerivation = drv: drv.overrideAttrs (self: super: seL4RustEnvVars //{
+      SEL4_LOADER_CONFIG = writeText "loader-config.json" (builtins.toJSON loaderConfig);
+
       # SEL4_KERNEL = "${seL4ForBoot}/bin/kernel.elf";
-      SEL4_PREFIX = seL4ForUserspace;
 
       passthru = (super.passthru or {}) // {
         elf = "${self.finalPackage}/bin/${rootCrate.name}";
       };
     });
-  });
+  };
 
 }
