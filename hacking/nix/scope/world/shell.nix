@@ -11,13 +11,18 @@
 }:
 
 let
-  loaderConfigEnvVars = lib.optionalAttrs (worldConfig.loaderConfig != null) {
+  loaderConfigEnvVars = lib.optionalAttrs (!worldConfig.isCorePlatform && worldConfig.loaderConfig != null) {
     SEL4_LOADER_CONFIG = writeText "loader-config.json" (builtins.toJSON worldConfig.loaderConfig);
     SEL4_APP = "${seL4ForBoot}/bin/kernel.elf"; # HACK
   };
 
+  capdlEnvVars = lib.optionalAttrs (!worldConfig.isCorePlatform) {
+    CAPDL_SPEC_FILE = serializeCapDLSpec { inherit (dummyCapDLSpec.passthru) spec; };
+    CAPDL_FILL_DIR = dummyCapDLSpec.passthru.fill;
+  };
+
 in
-mkShell (seL4RustEnvVars // loaderConfigEnvVars // {
+mkShell (seL4RustEnvVars // loaderConfigEnvVars // capdlEnvVars // {
   RUST_TARGET_PATH = toString (sources.srcRoot + "/support/targets");
 
   # TODO
@@ -33,9 +38,6 @@ mkShell (seL4RustEnvVars // loaderConfigEnvVars // {
   ];
 
   LIBCLANG_PATH = "${lib.getLib buildPackages.llvmPackages.libclang}/lib";
-
-  CAPDL_SPEC_FILE = serializeCapDLSpec { inherit (dummyCapDLSpec.passthru) spec; };
-  CAPDL_FILL_DIR = dummyCapDLSpec.passthru.fill;
 
   hardeningDisable = [ "all" ];
 

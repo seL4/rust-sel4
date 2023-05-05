@@ -21,8 +21,8 @@ let
 
   rustToolchainParams = {
     channel = "nightly";
-    date = "2023-01-26";
-    sha256 = "sha256-UdHZxhV3QQ+1ZdATle9/dl3zheEHw6nz14Aq4gMHj7Y=";
+    date = "2023-05-03";
+    sha256 = "sha256-0oi6CUT7J1nJj0lCRQS/7qClvzY7TrgfchjURE7WqxE=";
     # TODO
     # loader crashes when profile.{}.debug = "2"
     # date = "2023-01-27";

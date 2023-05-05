@@ -1,7 +1,5 @@
 use core::ffi::c_uint;
 
-use crate::ObjectType;
-
 pub type ObjectTypeSeL4Arch = ObjectTypeRISCV64;
 
 pub type ObjectBlueprintSeL4Arch = ObjectBlueprintRISCV64;
@@ -10,7 +8,7 @@ pub type ObjectBlueprintSeL4Arch = ObjectBlueprintRISCV64;
 pub enum ObjectTypeRISCV64 {}
 
 impl ObjectTypeRISCV64 {
-    pub const fn into_sys(self) -> c_uint {
+    pub(crate) const fn into_sys(self) -> c_uint {
         match self {}
     }
 }
@@ -19,11 +17,11 @@ impl ObjectTypeRISCV64 {
 pub enum ObjectBlueprintRISCV64 {}
 
 impl ObjectBlueprintRISCV64 {
-    pub const fn ty(self) -> ObjectType {
+    pub(crate) const fn ty(self) -> ObjectTypeRISCV64 {
         match self {}
     }
 
-    pub const fn physical_size_bits(self) -> usize {
+    pub(crate) const fn physical_size_bits(self) -> usize {
         match self {}
     }
 }

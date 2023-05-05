@@ -48,7 +48,7 @@ impl<'a, T: ?Sized> Indirect<'a, T> {
         })
     }
 
-    pub(crate) const fn inner(&self) -> &T {
+    pub(crate) fn inner(&self) -> &T {
         match self.0 {
             #[cfg(feature = "borrowed-indirect")]
             IndirectImpl::Borrowed { borrowed } => borrowed,
@@ -56,9 +56,18 @@ impl<'a, T: ?Sized> Indirect<'a, T> {
             IndirectImpl::Owned { ref owned, .. } => owned.borrow(),
         }
     }
+
+    pub const fn const_inner(&self) -> &T {
+        match self.0 {
+            #[cfg(feature = "borrowed-indirect")]
+            IndirectImpl::Borrowed { borrowed } => borrowed,
+            #[cfg(feature = "alloc")]
+            IndirectImpl::Owned { ref owned, .. } => panic!(),
+        }
+    }
 }
 
-impl<T: ?Sized> const Deref for Indirect<'_, T> {
+impl<T: ?Sized> Deref for Indirect<'_, T> {
     type Target = T;
 
     fn deref(&self) -> &T {
@@ -66,7 +75,7 @@ impl<T: ?Sized> const Deref for Indirect<'_, T> {
     }
 }
 
-impl<T: ?Sized> const Borrow<T> for Indirect<'_, T> {
+impl<T: ?Sized> Borrow<T> for Indirect<'_, T> {
     fn borrow(&self) -> &T {
         self.inner()
     }

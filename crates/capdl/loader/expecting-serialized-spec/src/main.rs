@@ -20,7 +20,7 @@ use sel4_root_task_runtime::main;
 
 const LOG_LEVEL: LevelFilter = LevelFilter::Info;
 
-static LOGGER: Logger = LoggerBuilder::default()
+static LOGGER: Logger = LoggerBuilder::const_default()
     .level_filter(LOG_LEVEL)
     .filter(|meta| meta.target() == "capdl_loader_core")
     .write(|s| sel4::debug_print!("{}", s))
@@ -31,7 +31,7 @@ fn main(bootinfo: &BootInfo) -> ! {
     LOGGER.set().unwrap();
     let spec_with_sources = get_spec_with_sources();
     let mut buffers = LoaderBuffers::new(vec![
-        PerObjectBuffer::default();
+        PerObjectBuffer::const_default();
         spec_with_sources.spec.objects.len()
     ]);
     Loader::load(
@@ -105,5 +105,5 @@ mod heap {
     static GLOBAL_ALLOCATOR: StaticDlmallocGlobalAlloc<
         PanickingMutexSyncOps,
         fn() -> Range<*mut u8>,
-    > = StaticDlmallocGlobalAlloc::new(Default::default(), static_heap_bounds);
+    > = StaticDlmallocGlobalAlloc::new(PanickingMutexSyncOps::new(), static_heap_bounds);
 }

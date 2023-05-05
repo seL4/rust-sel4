@@ -10,9 +10,11 @@ pub enum FrameSize {
 impl FrameSize {
     pub const fn blueprint(self) -> ObjectBlueprint {
         match self {
-            Self::_4K => ObjectBlueprintX86::_4K.into(),
-            Self::Large => ObjectBlueprintX86::LargePage.into(),
-            Self::Huge => ObjectBlueprintX64::HugePage.into(),
+            Self::_4K => ObjectBlueprint::Arch(ObjectBlueprintX86::_4K),
+            Self::Large => ObjectBlueprint::Arch(ObjectBlueprintX86::LargePage),
+            Self::Huge => {
+                ObjectBlueprint::Arch(ObjectBlueprintX86::SeL4Arch(ObjectBlueprintX64::HugePage))
+            }
         }
     }
 

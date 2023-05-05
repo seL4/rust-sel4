@@ -34,7 +34,7 @@ macro_rules! declare_memory_region {
                         <$target as $crate::memory_region::MemoryRegionTarget>::Element
                     >
                     as $crate::memory_region::MemoryRegionPointer
-                >::null();
+                >::NULL;
 
             $crate::memory_region::new_memory_region::<$target, $access>(
                 unsafe { $symbol },
@@ -48,19 +48,16 @@ pub use declare_memory_region;
 
 // // //
 
-#[const_trait]
 pub trait MemoryRegionPointer: Copy {
-    fn null() -> Self;
+    const NULL: Self;
 
     fn is_null(self) -> bool;
 
     fn is_aligned(self) -> bool;
 }
 
-impl<T> const MemoryRegionPointer for *const T {
-    fn null() -> Self {
-        ptr::null()
-    }
+impl<T> MemoryRegionPointer for *const T {
+    const NULL: Self = ptr::null();
 
     fn is_null(self) -> bool {
         <*const T>::is_null(self)
@@ -71,10 +68,8 @@ impl<T> const MemoryRegionPointer for *const T {
     }
 }
 
-impl<T> const MemoryRegionPointer for *mut T {
-    fn null() -> Self {
-        ptr::null_mut()
-    }
+impl<T> MemoryRegionPointer for *mut T {
+    const NULL: Self = ptr::null_mut();
 
     fn is_null(self) -> bool {
         <*mut T>::is_null(self)
@@ -207,7 +202,7 @@ macro_rules! declare_deferred_memory_region {
                     <$access as $crate::memory_region::MemoryRegionAccess>::Ptr::<
                         <$target as $crate::memory_region::MemoryRegionTarget>::Element
                     > as $crate::memory_region::MemoryRegionPointer
-                >::null();
+                >::NULL;
 
             unsafe { $symbol }
         })

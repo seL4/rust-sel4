@@ -7,7 +7,7 @@ use crate::fmt::debug_print;
 use crate::LOG_LEVEL;
 
 static LOGGER: SynchronizedLogger<Logger> = SynchronizedLogger::new(
-    LoggerBuilder::default()
+    LoggerBuilder::const_default()
         .level_filter(LOG_LEVEL)
         .write(|s| debug_print!("{}", s))
         .fmt(|record, f| write!(f, "seL4 loader | {:<5}  {}", record.level(), record.args()))

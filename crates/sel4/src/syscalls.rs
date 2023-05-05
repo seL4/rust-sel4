@@ -3,15 +3,15 @@ use core::array;
 use sel4_config::{sel4_cfg, sel4_cfg_if};
 
 use crate::{
-    sys, ConveysReplyAuthority, Endpoint, InvocationContext, MessageInfo, Notification, Word,
-    NUM_FAST_MESSAGE_REGISTERS,
+    const_helpers::u32_into_usize, sys, ConveysReplyAuthority, Endpoint, InvocationContext,
+    MessageInfo, Notification, Word, NUM_FAST_MESSAGE_REGISTERS,
 };
 
 #[sel4_cfg(not(KERNEL_MCS))]
 use crate::IPCBuffer;
 
 /// Number of message registers in the IPC buffer.
-pub const NUM_MESSAGE_REGISTERS: usize = sys::seL4_MsgMaxLength.try_into().ok().unwrap();
+pub const NUM_MESSAGE_REGISTERS: usize = u32_into_usize(sys::seL4_MsgMaxLength);
 
 /// A capability badge.
 pub type Badge = Word;

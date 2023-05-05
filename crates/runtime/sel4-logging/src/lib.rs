@@ -1,8 +1,6 @@
 #![no_std]
 #![feature(const_mut_refs)]
-#![feature(const_trait_impl)]
 
-use core::default::Default;
 use core::fmt::{self, Write};
 
 use log::{Log, Metadata, Record, SetLoggerError};
@@ -19,7 +17,19 @@ pub struct Logger {
 
 pub type FmtRecordFn = fn(&Record, &mut fmt::Formatter) -> fmt::Result;
 
+pub const FMT_RECORD_DEFAULT: FmtRecordFn = fmt_with_module;
+
 impl Logger {
+    pub const fn const_default() -> Self {
+        Self {
+            level_filter: LevelFilter::Warn,
+            filter: |_| true,
+            fmt: FMT_RECORD_DEFAULT,
+            write: |_| (),
+            flush: || (),
+        }
+    }
+
     pub fn level_filter(&self) -> LevelFilter {
         self.level_filter
     }
@@ -56,20 +66,6 @@ impl Log for Logger {
     }
 }
 
-pub const FMT_RECORD_DEFAULT: FmtRecordFn = fmt_with_module;
-
-impl const Default for Logger {
-    fn default() -> Self {
-        Self {
-            level_filter: LevelFilter::Warn,
-            filter: |_| true,
-            fmt: FMT_RECORD_DEFAULT,
-            write: |_| (),
-            flush: || (),
-        }
-    }
-}
-
 //
 
 struct WriteWrapper(fn(&str));
@@ -96,14 +92,11 @@ impl<'a> fmt::Display for DisplayWrapper<'a> {
 
 pub struct LoggerBuilder(Logger);
 
-#[allow(clippy::derivable_impls)] // until #![feature(derive_const)]
-impl const Default for LoggerBuilder {
-    fn default() -> Self {
-        Self(Default::default())
-    }
-}
-
 impl LoggerBuilder {
+    pub const fn const_default() -> Self {
+        Self(Logger::const_default())
+    }
+
     pub const fn build(self) -> Logger {
         self.0
     }

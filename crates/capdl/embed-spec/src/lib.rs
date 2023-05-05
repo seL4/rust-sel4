@@ -321,6 +321,17 @@ impl<'a> Embedding<'a> {
         }
     }
 
+    fn embed_root_objects(&self) -> TokenStream {
+        to_tokens_via_debug(&self.spec.root_objects)
+    }
+
+    fn embed_untyped_covers(&self) -> TokenStream {
+        let toks = to_tokens_via_debug(&self.spec.untyped_covers);
+        quote! {
+            Indirect::from_borrowed(#toks.as_slice())
+        }
+    }
+
     fn embed_asid_slots(&self) -> TokenStream {
         let toks = to_tokens_via_debug(&self.spec.asid_slots);
         quote! {
@@ -377,6 +388,8 @@ impl<'a> Embedding<'a> {
 
         let objects = self.embed_objects();
         let irqs = self.embed_irqs();
+        let root_objects = self.embed_root_objects();
+        let untyped_covers = self.embed_untyped_covers();
         let asid_slots = self.embed_asid_slots();
 
         let toks = quote! {
@@ -392,6 +405,8 @@ impl<'a> Embedding<'a> {
                 Spec {
                     objects: Indirect::from_borrowed(NAMED_OBJECTS),
                     irqs: #irqs,
+                    root_objects: #root_objects,
+                    untyped_covers: #untyped_covers,
                     asid_slots: #asid_slots,
                 }
             };

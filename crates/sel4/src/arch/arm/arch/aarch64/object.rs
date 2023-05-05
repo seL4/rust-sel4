@@ -1,6 +1,6 @@
 use core::ffi::c_uint;
 
-use crate::{sys, ObjectType};
+use crate::{const_helpers::u32_into_usize, sys};
 
 /// Alias for [`ObjectTypeAArch64`].
 pub type ObjectTypeSeL4Arch = ObjectTypeAArch64;
@@ -17,7 +17,7 @@ pub enum ObjectTypeAArch64 {
 }
 
 impl ObjectTypeAArch64 {
-    pub const fn into_sys(self) -> c_uint {
+    pub(crate) const fn into_sys(self) -> c_uint {
         match self {
             Self::HugePage => sys::_mode_object::seL4_ARM_HugePageObject,
             Self::PUD => sys::_mode_object::seL4_ARM_PageUpperDirectoryObject,
@@ -35,19 +35,19 @@ pub enum ObjectBlueprintAArch64 {
 }
 
 impl ObjectBlueprintAArch64 {
-    pub const fn ty(self) -> ObjectType {
+    pub(crate) const fn ty(self) -> ObjectTypeAArch64 {
         match self {
-            Self::HugePage => ObjectTypeAArch64::HugePage.into(),
-            Self::PUD => ObjectTypeAArch64::PUD.into(),
-            Self::PGD => ObjectTypeAArch64::PGD.into(),
+            Self::HugePage => ObjectTypeAArch64::HugePage,
+            Self::PUD => ObjectTypeAArch64::PUD,
+            Self::PGD => ObjectTypeAArch64::PGD,
         }
     }
 
-    pub const fn physical_size_bits(self) -> usize {
+    pub(crate) const fn physical_size_bits(self) -> usize {
         match self {
-            Self::HugePage => sys::seL4_HugePageBits.try_into().ok().unwrap(),
-            Self::PUD => sys::seL4_PUDBits.try_into().ok().unwrap(),
-            Self::PGD => sys::seL4_PGDBits.try_into().ok().unwrap(),
+            Self::HugePage => u32_into_usize(sys::seL4_HugePageBits),
+            Self::PUD => u32_into_usize(sys::seL4_PUDBits),
+            Self::PGD => u32_into_usize(sys::seL4_PGDBits),
         }
     }
 }

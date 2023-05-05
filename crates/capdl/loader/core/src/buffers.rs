@@ -12,8 +12,8 @@ pub struct PerObjectBuffer {
 }
 
 #[allow(clippy::derivable_impls)] // until #![feature(derive_const)]
-impl const Default for PerObjectBuffer {
-    fn default() -> Self {
+impl PerObjectBuffer {
+    pub const fn const_default() -> Self {
         Self { orig_slot: None }
     }
 }

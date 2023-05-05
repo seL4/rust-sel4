@@ -1,9 +1,15 @@
 use core::ffi::c_uint;
 
-use crate::{sel4_cfg, sel4_cfg_enum, sel4_cfg_match, sys, ObjectBlueprintArch, ObjectTypeArch};
+use crate::{
+    const_helpers::u32_into_usize, sel4_cfg, sel4_cfg_enum, sel4_cfg_match, sys,
+    ObjectBlueprintArch, ObjectTypeArch,
+};
 
 #[sel4_cfg(KERNEL_MCS)]
-pub const MIN_SCHED_CONTEXT_BITS: usize = sys::seL4_MinSchedContextBits as usize;
+use crate::const_helpers::usize_max;
+
+#[sel4_cfg(KERNEL_MCS)]
+pub const MIN_SCHED_CONTEXT_BITS: usize = u32_into_usize(sys::seL4_MinSchedContextBits);
 
 /// Corresponds to `seL4_ObjectType`.
 #[sel4_cfg_enum]
@@ -39,7 +45,7 @@ impl ObjectType {
     }
 }
 
-impl const From<ObjectTypeArch> for ObjectType {
+impl From<ObjectTypeArch> for ObjectType {
     fn from(ty: ObjectTypeArch) -> Self {
         Self::Arch(ty)
     }
@@ -80,7 +86,7 @@ impl ObjectBlueprint {
             Self::SchedContext { .. } => ObjectType::SchedContext,
             #[sel4_cfg(KERNEL_MCS)]
             Self::Reply { .. } => ObjectType::Reply,
-            Self::Arch(arch) => arch.ty(),
+            Self::Arch(arch) => ObjectType::Arch(arch.ty()),
         }
     }
 
@@ -99,28 +105,26 @@ impl ObjectBlueprint {
         #[sel4_cfg_match]
         match self {
             Self::Untyped { size_bits } => size_bits,
-            Self::Endpoint => sys::seL4_EndpointBits.try_into().ok().unwrap(),
-            Self::Notification => sys::seL4_NotificationBits.try_into().ok().unwrap(),
-            Self::CNode { size_bits } => {
-                usize::try_from(sys::seL4_SlotBits).ok().unwrap() + size_bits
-            }
-            Self::TCB => sys::seL4_TCBBits.try_into().ok().unwrap(),
+            Self::Endpoint => u32_into_usize(sys::seL4_EndpointBits),
+            Self::Notification => u32_into_usize(sys::seL4_NotificationBits),
+            Self::CNode { size_bits } => u32_into_usize(sys::seL4_SlotBits) + size_bits,
+            Self::TCB => u32_into_usize(sys::seL4_TCBBits),
             #[sel4_cfg(KERNEL_MCS)]
-            Self::SchedContext { size_bits } => MIN_SCHED_CONTEXT_BITS.max(size_bits),
+            Self::SchedContext { size_bits } => usize_max(MIN_SCHED_CONTEXT_BITS, size_bits),
             #[sel4_cfg(KERNEL_MCS)]
-            Self::Reply => sys::seL4_ReplyBits.try_into().ok().unwrap(),
+            Self::Reply => u32_into_usize(sys::seL4_ReplyBits),
             Self::Arch(arch) => arch.physical_size_bits(),
         }
     }
 
     pub const fn asid_pool() -> Self {
         Self::Untyped {
-            size_bits: sys::seL4_ASIDPoolBits.try_into().ok().unwrap(),
+            size_bits: u32_into_usize(sys::seL4_ASIDPoolBits),
         }
     }
 }
 
-impl const From<ObjectBlueprintArch> for ObjectBlueprint {
+impl From<ObjectBlueprintArch> for ObjectBlueprint {
     fn from(blueprint: ObjectBlueprintArch) -> Self {
         Self::Arch(blueprint)
     }

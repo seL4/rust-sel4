@@ -42,11 +42,6 @@
 #![no_std]
 #![feature(array_methods)]
 #![feature(cfg_target_thread_local)]
-#![feature(const_convert)]
-#![feature(const_num_from_num)]
-#![feature(const_option)]
-#![feature(const_result_drop)]
-#![feature(const_trait_impl)]
 #![feature(proc_macro_hygiene)]
 #![feature(stmt_expr_attributes)]
 #![feature(strict_provenance)]
@@ -65,6 +60,7 @@ mod arch;
 mod bootinfo;
 mod cap_rights;
 mod cnode_cap_data;
+mod const_helpers;
 mod cptr;
 mod error;
 mod helper_macros;

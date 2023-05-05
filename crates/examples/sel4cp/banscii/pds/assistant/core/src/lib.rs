@@ -64,7 +64,7 @@ impl Draft {
                     if x >= 0 && x < width as i32 && y >= 0 && y < pixel_height as i32 {
                         let x = x as usize;
                         let y = y as usize;
-                        pixel_data[(x + y * width)] = (v * 255.0 + 0.5) as u8;
+                        pixel_data[x + y * width] = (v * 255.0 + 0.5) as u8;
                     }
                 })
             }

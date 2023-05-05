@@ -1,6 +1,6 @@
 use core::ffi::c_uint;
 
-use crate::{sys, ObjectType};
+use crate::{const_helpers::u32_into_usize, sys};
 
 pub type ObjectTypeSeL4Arch = ObjectTypeX64;
 
@@ -14,7 +14,7 @@ pub enum ObjectTypeX64 {
 }
 
 impl ObjectTypeX64 {
-    pub const fn into_sys(self) -> c_uint {
+    pub(crate) const fn into_sys(self) -> c_uint {
         match self {
             Self::HugePage => sys::_mode_object::seL4_X64_HugePageObject,
             Self::PDPT => sys::_mode_object::seL4_X86_PDPTObject,
@@ -31,19 +31,19 @@ pub enum ObjectBlueprintX64 {
 }
 
 impl ObjectBlueprintX64 {
-    pub const fn ty(self) -> ObjectType {
+    pub(crate) const fn ty(self) -> ObjectTypeX64 {
         match self {
-            Self::HugePage => ObjectTypeX64::HugePage.into(),
-            Self::PDPT => ObjectTypeX64::PDPT.into(),
-            Self::PML4 => ObjectTypeX64::PML4.into(),
+            Self::HugePage => ObjectTypeX64::HugePage,
+            Self::PDPT => ObjectTypeX64::PDPT,
+            Self::PML4 => ObjectTypeX64::PML4,
         }
     }
 
-    pub const fn physical_size_bits(self) -> usize {
+    pub(crate) const fn physical_size_bits(self) -> usize {
         match self {
-            Self::HugePage => sys::seL4_HugePageBits.try_into().ok().unwrap(),
-            Self::PDPT => sys::seL4_PDPTBits.try_into().ok().unwrap(),
-            Self::PML4 => sys::seL4_PML4Bits.try_into().ok().unwrap(),
+            Self::HugePage => u32_into_usize(sys::seL4_HugePageBits),
+            Self::PDPT => u32_into_usize(sys::seL4_PDPTBits),
+            Self::PML4 => u32_into_usize(sys::seL4_PML4Bits),
         }
     }
 }

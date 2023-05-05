@@ -12,20 +12,20 @@ pub enum ObjectTypeRISCV {
 }
 
 impl ObjectTypeRISCV {
-    pub const fn into_sys(self) -> c_uint {
+    pub(crate) const fn into_sys(self) -> c_uint {
         match self {
             Self::SeL4Arch(sel4_arch) => sel4_arch.into_sys(),
         }
     }
 }
 
-impl const From<ObjectTypeSeL4Arch> for ObjectTypeArch {
+impl From<ObjectTypeSeL4Arch> for ObjectTypeArch {
     fn from(ty: ObjectTypeSeL4Arch) -> Self {
         Self::SeL4Arch(ty)
     }
 }
 
-impl const From<ObjectTypeSeL4Arch> for ObjectType {
+impl From<ObjectTypeSeL4Arch> for ObjectType {
     fn from(ty: ObjectTypeSeL4Arch) -> Self {
         Self::from(ObjectTypeArch::from(ty))
     }
@@ -37,26 +37,26 @@ pub enum ObjectBlueprintRISCV {
 }
 
 impl ObjectBlueprintRISCV {
-    pub const fn ty(self) -> ObjectType {
+    pub(crate) const fn ty(self) -> ObjectTypeRISCV {
         match self {
-            Self::SeL4Arch(sel4_arch) => sel4_arch.ty(),
+            Self::SeL4Arch(sel4_arch) => ObjectTypeRISCV::SeL4Arch(sel4_arch.ty()),
         }
     }
 
-    pub const fn physical_size_bits(self) -> usize {
+    pub(crate) const fn physical_size_bits(self) -> usize {
         match self {
             Self::SeL4Arch(sel4_arch) => sel4_arch.physical_size_bits(),
         }
     }
 }
 
-impl const From<ObjectBlueprintSeL4Arch> for ObjectBlueprintArch {
+impl From<ObjectBlueprintSeL4Arch> for ObjectBlueprintArch {
     fn from(blueprint: ObjectBlueprintSeL4Arch) -> Self {
         Self::SeL4Arch(blueprint)
     }
 }
 
-impl const From<ObjectBlueprintSeL4Arch> for ObjectBlueprint {
+impl From<ObjectBlueprintSeL4Arch> for ObjectBlueprint {
     fn from(ty: ObjectBlueprintSeL4Arch) -> Self {
         Self::from(ObjectBlueprintArch::from(ty))
     }

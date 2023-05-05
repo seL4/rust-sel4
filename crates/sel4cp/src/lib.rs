@@ -3,7 +3,6 @@
 #![feature(const_pointer_is_aligned)]
 #![feature(const_ptr_is_null)]
 #![feature(const_trait_impl)]
-#![feature(cstr_from_bytes_until_nul)]
 #![feature(int_roundings)]
 #![feature(maybe_uninit_slice)]
 #![feature(never_type)]

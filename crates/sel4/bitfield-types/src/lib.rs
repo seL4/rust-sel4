@@ -1,5 +1,4 @@
 #![no_std]
-#![feature(const_convert)]
 #![feature(const_trait_impl)]
 
 use core::mem;
@@ -67,7 +66,6 @@ fn range_spans_primitive_boundary<T: BitfieldPrimitive>(range: &Range<usize>) ->
     range.start / T::BITS != (range.end - 1) / T::BITS
 }
 
-#[const_trait]
 pub trait BitfieldPrimitive:
     Sized
     + Copy
@@ -79,7 +77,7 @@ pub trait BitfieldPrimitive:
     + Shr<usize, Output = Self>
     + BitOrAssign
     + BitAndAssign
-    + ~const From<bool> // HACK for generic 0
+    + From<bool> // HACK for generic 0
 {
     fn zero() -> Self {
         false.into()

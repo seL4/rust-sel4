@@ -1,8 +1,6 @@
-use sel4_config::sel4_cfg;
-
 use crate::{
     local_cptr::*, AbsoluteCPtr, CapRights, Error, FrameType, InvocationContext, LocalCPtr, Result,
-    VMAttributes, Word,
+    VMAttributes,
 };
 
 impl<T: FrameType, C: InvocationContext> LocalCPtr<T, C> {

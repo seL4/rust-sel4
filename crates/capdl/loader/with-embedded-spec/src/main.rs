@@ -13,13 +13,13 @@ use sel4_logging::{LevelFilter, Logger, LoggerBuilder};
 
 const LOG_LEVEL: LevelFilter = LevelFilter::Info;
 
-static LOGGER: Logger = LoggerBuilder::default()
+static LOGGER: Logger = LoggerBuilder::const_default()
     .level_filter(LOG_LEVEL)
     .write(|s| sel4::debug_print!("{}", s))
     .build();
 
-static mut BUFFERS: LoaderBuffers<[PerObjectBuffer; SPEC.objects.len()]> =
-    LoaderBuffers::new([PerObjectBuffer::default(); SPEC.objects.len()]);
+static mut BUFFERS: LoaderBuffers<[PerObjectBuffer; SPEC.objects.const_inner().len()]> =
+    LoaderBuffers::new([PerObjectBuffer::const_default(); SPEC.objects.const_inner().len()]);
 
 #[sel4_root_task_runtime::main]
 fn main(bootinfo: &BootInfo) -> ! {

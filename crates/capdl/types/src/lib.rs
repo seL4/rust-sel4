@@ -1,6 +1,4 @@
 #![no_std]
-#![feature(const_borrow)]
-#![feature(const_trait_impl)]
 #![feature(never_type)]
 #![feature(proc_macro_hygiene)]
 #![feature(stmt_expr_attributes)]
