@@ -7,5 +7,4 @@ license = "BSD-2-Clause"
 
 [dependencies]
 sel4-dlmalloc = { path = "../sel4-dlmalloc" }
-sel4-env-literal-helper = { path = "../sel4-env-literal-helper" }
 sel4-sync = { path = "../sel4-sync" }

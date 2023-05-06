@@ -2619,7 +2619,6 @@ name = "sel4-runtime-simple-entry"
 version = "0.1.0"
 dependencies = [
  "cfg-if",
- "sel4-env-literal-helper",
 ]
 
 [[package]]
@@ -2627,7 +2626,6 @@ name = "sel4-runtime-simple-static-heap"
 version = "0.1.0"
 dependencies = [
  "sel4-dlmalloc",
- "sel4-env-literal-helper",
  "sel4-sync",
 ]
 
