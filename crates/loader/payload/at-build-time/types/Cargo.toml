@@ -7,4 +7,4 @@ license = "BSD-2-Clause"
 
 [dependencies]
 loader-payload-types = { path = "../../types", features = ["serde"] }
-serde = { version = "*", default-features = false, features = ["derive", "alloc"] }
+serde = { version = "1.0.147", default-features = false, features = ["derive", "alloc"] }

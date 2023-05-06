@@ -6,12 +6,12 @@ edition = "2021"
 license = "BSD-2-Clause"
 
 [dependencies]
-anyhow = "*"
+anyhow = "1.0.66"
 capdl-loader-expecting-serialized-spec-types = { path = "../../types" }
 capdl-types = { path = "../../../../types", features = ["alloc", "serde", "deflate"] }
-clap = "3.2"
-fallible-iterator = "*"
-object = { version = "*", features = ["all"] }
-postcard = { version = "*", default-features = false, features = ["alloc"] }
+clap = "3.2.23"
+fallible-iterator = "0.2.0"
+object = { version = "0.30.3", features = ["all"] }
+postcard = { version = "1.0.2", default-features = false, features = ["alloc"] }
 render-elf-with-data = { path = "../../../../../build-tools/render-elf-with-data" }
-serde_json = "*"
+serde_json = "1.0.87"

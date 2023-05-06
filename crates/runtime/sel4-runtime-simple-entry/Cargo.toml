@@ -6,5 +6,5 @@ edition = "2021"
 license = "BSD-2-Clause"
 
 [dependencies]
-cfg-if = "*"
+cfg-if = "1.0.0"
 sel4-env-literal-helper = { path = "../sel4-env-literal-helper" }

@@ -7,9 +7,9 @@ license = "BSD-2-Clause"
 
 [dependencies]
 capdl-types = { path = "../types", features = ["alloc", "deflate"] }
-hex = "*"
-proc-macro2 = "1"
-quote = "1"
-serde = "*"
-serde_json = "*"
-syn = "1"
+hex = "0.4.3"
+proc-macro2 = "1.0.50"
+quote = "1.0.23"
+serde = "1.0.147"
+serde_json = "1.0.87"
+syn = "1.0.107"

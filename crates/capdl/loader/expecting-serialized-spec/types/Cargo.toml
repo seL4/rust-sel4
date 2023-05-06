@@ -7,5 +7,5 @@ license = "BSD-2-Clause"
 
 [dependencies]
 capdl-types = { path = "../../../types", features = ["alloc", "serde", "deflate"] }
-postcard = { version = "*", default-features = false, features = ["alloc"] }
-serde = { version = "*", default-features = false, features = ["alloc"] }
+postcard = { version = "1.0.2", default-features = false, features = ["alloc"] }
+serde = { version = "1.0.147", default-features = false, features = ["alloc"] }

@@ -11,8 +11,8 @@ sel4cp = ["dep:sel4cp", "sel4cp-postcard"]
 
 [dependencies]
 capdl-types = { path = "../capdl/types", features = ["alloc"] }
-cfg-if = "*"
-log = "*"
+cfg-if = "1.0.0"
+log = "0.4.17"
 
 [target."cfg(all(target_env = \"sel4\", not(target_arch = \"x86_64\")))".dependencies]
 sel4-platform-info = { path = "../sel4/platform-info", optional = true }

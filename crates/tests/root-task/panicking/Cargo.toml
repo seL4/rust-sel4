@@ -11,6 +11,6 @@ panic-abort = []
 panic-unwind = []
 
 [dependencies]
-cfg-if = "*"
+cfg-if = "1.0.0"
 sel4 = { path = "../../../sel4" }
 sel4-root-task-runtime = { path = "../../../runtime/sel4-root-task-runtime" }

@@ -6,7 +6,7 @@ edition = "2021"
 license = "BSD-2-Clause"
 
 [dependencies]
-proc-macro2 = "1"
-quote = "1"
+proc-macro2 = "1.0.50"
+quote = "1.0.23"
 sel4-config-generic-types = { path = "../types", features = ["serde"] }
-serde_json = "*"
+serde_json = "1.0.87"

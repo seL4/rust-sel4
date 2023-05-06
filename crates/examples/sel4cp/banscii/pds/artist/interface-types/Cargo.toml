@@ -6,5 +6,5 @@ edition = "2021"
 license = "BSD-2-Clause"
 
 [dependencies]
-num_enum = { version = "*", default-features = false }
-zerocopy = "*"
+num_enum = { version = "0.5.9", default-features = false }
+zerocopy = "0.6.1"

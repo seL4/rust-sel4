@@ -6,6 +6,6 @@ edition = "2021"
 license = "BSD-2-Clause"
 
 [dependencies]
-cargo = "0.70"
-cargo-util = "0.2"
-clap = "3.2"
+cargo = "0.70.1"
+cargo-util = "0.2.3"
+clap = "3.2.23"

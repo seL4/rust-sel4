@@ -7,13 +7,13 @@ license = "BSD-2-Clause"
 
 [dependencies]
 loader-payload-at-build-time-types = { path = "./types" }
-serde_json = "*"
+serde_json = "1.0.87"
 
 [build-dependencies]
 loader-build-env = { path = "../../build-env" }
 loader-payload-at-build-time-types = { path = "./types" }
-object = "*"
-quote = "1"
+object = "0.30.3"
+quote = "1.0.23"
 sel4-config = { path = "../../../sel4/config" }
 sel4-platform-info = { path = "../../../sel4/platform-info" }
-serde_json = "*"
+serde_json = "1.0.87"

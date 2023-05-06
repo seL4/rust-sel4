@@ -6,11 +6,11 @@ edition = "2021"
 license = "BSD-2-Clause"
 
 [dependencies]
-lazy_static = "*"
+lazy_static = "1.4.0"
 sel4-config-generic-types = { path = "../../../sel4/config/generic/types" }
 
 [build-dependencies]
 loader-build-env = { path = "../../build-env" }
-quote = "1"
+quote = "1.0.23"
 sel4-config-generic-build-core = { path = "../../../sel4/config/generic/build-core" }
 sel4-rustfmt-helper = { path = "../../../sel4/rustfmt-helper" }

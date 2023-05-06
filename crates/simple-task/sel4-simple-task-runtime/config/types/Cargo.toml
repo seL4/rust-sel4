@@ -10,5 +10,5 @@ alloc = ["serde?/alloc"]
 serde = ["dep:serde"]
 
 [dependencies]
-serde = { version = "*", default-features = false, features = ["derive"], optional = true }
-zerocopy = "*"
+serde = { version = "1.0.147", default-features = false, features = ["derive"], optional = true }
+zerocopy = "0.6.1"

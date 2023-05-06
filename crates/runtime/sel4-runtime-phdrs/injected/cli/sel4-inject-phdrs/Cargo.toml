@@ -6,6 +6,6 @@ edition = "2021"
 license = "BSD-2-Clause"
 
 [dependencies]
-anyhow = "*"
-clap = "3.2"
-object = { version = "*", features = ["all"] }
+anyhow = "1.0.66"
+clap = "3.2.23"
+object = { version = "0.30.3", features = ["all"] }

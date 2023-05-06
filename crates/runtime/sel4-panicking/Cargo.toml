@@ -9,7 +9,7 @@ license = "BSD-2-Clause"
 alloc = []
 
 [dependencies]
-cfg-if = "*"
+cfg-if = "1.0.0"
 sel4-immediate-sync-once-cell = { path = "../sel4-immediate-sync-once-cell" }
 sel4-panicking-env = { path = "./env" }
 

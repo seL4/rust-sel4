@@ -13,7 +13,12 @@ serde = ["alloc", "dep:serde"]
 
 [dependencies]
 capdl-types-derive = { path = "./derive" }
-cfg-if = "*"
+cfg-if = "1.0.0"
 miniz_oxide = { version = "0.6.2", default-features = false, optional = true }
 sel4 = { path = "../../sel4", default-features = false, optional = true }
-serde = { version = "*", default-features = false, features = ["derive", "alloc"], optional = true }
+
+[dependencies.serde]
+version = "1.0.147"
+default-features = false
+features = ["derive", "alloc"]
+optional = true

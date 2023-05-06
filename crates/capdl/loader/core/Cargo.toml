@@ -7,5 +7,5 @@ license = "BSD-2-Clause"
 
 [dependencies]
 capdl-types = { path = "../../types", features = ["sel4"] }
-log = "*"
+log = "0.4.17"
 sel4 = { path = "../../../sel4" }

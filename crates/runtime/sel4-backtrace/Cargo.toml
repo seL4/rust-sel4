@@ -12,10 +12,10 @@ postcard = ["sel4-backtrace-types/postcard", "dep:postcard", "dep:serde"]
 unwinding = ["dep:unwinding"]
 
 [dependencies]
-cfg-if = "*"
-postcard = { version = "*", default-features = false, features = [], optional = true }
+cfg-if = "1.0.0"
+postcard = { version = "1.0.2", default-features = false, features = [], optional = true }
 sel4-backtrace-types = { path = "./types" }
-serde = { version = "*", default-features = false, features = [], optional = true }
+serde = { version = "1.0.147", default-features = false, features = [], optional = true }
 
 [dependencies.unwinding]
 version = "0.1.6"

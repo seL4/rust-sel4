@@ -6,6 +6,6 @@ edition = "2021"
 license = "BSD-2-Clause"
 
 [dependencies]
-clap = "3.2"
-glob = "*"
+clap = "3.2.23"
+glob = "0.3.0"
 sel4-bitfield-parser = { path = ".." }

@@ -6,4 +6,4 @@ edition = "2021"
 license = "BSD-2-Clause"
 
 [dependencies]
-log = "*"
+log = "0.4.17"

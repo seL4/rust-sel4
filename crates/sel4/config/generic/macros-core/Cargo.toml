@@ -6,8 +6,8 @@ edition = "2021"
 license = "BSD-2-Clause"
 
 [dependencies]
-fallible-iterator = "*"
-proc-macro2 = "1"
-quote = "1"
+fallible-iterator = "0.2.0"
+proc-macro2 = "1.0.50"
+quote = "1.0.23"
 sel4-config-generic-types = { path = "../types" }
-syn = { version = "1", features = ["full"] }
+syn = { version = "1.0.107", features = ["full"] }

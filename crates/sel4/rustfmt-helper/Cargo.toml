@@ -6,4 +6,4 @@ edition = "2021"
 license = "BSD-2-Clause"
 
 [dependencies]
-which = "*"
+which = "4.3.0"

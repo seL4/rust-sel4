@@ -9,8 +9,8 @@ license = "BSD-2-Clause"
 capdl-loader-core = { path = "../core" }
 capdl-loader-expecting-serialized-spec-types = { path = "./types" }
 capdl-types = { path = "../../types", features = ["alloc", "serde", "deflate"] }
-log = "*"
-postcard = { version = "*", default-features = false, features = ["alloc"] }
+log = "0.4.17"
+postcard = { version = "1.0.2", default-features = false, features = ["alloc"] }
 sel4 = { path = "../../../sel4" }
 sel4-dlmalloc = { path = "../../../runtime/sel4-dlmalloc" }
 sel4-logging = { path = "../../../runtime/sel4-logging" }

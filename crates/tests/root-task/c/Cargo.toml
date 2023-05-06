@@ -10,5 +10,5 @@ sel4 = { path = "../../../sel4" }
 sel4-root-task-runtime = { path = "../../../runtime/sel4-root-task-runtime" }
 
 [build-dependencies]
-cc = "*"
-glob = "*"
+cc = "1.0.76"
+glob = "0.3.0"

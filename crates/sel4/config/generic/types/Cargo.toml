@@ -6,4 +6,9 @@ edition = "2021"
 license = "BSD-2-Clause"
 
 [dependencies]
-serde = { version = "*", default-features = false, features = ["alloc", "derive"], optional = true }
+
+[dependencies.serde]
+version = "1.0.147"
+default-features = false
+features = ["alloc", "derive"]
+optional = true

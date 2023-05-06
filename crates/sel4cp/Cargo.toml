@@ -12,8 +12,8 @@ full = ["default", "alloc"]
 unwinding = ["sel4-panicking/unwinding"]
 
 [dependencies]
-cfg-if = "*"
-num_enum = { version = "*", default-features = false }
+cfg-if = "1.0.0"
+num_enum = { version = "0.5.9", default-features = false }
 sel4 = { path = "../sel4", features = ["single-threaded"] }
 sel4-immediate-sync-once-cell = { path = "../runtime/sel4-immediate-sync-once-cell" }
 sel4-panicking = { path = "../runtime/sel4-panicking" }
@@ -21,8 +21,8 @@ sel4-panicking-env = { path = "../runtime/sel4-panicking/env" }
 sel4-runtime-simple-entry = { path = "../runtime/sel4-runtime-simple-entry" }
 sel4-runtime-simple-static-heap = { path = "../runtime/sel4-runtime-simple-static-heap" }
 sel4cp-macros = { path = "./macros" }
-volatile = { version = "*", features = ["unstable"] }
-zerocopy = "*"
+volatile = { version = "0.4.6", features = ["unstable"] }
+zerocopy = "0.6.1"
 
 [dependencies.sel4-runtime-phdrs]
 path = "../runtime/sel4-runtime-phdrs"

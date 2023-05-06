@@ -7,5 +7,5 @@ license = "BSD-2-Clause"
 
 [dependencies]
 libm = { version = "0.2.1", default-features = false }
-log = "*"
+log = "0.4.17"
 rusttype = { version = "0.9.3", default-features = false, features = ["has-atomics", "libm-math"] }

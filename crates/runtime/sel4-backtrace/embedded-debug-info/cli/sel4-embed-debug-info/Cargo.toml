@@ -6,5 +6,5 @@ edition = "2021"
 license = "BSD-2-Clause"
 
 [dependencies]
-clap = "3"
+clap = "3.2.23"
 render-elf-with-data = { path = "../../../../../build-tools/render-elf-with-data" }

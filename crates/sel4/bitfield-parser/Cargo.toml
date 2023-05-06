@@ -6,6 +6,6 @@ edition = "2021"
 license = "BSD-2-Clause"
 
 [dependencies]
-pest = "*"
-pest_derive = "*"
-regex = "*"
+pest = "2.4.1"
+pest_derive = "2.4.1"
+regex = "1.7.0"

@@ -6,6 +6,6 @@ edition = "2021"
 license = "BSD-2-Clause"
 
 [dependencies]
-addr2line = { version = "0.19", default-features = false }
-object = { version = "*", default-features = false, features = ["read"] }
+addr2line = { version = "0.19.0", default-features = false }
+object = { version = "0.30.3", default-features = false, features = ["read"] }
 sel4-backtrace-addr2line-context-helper = { path = "../addr2line-context-helper" }

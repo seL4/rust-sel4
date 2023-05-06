@@ -6,14 +6,14 @@ edition = "2021"
 license = "BSD-2-Clause"
 
 [dependencies]
-heapless = { version = "*", features = ["serde"] }
+heapless = { version = "0.7.16", features = ["serde"] }
 loader-payload-types = { path = "./types" }
 
 [build-dependencies]
 loader-config = { path = "../config" }
 loader-payload-at-build-time = { path = "./at-build-time" }
 loader-payload-types = { path = "./types" }
-proc-macro2 = "1"
-quote = "1"
+proc-macro2 = "1.0.50"
+quote = "1.0.23"
 sel4-config = { path = "../../sel4/config" }
 sel4-platform-info = { path = "../../sel4/platform-info" }

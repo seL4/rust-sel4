@@ -6,18 +6,18 @@ edition = "2021"
 license = "BSD-2-Clause"
 
 [dependencies]
-heapless = { version = "*", features = ["serde"] }
+heapless = { version = "0.7.16", features = ["serde"] }
 loader-core = { path = "../core" }
 loader-payload-types = { path = "../payload/types", features = ["serde"] }
-log = "*"
-postcard = { version = "*", default-features = false, features = [] }
+log = "0.4.17"
+postcard = { version = "1.0.2", default-features = false, features = [] }
 
 [build-dependencies]
 loader-embed-aarch64-translation-tables = { path = "../embed-aarch64-translation-tables" }
 loader-payload-types = { path = "../payload/types" }
-object = "*"
-postcard = { version = "*", default-features = false, features = ["alloc"] }
-quote = "1"
+object = "0.30.3"
+postcard = { version = "1.0.2", default-features = false, features = ["alloc"] }
+quote = "1.0.23"
 sel4-build-env = { path = "../../sel4/build-env" }
 sel4-config = { path = "../../sel4/config" }
 sel4-platform-info = { path = "../../sel4/platform-info" }

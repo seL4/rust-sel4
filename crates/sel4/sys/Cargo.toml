@@ -10,20 +10,20 @@ license = "BSD-2-Clause"
 wrappers = []
 
 [dependencies]
-log = "*"
+log = "0.4.17"
 sel4-bitfield-types = { path = "../bitfield-types" }
 sel4-config = { path = "../config" }
 
 [build-dependencies]
-bindgen = "0.64"
-glob = "*"
-proc-macro2 = "1"
-quote = "1"
-regex = "*"
+bindgen = "0.64.0"
+glob = "0.3.0"
+proc-macro2 = "1.0.50"
+quote = "1.0.23"
+regex = "1.7.0"
 sel4-bitfield-parser = { path = "../bitfield-parser" }
 sel4-build-env = { path = "../build-env" }
 sel4-config = { path = "../config" }
 sel4-config-data = { path = "../config/data" }
 sel4-rustfmt-helper = { path = "../rustfmt-helper" }
-syn = "1"
-xmltree = "*"
+syn = "1.0.107"
+xmltree = "0.10.3"
