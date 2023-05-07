@@ -28,6 +28,7 @@ dependencies = [
  "clap 3.2.25",
  "fallible-iterator",
  "heapless",
+ "loader-config-types",
  "loader-payload-types",
  "object",
  "postcard",
@@ -1494,7 +1495,7 @@ dependencies = [
  "cfg-if",
  "glob",
  "heapless",
- "loader-config",
+ "loader-config-types",
  "loader-embed-aarch64-translation-tables",
  "loader-payload-types",
  "log",
@@ -1507,35 +1508,17 @@ dependencies = [
  "sel4-logging",
  "sel4-platform-info",
  "sel4-rustfmt-helper",
+ "serde",
+ "serde_yaml",
  "spin 0.9.8",
  "tock-registers",
 ]
 
 [[package]]
-name = "loader-config"
+name = "loader-config-types"
 version = "0.1.0"
 dependencies = [
- "loader-config-macros",
-]
-
-[[package]]
-name = "loader-config-data"
-version = "0.1.0"
-dependencies = [
- "lazy_static",
- "quote",
- "sel4-config-generic-build-core",
- "sel4-config-generic-types",
- "sel4-rustfmt-helper",
-]
-
-[[package]]
-name = "loader-config-macros"
-version = "0.1.0"
-dependencies = [
- "loader-config-data",
- "sel4-config-generic-macros-core",
- "sel4-config-generic-types",
+ "serde",
 ]
 
 [[package]]
