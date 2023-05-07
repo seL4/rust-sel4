@@ -12,7 +12,7 @@ use object::{
 
 use serde::{Deserialize, Serialize};
 
-use loader_types::*;
+use loader_payload_types::*;
 
 const PAGE_SIZE: u64 = 4096;
 

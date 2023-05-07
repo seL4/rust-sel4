@@ -1,6 +1,6 @@
 use core::ops::Range;
 
-use loader_types::{Payload, PayloadInfo, RegionContent};
+use loader_payload_types::{Payload, PayloadInfo, RegionContent};
 use sel4_platform_info::PLATFORM_INFO;
 
 use crate::{

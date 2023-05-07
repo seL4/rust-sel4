@@ -1,7 +1,7 @@
 use core::ptr;
 use core::slice;
 
-use loader_types::{Region, RegionContent};
+use loader_payload_types::{Region, RegionContent};
 
 pub fn copy_payload_data<T: RegionContent>(
     regions: &[Region<T>],

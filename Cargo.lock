@@ -28,7 +28,7 @@ dependencies = [
  "clap 3.2.25",
  "fallible-iterator",
  "heapless",
- "loader-types",
+ "loader-payload-types",
  "object",
  "postcard",
  "render-elf-with-data",
@@ -1496,7 +1496,7 @@ dependencies = [
  "heapless",
  "loader-config",
  "loader-embed-aarch64-translation-tables",
- "loader-types",
+ "loader-payload-types",
  "log",
  "object",
  "postcard",
@@ -1547,7 +1547,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "loader-types"
+name = "loader-payload-types"
 version = "0.1.0"
 dependencies = [
  "heapless",

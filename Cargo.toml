@@ -31,7 +31,7 @@ members = [
     "crates/loader/config/data",
     "crates/loader/config/macros",
     "crates/loader/embed-aarch64-translation-tables",
-    "crates/loader/types",
+    "crates/loader/payload-types",
     "crates/meta",
     "crates/runtime/sel4-backtrace",
     "crates/runtime/sel4-backtrace/addr2line-context-helper",
