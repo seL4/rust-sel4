@@ -11,7 +11,7 @@ capdl-loader-expecting-serialized-spec-types = { path = "../../types" }
 capdl-types = { path = "../../../../types", features = ["alloc", "serde", "deflate"] }
 clap = "3.2.23"
 fallible-iterator = "0.2.0"
-object = { version = "0.30.3", features = ["all"] }
+object = { version = "0.31.0", features = ["all"] }
 postcard = { version = "1.0.2", default-features = false, features = ["alloc"] }
 render-elf-with-data = { path = "../../../../../build-tools/render-elf-with-data" }
 serde_json = "1.0.87"

@@ -29,34 +29,36 @@ impl<T> Backtrace<T> {
             // TODO
             // let mut seen = false;
             // let initial_location = ctx.find_location(frame.ip as u64)?;
-            ctx.find_frames(frame.ip as u64)?.for_each(|inner_frame| {
-                if first {
-                    write!(w, " {:4}:  {:#18x} - ", i, frame.ip).unwrap();
-                } else {
-                    write!(w, " {:4}   {:18  }   ", "", "").unwrap();
-                }
-                // TODO
-                // if inner_frame.location == frame {
-                //     seen = true;
-                // }
-                match inner_frame.function {
-                    Some(f) => {
-                        // TODO
-                        // let raw_name = f.raw_name()?;
-                        // let demangled = demangle(&raw_name);
-                        let demangled = f.demangle()?;
-                        write!(w, "{}", demangled).unwrap()
+            ctx.find_frames(frame.ip as u64)
+                .skip_all_loads()?
+                .for_each(|inner_frame| {
+                    if first {
+                        write!(w, " {:4}:  {:#18x} - ", i, frame.ip).unwrap();
+                    } else {
+                        write!(w, " {:4}   {:18  }   ", "", "").unwrap();
                     }
-                    None => write!(w, "<unknown>").unwrap(),
-                }
-                write!(w, "\n").unwrap();
-                // TODO
-                // if let Some(loc) = inner_frame.location {
-                //     writeln!(w, "      {:18}       at {}", "", fmt_location(loc)).unwrap();
-                // }
-                first = false;
-                Ok(())
-            })?;
+                    // TODO
+                    // if inner_frame.location == frame {
+                    //     seen = true;
+                    // }
+                    match inner_frame.function {
+                        Some(f) => {
+                            // TODO
+                            // let raw_name = f.raw_name()?;
+                            // let demangled = demangle(&raw_name);
+                            let demangled = f.demangle()?;
+                            write!(w, "{}", demangled).unwrap()
+                        }
+                        None => write!(w, "<unknown>").unwrap(),
+                    }
+                    write!(w, "\n").unwrap();
+                    // TODO
+                    // if let Some(loc) = inner_frame.location {
+                    //     writeln!(w, "      {:18}       at {}", "", fmt_location(loc)).unwrap();
+                    // }
+                    first = false;
+                    Ok(())
+                })?;
             // TODO this isn't accurate
             if let Some(loc) = ctx.find_location(frame.ip as u64)? {
                 writeln!(w, "      {:18}       at {}", "", fmt_location(loc)).unwrap();

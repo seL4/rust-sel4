@@ -19,7 +19,7 @@ postcard = { version = "1.0.2", default-features = false, features = [], optiona
 serde = { version = "1.0.147", default-features = false, features = ["derive"], optional = true }
 
 [dependencies.addr2line]
-version = "0.19.0"
+version = "0.20.0"
 default-features = false
-features = ["rustc-demangle", "cpp_demangle", "fallible-iterator", "smallvec"]
+features = ["rustc-demangle", "cpp_demangle", "object", "fallible-iterator", "smallvec"]
 optional = true
