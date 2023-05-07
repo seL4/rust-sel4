@@ -2421,15 +2421,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "sel4-env-literal-helper"
-version = "0.1.0"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 1.0.109",
-]
-
-[[package]]
 name = "sel4-immediate-sync-once-cell"
 version = "0.1.0"
 

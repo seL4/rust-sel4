@@ -39,7 +39,6 @@ members = [
     "crates/runtime/sel4-backtrace/simple",
     "crates/runtime/sel4-backtrace/types",
     "crates/runtime/sel4-dlmalloc",
-    "crates/runtime/sel4-env-literal-helper",
     "crates/runtime/sel4-immediate-sync-once-cell",
     "crates/runtime/sel4-logging",
     "crates/runtime/sel4-panicking",
