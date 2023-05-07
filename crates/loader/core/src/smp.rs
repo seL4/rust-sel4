@@ -1,6 +1,6 @@
 use spin::RwLock;
 
-use loader_payload_types::PayloadInfo;
+use loader_types::PayloadInfo;
 
 use crate::barrier::Barrier;
 use crate::stacks::get_secondary_stack_bottom;

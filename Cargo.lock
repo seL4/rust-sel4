@@ -28,7 +28,7 @@ dependencies = [
  "clap 3.2.25",
  "fallible-iterator",
  "heapless",
- "loader-payload-types",
+ "loader-types",
  "object",
  "postcard",
  "render-elf-with-data",
@@ -1486,10 +1486,21 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ece97ea872ece730aed82664c424eb4c8291e1ff2480247ccf7409044bc6479f"
 
 [[package]]
-name = "loader-build-env"
+name = "loader"
 version = "0.1.0"
 dependencies = [
+ "heapless",
+ "loader-core",
+ "loader-embed-aarch64-translation-tables",
+ "loader-types",
+ "log",
+ "object",
+ "postcard",
+ "quote",
  "sel4-build-env",
+ "sel4-config",
+ "sel4-platform-info",
+ "sel4-rustfmt-helper",
 ]
 
 [[package]]
@@ -1504,7 +1515,6 @@ name = "loader-config-data"
 version = "0.1.0"
 dependencies = [
  "lazy_static",
- "loader-build-env",
  "quote",
  "sel4-config-generic-build-core",
  "sel4-config-generic-types",
@@ -1530,7 +1540,7 @@ dependencies = [
  "glob",
  "loader-config",
  "loader-embed-aarch64-translation-tables",
- "loader-payload-types",
+ "loader-types",
  "log",
  "psci",
  "quote",
@@ -1552,25 +1562,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "loader-expecting-appended-payload"
-version = "0.1.0"
-dependencies = [
- "heapless",
- "loader-core",
- "loader-embed-aarch64-translation-tables",
- "loader-payload-types",
- "log",
- "object",
- "postcard",
- "quote",
- "sel4-build-env",
- "sel4-config",
- "sel4-platform-info",
- "sel4-rustfmt-helper",
-]
-
-[[package]]
-name = "loader-payload-types"
+name = "loader-types"
 version = "0.1.0"
 dependencies = [
  "heapless",

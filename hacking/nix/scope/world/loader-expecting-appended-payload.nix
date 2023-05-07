@@ -10,7 +10,7 @@ let
   rustTargetName = rustTargetInfo.name;
   rustTargetPath = rustTargetInfo.path;
 
-  rootCrate = crates.loader-expecting-appended-payload;
+  rootCrate = crates.loader;
 
   release = false;
 

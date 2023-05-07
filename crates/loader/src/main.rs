@@ -8,7 +8,7 @@ use core::ops::Range;
 use core::ptr;
 use core::slice;
 
-use loader_payload_types::*;
+use loader_types::*;
 
 #[no_mangle]
 extern "C" fn main() -> ! {

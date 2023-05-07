@@ -13,7 +13,7 @@ use core::arch::asm;
 use core::ops::Range;
 use core::panic::PanicInfo;
 
-use loader_payload_types::{Payload, PayloadInfo, RegionContent};
+use loader_types::{Payload, PayloadInfo, RegionContent};
 use sel4_logging::LevelFilter;
 use sel4_platform_info::PLATFORM_INFO;
 
