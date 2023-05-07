@@ -1489,18 +1489,26 @@ checksum = "ece97ea872ece730aed82664c424eb4c8291e1ff2480247ccf7409044bc6479f"
 name = "loader"
 version = "0.1.0"
 dependencies = [
+ "aarch64-cpu",
+ "cc",
+ "cfg-if",
+ "glob",
  "heapless",
- "loader-core",
+ "loader-config",
  "loader-embed-aarch64-translation-tables",
  "loader-types",
  "log",
  "object",
  "postcard",
+ "psci",
  "quote",
  "sel4-build-env",
  "sel4-config",
+ "sel4-logging",
  "sel4-platform-info",
  "sel4-rustfmt-helper",
+ "spin 0.9.8",
+ "tock-registers",
 ]
 
 [[package]]
@@ -1528,29 +1536,6 @@ dependencies = [
  "loader-config-data",
  "sel4-config-generic-macros-core",
  "sel4-config-generic-types",
-]
-
-[[package]]
-name = "loader-core"
-version = "0.1.0"
-dependencies = [
- "aarch64-cpu",
- "cc",
- "cfg-if",
- "glob",
- "loader-config",
- "loader-embed-aarch64-translation-tables",
- "loader-types",
- "log",
- "psci",
- "quote",
- "sel4-build-env",
- "sel4-config",
- "sel4-logging",
- "sel4-platform-info",
- "sel4-rustfmt-helper",
- "spin 0.9.8",
- "tock-registers",
 ]
 
 [[package]]

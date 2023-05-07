@@ -4,7 +4,7 @@ use loader_types::PayloadInfo;
 
 use crate::barrier::Barrier;
 use crate::stacks::get_secondary_stack_bottom;
-use crate::{plat, secondary_main, NUM_SECONDARY_CORES};
+use crate::{plat, run::secondary_main, NUM_SECONDARY_CORES};
 
 static SECONDARY_CORE_INIT_INFO: RwLock<Option<SecondaryCoreInitInfo>> = RwLock::new(None);
 

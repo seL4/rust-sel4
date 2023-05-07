@@ -30,7 +30,6 @@ members = [
     "crates/loader/config",
     "crates/loader/config/data",
     "crates/loader/config/macros",
-    "crates/loader/core",
     "crates/loader/embed-aarch64-translation-tables",
     "crates/loader/types",
     "crates/meta",

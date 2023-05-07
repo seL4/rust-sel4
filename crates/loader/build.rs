@@ -3,7 +3,7 @@
 use std::env;
 use std::fs;
 use std::ops::Range;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 use object::{
     elf::PT_LOAD,
@@ -14,7 +14,8 @@ use object::{
 use quote::format_ident;
 
 use loader_embed_aarch64_translation_tables::{MkLeafFnParams, Region, Regions};
-use sel4_build_env::{PathVarType, Var, SEL4_PREFIX_ENV};
+use sel4_build_env::{observe_path, PathVarType, Var, SEL4_INCLUDE_DIRS, SEL4_PREFIX_ENV};
+use sel4_platform_info::PLATFORM_INFO;
 use sel4_rustfmt_helper::Rustfmt;
 
 sel4_config::sel4_cfg_if! {
@@ -28,16 +29,33 @@ sel4_config::sel4_cfg_if! {
 pub const SEL4_KERNEL: Var<PathVarType<'static>> =
     Var::new("SEL4_KERNEL", SEL4_PREFIX_ENV, "bin/kernel.elf");
 
-fn observe_path<T: AsRef<Path>>(path: T) -> T {
-    println!("cargo:rerun-if-changed={}", path.as_ref().display());
-    path
-}
-
 const KERNEL_HEADROOM: u64 = 256 * 1024; // TODO
 const GRANULE_SIZE: u64 = 4096;
 
 fn main() {
     let out_dir = env::var("OUT_DIR").unwrap();
+
+    {
+        let asm_files = glob::glob("asm/aarch64/*.S")
+            .unwrap()
+            .collect::<Result<Vec<_>, _>>()
+            .unwrap();
+
+        cc::Build::new()
+            .files(&asm_files)
+            .includes(SEL4_INCLUDE_DIRS.get().iter())
+            .compile("asm");
+
+        for path in &asm_files {
+            println!("cargo:rerun-if-changed={}", path.display());
+        }
+    }
+
+    {
+        let out_path = PathBuf::from(&out_dir).join("loader_translation_tables.rs");
+        fs::write(&out_path, mk_loader_translation_tables()).unwrap();
+        Rustfmt::detect().format(&out_path);
+    }
 
     let kernel_path = observe_path(SEL4_KERNEL.get());
     let kernel_bytes = fs::read(kernel_path).unwrap();
@@ -49,10 +67,10 @@ fn main() {
         (kernel_phys_addr_range.end + KERNEL_HEADROOM).next_multiple_of(GRANULE_SIZE);
 
     {
-        let out_path = PathBuf::from(&out_dir).join("translation_tables.rs");
+        let out_path = PathBuf::from(&out_dir).join("kernel_translation_tables.rs");
         fs::write(
             &out_path,
-            mk_translation_tables(kernel_phys_addr_range.start, kernel_phys_to_virt_offset),
+            mk_kernel_translation_tables(kernel_phys_addr_range.start, kernel_phys_to_virt_offset),
         )
         .unwrap();
         Rustfmt::detect().format(&out_path);
@@ -69,15 +87,69 @@ fn main() {
     println!("cargo:rustc-link-arg=-z");
     println!("cargo:rustc-link-arg=max-page-size=4096");
 
-    // No use in loader.
-    // Remove unnecessary alignment gap between segments.
+    // Remove unnecessary alignment gap between segments; no use in loader.
     println!("cargo:rustc-link-arg=--no-rosegment");
-
-    // println!("cargo:rustc-link-arg=--verbose");
-    // println!("cargo:rustc-env=RUSTC_LOG=rustc_codegen_ssa::back::link=info");
 }
 
-fn mk_translation_tables(kernel_phys_start: u64, kernel_phys_to_virt_offset: i64) -> String {
+// // //
+
+fn mk_loader_translation_tables() -> String {
+    let normal_shareability = if sel4_config::sel4_cfg_usize!(MAX_NUM_NODES) > 1 {
+        0b11
+    } else {
+        0b00
+    };
+
+    let mk_normal_entry = move |params: MkLeafFnParams| {
+        params
+            .mk_identity()
+            .set_access_flag(true)
+            .set_attribute_index(4) // select MT_NORMAL
+            .set_shareability(normal_shareability)
+    };
+
+    let mk_device_entry = |params: MkLeafFnParams| {
+        params
+            .mk_identity()
+            .set_access_flag(true)
+            .set_attribute_index(0) // select MT_DEVICE_nGnRnE
+    };
+
+    let mut regions = Regions::new();
+    for range in PLATFORM_INFO.memory.iter() {
+        let range = range.start..range.end;
+        regions = regions.insert(Region::valid(range, mk_normal_entry));
+    }
+    for range in get_device_regions() {
+        regions = regions.insert(Region::valid(range, mk_device_entry));
+    }
+
+    let toks = regions.construct_and_embed_table(format_ident!("loader_level_0_table"));
+    format!("{toks}")
+}
+
+// HACK
+fn get_device_regions() -> Vec<Range<u64>> {
+    let page = |start| start..start + 4096;
+    sel4_config::sel4_cfg_if! {
+        if #[cfg(PLAT_QEMU_ARM_VIRT)] {
+            vec![
+                page(0x0900_0000),
+            ]
+        } else if #[cfg(PLAT_BCM2711)] {
+            vec![
+                page(0x0000_0000),
+                page(0xfe21_5000),
+            ]
+        } else {
+            compile_error!("Unsupported platform");
+        }
+    }
+}
+
+// // //
+
+fn mk_kernel_translation_tables(kernel_phys_start: u64, kernel_phys_to_virt_offset: i64) -> String {
     let phys_to_virt_offset = kernel_phys_to_virt_offset;
     let virt_start =
         u64::try_from(i64::try_from(kernel_phys_start).unwrap() + phys_to_virt_offset).unwrap();

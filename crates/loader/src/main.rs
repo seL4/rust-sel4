@@ -1,46 +1,67 @@
 #![no_std]
 #![no_main]
+#![feature(atomic_from_mut)]
 #![feature(const_pointer_byte_offsets)]
+#![feature(const_trait_impl)]
+#![feature(exclusive_wrapper)]
 #![feature(pointer_byte_offsets)]
 #![feature(strict_provenance)]
+#![allow(dead_code)]
+#![allow(unreachable_code)]
 
-use core::ops::Range;
-use core::ptr;
-use core::slice;
+use core::arch::asm;
+use core::panic::PanicInfo;
 
-use loader_types::*;
+use sel4_logging::LevelFilter;
+
+mod barrier;
+mod copy_payload_data;
+mod debug;
+mod drivers;
+mod enter_kernel;
+mod exception_handler;
+mod fmt;
+mod init_platform_state;
+mod logging;
+mod plat;
+mod run;
+mod sanity_check;
+mod smp;
+mod stacks;
+mod this_image;
+
+const LOG_LEVEL: LevelFilter = LevelFilter::Debug;
+
+const MAX_NUM_NODES: usize = sel4_config::sel4_cfg_usize!(MAX_NUM_NODES);
+const NUM_SECONDARY_CORES: usize = MAX_NUM_NODES - 1;
 
 #[no_mangle]
 extern "C" fn main() -> ! {
-    loader_core::main(get_payload, &user_image_bounds())
+    run::run(
+        this_image::get_payload,
+        &this_image::get_user_image_bounds(),
+    )
+}
+
+#[panic_handler]
+extern "C" fn panic_handler(info: &PanicInfo) -> ! {
+    log::error!("{}", info);
+    idle()
+}
+
+fn idle() -> ! {
+    loop {
+        unsafe {
+            asm!("wfe");
+        }
+    }
 }
 
 mod translation_tables {
-    include!(concat!(env!("OUT_DIR"), "/translation_tables.rs"));
-}
-
-fn get_payload() -> (PayloadForX, &'static [u8]) {
-    let blob = unsafe { slice::from_raw_parts(loader_payload_start, loader_payload_size) };
-    let (payload, source) = postcard::take_from_bytes(blob).unwrap();
-    (payload, source)
-}
-
-#[no_mangle]
-#[link_section = ".data"]
-static mut loader_payload_start: *mut u8 = ptr::null_mut();
-
-#[no_mangle]
-#[link_section = ".data"]
-static mut loader_payload_size: usize = 0;
-
-#[no_mangle]
-#[link_section = ".data"]
-static mut loader_image_start: *mut u8 = ptr::null_mut();
-
-#[no_mangle]
-#[link_section = ".data"]
-static mut loader_image_end: *mut u8 = ptr::null_mut();
-
-fn user_image_bounds() -> Range<usize> {
-    unsafe { loader_image_start.expose_addr()..loader_image_end.expose_addr() }
+    mod loader {
+        include!(concat!(env!("OUT_DIR"), "/loader_translation_tables.rs"));
+    }
+    mod kernel {
+        include!(concat!(env!("OUT_DIR"), "/kernel_translation_tables.rs"));
+    }
 }

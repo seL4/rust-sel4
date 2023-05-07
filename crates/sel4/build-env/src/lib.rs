@@ -130,3 +130,10 @@ impl<'a> VarType for PathsVarType<'a> {
         raw_value.split(':').map(PathBuf::from).collect()
     }
 }
+
+// // //
+
+pub fn observe_path<T: AsRef<Path>>(path: T) -> T {
+    println!("cargo:rerun-if-changed={}", path.as_ref().display());
+    path
+}
