@@ -1486,20 +1486,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ece97ea872ece730aed82664c424eb4c8291e1ff2480247ccf7409044bc6479f"
 
 [[package]]
-name = "loader"
-version = "0.1.0"
-dependencies = [
- "loader-core",
- "loader-embed-aarch64-translation-tables",
- "loader-payload",
- "loader-payload-at-build-time",
- "quote",
- "sel4-config",
- "sel4-platform-info",
- "sel4-rustfmt-helper",
-]
-
-[[package]]
 name = "loader-build-env"
 version = "0.1.0"
 dependencies = [
@@ -1581,41 +1567,6 @@ dependencies = [
  "sel4-config",
  "sel4-platform-info",
  "sel4-rustfmt-helper",
-]
-
-[[package]]
-name = "loader-payload"
-version = "0.1.0"
-dependencies = [
- "heapless",
- "loader-config",
- "loader-payload-at-build-time",
- "loader-payload-types",
- "proc-macro2",
- "quote",
- "sel4-config",
- "sel4-platform-info",
-]
-
-[[package]]
-name = "loader-payload-at-build-time"
-version = "0.1.0"
-dependencies = [
- "loader-build-env",
- "loader-payload-at-build-time-types",
- "object",
- "quote",
- "sel4-config",
- "sel4-platform-info",
- "serde_json",
-]
-
-[[package]]
-name = "loader-payload-at-build-time-types"
-version = "0.1.0"
-dependencies = [
- "loader-payload-types",
- "serde",
 ]
 
 [[package]]

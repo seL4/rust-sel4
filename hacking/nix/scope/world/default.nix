@@ -73,10 +73,6 @@ self: with self;
 
   ###
 
-  # mkLoader = callPackage ./mk-loader.nix {
-  #   inherit (worldConfig) loaderConfig;
-  # };
-
   mkLoader = { appELF }: mkLoaderWithSerialization {
     app = appELF;
   };
