@@ -1,5 +1,5 @@
 [package]
-name = "loader-embed-aarch64-translation-tables"
+name = "loader-embed-page-tables"
 version = "0.1.0"
 authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
 edition = "2021"

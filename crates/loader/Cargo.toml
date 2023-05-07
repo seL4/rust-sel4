@@ -23,7 +23,7 @@ tock-registers = "0.8.1"
 cc = "1.0.76"
 glob = "0.3.0"
 loader-config-types = { path = "./config-types" }
-loader-embed-aarch64-translation-tables = { path = "./embed-aarch64-translation-tables" }
+loader-embed-page-tables = { path = "./embed-page-tables" }
 loader-payload-types = { path = "./payload-types" }
 object = "0.30.3"
 postcard = { version = "1.0.2", default-features = false, features = ["alloc"] }

@@ -1496,7 +1496,7 @@ dependencies = [
  "glob",
  "heapless",
  "loader-config-types",
- "loader-embed-aarch64-translation-tables",
+ "loader-embed-page-tables",
  "loader-payload-types",
  "log",
  "object",
@@ -1522,7 +1522,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "loader-embed-aarch64-translation-tables"
+name = "loader-embed-page-tables"
 version = "0.1.0"
 dependencies = [
  "proc-macro2",

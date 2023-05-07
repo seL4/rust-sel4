@@ -28,7 +28,7 @@ members = [
     "crates/loader",
     "crates/loader/cli/add-payload-to-loader",
     "crates/loader/config-types",
-    "crates/loader/embed-aarch64-translation-tables",
+    "crates/loader/embed-page-tables",
     "crates/loader/payload-types",
     "crates/meta",
     "crates/runtime/sel4-backtrace",
