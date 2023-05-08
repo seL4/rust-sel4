@@ -1,5 +1,5 @@
 [package]
-name = "sel4-config-generic-macros-core"
+name = "sel4-config-generic-macro-impls"
 version = "0.1.0"
 authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
 edition = "2021"

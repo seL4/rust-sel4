@@ -10,4 +10,4 @@ proc-macro = true
 
 [dependencies]
 sel4-config-data = { path = "../data" }
-sel4-config-generic-macros-core = { path = "../generic/macros-core" }
+sel4-config-generic-macro-impls = { path = "../generic/macro-impls" }

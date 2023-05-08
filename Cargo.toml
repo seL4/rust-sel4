@@ -61,7 +61,7 @@ members = [
     "crates/sel4/config",
     "crates/sel4/config/data",
     "crates/sel4/config/generic/build-core",
-    "crates/sel4/config/generic/macros-core",
+    "crates/sel4/config/generic/macro-impls",
     "crates/sel4/config/generic/types",
     "crates/sel4/config/macros",
     "crates/sel4/platform-info",
