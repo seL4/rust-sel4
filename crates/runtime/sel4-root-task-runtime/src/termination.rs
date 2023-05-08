@@ -1,7 +1,3 @@
-#![no_std]
-#![feature(never_type)]
-#![feature(unwrap_infallible)]
-
 pub trait Termination {
     type Error;
 

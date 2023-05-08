@@ -19,7 +19,6 @@ sel4-panicking-env = { path = "../sel4-panicking/env" }
 sel4-root-task-runtime-macros = { path = "./macros" }
 sel4-runtime-simple-entry = { path = "../sel4-runtime-simple-entry" }
 sel4-runtime-simple-static-heap = { path = "../sel4-runtime-simple-static-heap" }
-sel4-runtime-simple-termination = { path = "../sel4-runtime-simple-termination" }
 
 [dependencies.sel4-runtime-phdrs]
 path = "../sel4-runtime-phdrs"

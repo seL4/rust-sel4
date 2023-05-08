@@ -49,7 +49,6 @@ members = [
     "crates/runtime/sel4-runtime-phdrs",
     "crates/runtime/sel4-runtime-simple-entry",
     "crates/runtime/sel4-runtime-simple-static-heap",
-    "crates/runtime/sel4-runtime-simple-termination",
     "crates/runtime/sel4-sync",
     "crates/sel4",
     "crates/sel4/bitfield-parser",

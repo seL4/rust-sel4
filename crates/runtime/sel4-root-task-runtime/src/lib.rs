@@ -1,5 +1,7 @@
 #![no_std]
 #![feature(cfg_target_thread_local)]
+#![feature(never_type)]
+#![feature(unwrap_infallible)]
 
 use core::ffi::c_char;
 use core::fmt;
@@ -13,7 +15,10 @@ use sel4_runtime_phdrs::EmbeddedProgramHeaders;
 pub use sel4_panicking as panicking;
 pub use sel4_panicking_env::{abort, debug_print, debug_println};
 pub use sel4_root_task_runtime_macros::main;
-pub use sel4_runtime_simple_termination::Termination;
+
+mod termination;
+
+use termination::Termination;
 
 #[cfg(target_thread_local)]
 #[no_mangle]

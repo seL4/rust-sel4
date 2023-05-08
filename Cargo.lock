@@ -2478,7 +2478,6 @@ dependencies = [
  "sel4-runtime-phdrs",
  "sel4-runtime-simple-entry",
  "sel4-runtime-simple-static-heap",
- "sel4-runtime-simple-termination",
 ]
 
 [[package]]
@@ -2512,10 +2511,6 @@ dependencies = [
  "sel4-dlmalloc",
  "sel4-sync",
 ]
-
-[[package]]
-name = "sel4-runtime-simple-termination"
-version = "0.1.0"
 
 [[package]]
 name = "sel4-rustfmt-helper"
