@@ -2363,18 +2363,7 @@ version = "0.1.0"
 name = "sel4-config"
 version = "0.1.0"
 dependencies = [
- "sel4-config-consts",
  "sel4-config-macros",
-]
-
-[[package]]
-name = "sel4-config-consts"
-version = "0.1.0"
-dependencies = [
- "sel4-build-env",
- "sel4-config-data",
- "sel4-config-generic-build-core",
- "sel4-rustfmt-helper",
 ]
 
 [[package]]

@@ -3,7 +3,7 @@ use std::fs;
 use std::path::Path;
 
 use proc_macro2::TokenStream;
-use quote::{format_ident, quote};
+use quote::quote;
 
 pub use sel4_config_generic_types::{Configuration, Value};
 
@@ -15,8 +15,6 @@ pub trait ConfigurationExt: Sized {
         fn_name_ident: TokenStream,
         helpers_module_path: TokenStream,
     ) -> TokenStream;
-
-    fn generate_consts_fragment(&self) -> TokenStream;
 }
 
 impl ConfigurationExt for Configuration {
@@ -64,30 +62,6 @@ impl ConfigurationExt for Configuration {
                 #(#insertions)*
                 config
             }
-        }
-    }
-
-    fn generate_consts_fragment(&self) -> TokenStream {
-        let definitions = self.iter().map(|(k, v)| {
-            let k = format_ident!("{}", k);
-            let tv = match v {
-                Value::Bool(v) => {
-                    quote! {
-                        bool = #v
-                    }
-                }
-                Value::String(v) => {
-                    quote! {
-                        &str = #v
-                    }
-                }
-            };
-            quote! {
-                pub const #k: #tv;
-            }
-        });
-        quote! {
-            #(#definitions)*
         }
     }
 }

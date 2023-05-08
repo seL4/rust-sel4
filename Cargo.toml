@@ -59,7 +59,6 @@ members = [
     "crates/sel4/bitfield-types",
     "crates/sel4/build-env",
     "crates/sel4/config",
-    "crates/sel4/config/consts",
     "crates/sel4/config/data",
     "crates/sel4/config/generic/build-core",
     "crates/sel4/config/generic/macros-core",
