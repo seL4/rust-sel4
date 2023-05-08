@@ -37,6 +37,11 @@ pub fn sel4_cfg_match(input: TokenStream, item: TokenStream) -> TokenStream {
 }
 
 #[proc_macro]
+pub fn sel4_cfg_if(toks: TokenStream) -> TokenStream {
+    get_impls().cfg_if_impl(toks.into()).into()
+}
+
+#[proc_macro]
 pub fn sel4_cfg_bool(key_toks: TokenStream) -> TokenStream {
     get_impls().cfg_bool_impl(key_toks.into()).into()
 }
@@ -53,9 +58,4 @@ pub fn sel4_cfg_usize(key_toks: TokenStream) -> TokenStream {
     get_impls()
         .cfg_from_str_impl::<usize>(PhantomData, key_toks.into())
         .into()
-}
-
-#[proc_macro]
-pub fn sel4_cfg_if(toks: TokenStream) -> TokenStream {
-    get_impls().cfg_if_impl(toks.into()).into()
 }
