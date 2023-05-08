@@ -2423,7 +2423,6 @@ version = "0.1.0"
 dependencies = [
  "sel4-config-data",
  "sel4-config-generic-macros-core",
- "sel4-config-generic-types",
 ]
 
 [[package]]

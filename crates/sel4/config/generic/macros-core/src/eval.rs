@@ -3,7 +3,9 @@ use proc_macro2::{Span, TokenStream};
 use quote::quote_spanned;
 use syn::spanned::Spanned;
 
-use sel4_config_generic_types::{Configuration, Value};
+use sel4_config_generic_types::Value;
+
+use crate::Impls;
 
 pub(crate) struct EvalError {
     pub(crate) span: Span,
@@ -23,19 +25,11 @@ impl EvalError {
     }
 }
 
-pub(crate) struct Evaluator<'a> {
-    config: &'a Configuration,
-}
-
 fn err<T, U: ToString>(node: impl Spanned, message: U) -> Result<T, EvalError> {
     Err(EvalError::new(node.span(), message.to_string()))
 }
 
-impl<'a> Evaluator<'a> {
-    pub(crate) fn new(config: &'a Configuration) -> Self {
-        Self { config }
-    }
-
+impl<'a> Impls<'a> {
     pub(crate) fn eval_nested_meta(&self, node: &syn::NestedMeta) -> Result<bool, EvalError> {
         Ok(match node {
             syn::NestedMeta::Meta(node) => self.eval_meta(node)?,
@@ -95,7 +89,7 @@ impl<'a> Evaluator<'a> {
             None => return err(node, "not an ident"),
             Some(ident) => {
                 let k = ident.to_string();
-                match self.config.get(&k) {
+                match self.config().get(&k) {
                     None => return err(node, format!("unknown config key '{k}'")),
                     Some(v) => v,
                 }

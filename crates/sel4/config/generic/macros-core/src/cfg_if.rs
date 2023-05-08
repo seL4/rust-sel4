@@ -2,28 +2,27 @@ use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
 use syn::{parse2, spanned::Spanned, Token};
 
-use sel4_config_generic_types::Configuration;
+use crate::{parse_or_return, Impls};
 
-use crate::{parse_or_return, Evaluator};
-
-pub fn cfg_if_impl(config: &Configuration, toks: TokenStream) -> TokenStream {
-    let evaluator = Evaluator::new(config);
-    let input = parse_or_return!(toks as CfgIfInput);
-    for branch_with_condition in input.branches_with_conditions.iter() {
-        match evaluator.eval_nested_meta(&branch_with_condition.condition) {
-            Ok(pass) => {
-                if pass {
-                    return branch_with_condition.branch.clone();
+impl<'a> Impls<'a> {
+    pub fn cfg_if_impl(&self, toks: TokenStream) -> TokenStream {
+        let input = parse_or_return!(toks as CfgIfInput);
+        for branch_with_condition in input.branches_with_conditions.iter() {
+            match self.eval_nested_meta(&branch_with_condition.condition) {
+                Ok(pass) => {
+                    if pass {
+                        return branch_with_condition.branch.clone();
+                    }
+                }
+                Err(err) => {
+                    return err.render();
                 }
             }
-            Err(err) => {
-                return err.render();
-            }
         }
-    }
-    match &input.trailing_branch_without_condition {
-        Some(branch) => branch.clone(),
-        None => quote!(),
+        match &input.trailing_branch_without_condition {
+            Some(branch) => branch.clone(),
+            None => quote!(),
+        }
     }
 }
 
