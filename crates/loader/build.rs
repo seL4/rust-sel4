@@ -87,7 +87,8 @@ fn main() {
     println!("cargo:rustc-link-arg=-z");
     println!("cargo:rustc-link-arg=max-page-size=4096");
 
-    // Remove unnecessary alignment gap between segments; no use in loader.
+    // No use in loader.
+    // Remove unnecessary alignment gap between segments.
     println!("cargo:rustc-link-arg=--no-rosegment");
 }
 
