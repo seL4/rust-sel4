@@ -1,20 +1,15 @@
 #![allow(unused_imports)]
 
-use lazy_static::lazy_static;
-
-pub use sel4_config_generic_types::{Configuration, Key, Value};
+pub use sel4_config_generic_types::Configuration;
 
 pub fn get_kernel_config() -> &'static Configuration {
-    &KERNEL_CONFIGURATION
+    &KERNEL_CONFIG
 }
 
-lazy_static! {
-    static ref KERNEL_CONFIGURATION: Configuration = mk();
+lazy_static::lazy_static! {
+    static ref KERNEL_CONFIG: Configuration = {
+        serde_json::from_str(KERNEL_CONFIG_JSON).unwrap()
+    };
 }
 
-mod helpers {
-    pub(crate) use sel4_config_generic_types::{Configuration, Value};
-    pub(crate) use std::string::ToString;
-}
-
-include!(concat!(env!("OUT_DIR"), "/gen.rs"));
+const KERNEL_CONFIG_JSON: &str = include_str!(concat!(env!("OUT_DIR"), "/kernel_config.json"));

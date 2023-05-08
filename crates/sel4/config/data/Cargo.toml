@@ -7,10 +7,10 @@ license = "BSD-2-Clause"
 
 [dependencies]
 lazy_static = "1.4.0"
-sel4-config-generic-types = { path = "../generic/types" }
+sel4-config-generic-types = { path = "../generic/types", features = ["serde"] }
+serde_json = "1.0.87"
 
 [build-dependencies]
-quote = "1.0.23"
 sel4-build-env = { path = "../../build-env" }
-sel4-config-generic-build-core = { path = "../generic/build-core" }
-sel4-rustfmt-helper = { path = "../../rustfmt-helper" }
+sel4-config-generic-types = { path = "../generic/types", features = ["serde"] }
+serde_json = "1.0.87"

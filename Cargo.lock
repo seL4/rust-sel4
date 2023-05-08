@@ -2371,19 +2371,7 @@ name = "sel4-config-data"
 version = "0.1.0"
 dependencies = [
  "lazy_static",
- "quote",
  "sel4-build-env",
- "sel4-config-generic-build-core",
- "sel4-config-generic-types",
- "sel4-rustfmt-helper",
-]
-
-[[package]]
-name = "sel4-config-generic-build-core"
-version = "0.1.0"
-dependencies = [
- "proc-macro2",
- "quote",
  "sel4-config-generic-types",
  "serde_json",
 ]
