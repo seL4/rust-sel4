@@ -2423,15 +2423,6 @@ name = "sel4-immediate-sync-once-cell"
 version = "0.1.0"
 
 [[package]]
-name = "sel4-inject-phdrs"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "clap 3.2.25",
- "object",
-]
-
-[[package]]
 name = "sel4-logging"
 version = "0.1.0"
 dependencies = [
@@ -2505,13 +2496,6 @@ version = "0.1.0"
 dependencies = [
  "sel4-reserve-tls-on-stack",
  "unwinding",
-]
-
-[[package]]
-name = "sel4-runtime-phdrs-injected"
-version = "0.1.0"
-dependencies = [
- "sel4-runtime-phdrs",
 ]
 
 [[package]]
@@ -3051,16 +3035,6 @@ dependencies = [
  "sel4-config",
  "sel4-root-task-runtime",
  "sel4-sys",
-]
-
-[[package]]
-name = "tests-root-task-injected-phdrs"
-version = "0.1.0"
-dependencies = [
- "sel4",
- "sel4-root-task-runtime",
- "sel4-runtime-phdrs",
- "sel4-runtime-phdrs-injected",
 ]
 
 [[package]]

@@ -25,8 +25,6 @@ in mkTask {
 
   rustTargetInfo = seL4RustTargetInfoWithConfig { minimal = true; };
 
-  # injectPhdrs = true;
-
   extraProfile = {
     opt-level = 1; # bug on 2
   };

@@ -1,6 +1,6 @@
 { lib, buildPackages
 , buildCrateInLayersHere, buildSysroot, crateUtils
-, crates, injectPhdrs
+, crates
 , defaultRustTargetInfo
 , seL4RustEnvVars
 } @ scopeArgs:
@@ -10,7 +10,6 @@
 
 , extraProfile ? {}
 , replaceSysroot ? null
-, injectPhdrs ? false
 
 , rustTargetInfo ? defaultRustTargetInfo
 , release ? true
@@ -39,8 +38,6 @@ let
     extraManifest = profiles;
   };
 
-  maybeInjectPhdrs = if injectPhdrs then scopeArgs.injectPhdrs else lib.id;
-
   theseCommonModifications = crateUtils.elaborateModifications {
     modifyManifest = lib.flip lib.recursiveUpdate profiles;
     modifyConfig = lib.flip lib.recursiveUpdate {
@@ -62,7 +59,7 @@ let
   theseLastLayerModifications = crateUtils.elaborateModifications {
     modifyDerivation = drv: drv.overrideAttrs (self: super: seL4RustEnvVars // {
       passthru = (super.passthru or {}) // {
-        elf = maybeInjectPhdrs "${self.finalPackage}/bin/${args.rootCrate.name}.elf";
+        elf = "${self.finalPackage}/bin/${args.rootCrate.name}.elf";
       };
     });
   };
@@ -70,7 +67,6 @@ let
   prunedArgs = builtins.removeAttrs args [
     "extraProfile"
     "replaceSysroot"
-    "injectPhdrs"
   ];
 
 in

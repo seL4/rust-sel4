@@ -30,7 +30,6 @@ in rec {
     tests.root-task.core-libs
     tests.root-task.config
     tests.root-task.tls
-    tests.root-task.injected-phdrs
     tests.root-task.backtrace
     tests.root-task.panicking.abort.withAlloc
     tests.root-task.panicking.abort.withoutAlloc
@@ -83,16 +82,6 @@ in rec {
         rootTask = mkTask {
           rootCrate = crates.tests-root-task-tls;
           release = false;
-        };
-        isSupported = haveFullRuntime;
-        canAutomate = true;
-      };
-
-      injected-phdrs = mkInstance {
-        rootTask = mkTask {
-          rootCrate = crates.tests-root-task-injected-phdrs;
-          release = true;
-          injectPhdrs = true;
         };
         isSupported = haveFullRuntime;
         canAutomate = true;

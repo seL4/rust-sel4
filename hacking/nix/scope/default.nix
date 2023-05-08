@@ -143,7 +143,6 @@ superCallPackage ../rust-utils {} self //
     release = false;
   };
 
-  sel4-inject-phdrs = mkTool crates.sel4-inject-phdrs;
   sel4-embed-debug-info = mkTool crates.sel4-embed-debug-info;
   sel4-symbolize-backtrace = mkTool crates.sel4-symbolize-backtrace;
   capdl-add-spec-to-loader = mkTool crates.capdl-add-spec-to-loader;
@@ -151,7 +150,6 @@ superCallPackage ../rust-utils {} self //
   add-payload-to-loader = mkTool crates.add-payload-to-loader;
 
   embedDebugInfo = callPackage ./embed-debug-info.nix {};
-  injectPhdrs = callPackage ./inject-phdrs.nix {};
 
   cargo-helpers = callPackage ./tools/cargo-helpers.nix {};
 
