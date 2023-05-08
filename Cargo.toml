@@ -26,7 +26,7 @@ members = [
     "crates/examples/sel4cp/banscii/pds/pl011-driver/interface-types",
     "crates/examples/sel4cp/hello/pds/hello",
     "crates/loader",
-    "crates/loader/cli/add-payload-to-loader",
+    "crates/loader/add-payload",
     "crates/loader/config-types",
     "crates/loader/embed-page-tables",
     "crates/loader/payload-types",

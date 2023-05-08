@@ -21,24 +21,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "add-payload-to-loader"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "clap 3.2.25",
- "fallible-iterator",
- "heapless",
- "loader-config-types",
- "loader-payload-types",
- "object",
- "postcard",
- "render-elf-with-data",
- "serde",
- "serde_json",
- "serde_yaml",
-]
-
-[[package]]
 name = "addr2line"
 version = "0.20.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1513,6 +1495,24 @@ dependencies = [
  "serde_yaml",
  "spin 0.9.8",
  "tock-registers",
+]
+
+[[package]]
+name = "loader-add-payload"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "clap 3.2.25",
+ "fallible-iterator",
+ "heapless",
+ "loader-config-types",
+ "loader-payload-types",
+ "object",
+ "postcard",
+ "render-elf-with-data",
+ "serde",
+ "serde_json",
+ "serde_yaml",
 ]
 
 [[package]]
