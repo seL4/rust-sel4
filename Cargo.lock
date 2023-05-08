@@ -316,21 +316,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "38fcc2979eff34a4b84e1cf9a1e3da42a7d44b3b690a40cdcb23e3d556cfb2e5"
 
 [[package]]
-name = "capdl-add-spec-to-loader"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "capdl-loader-expecting-serialized-spec-types",
- "capdl-types",
- "clap 3.2.25",
- "fallible-iterator",
- "object",
- "postcard",
- "render-elf-with-data",
- "serde_json",
-]
-
-[[package]]
 name = "capdl-embed-spec"
 version = "0.1.0"
 dependencies = [
@@ -376,20 +361,11 @@ dependencies = [
 ]
 
 [[package]]
-name = "capdl-loader-core"
-version = "0.1.0"
-dependencies = [
- "capdl-types",
- "log",
- "sel4",
-]
-
-[[package]]
-name = "capdl-loader-expecting-serialized-spec"
+name = "capdl-loader"
 version = "0.1.0"
 dependencies = [
  "capdl-loader-core",
- "capdl-loader-expecting-serialized-spec-types",
+ "capdl-loader-types",
  "capdl-types",
  "log",
  "postcard",
@@ -401,7 +377,31 @@ dependencies = [
 ]
 
 [[package]]
-name = "capdl-loader-expecting-serialized-spec-types"
+name = "capdl-loader-add-spec"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "capdl-loader-types",
+ "capdl-types",
+ "clap 3.2.25",
+ "fallible-iterator",
+ "object",
+ "postcard",
+ "render-elf-with-data",
+ "serde_json",
+]
+
+[[package]]
+name = "capdl-loader-core"
+version = "0.1.0"
+dependencies = [
+ "capdl-types",
+ "log",
+ "sel4",
+]
+
+[[package]]
+name = "capdl-loader-types"
 version = "0.1.0"
 dependencies = [
  "capdl-types",

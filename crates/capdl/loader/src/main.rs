@@ -13,7 +13,7 @@ use core::ptr;
 use core::slice;
 
 use capdl_loader_core::{Loader, LoaderBuffers, PerObjectBuffer};
-use capdl_loader_expecting_serialized_spec_types::SpecWithSourcesForSerialization;
+use capdl_loader_types::SpecWithSourcesForSerialization;
 use sel4::BootInfo;
 use sel4_logging::{LevelFilter, Logger, LoggerBuilder};
 use sel4_root_task_runtime::main;

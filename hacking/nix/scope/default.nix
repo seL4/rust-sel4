@@ -145,7 +145,7 @@ superCallPackage ../rust-utils {} self //
 
   sel4-embed-debug-info = mkTool crates.sel4-embed-debug-info;
   sel4-symbolize-backtrace = mkTool crates.sel4-symbolize-backtrace;
-  capdl-add-spec-to-loader = mkTool crates.capdl-add-spec-to-loader;
+  capdl-loader-add-spec = mkTool crates.capdl-loader-add-spec;
   sel4-simple-task-serialize-runtime-config = mkTool crates.sel4-simple-task-serialize-runtime-config;
   loader-add-payload = mkTool crates.loader-add-payload;
 

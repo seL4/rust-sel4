@@ -3,7 +3,7 @@ use std::fs::File;
 use std::os::unix::fs::FileExt;
 use std::path::{Path, PathBuf};
 
-use capdl_loader_expecting_serialized_spec_types::SpecForSerialization;
+use capdl_loader_types::SpecForSerialization;
 use capdl_types::*;
 
 use crate::ObjectNamesLevel;

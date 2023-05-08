@@ -58,8 +58,13 @@ let
 
   theseLastLayerModifications = crateUtils.elaborateModifications {
     modifyDerivation = drv: drv.overrideAttrs (self: super: seL4RustEnvVars // {
-      passthru = (super.passthru or {}) // {
+      passthru = (super.passthru or {}) // rec {
         elf = "${self.finalPackage}/bin/${args.rootCrate.name}.elf";
+        # HACK
+        split = {
+          min = elf;
+          full = elf;
+        };
       };
     });
   };

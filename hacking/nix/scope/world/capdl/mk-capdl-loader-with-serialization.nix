@@ -4,8 +4,8 @@
 , objectSizes
 , serializeCapDLSpec
 , crateUtils
-, capdl-add-spec-to-loader
-, capdl-loader-expecting-serialized-spec
+, capdl-loader-add-spec
+, capdl-loader
 }:
 
 { spec, fill }:
@@ -18,21 +18,22 @@ let
 in lib.fix (self: runCommand "armed-capdl-loader" {
 
   nativeBuildInputs = [
-    capdl-add-spec-to-loader
+    capdl-loader-add-spec
   ];
 
   passthru = {
     inherit spec json fill;
+    elf = self;
     split = {
-      full = capdl-loader-expecting-serialized-spec.elf;
+      full = capdl-loader.elf;
       min = self;
     };
   };
 
 } ''
-  capdl-add-spec-to-loader \
+  capdl-loader-add-spec \
     -v \
-    -e ${capdl-loader-expecting-serialized-spec.elf} \
+    -e ${capdl-loader.elf} \
     -f ${json} \
     -d ${fill} \
     --object-names-level 2 \

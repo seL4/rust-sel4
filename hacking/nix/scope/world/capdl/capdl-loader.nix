@@ -14,7 +14,7 @@ let
 
 in mkTask {
 
-  rootCrate = crates.capdl-loader-expecting-serialized-spec;
+  rootCrate = crates.capdl-loader;
 
   rustTargetInfo = seL4RustTargetInfoWithConfig { minimal = true; };
 

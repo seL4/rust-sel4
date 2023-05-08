@@ -101,7 +101,7 @@ let
         elf = loader.elf;
       } else {
         loader = mkCapDLLoader spec.cdl;
-        elf = loader;
+        elf = loader.elf;
       })
       // passthru
     );

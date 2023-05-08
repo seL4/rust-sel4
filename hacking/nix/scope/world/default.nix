@@ -89,13 +89,15 @@ self: with self;
     inherit (worldConfig) loaderConfig;
   };
 
-  capdl-loader-expecting-serialized-spec = callPackage ./capdl/capdl-loader-expecting-serialized-spec.nix {};
+  capdl-loader = callPackage ./capdl/capdl-loader.nix {};
   objectSizes = callPackage ./capdl/object-sizes.nix {};
   mkSmallCapDLLoader = callPackage ./capdl/mk-capdl-loader.nix {};
-  mkCapDLLoader = callPackage ./capdl/mk-capdl-loader-with-serialization.nix {};
   serializeCapDLSpec = callPackage ./capdl/serialize-capdl-spec.nix {};
   dummyCapDLSpec = callPackage ./capdl/dummy-spec.nix {};
   mkSimpleCompositionCapDLSpec = callPackage ./capdl/mk-capdl-spec.nix {};
+
+  mkCapDLLoader = callPackage ./capdl/mk-capdl-loader-with-serialization.nix {};
+  # mkCapDLLoader = mkSmallCapDLLoader;
 
   ###
 

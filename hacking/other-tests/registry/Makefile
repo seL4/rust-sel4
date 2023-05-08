@@ -34,4 +34,4 @@ test2: registry-link
 			--target aarch64-sel4-minimal \
 			--registry sel4 \
 			--config .cargo/config \
-			capdl-loader-expecting-serialized-spec
+			capdl-loader

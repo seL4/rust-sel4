@@ -1,5 +1,5 @@
 [package]
-name = "capdl-add-spec-to-loader"
+name = "capdl-loader-add-spec"
 version = "0.1.0"
 authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
 edition = "2021"
@@ -7,11 +7,11 @@ license = "BSD-2-Clause"
 
 [dependencies]
 anyhow = "1.0.66"
-capdl-loader-expecting-serialized-spec-types = { path = "../../types" }
-capdl-types = { path = "../../../../types", features = ["alloc", "serde", "deflate"] }
+capdl-loader-types = { path = "../types" }
+capdl-types = { path = "../../types", features = ["alloc", "serde", "deflate"] }
 clap = "3.2.23"
 fallible-iterator = "0.2.0"
 object = { version = "0.31.0", features = ["all"] }
 postcard = { version = "1.0.2", default-features = false, features = ["alloc"] }
-render-elf-with-data = { path = "../../../../../build-tools/render-elf-with-data" }
+render-elf-with-data = { path = "../../../build-tools/render-elf-with-data" }
 serde_json = "1.0.87"
