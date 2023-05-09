@@ -62,7 +62,7 @@ impl<'a, T: ?Sized> Indirect<'a, T> {
             #[cfg(feature = "borrowed-indirect")]
             IndirectImpl::Borrowed { borrowed } => borrowed,
             #[cfg(feature = "alloc")]
-            IndirectImpl::Owned { ref owned, .. } => panic!(),
+            IndirectImpl::Owned { .. } => panic!(),
         }
     }
 }
