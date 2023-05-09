@@ -35,7 +35,7 @@ pub use spec::{
 };
 
 #[cfg(feature = "alloc")]
-pub use fill::FileContent;
+pub use fill::{FileContent, FileContentRange};
 
 #[cfg(feature = "deflate")]
 pub use fill::{DeflatedBytesContent, IndirectDeflatedBytesContent};

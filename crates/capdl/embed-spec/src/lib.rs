@@ -2,6 +2,8 @@
 #![feature(never_type)]
 #![feature(unwrap_infallible)]
 
+use std::borrow::Borrow;
+use std::borrow::Cow;
 use std::collections::BTreeMap;
 use std::fmt;
 
@@ -14,31 +16,22 @@ use capdl_types::*;
 // In a few cases, we use a local const declaration to appease the borrow checker.
 // Using an exposed constructor of `Indirect` would be one way around this.
 
-type InputSpec<'a> = Spec<'a, String, FileAndBytesContent>;
-type FileAndBytesContent = (FileContent, BytesContent<'static>);
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Config {
+pub struct Embedding<'a> {
+    pub spec: Cow<'a, SpecForEmbedding<'a>>,
+    pub fill_map: Cow<'a, FillMap<'a>>,
     pub object_names_level: ObjectNamesLevel,
     pub deflate_fill: bool,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+pub type SpecForEmbedding<'a> = Spec<'a, String, FileContentRange>;
+
+pub type FillMap<'a> = BTreeMap<FileContentRange, Cow<'a, [u8]>>;
+
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum ObjectNamesLevel {
     All,
     JustTCBs,
     None,
-}
-
-impl Config {
-    pub fn embed<'a>(&'a self, spec: &'a InputSpec<'a>) -> (TokenStream, Vec<(String, Vec<u8>)>) {
-        Embedding { config: self, spec }.embed()
-    }
-}
-
-struct Embedding<'a> {
-    config: &'a Config,
-    spec: &'a InputSpec<'a>,
 }
 
 type FillEntryContentId = String;
@@ -48,6 +41,28 @@ fn to_tokens_via_debug(value: impl fmt::Debug) -> TokenStream {
 }
 
 impl<'a> Embedding<'a> {
+    fn spec(&self) -> &SpecForEmbedding<'a> {
+        self.spec.borrow()
+    }
+
+    fn fill_map(&self) -> &FillMap<'a> {
+        self.fill_map.borrow()
+    }
+
+    fn get_fill_map(&self, key: &FileContentRange) -> Option<&[u8]> {
+        self.fill_map().get(key).map(Borrow::borrow)
+    }
+
+    fn object_names_level(&self) -> ObjectNamesLevel {
+        self.object_names_level
+    }
+
+    fn deflate_fill(&self) -> bool {
+        self.deflate_fill
+    }
+
+    //
+
     fn types_mod(&self) -> TokenStream {
         quote! { capdl_types }
     }
@@ -67,14 +82,13 @@ impl<'a> Embedding<'a> {
         }
     }
 
-    fn embed_fill(&self, fill: &[FillEntry<FileAndBytesContent>]) -> TokenStream {
+    fn embed_fill(&self, fill: &[FillEntry<FileContentRange>]) -> TokenStream {
         let entries = fill.iter().map(|entry| {
             let range = to_tokens_via_debug(&entry.range);
             let content = match &entry.content {
                 FillEntryContent::Data(content_data) => {
-                    let inner_value = self.embedded_file_ident_from_id(
-                        &self.encode_fill_entry_to_id(entry.range.len(), &content_data),
-                    );
+                    let inner_value = self
+                        .embedded_file_ident_from_id(&self.encode_fill_entry_to_id(&content_data));
                     let outer_value = self.fill_value(inner_value);
                     quote! {
                         FillEntryContent::Data(#outer_value)
@@ -119,7 +133,7 @@ impl<'a> Embedding<'a> {
     fn embed_object_with_fill(
         &self,
         obj: impl fmt::Debug,
-        fill: &[FillEntry<FileAndBytesContent>],
+        fill: &[FillEntry<FileContentRange>],
     ) -> TokenStream {
         let mut expr_struct = syn::parse2::<syn::ExprStruct>(to_tokens_via_debug(&obj)).unwrap();
         self.patch_field(
@@ -130,7 +144,7 @@ impl<'a> Embedding<'a> {
         expr_struct.to_token_stream()
     }
 
-    fn embed_object(&self, obj: &Object<FileAndBytesContent>) -> TokenStream {
+    fn embed_object(&self, obj: &Object<FileContentRange>) -> TokenStream {
         match obj {
             Object::CNode(obj) => {
                 let toks = self.embed_object_with_cap_table(obj);
@@ -237,7 +251,7 @@ impl<'a> Embedding<'a> {
 
     fn name_type(&self, qualify: bool) -> TokenStream {
         let prefix = self.qualification_prefix(qualify);
-        let inner = match self.config.object_names_level {
+        let inner = match self.object_names_level() {
             ObjectNamesLevel::All => quote!(&str),
             ObjectNamesLevel::JustTCBs => quote!(Option<&str>),
             ObjectNamesLevel::None => quote!(#prefix Unnamed),
@@ -246,7 +260,7 @@ impl<'a> Embedding<'a> {
     }
 
     fn name_value<F>(&self, obj: &Object<'a, F>, name: &str) -> TokenStream {
-        let inner = match self.config.object_names_level {
+        let inner = match self.object_names_level() {
             ObjectNamesLevel::All => quote!(#name),
             ObjectNamesLevel::JustTCBs => match obj {
                 Object::TCB(_) => quote!(Some(#name)),
@@ -259,7 +273,7 @@ impl<'a> Embedding<'a> {
 
     fn fill_type_inner(&self, qualify: bool) -> TokenStream {
         let prefix = self.qualification_prefix(qualify);
-        let ty = if self.config.deflate_fill {
+        let ty = if self.deflate_fill() {
             quote!(DeflatedBytesContent)
         } else {
             quote!(BytesContent)
@@ -275,7 +289,7 @@ impl<'a> Embedding<'a> {
 
     fn fill_value(&self, field_value: impl ToTokens) -> TokenStream {
         let constructor = self.fill_type_inner(false);
-        let field_name = if self.config.deflate_fill {
+        let field_name = if self.deflate_fill() {
             quote!(deflated_bytes)
         } else {
             quote!(bytes)
@@ -288,7 +302,7 @@ impl<'a> Embedding<'a> {
     }
 
     fn pack_fill(&self, bytes: &[u8]) -> Vec<u8> {
-        (if self.config.deflate_fill {
+        (if self.deflate_fill() {
             DeflatedBytesContent::pack
         } else {
             BytesContent::pack
@@ -297,7 +311,7 @@ impl<'a> Embedding<'a> {
 
     fn embed_objects(&self) -> TokenStream {
         let toks = self
-            .spec
+            .spec()
             .named_objects()
             .map(|NamedObject { name, object }| {
                 let name = self.name_value(object, name);
@@ -315,39 +329,37 @@ impl<'a> Embedding<'a> {
     }
 
     fn embed_irqs(&self) -> TokenStream {
-        let toks = to_tokens_via_debug(&self.spec.irqs);
+        let toks = to_tokens_via_debug(&self.spec().irqs);
         quote! {
             Indirect::from_borrowed(#toks.as_slice())
         }
     }
 
     fn embed_root_objects(&self) -> TokenStream {
-        to_tokens_via_debug(&self.spec.root_objects)
+        to_tokens_via_debug(&self.spec().root_objects)
     }
 
     fn embed_untyped_covers(&self) -> TokenStream {
-        let toks = to_tokens_via_debug(&self.spec.untyped_covers);
+        let toks = to_tokens_via_debug(&self.spec().untyped_covers);
         quote! {
             Indirect::from_borrowed(#toks.as_slice())
         }
     }
 
     fn embed_asid_slots(&self) -> TokenStream {
-        let toks = to_tokens_via_debug(&self.spec.asid_slots);
+        let toks = to_tokens_via_debug(&self.spec().asid_slots);
         quote! {
             Indirect::from_borrowed(#toks.as_slice())
         }
     }
 
-    fn encode_fill_entry_to_id(
-        &self,
-        length: usize,
-        fill_entry: &FileAndBytesContent,
-    ) -> FillEntryContentId {
-        let (content_file, _) = &fill_entry;
+    fn encode_fill_entry_to_id(&self, fill_entry: &FileContentRange) -> FillEntryContentId {
+        let content_file = &fill_entry;
         hex::encode(format!(
             "{},{},{}",
-            content_file.file_offset, length, content_file.file
+            content_file.file_range().start,
+            content_file.file_range().end,
+            content_file.file
         ))
     }
 
@@ -361,13 +373,13 @@ impl<'a> Embedding<'a> {
 
     // NOTE
     // I would prefer this to return just the rhs, but rustfmt wouldn't be able to format that
-    fn embed(&self) -> (TokenStream, Vec<(String, Vec<u8>)>) {
+    pub fn embed(&self) -> (TokenStream, Vec<(String, Vec<u8>)>) {
         let mut file_definition_toks = quote!();
         let mut fills = BTreeMap::<FillEntryContentId, Vec<u8>>::new();
-        self.spec
-            .traverse_fill_with_context(|length, content| {
-                let (_, content_bytes) = content;
-                let id = self.encode_fill_entry_to_id(length, content);
+        self.spec()
+            .traverse_fill(|content| {
+                let content_bytes = self.get_fill_map(content).unwrap();
+                let id = self.encode_fill_entry_to_id(content);
                 if !fills.contains_key(&id) {
                     let ident = self.embedded_file_ident_from_id(&id);
                     let fname = self.embedded_file_fname_from_id(&id);
@@ -375,7 +387,7 @@ impl<'a> Embedding<'a> {
                         #[allow(non_upper_case_globals)]
                         const #ident: &[u8] = include_bytes!(concat!(env!("OUT_DIR"), "/", #fname));
                     });
-                    let content = self.pack_fill(&content_bytes.bytes);
+                    let content = self.pack_fill(content_bytes);
                     fills.insert(id, content);
                 }
                 Ok::<(), !>(())

@@ -333,22 +333,10 @@ name = "capdl-embedded-spec"
 version = "0.1.0"
 dependencies = [
  "capdl-embed-spec",
- "capdl-embedded-spec-serialized",
+ "capdl-loader-with-embedded-spec-build-env",
  "capdl-types",
  "sel4-rustfmt-helper",
  "serde_json",
-]
-
-[[package]]
-name = "capdl-embedded-spec-serialized"
-version = "0.1.0"
-dependencies = [
- "capdl-types",
- "hex 0.4.3",
- "proc-macro2",
- "quote",
- "serde_json",
- "syn 1.0.109",
 ]
 
 [[package]]
@@ -356,7 +344,7 @@ name = "capdl-embedded-spec-validate"
 version = "0.1.0"
 dependencies = [
  "capdl-embedded-spec",
- "capdl-embedded-spec-serialized",
+ "capdl-loader-with-embedded-spec-build-env",
  "capdl-types",
 ]
 
@@ -420,6 +408,16 @@ dependencies = [
  "sel4",
  "sel4-logging",
  "sel4-root-task-runtime",
+]
+
+[[package]]
+name = "capdl-loader-with-embedded-spec-build-env"
+version = "0.1.0"
+dependencies = [
+ "capdl-embed-spec",
+ "capdl-types",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]

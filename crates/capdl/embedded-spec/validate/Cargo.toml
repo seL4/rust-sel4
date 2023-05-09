@@ -10,5 +10,5 @@ deflate = ["capdl-embedded-spec/deflate"]
 
 [dependencies]
 capdl-embedded-spec = { path = ".." }
-capdl-embedded-spec-serialized = { path = "../serialized" }
+capdl-loader-with-embedded-spec-build-env = { path = "../../loader/with-embedded-spec/build-env" }
 capdl-types = { path = "../../types" }

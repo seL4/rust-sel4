@@ -15,11 +15,38 @@ use crate::SelfContained;
 // // //
 
 #[cfg(feature = "alloc")]
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct FileContent {
     pub file: String,
     pub file_offset: usize,
+}
+
+#[cfg(feature = "alloc")]
+impl FileContent {
+    pub fn with_length(&self, length: usize) -> FileContentRange {
+        FileContentRange {
+            file: self.file.clone(),
+            file_offset: self.file_offset,
+            file_length: length,
+        }
+    }
+}
+
+#[cfg(feature = "alloc")]
+#[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct FileContentRange {
+    pub file: String,
+    pub file_offset: usize,
+    pub file_length: usize,
+}
+
+#[cfg(feature = "alloc")]
+impl FileContentRange {
+    pub fn file_range(&self) -> Range<usize> {
+        self.file_offset..self.file_offset + self.file_length
+    }
 }
 
 // // //

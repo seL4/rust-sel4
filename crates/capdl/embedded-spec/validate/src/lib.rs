@@ -3,19 +3,28 @@
 
 use std::fmt;
 
+use capdl_loader_with_embedded_spec_build_env::get_embedding;
 use capdl_types::*;
 
 type SpecCommon<'a, N> = Spec<'a, N, Vec<u8>>;
 
-pub fn run() {
-    compare(
-        &capdl_embedded_spec_serialized::get(),
-        &capdl_embedded_spec::SPEC,
-    )
+pub fn run(tell_cargo: bool) {
+    let (embedding, footprint) = get_embedding();
+
+    if tell_cargo {
+        footprint.tell_cargo();
+    }
+
+    let serialized = embedding
+        .spec
+        .traverse_fill(|content| Ok::<_, !>(embedding.fill_map.get(content).unwrap().to_vec()))
+        .into_ok();
+
+    compare(&serialized, &capdl_embedded_spec::SPEC)
 }
 
 fn compare<'a, N: ObjectNameForComparison, F: SelfContainedContent>(
-    serialized: &Spec<'a, String, (FileContent, BytesContent<'static>)>,
+    serialized: &Spec<'a, String, Vec<u8>>,
     embedded: &Spec<'a, SelfContained<N>, SelfContained<F>>,
 ) where
     N::ComparisonPoint: fmt::Debug,
@@ -45,13 +54,10 @@ fn adapt_embedded<'a, N: ObjectNameForComparison, F: SelfContainedContent>(
 }
 
 fn adapt_serialized<'a, N: ObjectNameForComparison>(
-    spec: &Spec<'a, String, (FileContent, BytesContent<'static>)>,
+    spec: &Spec<'a, String, Vec<u8>>,
 ) -> SpecCommon<'a, N::ComparisonPoint> {
-    spec.traverse(
-        |_object, name| Ok(N::them(name)),
-        |_length, content| Ok::<_, !>(content.1.bytes.to_vec()),
-    )
-    .into_ok()
+    spec.traverse_names(|name| Ok::<_, !>(N::them(name)))
+        .into_ok()
 }
 
 trait ObjectNameForComparison {
