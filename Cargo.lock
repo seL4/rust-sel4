@@ -329,26 +329,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "capdl-embedded-spec"
-version = "0.1.0"
-dependencies = [
- "capdl-embed-spec",
- "capdl-loader-with-embedded-spec-build-env",
- "capdl-types",
- "sel4-rustfmt-helper",
- "serde_json",
-]
-
-[[package]]
-name = "capdl-embedded-spec-validate"
-version = "0.1.0"
-dependencies = [
- "capdl-embedded-spec",
- "capdl-loader-with-embedded-spec-build-env",
- "capdl-types",
-]
-
-[[package]]
 name = "capdl-loader"
 version = "0.1.0"
 dependencies = [
@@ -401,9 +381,9 @@ dependencies = [
 name = "capdl-loader-with-embedded-spec"
 version = "0.1.0"
 dependencies = [
- "capdl-embedded-spec",
- "capdl-embedded-spec-validate",
  "capdl-loader-core",
+ "capdl-loader-with-embedded-spec-embedded-spec",
+ "capdl-loader-with-embedded-spec-embedded-spec-validate",
  "capdl-types",
  "sel4",
  "sel4-logging",
@@ -418,6 +398,26 @@ dependencies = [
  "capdl-types",
  "serde",
  "serde_json",
+]
+
+[[package]]
+name = "capdl-loader-with-embedded-spec-embedded-spec"
+version = "0.1.0"
+dependencies = [
+ "capdl-embed-spec",
+ "capdl-loader-with-embedded-spec-build-env",
+ "capdl-types",
+ "sel4-rustfmt-helper",
+ "serde_json",
+]
+
+[[package]]
+name = "capdl-loader-with-embedded-spec-embedded-spec-validate"
+version = "0.1.0"
+dependencies = [
+ "capdl-loader-with-embedded-spec-build-env",
+ "capdl-loader-with-embedded-spec-embedded-spec",
+ "capdl-types",
 ]
 
 [[package]]

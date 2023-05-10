@@ -6,11 +6,14 @@ edition = "2021"
 license = "BSD-2-Clause"
 
 [features]
-deflate = ["capdl-embedded-spec/deflate", "capdl-embedded-spec-validate/deflate"]
+deflate = [
+    "capdl-loader-with-embedded-spec-embedded-spec/deflate",
+    "capdl-loader-with-embedded-spec-embedded-spec-validate/deflate"
+]
 
 [dependencies]
-capdl-embedded-spec = { path = "../../embedded-spec" }
 capdl-loader-core = { path = "../core" }
+capdl-loader-with-embedded-spec-embedded-spec = { path = "./embedded-spec" }
 capdl-types = { path = "../../types" }
 sel4 = { path = "../../../sel4" }
 sel4-logging = { path = "../../../runtime/sel4-logging" }
@@ -21,4 +24,4 @@ default-features = false
 features = ["single-threaded"]
 
 [build-dependencies]
-capdl-embedded-spec-validate = { path = "../../embedded-spec/validate" }
+capdl-loader-with-embedded-spec-embedded-spec-validate = { path = "./embedded-spec/validate" }

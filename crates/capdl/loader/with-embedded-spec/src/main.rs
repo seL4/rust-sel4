@@ -5,7 +5,7 @@
 
 use core::ops::Range;
 
-use capdl_embedded_spec::SPEC;
+use capdl_loader_with_embedded_spec_embedded_spec::SPEC;
 use capdl_loader_core::{Loader, LoaderBuffers, PerObjectBuffer};
 use capdl_types::SpecWithSources;
 use sel4::BootInfo;
