@@ -45,6 +45,13 @@ in rec {
                   KernelPlatform = mkString "qemu-arm-virt";
                   KernelMaxNumNodes = mkString numCores;
                   KernelIsMCS = fromBool mcs;
+
+                  # benchmarking config
+                  # KernelDebugBuild = off;
+                  # KernelBenchmarks = mkString "track_utilisation";
+                  # KernelArmExportPMUUser = on;
+                  # KernelSignalFastpath = on;
+
                 } // lib.optionalAttrs hypervisor {
                   KernelArmHypervisorSupport = on;
                 };
