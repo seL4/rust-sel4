@@ -132,8 +132,22 @@ sel4_cfg_if! {
             benchmark_reset_log,
             benchmark_finalize_log,
             benchmark_set_log_buffer,
+        };
+    }
+}
+
+sel4_cfg_if! {
+    if #[cfg(all(ENABLE_BENCHMARKS, BENCHMARK_TRACK_UTILISATION))] {
+        pub use benchmark::{
             benchmark_get_thread_utilisation,
             benchmark_reset_thread_utilisation,
+        };
+    }
+}
+
+sel4_cfg_if! {
+    if #[cfg(all(ENABLE_BENCHMARKS, BENCHMARK_TRACK_UTILISATION, DEBUG_BUILD))] {
+        pub use benchmark::{
             benchmark_dump_all_thread_utilisation,
             benchmark_reset_all_thread_utilisation,
         };

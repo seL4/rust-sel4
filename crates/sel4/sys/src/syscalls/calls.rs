@@ -685,7 +685,11 @@ sel4_cfg_if! {
                 frame_cap,
             ) as seL4_Error::Type
         }
+    }
+}
 
+sel4_cfg_if! {
+    if #[cfg(all(ENABLE_BENCHMARKS, BENCHMARK_TRACK_UTILISATION))] {
         pub fn seL4_BenchmarkGetThreadUtilisation(tcb: seL4_CPtr) {
             sys_send_recv_simple(
                 syscall_id::BenchmarkGetThreadUtilisation,
@@ -699,7 +703,11 @@ sel4_cfg_if! {
                 tcb,
             );
         }
+    }
+}
 
+sel4_cfg_if! {
+    if #[cfg(all(ENABLE_BENCHMARKS, BENCHMARK_TRACK_UTILISATION, DEBUG_BUILD))] {
         pub fn seL4_BenchmarkDumpAllThreadsUtilisation() {
             sys_send_recv_simple(
                 syscall_id::BenchmarkDumpAllThreadsUtilisation,
