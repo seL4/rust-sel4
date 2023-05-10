@@ -20,7 +20,10 @@ pub fn run(tell_cargo: bool) {
         .traverse_fill(|content| Ok::<_, !>(embedding.fill_map.get(content).unwrap().to_vec()))
         .into_ok();
 
-    compare(&serialized, &capdl_loader_with_embedded_spec_embedded_spec::SPEC)
+    compare(
+        &serialized,
+        &capdl_loader_with_embedded_spec_embedded_spec::SPEC,
+    )
 }
 
 fn compare<'a, N: ObjectNameForComparison, F: SelfContainedContent>(
