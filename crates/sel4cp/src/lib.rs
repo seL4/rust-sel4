@@ -14,7 +14,8 @@
 #[cfg(feature = "alloc")]
 extern crate alloc;
 
-pub use sel4_panicking_env::{abort, debug_print, debug_println};
+use sel4_panicking_env::abort;
+
 pub use sel4cp_macros::main;
 
 mod cspace;
@@ -23,6 +24,7 @@ mod handler;
 mod ipc_buffer;
 mod passivity;
 mod pd_name;
+mod fmt;
 
 pub mod memory_region;
 pub mod message;
