@@ -24,7 +24,6 @@ mod handler;
 mod ipc_buffer;
 mod passivity;
 mod pd_name;
-mod fmt;
 
 pub mod memory_region;
 pub mod message;
@@ -63,4 +62,20 @@ pub mod _private {
     pub use sel4::sys::seL4_BootInfo;
     pub use sel4_runtime_simple_entry::declare_stack;
     pub use sel4_runtime_simple_static_heap::declare_static_heap;
+}
+
+sel4::config::sel4_cfg_if! {
+    if #[cfg(PRINTING)] {
+        pub use sel4_panicking_env::{debug_print, debug_println};
+    } else {
+        #[macro_export]
+        macro_rules! debug_print {
+            ($($arg:tt)*) => {};
+        }
+
+        #[macro_export]
+        macro_rules! debug_println {
+            ($($arg:tt)*) => {};
+        }
+    }
 }
