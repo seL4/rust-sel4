@@ -685,41 +685,41 @@ sel4_cfg_if! {
                 frame_cap,
             ) as seL4_Error::Type
         }
-    }
-}
 
-sel4_cfg_if! {
-    if #[cfg(all(ENABLE_BENCHMARKS, BENCHMARK_TRACK_UTILISATION))] {
-        pub fn seL4_BenchmarkGetThreadUtilisation(tcb: seL4_CPtr) {
-            sys_send_recv_simple(
-                syscall_id::BenchmarkGetThreadUtilisation,
-                tcb,
-            );
-        }
+        sel4_cfg_if! {
+            if #[cfg(BENCHMARK_TRACK_UTILISATION)] {
+                pub fn seL4_BenchmarkGetThreadUtilisation(tcb: seL4_CPtr) {
+                    sys_send_recv_simple(
+                        syscall_id::BenchmarkGetThreadUtilisation,
+                        tcb,
+                    );
+                }
 
-        pub fn seL4_BenchmarkResetThreadUtilisation(tcb: seL4_CPtr) {
-            sys_send_recv_simple(
-                syscall_id::BenchmarkResetThreadUtilisation,
-                tcb,
-            );
-        }
-    }
-}
+                pub fn seL4_BenchmarkResetThreadUtilisation(tcb: seL4_CPtr) {
+                    sys_send_recv_simple(
+                        syscall_id::BenchmarkResetThreadUtilisation,
+                        tcb,
+                    );
+                }
 
-sel4_cfg_if! {
-    if #[cfg(all(ENABLE_BENCHMARKS, BENCHMARK_TRACK_UTILISATION, DEBUG_BUILD))] {
-        pub fn seL4_BenchmarkDumpAllThreadsUtilisation() {
-            sys_send_recv_simple(
-                syscall_id::BenchmarkDumpAllThreadsUtilisation,
-                0,
-            );
-        }
+                sel4_cfg_if! {
+                    if #[cfg(DEBUG_BUILD)] {
+                        pub fn seL4_BenchmarkDumpAllThreadsUtilisation() {
+                            sys_send_recv_simple(
+                                syscall_id::BenchmarkDumpAllThreadsUtilisation,
+                                0,
+                            );
+                        }
 
-        pub fn seL4_BenchmarkResetAllThreadsUtilisation() {
-            sys_send_recv_simple(
-                syscall_id::BenchmarkResetAllThreadsUtilisation,
-                0,
-            );
+                        pub fn seL4_BenchmarkResetAllThreadsUtilisation() {
+                            sys_send_recv_simple(
+                                syscall_id::BenchmarkResetAllThreadsUtilisation,
+                                0,
+                            );
+                        }
+                    }
+                }
+            }
         }
     }
 }
