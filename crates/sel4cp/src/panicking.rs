@@ -1,5 +1,3 @@
-use core::ffi::c_char;
-
 use sel4_immediate_sync_once_cell::ImmediateSyncOnceCell;
 use sel4_panicking::set_hook as set_outer_hook;
 use sel4_panicking_env::debug_println;
@@ -36,6 +34,10 @@ pub(crate) fn init_panicking() {
 // // //
 
 #[no_mangle]
+#[allow(unused_variables)]
 fn sel4_runtime_debug_put_char(c: u8) {
-    sel4::debug_put_char(c as c_char)
+    #[sel4::sel4_cfg(PRINTING)]
+    {
+        sel4::debug_put_char(c as core::ffi::c_char)
+    }
 }
