@@ -12,7 +12,7 @@ use core::mem;
 use core::str;
 
 use sel4cp::memory_region::{
-    declare_memory_region, MemoryRegion, ReadOnly, ReadWrite, VolatileSliceExt,
+    declare_memory_region, MemoryRegion, ReadOnly, ReadWrite, SharedSliceExt,
 };
 use sel4cp::message::{MessageInfo, NoMessageLabel, NoMessageValue, StatusMessageLabel};
 use sel4cp::{main, Channel, Handler};

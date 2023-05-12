@@ -44,10 +44,12 @@ pub mod access;
 /// The size of this struct is the same as the size of the contained reference.
 #[derive(Clone)]
 #[repr(transparent)]
-pub struct Volatile<R, A = ReadWrite> {
+pub struct Shared<R, A = ReadWrite> {
     reference: R,
     access: PhantomData<A>,
 }
+
+type Volatile<R, A = ReadWrite> = Shared<R, A>;
 
 /// Constructor functions for creating new values
 ///

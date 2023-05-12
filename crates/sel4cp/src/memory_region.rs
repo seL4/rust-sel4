@@ -6,9 +6,9 @@ use core::slice;
 use zerocopy::{AsBytes, FromBytes};
 
 pub use sel4_shared::access::{ReadOnly, ReadWrite};
-pub use sel4_shared::Volatile;
+pub use sel4_shared::Shared;
 
-pub type MemoryRegion<T, A> = Volatile<<A as MemoryRegionAccess>::Ref<T>, A>;
+pub type MemoryRegion<T, A> = Shared<<A as MemoryRegionAccess>::Ref<T>, A>;
 
 pub unsafe fn new_memory_region<T: MemoryRegionTarget + ?Sized, A: MemoryRegionAccess>(
     start: A::Ptr<T::Element>,
@@ -96,7 +96,7 @@ impl MemoryRegionAccess for ReadOnly {
     type Ref<T: 'static + ?Sized> = &'static T;
 
     unsafe fn new_memory_region<T: ?Sized>(reference: Self::Ref<T>) -> MemoryRegion<T, Self> {
-        Volatile::new_read_only(reference)
+        Shared::new_read_only(reference)
     }
 
     unsafe fn ref_from_ptr<T>(pointer: Self::Ptr<T>) -> Option<Self::Ref<T>> {
@@ -113,7 +113,7 @@ impl MemoryRegionAccess for ReadWrite {
     type Ref<T: 'static + ?Sized> = &'static mut T;
 
     unsafe fn new_memory_region<T: ?Sized>(reference: Self::Ref<T>) -> MemoryRegion<T, Self> {
-        Volatile::new(reference)
+        Shared::new(reference)
     }
 
     unsafe fn ref_from_ptr<T>(pointer: Self::Ptr<T>) -> Option<Self::Ref<T>> {
@@ -216,7 +216,7 @@ pub use declare_deferred_memory_region;
 // HACK
 
 #[cfg(feature = "alloc")]
-pub use volatile_slice_ext::VolatileSliceExt;
+pub use volatile_slice_ext::SharedSliceExt;
 
 #[cfg(feature = "alloc")]
 mod volatile_slice_ext {
@@ -224,13 +224,13 @@ mod volatile_slice_ext {
     use core::mem::MaybeUninit;
     use core::ops::Deref;
 
-    use sel4_shared::Volatile;
+    use sel4_shared::Shared;
 
-    pub trait VolatileSliceExt<T, R, A>
+    pub trait SharedSliceExt<T, R, A>
     where
         R: Deref<Target = [T]>,
     {
-        fn volatile_slice_ext_inner(&self) -> &Volatile<R, A>;
+        fn volatile_slice_ext_inner(&self) -> &Shared<R, A>;
 
         fn len(&self) -> usize {
             // HACK HACK HACK
@@ -253,11 +253,11 @@ mod volatile_slice_ext {
         }
     }
 
-    impl<T, R, A> VolatileSliceExt<T, R, A> for Volatile<R, A>
+    impl<T, R, A> SharedSliceExt<T, R, A> for Shared<R, A>
     where
         R: Deref<Target = [T]>,
     {
-        fn volatile_slice_ext_inner(&self) -> &Volatile<R, A> {
+        fn volatile_slice_ext_inner(&self) -> &Shared<R, A> {
             self
         }
     }
