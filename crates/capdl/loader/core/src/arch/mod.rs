@@ -51,7 +51,6 @@ pub(crate) mod frame_types {
 
     pub(crate) const FRAME_SIZE_0_BITS: usize = FrameType0::FRAME_SIZE.bits();
     pub(crate) const FRAME_SIZE_1_BITS: usize = FrameType1::FRAME_SIZE.bits();
-    pub(crate) const FRAME_SIZE_2_BITS: usize = FrameType2::FRAME_SIZE.bits();
 }
 
 sel4::sel4_cfg_if! {

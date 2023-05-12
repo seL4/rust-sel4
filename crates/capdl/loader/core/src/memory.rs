@@ -1,6 +1,6 @@
 use core::ops::Range;
 
-use sel4::{cap_type, BootInfo, FrameSize, FrameType};
+use sel4::{BootInfo, FrameType};
 
 use super::frame_types;
 

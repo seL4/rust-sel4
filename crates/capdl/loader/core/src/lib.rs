@@ -21,7 +21,7 @@ use log::{debug, info, trace};
 use capdl_types::*;
 use sel4::{
     cap_type, AbsoluteCPtr, BootInfo, CNodeCapData, CPtr, CapRights, CapType, FrameSize, FrameType,
-    InitCSpaceSlot, LocalCPtr, ObjectBlueprint, Untyped, UserContext, VMAttributes,
+    InitCSpaceSlot, LocalCPtr, ObjectBlueprint, Untyped, UserContext,
 };
 
 mod arch;

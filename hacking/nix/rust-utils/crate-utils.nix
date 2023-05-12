@@ -103,6 +103,11 @@ rec {
       build.incremental = false;
     }
     (linkerConfig args)
+    {
+      target."cfg(all())" = {
+        rustflags = [ "-D" "warnings" ];
+      };
+    }
   ];
 
   ###
