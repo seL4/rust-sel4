@@ -22,7 +22,6 @@ use core::{
 };
 #[cfg(feature = "unstable")]
 use core::{
-    intrinsics,
     ops::{Range, RangeBounds},
     slice::range,
 };
@@ -193,7 +192,7 @@ where
         A: Readable,
     {
         // UNSAFE: Safe, as we know that our internal value exists.
-        unsafe { ptr::read_volatile(&*self.reference) }
+        unsafe { ptr::read(&*self.reference) }
     }
 
     /// Performs a volatile write, setting the contained value to the given `value`.
@@ -219,7 +218,7 @@ where
         R: DerefMut,
     {
         // UNSAFE: Safe, as we know that our internal value exists.
-        unsafe { ptr::write_volatile(&mut *self.reference, value) };
+        unsafe { ptr::write(&mut *self.reference, value) };
     }
 
     /// Updates the contained value using the given closure and volatile instructions.
@@ -522,11 +521,7 @@ where
             "destination and source slices have different lengths"
         );
         unsafe {
-            intrinsics::volatile_copy_nonoverlapping_memory(
-                dst.as_mut_ptr(),
-                src.as_ptr(),
-                src.len(),
-            );
+            ptr::copy_nonoverlapping(src.as_ptr(), dst.as_mut_ptr(), src.len());
         }
     }
 
@@ -578,11 +573,7 @@ where
             "destination and source slices have different lengths"
         );
         unsafe {
-            intrinsics::volatile_copy_nonoverlapping_memory(
-                dest.as_mut_ptr(),
-                src.as_ptr(),
-                dest.len(),
-            );
+            ptr::copy_nonoverlapping(src.as_ptr(), dest.as_mut_ptr(), dest.len());
         }
     }
 
@@ -635,9 +626,9 @@ where
         // SAFETY: the conditions for `volatile_copy_memory` have all been checked above,
         // as have those for `ptr::add`.
         unsafe {
-            intrinsics::volatile_copy_memory(
-                slice.as_mut_ptr().add(dest),
+            ptr::copy(
                 slice.as_ptr().add(src_start),
+                slice.as_mut_ptr().add(dest),
                 count,
             );
         }
@@ -675,7 +666,7 @@ where
     {
         let dest = self.reference.deref_mut();
         unsafe {
-            intrinsics::volatile_set_memory(dest.as_mut_ptr(), value, dest.len());
+            ptr::write_bytes(dest.as_mut_ptr(), value, dest.len());
         }
     }
 }
