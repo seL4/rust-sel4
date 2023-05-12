@@ -5,8 +5,8 @@ use core::slice;
 
 use zerocopy::{AsBytes, FromBytes};
 
-pub use volatile::access::{ReadOnly, ReadWrite};
-pub use volatile::Volatile;
+pub use sel4_shared::access::{ReadOnly, ReadWrite};
+pub use sel4_shared::Volatile;
 
 pub type MemoryRegion<T, A> = Volatile<<A as MemoryRegionAccess>::Ref<T>, A>;
 
@@ -224,7 +224,7 @@ mod volatile_slice_ext {
     use core::mem::MaybeUninit;
     use core::ops::Deref;
 
-    use volatile::Volatile;
+    use sel4_shared::Volatile;
 
     pub trait VolatileSliceExt<T, R, A>
     where

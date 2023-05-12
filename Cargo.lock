@@ -2518,6 +2518,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "sel4-shared"
+version = "0.1.0"
+
+[[package]]
 name = "sel4-simple-task-config-types"
 version = "0.1.0"
 dependencies = [
@@ -2651,8 +2655,8 @@ dependencies = [
  "sel4-runtime-phdrs",
  "sel4-runtime-simple-entry",
  "sel4-runtime-simple-static-heap",
+ "sel4-shared",
  "sel4cp-macros",
- "volatile",
  "zerocopy",
 ]
 
@@ -3279,12 +3283,6 @@ name = "version_check"
 version = "0.9.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "49874b5167b65d7193b8aba1567f5c7d93d001cafc34600cee003eda787e483f"
-
-[[package]]
-name = "volatile"
-version = "0.4.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "442887c63f2c839b346c192d047a7c87e73d0689c9157b00b53dcc27dd5ea793"
 
 [[package]]
 name = "vte"

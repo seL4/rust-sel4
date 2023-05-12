@@ -1,0 +1,5 @@
+The 'sel4-shared' crate is derived, with minor modification, from:
+
+https://github.com/rust-osdev/volatile
+
+See sel4-shared.LICENSE for copyright information.
