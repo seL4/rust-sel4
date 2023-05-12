@@ -7,7 +7,7 @@
 extern crate alloc;
 
 use sel4cp::memory_region::{
-    declare_memory_region, MemoryRegion, ReadOnly, ReadWrite, VolatileSliceExt,
+    declare_memory_region, MemoryRegion, ReadOnly, ReadWrite, SharedSliceExt,
 };
 use sel4cp::message::{MessageInfo, NoMessageValue, StatusMessageLabel};
 use sel4cp::{main, Channel, Handler};
