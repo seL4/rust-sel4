@@ -1,4 +1,3 @@
-use core::marker::PhantomData;
 use core::mem;
 use core::ptr;
 use core::slice;
@@ -162,54 +161,6 @@ impl<T: Sized + AsBytes + FromBytes> MemoryRegionTarget for [T] {
         A::new_memory_region(unsafe { A::slice_from_raw_parts(start, len) })
     }
 }
-
-// // //
-
-pub struct DeferredMemoryRegion<T: MemoryRegionTarget + ?Sized, A: MemoryRegionAccess> {
-    size_in_bytes: usize,
-    get_start: fn() -> A::Ptr<T::Element>,
-    phantom: PhantomData<A>,
-}
-
-impl<T: MemoryRegionTarget + ?Sized, A: MemoryRegionAccess> DeferredMemoryRegion<T, A> {
-    pub const fn new(size_in_bytes: usize, get_start: fn() -> A::Ptr<T::Element>) -> Self {
-        // TODO check `size_in_bytes` at compile time using a const trait like `MemoryRegionTarget`
-        Self {
-            size_in_bytes,
-            get_start,
-            phantom: PhantomData,
-        }
-    }
-
-    pub unsafe fn construct(&self) -> MemoryRegion<T, A> {
-        new_memory_region((self.get_start)(), self.size_in_bytes)
-    }
-}
-
-#[macro_export]
-macro_rules! declare_deferred_memory_region {
-    {
-        <$target:ty, $access:ty>($symbol:ident, $size_in_bytes:expr)
-    } => {
-        $crate::memory_region::DeferredMemoryRegion::new($size_in_bytes, || {
-            #[no_mangle]
-            #[link_section = ".data"]
-            static mut $symbol:
-                <$access as $crate::memory_region::MemoryRegionAccess>::Ptr::<
-                    <$target as $crate::memory_region::MemoryRegionTarget>::Element
-                > =
-                <
-                    <$access as $crate::memory_region::MemoryRegionAccess>::Ptr::<
-                        <$target as $crate::memory_region::MemoryRegionTarget>::Element
-                    > as $crate::memory_region::MemoryRegionPointer
-                >::NULL;
-
-            unsafe { $symbol }
-        })
-    }
-}
-
-pub use declare_deferred_memory_region;
 
 // // //
 
