@@ -2,7 +2,6 @@ use core::fmt;
 
 pub use sel4_panicking::catch_unwind;
 pub use sel4_panicking_env::{abort, debug_print, debug_println};
-pub use sel4cp_macros::main;
 
 use crate::handler::Handler;
 use crate::ipc_buffer::get_ipc_buffer;
@@ -40,19 +39,19 @@ unsafe extern "C" fn inner_entry() -> ! {
 
     init_panicking();
     sel4::set_ipc_buffer(get_ipc_buffer());
-    __sel4cp_main();
+    __sel4cp_init();
     abort!("main thread returned")
 }
 
 extern "C" {
-    fn __sel4cp_main();
+    fn __sel4cp_init();
 }
 
 #[macro_export]
 macro_rules! declare_main {
     ($main:path) => {
         #[no_mangle]
-        pub unsafe extern "C" fn __sel4cp_main() {
+        pub unsafe extern "C" fn __sel4cp_init() {
             $crate::_private::run_main($main);
         }
     };

@@ -7,7 +7,7 @@ use core::ptr;
 use heapless::Deque;
 
 use sel4cp::message::{MessageInfo, NoMessageValue, StatusMessageLabel};
-use sel4cp::{main, Channel, Handler};
+use sel4cp::{protection_domain, Channel, Handler};
 
 use banscii_pl011_driver_interface_types::*;
 
@@ -22,8 +22,8 @@ const ASSISTANT: Channel = Channel::new(1);
 #[link_section = ".data"]
 static mut pl011_register_block: *const Pl011RegisterBlock = ptr::null();
 
-#[main]
-fn main() -> ThisHandler {
+#[protection_domain]
+fn init() -> ThisHandler {
     let device = unsafe { Pl011Device::new(pl011_register_block) };
     device.init();
     ThisHandler {

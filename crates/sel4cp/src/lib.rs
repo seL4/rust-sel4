@@ -16,7 +16,7 @@ extern crate alloc;
 
 use sel4_panicking_env::abort;
 
-pub use sel4cp_macros::main;
+pub use sel4cp_macros::protection_domain;
 
 mod cspace;
 mod entry;

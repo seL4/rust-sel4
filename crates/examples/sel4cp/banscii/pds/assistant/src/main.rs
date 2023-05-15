@@ -15,7 +15,7 @@ use sel4cp::memory_region::{
     declare_memory_region, MemoryRegion, ReadOnly, ReadWrite, SharedSliceExt,
 };
 use sel4cp::message::{MessageInfo, NoMessageLabel, NoMessageValue, StatusMessageLabel};
-use sel4cp::{main, Channel, Handler};
+use sel4cp::{protection_domain, Channel, Handler};
 
 use banscii_artist_interface_types as artist;
 use banscii_assistant_core::Draft;
@@ -28,8 +28,8 @@ const REGION_SIZE: usize = 0x4_000;
 
 const MAX_SUBJECT_LEN: usize = 16;
 
-#[main(heap_size = 0x10000)]
-fn main() -> ThisHandler {
+#[protection_domain(heap_size = 0x10000)]
+fn init() -> ThisHandler {
     let region_in = unsafe {
         declare_memory_region! {
             <[u8], ReadOnly>(region_in_start, REGION_SIZE)

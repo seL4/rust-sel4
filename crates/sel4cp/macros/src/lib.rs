@@ -4,7 +4,7 @@ use quote::quote;
 use syn::parse_macro_input;
 
 #[proc_macro_attribute]
-pub fn main(attr: TokenStream, item: TokenStream) -> TokenStream {
+pub fn protection_domain(attr: TokenStream, item: TokenStream) -> TokenStream {
     let crate_ = quote!(sel4cp);
     let module_path = quote!(declare_protection_domain);
     let item = parse_macro_input!(item as syn::ItemFn);
