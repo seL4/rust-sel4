@@ -3,8 +3,8 @@ use core::fmt;
 pub use sel4_panicking::catch_unwind;
 pub use sel4_panicking_env::{abort, debug_print, debug_println};
 
+use crate::get_ipc_buffer;
 use crate::handler::Handler;
-use crate::ipc_buffer::get_ipc_buffer;
 use crate::panicking::init_panicking;
 
 #[cfg(target_thread_local)]
