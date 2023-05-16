@@ -355,7 +355,7 @@ dependencies = [
  "fallible-iterator",
  "object",
  "postcard",
- "render-elf-with-data",
+ "sel4-render-elf-with-data",
  "serde_json",
 ]
 
@@ -1518,7 +1518,6 @@ dependencies = [
  "capdl-types",
  "cfg-if",
  "log",
- "render-elf-with-data",
  "sel4",
  "sel4-backtrace",
  "sel4-backtrace-embedded-debug-info",
@@ -1527,6 +1526,7 @@ dependencies = [
  "sel4-config",
  "sel4-logging",
  "sel4-platform-info",
+ "sel4-render-elf-with-data",
  "sel4-root-task-runtime",
  "sel4-sync",
  "sel4-sys",
@@ -2046,16 +2046,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a5996294f19bd3aae0453a862ad728f60e6600695733dd5df01da90c54363a3c"
 
 [[package]]
-name = "render-elf-with-data"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "clap 3.2.25",
- "fallible-iterator",
- "object",
-]
-
-[[package]]
 name = "rfc6979"
 version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2344,7 +2334,7 @@ name = "sel4-embed-debug-info"
 version = "0.1.0"
 dependencies = [
  "clap 3.2.25",
- "render-elf-with-data",
+ "sel4-render-elf-with-data",
 ]
 
 [[package]]
@@ -2389,9 +2379,9 @@ dependencies = [
  "heapless",
  "object",
  "postcard",
- "render-elf-with-data",
  "sel4-loader-config-types",
  "sel4-loader-payload-types",
+ "sel4-render-elf-with-data",
  "serde",
  "serde_json",
  "serde_yaml",
@@ -2456,6 +2446,16 @@ dependencies = [
 [[package]]
 name = "sel4-platform-info-types"
 version = "0.1.0"
+
+[[package]]
+name = "sel4-render-elf-with-data"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "clap 3.2.25",
+ "fallible-iterator",
+ "object",
+]
 
 [[package]]
 name = "sel4-reserve-tls-on-stack"

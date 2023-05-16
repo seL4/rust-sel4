@@ -3,7 +3,7 @@ use std::io;
 
 use clap::{App, Arg};
 
-use render_elf_with_data::{Input, SymbolicInjection, SymbolicValue};
+use sel4_render_elf_with_data::{Input, SymbolicInjection, SymbolicValue};
 
 fn main() -> Result<(), io::Error> {
     let matches = App::new("")

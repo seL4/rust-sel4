@@ -3,7 +3,7 @@
 resolver = "2"
 
 members = [
-    "crates/build-tools/render-elf-with-data",
+    "crates/build-tools/sel4-render-elf-with-data",
     "crates/capdl/embed-spec",
     "crates/capdl/loader",
     "crates/capdl/loader/add-spec",

@@ -18,7 +18,7 @@ log = "0.4.17"
 sel4-platform-info = { path = "../sel4/platform-info", optional = true }
 
 [target."cfg(not(target_os = \"none\"))".dependencies]
-render-elf-with-data = { path = "../build-tools/render-elf-with-data" }
+sel4-render-elf-with-data = { path = "../build-tools/sel4-render-elf-with-data" }
 
 [target."cfg(target_env = \"sel4\")".dependencies]
 sel4 = { path = "../sel4" }

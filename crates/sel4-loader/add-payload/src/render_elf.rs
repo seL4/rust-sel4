@@ -1,4 +1,4 @@
-use render_elf_with_data::{Input, SymbolicInjection, SymbolicValue};
+use sel4_render_elf_with_data::{Input, SymbolicInjection, SymbolicValue};
 
 pub fn render_elf(orig_elf: &[u8], serialized_payload: &[u8]) -> Vec<u8> {
     let align_modulus = 1;
