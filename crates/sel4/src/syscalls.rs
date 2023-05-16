@@ -7,6 +7,9 @@ use crate::{
     MessageInfo, Notification, Word, NUM_FAST_MESSAGE_REGISTERS,
 };
 
+#[sel4_cfg(KERNEL_MCS)]
+use crate::{cap_type, CapType, LocalCPtr};
+
 #[sel4_cfg(not(KERNEL_MCS))]
 use crate::IPCBuffer;
 
@@ -15,6 +18,12 @@ pub const NUM_MESSAGE_REGISTERS: usize = u32_into_usize(sys::seL4_MsgMaxLength);
 
 /// A capability badge.
 pub type Badge = Word;
+
+pub trait IPCCapType: CapType {}
+
+impl IPCCapType for cap_type::Notification {}
+
+impl IPCCapType for cap_type::Endpoint {}
 
 sel4_cfg_if! {
     if #[cfg(KERNEL_MCS)] {
@@ -171,6 +180,29 @@ impl<C: InvocationContext> Notification<C> {
         let (info, badge) =
             self.invoke(|cptr, ipc_buffer| ipc_buffer.inner_mut().seL4_Wait(cptr.bits()));
         (wait_message_info_from_sys(info), badge)
+    }
+}
+
+impl<T: IPCCapType, C: InvocationContext> LocalCPtr<T, C> {
+    /// Corresponds to `seL4_NBSendRecv`.
+    #[cfg(KERNEL_MCS)]
+    pub fn nb_send_recv<U: IPCCapType>(
+        self,
+        info: MessageInfo,
+        src: LocalCPtr<U>,
+        reply_authority: impl ConveysReplyAuthority,
+    ) -> (MessageInfo, Badge) {
+        let (raw_msg_info, badge) = self.invoke(|cptr, ipc_buffer| {
+            ipc_buffer.inner_mut().seL4_NBSendRecv(
+                cptr.bits(),
+                info.into_inner(),
+                src.bits(),
+                reply_authority
+                    .into_reply_authority()
+                    .into_sys_reply_authority(),
+            )
+        });
+        (MessageInfo::from_inner(raw_msg_info), badge)
     }
 }
 

@@ -90,7 +90,9 @@ pub use ipc_buffer::IPCBuffer;
 pub use message_info::{MessageInfo, MessageInfoBuilder};
 pub use object::{ObjectBlueprint, ObjectType};
 pub use reply_authority::{ConveysReplyAuthority, ReplyAuthority};
-pub use syscalls::{r#yield, Badge, CallWithMRs, FastMessages, RecvWithMRs, NUM_MESSAGE_REGISTERS};
+pub use syscalls::{
+    r#yield, Badge, CallWithMRs, FastMessages, IPCCapType, RecvWithMRs, NUM_MESSAGE_REGISTERS,
+};
 pub use vspace::{FrameType, GRANULE_SIZE};
 
 sel4_cfg_if! {
