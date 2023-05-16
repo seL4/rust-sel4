@@ -3,12 +3,9 @@ use core::array;
 use sel4_config::{sel4_cfg, sel4_cfg_if};
 
 use crate::{
-    const_helpers::u32_into_usize, sys, ConveysReplyAuthority, Endpoint, InvocationContext,
-    MessageInfo, Notification, Word, NUM_FAST_MESSAGE_REGISTERS,
+    cap_type, const_helpers::u32_into_usize, sys, CapType, ConveysReplyAuthority, Endpoint,
+    InvocationContext, LocalCPtr, MessageInfo, Notification, Word, NUM_FAST_MESSAGE_REGISTERS,
 };
-
-#[sel4_cfg(KERNEL_MCS)]
-use crate::{cap_type, CapType, LocalCPtr};
 
 #[sel4_cfg(not(KERNEL_MCS))]
 use crate::IPCBuffer;
@@ -234,29 +231,20 @@ pub struct CallWithMRs {
     pub msg: [Word; NUM_FAST_MESSAGE_REGISTERS],
 }
 
-pub trait FastMessages: FastMessagesSealed {}
-
-impl<T: FastMessagesSealed> FastMessages for T {}
-
-pub trait FastMessagesSealed: FastMessagesUnchecked {}
-
-impl FastMessagesSealed for [Word; 0] {}
-impl FastMessagesSealed for [Word; 1] {}
-impl FastMessagesSealed for [Word; 2] {}
-impl FastMessagesSealed for [Word; 3] {}
-impl FastMessagesSealed for [Word; 4] {}
-
 type ConcreteFastMessagesForIn = [Option<Word>; NUM_FAST_MESSAGE_REGISTERS];
 
 type ConcreteFastMessagesForInOut = [Word; NUM_FAST_MESSAGE_REGISTERS];
 
-pub trait FastMessagesUnchecked {
+pub trait FastMessages: fast_messages_sealing::FastMessagesSealed {
     fn prepare_in(self) -> ConcreteFastMessagesForIn;
 
     fn prepare_in_out(self) -> ConcreteFastMessagesForInOut;
 }
 
-impl<const N: usize> FastMessagesUnchecked for [Word; N] {
+impl<const N: usize> FastMessages for [Word; N]
+where
+    [Word; N]: fast_messages_sealing::FastMessagesSealed,
+{
     fn prepare_in(self) -> ConcreteFastMessagesForIn {
         array::from_fn(|i| if i < self.len() { Some(self[i]) } else { None })
     }
@@ -270,6 +258,18 @@ impl<const N: usize> FastMessagesUnchecked for [Word; N] {
             }
         })
     }
+}
+
+mod fast_messages_sealing {
+    use super::Word;
+
+    pub trait FastMessagesSealed {}
+
+    impl FastMessagesSealed for [Word; 0] {}
+    impl FastMessagesSealed for [Word; 1] {}
+    impl FastMessagesSealed for [Word; 2] {}
+    impl FastMessagesSealed for [Word; 3] {}
+    impl FastMessagesSealed for [Word; 4] {}
 }
 
 #[allow(dead_code)]
