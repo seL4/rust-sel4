@@ -10,4 +10,4 @@ alloc = []
 
 [dependencies]
 sel4 = { path = "../../../../sel4" }
-sel4-panicking = { path = "../../../../runtime/sel4-panicking" }
+sel4-panicking = { path = "../../../../sel4-panicking" }

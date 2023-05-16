@@ -138,7 +138,7 @@ in rec {
       threads = mkInstance {
         rootTask = mkCapDLRootTask rec {
           # small = true;
-          script = ../../../../../crates/tests/capdl/threads/cdl.py;
+          script = ../../../../../crates/private/tests/capdl/threads/cdl.py;
           config = {
             components = {
               example_component.image = passthru.test.elf;
@@ -157,7 +157,7 @@ in rec {
       utcover = mkInstance {
         rootTask = mkCapDLRootTask rec {
           # small = true;
-          script = ../../../../../crates/tests/capdl/utcover/cdl.py;
+          script = ../../../../../crates/private/tests/capdl/utcover/cdl.py;
           config = {
             components = {
               example_component.image = passthru.test.elf;

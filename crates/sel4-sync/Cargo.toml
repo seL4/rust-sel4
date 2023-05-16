@@ -6,5 +6,5 @@ edition = "2021"
 license = "BSD-2-Clause"
 
 [dependencies]
-sel4 = { path = "../../sel4" }
+sel4 = { path = "../sel4" }
 sel4-immediate-sync-once-cell = { path = "../sel4-immediate-sync-once-cell" }

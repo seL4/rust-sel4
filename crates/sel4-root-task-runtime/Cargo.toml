@@ -13,7 +13,7 @@ single-threaded = ["sel4/single-threaded"]
 unwinding = ["sel4-panicking/unwinding"]
 
 [dependencies]
-sel4 = { path = "../../sel4" }
+sel4 = { path = "../sel4" }
 sel4-panicking = { path = "../sel4-panicking" }
 sel4-panicking-env = { path = "../sel4-panicking/env" }
 sel4-root-task-runtime-macros = { path = "./macros" }

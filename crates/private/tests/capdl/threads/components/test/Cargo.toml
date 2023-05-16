@@ -8,7 +8,7 @@ license = "BSD-2-Clause"
 [dependencies]
 sel4 = { path = "../../../../../../sel4" }
 sel4-simple-task-runtime = { path = "../../../../../support/simple-task/sel4-simple-task-runtime" }
-sel4-sync = { path = "../../../../../../runtime/sel4-sync" }
+sel4-sync = { path = "../../../../../../sel4-sync" }
 serde = { version = "1.0.147", default-features = false, features = ["alloc", "derive"] }
 
 [dependencies.sel4-simple-task-config-types]

@@ -12,11 +12,11 @@ capdl-types = { path = "../types", features = ["alloc", "serde", "deflate"] }
 log = "0.4.17"
 postcard = { version = "1.0.2", default-features = false, features = ["alloc"] }
 sel4 = { path = "../../sel4" }
-sel4-dlmalloc = { path = "../../runtime/sel4-dlmalloc" }
-sel4-logging = { path = "../../runtime/sel4-logging" }
-sel4-sync = { path = "../../runtime/sel4-sync" }
+sel4-dlmalloc = { path = "../../sel4-dlmalloc" }
+sel4-logging = { path = "../../sel4-logging" }
+sel4-sync = { path = "../../sel4-sync" }
 
 [dependencies.sel4-root-task-runtime]
-path = "../../runtime/sel4-root-task-runtime"
+path = "../../sel4-root-task-runtime"
 default-features = false
 features = ["alloc", "single-threaded"]
