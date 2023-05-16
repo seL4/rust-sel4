@@ -23,7 +23,6 @@ use sel4_backtrace_simple::SimpleBacktracing;
 use sel4_immediate_sync_once_cell::ImmediateSyncOnceCell;
 use sel4_panicking::ExternalPanicInfo;
 use sel4_panicking_env::{abort, AbortInfo};
-use sel4_runtime_phdrs::EmbeddedProgramHeaders;
 use sel4_simple_task_runtime_config_types::RuntimeConfig;
 use sel4_simple_task_threading::StaticThread;
 
@@ -52,8 +51,8 @@ pub unsafe extern "C" fn _start(config: *const u8, config_size: usize, thread_in
         config,
         thread_index,
     };
-    EmbeddedProgramHeaders::finder()
-        .find_tls_image()
+    sel4_runtime_common::locate_tls_image()
+        .unwrap()
         .reserve_on_stack_and_continue(
             cont_fn,
             (&cont_arg as *const ContinueArg)
@@ -82,7 +81,7 @@ pub unsafe extern "C" fn cont_fn(cont_arg: *mut c_void) -> ! {
 
     if thread_index == 0 {
         CONFIG.set(config.clone()).unwrap();
-        sel4_runtime_phdrs::unwinding::set_custom_eh_frame_finder_using_embedded_phdrs().unwrap();
+        sel4_runtime_common::set_eh_frame_finder().unwrap();
         sel4_panicking::set_hook(&panic_hook);
         __sel4_simple_task_main(config.arg());
     } else {

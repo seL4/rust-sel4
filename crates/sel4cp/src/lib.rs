@@ -55,8 +55,8 @@ pub mod _private {
     pub use crate::{declare_main, declare_protection_domain, entry::run_main, DEFAULT_STACK_SIZE};
 
     pub use sel4::sys::seL4_BootInfo;
-    pub use sel4_runtime_simple_entry::declare_stack;
-    pub use sel4_runtime_simple_static_heap::declare_static_heap;
+    pub use sel4_runtime_common::declare_stack;
+    pub use sel4_runtime_common::declare_static_heap;
 }
 
 sel4::config::sel4_cfg_if! {

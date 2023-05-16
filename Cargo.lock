@@ -942,8 +942,8 @@ dependencies = [
 name = "example-root-task-without-runtime"
 version = "0.1.0"
 dependencies = [
+ "cfg-if",
  "sel4",
- "sel4-runtime-simple-entry",
 ]
 
 [[package]]
@@ -2473,9 +2473,7 @@ dependencies = [
  "sel4-panicking",
  "sel4-panicking-env",
  "sel4-root-task-runtime-macros",
- "sel4-runtime-phdrs",
- "sel4-runtime-simple-entry",
- "sel4-runtime-simple-static-heap",
+ "sel4-runtime-common",
 ]
 
 [[package]]
@@ -2488,26 +2486,14 @@ dependencies = [
 ]
 
 [[package]]
-name = "sel4-runtime-phdrs"
-version = "0.1.0"
-dependencies = [
- "sel4-reserve-tls-on-stack",
- "unwinding",
-]
-
-[[package]]
-name = "sel4-runtime-simple-entry"
+name = "sel4-runtime-common"
 version = "0.1.0"
 dependencies = [
  "cfg-if",
-]
-
-[[package]]
-name = "sel4-runtime-simple-static-heap"
-version = "0.1.0"
-dependencies = [
  "sel4-dlmalloc",
+ "sel4-reserve-tls-on-stack",
  "sel4-sync",
+ "unwinding",
 ]
 
 [[package]]
@@ -2553,7 +2539,7 @@ dependencies = [
  "sel4-panicking",
  "sel4-panicking-env",
  "sel4-reserve-tls-on-stack",
- "sel4-runtime-phdrs",
+ "sel4-runtime-common",
  "sel4-simple-task-runtime-config-types",
  "sel4-simple-task-runtime-macros",
  "sel4-simple-task-threading",
@@ -2652,9 +2638,7 @@ dependencies = [
  "sel4-immediate-sync-once-cell",
  "sel4-panicking",
  "sel4-panicking-env",
- "sel4-runtime-phdrs",
- "sel4-runtime-simple-entry",
- "sel4-runtime-simple-static-heap",
+ "sel4-runtime-common",
  "sel4-shared",
  "sel4cp-macros",
  "zerocopy",

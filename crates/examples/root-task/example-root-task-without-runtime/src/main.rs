@@ -1,19 +1,12 @@
 #![no_std]
 #![no_main]
 #![feature(core_intrinsics)]
+#![feature(exclusive_wrapper)]
 #![feature(never_type)]
 #![feature(unwrap_infallible)]
 
-use sel4_runtime_simple_entry::declare_stack;
-
-declare_stack!(0x4000);
-
-#[no_mangle]
-unsafe extern "C" fn sel4_runtime_rust_entry(bootinfo: *const sel4::sys::seL4_BootInfo) -> ! {
-    let bootinfo = sel4::BootInfo::from_ptr(bootinfo);
-    let err = main(&bootinfo).into_err();
-    panic!("Error: {}", err)
-}
+use core::arch::global_asm;
+use core::sync::Exclusive;
 
 fn main(bootinfo: &sel4::BootInfo) -> sel4::Result<!> {
     sel4::debug_println!("Hello, World!");
@@ -77,6 +70,77 @@ fn main(bootinfo: &sel4::BootInfo) -> sel4::Result<!> {
         .with(&mut ipc_buffer)
         .tcb_suspend()?;
     unreachable!()
+}
+
+// minimal ad-hoc runtime
+
+#[repr(C, align(16))]
+pub struct Stack<const N: usize>([u8; N]);
+
+impl<const N: usize> Stack<N> {
+    pub const fn new() -> Self {
+        Self([0; N])
+    }
+
+    pub const fn top(&self) -> StackTop {
+        StackTop(Exclusive::new(self.0.as_ptr_range().end.cast_mut()))
+    }
+}
+
+#[repr(transparent)]
+pub struct StackTop(Exclusive<*mut u8>);
+
+const STACK_SIZE: usize = 0x4000;
+
+static mut STACK: Stack<STACK_SIZE> = Stack::new();
+
+#[no_mangle]
+static __stack_top: StackTop = unsafe { STACK.top() };
+
+cfg_if::cfg_if! {
+    if #[cfg(target_arch = "aarch64")] {
+        global_asm! {
+            r#"
+                .extern __rust_entry
+                .extern __stack_top
+
+                .section .text
+
+                .global _start
+                _start:
+                    ldr x9, =__stack_top
+                    ldr x9, [x9]
+                    mov sp, x9
+                    b __rust_entry
+            "#
+        }
+    } else if #[cfg(target_arch = "x86_64")] {
+        global_asm! {
+            r#"
+                .extern __rust_entry
+                .extern __stack_top
+
+                .section .text
+
+                .global _start
+                _start:
+                    mov rsp, __stack_top
+                    mov rbp, rsp
+                    sub rsp, 0x8 // Stack must be 16-byte aligned before call
+                    push rbp
+                    call __rust_entry
+            "#
+        }
+    } else {
+        compile_error!("unsupported architecture");
+    }
+}
+
+#[no_mangle]
+unsafe extern "C" fn __rust_entry(bootinfo: *const sel4::sys::seL4_BootInfo) -> ! {
+    let bootinfo = sel4::BootInfo::from_ptr(bootinfo);
+    let err = main(&bootinfo).into_err();
+    panic!("Error: {}", err)
 }
 
 #[panic_handler]

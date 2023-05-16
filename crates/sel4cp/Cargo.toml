@@ -18,12 +18,10 @@ sel4 = { path = "../sel4", features = ["single-threaded"] }
 sel4-immediate-sync-once-cell = { path = "../sel4-immediate-sync-once-cell" }
 sel4-panicking = { path = "../sel4-panicking" }
 sel4-panicking-env = { path = "../sel4-panicking/env" }
-sel4-runtime-simple-entry = { path = "../sel4-runtime-simple-entry" }
-sel4-runtime-simple-static-heap = { path = "../sel4-runtime-simple-static-heap" }
 sel4-shared = { path = "../sel4-shared", features = ["unstable"] }
 sel4cp-macros = { path = "./macros" }
 zerocopy = "0.6.1"
 
-[dependencies.sel4-runtime-phdrs]
-path = "../sel4-runtime-phdrs"
-features = ["unwinding", "tls", "embedded-phdrs"]
+[dependencies.sel4-runtime-common]
+path = "../sel4-runtime-common"
+features = ["unwinding", "tls", "embedded-phdrs", "start", "static-heap"]

@@ -9,9 +9,6 @@ use core::fmt;
 #[cfg(target_thread_local)]
 use core::ffi::c_void;
 
-#[cfg(target_thread_local)]
-use sel4_runtime_phdrs::EmbeddedProgramHeaders;
-
 pub use sel4_panicking as panicking;
 pub use sel4_panicking_env::{abort, debug_print, debug_println};
 pub use sel4_root_task_runtime_macros::main;
@@ -30,8 +27,8 @@ unsafe extern "C" fn sel4_runtime_rust_entry(bootinfo: *const sel4::sys::seL4_Bo
 
     let cont_arg = bootinfo.cast::<c_void>().cast_mut();
 
-    EmbeddedProgramHeaders::finder()
-        .find_tls_image()
+    sel4_runtime_common::locate_tls_image()
+        .unwrap()
         .reserve_on_stack_and_continue(cont_fn, cont_arg)
 }
 
@@ -44,7 +41,7 @@ unsafe extern "C" fn sel4_runtime_rust_entry(bootinfo: *const sel4::sys::seL4_Bo
 unsafe extern "C" fn inner_entry(bootinfo: *const sel4::sys::seL4_BootInfo) -> ! {
     #[cfg(feature = "unwinding")]
     {
-        sel4_runtime_phdrs::unwinding::set_custom_eh_frame_finder_using_embedded_phdrs().unwrap();
+        sel4_runtime_common::set_eh_frame_finder().unwrap();
     }
 
     let ipc_buffer = sel4::BootInfo::from_ptr(bootinfo).ipc_buffer();
@@ -117,6 +114,6 @@ pub mod _private {
     pub use super::{declare_main, declare_root_task, run_main, DEFAULT_STACK_SIZE};
 
     pub use sel4::sys::seL4_BootInfo;
-    pub use sel4_runtime_simple_entry::declare_stack;
-    pub use sel4_runtime_simple_static_heap::declare_static_heap;
+    pub use sel4_runtime_common::declare_stack;
+    pub use sel4_runtime_common::declare_static_heap;
 }

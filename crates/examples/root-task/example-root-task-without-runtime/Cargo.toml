@@ -6,5 +6,5 @@ edition = "2021"
 license = "BSD-2-Clause"
 
 [dependencies]
+cfg-if = "1.0.0"
 sel4 = { path = "../../../sel4", default-features = false }
-sel4-runtime-simple-entry = { path = "../../../sel4-runtime-simple-entry" }

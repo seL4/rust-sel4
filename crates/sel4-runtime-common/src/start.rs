@@ -1,6 +1,3 @@
-#![no_std]
-#![feature(exclusive_wrapper)]
-
 use core::arch::global_asm;
 use core::sync::Exclusive;
 
@@ -28,8 +25,9 @@ pub struct StackTop(Exclusive<*mut u8>);
 macro_rules! declare_stack {
     ($size:expr) => {
         #[no_mangle]
-        static __sel4_runtime_stack_top: $crate::StackTop = {
-            static mut STACK: $crate::Stack<{ $size }> = $crate::Stack::new();
+        static __sel4_runtime_stack_top: $crate::_private::start::StackTop = {
+            static mut STACK: $crate::_private::start::Stack<{ $size }> =
+                $crate::_private::start::Stack::new();
             unsafe { STACK.top() }
         };
     };
@@ -72,4 +70,8 @@ cfg_if::cfg_if! {
     } else {
         compile_error!("unsupported architecture");
     }
+}
+
+pub mod _private {
+    pub use super::{Stack, StackTop};
 }

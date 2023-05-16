@@ -1,5 +1,3 @@
-#![no_std]
-
 use sel4_dlmalloc::{ConstantStaticHeapBounds, StaticDlmallocGlobalAlloc};
 use sel4_sync::DeferredNotificationMutexSyncOps;
 
@@ -18,9 +16,14 @@ macro_rules! declare_static_heap {
         $vis:vis $ident:ident: $size:expr;
     } => {
         #[global_allocator]
-        $vis static $ident: $crate::GlobalAllocator = {
-            static mut STATIC_HEAP: $crate::StaticHeap<{ $size }> = $crate::StaticHeap::new();
-            $crate::new_global_allocator(unsafe { STATIC_HEAP.bounds() })
+        $vis static $ident: $crate::_private::static_heap::GlobalAllocator = {
+            static mut STATIC_HEAP: $crate::_private::static_heap::StaticHeap<{ $size }> =
+                $crate::_private::static_heap::StaticHeap::new();
+            $crate::_private::static_heap::new_global_allocator(unsafe { STATIC_HEAP.bounds() })
         };
     }
+}
+
+pub mod _private {
+    pub use super::{new_global_allocator, GlobalAllocator, StaticHeap};
 }

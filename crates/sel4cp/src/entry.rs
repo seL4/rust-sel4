@@ -12,7 +12,6 @@ use crate::panicking::init_panicking;
 unsafe extern "C" fn sel4_runtime_rust_entry() -> ! {
     use core::ffi::c_void;
     use core::ptr;
-    use sel4_runtime_phdrs::EmbeddedProgramHeaders;
 
     unsafe extern "C" fn cont_fn(_cont_arg: *mut c_void) -> ! {
         inner_entry()
@@ -20,8 +19,8 @@ unsafe extern "C" fn sel4_runtime_rust_entry() -> ! {
 
     let cont_arg = ptr::null_mut();
 
-    EmbeddedProgramHeaders::finder()
-        .find_tls_image()
+    sel4_runtime_common::locate_tls_image()
+        .unwrap()
         .reserve_on_stack_and_continue(cont_fn, cont_arg)
 }
 
@@ -34,7 +33,7 @@ unsafe extern "C" fn sel4_runtime_rust_entry() -> ! {
 unsafe extern "C" fn inner_entry() -> ! {
     #[cfg(feature = "unwinding")]
     {
-        sel4_runtime_phdrs::unwinding::set_custom_eh_frame_finder_using_embedded_phdrs().unwrap();
+        sel4_runtime_common::set_eh_frame_finder().unwrap();
     }
 
     init_panicking();

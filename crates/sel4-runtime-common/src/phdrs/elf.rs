@@ -1,3 +1,8 @@
+#![allow(dead_code)]
+
+use core::ops::Range;
+use core::slice;
+
 #[cfg(target_pointer_width = "32")]
 pub type Word = u32;
 
@@ -41,6 +46,16 @@ impl ElfHeader {
     pub fn check_magic(&self) -> bool {
         self.e_ident.magic == ELFMAG
     }
+
+    pub fn locate_phdrs(&self) -> &'static [ProgramHeader] {
+        unsafe {
+            let ptr = (self as *const Self)
+                .cast::<u8>()
+                .offset(self.e_phoff.try_into().unwrap())
+                .cast::<ProgramHeader>();
+            slice::from_raw_parts(ptr, self.e_phnum.try_into().unwrap())
+        }
+    }
 }
 
 #[repr(C)]
@@ -60,3 +75,11 @@ pub const PT_NULL: u32 = 0;
 pub const PT_LOAD: u32 = 1;
 pub const PT_TLS: u32 = 7;
 pub const PT_GNU_EH_FRAME: u32 = 0x6474_e550;
+
+impl ProgramHeader {
+    pub fn vaddr_range(&self) -> Range<usize> {
+        let start = self.p_vaddr;
+        let end = start + self.p_memsz;
+        start.try_into().unwrap()..end.try_into().unwrap()
+    }
+}

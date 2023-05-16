@@ -32,6 +32,6 @@ sel4-sync = { path = "../../../../sel4-sync" }
 serde = { version = "1.0.147", default-features = false, features = [] }
 serde_json = { version = "1.0.87", default-features = false, optional = true }
 
-[dependencies.sel4-runtime-phdrs]
-path = "../../../../sel4-runtime-phdrs"
+[dependencies.sel4-runtime-common]
+path = "../../../../sel4-runtime-common"
 features = ["tls", "unwinding", "embedded-phdrs"]
