@@ -13,7 +13,7 @@ use object::{
 };
 use quote::format_ident;
 
-use loader_embed_page_tables::{MkLeafFnParams, Region, Regions};
+use sel4_loader_embed_page_tables::{MkLeafFnParams, Region, Regions};
 use sel4_build_env::{observe_path, PathVarType, Var, SEL4_INCLUDE_DIRS, SEL4_PREFIX_ENV};
 use sel4_platform_info::PLATFORM_INFO;
 use sel4_rustfmt_helper::Rustfmt;

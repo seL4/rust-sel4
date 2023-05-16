@@ -2,7 +2,7 @@ use core::ops::Range;
 use core::ptr;
 use core::slice;
 
-use loader_payload_types::*;
+use sel4_loader_payload_types::*;
 
 pub(crate) fn get_payload() -> (PayloadForX, &'static [u8]) {
     let blob = unsafe { slice::from_raw_parts(loader_payload_start, loader_payload_size) };

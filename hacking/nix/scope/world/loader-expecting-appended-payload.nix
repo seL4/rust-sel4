@@ -10,7 +10,7 @@ let
   rustTargetName = rustTargetInfo.name;
   rustTargetPath = rustTargetInfo.path;
 
-  rootCrate = crates.loader;
+  rootCrate = crates.sel4-loader;
 
   release = false;
 

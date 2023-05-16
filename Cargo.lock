@@ -1468,75 +1468,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ece97ea872ece730aed82664c424eb4c8291e1ff2480247ccf7409044bc6479f"
 
 [[package]]
-name = "loader"
-version = "0.1.0"
-dependencies = [
- "aarch64-cpu",
- "cc",
- "cfg-if",
- "glob",
- "heapless",
- "loader-config-types",
- "loader-embed-page-tables",
- "loader-payload-types",
- "log",
- "object",
- "postcard",
- "psci",
- "quote",
- "sel4-build-env",
- "sel4-config",
- "sel4-logging",
- "sel4-platform-info",
- "sel4-rustfmt-helper",
- "serde",
- "serde_yaml",
- "spin 0.9.8",
- "tock-registers",
-]
-
-[[package]]
-name = "loader-add-payload"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "clap 3.2.25",
- "fallible-iterator",
- "heapless",
- "loader-config-types",
- "loader-payload-types",
- "object",
- "postcard",
- "render-elf-with-data",
- "serde",
- "serde_json",
- "serde_yaml",
-]
-
-[[package]]
-name = "loader-config-types"
-version = "0.1.0"
-dependencies = [
- "serde",
-]
-
-[[package]]
-name = "loader-embed-page-tables"
-version = "0.1.0"
-dependencies = [
- "proc-macro2",
- "quote",
-]
-
-[[package]]
-name = "loader-payload-types"
-version = "0.1.0"
-dependencies = [
- "heapless",
- "serde",
-]
-
-[[package]]
 name = "lock_api"
 version = "0.4.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2419,6 +2350,75 @@ dependencies = [
 [[package]]
 name = "sel4-immediate-sync-once-cell"
 version = "0.1.0"
+
+[[package]]
+name = "sel4-loader"
+version = "0.1.0"
+dependencies = [
+ "aarch64-cpu",
+ "cc",
+ "cfg-if",
+ "glob",
+ "heapless",
+ "log",
+ "object",
+ "postcard",
+ "psci",
+ "quote",
+ "sel4-build-env",
+ "sel4-config",
+ "sel4-loader-config-types",
+ "sel4-loader-embed-page-tables",
+ "sel4-loader-payload-types",
+ "sel4-logging",
+ "sel4-platform-info",
+ "sel4-rustfmt-helper",
+ "serde",
+ "serde_yaml",
+ "spin 0.9.8",
+ "tock-registers",
+]
+
+[[package]]
+name = "sel4-loader-add-payload"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "clap 3.2.25",
+ "fallible-iterator",
+ "heapless",
+ "object",
+ "postcard",
+ "render-elf-with-data",
+ "sel4-loader-config-types",
+ "sel4-loader-payload-types",
+ "serde",
+ "serde_json",
+ "serde_yaml",
+]
+
+[[package]]
+name = "sel4-loader-config-types"
+version = "0.1.0"
+dependencies = [
+ "serde",
+]
+
+[[package]]
+name = "sel4-loader-embed-page-tables"
+version = "0.1.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+]
+
+[[package]]
+name = "sel4-loader-payload-types"
+version = "0.1.0"
+dependencies = [
+ "heapless",
+ "serde",
+]
 
 [[package]]
 name = "sel4-logging"

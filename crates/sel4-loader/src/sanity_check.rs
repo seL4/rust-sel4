@@ -1,7 +1,7 @@
 use core::borrow::Borrow;
 use core::ops::Range;
 
-use loader_payload_types::Region;
+use sel4_loader_payload_types::Region;
 use sel4_platform_info::PLATFORM_INFO;
 
 pub(crate) fn sanity_check<T>(own_footprint: &Range<u64>, regions: &[Region<T>]) {

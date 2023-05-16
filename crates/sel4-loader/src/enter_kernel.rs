@@ -1,7 +1,7 @@
 use core::mem;
 use core::ops::Neg;
 
-use loader_payload_types::PayloadInfo;
+use sel4_loader_payload_types::PayloadInfo;
 
 type KernelEntry = extern "C" fn(
     ui_p_reg_start: usize,

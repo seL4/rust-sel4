@@ -6,7 +6,7 @@
 , crateUtils
 , kernelBinary
 , seL4ForBoot
-, loader-add-payload
+, sel4-loader-add-payload
 , loader-expecting-appended-payload
 }:
 
@@ -17,7 +17,7 @@ let
 in lib.fix (self: runCommand "loader-with-serialization" {
 
   nativeBuildInputs = [
-    loader-add-payload
+    sel4-loader-add-payload
   ];
 
   passthru = {
@@ -29,7 +29,7 @@ in lib.fix (self: runCommand "loader-with-serialization" {
   };
 
 } ''
-  loader-add-payload \
+  sel4-loader-add-payload \
     -v \
     --loader ${loader-expecting-appended-payload.elf} \
     --sel4-prefix ${seL4ForBoot} \

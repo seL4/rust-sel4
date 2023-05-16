@@ -21,7 +21,7 @@ let
         "grammar.pest"
       ];
     };
-    loader = {
+    sel4-loader = {
       extraPaths = [
         "asm"
       ];
