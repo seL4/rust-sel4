@@ -1,5 +1,5 @@
 [package]
-name = "generate-target-specs"
+name = "sel4-generate-target-specs"
 version = "0.1.0"
 authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
 edition = "2021"

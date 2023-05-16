@@ -77,7 +77,7 @@ members = [
     "crates/simple-task/sel4-simple-task-runtime/macros",
     "crates/simple-task/sel4-simple-task-threading",
     "crates/support/cargo-helpers",
-    "crates/support/generate-target-specs",
+    "crates/support/sel4-generate-target-specs",
     "crates/tests/capdl/threads/components/test",
     "crates/tests/capdl/utcover/components/test",
     "crates/tests/root-task/backtrace",

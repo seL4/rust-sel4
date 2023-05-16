@@ -1047,14 +1047,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "generate-target-specs"
-version = "0.1.0"
-dependencies = [
- "clap 3.2.25",
- "serde_json",
-]
-
-[[package]]
 name = "generic-array"
 version = "0.14.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2335,6 +2327,14 @@ version = "0.1.0"
 dependencies = [
  "clap 3.2.25",
  "sel4-render-elf-with-data",
+]
+
+[[package]]
+name = "sel4-generate-target-specs"
+version = "0.1.0"
+dependencies = [
+ "clap 3.2.25",
+ "serde_json",
 ]
 
 [[package]]
