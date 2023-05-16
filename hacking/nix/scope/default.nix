@@ -115,6 +115,8 @@ superCallPackage ../rust-utils {} self //
 
   inherit (callPackage ./crates.nix {}) crates;
 
+  distribution = callPackage ./distribution.nix {};
+
   registry = callPackage ./registry.nix {};
 
   buildCrateInLayersHere = buildCrateInLayers {
