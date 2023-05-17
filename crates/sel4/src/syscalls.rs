@@ -182,7 +182,7 @@ impl<C: InvocationContext> Notification<C> {
 
 impl<T: IPCCapType, C: InvocationContext> LocalCPtr<T, C> {
     /// Corresponds to `seL4_NBSendRecv`.
-    #[cfg(KERNEL_MCS)]
+    #[sel4_cfg(KERNEL_MCS)]
     pub fn nb_send_recv<U: IPCCapType>(
         self,
         info: MessageInfo,
