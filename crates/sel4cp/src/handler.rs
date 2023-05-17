@@ -1,4 +1,6 @@
-use crate::cspace::{Channel, INPUT_CAP, REPLY_CAP};
+use crate::cspace::{
+    Channel, DeferredAction, PreparedDeferredAction, INPUT_CAP, MONITOR_EP_CAP, REPLY_CAP,
+};
 use crate::is_passive;
 use crate::message::MessageInfo;
 
@@ -17,32 +19,57 @@ pub trait Handler {
         panic!("unexpected protected procedure call from channel {channel:?} with msg_info={msg_info:?}")
     }
 
-    fn run(&mut self) -> Result<!, Self::Error> {
-        assert!(!is_passive());
-        let mut reply_tag: Option<MessageInfo> = None;
-        loop {
-            let (tag, badge) = match reply_tag {
-                Some(tag) => INPUT_CAP.reply_recv(tag.into_sel4(), REPLY_CAP),
-                None => INPUT_CAP.recv(REPLY_CAP),
-            };
+    fn take_deferred_action(&mut self) -> Option<DeferredAction> {
+        None
+    }
+}
 
-            let tag = MessageInfo::from_sel4(tag);
+pub(crate) fn run_handler<T: Handler>(mut handler: T) -> Result<!, T::Error> {
+    let mut reply_tag: Option<MessageInfo> = None;
 
-            let is_endpoint = badge & (1 << (sel4::WORD_SIZE - 1)) != 0;
+    let mut prepared_deferred_action: Option<PreparedDeferredAction> = if is_passive() {
+        sel4::with_borrow_ipc_buffer_mut(|ipc_buffer| ipc_buffer.msg_regs_mut()[0] = 0);
+        Some(PreparedDeferredAction::new(
+            MONITOR_EP_CAP.cast(),
+            sel4::MessageInfoBuilder::default().length(1).build(),
+        ))
+    } else {
+        None
+    };
 
-            reply_tag = if is_endpoint {
-                let channel_index = badge & (sel4::Word::try_from(sel4::WORD_SIZE).unwrap() - 1);
-                Some(self.protected(Channel::new(channel_index.try_into().unwrap()), tag)?)
-            } else {
-                let mut badge_bits = badge;
-                while badge_bits != 0 {
-                    let i = badge_bits.trailing_zeros();
-                    self.notified(Channel::new(i.try_into().unwrap()))?;
-                    badge_bits &= !(1 << i);
-                }
-                None
-            };
-        }
+    loop {
+        let (tag, badge) = match (reply_tag.take(), prepared_deferred_action.take()) {
+            (Some(tag), None) => INPUT_CAP.reply_recv(tag.into_sel4(), REPLY_CAP),
+            (None, Some(action)) => action.cptr().nb_send_recv(
+                action.msg_info(),
+                INPUT_CAP.cast::<sel4::cap_type::Unspecified>(),
+                REPLY_CAP,
+            ),
+            (None, None) => INPUT_CAP.recv(REPLY_CAP),
+            _ => unreachable!(),
+        };
+
+        let tag = MessageInfo::from_sel4(tag);
+
+        let is_endpoint = badge & (1 << (sel4::WORD_SIZE - 1)) != 0;
+
+        if is_endpoint {
+            let channel_index = badge & (sel4::Word::try_from(sel4::WORD_SIZE).unwrap() - 1);
+            reply_tag =
+                Some(handler.protected(Channel::new(channel_index.try_into().unwrap()), tag)?);
+        } else {
+            let mut badge_bits = badge;
+            while badge_bits != 0 {
+                let i = badge_bits.trailing_zeros();
+                handler.notified(Channel::new(i.try_into().unwrap()))?;
+                badge_bits &= !(1 << i);
+            }
+        };
+
+        prepared_deferred_action = handler
+            .take_deferred_action()
+            .as_ref()
+            .map(DeferredAction::prepare);
     }
 }
 

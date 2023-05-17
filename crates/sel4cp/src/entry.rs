@@ -4,7 +4,7 @@ pub use sel4_panicking::catch_unwind;
 pub use sel4_panicking_env::{abort, debug_print, debug_println};
 
 use crate::get_ipc_buffer;
-use crate::handler::Handler;
+use crate::handler::{run_handler, Handler};
 use crate::panicking::init_panicking;
 
 #[cfg(target_thread_local)]
@@ -62,7 +62,7 @@ where
     T: Handler,
     T::Error: fmt::Debug,
 {
-    match catch_unwind(|| f().run().into_err()) {
+    match catch_unwind(|| run_handler(f()).into_err()) {
         Ok(err) => abort!("main thread terminated with error: {err:?}"),
         Err(_) => abort!("main thread panicked"),
     }

@@ -22,6 +22,9 @@ impl IPCCapType for cap_type::Notification {}
 
 impl IPCCapType for cap_type::Endpoint {}
 
+// HACK
+impl IPCCapType for cap_type::Unspecified {}
+
 sel4_cfg_if! {
     if #[cfg(KERNEL_MCS)] {
         pub type WaitMessageInfo = MessageInfo;

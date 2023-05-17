@@ -7,7 +7,7 @@ use core::ptr;
 use heapless::Deque;
 
 use sel4cp::message::{MessageInfo, NoMessageValue, StatusMessageLabel};
-use sel4cp::{protection_domain, Channel, Handler};
+use sel4cp::{protection_domain, Channel, DeferredAction, Handler};
 
 use banscii_pl011_driver_interface_types::*;
 

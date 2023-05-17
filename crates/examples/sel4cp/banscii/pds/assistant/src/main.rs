@@ -15,7 +15,7 @@ use sel4cp::memory_region::{
     declare_memory_region, MemoryRegion, ReadOnly, ReadWrite, SharedSliceExt,
 };
 use sel4cp::message::{MessageInfo, NoMessageLabel, NoMessageValue, StatusMessageLabel};
-use sel4cp::{protection_domain, Channel, Handler};
+use sel4cp::{protection_domain, Channel, DeferredAction, Handler};
 
 use banscii_artist_interface_types as artist;
 use banscii_assistant_core::Draft;

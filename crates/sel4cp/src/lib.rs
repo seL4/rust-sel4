@@ -26,7 +26,7 @@ pub mod memory_region;
 pub mod message;
 pub mod panicking;
 
-pub use cspace::{Channel, IrqAckError};
+pub use cspace::{Channel, DeferredAction, IrqAckError};
 pub use handler::{Handler, NullHandler};
 
 // TODO decrease

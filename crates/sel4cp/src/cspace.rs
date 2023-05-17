@@ -6,6 +6,7 @@ pub(crate) type Slot = usize;
 
 pub(crate) const INPUT_CAP: sel4::Endpoint = slot_to_local_cptr(1);
 pub(crate) const REPLY_CAP: sel4::Reply = slot_to_local_cptr(4);
+pub(crate) const MONITOR_EP_CAP: sel4::Endpoint = slot_to_local_cptr(5);
 
 const BASE_OUTPUT_NOTIFICATION_CAP: Slot = 10;
 const BASE_ENDPOINT_CAP: Slot = BASE_OUTPUT_NOTIFICATION_CAP + 64;
@@ -32,21 +33,97 @@ impl Channel {
         slot_to_local_cptr(offset + self.index)
     }
 
-    pub fn notify(&self) {
+    fn notification(&self) -> sel4::Notification {
         self.local_cptr::<sel4::cap_type::Notification>(BASE_OUTPUT_NOTIFICATION_CAP)
-            .signal()
+    }
+
+    fn irq_handler(&self) -> sel4::IRQHandler {
+        self.local_cptr::<sel4::cap_type::IRQHandler>(BASE_IRQ_CAP)
+    }
+
+    fn endpoint(&self) -> sel4::Endpoint {
+        self.local_cptr::<sel4::cap_type::Endpoint>(BASE_ENDPOINT_CAP)
+    }
+
+    pub fn notify(&self) {
+        self.notification().signal()
     }
 
     pub fn irq_ack(&self) -> Result<(), sel4::Error> {
-        self.local_cptr::<sel4::cap_type::IRQHandler>(BASE_IRQ_CAP)
-            .irq_handler_ack()
+        self.irq_handler().irq_handler_ack()
     }
 
     pub fn pp_call(&self, msg_info: MessageInfo) -> MessageInfo {
-        MessageInfo::from_sel4(
-            self.local_cptr::<sel4::cap_type::Endpoint>(BASE_ENDPOINT_CAP)
-                .call(msg_info.into_sel4()),
-        )
+        MessageInfo::from_sel4(self.endpoint().call(msg_info.into_sel4()))
+    }
+
+    pub fn defer_notify(&self) -> DeferredAction {
+        DeferredAction::new(self.clone(), DeferredActionInterface::Notify)
+    }
+
+    pub fn defer_irq_ack(&self) -> DeferredAction {
+        DeferredAction::new(self.clone(), DeferredActionInterface::IrqAck)
+    }
+}
+
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub struct DeferredAction {
+    channel: Channel,
+    interface: DeferredActionInterface,
+}
+
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub enum DeferredActionInterface {
+    Notify,
+    IrqAck,
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub(crate) struct PreparedDeferredAction {
+    cptr: sel4::Unspecified,
+    msg_info: sel4::MessageInfo,
+}
+
+impl DeferredAction {
+    pub fn new(channel: Channel, interface: DeferredActionInterface) -> Self {
+        Self { channel, interface }
+    }
+
+    pub fn channel(&self) -> Channel {
+        self.channel
+    }
+
+    pub fn interface(&self) -> DeferredActionInterface {
+        self.interface
+    }
+
+    pub(crate) fn prepare(&self) -> PreparedDeferredAction {
+        match self.interface() {
+            DeferredActionInterface::Notify => PreparedDeferredAction::new(
+                self.channel().notification().cast(),
+                sel4::MessageInfoBuilder::default().build(),
+            ),
+            DeferredActionInterface::IrqAck => PreparedDeferredAction::new(
+                self.channel().irq_handler().cast(),
+                sel4::MessageInfoBuilder::default()
+                    .label(sel4::sys::invocation_label::IRQAckIRQ.into())
+                    .build(),
+            ),
+        }
+    }
+}
+
+impl PreparedDeferredAction {
+    pub(crate) fn new(cptr: sel4::Unspecified, msg_info: sel4::MessageInfo) -> Self {
+        Self { cptr, msg_info }
+    }
+
+    pub(crate) fn cptr(&self) -> sel4::Unspecified {
+        self.cptr
+    }
+
+    pub(crate) fn msg_info(&self) -> sel4::MessageInfo {
+        self.msg_info.clone() // TODO
     }
 }
 
