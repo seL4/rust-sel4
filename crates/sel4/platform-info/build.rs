@@ -7,7 +7,13 @@ use proc_macro2::TokenStream;
 use quote::quote;
 use serde::{Deserialize, Serialize};
 
-use sel4_build_env::SEL4_PLATFORM_INFO;
+use sel4_build_env::{PathVarType, Var, SEL4_PREFIX_ENV};
+
+const SEL4_PLATFORM_INFO: Var<PathVarType<'static>> = Var::new(
+    "SEL4_PLATFORM_INFO",
+    SEL4_PREFIX_ENV,
+    "support/platform_gen.yaml",
+);
 
 fn main() {
     let platform_info_path = SEL4_PLATFORM_INFO.get();
