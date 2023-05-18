@@ -263,6 +263,24 @@ where
     }
 }
 
+impl FastMessages for &[Word] {
+    fn prepare_in(self) -> ConcreteFastMessagesForIn {
+        assert!(self.len() <= NUM_FAST_MESSAGE_REGISTERS);
+        array::from_fn(|i| if i < self.len() { Some(self[i]) } else { None })
+    }
+
+    fn prepare_in_out(self) -> ConcreteFastMessagesForInOut {
+        assert!(self.len() <= NUM_FAST_MESSAGE_REGISTERS);
+        array::from_fn(|i| {
+            if i < self.len() {
+                self[i]
+            } else {
+                UNUSED_FOR_IN
+            }
+        })
+    }
+}
+
 mod fast_messages_sealing {
     use super::Word;
 
@@ -273,6 +291,8 @@ mod fast_messages_sealing {
     impl FastMessagesSealed for [Word; 2] {}
     impl FastMessagesSealed for [Word; 3] {}
     impl FastMessagesSealed for [Word; 4] {}
+
+    impl FastMessagesSealed for &[Word] {}
 }
 
 #[allow(dead_code)]
