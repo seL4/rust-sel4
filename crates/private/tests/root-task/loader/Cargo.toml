@@ -8,5 +8,5 @@ license = "BSD-2-Clause"
 [dependencies]
 fdt = "0.1.4"
 sel4 = { path = "../../../../sel4" }
-sel4-platform-info = { path = "../../../../sel4/platform-info" }
+sel4-platform-info = { path = "../../../../sel4-platform-info" }
 sel4-root-task-runtime = { path = "../../../../sel4-root-task-runtime" }

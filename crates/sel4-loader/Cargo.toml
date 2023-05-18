@@ -15,7 +15,7 @@ psci = { version = "0.1.1", default-features = false }
 sel4-config = { path = "../sel4/config" }
 sel4-loader-payload-types = { path = "./payload-types", features = ["serde"] }
 sel4-logging = { path = "../sel4-logging" }
-sel4-platform-info = { path = "../sel4/platform-info" }
+sel4-platform-info = { path = "../sel4-platform-info" }
 spin = "0.9.4"
 tock-registers = "0.8.1"
 
@@ -30,7 +30,7 @@ sel4-config = { path = "../sel4/config" }
 sel4-loader-config-types = { path = "./config-types" }
 sel4-loader-embed-page-tables = { path = "./embed-page-tables" }
 sel4-loader-payload-types = { path = "./payload-types" }
-sel4-platform-info = { path = "../sel4/platform-info" }
+sel4-platform-info = { path = "../sel4-platform-info" }
 sel4-rustfmt-helper = { path = "../sel4/rustfmt-helper" }
 serde = "1.0.147"
 serde_yaml = "0.9.14"

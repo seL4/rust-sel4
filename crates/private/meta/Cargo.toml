@@ -15,7 +15,7 @@ cfg-if = "1.0.0"
 log = "0.4.17"
 
 [target."cfg(all(target_env = \"sel4\", not(target_arch = \"x86_64\")))".dependencies]
-sel4-platform-info = { path = "../../sel4/platform-info", optional = true }
+sel4-platform-info = { path = "../../sel4-platform-info", optional = true }
 
 [target."cfg(not(target_os = \"none\"))".dependencies]
 sel4-render-elf-with-data = { path = "../../sel4-render-elf-with-data" }
