@@ -31,6 +31,6 @@ sel4-loader-config-types = { path = "./config-types" }
 sel4-loader-embed-page-tables = { path = "./embed-page-tables" }
 sel4-loader-payload-types = { path = "./payload-types" }
 sel4-platform-info = { path = "../sel4-platform-info" }
-sel4-rustfmt-helper = { path = "../sel4/rustfmt-helper" }
+sel4-rustfmt-helper = { path = "../sel4-rustfmt-helper" }
 serde = "1.0.147"
 serde_yaml = "0.9.14"
