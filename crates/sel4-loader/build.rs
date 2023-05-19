@@ -13,7 +13,7 @@ use object::{
 };
 use quote::format_ident;
 
-use sel4_build_env::{observe_path, PathVarType, Var, SEL4_INCLUDE_DIRS, SEL4_PREFIX_ENV};
+use sel4_build_env::{get_libsel4_include_dirs, get_with_sel4_prefix_relative_fallback};
 use sel4_loader_embed_page_tables::{MkLeafFnParams, Region, Regions};
 use sel4_platform_info::PLATFORM_INFO;
 use sel4_rustfmt_helper::Rustfmt;
@@ -26,8 +26,7 @@ sel4_config::sel4_cfg_if! {
     }
 }
 
-pub const SEL4_KERNEL: Var<PathVarType<'static>> =
-    Var::new("SEL4_KERNEL", SEL4_PREFIX_ENV, "bin/kernel.elf");
+pub const SEL4_KERNEL_ENV: &str = "SEL4_KERNEL";
 
 const KERNEL_HEADROOM: u64 = 256 * 1024; // TODO
 const GRANULE_SIZE: u64 = 4096;
@@ -43,7 +42,7 @@ fn main() {
 
         cc::Build::new()
             .files(&asm_files)
-            .includes(SEL4_INCLUDE_DIRS.get().iter())
+            .includes(get_libsel4_include_dirs())
             .compile("asm");
 
         for path in &asm_files {
@@ -57,7 +56,7 @@ fn main() {
         Rustfmt::detect().format(&out_path);
     }
 
-    let kernel_path = observe_path(SEL4_KERNEL.get());
+    let kernel_path = get_with_sel4_prefix_relative_fallback(SEL4_KERNEL_ENV, "bin/kernel.elf");
     let kernel_bytes = fs::read(kernel_path).unwrap();
     let kernel_elf = ElfFile::<FileHeader<Endianness>, _>::parse(kernel_bytes.as_slice()).unwrap();
     let kernel_phys_addr_range = elf_phys_addr_range(&kernel_elf);

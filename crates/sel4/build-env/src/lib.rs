@@ -1,133 +1,77 @@
-use std::env;
-use std::marker::PhantomData;
+use std::env::{self, VarError};
 use std::path::{Path, PathBuf};
 
 pub const SEL4_PREFIX_ENV: &str = "SEL4_PREFIX";
 
-pub const SEL4_INCLUDE_DIRS: Var<PathsVarType<'static>> = Var::new(
-    "SEL4_INCLUDE_DIRS",
-    SEL4_PREFIX_ENV,
-    ["libsel4/include"].as_slice(),
-);
+pub const SEL4_INCLUDE_DIRS_ENV: &str = "SEL4_INCLUDE_DIRS";
 
-pub struct Var<'a, T: VarType> {
-    var: &'a str,
-    default_prefix_var: &'a str,
-    default_suffix: T::Suffix,
-    phantom: PhantomData<T>,
+fn get_asserting_valid_unicode(var: &str) -> Option<String> {
+    env::var(var)
+        .map_err(|err| {
+            if let VarError::NotUnicode(val) = err {
+                panic!("the value of environment variable {var:?} is not valid unicode: {val:?}");
+            }
+        })
+        .ok()
+        .map(|val| {
+            println!("cargo:rerun-if-env-changed={var}");
+            val
+        })
 }
 
-impl<'a, T: VarType> Var<'a, T> {
-    pub const fn new(var: &'a str, default_prefix_var: &'a str, default_suffix: T::Suffix) -> Self {
-        Self {
-            var,
-            default_prefix_var,
-            default_suffix,
-            phantom: PhantomData,
+pub fn get_with_sel4_prefix_relative_fallback(
+    var: &str,
+    relative_path_from_fallback: impl AsRef<Path>,
+) -> PathBuf {
+    try_get_with_sel4_prefix_relative_fallback(var, relative_path_from_fallback)
+        .unwrap_or_else(|| panic!("{var} or {SEL4_PREFIX_ENV} must be set"))
+}
+
+pub fn try_get_with_sel4_prefix_relative_fallback(
+    var: &str,
+    relative_path_from_fallback: impl AsRef<Path>,
+) -> Option<PathBuf> {
+    get_asserting_valid_unicode(var)
+        .map(PathBuf::from)
+        .or_else(|| get_sel4_prefix().map(|fallback| fallback.join(relative_path_from_fallback)))
+        .map(|path| {
+            println!("cargo:rerun-if-changed={}", path.display());
+            path
+        })
+}
+
+pub fn get_sel4_prefix() -> Option<PathBuf> {
+    get_asserting_valid_unicode(SEL4_PREFIX_ENV).map(PathBuf::from)
+}
+
+pub fn get_libsel4_include_dirs() -> impl Iterator<Item = PathBuf> {
+    get_asserting_valid_unicode(SEL4_INCLUDE_DIRS_ENV)
+        .map(|val| val.split(':').map(PathBuf::from).collect())
+        .or_else(|| get_sel4_prefix().map(|sel4_prefix| vec![sel4_prefix.join("libsel4/include")]))
+        .unwrap_or_else(|| panic!("{SEL4_INCLUDE_DIRS_ENV} or {SEL4_PREFIX_ENV} must be set"))
+        .into_iter()
+        .map(|path| {
+            println!("cargo:rerun-if-changed={}", path.display());
+            path
+        })
+}
+
+pub fn try_find_in_libsel4_include_dirs(relative_path: impl AsRef<Path>) -> Option<PathBuf> {
+    for d in get_libsel4_include_dirs() {
+        let path = Path::new(&d).join(relative_path.as_ref());
+        if path.exists() {
+            return Some(path);
         }
     }
-
-    fn try_get_default(&self) -> Option<T::Value> {
-        env::var(self.default_prefix_var)
-            .ok()
-            .map(PathBuf::from)
-            .map(|prefix| T::from_suffix(&prefix, &self.default_suffix))
-    }
-
-    pub fn try_get(&self) -> Option<T::Value> {
-        self.declare_as_dependency();
-        env::var(self.var)
-            .ok()
-            .map(|raw_value| T::from_raw_value(&raw_value))
-            .or_else(|| self.try_get_default())
-    }
-
-    pub fn get(&self) -> T::Value {
-        self.try_get()
-            .unwrap_or_else(|| panic!("{} or {} must be set", &self.var, &self.default_prefix_var))
-    }
-
-    pub fn declare_as_dependency(&self) {
-        println!("cargo:rerun-if-env-changed={}", &self.var);
-        println!("cargo:rerun-if-env-changed={}", &self.default_prefix_var);
-    }
+    None
 }
 
-pub trait VarType {
-    type Value;
-    type Suffix;
-
-    fn from_suffix(prefix: &Path, suffix: &Self::Suffix) -> Self::Value;
-    fn from_raw_value(raw_value: &str) -> Self::Value;
-}
-
-pub struct SimpleVar<'a, T: VarType> {
-    var: &'a str,
-    phantom: PhantomData<T>,
-}
-
-impl<'a, T: VarType> SimpleVar<'a, T> {
-    pub const fn new(var: &'a str) -> Self {
-        Self {
-            var,
-            phantom: PhantomData,
-        }
-    }
-
-    pub fn try_get(&self) -> Option<T::Value> {
-        self.declare_as_dependency();
-        env::var(self.var)
-            .ok()
-            .map(|raw_value| T::from_raw_value(&raw_value))
-    }
-
-    pub fn get(&self) -> T::Value {
-        self.try_get()
-            .unwrap_or_else(|| panic!("{} must be set", &self.var))
-    }
-
-    pub fn declare_as_dependency(&self) {
-        println!("cargo:rerun-if-env-changed={}", &self.var);
-    }
-}
-
-pub struct PathVarType<'a> {
-    phantom: PhantomData<&'a ()>,
-}
-
-impl<'a> VarType for PathVarType<'a> {
-    type Value = PathBuf;
-    type Suffix = &'a str;
-
-    fn from_suffix(prefix: &Path, suffix: &Self::Suffix) -> Self::Value {
-        prefix.join(suffix)
-    }
-
-    fn from_raw_value(raw_value: &str) -> Self::Value {
-        raw_value.into()
-    }
-}
-
-pub struct PathsVarType<'a> {
-    phantom: PhantomData<&'a ()>,
-}
-
-impl<'a> VarType for PathsVarType<'a> {
-    type Value = Vec<PathBuf>;
-    type Suffix = &'a [&'a str];
-
-    fn from_suffix(prefix: &Path, suffix: &Self::Suffix) -> Self::Value {
-        suffix.iter().map(|suffix| prefix.join(suffix)).collect()
-    }
-
-    fn from_raw_value(raw_value: &str) -> Self::Value {
-        raw_value.split(':').map(PathBuf::from).collect()
-    }
-}
-
-// // //
-
-pub fn observe_path<T: AsRef<Path>>(path: T) -> T {
-    println!("cargo:rerun-if-changed={}", path.as_ref().display());
-    path
+pub fn find_in_libsel4_include_dirs(relative_path: impl AsRef<Path>) -> PathBuf {
+    let relative_path = relative_path.as_ref();
+    try_find_in_libsel4_include_dirs(relative_path).unwrap_or_else(|| {
+        panic!(
+            "{} not found in libsel4 include path",
+            relative_path.display()
+        )
+    })
 }
