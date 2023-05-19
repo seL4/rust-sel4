@@ -6,7 +6,6 @@ edition = "2021"
 license = "BSD-2-Clause"
 
 [features]
-embedded-phdrs = []
 start = []
 static-heap = ["sel4-sync", "sel4-dlmalloc"]
 tls = ["dep:sel4-reserve-tls-on-stack"]

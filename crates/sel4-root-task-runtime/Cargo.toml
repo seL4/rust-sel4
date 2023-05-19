@@ -20,4 +20,4 @@ sel4-root-task-runtime-macros = { path = "./macros" }
 
 [dependencies.sel4-runtime-common]
 path = "../sel4-runtime-common"
-features = ["unwinding", "tls", "embedded-phdrs", "start", "static-heap"]
+features = ["tls", "unwinding", "start", "static-heap"]
