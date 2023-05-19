@@ -1,5 +1,10 @@
-//! Provides the wrapper type `ExternallyShared`, which wraps a reference to any copy-able type and allows for
-//! ergonomic access to wrapped the value via raw pointer operations.
+//! Provides the wrapper type `ExternallyShared`, which wraps a reference to any copy-able type and
+//! allows for ergonomic access to the referenced value via raw pointer operations.
+//!
+//! This type is meant to faciliate access to memory resources that are shared by other processes or
+//! system components outside of the Rust language runtime. Such cases violate the assumptions that
+//! the Rust compiler makes about `&` references, so raw pointer operations must be used. This crate
+//! enables wraps accesses and enables safe and ergonimic pointer arithmatic.
 
 #![no_std]
 #![cfg_attr(feature = "unstable", feature(core_intrinsics))]
@@ -25,13 +30,13 @@ use core::{
 /// Allows creating read-only and write-only `ExternallyShared` values.
 pub mod access;
 
-/// Wraps a reference to make accesses to the referenced value carried out via raw pointer
+/// Wraps a reference to facilitate accesses to the referenced value carried via raw pointer
 /// operations.
 ///
-/// Since not all shared memory resources are both readable and writable, this type supports
-/// limiting the allowed access types through an optional second generic parameter `A` that can be
-/// one of `ReadWrite`, `ReadOnly`, or `WriteOnly`. It defaults to `ReadWrite`, which allows all
-/// operations.
+/// Since not all externally shared memory resources are both readable and writable, this type
+/// supports limiting the allowed access types through an optional second generic parameter `A` that
+/// can be one of `ReadWrite`, `ReadOnly`, or `WriteOnly`. It defaults to `ReadWrite`, which allows
+/// all operations.
 ///
 /// The size of this struct is the same as the size of the contained reference.
 #[derive(Clone)]
@@ -47,7 +52,7 @@ pub struct ExternallyShared<R, A = ReadWrite> {
 /// the `new` function creates a `ExternallyShared` instance with unrestricted access, there are also
 /// functions for creating read-only or write-only instances.
 impl<R> ExternallyShared<R> {
-    /// Constructs a new shared instance wrapping the given reference.
+    /// Constructs a new instance wrapping the given reference.
     ///
     /// While it is possible to construct `ExternallyShared` instances from arbitrary values (including
     /// non-reference values), most of the methods are only available when the wrapped type is
@@ -75,7 +80,7 @@ impl<R> ExternallyShared<R> {
         }
     }
 
-    /// Constructs a new read-only shared instance wrapping the given reference.
+    /// Constructs a new read-only instance wrapping the given reference.
     ///
     /// This is equivalent to the `new` function with the difference that the returned
     /// `ExternallyShared` instance does not permit write operations. This is for example useful
@@ -113,7 +118,7 @@ impl<R> ExternallyShared<R> {
         }
     }
 
-    /// Constructs a new write-only shared instance wrapping the given reference.
+    /// Constructs a new write-only instance wrapping the given reference.
     ///
     /// This is equivalent to the `new` function with the difference that the returned
     /// `ExternallyShared` instance does not permit read operations. This is for example useful
@@ -278,7 +283,7 @@ where
 {
     /// Constructs a new `ExternallyShared` reference by mapping the wrapped value.
     ///
-    /// This method is useful for accessing individual fields of shared structs.
+    /// This method is useful for accessing individual fields of externally shared structs.
     ///
     /// Note that this method gives temporary access to the wrapped reference, which allows
     /// accessing the value in arbitrary ways. This is normally not what you want, so **this method
@@ -329,7 +334,7 @@ where
 
     /// Constructs a new mutable `ExternallyShared` reference by mapping the wrapped value.
     ///
-    /// This method is useful for accessing individual fields of shared structs.
+    /// This method is useful for accessing individual fields of externally shared structs.
     ///
     /// Note that this method gives temporary access to the wrapped reference, which allows
     /// accessing the value in arbirary ways. This is normally not what you want, so
@@ -380,7 +385,7 @@ where
     }
 }
 
-/// Methods for shared slices
+/// Methods for externally shared slices
 impl<T, R, A> ExternallyShared<R, A>
 where
     R: Deref<Target = [T]>,
@@ -481,7 +486,7 @@ where
     ///
     /// ## Examples
     ///
-    /// Copying two elements from a shared slice:
+    /// Copying two elements from an externally shared slice:
     ///
     /// ```
     /// use sel4_externally_shared::ExternallyShared;
@@ -532,7 +537,7 @@ where
     ///
     /// ## Examples
     ///
-    /// Copying two elements from a slice into a shared slice:
+    /// Copying two elements from a slice into an externally shared slice:
     ///
     /// ```
     /// use sel4_externally_shared::ExternallyShared;
@@ -625,7 +630,7 @@ where
     }
 }
 
-/// Methods for shared byte slices
+/// Methods for externally shared byte slices
 impl<R, A> ExternallyShared<R, A>
 where
     R: Deref<Target = [u8]>,
@@ -666,13 +671,13 @@ impl<R, A, T, const N: usize> ExternallyShared<R, A>
 where
     R: Deref<Target = [T; N]>,
 {
-    /// Converts an array reference to a shared slice.
+    /// Converts an array reference to an externally shared slice.
     ///
     /// This makes it possible to use the methods defined on slices.
     ///
     /// ## Example
     ///
-    /// Reading a subslice from a shared array reference using `index`:
+    /// Reading a subslice from an externally shared array reference using `index`:
     ///
     /// ```
     /// use sel4_externally_shared::ExternallyShared;
