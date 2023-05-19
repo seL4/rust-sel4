@@ -1,4 +1,4 @@
-//! Provides the wrapper type `Shared`, which wraps a reference to any copy-able type and allows for
+//! Provides the wrapper type `ExternallyShared`, which wraps a reference to any copy-able type and allows for
 //! ergonomic access to wrapped the value via raw pointer operations.
 
 #![no_std]
@@ -22,7 +22,7 @@ use core::{
     slice::range,
 };
 
-/// Allows creating read-only and write-only `Shared` values.
+/// Allows creating read-only and write-only `ExternallyShared` values.
 pub mod access;
 
 /// Wraps a reference to make accesses to the referenced value carried out via raw pointer
@@ -36,40 +36,40 @@ pub mod access;
 /// The size of this struct is the same as the size of the contained reference.
 #[derive(Clone)]
 #[repr(transparent)]
-pub struct Shared<R, A = ReadWrite> {
+pub struct ExternallyShared<R, A = ReadWrite> {
     reference: R,
     access: PhantomData<A>,
 }
 
 /// Constructor functions for creating new values
 ///
-/// These functions allow to construct a new `Shared` instance from a reference type. While
-/// the `new` function creates a `Shared` instance with unrestricted access, there are also
+/// These functions allow to construct a new `ExternallyShared` instance from a reference type. While
+/// the `new` function creates a `ExternallyShared` instance with unrestricted access, there are also
 /// functions for creating read-only or write-only instances.
-impl<R> Shared<R> {
+impl<R> ExternallyShared<R> {
     /// Constructs a new shared instance wrapping the given reference.
     ///
-    /// While it is possible to construct `Shared` instances from arbitrary values (including
+    /// While it is possible to construct `ExternallyShared` instances from arbitrary values (including
     /// non-reference values), most of the methods are only available when the wrapped type is
     /// a reference. The only reason that we don't forbid non-reference types in the constructor
     /// functions is that the Rust compiler does not support trait bounds on generic `const`
     /// functions yet. When this becomes possible, we will release a new version of this library
     /// with removed support for non-references. For these reasons it is recommended to use
-    /// the `Shared` type only with references.
+    /// the `ExternallyShared` type only with references.
     ///
     /// ## Example
     ///
     /// ```rust
-    /// use sel4_shared::Shared;
+    /// use sel4_externally_shared::ExternallyShared;
     ///
     /// let mut value = 0u32;
     ///
-    /// let mut shared = Shared::new(&mut value);
+    /// let mut shared = ExternallyShared::new(&mut value);
     /// shared.write(1);
     /// assert_eq!(shared.read(), 1);
     /// ```
-    pub const fn new(reference: R) -> Shared<R> {
-        Shared {
+    pub const fn new(reference: R) -> ExternallyShared<R> {
+        ExternallyShared {
             reference,
             access: PhantomData,
         }
@@ -78,7 +78,7 @@ impl<R> Shared<R> {
     /// Constructs a new read-only shared instance wrapping the given reference.
     ///
     /// This is equivalent to the `new` function with the difference that the returned
-    /// `Shared` instance does not permit write operations. This is for example useful
+    /// `ExternallyShared` instance does not permit write operations. This is for example useful
     /// with memory-mapped hardware registers that are defined as read-only by the hardware.
     ///
     /// ## Example
@@ -86,28 +86,28 @@ impl<R> Shared<R> {
     /// Reading is allowed:
     ///
     /// ```rust
-    /// use sel4_shared::Shared;
+    /// use sel4_externally_shared::ExternallyShared;
     ///
     /// let value = 0u32;
     ///
-    /// let shared = Shared::new_read_only(&value);
+    /// let shared = ExternallyShared::new_read_only(&value);
     /// assert_eq!(shared.read(), 0);
     /// ```
     ///
     /// But writing is not:
     ///
     /// ```compile_fail
-    /// use sel4_shared::Shared;
+    /// use sel4_externally_shared::ExternallyShared;
     ///
     /// let mut value = 0u32;
     ///
-    /// let mut shared = Shared::new_read_only(&mut value);
+    /// let mut shared = ExternallyShared::new_read_only(&mut value);
     /// shared.write(1);
     /// //ERROR: ^^^^^ the trait `shared::access::Writable` is not implemented
     /// //             for `shared::access::ReadOnly`
     /// ```
-    pub const fn new_read_only(reference: R) -> Shared<R, ReadOnly> {
-        Shared {
+    pub const fn new_read_only(reference: R) -> ExternallyShared<R, ReadOnly> {
+        ExternallyShared {
             reference,
             access: PhantomData,
         }
@@ -116,7 +116,7 @@ impl<R> Shared<R> {
     /// Constructs a new write-only shared instance wrapping the given reference.
     ///
     /// This is equivalent to the `new` function with the difference that the returned
-    /// `Shared` instance does not permit read operations. This is for example useful
+    /// `ExternallyShared` instance does not permit read operations. This is for example useful
     /// with memory-mapped hardware registers that are defined as write-only by the hardware.
     ///
     /// ## Example
@@ -124,28 +124,28 @@ impl<R> Shared<R> {
     /// Writing is allowed:
     ///
     /// ```rust
-    /// use sel4_shared::Shared;
+    /// use sel4_externally_shared::ExternallyShared;
     ///
     /// let mut value = 0u32;
     ///
-    /// let mut shared = Shared::new_write_only(&mut value);
+    /// let mut shared = ExternallyShared::new_write_only(&mut value);
     /// shared.write(1);
     /// ```
     ///
     /// But reading is not:
     ///
     /// ```compile_fail
-    /// use sel4_shared::Shared;
+    /// use sel4_externally_shared::ExternallyShared;
     ///
     /// let value = 0u32;
     ///
-    /// let shared = Shared::new_write_only(&value);
+    /// let shared = ExternallyShared::new_write_only(&value);
     /// shared.read();
     /// //ERROR: ^^^^ the trait `shared::access::Readable` is not implemented
     /// //            for `shared::access::WriteOnly`
     /// ```
-    pub const fn new_write_only(reference: R) -> Shared<R, WriteOnly> {
-        Shared {
+    pub const fn new_write_only(reference: R) -> ExternallyShared<R, WriteOnly> {
+        ExternallyShared {
             reference,
             access: PhantomData,
         }
@@ -153,7 +153,7 @@ impl<R> Shared<R> {
 }
 
 /// Methods for references to `Copy` types
-impl<R, T, A> Shared<R, A>
+impl<R, T, A> ExternallyShared<R, A>
 where
     R: Deref<Target = T>,
     T: Copy,
@@ -168,14 +168,14 @@ where
     /// ## Examples
     ///
     /// ```rust
-    /// use sel4_shared::Shared;
+    /// use sel4_externally_shared::ExternallyShared;
     ///
     /// let value = 42;
-    /// let shared_reference = Shared::new(&value);
+    /// let shared_reference = ExternallyShared::new(&value);
     /// assert_eq!(shared_reference.read(), 42);
     ///
     /// let mut value = 50;
-    /// let mut_reference = Shared::new(&mut value);
+    /// let mut_reference = ExternallyShared::new(&mut value);
     /// assert_eq!(mut_reference.read(), 50);
     /// ```
     pub fn read(&self) -> T
@@ -195,10 +195,10 @@ where
     /// ## Example
     ///
     /// ```rust
-    /// use sel4_shared::Shared;
+    /// use sel4_externally_shared::ExternallyShared;
     ///
     /// let mut value = 42;
-    /// let mut shared = Shared::new(&mut value);
+    /// let mut shared = ExternallyShared::new(&mut value);
     /// shared.write(50);
     ///
     /// assert_eq!(shared.read(), 50);
@@ -219,10 +219,10 @@ where
     /// to the contained value.
     ///
     /// ```rust
-    /// use sel4_shared::Shared;
+    /// use sel4_externally_shared::ExternallyShared;
     ///
     /// let mut value = 42;
-    /// let mut shared = Shared::new(&mut value);
+    /// let mut shared = ExternallyShared::new(&mut value);
     /// shared.update(|val| *val += 1);
     ///
     /// assert_eq!(shared.read(), 43);
@@ -240,12 +240,12 @@ where
 }
 
 /// Method for extracting the wrapped value.
-impl<R, A> Shared<R, A> {
+impl<R, A> ExternallyShared<R, A> {
     /// Extracts the inner value stored in the wrapper type.
     ///
     /// This method gives direct access to the wrapped reference and thus allows normal access
     /// again. This is seldom what you want since there is usually a reason that a reference is
-    /// wrapped in `Shared`. However, in some cases it might be required or useful to use the
+    /// wrapped in `ExternallyShared`. However, in some cases it might be required or useful to use the
     /// `ptr::read`/`ptr::write` pointer methods of the standard library directly, which
     /// this method makes possible.
     ///
@@ -256,10 +256,10 @@ impl<R, A> Shared<R, A> {
     /// ## Example
     ///
     /// ```
-    /// use sel4_shared::Shared;
+    /// use sel4_externally_shared::ExternallyShared;
     ///
     /// let mut value = 42;
-    /// let mut shared = Shared::new(&mut value);
+    /// let mut shared = ExternallyShared::new(&mut value);
     /// shared.write(50);
     /// let unwrapped: &mut i32 = shared.extract_inner();
     ///
@@ -271,12 +271,12 @@ impl<R, A> Shared<R, A> {
 }
 
 /// Transformation methods for accessing struct fields
-impl<R, T, A> Shared<R, A>
+impl<R, T, A> ExternallyShared<R, A>
 where
     R: Deref<Target = T>,
     T: ?Sized,
 {
-    /// Constructs a new `Shared` reference by mapping the wrapped value.
+    /// Constructs a new `ExternallyShared` reference by mapping the wrapped value.
     ///
     /// This method is useful for accessing individual fields of shared structs.
     ///
@@ -289,11 +289,11 @@ where
     /// Accessing a struct field:
     ///
     /// ```
-    /// use sel4_shared::Shared;
+    /// use sel4_externally_shared::ExternallyShared;
     ///
     /// struct Example { field_1: u32, field_2: u8, }
     /// let mut value = Example { field_1: 15, field_2: 255 };
-    /// let mut shared = Shared::new(&mut value);
+    /// let mut shared = ExternallyShared::new(&mut value);
     ///
     /// // construct a shared reference to a field
     /// let field_2 = shared.map(|example| &example.field_2);
@@ -303,10 +303,10 @@ where
     /// Don't misuse this method to do a arbitrary reads of the referenced value:
     ///
     /// ```
-    /// use sel4_shared::Shared;
+    /// use sel4_externally_shared::ExternallyShared;
     ///
     /// let mut value = 5;
-    /// let mut shared = Shared::new(&mut value);
+    /// let mut shared = ExternallyShared::new(&mut value);
     ///
     /// // DON'T DO THIS:
     /// let mut readout = 0;
@@ -315,19 +315,19 @@ where
     ///    value
     /// });
     /// ```
-    pub fn map<'a, F, U>(&'a self, f: F) -> Shared<&'a U, A>
+    pub fn map<'a, F, U>(&'a self, f: F) -> ExternallyShared<&'a U, A>
     where
         F: FnOnce(&'a T) -> &'a U,
         U: ?Sized,
         T: 'a,
     {
-        Shared {
+        ExternallyShared {
             reference: f(self.reference.deref()),
             access: self.access,
         }
     }
 
-    /// Constructs a new mutable `Shared` reference by mapping the wrapped value.
+    /// Constructs a new mutable `ExternallyShared` reference by mapping the wrapped value.
     ///
     /// This method is useful for accessing individual fields of shared structs.
     ///
@@ -340,11 +340,11 @@ where
     /// Accessing a struct field:
     ///
     /// ```
-    /// use sel4_shared::Shared;
+    /// use sel4_externally_shared::ExternallyShared;
     ///
     /// struct Example { field_1: u32, field_2: u8, }
     /// let mut value = Example { field_1: 15, field_2: 255 };
-    /// let mut shared = Shared::new(&mut value);
+    /// let mut shared = ExternallyShared::new(&mut value);
     ///
     /// // construct a shared reference to a field
     /// let mut field_2 = shared.map_mut(|example| &mut example.field_2);
@@ -355,10 +355,10 @@ where
     /// Don't misuse this method to do abitrary reads or writes of the referenced value:
     ///
     /// ```
-    /// use sel4_shared::Shared;
+    /// use sel4_externally_shared::ExternallyShared;
     ///
     /// let mut value = 5;
-    /// let mut shared = Shared::new(&mut value);
+    /// let mut shared = ExternallyShared::new(&mut value);
     ///
     /// // DON'T DO THIS:
     /// shared.map_mut(|value| {
@@ -366,14 +366,14 @@ where
     ///    value
     /// });
     /// ```
-    pub fn map_mut<'a, F, U>(&'a mut self, f: F) -> Shared<&'a mut U, A>
+    pub fn map_mut<'a, F, U>(&'a mut self, f: F) -> ExternallyShared<&'a mut U, A>
     where
         F: FnOnce(&mut T) -> &mut U,
         R: DerefMut,
         U: ?Sized,
         T: 'a,
     {
-        Shared {
+        ExternallyShared {
             reference: f(&mut self.reference),
             access: self.access,
         }
@@ -381,13 +381,13 @@ where
 }
 
 /// Methods for shared slices
-impl<T, R, A> Shared<R, A>
+impl<T, R, A> ExternallyShared<R, A>
 where
     R: Deref<Target = [T]>,
 {
     /// Applies the index operation on the wrapped slice.
     ///
-    /// Returns a shared `Shared` reference to the resulting subslice.
+    /// Returns a shared `ExternallyShared` reference to the resulting subslice.
     ///
     /// This is a convenience method for the `map(|slice| slice.index(index))` operation, so it
     /// has the same behavior as the indexing operation on slice (e.g. panic if index is
@@ -398,26 +398,26 @@ where
     /// Accessing a single slice element:
     ///
     /// ```
-    /// use sel4_shared::Shared;
+    /// use sel4_externally_shared::ExternallyShared;
     ///
     /// let array = [1, 2, 3];
     /// let slice = &array[..];
-    /// let shared = Shared::new(slice);
+    /// let shared = ExternallyShared::new(slice);
     /// assert_eq!(shared.index(1).read(), 2);
     /// ```
     ///
     /// Accessing a subslice:
     ///
     /// ```
-    /// use sel4_shared::Shared;
+    /// use sel4_externally_shared::ExternallyShared;
     ///
     /// let array = [1, 2, 3];
     /// let slice = &array[..];
-    /// let shared = Shared::new(slice);
+    /// let shared = ExternallyShared::new(slice);
     /// let subslice = shared.index(1..);
     /// assert_eq!(subslice.index(0).read(), 2);
     /// ```
-    pub fn index<'a, I>(&'a self, index: I) -> Shared<&'a I::Output, A>
+    pub fn index<'a, I>(&'a self, index: I) -> ExternallyShared<&'a I::Output, A>
     where
         I: SliceIndex<[T]>,
         T: 'a,
@@ -427,7 +427,7 @@ where
 
     /// Applies the mutable index operation on the wrapped slice.
     ///
-    /// Returns a mutable `Shared` reference to the resulting subslice.
+    /// Returns a mutable `ExternallyShared` reference to the resulting subslice.
     ///
     /// This is a convenience method for the `map_mut(|slice| slice.index_mut(index))`
     /// operation, so it has the same behavior as the indexing operation on slice
@@ -438,11 +438,11 @@ where
     /// Accessing a single slice element:
     ///
     /// ```
-    /// use sel4_shared::Shared;
+    /// use sel4_externally_shared::ExternallyShared;
     ///
     /// let mut array = [1, 2, 3];
     /// let slice = &mut array[..];
-    /// let mut shared = Shared::new(slice);
+    /// let mut shared = ExternallyShared::new(slice);
     /// shared.index_mut(1).write(6);
     /// assert_eq!(shared.index(1).read(), 6);
     /// ```
@@ -450,16 +450,16 @@ where
     /// Accessing a subslice:
     ///
     /// ```
-    /// use sel4_shared::Shared;
+    /// use sel4_externally_shared::ExternallyShared;
     ///
     /// let mut array = [1, 2, 3];
     /// let slice = &mut array[..];
-    /// let mut shared = Shared::new(slice);
+    /// let mut shared = ExternallyShared::new(slice);
     /// let mut subslice = shared.index_mut(1..);
     /// subslice.index_mut(0).write(6);
     /// assert_eq!(subslice.index(0).read(), 6);
     /// ```
-    pub fn index_mut<'a, I>(&'a mut self, index: I) -> Shared<&mut I::Output, A>
+    pub fn index_mut<'a, I>(&'a mut self, index: I) -> ExternallyShared<&mut I::Output, A>
     where
         I: SliceIndex<[T]>,
         R: DerefMut,
@@ -484,12 +484,12 @@ where
     /// Copying two elements from a shared slice:
     ///
     /// ```
-    /// use sel4_shared::Shared;
+    /// use sel4_externally_shared::ExternallyShared;
     ///
     /// let src = [1, 2];
-    /// // the `Shared` type does not work with arrays, so convert `src` to a slice
+    /// // the `ExternallyShared` type does not work with arrays, so convert `src` to a slice
     /// let slice = &src[..];
-    /// let shared = Shared::new(slice);
+    /// let shared = ExternallyShared::new(slice);
     /// let mut dst = [5, 0, 0];
     ///
     /// // Because the slices have to be the same length,
@@ -535,13 +535,13 @@ where
     /// Copying two elements from a slice into a shared slice:
     ///
     /// ```
-    /// use sel4_shared::Shared;
+    /// use sel4_externally_shared::ExternallyShared;
     ///
     /// let src = [1, 2, 3, 4];
     /// let mut dst = [0, 0];
-    /// // the `Shared` type does not work with arrays, so convert `dst` to a slice
+    /// // the `ExternallyShared` type does not work with arrays, so convert `dst` to a slice
     /// let slice = &mut dst[..];
-    /// let mut shared = Shared::new(slice);
+    /// let mut shared = ExternallyShared::new(slice);
     ///
     /// // Because the slices have to be the same length,
     /// // we slice the source slice from four elements
@@ -590,11 +590,11 @@ where
     /// Copying four bytes within a slice:
     ///
     /// ```
-    /// use sel4_shared::Shared;
+    /// use sel4_externally_shared::ExternallyShared;
     ///
     /// let mut byte_array = *b"Hello, World!";
     /// let mut slice: &mut [u8] = &mut byte_array[..];
-    /// let mut shared = Shared::new(slice);
+    /// let mut shared = ExternallyShared::new(slice);
     ///
     /// shared.copy_within(1..5, 8);
     ///
@@ -626,7 +626,7 @@ where
 }
 
 /// Methods for shared byte slices
-impl<R, A> Shared<R, A>
+impl<R, A> ExternallyShared<R, A>
 where
     R: Deref<Target = [u8]>,
 {
@@ -643,9 +643,9 @@ where
     /// ## Example
     ///
     /// ```rust
-    /// use sel4_shared::Shared;
+    /// use sel4_externally_shared::ExternallyShared;
     ///
-    /// let mut buf = Shared::new(vec![0; 10]);
+    /// let mut buf = ExternallyShared::new(vec![0; 10]);
     /// buf.fill(1);
     /// assert_eq!(buf.extract_inner(), vec![1; 10]);
     /// ```
@@ -662,7 +662,7 @@ where
 }
 
 /// Methods for converting arrays to slices
-impl<R, A, T, const N: usize> Shared<R, A>
+impl<R, A, T, const N: usize> ExternallyShared<R, A>
 where
     R: Deref<Target = [T; N]>,
 {
@@ -675,12 +675,12 @@ where
     /// Reading a subslice from a shared array reference using `index`:
     ///
     /// ```
-    /// use sel4_shared::Shared;
+    /// use sel4_externally_shared::ExternallyShared;
     ///
     /// let src = [1, 2, 3, 4];
-    /// let shared = Shared::new(&src);
+    /// let shared = ExternallyShared::new(&src);
     ///
-    /// // convert the `Shared<&[i32; 4]>` array reference to a `Shared<&[i32]>` slice
+    /// // convert the `ExternallyShared<&[i32; 4]>` array reference to a `ExternallyShared<&[i32]>` slice
     /// let shared_slice = shared.as_slice();
     /// // we can now use the slice methods
     /// let subslice = shared_slice.index(2..);
@@ -688,7 +688,7 @@ where
     /// assert_eq!(subslice.index(0).read(), 3);
     /// assert_eq!(subslice.index(1).read(), 4);
     /// ```
-    pub fn as_slice(&self) -> Shared<&[T], A> {
+    pub fn as_slice(&self) -> ExternallyShared<&[T], A> {
         self.map(|array| &array[..])
     }
 
@@ -701,19 +701,19 @@ where
     /// Writing to an index of a mutable array reference:
     ///
     /// ```
-    /// use sel4_shared::Shared;
+    /// use sel4_externally_shared::ExternallyShared;
     ///
     /// let mut dst = [0, 0];
-    /// let mut shared = Shared::new(&mut dst);
+    /// let mut shared = ExternallyShared::new(&mut dst);
     ///
-    /// // convert the `Shared<&mut [i32; 2]>` array reference to a `Shared<&mut [i32]>` slice
+    /// // convert the `ExternallyShared<&mut [i32; 2]>` array reference to a `ExternallyShared<&mut [i32]>` slice
     /// let mut shared_slice = shared.as_mut_slice();
     /// // we can now use the slice methods
     /// shared_slice.index_mut(1).write(1);
     ///
     /// assert_eq!(dst, [0, 1]);
     /// ```
-    pub fn as_mut_slice(&mut self) -> Shared<&mut [T], A>
+    pub fn as_mut_slice(&mut self) -> ExternallyShared<&mut [T], A>
     where
         R: DerefMut,
     {
@@ -722,23 +722,23 @@ where
 }
 
 /// Methods for restricting access.
-impl<R> Shared<R> {
+impl<R> ExternallyShared<R> {
     /// Restricts access permissions to read-only.
     ///
     /// ## Example
     ///
     /// ```
-    /// use sel4_shared::Shared;
+    /// use sel4_externally_shared::ExternallyShared;
     ///
     /// let mut value: i16 = -4;
-    /// let mut shared = Shared::new(&mut value);
+    /// let mut shared = ExternallyShared::new(&mut value);
     ///
     /// let read_only = shared.read_only();
     /// assert_eq!(read_only.read(), -4);
     /// // read_only.write(10); // compile-time error
     /// ```
-    pub fn read_only(self) -> Shared<R, ReadOnly> {
-        Shared {
+    pub fn read_only(self) -> ExternallyShared<R, ReadOnly> {
+        ExternallyShared {
             reference: self.reference,
             access: PhantomData,
         }
@@ -751,59 +751,63 @@ impl<R> Shared<R> {
     /// Creating a write-only reference to a struct field:
     ///
     /// ```
-    /// use sel4_shared::Shared;
+    /// use sel4_externally_shared::ExternallyShared;
     ///
     /// struct Example { field_1: u32, field_2: u8, }
     /// let mut value = Example { field_1: 15, field_2: 255 };
-    /// let mut shared = Shared::new(&mut value);
+    /// let mut shared = ExternallyShared::new(&mut value);
     ///
     /// // construct a shared write-only reference to `field_2`
     /// let mut field_2 = shared.map_mut(|example| &mut example.field_2).write_only();
     /// field_2.write(14);
     /// // field_2.read(); // compile-time error
     /// ```
-    pub fn write_only(self) -> Shared<R, WriteOnly> {
-        Shared {
+    pub fn write_only(self) -> ExternallyShared<R, WriteOnly> {
+        ExternallyShared {
             reference: self.reference,
             access: PhantomData,
         }
     }
 }
 
-impl<R, T, A> fmt::Debug for Shared<R, A>
+impl<R, T, A> fmt::Debug for ExternallyShared<R, A>
 where
     R: Deref<Target = T>,
     T: Copy + fmt::Debug,
     A: Readable,
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_tuple("Shared").field(&self.read()).finish()
+        f.debug_tuple("ExternallyShared")
+            .field(&self.read())
+            .finish()
     }
 }
 
-impl<R> fmt::Debug for Shared<R, WriteOnly>
+impl<R> fmt::Debug for ExternallyShared<R, WriteOnly>
 where
     R: Deref,
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_tuple("Shared").field(&"[write-only]").finish()
+        f.debug_tuple("ExternallyShared")
+            .field(&"[write-only]")
+            .finish()
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::Shared;
+    use super::ExternallyShared;
 
     #[test]
     fn test_read() {
         let val = 42;
-        assert_eq!(Shared::new(&val).read(), 42);
+        assert_eq!(ExternallyShared::new(&val).read(), 42);
     }
 
     #[test]
     fn test_write() {
         let mut val = 50;
-        let mut shared = Shared::new(&mut val);
+        let mut shared = ExternallyShared::new(&mut val);
         shared.write(50);
         assert_eq!(val, 50);
     }
@@ -811,7 +815,7 @@ mod tests {
     #[test]
     fn test_update() {
         let mut val = 42;
-        let mut shared = Shared::new(&mut val);
+        let mut shared = ExternallyShared::new(&mut val);
         shared.update(|v| *v += 1);
         assert_eq!(val, 43);
     }
@@ -819,7 +823,7 @@ mod tests {
     #[test]
     fn test_slice() {
         let mut val = [1, 2, 3];
-        let mut shared = Shared::new(&mut val[..]);
+        let mut shared = ExternallyShared::new(&mut val[..]);
         shared.index_mut(0).update(|v| *v += 1);
         assert_eq!(val, [2, 2, 3]);
     }
@@ -835,7 +839,7 @@ mod tests {
             field_1: 60,
             field_2: true,
         };
-        let mut shared = Shared::new(&mut val);
+        let mut shared = ExternallyShared::new(&mut val);
         shared.map_mut(|s| &mut s.field_1).update(|v| *v += 1);
         let mut field_2 = shared.map_mut(|s| &mut s.field_2);
         assert!(field_2.read());
@@ -848,7 +852,7 @@ mod tests {
     #[test]
     fn test_chunks() {
         let mut val = [1, 2, 3, 4, 5, 6];
-        let mut shared = Shared::new(&mut val[..]);
+        let mut shared = ExternallyShared::new(&mut val[..]);
         let mut chunks = shared.map_mut(|s| s.as_chunks_mut().0);
         chunks.index_mut(1).write([10, 11, 12]);
         assert_eq!(chunks.index(0).read(), [1, 2, 3]);
