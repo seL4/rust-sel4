@@ -16,11 +16,14 @@ fn main() {
     let (embedded_spec, aux_files) = embedding.embed();
 
     let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
-    let spec_out_path = out_dir.join("spec.rs");
-    fs::write(&spec_out_path, format!("{}", embedded_spec)).unwrap();
+
+    {
+        let spec_out_path = out_dir.join("spec.rs");
+        fs::write(&spec_out_path, format!("{}", embedded_spec)).unwrap();
+        Rustfmt::detect().format(&spec_out_path);
+    }
+
     for (fname, content) in &aux_files {
         fs::write(out_dir.join(fname), content).unwrap();
     }
-
-    Rustfmt::detect().format(&spec_out_path);
 }
