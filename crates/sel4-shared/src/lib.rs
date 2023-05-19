@@ -1,9 +1,5 @@
-//! Provides the wrapper type `Volatile`, which wraps a reference to any copy-able type and allows
-//! for volatile memory access to wrapped value. Volatile memory accesses are never optimized away
-//! by the compiler, and are useful in many low-level systems programming and concurrent contexts.
-//!
-//! The wrapper types *do not* enforce any atomicity guarantees; to also get atomicity, consider
-//! looking at the `Atomic` wrapper types found in `libcore` or `libstd`.
+//! Provides the wrapper type `Shared`, which wraps a reference to any copy-able type and allows for
+//! ergonomic access to wrapped the value via raw pointer operations.
 
 #![no_std]
 #![cfg_attr(feature = "unstable", feature(core_intrinsics))]
@@ -26,19 +22,16 @@ use core::{
     slice::range,
 };
 
-/// Allows creating read-only and write-only `Volatile` values.
+/// Allows creating read-only and write-only `Shared` values.
 pub mod access;
 
-/// Wraps a reference to make accesses to the referenced value volatile.
+/// Wraps a reference to make accesses to the referenced value carried out via raw pointer
+/// operations.
 ///
-/// Allows volatile reads and writes on the referenced value. The referenced value needs to
-/// be `Copy` for reading and writing, as volatile reads and writes take and return copies
-/// of the value.
-///
-/// Since not all volatile resources (e.g. memory mapped device registers) are both readable
-/// and writable, this type supports limiting the allowed access types through an optional second
-/// generic parameter `A` that can be one of `ReadWrite`, `ReadOnly`, or `WriteOnly`. It defaults
-/// to `ReadWrite`, which allows all operations.
+/// Since not all shared memory resources are both readable and writable, this type supports
+/// limiting the allowed access types through an optional second generic parameter `A` that can be
+/// one of `ReadWrite`, `ReadOnly`, or `WriteOnly`. It defaults to `ReadWrite`, which allows all
+/// operations.
 ///
 /// The size of this struct is the same as the size of the contained reference.
 #[derive(Clone)]
@@ -50,30 +43,30 @@ pub struct Shared<R, A = ReadWrite> {
 
 /// Constructor functions for creating new values
 ///
-/// These functions allow to construct a new `Volatile` instance from a reference type. While
-/// the `new` function creates a `Volatile` instance with unrestricted access, there are also
+/// These functions allow to construct a new `Shared` instance from a reference type. While
+/// the `new` function creates a `Shared` instance with unrestricted access, there are also
 /// functions for creating read-only or write-only instances.
 impl<R> Shared<R> {
-    /// Constructs a new volatile instance wrapping the given reference.
+    /// Constructs a new shared instance wrapping the given reference.
     ///
-    /// While it is possible to construct `Volatile` instances from arbitrary values (including
+    /// While it is possible to construct `Shared` instances from arbitrary values (including
     /// non-reference values), most of the methods are only available when the wrapped type is
     /// a reference. The only reason that we don't forbid non-reference types in the constructor
     /// functions is that the Rust compiler does not support trait bounds on generic `const`
     /// functions yet. When this becomes possible, we will release a new version of this library
     /// with removed support for non-references. For these reasons it is recommended to use
-    /// the `Volatile` type only with references.
+    /// the `Shared` type only with references.
     ///
     /// ## Example
     ///
     /// ```rust
-    /// use volatile::Volatile;
+    /// use sel4_shared::Shared;
     ///
     /// let mut value = 0u32;
     ///
-    /// let mut volatile = Volatile::new(&mut value);
-    /// volatile.write(1);
-    /// assert_eq!(volatile.read(), 1);
+    /// let mut shared = Shared::new(&mut value);
+    /// shared.write(1);
+    /// assert_eq!(shared.read(), 1);
     /// ```
     pub const fn new(reference: R) -> Shared<R> {
         Shared {
@@ -82,10 +75,10 @@ impl<R> Shared<R> {
         }
     }
 
-    /// Constructs a new read-only volatile instance wrapping the given reference.
+    /// Constructs a new read-only shared instance wrapping the given reference.
     ///
     /// This is equivalent to the `new` function with the difference that the returned
-    /// `Volatile` instance does not permit write operations. This is for example useful
+    /// `Shared` instance does not permit write operations. This is for example useful
     /// with memory-mapped hardware registers that are defined as read-only by the hardware.
     ///
     /// ## Example
@@ -93,25 +86,25 @@ impl<R> Shared<R> {
     /// Reading is allowed:
     ///
     /// ```rust
-    /// use volatile::Volatile;
+    /// use sel4_shared::Shared;
     ///
     /// let value = 0u32;
     ///
-    /// let volatile = Volatile::new_read_only(&value);
-    /// assert_eq!(volatile.read(), 0);
+    /// let shared = Shared::new_read_only(&value);
+    /// assert_eq!(shared.read(), 0);
     /// ```
     ///
     /// But writing is not:
     ///
     /// ```compile_fail
-    /// use volatile::Volatile;
+    /// use sel4_shared::Shared;
     ///
     /// let mut value = 0u32;
     ///
-    /// let mut volatile = Volatile::new_read_only(&mut value);
-    /// volatile.write(1);
-    /// //ERROR: ^^^^^ the trait `volatile::access::Writable` is not implemented
-    /// //             for `volatile::access::ReadOnly`
+    /// let mut shared = Shared::new_read_only(&mut value);
+    /// shared.write(1);
+    /// //ERROR: ^^^^^ the trait `shared::access::Writable` is not implemented
+    /// //             for `shared::access::ReadOnly`
     /// ```
     pub const fn new_read_only(reference: R) -> Shared<R, ReadOnly> {
         Shared {
@@ -120,10 +113,10 @@ impl<R> Shared<R> {
         }
     }
 
-    /// Constructs a new write-only volatile instance wrapping the given reference.
+    /// Constructs a new write-only shared instance wrapping the given reference.
     ///
     /// This is equivalent to the `new` function with the difference that the returned
-    /// `Volatile` instance does not permit read operations. This is for example useful
+    /// `Shared` instance does not permit read operations. This is for example useful
     /// with memory-mapped hardware registers that are defined as write-only by the hardware.
     ///
     /// ## Example
@@ -131,25 +124,25 @@ impl<R> Shared<R> {
     /// Writing is allowed:
     ///
     /// ```rust
-    /// use volatile::Volatile;
+    /// use sel4_shared::Shared;
     ///
     /// let mut value = 0u32;
     ///
-    /// let mut volatile = Volatile::new_write_only(&mut value);
-    /// volatile.write(1);
+    /// let mut shared = Shared::new_write_only(&mut value);
+    /// shared.write(1);
     /// ```
     ///
     /// But reading is not:
     ///
     /// ```compile_fail
-    /// use volatile::Volatile;
+    /// use sel4_shared::Shared;
     ///
     /// let value = 0u32;
     ///
-    /// let volatile = Volatile::new_write_only(&value);
-    /// volatile.read();
-    /// //ERROR: ^^^^ the trait `volatile::access::Readable` is not implemented
-    /// //            for `volatile::access::WriteOnly`
+    /// let shared = Shared::new_write_only(&value);
+    /// shared.read();
+    /// //ERROR: ^^^^ the trait `shared::access::Readable` is not implemented
+    /// //            for `shared::access::WriteOnly`
     /// ```
     pub const fn new_write_only(reference: R) -> Shared<R, WriteOnly> {
         Shared {
@@ -165,7 +158,7 @@ where
     R: Deref<Target = T>,
     T: Copy,
 {
-    /// Performs a volatile read of the contained value.
+    /// Performs a raw pointer read of the contained value.
     ///
     /// Returns a copy of the read value. Volatile reads are guaranteed not to be optimized
     /// away by the compiler, but by themselves do not have atomic ordering
@@ -175,14 +168,14 @@ where
     /// ## Examples
     ///
     /// ```rust
-    /// use volatile::Volatile;
+    /// use sel4_shared::Shared;
     ///
     /// let value = 42;
-    /// let shared_reference = Volatile::new(&value);
+    /// let shared_reference = Shared::new(&value);
     /// assert_eq!(shared_reference.read(), 42);
     ///
     /// let mut value = 50;
-    /// let mut_reference = Volatile::new(&mut value);
+    /// let mut_reference = Shared::new(&mut value);
     /// assert_eq!(mut_reference.read(), 50);
     /// ```
     pub fn read(&self) -> T
@@ -193,7 +186,7 @@ where
         unsafe { ptr::read(&*self.reference) }
     }
 
-    /// Performs a volatile write, setting the contained value to the given `value`.
+    /// Performs a raw pointer write, setting the contained value to the given `value`.
     ///
     /// Volatile writes are guaranteed to not be optimized away by the compiler, but by
     /// themselves do not have atomic ordering guarantees. To also get atomicity, consider
@@ -202,13 +195,13 @@ where
     /// ## Example
     ///
     /// ```rust
-    /// use volatile::Volatile;
+    /// use sel4_shared::Shared;
     ///
     /// let mut value = 42;
-    /// let mut volatile = Volatile::new(&mut value);
-    /// volatile.write(50);
+    /// let mut shared = Shared::new(&mut value);
+    /// shared.write(50);
     ///
-    /// assert_eq!(volatile.read(), 50);
+    /// assert_eq!(shared.read(), 50);
     /// ```
     pub fn write(&mut self, value: T)
     where
@@ -219,20 +212,20 @@ where
         unsafe { ptr::write(&mut *self.reference, value) };
     }
 
-    /// Updates the contained value using the given closure and volatile instructions.
+    /// Updates the contained value using the given closure and raw pointer operations.
     ///
-    /// Performs a volatile read of the contained value, passes a mutable reference to it to the
-    /// function `f`, and then performs a volatile write of the (potentially updated) value back to
-    /// the contained value.
+    /// Performs a raw pointer read of the contained value, passes a mutable reference to it to the
+    /// function `f`, and then performs a raw pointer write of the (potentially updated) value back
+    /// to the contained value.
     ///
     /// ```rust
-    /// use volatile::Volatile;
+    /// use sel4_shared::Shared;
     ///
     /// let mut value = 42;
-    /// let mut volatile = Volatile::new(&mut value);
-    /// volatile.update(|val| *val += 1);
+    /// let mut shared = Shared::new(&mut value);
+    /// shared.update(|val| *val += 1);
     ///
-    /// assert_eq!(volatile.read(), 43);
+    /// assert_eq!(shared.read(), 43);
     /// ```
     pub fn update<F>(&mut self, f: F)
     where
@@ -250,27 +243,27 @@ where
 impl<R, A> Shared<R, A> {
     /// Extracts the inner value stored in the wrapper type.
     ///
-    /// This method gives direct access to the wrapped reference and thus allows
-    /// non-volatile access again. This is seldom what you want since there is usually
-    /// a reason that a reference is wrapped in `Volatile`. However, in some cases it might
-    /// be required or useful to use the `read_volatile`/`write_volatile` pointer methods of
-    /// the standard library directly, which this method makes possible.
+    /// This method gives direct access to the wrapped reference and thus allows normal access
+    /// again. This is seldom what you want since there is usually a reason that a reference is
+    /// wrapped in `Shared`. However, in some cases it might be required or useful to use the
+    /// `ptr::read`/`ptr::write` pointer methods of the standard library directly, which
+    /// this method makes possible.
     ///
-    /// Since no memory safety violation can occur when accessing the referenced value using
-    /// non-volatile operations, this method is safe. However, it _can_ lead to bugs at the
-    /// application level, so this method should be used with care.
+    /// Since no memory safety violation can occur when accessing the referenced value using normal
+    /// operations, this method is safe. However, it _can_ lead to bugs at the application level, so
+    /// this method should be used with care.
     ///
     /// ## Example
     ///
     /// ```
-    /// use volatile::Volatile;
+    /// use sel4_shared::Shared;
     ///
     /// let mut value = 42;
-    /// let mut volatile = Volatile::new(&mut value);
-    /// volatile.write(50);
-    /// let unwrapped: &mut i32 = volatile.extract_inner();
+    /// let mut shared = Shared::new(&mut value);
+    /// shared.write(50);
+    /// let unwrapped: &mut i32 = shared.extract_inner();
     ///
-    /// assert_eq!(*unwrapped, 50); // non volatile access, be careful!
+    /// assert_eq!(*unwrapped, 50); // reference access subject to more optimization, be careful!
     /// ```
     pub fn extract_inner(self) -> R {
         self.reference
@@ -283,42 +276,42 @@ where
     R: Deref<Target = T>,
     T: ?Sized,
 {
-    /// Constructs a new `Volatile` reference by mapping the wrapped value.
+    /// Constructs a new `Shared` reference by mapping the wrapped value.
     ///
-    /// This method is useful for accessing individual fields of volatile structs.
+    /// This method is useful for accessing individual fields of shared structs.
     ///
     /// Note that this method gives temporary access to the wrapped reference, which allows
-    /// accessing the value in a non-volatile way. This is normally not what you want, so
-    /// **this method should only be used for reference-to-reference transformations**.
+    /// accessing the value in arbitrary ways. This is normally not what you want, so **this method
+    /// should only be used for reference-to-reference transformations**.
     ///
     /// ## Examples
     ///
     /// Accessing a struct field:
     ///
     /// ```
-    /// use volatile::Volatile;
+    /// use sel4_shared::Shared;
     ///
     /// struct Example { field_1: u32, field_2: u8, }
     /// let mut value = Example { field_1: 15, field_2: 255 };
-    /// let mut volatile = Volatile::new(&mut value);
+    /// let mut shared = Shared::new(&mut value);
     ///
-    /// // construct a volatile reference to a field
-    /// let field_2 = volatile.map(|example| &example.field_2);
+    /// // construct a shared reference to a field
+    /// let field_2 = shared.map(|example| &example.field_2);
     /// assert_eq!(field_2.read(), 255);
     /// ```
     ///
-    /// Don't misuse this method to do a non-volatile read of the referenced value:
+    /// Don't misuse this method to do a arbitrary reads of the referenced value:
     ///
     /// ```
-    /// use volatile::Volatile;
+    /// use sel4_shared::Shared;
     ///
     /// let mut value = 5;
-    /// let mut volatile = Volatile::new(&mut value);
+    /// let mut shared = Shared::new(&mut value);
     ///
     /// // DON'T DO THIS:
     /// let mut readout = 0;
-    /// volatile.map(|value| {
-    ///    readout = *value; // non-volatile read, might lead to bugs
+    /// shared.map(|value| {
+    ///    readout = *value; // normal reference read, might lead to bugs
     ///    value
     /// });
     /// ```
@@ -334,12 +327,12 @@ where
         }
     }
 
-    /// Constructs a new mutable `Volatile` reference by mapping the wrapped value.
+    /// Constructs a new mutable `Shared` reference by mapping the wrapped value.
     ///
-    /// This method is useful for accessing individual fields of volatile structs.
+    /// This method is useful for accessing individual fields of shared structs.
     ///
     /// Note that this method gives temporary access to the wrapped reference, which allows
-    /// accessing the value in a non-volatile way. This is normally not what you want, so
+    /// accessing the value in arbirary ways. This is normally not what you want, so
     /// **this method should only be used for reference-to-reference transformations**.
     ///
     /// ## Examples
@@ -347,29 +340,29 @@ where
     /// Accessing a struct field:
     ///
     /// ```
-    /// use volatile::Volatile;
+    /// use sel4_shared::Shared;
     ///
     /// struct Example { field_1: u32, field_2: u8, }
     /// let mut value = Example { field_1: 15, field_2: 255 };
-    /// let mut volatile = Volatile::new(&mut value);
+    /// let mut shared = Shared::new(&mut value);
     ///
-    /// // construct a volatile reference to a field
-    /// let mut field_2 = volatile.map_mut(|example| &mut example.field_2);
+    /// // construct a shared reference to a field
+    /// let mut field_2 = shared.map_mut(|example| &mut example.field_2);
     /// field_2.write(128);
     /// assert_eq!(field_2.read(), 128);
     /// ```
     ///
-    /// Don't misuse this method to do a non-volatile read or write of the referenced value:
+    /// Don't misuse this method to do abitrary reads or writes of the referenced value:
     ///
     /// ```
-    /// use volatile::Volatile;
+    /// use sel4_shared::Shared;
     ///
     /// let mut value = 5;
-    /// let mut volatile = Volatile::new(&mut value);
+    /// let mut shared = Shared::new(&mut value);
     ///
     /// // DON'T DO THIS:
-    /// volatile.map_mut(|value| {
-    ///    *value = 10; // non-volatile write, might lead to bugs
+    /// shared.map_mut(|value| {
+    ///    *value = 10; // normal reference write, might lead to bugs
     ///    value
     /// });
     /// ```
@@ -387,14 +380,14 @@ where
     }
 }
 
-/// Methods for volatile slices
+/// Methods for shared slices
 impl<T, R, A> Shared<R, A>
 where
     R: Deref<Target = [T]>,
 {
     /// Applies the index operation on the wrapped slice.
     ///
-    /// Returns a shared `Volatile` reference to the resulting subslice.
+    /// Returns a shared `Shared` reference to the resulting subslice.
     ///
     /// This is a convenience method for the `map(|slice| slice.index(index))` operation, so it
     /// has the same behavior as the indexing operation on slice (e.g. panic if index is
@@ -405,23 +398,23 @@ where
     /// Accessing a single slice element:
     ///
     /// ```
-    /// use volatile::Volatile;
+    /// use sel4_shared::Shared;
     ///
     /// let array = [1, 2, 3];
     /// let slice = &array[..];
-    /// let volatile = Volatile::new(slice);
-    /// assert_eq!(volatile.index(1).read(), 2);
+    /// let shared = Shared::new(slice);
+    /// assert_eq!(shared.index(1).read(), 2);
     /// ```
     ///
     /// Accessing a subslice:
     ///
     /// ```
-    /// use volatile::Volatile;
+    /// use sel4_shared::Shared;
     ///
     /// let array = [1, 2, 3];
     /// let slice = &array[..];
-    /// let volatile = Volatile::new(slice);
-    /// let subslice = volatile.index(1..);
+    /// let shared = Shared::new(slice);
+    /// let subslice = shared.index(1..);
     /// assert_eq!(subslice.index(0).read(), 2);
     /// ```
     pub fn index<'a, I>(&'a self, index: I) -> Shared<&'a I::Output, A>
@@ -434,7 +427,7 @@ where
 
     /// Applies the mutable index operation on the wrapped slice.
     ///
-    /// Returns a mutable `Volatile` reference to the resulting subslice.
+    /// Returns a mutable `Shared` reference to the resulting subslice.
     ///
     /// This is a convenience method for the `map_mut(|slice| slice.index_mut(index))`
     /// operation, so it has the same behavior as the indexing operation on slice
@@ -445,24 +438,24 @@ where
     /// Accessing a single slice element:
     ///
     /// ```
-    /// use volatile::Volatile;
+    /// use sel4_shared::Shared;
     ///
     /// let mut array = [1, 2, 3];
     /// let slice = &mut array[..];
-    /// let mut volatile = Volatile::new(slice);
-    /// volatile.index_mut(1).write(6);
-    /// assert_eq!(volatile.index(1).read(), 6);
+    /// let mut shared = Shared::new(slice);
+    /// shared.index_mut(1).write(6);
+    /// assert_eq!(shared.index(1).read(), 6);
     /// ```
     ///
     /// Accessing a subslice:
     ///
     /// ```
-    /// use volatile::Volatile;
+    /// use sel4_shared::Shared;
     ///
     /// let mut array = [1, 2, 3];
     /// let slice = &mut array[..];
-    /// let mut volatile = Volatile::new(slice);
-    /// let mut subslice = volatile.index_mut(1..);
+    /// let mut shared = Shared::new(slice);
+    /// let mut subslice = shared.index_mut(1..);
     /// subslice.index_mut(0).write(6);
     /// assert_eq!(subslice.index(0).read(), 6);
     /// ```
@@ -475,7 +468,7 @@ where
         self.map_mut(|slice| slice.index_mut(index))
     }
 
-    /// Copies all elements from `self` into `dst`, using a volatile memcpy.
+    /// Copies all elements from `self` into `dst`, using memcpy.
     ///
     /// The length of `dst` must be the same as `self`.
     ///
@@ -488,21 +481,21 @@ where
     ///
     /// ## Examples
     ///
-    /// Copying two elements from a volatile slice:
+    /// Copying two elements from a shared slice:
     ///
     /// ```
-    /// use volatile::Volatile;
+    /// use sel4_shared::Shared;
     ///
     /// let src = [1, 2];
-    /// // the `Volatile` type does not work with arrays, so convert `src` to a slice
+    /// // the `Shared` type does not work with arrays, so convert `src` to a slice
     /// let slice = &src[..];
-    /// let volatile = Volatile::new(slice);
+    /// let shared = Shared::new(slice);
     /// let mut dst = [5, 0, 0];
     ///
     /// // Because the slices have to be the same length,
     /// // we slice the destination slice from three elements
     /// // to two. It will panic if we don't do this.
-    /// volatile.copy_into_slice(&mut dst[1..]);
+    /// shared.copy_into_slice(&mut dst[1..]);
     ///
     /// assert_eq!(src, [1, 2]);
     /// assert_eq!(dst, [5, 1, 2]);
@@ -523,12 +516,12 @@ where
         }
     }
 
-    /// Copies all elements from `src` into `self`, using a volatile memcpy.
+    /// Copies all elements from `src` into `self`, using memcpy.
     ///
     /// The length of `src` must be the same as `self`.
     ///
     /// This method is similar to the `slice::copy_from_slice` method of the standard library. The
-    /// difference is that this method performs a volatile copy.
+    /// difference is that this method performs a raw pointer copy.
     ///
     /// The method is only available with the `unstable` feature enabled (requires a nightly
     /// Rust compiler).
@@ -539,21 +532,21 @@ where
     ///
     /// ## Examples
     ///
-    /// Copying two elements from a slice into a volatile slice:
+    /// Copying two elements from a slice into a shared slice:
     ///
     /// ```
-    /// use volatile::Volatile;
+    /// use sel4_shared::Shared;
     ///
     /// let src = [1, 2, 3, 4];
     /// let mut dst = [0, 0];
-    /// // the `Volatile` type does not work with arrays, so convert `dst` to a slice
+    /// // the `Shared` type does not work with arrays, so convert `dst` to a slice
     /// let slice = &mut dst[..];
-    /// let mut volatile = Volatile::new(slice);
+    /// let mut shared = Shared::new(slice);
     ///
     /// // Because the slices have to be the same length,
     /// // we slice the source slice from four elements
     /// // to two. It will panic if we don't do this.
-    /// volatile.copy_from_slice(&src[2..]);
+    /// shared.copy_from_slice(&src[2..]);
     ///
     /// assert_eq!(src, [1, 2, 3, 4]);
     /// assert_eq!(dst, [3, 4]);
@@ -575,15 +568,14 @@ where
         }
     }
 
-    /// Copies elements from one part of the slice to another part of itself, using a
-    /// volatile `memmove`.
+    /// Copies elements from one part of the slice to another part of itself, using `memmove`.
     ///
     /// `src` is the range within `self` to copy from. `dest` is the starting index of the
     /// range within `self` to copy to, which will have the same length as `src`. The two ranges
     /// may overlap. The ends of the two ranges must be less than or equal to `self.len()`.
     ///
     /// This method is similar to the `slice::copy_within` method of the standard library. The
-    /// difference is that this method performs a volatile copy.
+    /// difference is that this method performs a raw pointer copy.
     ///
     /// This method is only available with the `unstable` feature enabled (requires a nightly
     /// Rust compiler).
@@ -598,13 +590,13 @@ where
     /// Copying four bytes within a slice:
     ///
     /// ```
-    /// use volatile::Volatile;
+    /// use sel4_shared::Shared;
     ///
     /// let mut byte_array = *b"Hello, World!";
     /// let mut slice: &mut [u8] = &mut byte_array[..];
-    /// let mut volatile = Volatile::new(slice);
+    /// let mut shared = Shared::new(slice);
     ///
-    /// volatile.copy_within(1..5, 8);
+    /// shared.copy_within(1..5, 8);
     ///
     /// assert_eq!(&byte_array, b"Hello, Wello!");
     #[cfg(feature = "unstable")]
@@ -621,7 +613,7 @@ where
         } = range(src, ..slice.len());
         let count = src_end - src_start;
         assert!(dest <= slice.len() - count, "dest is out of bounds");
-        // SAFETY: the conditions for `volatile_copy_memory` have all been checked above,
+        // SAFETY: the conditions for `ptr::copy` have all been checked above,
         // as have those for `ptr::add`.
         unsafe {
             ptr::copy(
@@ -633,15 +625,15 @@ where
     }
 }
 
-/// Methods for volatile byte slices
+/// Methods for shared byte slices
 impl<R, A> Shared<R, A>
 where
     R: Deref<Target = [u8]>,
 {
-    /// Sets all elements of the byte slice to the given `value` using a volatile `memset`.
+    /// Sets all elements of the byte slice to the given `value` using `memset`.
     ///
     /// This method is similar to the `slice::fill` method of the standard library, with the
-    /// difference that this method performs a volatile write operation. Another difference
+    /// difference that this method performs raw pointer write operation. Another difference
     /// is that this method is only available for byte slices (not general `&mut [T]` slices)
     /// because there currently isn't a instrinsic function that allows non-`u8` values.
     ///
@@ -651,9 +643,9 @@ where
     /// ## Example
     ///
     /// ```rust
-    /// use volatile::Volatile;
+    /// use sel4_shared::Shared;
     ///
-    /// let mut buf = Volatile::new(vec![0; 10]);
+    /// let mut buf = Shared::new(vec![0; 10]);
     /// buf.fill(1);
     /// assert_eq!(buf.extract_inner(), vec![1; 10]);
     /// ```
@@ -680,18 +672,18 @@ where
     ///
     /// ## Example
     ///
-    /// Reading a subslice from a volatile array reference using `index`:
+    /// Reading a subslice from a shared array reference using `index`:
     ///
     /// ```
-    /// use volatile::Volatile;
+    /// use sel4_shared::Shared;
     ///
     /// let src = [1, 2, 3, 4];
-    /// let volatile = Volatile::new(&src);
+    /// let shared = Shared::new(&src);
     ///
-    /// // convert the `Volatile<&[i32; 4]>` array reference to a `Volatile<&[i32]>` slice
-    /// let volatile_slice = volatile.as_slice();
+    /// // convert the `Shared<&[i32; 4]>` array reference to a `Shared<&[i32]>` slice
+    /// let shared_slice = shared.as_slice();
     /// // we can now use the slice methods
-    /// let subslice = volatile_slice.index(2..);
+    /// let subslice = shared_slice.index(2..);
     ///
     /// assert_eq!(subslice.index(0).read(), 3);
     /// assert_eq!(subslice.index(1).read(), 4);
@@ -709,15 +701,15 @@ where
     /// Writing to an index of a mutable array reference:
     ///
     /// ```
-    /// use volatile::Volatile;
+    /// use sel4_shared::Shared;
     ///
     /// let mut dst = [0, 0];
-    /// let mut volatile = Volatile::new(&mut dst);
+    /// let mut shared = Shared::new(&mut dst);
     ///
-    /// // convert the `Volatile<&mut [i32; 2]>` array reference to a `Volatile<&mut [i32]>` slice
-    /// let mut volatile_slice = volatile.as_mut_slice();
+    /// // convert the `Shared<&mut [i32; 2]>` array reference to a `Shared<&mut [i32]>` slice
+    /// let mut shared_slice = shared.as_mut_slice();
     /// // we can now use the slice methods
-    /// volatile_slice.index_mut(1).write(1);
+    /// shared_slice.index_mut(1).write(1);
     ///
     /// assert_eq!(dst, [0, 1]);
     /// ```
@@ -736,12 +728,12 @@ impl<R> Shared<R> {
     /// ## Example
     ///
     /// ```
-    /// use volatile::Volatile;
+    /// use sel4_shared::Shared;
     ///
     /// let mut value: i16 = -4;
-    /// let mut volatile = Volatile::new(&mut value);
+    /// let mut shared = Shared::new(&mut value);
     ///
-    /// let read_only = volatile.read_only();
+    /// let read_only = shared.read_only();
     /// assert_eq!(read_only.read(), -4);
     /// // read_only.write(10); // compile-time error
     /// ```
@@ -759,14 +751,14 @@ impl<R> Shared<R> {
     /// Creating a write-only reference to a struct field:
     ///
     /// ```
-    /// use volatile::Volatile;
+    /// use sel4_shared::Shared;
     ///
     /// struct Example { field_1: u32, field_2: u8, }
     /// let mut value = Example { field_1: 15, field_2: 255 };
-    /// let mut volatile = Volatile::new(&mut value);
+    /// let mut shared = Shared::new(&mut value);
     ///
-    /// // construct a volatile write-only reference to `field_2`
-    /// let mut field_2 = volatile.map_mut(|example| &mut example.field_2).write_only();
+    /// // construct a shared write-only reference to `field_2`
+    /// let mut field_2 = shared.map_mut(|example| &mut example.field_2).write_only();
     /// field_2.write(14);
     /// // field_2.read(); // compile-time error
     /// ```
@@ -785,7 +777,7 @@ where
     A: Readable,
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_tuple("Volatile").field(&self.read()).finish()
+        f.debug_tuple("Shared").field(&self.read()).finish()
     }
 }
 
@@ -794,41 +786,41 @@ where
     R: Deref,
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_tuple("Volatile").field(&"[write-only]").finish()
+        f.debug_tuple("Shared").field(&"[write-only]").finish()
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::Volatile;
+    use super::Shared;
 
     #[test]
     fn test_read() {
         let val = 42;
-        assert_eq!(Volatile::new(&val).read(), 42);
+        assert_eq!(Shared::new(&val).read(), 42);
     }
 
     #[test]
     fn test_write() {
         let mut val = 50;
-        let mut volatile = Volatile::new(&mut val);
-        volatile.write(50);
+        let mut shared = Shared::new(&mut val);
+        shared.write(50);
         assert_eq!(val, 50);
     }
 
     #[test]
     fn test_update() {
         let mut val = 42;
-        let mut volatile = Volatile::new(&mut val);
-        volatile.update(|v| *v += 1);
+        let mut shared = Shared::new(&mut val);
+        shared.update(|v| *v += 1);
         assert_eq!(val, 43);
     }
 
     #[test]
     fn test_slice() {
         let mut val = [1, 2, 3];
-        let mut volatile = Volatile::new(&mut val[..]);
-        volatile.index_mut(0).update(|v| *v += 1);
+        let mut shared = Shared::new(&mut val[..]);
+        shared.index_mut(0).update(|v| *v += 1);
         assert_eq!(val, [2, 2, 3]);
     }
 
@@ -843,21 +835,21 @@ mod tests {
             field_1: 60,
             field_2: true,
         };
-        let mut volatile = Volatile::new(&mut val);
-        volatile.map_mut(|s| &mut s.field_1).update(|v| *v += 1);
-        let mut field_2 = volatile.map_mut(|s| &mut s.field_2);
+        let mut shared = Shared::new(&mut val);
+        shared.map_mut(|s| &mut s.field_1).update(|v| *v += 1);
+        let mut field_2 = shared.map_mut(|s| &mut s.field_2);
         assert!(field_2.read());
         field_2.write(false);
-        assert_eq!(volatile.map(|s| &s.field_1).read(), 61);
-        assert_eq!(volatile.map(|s| &s.field_2).read(), false);
+        assert_eq!(shared.map(|s| &s.field_1).read(), 61);
+        assert_eq!(shared.map(|s| &s.field_2).read(), false);
     }
 
     #[cfg(feature = "unstable")]
     #[test]
     fn test_chunks() {
         let mut val = [1, 2, 3, 4, 5, 6];
-        let mut volatile = Volatile::new(&mut val[..]);
-        let mut chunks = volatile.map_mut(|s| s.as_chunks_mut().0);
+        let mut shared = Shared::new(&mut val[..]);
+        let mut chunks = shared.map_mut(|s| s.as_chunks_mut().0);
         chunks.index_mut(1).write([10, 11, 12]);
         assert_eq!(chunks.index(0).read(), [1, 2, 3]);
         assert_eq!(chunks.index(1).read(), [10, 11, 12]);
