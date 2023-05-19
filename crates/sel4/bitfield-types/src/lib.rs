@@ -146,3 +146,13 @@ fn check_range<T: BitfieldPrimitive, const N: usize>(range: &Range<usize>) {
 fn range_spans_primitive_boundary<T: BitfieldPrimitive>(range: &Range<usize>) -> bool {
     range.start / T::BITS != (range.end - 1) / T::BITS
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn zero() {
+        assert_eq!(Bitfield::<u64, 2>::zeroed().get_bits(50..80), 0);
+    }
+}
