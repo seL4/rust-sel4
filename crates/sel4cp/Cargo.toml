@@ -6,7 +6,7 @@ edition = "2021"
 license = "BSD-2-Clause"
 
 [features]
-alloc = ["zerocopy/alloc", "sel4-panicking/alloc"]
+alloc = ["zerocopy/alloc", "sel4-externally-shared/alloc", "sel4-panicking/alloc"]
 default = ["unwinding"]
 full = ["default", "alloc"]
 unwinding = ["sel4-panicking/unwinding"]

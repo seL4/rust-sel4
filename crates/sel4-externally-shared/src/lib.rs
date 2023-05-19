@@ -13,7 +13,12 @@
 #![cfg_attr(all(feature = "unstable", test), feature(slice_as_chunks))]
 #![warn(missing_docs)]
 
+#[cfg(feature = "alloc")]
+extern crate alloc;
+
 use access::{ReadOnly, ReadWrite, Readable, Writable, WriteOnly};
+#[cfg(feature = "alloc")]
+use alloc::vec::Vec;
 use core::{
     fmt,
     marker::PhantomData,
@@ -632,6 +637,25 @@ where
                 count,
             );
         }
+    }
+
+    /// Copies all elements from `self` into a `Vec`.
+    #[cfg(feature = "alloc")]
+    pub fn copy_to_vec(&self) -> Vec<T>
+    where
+        T: Copy,
+    {
+        let src = self.reference.deref();
+        let n = src.len();
+        let mut v = Vec::with_capacity(n);
+        // SAFETY:
+        // allocated above with the capacity of `src`, and initialize to `src.len()` in
+        // ptr::copy_to_non_overlapping below.
+        unsafe {
+            src.as_ptr().copy_to_nonoverlapping(v.as_mut_ptr(), n);
+            v.set_len(n);
+        }
+        v
     }
 }
 
