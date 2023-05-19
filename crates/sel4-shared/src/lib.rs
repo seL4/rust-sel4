@@ -48,14 +48,12 @@ pub struct Shared<R, A = ReadWrite> {
     access: PhantomData<A>,
 }
 
-type Volatile<R, A = ReadWrite> = Shared<R, A>;
-
 /// Constructor functions for creating new values
 ///
 /// These functions allow to construct a new `Volatile` instance from a reference type. While
 /// the `new` function creates a `Volatile` instance with unrestricted access, there are also
 /// functions for creating read-only or write-only instances.
-impl<R> Volatile<R> {
+impl<R> Shared<R> {
     /// Constructs a new volatile instance wrapping the given reference.
     ///
     /// While it is possible to construct `Volatile` instances from arbitrary values (including
@@ -77,8 +75,8 @@ impl<R> Volatile<R> {
     /// volatile.write(1);
     /// assert_eq!(volatile.read(), 1);
     /// ```
-    pub const fn new(reference: R) -> Volatile<R> {
-        Volatile {
+    pub const fn new(reference: R) -> Shared<R> {
+        Shared {
             reference,
             access: PhantomData,
         }
@@ -115,8 +113,8 @@ impl<R> Volatile<R> {
     /// //ERROR: ^^^^^ the trait `volatile::access::Writable` is not implemented
     /// //             for `volatile::access::ReadOnly`
     /// ```
-    pub const fn new_read_only(reference: R) -> Volatile<R, ReadOnly> {
-        Volatile {
+    pub const fn new_read_only(reference: R) -> Shared<R, ReadOnly> {
+        Shared {
             reference,
             access: PhantomData,
         }
@@ -153,8 +151,8 @@ impl<R> Volatile<R> {
     /// //ERROR: ^^^^ the trait `volatile::access::Readable` is not implemented
     /// //            for `volatile::access::WriteOnly`
     /// ```
-    pub const fn new_write_only(reference: R) -> Volatile<R, WriteOnly> {
-        Volatile {
+    pub const fn new_write_only(reference: R) -> Shared<R, WriteOnly> {
+        Shared {
             reference,
             access: PhantomData,
         }
@@ -162,7 +160,7 @@ impl<R> Volatile<R> {
 }
 
 /// Methods for references to `Copy` types
-impl<R, T, A> Volatile<R, A>
+impl<R, T, A> Shared<R, A>
 where
     R: Deref<Target = T>,
     T: Copy,
@@ -249,7 +247,7 @@ where
 }
 
 /// Method for extracting the wrapped value.
-impl<R, A> Volatile<R, A> {
+impl<R, A> Shared<R, A> {
     /// Extracts the inner value stored in the wrapper type.
     ///
     /// This method gives direct access to the wrapped reference and thus allows
@@ -280,7 +278,7 @@ impl<R, A> Volatile<R, A> {
 }
 
 /// Transformation methods for accessing struct fields
-impl<R, T, A> Volatile<R, A>
+impl<R, T, A> Shared<R, A>
 where
     R: Deref<Target = T>,
     T: ?Sized,
@@ -324,13 +322,13 @@ where
     ///    value
     /// });
     /// ```
-    pub fn map<'a, F, U>(&'a self, f: F) -> Volatile<&'a U, A>
+    pub fn map<'a, F, U>(&'a self, f: F) -> Shared<&'a U, A>
     where
         F: FnOnce(&'a T) -> &'a U,
         U: ?Sized,
         T: 'a,
     {
-        Volatile {
+        Shared {
             reference: f(self.reference.deref()),
             access: self.access,
         }
@@ -375,14 +373,14 @@ where
     ///    value
     /// });
     /// ```
-    pub fn map_mut<'a, F, U>(&'a mut self, f: F) -> Volatile<&'a mut U, A>
+    pub fn map_mut<'a, F, U>(&'a mut self, f: F) -> Shared<&'a mut U, A>
     where
         F: FnOnce(&mut T) -> &mut U,
         R: DerefMut,
         U: ?Sized,
         T: 'a,
     {
-        Volatile {
+        Shared {
             reference: f(&mut self.reference),
             access: self.access,
         }
@@ -390,7 +388,7 @@ where
 }
 
 /// Methods for volatile slices
-impl<T, R, A> Volatile<R, A>
+impl<T, R, A> Shared<R, A>
 where
     R: Deref<Target = [T]>,
 {
@@ -426,7 +424,7 @@ where
     /// let subslice = volatile.index(1..);
     /// assert_eq!(subslice.index(0).read(), 2);
     /// ```
-    pub fn index<'a, I>(&'a self, index: I) -> Volatile<&'a I::Output, A>
+    pub fn index<'a, I>(&'a self, index: I) -> Shared<&'a I::Output, A>
     where
         I: SliceIndex<[T]>,
         T: 'a,
@@ -468,7 +466,7 @@ where
     /// subslice.index_mut(0).write(6);
     /// assert_eq!(subslice.index(0).read(), 6);
     /// ```
-    pub fn index_mut<'a, I>(&'a mut self, index: I) -> Volatile<&mut I::Output, A>
+    pub fn index_mut<'a, I>(&'a mut self, index: I) -> Shared<&mut I::Output, A>
     where
         I: SliceIndex<[T]>,
         R: DerefMut,
@@ -636,7 +634,7 @@ where
 }
 
 /// Methods for volatile byte slices
-impl<R, A> Volatile<R, A>
+impl<R, A> Shared<R, A>
 where
     R: Deref<Target = [u8]>,
 {
@@ -672,7 +670,7 @@ where
 }
 
 /// Methods for converting arrays to slices
-impl<R, A, T, const N: usize> Volatile<R, A>
+impl<R, A, T, const N: usize> Shared<R, A>
 where
     R: Deref<Target = [T; N]>,
 {
@@ -698,7 +696,7 @@ where
     /// assert_eq!(subslice.index(0).read(), 3);
     /// assert_eq!(subslice.index(1).read(), 4);
     /// ```
-    pub fn as_slice(&self) -> Volatile<&[T], A> {
+    pub fn as_slice(&self) -> Shared<&[T], A> {
         self.map(|array| &array[..])
     }
 
@@ -723,7 +721,7 @@ where
     ///
     /// assert_eq!(dst, [0, 1]);
     /// ```
-    pub fn as_mut_slice(&mut self) -> Volatile<&mut [T], A>
+    pub fn as_mut_slice(&mut self) -> Shared<&mut [T], A>
     where
         R: DerefMut,
     {
@@ -732,7 +730,7 @@ where
 }
 
 /// Methods for restricting access.
-impl<R> Volatile<R> {
+impl<R> Shared<R> {
     /// Restricts access permissions to read-only.
     ///
     /// ## Example
@@ -747,8 +745,8 @@ impl<R> Volatile<R> {
     /// assert_eq!(read_only.read(), -4);
     /// // read_only.write(10); // compile-time error
     /// ```
-    pub fn read_only(self) -> Volatile<R, ReadOnly> {
-        Volatile {
+    pub fn read_only(self) -> Shared<R, ReadOnly> {
+        Shared {
             reference: self.reference,
             access: PhantomData,
         }
@@ -772,15 +770,15 @@ impl<R> Volatile<R> {
     /// field_2.write(14);
     /// // field_2.read(); // compile-time error
     /// ```
-    pub fn write_only(self) -> Volatile<R, WriteOnly> {
-        Volatile {
+    pub fn write_only(self) -> Shared<R, WriteOnly> {
+        Shared {
             reference: self.reference,
             access: PhantomData,
         }
     }
 }
 
-impl<R, T, A> fmt::Debug for Volatile<R, A>
+impl<R, T, A> fmt::Debug for Shared<R, A>
 where
     R: Deref<Target = T>,
     T: Copy + fmt::Debug,
@@ -791,7 +789,7 @@ where
     }
 }
 
-impl<R> fmt::Debug for Volatile<R, WriteOnly>
+impl<R> fmt::Debug for Shared<R, WriteOnly>
 where
     R: Deref,
 {
