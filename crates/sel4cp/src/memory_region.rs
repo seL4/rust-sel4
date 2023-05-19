@@ -183,22 +183,11 @@ mod volatile_slice_ext {
     {
         fn volatile_slice_ext_inner(&self) -> &ExternallyShared<R, A>;
 
-        fn len(&self) -> usize {
-            // HACK HACK HACK
-            // TODO upstream proper `len` method
-            let mut len = None;
-            self.volatile_slice_ext_inner().map(|x| {
-                len = Some(x.len());
-                x
-            });
-            len.unwrap()
-        }
-
         fn copy_to_vec(&self) -> Vec<T>
         where
             T: Copy,
         {
-            vec_from_write_only_init(self.len(), |buf| {
+            vec_from_write_only_init(self.volatile_slice_ext_inner().len(), |buf| {
                 self.volatile_slice_ext_inner().copy_into_slice(buf);
             })
         }

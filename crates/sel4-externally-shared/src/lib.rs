@@ -390,6 +390,11 @@ impl<T, R, A> ExternallyShared<R, A>
 where
     R: Deref<Target = [T]>,
 {
+    /// Length of the wrapped slice.
+    pub fn len(&self) -> usize {
+        self.reference.deref().len()
+    }
+
     /// Applies the index operation on the wrapped slice.
     ///
     /// Returns a shared `ExternallyShared` reference to the resulting subslice.
