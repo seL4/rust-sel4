@@ -1,7 +1,6 @@
 { mk, localCrates, versions }:
 
 mk {
-  nix.meta.requirements = [ "sel4" ];
   package.name = "meta";
   nix.local.dependencies = with localCrates; [
     capdl-types
@@ -60,4 +59,5 @@ mk {
       "sel4cp-postcard"
     ];
   };
+  nix.meta.requirements = [ "sel4" ];
 }

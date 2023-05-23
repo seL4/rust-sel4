@@ -1,20 +1,8 @@
 { mk, localCrates, versions }:
 
 mk {
-  nix.meta.requirements = [ "sel4" ];
   package.name = "sel4-sys";
   package.build = "build/main.rs";
-  nix.local.dependencies = with localCrates; [
-    sel4-config
-    sel4-bitfield-types
-  ];
-  nix.local.build-dependencies = with localCrates; [
-    sel4-build-env
-    sel4-rustfmt-helper
-    sel4-bitfield-parser
-    sel4-config
-    sel4-config-data
-  ];
   dependencies = {
     inherit (versions) log;
   };
@@ -30,4 +18,16 @@ mk {
   features = {
     wrappers = [];
   };
+  nix.local.dependencies = with localCrates; [
+    sel4-config
+    sel4-bitfield-types
+  ];
+  nix.local.build-dependencies = with localCrates; [
+    sel4-build-env
+    sel4-rustfmt-helper
+    sel4-bitfield-parser
+    sel4-config
+    sel4-config-data
+  ];
+  nix.meta.requirements = [ "sel4" ];
 }

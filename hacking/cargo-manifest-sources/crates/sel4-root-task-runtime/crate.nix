@@ -1,15 +1,7 @@
 { mk, localCrates }:
 
 mk {
-  nix.meta.requirements = [ "sel4" ];
   package.name = "sel4-root-task-runtime";
-  nix.local.dependencies = with localCrates; [
-    sel4
-    sel4-panicking
-    sel4-panicking-env
-    sel4-runtime-common
-    sel4-root-task-runtime-macros
-  ];
   dependencies = {
     sel4-runtime-common.features = [ "tls" "unwinding" "start" "static-heap" ];
   };
@@ -31,4 +23,12 @@ mk {
       "sel4/single-threaded"
     ];
   };
+  nix.local.dependencies = with localCrates; [
+    sel4
+    sel4-panicking
+    sel4-panicking-env
+    sel4-runtime-common
+    sel4-root-task-runtime-macros
+  ];
+  nix.meta.requirements = [ "sel4" ];
 }

@@ -1,18 +1,20 @@
 { mk, localCrates, versions }:
 
 mk {
-  nix.meta.requirements = [ "linux" ];
   package.name = "capdl-embed-spec";
+  dependencies = {
+    capdl-types.features = [ "alloc" "deflate" ];
+    hex = "0.4.3";
+    syn = { version = versions.syn; features = [ "full" ]; };
+    inherit (versions)
+      proc-macro2
+      quote
+      serde
+      serde_json
+    ;
+  };
   nix.local.dependencies = with localCrates; [
     capdl-types
   ];
-  dependencies = {
-    capdl-types.features = [ "alloc" "deflate" ];
-    inherit (versions) serde_json;
-    syn = { version = versions.syn; features = [ "full" ]; };
-    inherit (versions) serde;
-    inherit (versions) proc-macro2;
-    inherit (versions) quote;
-    hex = "0.4.3";
-  };
+  nix.meta.requirements = [ "linux" ];
 }

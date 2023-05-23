@@ -2,15 +2,6 @@
 
 mk {
   package.name = "capdl-loader-with-embedded-spec-embedded-spec";
-  nix.local.dependencies = with localCrates; [
-    capdl-types
-  ];
-  nix.local.build-dependencies = with localCrates; [
-    capdl-types
-    capdl-embed-spec
-    capdl-loader-with-embedded-spec-build-env
-    sel4-rustfmt-helper
-  ];
   dependencies = {
     capdl-types.features = [ "borrowed-indirect" ];
   };
@@ -22,5 +13,14 @@ mk {
       "capdl-types/deflate"
     ];
   };
+  nix.local.dependencies = with localCrates; [
+    capdl-types
+  ];
+  nix.local.build-dependencies = with localCrates; [
+    capdl-embed-spec
+    capdl-loader-with-embedded-spec-build-env
+    capdl-types
+    sel4-rustfmt-helper
+  ];
   nix.meta.requirements = [ "capdl-spec" ];
 }

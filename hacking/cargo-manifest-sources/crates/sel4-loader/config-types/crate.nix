@@ -1,4 +1,4 @@
-{ mk, serdeWith, versions }:
+{ mk, serdeWith }:
 
 mk {
   package.name = "sel4-loader-config-types";

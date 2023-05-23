@@ -1,8 +1,6 @@
 { mk, localCrates }:
 
 mk {
-  nix.meta.labels = [ "leaf" ];
-  nix.meta.requirements = [ "sel4" ];
   package.name = "banscii-assistant";
   nix.local.dependencies = with localCrates; [
     sel4cp
@@ -14,5 +12,7 @@ mk {
     sel4cp = { default-features = false; features = [ "alloc" ]; };
     hex = { version = "0.4.3"; default-features = false; features = [ "alloc" ]; };
   };
+  nix.meta.labels = [ "leaf" ];
+  nix.meta.requirements = [ "sel4" ];
   nix.meta.skip = true;
 }

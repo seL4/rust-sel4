@@ -1,9 +1,13 @@
 { mk, localCrates }:
 
 mk {
-  nix.meta.labels = [ "leaf" ];
-  nix.meta.requirements = [ "sel4" ];
   package.name = "tests-root-task-backtrace";
+  dependencies = {
+    sel4-root-task-runtime.features = [ "alloc" "single-threaded" ];
+    sel4-backtrace-simple.features = [ "alloc" ];
+    sel4-backtrace.features = [ "full" ];
+    sel4-backtrace-types.features = [ "full" ];
+  };
   nix.local.dependencies = with localCrates; [
     sel4
     sel4-backtrace
@@ -12,10 +16,6 @@ mk {
     sel4-backtrace-embedded-debug-info
     sel4-root-task-runtime
   ];
-  dependencies = {
-    sel4-root-task-runtime.features = [ "alloc" "single-threaded" ];
-    sel4-backtrace-simple.features = [ "alloc" ];
-    sel4-backtrace.features = [ "full" ];
-    sel4-backtrace-types.features = [ "full" ];
-  };
+  nix.meta.labels = [ "leaf" ];
+  nix.meta.requirements = [ "sel4" ];
 }

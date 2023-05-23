@@ -1,8 +1,6 @@
 { mk, localCrates }:
 
 mk {
-  nix.meta.labels = [ "leaf" ];
-  nix.meta.requirements = [ "sel4" ];
   package.name = "tests-root-task-core-libs";
   nix.local.dependencies = with localCrates; [
     sel4-root-task-runtime
@@ -10,4 +8,6 @@ mk {
     sel4-config
     sel4
   ];
+  nix.meta.labels = [ "leaf" ];
+  nix.meta.requirements = [ "sel4" ];
 }

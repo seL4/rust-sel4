@@ -1,4 +1,4 @@
-{ mk, serdeWith, postcardWith }:
+{ mk }:
 
 mk {
   package.name = "sel4-backtrace-addr2line-context-helper";

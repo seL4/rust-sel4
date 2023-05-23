@@ -1,14 +1,10 @@
-{ mk, localCrates, serdeWith, versions }:
+{ mk, versions, serdeWith }:
 
 mk {
   package.name = "sel4-simple-task-runtime-config-types";
-  nix.local.dependencies = with localCrates; [
-  ];
   dependencies = {
     inherit (versions) zerocopy;
-    serde = serdeWith [ "derive" ] // {
-      optional = true;
-    };
+    serde = serdeWith [ "derive" ] // { optional = true; };
   };
   features = {
     alloc = [

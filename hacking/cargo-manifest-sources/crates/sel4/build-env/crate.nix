@@ -1,6 +1,6 @@
-{ mk, localCrates }:
+{ mk }:
 
 mk {
-  nix.meta.requirements = [ "linux" ];
   package.name = "sel4-build-env";
+  nix.meta.requirements = [ "linux" ];
 }

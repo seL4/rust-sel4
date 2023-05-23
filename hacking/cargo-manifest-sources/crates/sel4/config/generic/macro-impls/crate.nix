@@ -1,15 +1,17 @@
 { mk, localCrates, versions }:
 
 mk {
-  nix.meta.requirements = [ "linux" ];
   package.name = "sel4-config-generic-macro-impls";
+  dependencies = {
+    syn = { version = versions.syn; features = [ "full" ]; };
+    inherit (versions)
+      fallible-iterator
+      proc-macro2
+      quote
+    ;
+  };
   nix.local.dependencies = with localCrates; [
     sel4-config-generic-types
   ];
-  dependencies = {
-    inherit (versions) fallible-iterator;
-    inherit (versions) proc-macro2;
-    inherit (versions) quote;
-    syn = { version = versions.syn; features = [ "full" ]; };
-  };
+  nix.meta.requirements = [ "linux" ];
 }

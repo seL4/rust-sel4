@@ -1,4 +1,4 @@
-{ mk, serdeWith, postcardWith, versions }:
+{ mk, versions, serdeWith, postcardWith }:
 
 mk {
   package.name = "sel4-backtrace-types";

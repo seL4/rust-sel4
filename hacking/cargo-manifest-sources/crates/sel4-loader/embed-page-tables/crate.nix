@@ -1,10 +1,9 @@
-{ mk, localCrates, versions }:
+{ mk, versions }:
 
 mk {
-  nix.meta.requirements = [ "linux" ];
   package.name = "sel4-loader-embed-page-tables";
   dependencies = {
-    inherit (versions) proc-macro2;
-    inherit (versions) quote;
+    inherit (versions) proc-macro2 quote;
   };
+  nix.meta.requirements = [ "linux" ];
 }

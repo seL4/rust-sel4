@@ -1,13 +1,7 @@
 { mk, localCrates }:
 
 mk {
-  nix.meta.labels = [ "leaf" ];
-  nix.meta.requirements = [ "sel4" ];
   package.name = "tests-root-task-c";
-  nix.local.dependencies = with localCrates; [
-    sel4
-    sel4-root-task-runtime
-  ];
   dependencies = {
     # mbedtls = {
     #   # version = "0.9.0";
@@ -21,5 +15,11 @@ mk {
     cc = "1.0.76";
     glob = "0.3.0";
   };
+  nix.local.dependencies = with localCrates; [
+    sel4
+    sel4-root-task-runtime
+  ];
+  nix.meta.labels = [ "leaf" ];
+  nix.meta.requirements = [ "sel4" ];
   nix.meta.skip = true;
 }

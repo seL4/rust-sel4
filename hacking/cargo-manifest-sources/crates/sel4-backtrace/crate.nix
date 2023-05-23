@@ -1,12 +1,7 @@
-{ mk, localCrates, postcardWith, unwindingWith, serdeWith, versions }:
+{ mk, localCrates, versions, postcardWith, unwindingWith, serdeWith }:
 
 mk {
-  nix.meta.requirements = [ "sel4" ];
   package.name = "sel4-backtrace";
-  nix.local.dependencies = with localCrates; [
-    sel4-backtrace-types
-    # unwinding # XXX
-  ];
   dependencies = {
     inherit (versions) cfg-if;
     unwinding = unwindingWith [] // { optional = true; };
@@ -31,4 +26,8 @@ mk {
       "unwinding"
     ];
   };
+  nix.local.dependencies = with localCrates; [
+    sel4-backtrace-types
+  ];
+  nix.meta.requirements = [ "sel4" ];
 }

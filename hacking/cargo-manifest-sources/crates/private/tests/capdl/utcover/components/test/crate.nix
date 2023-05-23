@@ -1,8 +1,6 @@
 { mk, localCrates, serdeWith }:
 
 mk {
-  nix.meta.labels = [ "leaf" ];
-  nix.meta.requirements = [ "sel4" ];
   package.name = "tests-capdl-utcover-components-test";
   nix.local.dependencies = with localCrates; [
     sel4
@@ -13,4 +11,6 @@ mk {
   dependencies = {
     serde = serdeWith [ "alloc" "derive" ];
   };
+  nix.meta.labels = [ "leaf" ];
+  nix.meta.requirements = [ "sel4" ];
 }
