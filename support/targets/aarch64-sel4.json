@@ -4,7 +4,7 @@
   "disable-redzone": true,
   "env": "sel4",
   "exe-suffix": ".elf",
-  "features": "+strict-align,+neon,+fp-armv8",
+  "features": "+v8a,+strict-align,+neon,+fp-armv8",
   "has-thread-local": true,
   "linker": "rust-lld",
   "linker-flavor": "ld.lld",
@@ -18,7 +18,8 @@
   },
   "relocation-model": "static",
   "supported-sanitizers": [
-    "kcfi"
+    "kcfi",
+    "kernel-address"
   ],
   "target-pointer-width": "64"
 }

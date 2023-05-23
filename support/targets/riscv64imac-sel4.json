@@ -13,5 +13,8 @@
   "llvm-target": "riscv64",
   "max-atomic-width": 64,
   "relocation-model": "static",
+  "supported-sanitizers": [
+    "kernel-address"
+  ],
   "target-pointer-width": "64"
 }

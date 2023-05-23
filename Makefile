@@ -43,7 +43,7 @@ update-lockfile:
 
 .PHONY: generate-target-specs
 generate-target-specs:
-	cargo run -p sel4-generate-target-specs -- support/targets/
+	cargo run -p sel4-generate-target-specs -- write --target-dir support/targets/ --all
 
 .PHONY: check-generated-sources
 check-generated-sources:

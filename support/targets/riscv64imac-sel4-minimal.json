@@ -14,5 +14,8 @@
   "max-atomic-width": 64,
   "panic-strategy": "abort",
   "relocation-model": "static",
+  "supported-sanitizers": [
+    "kernel-address"
+  ],
   "target-pointer-width": "64"
 }

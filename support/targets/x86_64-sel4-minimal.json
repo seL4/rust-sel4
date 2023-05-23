@@ -23,7 +23,8 @@
     ]
   },
   "supported-sanitizers": [
-    "kcfi"
+    "kcfi",
+    "kernel-address"
   ],
   "target-pointer-width": "64"
 }

@@ -15,7 +15,7 @@ use rustc_target::spec::PanicStrategy;
 use rustc_target::spec::Target;
 use rustc_target::spec::TargetTriple;
 
-use clap::{App, Arg};
+use clap::{Arg, ArgAction, Command};
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 struct Config {
@@ -32,7 +32,7 @@ enum Arch {
 }
 
 impl Config {
-    fn target(&self) -> Target {
+    fn target_spec(&self) -> Target {
         let mut target = match &self.arch {
             Arch::AArch64 => {
                 let mut target = builtin("aarch64-unknown-none");
@@ -146,19 +146,85 @@ fn builtin(triple: &str) -> Target {
     Target::expect_builtin(&TargetTriple::from_triple(triple))
 }
 
-fn write(target_dir: impl AsRef<Path>, target_name: &str, target: &Target) -> std::io::Result<()> {
+fn all_target_specs() -> BTreeMap<String, Target> {
+    Config::all()
+        .into_iter()
+        .map(|config| (config.name(), config.target_spec()))
+        .collect::<BTreeMap<_, _>>()
+}
+
+fn do_list() {
+    for target_name in all_target_specs().keys() {
+        println!("{}", target_name)
+    }
+}
+
+fn do_write(
+    target_dir: impl AsRef<Path>,
+    optional_targets: Option<Vec<String>>,
+) -> std::io::Result<()> {
+    let all_targets = all_target_specs();
+    let these_targets =
+        optional_targets.unwrap_or_else(|| all_target_specs().keys().cloned().collect::<Vec<_>>());
+    for target_name in &these_targets {
+        let target_spec = all_targets.get(target_name).unwrap();
+        write_one(&target_dir, target_name, target_spec)?;
+    }
+    Ok(())
+}
+
+fn write_one(
+    target_dir: impl AsRef<Path>,
+    target_name: &str,
+    target_spec: &Target,
+) -> std::io::Result<()> {
     let path = target_dir.as_ref().join(format!("{}.json", target_name));
-    let contents = format!("{:#}\n", target.to_json());
+    let contents = format!("{:#}\n", target_spec.to_json());
     fs::write(path, contents)
 }
 
 fn main() -> std::io::Result<()> {
-    let matches = App::new("")
-        .arg(Arg::from_usage("<target_dir>"))
+    let matches = Command::new("")
+        .subcommand_required(true)
+        .subcommand(Command::new("list"))
+        .subcommand(
+            Command::new("write")
+                .arg(
+                    Arg::new("target_dir")
+                        .long("target-dir")
+                        .short('d')
+                        .value_name("TARGET_DIR")
+                        .required(true),
+                )
+                .arg(
+                    Arg::new("targets")
+                        .long("target")
+                        .short('t')
+                        .value_name("TARGET")
+                        .action(ArgAction::Append),
+                )
+                .arg(Arg::new("all").long("all").action(ArgAction::SetTrue)),
+        )
         .get_matches();
-    let target_dir = matches.value_of("target_dir").unwrap();
-    for config in Config::all().iter() {
-        write(target_dir, &config.name(), &config.target())?;
+
+    match matches.subcommand() {
+        Some(("list", _)) => {
+            do_list();
+        }
+        Some(("write", sub_matches)) => {
+            let target_dir = sub_matches.value_of("target_dir").unwrap();
+            let targets = sub_matches
+                .get_many::<String>("targets")
+                .map(|many| many.cloned().collect::<Vec<_>>())
+                .unwrap_or_else(Vec::new);
+            let all = *sub_matches.get_one::<bool>("all").unwrap();
+            let optional_targets = if all { None } else { Some(targets) };
+            do_write(target_dir, optional_targets)?;
+        }
+        _ => {
+            unreachable!()
+        }
     }
+
     Ok(())
 }
