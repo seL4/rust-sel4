@@ -1,11 +1,9 @@
-{ mk, localCrates, postcardWith, coreLicense, meAsAuthor, versions }:
+{ mk, localCrates, postcardWith, versions }:
 
 mk {
   nix.meta.labels = [ "leaf" ];
   nix.meta.requirements = [ "sel4" "capdl-spec" ];
   package.name = "capdl-loader";
-  package.license = coreLicense;
-  package.authors = [ meAsAuthor ];
   nix.local.dependencies = with localCrates; [
     sel4
     sel4-logging

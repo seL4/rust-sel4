@@ -1,4 +1,4 @@
-{ mk, localCrates, coreLicense, meAsAuthor, versions }:
+{ mk, localCrates, versions }:
 
 mk {
   nix.meta.requirements = [ "sel4" ];
@@ -15,8 +15,6 @@ mk {
     sel4-config
     sel4-config-data
   ];
-  package.license = coreLicense;
-  package.authors = [ meAsAuthor ];
   dependencies = {
     inherit (versions) log;
   };

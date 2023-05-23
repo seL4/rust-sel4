@@ -1,4 +1,4 @@
-{ mk, localCrates, coreLicense, meAsAuthor, versions }:
+{ mk, localCrates, versions }:
 
 mk {
   nix.meta.requirements = [ "linux" "sel4-config" ];
@@ -19,6 +19,4 @@ mk {
     lazy_static = "1.4.0";
     inherit (versions) serde_json;
   };
-  package.license = coreLicense;
-  package.authors = [ meAsAuthor ];
 }

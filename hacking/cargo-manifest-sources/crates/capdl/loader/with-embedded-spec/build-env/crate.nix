@@ -1,10 +1,8 @@
-{ mk, localCrates, coreLicense, meAsAuthor, versions }:
+{ mk, localCrates, versions }:
 
 mk {
   nix.meta.requirements = [ "linux" ];
   package.name = "capdl-loader-with-embedded-spec-build-env";
-  package.license = coreLicense;
-  package.authors = [ meAsAuthor ];
   nix.local.dependencies = with localCrates; [
     capdl-types
     capdl-embed-spec

@@ -1,11 +1,9 @@
-{ mk, localCrates, coreLicense, meAsAuthor }:
+{ mk, localCrates }:
 
 mk {
   nix.meta.labels = [ "leaf" ];
   nix.meta.requirements = [ "sel4" ];
   package.name = "banscii-artist";
-  package.license = coreLicense;
-  package.authors = [ meAsAuthor ];
   nix.local.dependencies = with localCrates; [
     sel4cp
     banscii-artist-interface-types

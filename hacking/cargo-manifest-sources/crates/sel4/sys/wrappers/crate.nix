@@ -1,4 +1,4 @@
-{ mk, localCrates, coreLicense, meAsAuthor }:
+{ mk, localCrates }:
 
 mk {
   nix.meta.requirements = [ "sel4" ];
@@ -6,8 +6,6 @@ mk {
   nix.local.dependencies = with localCrates; [
     sel4-sys
   ];
-  package.license = coreLicense;
-  package.authors = [ meAsAuthor ];
   dependencies = {
     sel4-sys.features = [ "wrappers" ];
   };

@@ -1,11 +1,9 @@
-{ mk, localCrates, postcardCommon, coreLicense, meAsAuthor, serdeWith, versions }:
+{ mk, localCrates, postcardWith, serdeWith, versions }:
 
 mk {
   nix.meta.labels = [ "leaf" ];
   nix.meta.requirements = [ "unix" ];
   package.name = "sel4-loader-add-payload";
-  package.license = coreLicense;
-  package.authors = [ meAsAuthor ];
   nix.local.dependencies = with localCrates; [
     sel4-loader-payload-types
     sel4-render-elf-with-data
@@ -19,7 +17,7 @@ mk {
     inherit (versions) fallible-iterator;
     inherit (versions) serde_json;
     inherit (versions) serde_yaml;
-    postcard = postcardCommon;
+    postcard = postcardWith [ "alloc" ];
     inherit (versions) heapless;
     serde = serdeWith [ "alloc" "derive" ];
   };

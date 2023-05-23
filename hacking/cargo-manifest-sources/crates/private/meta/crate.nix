@@ -1,10 +1,8 @@
-{ mk, localCrates, coreLicense, meAsAuthor, versions }:
+{ mk, localCrates, versions }:
 
 mk {
   nix.meta.requirements = [ "sel4" ];
   package.name = "meta";
-  package.license = coreLicense;
-  package.authors = [ meAsAuthor ];
   nix.local.dependencies = with localCrates; [
     capdl-types
   ];

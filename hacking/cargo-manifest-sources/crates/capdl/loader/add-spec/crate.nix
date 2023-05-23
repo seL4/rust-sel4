@@ -1,11 +1,9 @@
-{ mk, localCrates, postcardCommon, coreLicense, meAsAuthor, versions }:
+{ mk, localCrates, postcardWith, versions }:
 
 mk {
   nix.meta.labels = [ "leaf" ];
   nix.meta.requirements = [ "unix" ];
   package.name = "capdl-loader-add-spec";
-  package.license = coreLicense;
-  package.authors = [ meAsAuthor ];
   nix.local.dependencies = with localCrates; [
     capdl-types
     capdl-loader-types
@@ -18,6 +16,6 @@ mk {
     inherit (versions) anyhow;
     inherit (versions) fallible-iterator;
     inherit (versions) serde_json;
-    postcard = postcardCommon;
+    postcard = postcardWith [ "alloc" ];
   };
 }

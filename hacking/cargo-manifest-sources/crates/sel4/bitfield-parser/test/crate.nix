@@ -1,11 +1,9 @@
-{ mk, localCrates, coreLicense, meAsAuthor }:
+{ mk, localCrates }:
 
 mk {
   nix.meta.labels = [ "leaf" ];
   nix.meta.requirements = [ "unix" ];
   package.name = "sel4-bitfield-parser-test";
-  package.license = coreLicense;
-  package.authors = [ meAsAuthor ];
   nix.local.dependencies = with localCrates; [
     sel4-bitfield-parser
   ];

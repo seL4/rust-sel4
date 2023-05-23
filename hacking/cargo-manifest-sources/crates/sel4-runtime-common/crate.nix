@@ -1,10 +1,8 @@
-{ mk, localCrates, coreLicense, meAsAuthor, versions, unwindingWith }:
+{ mk, localCrates, versions, unwindingWith }:
 
 mk {
   nix.meta.requirements = [ "sel4" ];
   package.name = "sel4-runtime-common";
-  package.license = coreLicense;
-  package.authors = [ meAsAuthor ];
   dependencies = {
     inherit (versions) cfg-if;
     unwinding = unwindingWith [] // { optional = true; };

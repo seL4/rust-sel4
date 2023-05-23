@@ -1,10 +1,8 @@
-{ mk, localCrates, postcardWith, unwindingWith, serdeWith, coreLicense, meAsAuthor, versions }:
+{ mk, localCrates, postcardWith, unwindingWith, serdeWith, versions }:
 
 mk {
   nix.meta.requirements = [ "sel4" ];
   package.name = "sel4-backtrace";
-  package.license = coreLicense;
-  package.authors = [ meAsAuthor ];
   nix.local.dependencies = with localCrates; [
     sel4-backtrace-types
     # unwinding # XXX

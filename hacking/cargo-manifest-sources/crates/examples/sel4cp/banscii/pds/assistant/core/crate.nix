@@ -1,9 +1,7 @@
-{ mk, localCrates, coreLicense, meAsAuthor, versions }:
+{ mk, localCrates, versions }:
 
 mk {
   package.name = "banscii-assistant-core";
-  package.license = coreLicense;
-  package.authors = [ meAsAuthor ];
   nix.local.dependencies = with localCrates; [
   ];
   dependencies = {

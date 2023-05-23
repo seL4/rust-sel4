@@ -1,11 +1,9 @@
-{ mk, localCrates, coreLicense, meAsAuthor, versions }:
+{ mk, localCrates, versions }:
 
 mk {
   nix.meta.labels = [ "leaf" ];
   nix.meta.requirements = [ "unix" ];
   package.name = "banscii-assistant-core-test";
-  package.license = coreLicense;
-  package.authors = [ meAsAuthor ];
   nix.local.dependencies = with localCrates; [
     banscii-assistant-core
   ];

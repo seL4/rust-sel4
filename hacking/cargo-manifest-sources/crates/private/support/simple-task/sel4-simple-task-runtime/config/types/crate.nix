@@ -1,9 +1,7 @@
-{ mk, localCrates, serdeWith, coreLicense, meAsAuthor, versions }:
+{ mk, localCrates, serdeWith, versions }:
 
 mk {
   package.name = "sel4-simple-task-runtime-config-types";
-  package.license = coreLicense;
-  package.authors = [ meAsAuthor ];
   nix.local.dependencies = with localCrates; [
   ];
   dependencies = {

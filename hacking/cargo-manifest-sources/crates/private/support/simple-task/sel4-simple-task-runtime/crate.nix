@@ -1,10 +1,8 @@
-{ mk, localCrates, serdeWith, postcardWith, coreLicense, meAsAuthor, versions }:
+{ mk, localCrates, serdeWith, postcardWith, versions }:
 
 mk {
   nix.meta.requirements = [ "sel4" ];
   package.name = "sel4-simple-task-runtime";
-  package.license = coreLicense;
-  package.authors = [ meAsAuthor ];
   nix.local.dependencies = with localCrates; [
     sel4
     sel4-sync

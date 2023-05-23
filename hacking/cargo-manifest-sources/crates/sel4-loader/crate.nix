@@ -1,11 +1,9 @@
-{ mk, localCrates, coreLicense, meAsAuthor, postcardWith, versions }:
+{ mk, localCrates, postcardWith, versions }:
 
 mk {
   nix.meta.labels = [ "leaf" ];
   nix.meta.requirements = [ "sel4" ];
   package.name = "sel4-loader";
-  package.license = coreLicense;
-  package.authors = [ meAsAuthor ];
   nix.local.dependencies = with localCrates; [
     sel4-platform-info
     sel4-logging

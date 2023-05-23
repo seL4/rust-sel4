@@ -1,7 +1,5 @@
-{ mk, coreLicense, meAsAuthor }:
+{ mk }:
 
 mk {
   package.name = "sel4-platform-info-types";
-  package.license = coreLicense;
-  package.authors = [ meAsAuthor ];
 }

@@ -1,9 +1,7 @@
-{ mk, serdeWith, postcardWith, coreLicense, meAsAuthor, versions }:
+{ mk, serdeWith, postcardWith, versions }:
 
 mk {
   package.name = "sel4-backtrace-types";
-  package.license = coreLicense;
-  package.authors = [ meAsAuthor ];
   dependencies = {
     inherit (versions) cfg-if;
     serde = serdeWith [ "derive" ] // { optional = true; };

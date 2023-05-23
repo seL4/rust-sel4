@@ -1,4 +1,4 @@
-{ mk, localCrates, coreLicense, meAsAuthor, versions }:
+{ mk, localCrates, versions }:
 
 mk {
   nix.meta.requirements = [ "linux" ];
@@ -6,8 +6,6 @@ mk {
   nix.local.dependencies = with localCrates; [
     sel4-config-generic-types
   ];
-  package.license = coreLicense;
-  package.authors = [ meAsAuthor ];
   dependencies = {
     inherit (versions) fallible-iterator;
     inherit (versions) proc-macro2;

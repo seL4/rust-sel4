@@ -1,10 +1,8 @@
-{ mk, localCrates, serdeWith, postcardWith, coreLicense, meAsAuthor }:
+{ mk, localCrates, serdeWith, postcardWith }:
 
 mk {
   nix.meta.requirements = [ "sel4" ];
   package.name = "sel4cp-postcard";
-  package.license = coreLicense;
-  package.authors = [ meAsAuthor ];
   nix.local.dependencies = with localCrates; [
     sel4
     sel4cp

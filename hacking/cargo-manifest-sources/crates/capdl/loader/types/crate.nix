@@ -1,9 +1,7 @@
-{ mk, localCrates, postcardWith, serdeWith, coreLicense, meAsAuthor }:
+{ mk, localCrates, postcardWith, serdeWith }:
 
 mk {
   package.name = "capdl-loader-types";
-  package.license = coreLicense;
-  package.authors = [ meAsAuthor ];
   nix.local.dependencies = with localCrates; [
     capdl-types
   ];

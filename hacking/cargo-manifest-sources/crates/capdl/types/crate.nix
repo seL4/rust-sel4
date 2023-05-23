@@ -1,9 +1,7 @@
-{ mk, localCrates, serdeWith, coreLicense, meAsAuthor, versions }:
+{ mk, localCrates, serdeWith, versions }:
 
 mk {
   package.name = "capdl-types";
-  package.license = coreLicense;
-  package.authors = [ meAsAuthor ];
   nix.local.dependencies = with localCrates; [
     capdl-types-derive
     sel4

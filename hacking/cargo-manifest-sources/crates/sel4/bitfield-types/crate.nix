@@ -1,8 +1,6 @@
-{ mk, localCrates, coreLicense, meAsAuthor }:
+{ mk, localCrates }:
 
 mk {
   nix.meta.requirements = [ "sel4" ];
   package.name = "sel4-bitfield-types";
-  package.license = coreLicense;
-  package.authors = [ meAsAuthor ];
 }

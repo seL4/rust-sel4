@@ -35,8 +35,7 @@ let
           (toString (builtins.dirOf path));
 
       crate = callCrate { inherit relativePath; } path {};
-    in
-    {
+    in {
       name = crate.manifest.package.name;
       value = crate;
     }));
@@ -49,79 +48,77 @@ let
 
   cratePaths = lib.mapAttrs (name: path: { inherit name path; }) cratePathAttrs;
 
-  callCrate =
-    { relativePath
-    }:
+  callCrate = { relativePath }:
 
-    let
-      mk = args:
-        let
-          passthru = args.nix.passthru or {};
-        in
-          mkCrate (lib.fix (self: crateUtils.clobber [
-            {
-              package = {
-                edition = "2021";
-                version = "0.1.0";
-              };
-            }
-            {
-              nix.path = relativePath;
-            }
-            args
-          ]));
-
-    in newScope rec {
+    newScope rec {
 
       localCrates = cratePaths;
 
-      inherit mk;
+      mk = args: mkCrate (crateUtils.clobber [
+        {
+          nix.path = relativePath;
+          package = {
+            edition = "2021";
+            version = "0.1.0";
+            license = defaultLicense;
+            authors = [ defaultAuthor ];
+          };
+        }
+        args
+      ]);
 
-      meAsAuthor = "Nick Spinale <nick.spinale@coliasgroup.com>";
-      coreLicense = "BSD-2-Clause";
-
-      serdeVersion = "1.0.147";
-      serdeWith = features: { version = serdeVersion; default-features = false; inherit features; };
-      serdeWithDefaultAnd = features: { version = serdeVersion; inherit features; };
-      postcardVersion = "1.0.2";
-      postcardWith = features: { version = postcardVersion; default-features = false; inherit features; };
-      postcardCommon = postcardWith [ "alloc" ]; # HACK
-      unwindingVersion = "0.1.6";
-      unwindingFromCratesIO = { version = unwindingVersion; };
-      unwindingSource = unwindingFromCratesIO;
-      unwindingBaseFeatures = [ "unwinder" "fde-custom" "hide-trace" ];
-      unwindingWith = features: unwindingSource // { default-features = false; features = unwindingBaseFeatures ++ features; };
+      defaultLicense = "BSD-2-Clause";
+      defaultAuthor = "Nick Spinale <nick.spinale@coliasgroup.com>";
 
       versions = {
-        log = "0.4.17";
+        anyhow = "1.0.66";
         cfg-if = "1.0.0";
-        zerocopy = "0.6.1";
+        fallible-iterator = "0.2.0";
         heapless = "0.7.16";
+        log = "0.4.17";
+        num_enum = "0.5.9";
+        object = "0.31.0";
+        postcard = "1.0.2";
+        proc-macro2 = "1.0.50";
+        quote = "1.0.23";
+        serde = "1.0.147";
         serde_json = "1.0.87";
         serde_yaml = "0.9.14";
-        serde = serdeVersion;
-        fallible-iterator = "0.2.0";
-        object = "0.31.0";
-        anyhow = "1.0.66";
-        num_enum = "0.5.9";
-        tock-registers = "0.8.1";
         syn = "1.0.107";
-        quote = "1.0.23";
-        proc-macro2 = "1.0.50";
         synstructure = "0.12.6";
+        tock-registers = "0.8.1";
+        unwinding = "0.1.6";
+        zerocopy = "0.6.1";
+      };
+
+      serdeWith = features: {
+        version = versions.serde;
+        default-features = false;
+        inherit features;
+      };
+
+      postcardWith = features: {
+        version = versions.postcard;
+        default-features = false;
+        inherit features;
+      };
+
+      unwindingWith = features: {
+        version = versions.unwinding;
+        default-features = false;
+        features = [ "unwinder" "fde-custom" "hide-trace" ] ++ features;
       };
     };
 
-  workspaceTOML = helpers.renderManifest
-    {
-      frontmatter = null;
-      manifest = {
-        workspace = {
-          resolver = "2";
-          members = lib.naturalSort (lib.attrValues cratePathAttrs);
-        };
+  workspaceTOML = helpers.renderManifest {
+    frontmatter = null;
+    manifest = {
+      workspace = {
+        resolver = "2";
+        members = lib.naturalSort (lib.attrValues cratePathAttrs);
       };
     };
+  };
 
   meta = lib.mapAttrs (_: crate: crate.meta) crates;
 
