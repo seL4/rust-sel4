@@ -143,7 +143,7 @@ let
   plan = {
     "Cargo.toml" = {
       src = workspaceTOML;
-      justCheckEquivalenceWith = null;
+      justCheckEquivalenceWith = helpers.checkTOMLEquivalence;
     };
     "support/workspace-meta.json" = {
       src = metaJSON;

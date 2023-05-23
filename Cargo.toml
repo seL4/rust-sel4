@@ -1,4 +1,7 @@
 [workspace]
+
+resolver = "2"
+
 members = [
     "crates/capdl/embed-spec",
     "crates/capdl/loader",
@@ -81,6 +84,5 @@ members = [
     "crates/sel4/sys/wrappers",
     "crates/sel4cp",
     "crates/sel4cp/macros",
-    "crates/sel4cp/postcard"
+    "crates/sel4cp/postcard",
 ]
-resolver = "2"

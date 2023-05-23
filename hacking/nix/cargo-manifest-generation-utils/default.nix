@@ -1,8 +1,8 @@
-{ lib, stdenv, buildPackages, buildPlatform, hostPlatform
-, writeText, linkFarm, emptyFile, runCommand, writeScript
+{ lib
+, callPackage
+, runCommand, writeText, writeScript, linkFarm
 , runtimeShell
 , python3, python3Packages
-, callPackage
 , crateUtils
 }:
 
@@ -156,19 +156,28 @@ rec {
   '';
 
   tomlDiff = writeText "toml-diff.py" ''
+    import difflib
+    import json
     import sys
     import toml
 
-    a = sys.argv[1]
-    b = sys.argv[2]
+    a_path = sys.argv[1]
+    b_path = sys.argv[2]
 
-    with open(a) as f:
-      a = toml.load(f)
+    def read(f):
+      return json.dumps(toml.load(f), indent=2, sort_keys=True).splitlines()
 
-    with open(b) as f:
-      b = toml.load(f)
+    with open(a_path) as f:
+      a = read(f)
 
-    assert(a == b)
+    with open(b_path) as f:
+      b = read(f)
+
+    for line in difflib.unified_diff(a, b, fromfile=a_path, tofile=b_path, lineterm=""):
+      print(line)
+
+    if a != b:
+      sys.exit(1)
   '';
 
   # # #

@@ -1,4 +1,4 @@
-{ stdenv, hostPlatform
+{ stdenv
 , fetchFromGitHub
 , rustToolchain
 , crateUtils
@@ -6,8 +6,6 @@
 }:
 
 let
-  rustTargetName = hostPlatform.config;
-
   src = fetchFromGitHub {
     owner = "xxchan";
     repo = "rustfmt";
@@ -16,13 +14,16 @@ let
   };
 
   cargoConfig = crateUtils.toTOMLFile "config" (crateUtils.clobber [
-    (crateUtils.linkerConfig { inherit rustToolchain rustTargetName; })
+    {
+      unstable.unstable-options = true;
+    }
     (vendorLockfile { lockfile = "${src}/Cargo.lock"; }).configFragment
   ]);
 
 in
 stdenv.mkDerivation {
   name = "rustfmt-with-toml-support";
+
   inherit src;
 
   nativeBuildInputs = [
@@ -34,11 +35,10 @@ stdenv.mkDerivation {
 
   buildPhase = ''
     cargo build \
-      -Z unstable-options \
-      --offline --frozen \
       --config ${cargoConfig} \
+      --offline \
+      --frozen \
       --release \
-      --target ${rustTargetName} \
       --out-dir $out/bin \
       -j $NIX_BUILD_CORES
   '';
