@@ -200,4 +200,8 @@ superCallPackage ../rust-utils {} self //
       override' = newArgs: makeOverridable' f (overrideWith newArgs);
     };
 
+  ### cargo manifest generation utils
+
+  cargoManifestGenrationUtils = callPackage ../cargo-manifest-generation-utils {};
+
 })
