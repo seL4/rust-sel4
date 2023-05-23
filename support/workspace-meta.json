@@ -1,0 +1,618 @@
+{
+  "banscii-artist": {
+    "labels": [
+      "leaf"
+    ],
+    "requirements": [
+      "sel4"
+    ],
+    "skip": true
+  },
+  "banscii-artist-interface-types": {
+    "labels": [
+      "leaf"
+    ],
+    "requirements": [
+      "sel4"
+    ],
+    "skip": true
+  },
+  "banscii-assistant": {
+    "labels": [
+      "leaf"
+    ],
+    "requirements": [
+      "sel4"
+    ],
+    "skip": true
+  },
+  "banscii-assistant-core": {
+    "labels": {},
+    "requirements": {},
+    "skip": true
+  },
+  "banscii-assistant-core-test": {
+    "labels": [
+      "leaf"
+    ],
+    "requirements": [
+      "unix"
+    ],
+    "skip": true
+  },
+  "banscii-pl011-driver": {
+    "labels": [
+      "leaf"
+    ],
+    "requirements": [
+      "sel4"
+    ],
+    "skip": true
+  },
+  "banscii-pl011-driver-interface-types": {
+    "labels": [
+      "leaf"
+    ],
+    "requirements": [
+      "sel4"
+    ],
+    "skip": true
+  },
+  "capdl-embed-spec": {
+    "labels": {},
+    "requirements": [
+      "linux"
+    ],
+    "skip": false
+  },
+  "capdl-loader": {
+    "labels": [
+      "leaf"
+    ],
+    "requirements": [
+      "sel4",
+      "capdl-spec"
+    ],
+    "skip": false
+  },
+  "capdl-loader-add-spec": {
+    "labels": [
+      "leaf"
+    ],
+    "requirements": [
+      "unix"
+    ],
+    "skip": false
+  },
+  "capdl-loader-core": {
+    "labels": {},
+    "requirements": [
+      "sel4"
+    ],
+    "skip": false
+  },
+  "capdl-loader-types": {
+    "labels": {},
+    "requirements": {},
+    "skip": false
+  },
+  "capdl-loader-with-embedded-spec": {
+    "labels": [
+      "leaf"
+    ],
+    "requirements": [
+      "sel4",
+      "capdl-spec"
+    ],
+    "skip": false
+  },
+  "capdl-loader-with-embedded-spec-build-env": {
+    "labels": {},
+    "requirements": [
+      "linux"
+    ],
+    "skip": false
+  },
+  "capdl-loader-with-embedded-spec-embedded-spec": {
+    "labels": {},
+    "requirements": [
+      "capdl-spec"
+    ],
+    "skip": false
+  },
+  "capdl-loader-with-embedded-spec-embedded-spec-validate": {
+    "labels": {},
+    "requirements": [
+      "linux",
+      "capdl-spec"
+    ],
+    "skip": false
+  },
+  "capdl-types": {
+    "labels": {},
+    "requirements": {},
+    "skip": false
+  },
+  "capdl-types-derive": {
+    "labels": {},
+    "requirements": [
+      "linux"
+    ],
+    "skip": false
+  },
+  "cargo-helpers": {
+    "labels": [
+      "leaf"
+    ],
+    "requirements": [
+      "unix"
+    ],
+    "skip": false
+  },
+  "example-root-task": {
+    "labels": [
+      "leaf"
+    ],
+    "requirements": [
+      "sel4"
+    ],
+    "skip": false
+  },
+  "example-root-task-without-runtime": {
+    "labels": [
+      "leaf"
+    ],
+    "requirements": [
+      "sel4"
+    ],
+    "skip": false
+  },
+  "meta": {
+    "labels": {},
+    "requirements": [
+      "sel4"
+    ],
+    "skip": false
+  },
+  "sel4": {
+    "labels": {},
+    "requirements": [
+      "sel4"
+    ],
+    "skip": false
+  },
+  "sel4-backtrace": {
+    "labels": {},
+    "requirements": [
+      "sel4"
+    ],
+    "skip": false
+  },
+  "sel4-backtrace-addr2line-context-helper": {
+    "labels": {},
+    "requirements": {},
+    "skip": false
+  },
+  "sel4-backtrace-embedded-debug-info": {
+    "labels": {},
+    "requirements": [
+      "sel4"
+    ],
+    "skip": false
+  },
+  "sel4-backtrace-simple": {
+    "labels": {},
+    "requirements": [
+      "sel4"
+    ],
+    "skip": false
+  },
+  "sel4-backtrace-types": {
+    "labels": {},
+    "requirements": {},
+    "skip": false
+  },
+  "sel4-bitfield-parser": {
+    "labels": {},
+    "requirements": [
+      "linux"
+    ],
+    "skip": false
+  },
+  "sel4-bitfield-parser-test": {
+    "labels": [
+      "leaf"
+    ],
+    "requirements": [
+      "unix"
+    ],
+    "skip": false
+  },
+  "sel4-bitfield-types": {
+    "labels": {},
+    "requirements": [
+      "sel4"
+    ],
+    "skip": false
+  },
+  "sel4-build-env": {
+    "labels": {},
+    "requirements": [
+      "linux"
+    ],
+    "skip": false
+  },
+  "sel4-config": {
+    "labels": {},
+    "requirements": [
+      "sel4"
+    ],
+    "skip": false
+  },
+  "sel4-config-data": {
+    "labels": {},
+    "requirements": [
+      "linux",
+      "sel4-config"
+    ],
+    "skip": false
+  },
+  "sel4-config-generic-macro-impls": {
+    "labels": {},
+    "requirements": [
+      "linux"
+    ],
+    "skip": false
+  },
+  "sel4-config-generic-types": {
+    "labels": {},
+    "requirements": {},
+    "skip": false
+  },
+  "sel4-config-macros": {
+    "labels": {},
+    "requirements": [
+      "sel4-config"
+    ],
+    "skip": false
+  },
+  "sel4-dlmalloc": {
+    "labels": {},
+    "requirements": [
+      "sel4"
+    ],
+    "skip": false
+  },
+  "sel4-embed-debug-info": {
+    "labels": [
+      "leaf"
+    ],
+    "requirements": [
+      "unix"
+    ],
+    "skip": false
+  },
+  "sel4-externally-shared": {
+    "labels": {},
+    "requirements": [
+      "sel4"
+    ],
+    "skip": false
+  },
+  "sel4-generate-target-specs": {
+    "labels": [
+      "leaf"
+    ],
+    "requirements": [
+      "unix"
+    ],
+    "skip": true
+  },
+  "sel4-immediate-sync-once-cell": {
+    "labels": {},
+    "requirements": [
+      "sel4"
+    ],
+    "skip": false
+  },
+  "sel4-loader": {
+    "labels": [
+      "leaf"
+    ],
+    "requirements": [
+      "sel4"
+    ],
+    "skip": false
+  },
+  "sel4-loader-add-payload": {
+    "labels": [
+      "leaf"
+    ],
+    "requirements": [
+      "unix"
+    ],
+    "skip": false
+  },
+  "sel4-loader-config-types": {
+    "labels": {},
+    "requirements": {},
+    "skip": false
+  },
+  "sel4-loader-embed-page-tables": {
+    "labels": {},
+    "requirements": [
+      "linux"
+    ],
+    "skip": false
+  },
+  "sel4-loader-payload-types": {
+    "labels": {},
+    "requirements": {},
+    "skip": false
+  },
+  "sel4-logging": {
+    "labels": {},
+    "requirements": [
+      "sel4"
+    ],
+    "skip": false
+  },
+  "sel4-panicking": {
+    "labels": {},
+    "requirements": [
+      "sel4"
+    ],
+    "skip": false
+  },
+  "sel4-panicking-env": {
+    "labels": {},
+    "requirements": [
+      "sel4"
+    ],
+    "skip": false
+  },
+  "sel4-platform-info": {
+    "labels": {},
+    "requirements": [
+      "sel4"
+    ],
+    "skip": false
+  },
+  "sel4-platform-info-types": {
+    "labels": {},
+    "requirements": {},
+    "skip": false
+  },
+  "sel4-render-elf-with-data": {
+    "labels": [
+      "leaf"
+    ],
+    "requirements": [
+      "unix"
+    ],
+    "skip": false
+  },
+  "sel4-reserve-tls-on-stack": {
+    "labels": {},
+    "requirements": [
+      "sel4"
+    ],
+    "skip": false
+  },
+  "sel4-root-task-runtime": {
+    "labels": {},
+    "requirements": [
+      "sel4"
+    ],
+    "skip": false
+  },
+  "sel4-root-task-runtime-macros": {
+    "labels": {},
+    "requirements": [
+      "linux"
+    ],
+    "skip": false
+  },
+  "sel4-runtime-common": {
+    "labels": {},
+    "requirements": [
+      "sel4"
+    ],
+    "skip": false
+  },
+  "sel4-rustfmt-helper": {
+    "labels": {},
+    "requirements": [
+      "linux"
+    ],
+    "skip": false
+  },
+  "sel4-simple-task-config-types": {
+    "labels": {},
+    "requirements": {},
+    "skip": false
+  },
+  "sel4-simple-task-rpc": {
+    "labels": {},
+    "requirements": [
+      "sel4"
+    ],
+    "skip": false
+  },
+  "sel4-simple-task-runtime": {
+    "labels": {},
+    "requirements": [
+      "sel4"
+    ],
+    "skip": false
+  },
+  "sel4-simple-task-runtime-config-types": {
+    "labels": {},
+    "requirements": {},
+    "skip": false
+  },
+  "sel4-simple-task-runtime-macros": {
+    "labels": {},
+    "requirements": [
+      "linux"
+    ],
+    "skip": false
+  },
+  "sel4-simple-task-serialize-runtime-config": {
+    "labels": [
+      "leaf"
+    ],
+    "requirements": [
+      "unix"
+    ],
+    "skip": false
+  },
+  "sel4-simple-task-threading": {
+    "labels": {},
+    "requirements": [
+      "sel4"
+    ],
+    "skip": false
+  },
+  "sel4-symbolize-backtrace": {
+    "labels": [
+      "leaf"
+    ],
+    "requirements": [
+      "unix"
+    ],
+    "skip": false
+  },
+  "sel4-sync": {
+    "labels": {},
+    "requirements": [
+      "sel4"
+    ],
+    "skip": false
+  },
+  "sel4-sys": {
+    "labels": {},
+    "requirements": [
+      "sel4"
+    ],
+    "skip": false
+  },
+  "sel4-sys-wrappers": {
+    "labels": {},
+    "requirements": [
+      "sel4"
+    ],
+    "skip": true
+  },
+  "sel4cp": {
+    "labels": {},
+    "requirements": [
+      "sel4"
+    ],
+    "skip": true
+  },
+  "sel4cp-hello": {
+    "labels": [
+      "leaf"
+    ],
+    "requirements": [
+      "sel4"
+    ],
+    "skip": true
+  },
+  "sel4cp-macros": {
+    "labels": {},
+    "requirements": [
+      "linux"
+    ],
+    "skip": false
+  },
+  "sel4cp-postcard": {
+    "labels": {},
+    "requirements": [
+      "sel4"
+    ],
+    "skip": true
+  },
+  "tests-capdl-threads-components-test": {
+    "labels": [
+      "leaf"
+    ],
+    "requirements": [
+      "sel4"
+    ],
+    "skip": false
+  },
+  "tests-capdl-utcover-components-test": {
+    "labels": [
+      "leaf"
+    ],
+    "requirements": [
+      "sel4"
+    ],
+    "skip": false
+  },
+  "tests-root-task-backtrace": {
+    "labels": [
+      "leaf"
+    ],
+    "requirements": [
+      "sel4"
+    ],
+    "skip": false
+  },
+  "tests-root-task-c": {
+    "labels": [
+      "leaf"
+    ],
+    "requirements": [
+      "sel4"
+    ],
+    "skip": true
+  },
+  "tests-root-task-config": {
+    "labels": [
+      "leaf"
+    ],
+    "requirements": [
+      "sel4"
+    ],
+    "skip": false
+  },
+  "tests-root-task-core-libs": {
+    "labels": [
+      "leaf"
+    ],
+    "requirements": [
+      "sel4"
+    ],
+    "skip": false
+  },
+  "tests-root-task-loader": {
+    "labels": [
+      "leaf"
+    ],
+    "requirements": [
+      "sel4"
+    ],
+    "skip": false
+  },
+  "tests-root-task-panicking": {
+    "labels": [
+      "leaf"
+    ],
+    "requirements": [
+      "sel4"
+    ],
+    "skip": false
+  },
+  "tests-root-task-tls": {
+    "labels": [
+      "leaf"
+    ],
+    "requirements": [
+      "sel4"
+    ],
+    "skip": false
+  }
+}

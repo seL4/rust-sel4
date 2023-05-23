@@ -1,5 +1,9 @@
 self: with self; {
 
+  generatedSources = {
+    inherit (pkgs.build.this.generatedCargoManifests) update check;
+  };
+
   worldsForEverythingInstances = [
     pkgs.host.x86_64.none.this.worlds.default
     pkgs.host.aarch64.none.this.worlds.default

@@ -1,7 +1,4 @@
 [workspace]
-
-resolver = "2"
-
 members = [
     "crates/capdl/embed-spec",
     "crates/capdl/loader",
@@ -14,8 +11,8 @@ members = [
     "crates/capdl/loader/with-embedded-spec/embedded-spec/validate",
     "crates/capdl/types",
     "crates/capdl/types/derive",
-    "crates/examples/root-task/example-root-task-without-runtime",
     "crates/examples/root-task/example-root-task",
+    "crates/examples/root-task/example-root-task-without-runtime",
     "crates/examples/sel4cp/banscii/pds/artist",
     "crates/examples/sel4cp/banscii/pds/artist/interface-types",
     "crates/examples/sel4cp/banscii/pds/assistant",
@@ -42,6 +39,7 @@ members = [
     "crates/private/tests/root-task/loader",
     "crates/private/tests/root-task/panicking",
     "crates/private/tests/root-task/tls",
+    "crates/sel4",
     "crates/sel4-backtrace",
     "crates/sel4-backtrace/addr2line-context-helper",
     "crates/sel4-backtrace/cli/sel4-symbolize-backtrace",
@@ -70,7 +68,6 @@ members = [
     "crates/sel4-runtime-common",
     "crates/sel4-rustfmt-helper",
     "crates/sel4-sync",
-    "crates/sel4",
     "crates/sel4/bitfield-parser",
     "crates/sel4/bitfield-parser/test",
     "crates/sel4/bitfield-types",
@@ -84,5 +81,6 @@ members = [
     "crates/sel4/sys/wrappers",
     "crates/sel4cp",
     "crates/sel4cp/macros",
-    "crates/sel4cp/postcard",
+    "crates/sel4cp/postcard"
 ]
+resolver = "2"

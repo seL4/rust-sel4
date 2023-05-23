@@ -204,4 +204,6 @@ superCallPackage ../rust-utils {} self //
 
   cargoManifestGenrationUtils = callPackage ../cargo-manifest-generation-utils {};
 
+  generatedCargoManifests = callPackage ./generated-cargo-manifests {};
+
 })

@@ -44,3 +44,12 @@ update-lockfile:
 .PHONY: generate-target-specs
 generate-target-specs:
 	cargo run -p sel4-generate-target-specs -- support/targets/
+
+.PHONY: check-generated-sources
+check-generated-sources:
+	script=$$($(nix_build) -A generatedSources.check --no-out-link) && $$script
+
+.PHONY: update-generated-sources
+update-generated-sources:
+	script=$$($(nix_build) -A generatedSources.update --no-out-link) && $$script
+	cargo update -w

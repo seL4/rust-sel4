@@ -1,7 +1,7 @@
 { stdenv, hostPlatform
 , fetchFromGitHub
 , rustToolchain
-, crateUtils, toAnonymousTOMLFile
+, crateUtils
 , vendorLockfile
 }:
 
@@ -15,7 +15,7 @@ let
     hash = "sha256-YJ9qNpSnEmOEb45TZcs/HwnZRWOTIXKqvW+f65MtMVE=";
   };
 
-  cargoConfig = toAnonymousTOMLFile (crateUtils.clobber [
+  cargoConfig = crateUtils.toTOMLFile "config" (crateUtils.clobber [
     (crateUtils.linkerConfig { inherit rustToolchain rustTargetName; })
     (vendorLockfile { lockfile = "${src}/Cargo.lock"; }).configFragment
   ]);
