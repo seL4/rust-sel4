@@ -28,6 +28,7 @@ everything-with-excess:
 .PHONY: run-automated-tests
 run-automated-tests:
 	script=$$($(nix_build) -A runAutomatedTests --no-out-link) && $$script
+	tput smam
 
 .PHONY: example
 example:
@@ -37,9 +38,17 @@ example:
 fmt:
 	cargo fmt --all
 
+.PHONY: fmt-check
+fmt-check:
+	cargo fmt --all -- --check
+
 .PHONY: update-lockfile
 update-lockfile:
 	cargo update -w
+
+.PHONY: check-lockfile
+check-lockfile:
+	cargo update -w --locked
 
 .PHONY: generate-target-specs
 generate-target-specs:
