@@ -4,11 +4,11 @@ This repository contains crates for supporting the use of Rust in seL4 userspace
 
 - Rust bindings to the seL4 API ([source](./crates/sel4))
 - A runtime for root tasks ([source](./crates/sel4-root-task-runtime))
-- A runtime for seL4 Core Platform protection domains ([source](./crates/sel4cp))
+- A runtime for [seL4 Core Platform protection](https://github.com/BreakawayConsulting/sel4cp) domains ([source](./crates/sel4cp))
+- A [CapDL](https://docs.sel4.systems/projects/capdl/) loader ([source](./crates/capdl))
 - A loader for the seL4 kernel ([source](./crates/sel4-loader))
-- A CapDL loader ([source](./crates/capdl))
 
-The [./hacking](./hacking) directory contains code for building and testing these crates using Nix and, optionally, Docker. However, the crates in this repository are in no way bound to that build system code.
+The [./hacking](./hacking) directory contains scripts for developing and testing these crates using Nix and, optionally, Docker.
 
 This work is funded by the [seL4 Foundation](https://sel4.systems/Foundation/home.pml).
 
@@ -27,17 +27,17 @@ This work is funded by the [seL4 Foundation](https://sel4.systems/Foundation/hom
 - [`sel4-sync`](./crates/sel4-sync): Synchronization constructs using seL4 IPC. Currently only supports notification-based mutexes.
 - [`sel4-logging`](./crates/sel4-logging): Log implementation for the [`log`](https://crates.io/crates/log) crate.
 
-##### Context-specific crates
+##### Runtime crates
 
 - **Root task**:
-  - [`sel4-root-task-runtime`](./crates/sel4-root-task-runtime): A runtime for root tasks which supports thread-local storage and unwinding, and provides a global allocator.
+  - [`sel4-root-task-runtime`](./crates/sel4-root-task-runtime): A runtime for root tasks that supports thread-local storage and unwinding, and provides a global allocator.
 - **seL4 Core Platform**:
   - [`sel4cp`](./crates/sel4cp): A runtime for [seL4 Core Platform](https://github.com/BreakawayConsulting/sel4cp) protection domains, including an implementation of libsel4cp and abstractions for IPC.
 
 ##### Programs
 
+- [CapDL loader](./crates/capdl): A [CapDL](https://docs.sel4.systems/projects/capdl/) loader.
 - [Kernel loader](./crates/sel4-loader): A loader for the seL4 kernel, similar in purpose to [elfloader](https://github.com/seL4/seL4_tools/tree/master/elfloader-tool).
-- [CapDL loader](./crates/capdl): A CapDL loader.
 
 ### Integrating these crates into your project
 
@@ -53,11 +53,11 @@ Here is a list of environment variables that the crates which use them:
 
 - `sel4-config` and `sel4-sys` (whose dependants include `sel4`, `sel4cp`, and many more) use
   `$SEL4_INCLUDE_DIRS`, defaulting to `$SEL4_PREFIX/libsel4/include` if `$SEL4_PREFIX` is set, which
-  must contain a colon-separated list of include paths for the libsel4 headers. See the rustdoc for
-  the `sel4` crate's rustdoc for more information.
+  must contain a colon-separated list of include paths for the libsel4 headers. See the the `sel4`
+  crate's rustdoc for more information.
 - `sel4-platform-info` (whose dependants include `sel4-loader`) uses `$SEL4_PLATFORM_INFO`,
   defaulting to `$SEL4_PREFIX/support/platform_gen.yaml` if `$SEL4_PREFIX` is set, which must
-  contain the path of a `platform_gen.yaml` file from the seL4 kernel build system.
+  contain the path of the `platform_gen.yaml` file from the seL4 kernel build system.
 - `sel4-loader` uses `$SEL4_KERNEL`, defaulting to `$SEL4_PREFIX/bin/kernel.elf` if `$SEL4_PREFIX`
   is set, which must contain the path of the seL4 kernel (as an ELF executable). Furthermore, if
   `$SEL4_LOADER_CONFIG` is set, then `sel4-loader` overrides the default configuration with one in
