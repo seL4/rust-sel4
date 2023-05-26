@@ -6,7 +6,7 @@ edition = "2021"
 license = "BSD-2-Clause"
 
 [features]
-root-task = ["sel4-root-task-runtime"]
+sel4-root-task-runtime = ["dep:sel4-root-task-runtime"]
 sel4cp = ["dep:sel4cp", "sel4cp-postcard"]
 
 [dependencies]
@@ -16,6 +16,9 @@ log = "0.4.17"
 
 [target."cfg(all(target_env = \"sel4\", not(target_arch = \"x86_64\")))".dependencies]
 sel4-platform-info = { path = "../../sel4-platform-info", optional = true }
+
+[target."cfg(all(target_env = \"sel4\", not(target_thread_local)))".dependencies]
+sel4 = { path = "../../sel4", features = ["single-threaded"] }
 
 [target."cfg(not(target_os = \"none\"))".dependencies]
 sel4-render-elf-with-data = { path = "../../sel4-render-elf-with-data" }

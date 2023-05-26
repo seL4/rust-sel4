@@ -5,8 +5,8 @@ This repository contains crates for supporting the use of Rust in seL4 userspace
 - Rust bindings to the seL4 API ([source](./crates/sel4))
 - A runtime for root tasks ([source](./crates/sel4-root-task-runtime))
 - A runtime for [seL4 Core Platform protection](https://github.com/BreakawayConsulting/sel4cp) domains ([source](./crates/sel4cp))
-- A [CapDL](https://docs.sel4.systems/projects/capdl/) loader ([source](./crates/capdl))
-- A loader for the seL4 kernel ([source](./crates/sel4-loader))
+- A [CapDL](https://docs.sel4.systems/projects/capdl/) loader ([source and docs](./crates/capdl))
+- A loader for the seL4 kernel ([source and docs](./crates/sel4-loader))
 
 The [./hacking](./hacking) directory contains scripts for developing and testing these crates using Nix and, optionally, Docker.
 
@@ -41,11 +41,8 @@ This work is funded by the [seL4 Foundation](https://sel4.systems/Foundation/hom
 
 ### Integrating these crates into your project
 
-The best way to learn how to integrate these crates into your project is to check out these concrete examples of their use:
-
-- Simple root task: https://gitlab.com/coliasgroup/rust-seL4-demos/simple-build-system-demo
-- Using the seL4 Core Platform: https://gitlab.com/coliasgroup/rust-seL4-demos/simple-sel4cp-demo
-- Using the CapDL loader: https://gitlab.com/coliasgroup/rust-seL4-demos/simple-capdl-loader-demo
+These crates are not yet hosted on [crates.io](https://crates.io).
+Use them either as Git or path Cargo dependencies.
 
 Some of these crates depend, at build time, on external components and configuration.
 In all cases, information for locating these dependencies is passed to the dependant crates via environment variables which are interpreted by `build.rs` scripts.
@@ -63,7 +60,13 @@ Here is a list of environment variables that the crates which use them:
   `$SEL4_LOADER_CONFIG` is set, then `sel4-loader` overrides the default configuration with one in
   the provided JSON file. Note that no configuration options are actually implemented yet!
 
-### Running the tests in this repository (quick start)
+The best way to learn how to integrate these crates into your project is to check out these concrete examples of their use:
+
+- Simple root task: https://gitlab.com/coliasgroup/rust-seL4-demos/simple-build-system-demo
+- Using the seL4 Core Platform: https://gitlab.com/coliasgroup/rust-seL4-demos/simple-sel4cp-demo
+- Using the CapDL loader: https://gitlab.com/coliasgroup/rust-seL4-demos/simple-capdl-loader-demo
+
+### Quick start for running the tests in this repository
 
 The only requirements for running the tests in this repository are Git, Make, and Docker.
 

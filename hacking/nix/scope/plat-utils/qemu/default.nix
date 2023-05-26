@@ -70,7 +70,7 @@ in rec {
         then null
         else automateQemuSimple {
           inherit simulate;
-          inherit (elaboratedSimpleAutomationParams) timeout; 
+          inherit (elaboratedSimpleAutomationParams) timeout;
         };
 
     in rec {

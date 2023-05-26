@@ -48,12 +48,14 @@ let
   sdk = stdenv.mkDerivation {
     name = "sel4cp-sdk";
 
-    src = lib.cleanSourceWith {
-      src = sel4cpSource;
-      filter = name: type:
-        let baseName = baseNameOf (toString name);
-        in !(type == "directory" && baseName == "tool");
-    };
+    src = sel4cpSource;
+
+    # src = lib.cleanSourceWith {
+    #   src = sel4cpSource;
+    #   filter = name: type:
+    #     let baseName = baseNameOf (toString name);
+    #     in !(type == "directory" && baseName == "tool");
+    # };
 
     buildInputs = [
       libc
@@ -83,7 +85,11 @@ let
   };
 
   tool = linkFarm "sel4cp-tool" [
-    (rec { name = "sel4coreplat"; path = lib.cleanSource (sel4cpSource + "/tool/${name}"); })
+    (rec {
+      name = "sel4coreplat";
+      # path = lib.cleanSource (sel4cpSource + "/tool/${name}");
+      path = sel4cpSource + "/tool/${name}";
+    })
   ];
 
   exampleSource = sel4cpSource + "/example/qemu_arm_virt/hello";

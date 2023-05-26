@@ -38,6 +38,12 @@ mk {
     sel4-backtrace-simple = { features = [ "alloc" ]; };
     # capdl-types = { features = [ "sel4" "alloc" ]; };
   };
+  nix.local.target."cfg(all(target_env = \"sel4\", not(target_thread_local)))".dependencies = with localCrates; [
+    sel4
+  ];
+  target."cfg(all(target_env = \"sel4\", not(target_thread_local)))".dependencies = {
+    sel4 = { features = [ "single-threaded" ]; };
+  };
   # nix.local.target."cfg(not(target_env = \"sel4\"))".dependencies = with localCrates; [
   #   capdl-types
   # ];
@@ -51,8 +57,8 @@ mk {
     sel4-platform-info = { optional = true; };
   };
   features = {
-    root-task = [
-      "sel4-root-task-runtime"
+    sel4-root-task-runtime = [
+      "dep:sel4-root-task-runtime"
     ];
     sel4cp = [
       "dep:sel4cp"

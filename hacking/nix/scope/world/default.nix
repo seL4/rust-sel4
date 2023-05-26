@@ -1,6 +1,8 @@
 { lib
 , hostPlatform
-, runCommandCC
+, runCommand, runCommandCC
+, jq
+, symlinkToRegularFile
 , mkSeL4
 , mkSeL4CorePlatform
 }:
@@ -49,7 +51,17 @@ self: with self;
     # src = lib.cleanSource (sources.localRoot + "/seL4");
   });
 
-  seL4RustEnvVars = 
+  seL4IncludeDir =
+    if worldConfig.isCorePlatform
+    then
+      let
+        d = "${sel4cpForUserspace.sdk}/board/qemu_arm_virt/debug";
+      in
+        "${d}/include"
+    else
+      "${seL4ForUserspace}/libsel4/include";
+
+  seL4RustEnvVars =
     if worldConfig.isCorePlatform
     then
       let
@@ -70,6 +82,22 @@ self: with self;
     '';
 
   libsel4 = assert !worldConfig.isCorePlatform; "${seL4ForUserspace}/libsel4";
+
+  seL4Config =
+    let
+      f = seg: builtins.fromJSON (builtins.readFile (symlinkToRegularFile "x.json" "${seL4IncludeDir}/${seg}/gen_config.json"));
+    in
+      f "kernel" // f "sel4";
+
+  seL4ConfigJSON = runCommand "sel4-config.json" {
+    nativeBuildInputs = [
+      jq
+    ];
+    json = builtins.toJSON seL4Config;
+    passAsFile = [ "json" ];
+  } ''
+    jq . $jsonPath > $out
+  '';
 
   ###
 

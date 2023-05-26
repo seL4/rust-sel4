@@ -16,6 +16,9 @@
 , seL4RustEnvVars
 
 , worldConfig
+
+, seL4ConfigJSON
+, seL4Config
 }:
 
 let
@@ -30,8 +33,8 @@ let
         rustTargetInfo = seL4RustTargetInfoWithConfig { minimal = false; };
       }
     ] ++ lib.optionals (hostPlatform.isAarch64 || hostPlatform.isx86_64) [
-      { name = "root-task";
-        features = common ++ [ "root-task" ];
+      { name = "sel4-root-task-runtime";
+        features = common ++ [ "sel4-root-task-runtime" ];
         rustTargetInfo = seL4RustTargetInfoWithConfig { minimal = false; };
       }
     ] ++ lib.optionals (worldConfig.isCorePlatform or false) [
@@ -43,9 +46,24 @@ let
 
   rootCrate = crates.meta;
 
-  # TODO try using build-std
+  mkView = { runtime ? null, minimal ? true }:
+    let
+      commonFeatures = lib.optionals (!worldConfig.isCorePlatform) [ "sel4-platform-info" ];
+      rustTargetInfo = seL4RustTargetInfoWithConfig { cp = runtime == "sel4cp"; inherit minimal; };
+    in {
+      inherit seL4ConfigJSON;
+      inherit (seL4Config) PLAT SEL4_ARCH KERNEL_MCS;
+      hypervisorSupport = if seL4Config.ARCH_ARM then seL4Config.ARM_HYPERVISOR_SUPPORT else false;
+      targetName = rustTargetInfo.name;
+      targetJSON = "${rustTargetInfo.path}/${rustTargetInfo.name}.json";
+      inherit runtime;
+      rustdoc = buildDocs {
+        features = commonFeatures ++ lib.optional (runtime != null) runtime;
+        inherit rustTargetInfo;
+      };
+    };
 
-  mk = { name, features, rustTargetInfo }:
+  buildDocs = { features, rustTargetInfo }:
     let
       rustTargetName = rustTargetInfo.name;
       rustTargetPath = rustTargetInfo.path;
@@ -122,7 +140,7 @@ let
       ]);
 
     in
-      runCommandCC "docs-${name}" ({
+      runCommandCC "rustdoc-view" ({
         depsBuildBuild = [ buildPackages.stdenv.cc ];
         nativeBuildInputs = [ rsync rustToolchain ];
 
@@ -145,8 +163,6 @@ let
           --exclude 'CACHEDIR.TAG'
       '';
 
-in
-  lib.forEach runtimes ({ name, rustTargetInfo, ... }@runtime: {
-    inherit name rustTargetInfo;
-    drv = mk runtime;
-  })
+in {
+  inherit mkView;
+}

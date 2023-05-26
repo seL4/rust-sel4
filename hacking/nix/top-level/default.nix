@@ -66,7 +66,7 @@ self: with self; {
       echo
     '';
 
-  docs = import ./docs.nix {
+  docs = import ./docs {
     inherit lib pkgs;
   };
 

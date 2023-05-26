@@ -20,7 +20,7 @@ mk {
     sel4-loader-payload-types
     sel4-render-elf-with-data
     sel4-loader-config-types
-  ];  
+  ];
   nix.meta.labels = [ "leaf" ];
   nix.meta.requirements = [ "unix" ];
 }
