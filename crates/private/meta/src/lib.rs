@@ -23,7 +23,7 @@
 macro_rules! maybe {
     ($condition:meta, $i:ident) => {
         #[cfg(not($condition))]
-        use unsupported as $i;
+        use absent as $i;
         #[doc(hidden)]
         #[cfg($condition)]
         pub use $i;
@@ -42,12 +42,12 @@ macro_rules! mutually_exclusive {
 }
 
 mutually_exclusive!(runtime_feature_check, [
-    "root-task"
+    "sel4-root-task"
     "sel4cp"
 ]);
 
-/// Placeholder for crates which are not part of this configuration.
-pub mod unsupported {}
+/// Placeholder for crates which are not part of this view.
+pub mod absent {}
 
 maybe!(target_env = "sel4", sel4);
 maybe!(target_env = "sel4", sel4_config);
@@ -63,7 +63,7 @@ maybe!(
     sel4_platform_info
 );
 maybe!(
-    all(target_env = "sel4", feature = "root-task"),
+    all(target_env = "sel4", feature = "sel4-root-task"),
     sel4_root_task
 );
 maybe!(all(target_env = "sel4", feature = "sel4cp"), sel4cp);
