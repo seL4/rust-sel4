@@ -17,11 +17,11 @@ let
         minimal = true;
       }
       { world = pkgs.host.aarch64.none.this.worlds.default;
-        runtime = "sel4-root-task-runtime";
+        runtime = "sel4-root-task";
         minimal = true;
       }
       { world = pkgs.host.aarch64.none.this.worlds.default;
-        runtime = "sel4-root-task-runtime";
+        runtime = "sel4-root-task";
         minimal = false;
       }
       { world = pkgs.host.aarch64.none.this.worlds.qemu-arm-virt.sel4cp;
@@ -33,7 +33,7 @@ let
         minimal = false;
       }
       { world = pkgs.host.x86_64.none.this.worlds.default;
-        runtime = "sel4-root-task-runtime";
+        runtime = "sel4-root-task";
         minimal = false;
       }
       { world = pkgs.host.riscv64.none.this.worlds.default;

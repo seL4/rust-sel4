@@ -13,7 +13,7 @@
 //!
 //! ### Runtimes
 //!
-//! - [`sel4_root_task_runtime`]: A runtime for root tasks which supports thread-local storage and unwinding, and provides a global allocator.
+//! - [`sel4_root_task`]: A runtime for root tasks which supports thread-local storage and unwinding, and provides a global allocator.
 //! - [`sel4cp`]: A runtime for the seL4 Core Platform.
 //!
 //! ### Other crates of interest
@@ -64,6 +64,6 @@ maybe!(
 );
 maybe!(
     all(target_env = "sel4", feature = "root-task"),
-    sel4_root_task_runtime
+    sel4_root_task
 );
 maybe!(all(target_env = "sel4", feature = "sel4cp"), sel4cp);

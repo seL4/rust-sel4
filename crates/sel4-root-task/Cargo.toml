@@ -1,5 +1,5 @@
 [package]
-name = "sel4-root-task-runtime"
+name = "sel4-root-task"
 version = "0.1.0"
 authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
 edition = "2021"
@@ -16,7 +16,7 @@ unwinding = ["sel4-panicking/unwinding"]
 sel4 = { path = "../sel4" }
 sel4-panicking = { path = "../sel4-panicking" }
 sel4-panicking-env = { path = "../sel4-panicking/env" }
-sel4-root-task-runtime-macros = { path = "./macros" }
+sel4-root-task-macros = { path = "./macros" }
 
 [dependencies.sel4-runtime-common]
 path = "../sel4-runtime-common"

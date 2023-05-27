@@ -11,7 +11,7 @@ use core::ffi::c_void;
 
 pub use sel4_panicking as panicking;
 pub use sel4_panicking_env::{abort, debug_print, debug_println};
-pub use sel4_root_task_runtime_macros::main;
+pub use sel4_root_task_macros::main;
 
 mod termination;
 

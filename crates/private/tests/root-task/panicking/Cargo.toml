@@ -6,11 +6,11 @@ edition = "2021"
 license = "BSD-2-Clause"
 
 [features]
-alloc = ["sel4-root-task-runtime/alloc"]
+alloc = ["sel4-root-task/alloc"]
 panic-abort = []
 panic-unwind = []
 
 [dependencies]
 cfg-if = "1.0.0"
 sel4 = { path = "../../../../sel4" }
-sel4-root-task-runtime = { path = "../../../../sel4-root-task-runtime" }
+sel4-root-task = { path = "../../../../sel4-root-task" }

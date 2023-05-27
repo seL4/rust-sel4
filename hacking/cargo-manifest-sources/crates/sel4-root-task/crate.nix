@@ -1,7 +1,7 @@
 { mk, localCrates }:
 
 mk {
-  package.name = "sel4-root-task-runtime";
+  package.name = "sel4-root-task";
   dependencies = {
     sel4-runtime-common.features = [ "tls" "unwinding" "start" "static-heap" ];
   };
@@ -28,7 +28,7 @@ mk {
     sel4-panicking
     sel4-panicking-env
     sel4-runtime-common
-    sel4-root-task-runtime-macros
+    sel4-root-task-macros
   ];
   nix.meta.requirements = [ "sel4" ];
 }

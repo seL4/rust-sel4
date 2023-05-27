@@ -20,7 +20,7 @@ mk {
     sel4-sync
     sel4-logging
     sel4-sys
-    sel4-root-task-runtime
+    sel4-root-task
     sel4-backtrace
     sel4-backtrace-types
     sel4-backtrace-embedded-debug-info
@@ -30,7 +30,7 @@ mk {
     # capdl-types
   ];
   target."cfg(target_env = \"sel4\")".dependencies = {
-    sel4-root-task-runtime = { features = [ "full" ]; optional = true; };
+    sel4-root-task = { features = [ "full" ]; optional = true; };
     sel4cp = { features = [ "full" ]; optional = true; };
     sel4cp-postcard = { optional = true; };
     sel4-backtrace = { features = [ "full" ]; };
@@ -57,8 +57,8 @@ mk {
     sel4-platform-info = { optional = true; };
   };
   features = {
-    sel4-root-task-runtime = [
-      "dep:sel4-root-task-runtime"
+    sel4-root-task = [
+      "dep:sel4-root-task"
     ];
     sel4cp = [
       "dep:sel4cp"

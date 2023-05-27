@@ -16,7 +16,7 @@ use capdl_loader_core::{Loader, LoaderBuffers, PerObjectBuffer};
 use capdl_loader_types::SpecWithSourcesForSerialization;
 use sel4::BootInfo;
 use sel4_logging::{LevelFilter, Logger, LoggerBuilder};
-use sel4_root_task_runtime::main;
+use sel4_root_task::main;
 
 const LOG_LEVEL: LevelFilter = LevelFilter::Info;
 

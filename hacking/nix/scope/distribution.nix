@@ -8,7 +8,7 @@ let
   rootCratesForDistribution = with crates; [
     sel4
     sel4cp
-    sel4-root-task-runtime
+    sel4-root-task
     sel4-loader
     sel4-loader-add-payload
     capdl-loader

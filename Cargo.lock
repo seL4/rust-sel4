@@ -340,7 +340,7 @@ dependencies = [
  "sel4",
  "sel4-dlmalloc",
  "sel4-logging",
- "sel4-root-task-runtime",
+ "sel4-root-task",
  "sel4-sync",
 ]
 
@@ -387,7 +387,7 @@ dependencies = [
  "capdl-types",
  "sel4",
  "sel4-logging",
- "sel4-root-task-runtime",
+ "sel4-root-task",
 ]
 
 [[package]]
@@ -935,7 +935,7 @@ name = "example-root-task"
 version = "0.1.0"
 dependencies = [
  "sel4",
- "sel4-root-task-runtime",
+ "sel4-root-task",
 ]
 
 [[package]]
@@ -1519,7 +1519,7 @@ dependencies = [
  "sel4-logging",
  "sel4-platform-info",
  "sel4-render-elf-with-data",
- "sel4-root-task-runtime",
+ "sel4-root-task",
  "sel4-sync",
  "sel4-sys",
  "sel4cp",
@@ -2470,18 +2470,18 @@ dependencies = [
 ]
 
 [[package]]
-name = "sel4-root-task-runtime"
+name = "sel4-root-task"
 version = "0.1.0"
 dependencies = [
  "sel4",
  "sel4-panicking",
  "sel4-panicking-env",
- "sel4-root-task-runtime-macros",
+ "sel4-root-task-macros",
  "sel4-runtime-common",
 ]
 
 [[package]]
-name = "sel4-root-task-runtime-macros"
+name = "sel4-root-task-macros"
 version = "0.1.0"
 dependencies = [
  "proc-macro2",
@@ -2987,7 +2987,7 @@ dependencies = [
  "sel4-backtrace-embedded-debug-info",
  "sel4-backtrace-simple",
  "sel4-backtrace-types",
- "sel4-root-task-runtime",
+ "sel4-root-task",
 ]
 
 [[package]]
@@ -2997,7 +2997,7 @@ dependencies = [
  "cc",
  "glob",
  "sel4",
- "sel4-root-task-runtime",
+ "sel4-root-task",
 ]
 
 [[package]]
@@ -3005,7 +3005,7 @@ name = "tests-root-task-config"
 version = "0.1.0"
 dependencies = [
  "sel4",
- "sel4-root-task-runtime",
+ "sel4-root-task",
 ]
 
 [[package]]
@@ -3014,7 +3014,7 @@ version = "0.1.0"
 dependencies = [
  "sel4",
  "sel4-config",
- "sel4-root-task-runtime",
+ "sel4-root-task",
  "sel4-sys",
 ]
 
@@ -3025,7 +3025,7 @@ dependencies = [
  "fdt",
  "sel4",
  "sel4-platform-info",
- "sel4-root-task-runtime",
+ "sel4-root-task",
 ]
 
 [[package]]
@@ -3034,7 +3034,7 @@ version = "0.1.0"
 dependencies = [
  "cfg-if",
  "sel4",
- "sel4-root-task-runtime",
+ "sel4-root-task",
 ]
 
 [[package]]
@@ -3042,7 +3042,7 @@ name = "tests-root-task-tls"
 version = "0.1.0"
 dependencies = [
  "sel4",
- "sel4-root-task-runtime",
+ "sel4-root-task",
 ]
 
 [[package]]

@@ -6,7 +6,7 @@ edition = "2021"
 license = "BSD-2-Clause"
 
 [features]
-sel4-root-task-runtime = ["dep:sel4-root-task-runtime"]
+sel4-root-task = ["dep:sel4-root-task"]
 sel4cp = ["dep:sel4cp", "sel4cp-postcard"]
 
 [dependencies]
@@ -31,12 +31,8 @@ sel4-backtrace-simple = { path = "../../sel4-backtrace/simple", features = ["all
 sel4-backtrace-types = { path = "../../sel4-backtrace/types", features = ["full"] }
 sel4-config = { path = "../../sel4/config" }
 sel4-logging = { path = "../../sel4-logging" }
+sel4-root-task = { path = "../../sel4-root-task", features = ["full"], optional = true }
 sel4-sync = { path = "../../sel4-sync" }
 sel4-sys = { path = "../../sel4/sys" }
 sel4cp = { path = "../../sel4cp", features = ["full"], optional = true }
 sel4cp-postcard = { path = "../../sel4cp/postcard", optional = true }
-
-[target."cfg(target_env = \"sel4\")".dependencies.sel4-root-task-runtime]
-path = "../../sel4-root-task-runtime"
-features = ["full"]
-optional = true

@@ -399,14 +399,14 @@
     ],
     "skip": false
   },
-  "sel4-root-task-runtime": {
+  "sel4-root-task": {
     "labels": {},
     "requirements": [
       "sel4"
     ],
     "skip": false
   },
-  "sel4-root-task-runtime-macros": {
+  "sel4-root-task-macros": {
     "labels": {},
     "requirements": [
       "linux"

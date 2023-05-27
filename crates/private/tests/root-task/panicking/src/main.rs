@@ -3,7 +3,7 @@
 
 use core::sync::atomic::{AtomicBool, Ordering};
 
-use sel4_root_task_runtime::{debug_println, main, panicking};
+use sel4_root_task::{debug_println, main, panicking};
 
 static F1_DROPPED: AtomicBool = AtomicBool::new(false);
 

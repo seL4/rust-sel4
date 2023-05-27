@@ -3,7 +3,7 @@
 
 use core::ffi::{c_char, CStr};
 
-use sel4_root_task_runtime::{debug_println, main};
+use sel4_root_task::{debug_println, main};
 
 extern "C" {
     fn test(s: *const c_char) -> i32;

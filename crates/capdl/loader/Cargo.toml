@@ -16,7 +16,7 @@ sel4-dlmalloc = { path = "../../sel4-dlmalloc" }
 sel4-logging = { path = "../../sel4-logging" }
 sel4-sync = { path = "../../sel4-sync" }
 
-[dependencies.sel4-root-task-runtime]
-path = "../../sel4-root-task-runtime"
+[dependencies.sel4-root-task]
+path = "../../sel4-root-task"
 default-features = false
 features = ["alloc", "single-threaded"]

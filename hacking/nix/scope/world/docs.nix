@@ -33,8 +33,8 @@ let
         rustTargetInfo = seL4RustTargetInfoWithConfig { minimal = false; };
       }
     ] ++ lib.optionals (hostPlatform.isAarch64 || hostPlatform.isx86_64) [
-      { name = "sel4-root-task-runtime";
-        features = common ++ [ "sel4-root-task-runtime" ];
+      { name = "sel4-root-task";
+        features = common ++ [ "sel4-root-task" ];
         rustTargetInfo = seL4RustTargetInfoWithConfig { minimal = false; };
       }
     ] ++ lib.optionals (worldConfig.isCorePlatform or false) [

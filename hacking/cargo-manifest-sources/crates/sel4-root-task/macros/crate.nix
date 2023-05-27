@@ -1,7 +1,7 @@
 { mk, versions }:
 
 mk {
-  package.name = "sel4-root-task-runtime-macros";
+  package.name = "sel4-root-task-macros";
   lib.proc-macro = true;
   dependencies = {
     syn = { version = versions.syn; features = [ "full" ]; };

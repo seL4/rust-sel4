@@ -5,7 +5,7 @@ mk {
   dependencies = {
     capdl-types.features = [ "alloc" "serde" "deflate" ];
     postcard = postcardWith [ "alloc" ];
-    sel4-root-task-runtime = { default-features = false; features = [ "alloc" "single-threaded" ]; };
+    sel4-root-task = { default-features = false; features = [ "alloc" "single-threaded" ]; };
     inherit (versions) log;
   };
   # features = {
@@ -20,7 +20,7 @@ mk {
     sel4
     sel4-dlmalloc
     sel4-logging
-    sel4-root-task-runtime
+    sel4-root-task
     sel4-sync
   ];
   nix.meta.labels = [ "leaf" ];

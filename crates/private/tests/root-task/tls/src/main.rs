@@ -2,7 +2,7 @@
 #![no_main]
 #![feature(thread_local)]
 
-use sel4_root_task_runtime::{debug_println, main};
+use sel4_root_task::{debug_println, main};
 
 #[repr(C, align(4096))]
 struct Y(i32);

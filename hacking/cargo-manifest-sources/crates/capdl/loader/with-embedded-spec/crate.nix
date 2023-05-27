@@ -3,7 +3,7 @@
 mk {
   package.name = "capdl-loader-with-embedded-spec";
   dependencies = {
-    sel4-root-task-runtime = { default-features = false; features = [ "single-threaded" ]; };
+    sel4-root-task = { default-features = false; features = [ "single-threaded" ]; };
   };
   features = {
     deflate = [
@@ -17,7 +17,7 @@ mk {
     capdl-types
     sel4
     sel4-logging
-    sel4-root-task-runtime
+    sel4-root-task
   ];
   nix.local.build-dependencies = with localCrates; [
     capdl-loader-with-embedded-spec-embedded-spec-validate
