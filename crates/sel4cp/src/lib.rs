@@ -35,25 +35,25 @@ pub const DEFAULT_STACK_SIZE: usize = 0x10000;
 
 #[macro_export]
 macro_rules! declare_protection_domain {
-    ($main:path) => {
-        $crate::_private::declare_protection_domain!($main, stack_size = $crate::_private::DEFAULT_STACK_SIZE);
+    (init = $init:path) => {
+        $crate::_private::declare_protection_domain!(init = $init, stack_size = $crate::_private::DEFAULT_STACK_SIZE);
     };
-    ($main:path, stack_size = $stack_size:expr) => {
-        $crate::_private::declare_main!($main);
+    (init = $init:path, stack_size = $stack_size:expr) => {
+        $crate::_private::declare_init!($init);
         $crate::_private::declare_stack!($stack_size);
     };
-    ($main:path, $(stack_size = $stack_size:expr,)? heap_size = $heap_size:expr) => {
+    (init = $init:path, $(stack_size = $stack_size:expr,)? heap_size = $heap_size:expr) => {
         $crate::_private::declare_static_heap! {
             __GLOBAL_ALLOCATOR: $heap_size;
         }
-        $crate::_private::declare_protection_domain!($main $(, stack_size = $stack_size)?);
+        $crate::_private::declare_protection_domain!(init = $init $(, stack_size = $stack_size)?);
     };
 }
 
 // For macros
 #[doc(hidden)]
 pub mod _private {
-    pub use crate::{declare_main, declare_protection_domain, entry::run_main, DEFAULT_STACK_SIZE};
+    pub use crate::{declare_init, declare_protection_domain, entry::run_main, DEFAULT_STACK_SIZE};
 
     pub use sel4::sys::seL4_BootInfo;
     pub use sel4_runtime_common::declare_stack;
@@ -90,7 +90,7 @@ pub(crate) unsafe fn get_ipc_buffer() -> sel4::IPCBuffer {
 #[link_section = ".data"]
 static mut passive: bool = false; // just a placeholder
 
-pub fn is_passive() -> bool {
+pub fn pd_is_passive() -> bool {
     unsafe { passive }
 }
 

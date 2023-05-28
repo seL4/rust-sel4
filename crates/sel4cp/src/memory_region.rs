@@ -7,43 +7,53 @@ use zerocopy::{AsBytes, FromBytes};
 pub use sel4_externally_shared::access::{ReadOnly, ReadWrite};
 pub use sel4_externally_shared::ExternallyShared;
 
-pub type MemoryRegion<T, A> = ExternallyShared<<A as MemoryRegionAccess>::Ref<T>, A>;
+pub type MemoryRegionData<T, A> = ExternallyShared<<A as MemoryRegionAccess>::Ref<T>, A>;
 
-pub unsafe fn new_memory_region<T: MemoryRegionTarget + ?Sized, A: MemoryRegionAccess>(
+pub struct MemoryRegion<T: MemoryRegionTarget + ?Sized, A: MemoryRegionAccess> {
     start: A::Ptr<T::Element>,
     size_in_bytes: usize,
-) -> MemoryRegion<T, A> {
-    T::new_memory_region(start, size_in_bytes)
 }
 
-#[macro_export]
-macro_rules! declare_memory_region {
-    {
-        <$target:ty, $access:ty>($symbol:ident, $size_in_bytes:expr)
-    } => {
-        {
-            #[no_mangle]
-            #[link_section = ".data"]
-            static mut $symbol:
-                <$access as $crate::memory_region::MemoryRegionAccess>::Ptr::<
-                    <$target as $crate::memory_region::MemoryRegionTarget>::Element
-                > =
-                <
-                    <$access as $crate::memory_region::MemoryRegionAccess>::Ptr::<
-                        <$target as $crate::memory_region::MemoryRegionTarget>::Element
-                    >
-                    as $crate::memory_region::MemoryRegionPointer
-                >::NULL;
-
-            $crate::memory_region::new_memory_region::<$target, $access>(
-                unsafe { $symbol },
-                $size_in_bytes,
-            )
+impl<T: MemoryRegionTarget + ?Sized, A: MemoryRegionAccess> MemoryRegion<T, A> {
+    pub unsafe fn new(start: A::Ptr<T::Element>, size_in_bytes: usize) -> MemoryRegion<T, A> {
+        Self {
+            start,
+            size_in_bytes,
         }
+    }
+
+    pub fn start(&self) -> A::Ptr<T::Element> {
+        self.start
+    }
+
+    pub fn size_in_bytes(&self) -> usize {
+        self.size_in_bytes
+    }
+
+    pub fn data(&self) -> MemoryRegionData<T, A> {
+        unsafe { T::new_memory_region(self.start(), self.size_in_bytes()) }
     }
 }
 
-pub use declare_memory_region;
+#[macro_export]
+macro_rules! memory_region_symbol {
+    ($symbol:ident: *const $ty:ty) => {{
+        #[no_mangle]
+        #[link_section = ".data"]
+        static mut $symbol: *const $ty = core::ptr::null();
+
+        $symbol
+    }};
+    ($symbol:ident: *mut $ty:ty) => {{
+        #[no_mangle]
+        #[link_section = ".data"]
+        static mut $symbol: *mut $ty = core::ptr::null_mut();
+
+        $symbol
+    }};
+}
+
+pub use memory_region_symbol;
 
 // // //
 
@@ -83,7 +93,7 @@ pub trait MemoryRegionAccess: Sized {
     type Ptr<T>: MemoryRegionPointer;
     type Ref<T: 'static + ?Sized>;
 
-    unsafe fn new_memory_region<T: ?Sized>(reference: Self::Ref<T>) -> MemoryRegion<T, Self>;
+    unsafe fn new_memory_region<T: ?Sized>(reference: Self::Ref<T>) -> MemoryRegionData<T, Self>;
 
     unsafe fn ref_from_ptr<T>(pointer: Self::Ptr<T>) -> Option<Self::Ref<T>>;
 
@@ -94,7 +104,7 @@ impl MemoryRegionAccess for ReadOnly {
     type Ptr<T> = *const T;
     type Ref<T: 'static + ?Sized> = &'static T;
 
-    unsafe fn new_memory_region<T: ?Sized>(reference: Self::Ref<T>) -> MemoryRegion<T, Self> {
+    unsafe fn new_memory_region<T: ?Sized>(reference: Self::Ref<T>) -> MemoryRegionData<T, Self> {
         ExternallyShared::new_read_only(reference)
     }
 
@@ -111,7 +121,7 @@ impl MemoryRegionAccess for ReadWrite {
     type Ptr<T> = *mut T;
     type Ref<T: 'static + ?Sized> = &'static mut T;
 
-    unsafe fn new_memory_region<T: ?Sized>(reference: Self::Ref<T>) -> MemoryRegion<T, Self> {
+    unsafe fn new_memory_region<T: ?Sized>(reference: Self::Ref<T>) -> MemoryRegionData<T, Self> {
         ExternallyShared::new(reference)
     }
 
@@ -130,7 +140,7 @@ pub trait MemoryRegionTarget: AsBytes + FromBytes {
     unsafe fn new_memory_region<A: MemoryRegionAccess>(
         start: A::Ptr<Self::Element>,
         size_in_bytes: usize,
-    ) -> MemoryRegion<Self, A>;
+    ) -> MemoryRegionData<Self, A>;
 }
 
 impl<T: Sized + AsBytes + FromBytes> MemoryRegionTarget for T {
@@ -139,7 +149,7 @@ impl<T: Sized + AsBytes + FromBytes> MemoryRegionTarget for T {
     unsafe fn new_memory_region<A: MemoryRegionAccess>(
         start: A::Ptr<Self::Element>,
         size_in_bytes: usize,
-    ) -> MemoryRegion<Self, A> {
+    ) -> MemoryRegionData<Self, A> {
         assert!(!start.is_null());
         assert!(start.is_aligned());
         assert!(size_in_bytes >= mem::size_of::<Self::Element>());
@@ -153,7 +163,7 @@ impl<T: Sized + AsBytes + FromBytes> MemoryRegionTarget for [T] {
     unsafe fn new_memory_region<A: MemoryRegionAccess>(
         start: A::Ptr<Self::Element>,
         size_in_bytes: usize,
-    ) -> MemoryRegion<Self, A> {
+    ) -> MemoryRegionData<Self, A> {
         assert!(!start.is_null());
         assert!(start.is_aligned());
         assert_eq!(size_in_bytes % mem::size_of::<Self::Element>(), 0);

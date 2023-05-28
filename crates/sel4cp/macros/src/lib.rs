@@ -16,7 +16,7 @@ pub fn protection_domain(attr: TokenStream, item: TokenStream) -> TokenStream {
         quote!(, #attr)
     };
     quote! {
-        ::#crate_::#module_path!(#ident #extra);
+        ::#crate_::#module_path!(init = #ident #extra);
 
         #item
     }

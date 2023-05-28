@@ -1,8 +1,8 @@
 use crate::cspace::{
     Channel, DeferredAction, PreparedDeferredAction, INPUT_CAP, MONITOR_EP_CAP, REPLY_CAP,
 };
-use crate::is_passive;
 use crate::message::MessageInfo;
+use crate::pd_is_passive;
 
 pub trait Handler {
     type Error;
@@ -27,7 +27,7 @@ pub trait Handler {
 pub(crate) fn run_handler<T: Handler>(mut handler: T) -> Result<!, T::Error> {
     let mut reply_tag: Option<MessageInfo> = None;
 
-    let mut prepared_deferred_action: Option<PreparedDeferredAction> = if is_passive() {
+    let mut prepared_deferred_action: Option<PreparedDeferredAction> = if pd_is_passive() {
         sel4::with_borrow_ipc_buffer_mut(|ipc_buffer| ipc_buffer.msg_regs_mut()[0] = 0);
         Some(PreparedDeferredAction::new(
             MONITOR_EP_CAP.cast(),

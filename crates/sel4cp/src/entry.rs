@@ -38,32 +38,32 @@ unsafe extern "C" fn inner_entry() -> ! {
 
     init_panicking();
     sel4::set_ipc_buffer(get_ipc_buffer());
-    __sel4cp_init();
+    __sel4cp_main();
     abort!("main thread returned")
 }
 
 extern "C" {
-    fn __sel4cp_init();
+    fn __sel4cp_main();
 }
 
 #[doc(hidden)]
 #[macro_export]
-macro_rules! declare_main {
-    ($main:path) => {
+macro_rules! declare_init {
+    ($init:path) => {
         #[no_mangle]
-        pub unsafe extern "C" fn __sel4cp_init() {
-            $crate::_private::run_main($main);
+        pub unsafe extern "C" fn __sel4cp_main() {
+            $crate::_private::run_main($init);
         }
     };
 }
 
 #[allow(clippy::missing_safety_doc)]
-pub unsafe fn run_main<T>(f: impl FnOnce() -> T)
+pub unsafe fn run_main<T>(init: impl FnOnce() -> T)
 where
     T: Handler,
     T::Error: fmt::Debug,
 {
-    match catch_unwind(|| run_handler(f()).into_err()) {
+    match catch_unwind(|| run_handler(init()).into_err()) {
         Ok(err) => abort!("main thread terminated with error: {err:?}"),
         Err(_) => abort!("main thread panicked"),
     }

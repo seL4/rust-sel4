@@ -11,7 +11,9 @@ use core::fmt::Write;
 use core::mem;
 use core::str;
 
-use sel4cp::memory_region::{declare_memory_region, MemoryRegion, ReadOnly, ReadWrite};
+use sel4cp::memory_region::{
+    memory_region_symbol, MemoryRegion, MemoryRegionData, ReadOnly, ReadWrite,
+};
 use sel4cp::message::{MessageInfo, NoMessageLabel, NoMessageValue, StatusMessageLabel};
 use sel4cp::{protection_domain, Channel, Handler};
 
@@ -29,15 +31,20 @@ const MAX_SUBJECT_LEN: usize = 16;
 #[protection_domain(heap_size = 0x10000)]
 fn init() -> ThisHandler {
     let region_in = unsafe {
-        declare_memory_region! {
-            <[u8], ReadOnly>(region_in_start, REGION_SIZE)
-        }
-    };
+        MemoryRegion::<[u8], ReadOnly>::new(
+            memory_region_symbol!(region_in_start: *const u8),
+            REGION_SIZE,
+        )
+    }
+    .data();
+
     let region_out = unsafe {
-        declare_memory_region! {
-            <[u8], ReadWrite>(region_out_start, REGION_SIZE)
-        }
-    };
+        MemoryRegion::<[u8], ReadWrite>::new(
+            memory_region_symbol!(region_out_start: *mut u8),
+            REGION_SIZE,
+        )
+    }
+    .data();
 
     prompt();
 
@@ -49,8 +56,8 @@ fn init() -> ThisHandler {
 }
 
 struct ThisHandler {
-    region_in: MemoryRegion<[u8], ReadOnly>,
-    region_out: MemoryRegion<[u8], ReadWrite>,
+    region_in: MemoryRegionData<[u8], ReadOnly>,
+    region_out: MemoryRegionData<[u8], ReadWrite>,
     buffer: Vec<u8>,
 }
 
