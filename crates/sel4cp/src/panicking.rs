@@ -6,7 +6,7 @@ pub use sel4_panicking::{
     catch_unwind, panic_any, ExternalPanicInfo, IntoPayload, PanicHook, Payload, TryFromPayload,
 };
 
-use crate::get_pd_name;
+use crate::pd_name;
 
 static PANIC_HOOK: ImmediateSyncOnceCell<PanicHook> = ImmediateSyncOnceCell::new();
 
@@ -20,7 +20,7 @@ fn get_hook() -> &'static PanicHook {
 }
 
 fn default_hook(info: &ExternalPanicInfo) {
-    debug_println!("{}: {}", get_pd_name(), info);
+    debug_println!("{}: {}", pd_name(), info);
 }
 
 fn outer_hook(info: &ExternalPanicInfo) {

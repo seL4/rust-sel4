@@ -55,6 +55,7 @@ extern "C" {
 }
 
 // TODO decrease
+#[doc(hidden)]
 pub const DEFAULT_STACK_SIZE: usize = 0x10000;
 
 #[macro_export]
@@ -74,6 +75,7 @@ macro_rules! declare_root_task {
     };
 }
 
+#[doc(hidden)]
 #[macro_export]
 macro_rules! declare_main {
     ($main:path) => {
@@ -86,6 +88,7 @@ macro_rules! declare_main {
     };
 }
 
+#[doc(hidden)]
 #[allow(clippy::missing_safety_doc)]
 pub unsafe fn run_main<T>(
     f: impl Fn(&sel4::BootInfo) -> T,

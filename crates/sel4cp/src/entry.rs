@@ -46,6 +46,7 @@ extern "C" {
     fn __sel4cp_init();
 }
 
+#[doc(hidden)]
 #[macro_export]
 macro_rules! declare_main {
     ($main:path) => {

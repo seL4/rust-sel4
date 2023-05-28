@@ -30,6 +30,7 @@ pub use cspace::{Channel, DeferredAction, IrqAckError};
 pub use handler::{Handler, NullHandler};
 
 // TODO decrease
+#[doc(hidden)]
 pub const DEFAULT_STACK_SIZE: usize = 0x10000;
 
 #[macro_export]
@@ -81,7 +82,7 @@ extern "C" {
     static mut __sel4_ipc_buffer_obj: sel4::sys::seL4_IPCBuffer;
 }
 
-pub unsafe fn get_ipc_buffer() -> sel4::IPCBuffer {
+pub(crate) unsafe fn get_ipc_buffer() -> sel4::IPCBuffer {
     sel4::IPCBuffer::from_ptr(&mut __sel4_ipc_buffer_obj)
 }
 
@@ -97,7 +98,7 @@ pub fn is_passive() -> bool {
 #[link_section = ".data"]
 static sel4cp_name: [u8; 16] = [0; 16];
 
-pub fn get_pd_name() -> &'static str {
+pub fn pd_name() -> &'static str {
     // avoid recursive panic
     fn on_err<T, U>(_: T) -> U {
         abort!("invalid embedded protection domain name");
