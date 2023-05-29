@@ -21,7 +21,7 @@ static LOGGER: Logger = LoggerBuilder::const_default()
 static mut BUFFERS: LoaderBuffers<[PerObjectBuffer; SPEC.objects.const_inner().len()]> =
     LoaderBuffers::new([PerObjectBuffer::const_default(); SPEC.objects.const_inner().len()]);
 
-#[sel4_root_task::main]
+#[sel4_root_task::root_task]
 fn main(bootinfo: &BootInfo) -> ! {
     LOGGER.set().unwrap();
     let trivial_source = ();

@@ -8,12 +8,12 @@ use alloc::string::String;
 use sel4_backtrace::collect;
 use sel4_backtrace_embedded_debug_info::get_context;
 use sel4_backtrace_simple::SimpleBacktracing;
-use sel4_root_task::{debug_println, main, panicking};
+use sel4_root_task::{debug_println, panicking, root_task};
 
 // TODO
 // Why are such a large stack and heap required? The unwinding part seems to consume the stack, and
 // addr2line the heap.
-#[main(stack_size = 4096 * 64, heap_size = 16 << 20)]
+#[root_task(stack_size = 4096 * 64, heap_size = 16 << 20)]
 fn main(_: &sel4::BootInfo) -> ! {
     let _ = panicking::catch_unwind(|| {
         f();

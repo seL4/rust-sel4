@@ -3,13 +3,13 @@
 
 use core::ffi::{c_char, CStr};
 
-use sel4_root_task::{debug_println, main};
+use sel4_root_task::{debug_println, root_task};
 
 extern "C" {
     fn test(s: *const c_char) -> i32;
 }
 
-#[main]
+#[root_task]
 fn main(_: &sel4::BootInfo) -> ! {
     let s = CStr::from_bytes_with_nul(b"1234\0").unwrap();
     let n = unsafe { test(s.as_ptr()) };

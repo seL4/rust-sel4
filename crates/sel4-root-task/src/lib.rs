@@ -10,7 +10,7 @@ use core::fmt;
 use core::ffi::c_void;
 
 pub use sel4_panicking_env::{abort, debug_print, debug_println};
-pub use sel4_root_task_macros::main;
+pub use sel4_root_task_macros::root_task;
 
 #[doc(inline)]
 pub use sel4_panicking as panicking;
@@ -62,16 +62,16 @@ pub const DEFAULT_STACK_SIZE: usize = 0x10000;
 
 #[macro_export]
 macro_rules! declare_root_task {
-    ($main:path, $(stack_size = $stack_size:expr,)? heap_size = $heap_size:expr) => {
+    (main = $main:path, $(stack_size = $stack_size:expr,)? heap_size = $heap_size:expr) => {
         $crate::_private::declare_static_heap! {
             __GLOBAL_ALLOCATOR: $heap_size;
         }
-        $crate::_private::declare_root_task!($main $(, stack_size = $stack_size)?);
+        $crate::_private::declare_root_task!(main = $main $(, stack_size = $stack_size)?);
     };
-    ($main:path) => {
-        $crate::_private::declare_root_task!($main, stack_size = $crate::_private::DEFAULT_STACK_SIZE);
+    (main = $main:path) => {
+        $crate::_private::declare_root_task!(main = $main, stack_size = $crate::_private::DEFAULT_STACK_SIZE);
     };
-    ($main:path, stack_size = $stack_size:expr) => {
+    (main = $main:path, stack_size = $stack_size:expr) => {
         $crate::_private::declare_main!($main);
         $crate::_private::declare_stack!($stack_size);
     };

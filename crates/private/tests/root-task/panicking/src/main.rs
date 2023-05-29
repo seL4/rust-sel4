@@ -3,11 +3,11 @@
 
 use core::sync::atomic::{AtomicBool, Ordering};
 
-use sel4_root_task::{debug_println, main, panicking};
+use sel4_root_task::{debug_println, panicking, root_task};
 
 static F1_DROPPED: AtomicBool = AtomicBool::new(false);
 
-#[main(stack_size = 4096 * 64, heap_size = 4096 * 16)] // TODO decrease stack size
+#[root_task(stack_size = 4096 * 64, heap_size = 4096 * 16)] // TODO decrease stack size
 fn main(_: &sel4::BootInfo) -> ! {
     let _ = panicking::catch_unwind(|| {
         f1();

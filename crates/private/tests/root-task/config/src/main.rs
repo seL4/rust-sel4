@@ -1,10 +1,10 @@
 #![no_std]
 #![no_main]
 
-use sel4_root_task::{debug_println, main};
+use sel4_root_task::{debug_println, root_task};
 
 #[sel4::sel4_cfg(not(KERNEL_STACK_BITS = "0"))]
-#[main]
+#[root_task]
 fn main(_: &sel4::BootInfo) -> ! {
     debug_println!(
         "RETYPE_FAN_OUT_LIMIT: {}",

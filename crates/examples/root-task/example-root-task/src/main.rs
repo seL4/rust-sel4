@@ -2,9 +2,9 @@
 #![no_main]
 #![feature(never_type)]
 
-use sel4_root_task::main;
+use sel4_root_task::root_task;
 
-#[main]
+#[root_task]
 fn main(bootinfo: &sel4::BootInfo) -> sel4::Result<!> {
     sel4::debug_println!("Hello, World!");
 
