@@ -1,3 +1,5 @@
+//! Utilities for declaring and using share memory regions.
+
 use core::mem;
 use core::ptr;
 use core::slice;
@@ -34,28 +36,6 @@ impl<T: MemoryRegionTarget + ?Sized, A: MemoryRegionAccess> MemoryRegion<T, A> {
         unsafe { T::new_memory_region(self.start(), self.size_in_bytes()) }
     }
 }
-
-#[macro_export]
-macro_rules! memory_region_symbol {
-    ($symbol:ident: *const $ty:ty) => {{
-        #[no_mangle]
-        #[link_section = ".data"]
-        static mut $symbol: *const $ty = core::ptr::null();
-
-        $symbol
-    }};
-    ($symbol:ident: *mut $ty:ty) => {{
-        #[no_mangle]
-        #[link_section = ".data"]
-        static mut $symbol: *mut $ty = core::ptr::null_mut();
-
-        $symbol
-    }};
-}
-
-pub use memory_region_symbol;
-
-// // //
 
 pub trait MemoryRegionPointer: Copy {
     const NULL: Self;
@@ -171,3 +151,50 @@ impl<T: Sized + AsBytes + FromBytes> MemoryRegionTarget for [T] {
         A::new_memory_region(unsafe { A::slice_from_raw_parts(start, len) })
     }
 }
+
+/// Declares a symbol via which the `sel4cp` tool can inject a memory region's address, and returns
+/// the memory region's address at runtime.
+///
+/// This is its definition:
+///
+/// ```rust
+/// #[macro_export]
+/// macro_rules! memory_region_symbol {
+///     ($symbol:ident: *const $ty:ty) => {{
+///         #[no_mangle]
+///         #[link_section = ".data"]
+///         static mut $symbol: *const $ty = core::ptr::null();
+///
+///         $symbol
+///     }};
+///     ($symbol:ident: *mut $ty:ty) => {{
+///         #[no_mangle]
+///         #[link_section = ".data"]
+///         static mut $symbol: *mut $ty = core::ptr::null_mut();
+///
+///         $symbol
+///     }};
+/// }
+/// ```
+///
+/// The patching mechanism used by the `sel4cp` tool requires that the symbol be allocated space in
+/// the protection domain's ELF file, so we delare the symbol as part of the `.data` section.
+#[macro_export]
+macro_rules! memory_region_symbol {
+    ($symbol:ident: *const $ty:ty) => {{
+        #[no_mangle]
+        #[link_section = ".data"]
+        static mut $symbol: *const $ty = core::ptr::null();
+
+        $symbol
+    }};
+    ($symbol:ident: *mut $ty:ty) => {{
+        #[no_mangle]
+        #[link_section = ".data"]
+        static mut $symbol: *mut $ty = core::ptr::null_mut();
+
+        $symbol
+    }};
+}
+
+pub use memory_region_symbol;

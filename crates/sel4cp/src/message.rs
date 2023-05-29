@@ -1,3 +1,5 @@
+//! Utilities for handling IPC messages for protected procedure calls.
+
 use core::fmt;
 use core::mem;
 

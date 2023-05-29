@@ -3,6 +3,28 @@ use proc_macro2::TokenStream as TokenStream2;
 use quote::quote;
 use syn::parse_macro_input;
 
+/// Declares the initialization function, stack size, and, optionally, heap and heap size.
+///
+/// This macro is a thin wrapper around `sel4cp::declare_protection_domain`. The following are equivalent:
+///
+/// ```rust
+/// #[sel4cp::protection_domain(stack_size = 0x12000, heap_size = 0x34000)]
+/// fn my_init() -> MyHandler {
+///     // ...
+/// }
+/// ```
+///
+/// ```rust
+/// sel4cp::declare_protection_domain! {
+///     init = my_init,
+///     stack_size = 0x12000,
+///     heap_size = 0x34000,
+/// }
+///
+/// fn my_init() -> MyHandler {
+///     // ...
+/// }
+/// ```
 #[proc_macro_attribute]
 pub fn protection_domain(attr: TokenStream, item: TokenStream) -> TokenStream {
     let crate_ = quote!(sel4cp);
