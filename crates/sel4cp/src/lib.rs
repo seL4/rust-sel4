@@ -47,45 +47,62 @@ pub use sel4cp_macros::protection_domain;
 
 mod cspace;
 mod entry;
+mod env;
 mod handler;
 
 pub mod memory_region;
 pub mod message;
 pub mod panicking;
 
-pub use cspace::{Channel, DeferredAction, IrqAckError};
+pub use cspace::{Channel, DeferredAction, DeferredActionInterface, IrqAckError};
+pub use env::{pd_is_passive, pd_name};
 pub use handler::{Handler, NullHandler};
 
-// TODO decrease
-#[doc(hidden)]
-pub const DEFAULT_STACK_SIZE: usize = 0x10000;
-
 /// Declares the initialization function, stack size, and, optionally, heap and heap size.
+///
+/// See the [`protection_domain`] attribute macro for more detail.
 #[macro_export]
 macro_rules! declare_protection_domain {
-    (init = $init:path $(,)?) => {
-        $crate::_private::declare_protection_domain!(init = $init, stack_size = $crate::_private::DEFAULT_STACK_SIZE);
+     {
+        init = $init:expr $(,)?
+    } => {
+        $crate::_private::declare_protection_domain! {
+            init = $init,
+            stack_size = $crate::_private::DEFAULT_STACK_SIZE,
+        }
     };
-    (init = $init:path, stack_size = $stack_size:expr $(,)?) => {
+    {
+        init = $init:expr,
+        stack_size = $stack_size:expr $(,)?
+    } => {
         $crate::_private::declare_init!($init);
         $crate::_private::declare_stack!($stack_size);
     };
-    (init = $init:path, $(stack_size = $stack_size:expr,)? heap_size = $heap_size:expr $(,)?) => {
+    {
+        init = $init:expr,
+        $(stack_size = $stack_size:expr,)?
+        heap_size = $heap_size:expr $(,)?
+    } => {
         $crate::_private::declare_static_heap! {
+            #[doc(hidden)]
             __GLOBAL_ALLOCATOR: $heap_size;
         }
-        $crate::_private::declare_protection_domain!(init = $init $(, stack_size = $stack_size)?);
+        $crate::_private::declare_protection_domain! {
+            init = $init,
+            $(stack_size = $stack_size,)?
+        }
     };
 }
 
 // For macros
 #[doc(hidden)]
 pub mod _private {
-    pub use crate::{declare_init, declare_protection_domain, entry::run_main, DEFAULT_STACK_SIZE};
+    pub use sel4_runtime_common::{declare_stack, declare_static_heap};
 
-    pub use sel4::sys::seL4_BootInfo;
-    pub use sel4_runtime_common::declare_stack;
-    pub use sel4_runtime_common::declare_static_heap;
+    pub use crate::{declare_init, declare_protection_domain, entry::run_main};
+
+    // TODO decrease
+    pub const DEFAULT_STACK_SIZE: usize = 0x4000;
 }
 
 sel4::config::sel4_cfg_if! {
@@ -104,39 +121,4 @@ sel4::config::sel4_cfg_if! {
             ($($arg:tt)*) => {};
         }
     }
-}
-
-// // //
-
-extern "C" {
-    static mut __sel4_ipc_buffer_obj: sel4::sys::seL4_IPCBuffer;
-}
-
-pub(crate) unsafe fn get_ipc_buffer() -> sel4::IPCBuffer {
-    sel4::IPCBuffer::from_ptr(&mut __sel4_ipc_buffer_obj)
-}
-
-#[no_mangle]
-#[link_section = ".data"]
-static mut passive: bool = false; // just a placeholder
-
-/// Returns whether this projection domain is passive.
-pub fn pd_is_passive() -> bool {
-    unsafe { passive }
-}
-
-#[no_mangle]
-#[link_section = ".data"]
-static sel4cp_name: [u8; 16] = [0; 16];
-
-/// Returns the name of this projection domain.
-pub fn pd_name() -> &'static str {
-    // avoid recursive panic
-    fn on_err<T, U>(_: T) -> U {
-        abort!("invalid embedded protection domain name");
-    }
-    core::ffi::CStr::from_bytes_until_nul(&sel4cp_name)
-        .unwrap_or_else(&on_err)
-        .to_str()
-        .unwrap_or_else(&on_err)
 }

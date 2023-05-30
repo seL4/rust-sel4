@@ -29,7 +29,7 @@ const REGION_SIZE: usize = 0x4_000;
 const MAX_SUBJECT_LEN: usize = 16;
 
 #[protection_domain(heap_size = 0x10000)]
-fn init() -> ThisHandler {
+fn init() -> impl Handler {
     let region_in = unsafe {
         MemoryRegion::<[u8], ReadOnly>::new(
             memory_region_symbol!(region_in_start: *const u8),

@@ -2,6 +2,10 @@ use core::fmt;
 
 use crate::message::MessageInfo;
 
+// For rustdoc.
+#[allow(unused_imports)]
+use crate::Handler;
+
 pub(crate) type Slot = usize;
 
 pub(crate) const INPUT_CAP: sel4::Endpoint = slot_to_local_cptr(1);
@@ -18,6 +22,7 @@ const fn slot_to_local_cptr<T: sel4::CapType>(slot: Slot) -> sel4::LocalCPtr<T> 
     sel4::LocalCPtr::from_bits(slot as sel4::CPtrBits)
 }
 
+/// A channel between this protection domain and another, identified by a channel index.
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct Channel {
     index: usize,
@@ -49,29 +54,35 @@ impl Channel {
         self.notification().signal()
     }
 
-    pub fn irq_ack(&self) -> Result<(), sel4::Error> {
-        self.irq_handler().irq_handler_ack()
+    pub fn irq_ack(&self) -> Result<(), IrqAckError> {
+        self.irq_handler()
+            .irq_handler_ack()
+            .map_err(IrqAckError::from_sel4_error)
     }
 
     pub fn pp_call(&self, msg_info: MessageInfo) -> MessageInfo {
         MessageInfo::from_sel4(self.endpoint().call(msg_info.into_sel4()))
     }
 
+    /// Prepare a [`DeferredAction`] for syscall coalescing using [`Handler::take_deferred_action`].
     pub fn defer_notify(&self) -> DeferredAction {
         DeferredAction::new(self.clone(), DeferredActionInterface::Notify)
     }
 
+    /// Prepare a [`DeferredAction`] for syscall coalescing using [`Handler::take_deferred_action`].
     pub fn defer_irq_ack(&self) -> DeferredAction {
         DeferredAction::new(self.clone(), DeferredActionInterface::IrqAck)
     }
 }
 
+/// An action deferred for syscall coalescing using [`Handler::take_deferred_action`].
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub struct DeferredAction {
     channel: Channel,
     interface: DeferredActionInterface,
 }
 
+/// A channel interface for which actions can be deferred.
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum DeferredActionInterface {
     Notify,
@@ -127,12 +138,17 @@ impl PreparedDeferredAction {
     }
 }
 
+/// Error type returned by [`Channel::irq_ack`].
 #[derive(Debug, PartialEq, Eq)]
 pub struct IrqAckError {
     sel4_error: sel4::Error,
 }
 
 impl IrqAckError {
+    fn from_sel4_error(sel4_error: sel4::Error) -> Self {
+        Self { sel4_error }
+    }
+
     fn as_sel4_error(&self) -> &sel4::Error {
         &self.sel4_error
     }

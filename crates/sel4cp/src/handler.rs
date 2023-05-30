@@ -1,16 +1,26 @@
+use core::fmt;
+
 use crate::cspace::{
     Channel, DeferredAction, PreparedDeferredAction, INPUT_CAP, MONITOR_EP_CAP, REPLY_CAP,
 };
 use crate::message::MessageInfo;
 use crate::pd_is_passive;
 
+/// Trait for the application-specific part of a protection domain's main loop.
 pub trait Handler {
-    type Error;
+    /// Error type returned by this protection domain's entrypoints.
+    type Error: fmt::Display;
 
+    /// This method has the same meaning and type as its analog in `libsel4cp`.
+    ///
+    /// The default implementation just panics.
     fn notified(&mut self, channel: Channel) -> Result<(), Self::Error> {
         panic!("unexpected notification from channel {channel:?}")
     }
 
+    /// This method has the same meaning and type as its analog in `libsel4cp`.
+    ///
+    /// The default implementation just panics.
     fn protected(
         &mut self,
         channel: Channel,
@@ -19,6 +29,11 @@ pub trait Handler {
         panic!("unexpected protected procedure call from channel {channel:?} with msg_info={msg_info:?}")
     }
 
+    /// An advanced feature for use by protection domains which seek to coalesce syscalls when
+    /// possible.
+    ///
+    /// This method is used by the main loop to fuse a queued `seL4_Send` call with the next
+    /// `seL4_Recv` using `seL4_NBSendRecv`. Its default implementation just returns `None`.
     fn take_deferred_action(&mut self) -> Option<DeferredAction> {
         None
     }
@@ -73,6 +88,7 @@ pub(crate) fn run_handler<T: Handler>(mut handler: T) -> Result<!, T::Error> {
     }
 }
 
+/// A [`Handler`] implementation which does not override any of the default method implementations.
 pub struct NullHandler(());
 
 impl NullHandler {

@@ -13,9 +13,11 @@ pub const fn new_global_allocator(bounds: ConstantStaticHeapBounds) -> GlobalAll
 #[macro_export]
 macro_rules! declare_static_heap {
     {
+        $(#[$attrs:meta])*
         $vis:vis $ident:ident: $size:expr;
     } => {
         #[global_allocator]
+        $(#[$attrs])*
         $vis static $ident: $crate::_private::static_heap::GlobalAllocator = {
             static mut STATIC_HEAP: $crate::_private::static_heap::StaticHeap<{ $size }> =
                 $crate::_private::static_heap::StaticHeap::new();

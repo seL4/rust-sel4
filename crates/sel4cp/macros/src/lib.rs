@@ -5,23 +5,41 @@ use syn::parse_macro_input;
 
 /// Declares the initialization function, stack size, and, optionally, heap and heap size.
 ///
-/// This macro is a thin wrapper around `sel4cp::declare_protection_domain`. The following are equivalent:
+/// The syntax is:
 ///
 /// ```rust
-/// #[sel4cp::protection_domain(stack_size = 0x12000, heap_size = 0x34000)]
-/// fn my_init() -> MyHandler {
+/// #[protection_domain($($key:ident = $value:expr),* $(,)?)]
+/// fn init() -> impl Handler {
+///    // ...
+/// }
+/// ```
+///
+/// Where the possible keys are:
+///   - `stack_size`: Sets the stack size. Defaults to `0x4000`.
+///   - `heap_size`: Declares a `#[global_allocator]` implemented using Dlmalloc and a
+///     statically-allocated heap. Optional.
+///
+/// The function to which the attribute is applied will be used to initialize the protection domain.
+/// It must satisfy `<T: Handler, F: FnOnce() -> T>`.
+///
+/// This macro is a thin wrapper around `sel4cp::declare_protection_domain`. The following are
+/// equivalent:
+///
+/// ```rust
+/// #[protection_domain(stack_size = 0x12000, heap_size = 0x34000)]
+/// fn init() -> impl Handler {
 ///     // ...
 /// }
 /// ```
 ///
 /// ```rust
-/// sel4cp::declare_protection_domain! {
+/// declare_protection_domain! {
 ///     init = my_init,
 ///     stack_size = 0x12000,
 ///     heap_size = 0x34000,
 /// }
 ///
-/// fn my_init() -> MyHandler {
+/// fn init() -> impl Handler {
 ///     // ...
 /// }
 /// ```

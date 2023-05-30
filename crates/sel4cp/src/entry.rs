@@ -1,9 +1,7 @@
-use core::fmt;
-
 pub use sel4_panicking::catch_unwind;
 pub use sel4_panicking_env::{abort, debug_print, debug_println};
 
-use crate::get_ipc_buffer;
+use crate::env::get_ipc_buffer;
 use crate::handler::{run_handler, Handler};
 use crate::panicking::init_panicking;
 
@@ -58,13 +56,9 @@ macro_rules! declare_init {
 }
 
 #[allow(clippy::missing_safety_doc)]
-pub unsafe fn run_main<T>(init: impl FnOnce() -> T)
-where
-    T: Handler,
-    T::Error: fmt::Debug,
-{
+pub unsafe fn run_main<T: Handler>(init: impl FnOnce() -> T) {
     match catch_unwind(|| run_handler(init()).into_err()) {
-        Ok(err) => abort!("main thread terminated with error: {err:?}"),
+        Ok(err) => abort!("main thread terminated with error: {err}"),
         Err(_) => abort!("main thread panicked"),
     }
 }
