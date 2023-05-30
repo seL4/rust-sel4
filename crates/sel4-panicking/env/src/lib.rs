@@ -23,6 +23,15 @@ mod defaults {
 
 // // //
 
+/// Prints via a link-time hook.
+///
+/// This function uses the following externally defined symobol:
+///
+/// ```rust
+/// extern "Rust" {
+///     fn sel4_runtime_debug_put_char(c: u8);
+/// }
+/// ```
 pub fn debug_put_char(c: u8) {
     unsafe { sel4_runtime_debug_put_char(c) }
 }
@@ -42,15 +51,17 @@ impl fmt::Write for DebugWrite {
 pub fn debug_print_helper(args: fmt::Arguments) {
     fmt::write(&mut DebugWrite, args).unwrap_or_else(|err| {
         // Just report error. This this function must not fail.
-        debug_print!("({err})")
+        let _ = fmt::write(&mut DebugWrite, format_args!("({err})"));
     })
 }
 
+/// Like `std::print`, except backed by [`debug_put_char`].
 #[macro_export]
 macro_rules! debug_print {
     ($($arg:tt)*) => ($crate::debug_print_helper(format_args!($($arg)*)));
 }
 
+/// Like `std::println`, except backed by [`debug_put_char`].
 #[macro_export]
 macro_rules! debug_println {
     () => ($crate::debug_println!(""));
@@ -62,16 +73,19 @@ macro_rules! debug_println {
 
 // // //
 
+/// Information about an abort passed to an abort hook.
 pub struct AbortInfo<'a> {
     message: Option<&'a fmt::Arguments<'a>>,
     location: Option<&'a Location<'a>>,
 }
 
 impl<'a> AbortInfo<'a> {
+    /// The `core::fmt::Arguments` with which [`abort!`] was called.
     pub fn message(&self) -> Option<&fmt::Arguments> {
         self.message
     }
 
+    /// The location at which [`abort!`] was called.
     pub fn location(&self) -> Option<&Location> {
         self.location
     }
@@ -106,6 +120,9 @@ fn default_abort_hook(info: Option<&AbortInfo>) {
     }
 }
 
+/// Abort without any [`AbortInfo`].
+///
+/// This function does the same thing as [`abort!`], except it passes `None` to the abort hook.
 pub fn abort_without_info() -> ! {
     abort(None)
 }
@@ -119,6 +136,10 @@ pub fn abort_helper(args: fmt::Arguments) -> ! {
     }))
 }
 
+/// Abort execution with a message.
+///
+/// This function first invokes an externally defined abort hook which is resolved at link time,
+/// and then calls `core::intrinsics::abort()`.
 #[macro_export]
 macro_rules! abort {
     () => ($crate::abort!(""));

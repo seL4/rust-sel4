@@ -101,7 +101,6 @@ pub mod _private {
 
     pub use crate::{declare_init, declare_protection_domain, entry::run_main};
 
-    // TODO decrease
     pub const DEFAULT_STACK_SIZE: usize = 0x4000;
 }
 

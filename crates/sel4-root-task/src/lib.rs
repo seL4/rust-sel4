@@ -56,31 +56,10 @@ extern "C" {
     fn __sel4_root_task_main(bootinfo: *const sel4::sys::seL4_BootInfo);
 }
 
-// TODO decrease
-#[doc(hidden)]
-pub const DEFAULT_STACK_SIZE: usize = 0x10000;
-
-#[macro_export]
-macro_rules! declare_root_task {
-    (main = $main:path, $(stack_size = $stack_size:expr,)? heap_size = $heap_size:expr) => {
-        $crate::_private::declare_static_heap! {
-            __GLOBAL_ALLOCATOR: $heap_size;
-        }
-        $crate::_private::declare_root_task!(main = $main $(, stack_size = $stack_size)?);
-    };
-    (main = $main:path) => {
-        $crate::_private::declare_root_task!(main = $main, stack_size = $crate::_private::DEFAULT_STACK_SIZE);
-    };
-    (main = $main:path, stack_size = $stack_size:expr) => {
-        $crate::_private::declare_main!($main);
-        $crate::_private::declare_stack!($stack_size);
-    };
-}
-
 #[doc(hidden)]
 #[macro_export]
 macro_rules! declare_main {
-    ($main:path) => {
+    ($main:expr) => {
         #[no_mangle]
         pub unsafe extern "C" fn __sel4_root_task_main(
             bootinfo: *const $crate::_private::seL4_BootInfo,
@@ -113,12 +92,46 @@ fn sel4_runtime_debug_put_char(c: u8) {
     sel4::debug_put_char(c as c_char)
 }
 
+#[macro_export]
+macro_rules! declare_root_task {
+    {
+       main = $main:expr $(,)?
+   } => {
+       $crate::_private::declare_root_task! {
+           main = $main,
+           stack_size = $crate::_private::DEFAULT_STACK_SIZE,
+       }
+   };
+   {
+       main = $main:expr,
+       stack_size = $stack_size:expr $(,)?
+   } => {
+       $crate::_private::declare_main!($main);
+       $crate::_private::declare_stack!($stack_size);
+   };
+   {
+       main = $main:expr,
+       $(stack_size = $stack_size:expr,)?
+       heap_size = $heap_size:expr $(,)?
+   } => {
+       $crate::_private::declare_static_heap! {
+           #[doc(hidden)]
+           __GLOBAL_ALLOCATOR: $heap_size;
+       }
+       $crate::_private::declare_root_task! {
+           main = $main,
+           $(stack_size = $stack_size,)?
+       }
+   };
+}
+
 // For macros
 #[doc(hidden)]
 pub mod _private {
-    pub use super::{declare_main, declare_root_task, run_main, DEFAULT_STACK_SIZE};
-
     pub use sel4::sys::seL4_BootInfo;
-    pub use sel4_runtime_common::declare_stack;
-    pub use sel4_runtime_common::declare_static_heap;
+    pub use sel4_runtime_common::{declare_stack, declare_static_heap};
+
+    pub use crate::{declare_main, declare_root_task, run_main};
+
+    pub const DEFAULT_STACK_SIZE: usize = 0x4000;
 }
