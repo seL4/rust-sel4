@@ -49,7 +49,7 @@ extern "C" {
 #[doc(hidden)]
 #[macro_export]
 macro_rules! declare_init {
-    ($init:path) => {
+    ($init:expr) => {
         #[no_mangle]
         pub unsafe extern "C" fn __sel4cp_main() {
             $crate::_private::run_main($init);
