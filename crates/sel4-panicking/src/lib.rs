@@ -3,9 +3,9 @@
 #![feature(cfg_target_thread_local)]
 #![feature(core_intrinsics)]
 #![feature(lang_items)]
-#![feature(thread_local)]
 #![feature(panic_can_unwind)]
 #![feature(panic_info_message)]
+#![feature(thread_local)]
 
 #[cfg(feature = "alloc")]
 extern crate alloc;
@@ -28,10 +28,7 @@ use payload::NoPayload;
 use strategy::{panic_cleanup, start_panic};
 
 pub use hook::{set_hook, PanicHook};
-pub use payload::{IntoPayload, Payload, TryFromPayload};
-
-#[cfg(not(feature = "alloc"))]
-pub use payload::{FromPayloadValue, IntoPayloadValue, PayloadValue, PAYLOAD_VALUE_SIZE};
+pub use payload::{FitsWithinSmallPayload, Payload, SmallPayloadValue, UpcastIntoPayload};
 
 // // //
 
@@ -78,7 +75,7 @@ impl fmt::Display for ExternalPanicInfo<'_> {
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
     do_panic(ExternalPanicInfo {
-        payload: NoPayload.into_payload(),
+        payload: NoPayload.upcast_into_payload(),
         message: info.message(),
         location: info.location(),
         can_unwind: info.can_unwind(),
@@ -86,9 +83,9 @@ fn panic(info: &PanicInfo) -> ! {
 }
 
 #[track_caller]
-pub fn panic_any<M: IntoPayload>(msg: M) -> ! {
+pub fn panic_any<M: UpcastIntoPayload>(msg: M) -> ! {
     do_panic(ExternalPanicInfo {
-        payload: msg.into_payload(),
+        payload: msg.upcast_into_payload(),
         message: None,
         location: Some(Location::caller()),
         can_unwind: true,

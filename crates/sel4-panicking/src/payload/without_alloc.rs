@@ -1,60 +1,32 @@
 use core::any::{Any, TypeId};
 
-use super::NoPayload;
+use super::{FitsWithinSmallPayload, SmallPayloadValue, UpcastIntoPayload};
 
 pub struct Payload {
     type_id: TypeId,
-    value: PayloadValue,
+    value: SmallPayloadValue,
 }
 
-pub const PAYLOAD_VALUE_SIZE: usize = 32;
+impl Payload {
+    pub fn type_id(&self) -> TypeId {
+        self.type_id
+    }
 
-pub type PayloadValue = [u8; PAYLOAD_VALUE_SIZE];
-
-pub trait IntoPayload {
-    fn into_payload(self) -> Payload;
+    pub fn downcast<T: FitsWithinSmallPayload + Copy + 'static>(self) -> Result<T, Self> {
+        if self.type_id() == TypeId::of::<T>() {
+            Ok(self.value.read())
+        } else {
+            Err(self)
+        }
+    }
 }
 
-pub trait TryFromPayload: Sized {
-    fn try_from_payload(payload: &Payload) -> Option<Self>;
-}
-
-impl<T: IntoPayloadValue + Any> IntoPayload for T {
-    fn into_payload(self) -> Payload {
+impl<T: FitsWithinSmallPayload + Copy + Any> UpcastIntoPayload for T {
+    fn upcast_into_payload(self) -> Payload {
         let type_id = self.type_id();
         Payload {
             type_id,
-            value: self.into_payload_value(),
+            value: SmallPayloadValue::write(&self),
         }
-    }
-}
-
-impl<T: FromPayloadValue + Any> TryFromPayload for T {
-    fn try_from_payload(payload: &Payload) -> Option<Self> {
-        if payload.type_id == TypeId::of::<T>() {
-            Some(T::from_payload_value(&payload.value))
-        } else {
-            None
-        }
-    }
-}
-
-pub unsafe trait IntoPayloadValue: Copy {
-    fn into_payload_value(self) -> PayloadValue;
-}
-
-pub unsafe trait FromPayloadValue: Copy {
-    fn from_payload_value(payload_value: &PayloadValue) -> Self;
-}
-
-unsafe impl IntoPayloadValue for NoPayload {
-    fn into_payload_value(self) -> PayloadValue {
-        Default::default()
-    }
-}
-
-unsafe impl FromPayloadValue for NoPayload {
-    fn from_payload_value(_payload_value: &PayloadValue) -> Self {
-        NoPayload
     }
 }
