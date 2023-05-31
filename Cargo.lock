@@ -329,11 +329,11 @@ dependencies = [
 ]
 
 [[package]]
-name = "capdl-loader"
+name = "capdl-initializer"
 version = "0.1.0"
 dependencies = [
- "capdl-loader-core",
- "capdl-loader-types",
+ "capdl-initializer-core",
+ "capdl-initializer-types",
  "capdl-types",
  "log",
  "postcard",
@@ -345,11 +345,11 @@ dependencies = [
 ]
 
 [[package]]
-name = "capdl-loader-add-spec"
+name = "capdl-initializer-add-spec"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "capdl-loader-types",
+ "capdl-initializer-types",
  "capdl-types",
  "clap 3.2.25",
  "fallible-iterator",
@@ -360,7 +360,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "capdl-loader-core"
+name = "capdl-initializer-core"
 version = "0.1.0"
 dependencies = [
  "capdl-types",
@@ -369,7 +369,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "capdl-loader-types"
+name = "capdl-initializer-types"
 version = "0.1.0"
 dependencies = [
  "capdl-types",
@@ -378,12 +378,12 @@ dependencies = [
 ]
 
 [[package]]
-name = "capdl-loader-with-embedded-spec"
+name = "capdl-initializer-with-embedded-spec"
 version = "0.1.0"
 dependencies = [
- "capdl-loader-core",
- "capdl-loader-with-embedded-spec-embedded-spec",
- "capdl-loader-with-embedded-spec-embedded-spec-validate",
+ "capdl-initializer-core",
+ "capdl-initializer-with-embedded-spec-embedded-spec",
+ "capdl-initializer-with-embedded-spec-embedded-spec-validate",
  "capdl-types",
  "sel4",
  "sel4-logging",
@@ -391,7 +391,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "capdl-loader-with-embedded-spec-build-env"
+name = "capdl-initializer-with-embedded-spec-build-env"
 version = "0.1.0"
 dependencies = [
  "capdl-embed-spec",
@@ -401,22 +401,22 @@ dependencies = [
 ]
 
 [[package]]
-name = "capdl-loader-with-embedded-spec-embedded-spec"
+name = "capdl-initializer-with-embedded-spec-embedded-spec"
 version = "0.1.0"
 dependencies = [
  "capdl-embed-spec",
- "capdl-loader-with-embedded-spec-build-env",
+ "capdl-initializer-with-embedded-spec-build-env",
  "capdl-types",
  "sel4-rustfmt-helper",
  "serde_json",
 ]
 
 [[package]]
-name = "capdl-loader-with-embedded-spec-embedded-spec-validate"
+name = "capdl-initializer-with-embedded-spec-embedded-spec-validate"
 version = "0.1.0"
 dependencies = [
- "capdl-loader-with-embedded-spec-build-env",
- "capdl-loader-with-embedded-spec-embedded-spec",
+ "capdl-initializer-with-embedded-spec-build-env",
+ "capdl-initializer-with-embedded-spec-embedded-spec",
  "capdl-types",
 ]
 

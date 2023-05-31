@@ -65,7 +65,7 @@
     ],
     "skip": false
   },
-  "capdl-loader": {
+  "capdl-initializer": {
     "labels": [
       "leaf"
     ],
@@ -75,7 +75,7 @@
     ],
     "skip": false
   },
-  "capdl-loader-add-spec": {
+  "capdl-initializer-add-spec": {
     "labels": [
       "leaf"
     ],
@@ -84,19 +84,19 @@
     ],
     "skip": false
   },
-  "capdl-loader-core": {
+  "capdl-initializer-core": {
     "labels": {},
     "requirements": [
       "sel4"
     ],
     "skip": false
   },
-  "capdl-loader-types": {
+  "capdl-initializer-types": {
     "labels": {},
     "requirements": {},
     "skip": false
   },
-  "capdl-loader-with-embedded-spec": {
+  "capdl-initializer-with-embedded-spec": {
     "labels": [
       "leaf"
     ],
@@ -106,21 +106,21 @@
     ],
     "skip": false
   },
-  "capdl-loader-with-embedded-spec-build-env": {
+  "capdl-initializer-with-embedded-spec-build-env": {
     "labels": {},
     "requirements": [
       "linux"
     ],
     "skip": false
   },
-  "capdl-loader-with-embedded-spec-embedded-spec": {
+  "capdl-initializer-with-embedded-spec-embedded-spec": {
     "labels": {},
     "requirements": [
       "capdl-spec"
     ],
     "skip": false
   },
-  "capdl-loader-with-embedded-spec-embedded-spec-validate": {
+  "capdl-initializer-with-embedded-spec-embedded-spec-validate": {
     "labels": {},
     "requirements": [
       "linux",

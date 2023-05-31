@@ -1,0 +1,22 @@
+[package]
+name = "capdl-initializer"
+version = "0.1.0"
+authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
+edition = "2021"
+license = "BSD-2-Clause"
+
+[dependencies]
+capdl-initializer-core = { path = "./core" }
+capdl-initializer-types = { path = "./types" }
+capdl-types = { path = "../types", features = ["alloc", "serde", "deflate"] }
+log = "0.4.17"
+postcard = { version = "1.0.2", default-features = false, features = ["alloc"] }
+sel4 = { path = "../../sel4" }
+sel4-dlmalloc = { path = "../../sel4-dlmalloc" }
+sel4-logging = { path = "../../sel4-logging" }
+sel4-sync = { path = "../../sel4-sync" }
+
+[dependencies.sel4-root-task]
+path = "../../sel4-root-task"
+default-features = false
+features = ["alloc", "single-threaded"]

@@ -8,8 +8,8 @@
 , callPackage
 , seL4ForBoot
 
-, mkCapDLLoader
-, mkSmallCapDLLoader
+, mkCapDLInitializer
+, mkSmallCapDLInitializer
 , mkSimpleCompositionCapDLSpec
 
 , mkInstance

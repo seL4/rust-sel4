@@ -1,4 +1,4 @@
-# CapDL Loader
+# CapDL-based system initializer
 
 ```
 TODO

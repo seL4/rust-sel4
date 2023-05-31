@@ -4,8 +4,8 @@
 , worldConfig
 , seL4ForBoot
 
-, mkCapDLLoader
-, mkSmallCapDLLoader
+, mkCapDLInitializer
+, mkSmallCapDLInitializer
 , mkSimpleCompositionCapDLSpec
 }:
 
@@ -97,10 +97,10 @@ let
         ];
       }
       // (if small then {
-        loader = mkSmallCapDLLoader spec.cdl;
+        loader = mkSmallCapDLInitializer spec.cdl;
         elf = loader.elf;
       } else {
-        loader = mkCapDLLoader spec.cdl;
+        loader = mkCapDLInitializer spec.cdl;
         elf = loader.elf;
       })
       // passthru
