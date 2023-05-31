@@ -10,7 +10,14 @@ static LOGGER: SynchronizedLogger<Logger> = SynchronizedLogger::new(
     LoggerBuilder::const_default()
         .level_filter(LOG_LEVEL)
         .write(|s| debug_print!("{}", s))
-        .fmt(|record, f| write!(f, "seL4 kernel loader | {:<5}  {}", record.level(), record.args()))
+        .fmt(|record, f| {
+            write!(
+                f,
+                "seL4 kernel loader | {:<5}  {}",
+                record.level(),
+                record.args()
+            )
+        })
         .build(),
 );
 
