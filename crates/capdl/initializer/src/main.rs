@@ -83,13 +83,16 @@ fn get_spec_with_sources<'a>() -> SpecWithSourcesForSerialization<'a> {
 }
 
 fn user_image_bounds() -> Range<usize> {
-    unsafe { capdl_initializer_image_start.expose_addr()..capdl_initializer_image_end.expose_addr() }
+    unsafe {
+        capdl_initializer_image_start.expose_addr()..capdl_initializer_image_end.expose_addr()
+    }
 }
 
 fn static_heap_bounds() -> Range<*mut u8> {
     unsafe {
         capdl_initializer_heap_start
-            ..capdl_initializer_heap_start.byte_offset(capdl_initializer_heap_size.try_into().unwrap())
+            ..capdl_initializer_heap_start
+                .byte_offset(capdl_initializer_heap_size.try_into().unwrap())
     }
 }
 

@@ -50,7 +50,10 @@ impl Args {
             .arg(Arg::new("verbose").short('v').action(ArgAction::SetTrue))
             .get_matches();
 
-        let initializer_elf_path = matches.get_one::<String>("initializer_elf").unwrap().to_owned();
+        let initializer_elf_path = matches
+            .get_one::<String>("initializer_elf")
+            .unwrap()
+            .to_owned();
         let spec_json_path = matches.get_one::<String>("spec_json").unwrap().to_owned();
         let fill_dir_path = matches.get_one::<String>("fill_dir").unwrap().to_owned();
         let out_file_path = matches.get_one::<String>("out_file").unwrap().to_owned();

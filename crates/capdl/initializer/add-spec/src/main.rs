@@ -48,7 +48,8 @@ fn main() -> Result<()> {
         eprintln!("heap size: {}", heap_size / 4096);
     }
 
-    let armed_initializer_elf = render_elf::render_elf(&initializer_elf, &serialized_spec, heap_size);
+    let armed_initializer_elf =
+        render_elf::render_elf(&initializer_elf, &serialized_spec, heap_size);
 
     fs::write(out_file_path, &armed_initializer_elf)?;
     Ok(())
