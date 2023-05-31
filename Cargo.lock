@@ -1507,14 +1507,12 @@ dependencies = [
 name = "meta"
 version = "0.1.0"
 dependencies = [
- "capdl-types",
  "cfg-if",
  "log",
  "sel4",
  "sel4-config",
  "sel4-logging",
  "sel4-platform-info",
- "sel4-render-elf-with-data",
  "sel4-root-task",
  "sel4-sync",
  "sel4-sys",

@@ -21,7 +21,10 @@
 //! - [`sel4_sys`]: Raw bindings to the seL4 API, generated from the libsel4 headers and interface definition files. The [`sel4`] crate's implementation is based on this crate.
 
 macro_rules! maybe {
-    ($condition:meta, $i:ident) => {
+    {
+        #[cfg($condition:meta)]
+        $i:ident
+    } => {
         #[cfg(not($condition))]
         use absent as $i;
         #[doc(hidden)]
@@ -31,7 +34,7 @@ macro_rules! maybe {
 }
 
 macro_rules! mutually_exclusive {
-    ($tag:ident, [$($feature:literal)*]) => {
+    ($tag:ident [$($feature:literal)*]) => {
         mod $tag {
             $(
                 #[cfg(feature = $feature)]
@@ -41,29 +44,45 @@ macro_rules! mutually_exclusive {
     }
 }
 
-mutually_exclusive!(runtime_feature_check, [
-    "sel4-root-task"
-    "sel4cp"
-]);
+mutually_exclusive! {
+    runtime_feature_check [
+        "sel4-root-task"
+        "sel4cp"
+    ]
+}
 
 /// Placeholder for crates which are not part of this view.
 pub mod absent {}
 
-maybe!(target_env = "sel4", sel4);
-maybe!(target_env = "sel4", sel4_config);
-maybe!(target_env = "sel4", sel4_logging);
-maybe!(target_env = "sel4", sel4_sync);
-maybe!(target_env = "sel4", sel4_sys);
-maybe!(
-    all(
-        target_env = "sel4",
+#[doc(hidden)]
+pub use sel4;
+
+#[doc(hidden)]
+pub use sel4_config;
+
+#[doc(hidden)]
+pub use sel4_logging;
+
+#[doc(hidden)]
+pub use sel4_sync;
+
+#[doc(hidden)]
+pub use sel4_sys;
+
+maybe! {
+    #[cfg(all(
         feature = "sel4-platform-info",
         not(target_arch = "x86_64")
-    ),
+    ))]
     sel4_platform_info
-);
-maybe!(
-    all(target_env = "sel4", feature = "sel4-root-task"),
+}
+
+maybe! {
+    #[cfg(feature = "sel4-root-task")]
     sel4_root_task
-);
-maybe!(all(target_env = "sel4", feature = "sel4cp"), sel4cp);
+}
+
+maybe! {
+    #[cfg(feature = "sel4cp")]
+    sel4cp
+}
