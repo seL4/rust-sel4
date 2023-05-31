@@ -2,7 +2,7 @@
 
 This repository contains crates for supporting the use of Rust in seL4 userspace. So far, this includes:
 
-- Rust bindings to the seL4 API ([source](./crates/sel4))
+- Rust bindings for the seL4 API ([source](./crates/sel4))
 - A runtime for root tasks ([source](./crates/sel4-root-task))
 - A runtime for [seL4 Core Platform protection](https://github.com/BreakawayConsulting/sel4cp) domains ([source](./crates/sel4cp))
 - A [CapDL](https://docs.sel4.systems/projects/capdl/) loader ([source and docs](./crates/capdl))
