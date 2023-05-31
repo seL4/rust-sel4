@@ -52,33 +52,18 @@ cfg_if::cfg_if! {
             assert_eq!(r.err().unwrap().inner().downcast_ref::<String>().unwrap().as_str(), "foo");
         }
     } else {
-        use core::mem;
-
-        use panicking::{FromPayloadValue, IntoPayloadValue, PayloadValue, TryFromPayload, PAYLOAD_VALUE_SIZE};
+        use panicking::FitsWithinSmallPayload;
 
         fn whether_alloc() {
             let r = panicking::catch_unwind(|| {
                 panicking::panic_any(Foo(1337));
             });
-            assert!(matches!(Foo::try_from_payload(&r.err().unwrap()).unwrap(), Foo(1337)));
+            assert!(matches!(r.err().unwrap().downcast::<Foo>().ok().unwrap(), Foo(1337)));
         }
 
         #[derive(Copy, Clone)]
         struct Foo(usize);
 
-        unsafe impl IntoPayloadValue for Foo {
-            fn into_payload_value(self) -> PayloadValue {
-                let mut outer = [0; PAYLOAD_VALUE_SIZE];
-                let inner = self.0.to_ne_bytes();
-                outer[..inner.len()].copy_from_slice(&inner);
-                outer
-            }
-        }
-
-        unsafe impl FromPayloadValue for Foo {
-            fn from_payload_value(payload_value: &PayloadValue) -> Self {
-                Foo(usize::from_ne_bytes(payload_value[..mem::size_of::<usize>()].try_into().unwrap()))
-            }
-        }
+        impl FitsWithinSmallPayload for Foo {}
     }
 }
