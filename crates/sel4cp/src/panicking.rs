@@ -3,7 +3,8 @@ use sel4_panicking::set_hook as set_outer_hook;
 use sel4_panicking_env::debug_println;
 
 pub use sel4_panicking::{
-    catch_unwind, panic_any, ExternalPanicInfo, IntoPayload, PanicHook, Payload, TryFromPayload,
+    catch_unwind, panic_any, ExternalPanicInfo, FitsWithinSmallPayload, PanicHook, Payload,
+    SmallPayloadValue, UpcastIntoPayload,
 };
 
 use crate::pd_name;
