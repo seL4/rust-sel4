@@ -315,7 +315,7 @@
     ],
     "skip": false
   },
-  "sel4-loader": {
+  "sel4-kernel-loader": {
     "labels": [
       "leaf"
     ],
@@ -324,7 +324,7 @@
     ],
     "skip": false
   },
-  "sel4-loader-add-payload": {
+  "sel4-kernel-loader-add-payload": {
     "labels": [
       "leaf"
     ],
@@ -333,19 +333,19 @@
     ],
     "skip": false
   },
-  "sel4-loader-config-types": {
+  "sel4-kernel-loader-config-types": {
     "labels": {},
     "requirements": {},
     "skip": false
   },
-  "sel4-loader-embed-page-tables": {
+  "sel4-kernel-loader-embed-page-tables": {
     "labels": {},
     "requirements": [
       "linux"
     ],
     "skip": false
   },
-  "sel4-loader-payload-types": {
+  "sel4-kernel-loader-payload-types": {
     "labels": {},
     "requirements": {},
     "skip": false

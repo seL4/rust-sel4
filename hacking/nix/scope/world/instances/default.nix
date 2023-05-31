@@ -1,7 +1,7 @@
 { lib, hostPlatform, buildPackages
 , writeScript, linkFarm
 , crates
-, mkTask, mkSeL4LoaderWithPayload
+, mkTask, mkSeL4KernelWithPayload
 , embedDebugInfo
 , seL4RustTargetInfoWithConfig
 , worldConfig

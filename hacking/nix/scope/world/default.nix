@@ -11,7 +11,7 @@ let
   elaborateWorldConfig =
     { isCorePlatform ? false
     , kernelConfig ? null
-    , loaderConfig ? null
+    , kernelLoaderConfig ? null
     , corePlatformConfig ? null
     , platformRequiresLoader ? true
     , mkInstanceForPlatform ? _: { attrs = {}; links = []; }
@@ -19,7 +19,7 @@ let
     { inherit
         isCorePlatform
         kernelConfig
-        loaderConfig
+        kernelLoaderConfig
         corePlatformConfig
         platformRequiresLoader
         mkInstanceForPlatform
@@ -112,11 +112,11 @@ self: with self;
   # mkCapDLInitializer = mkSmallCapDLInitializer;
   mkCapDLInitializer = mkCapDLInitializerWithSpec;
 
-  sel4-loader = callPackage ./sel4-loader.nix {
-    inherit (worldConfig) loaderConfig;
+  sel4-kernel-loader = callPackage ./sel4-kernel-loader.nix {
+    inherit (worldConfig) kernelLoaderConfig;
   };
 
-  mkSeL4LoaderWithPayload = { appELF } : callPackage ./mk-sel4-loader-with-payload.nix {} {
+  mkSeL4KernelWithPayload = { appELF } : callPackage ./mk-sel4-kernel-loader-with-payload.nix {} {
     app = appELF;
   };
 

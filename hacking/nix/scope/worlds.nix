@@ -12,7 +12,7 @@ let
     KernelRootCNodeSizeBits = mkString "14"; # For backtrace test with embedded debug info
   };
 
-  loaderConfig = {};
+  kernelLoaderConfig = {};
 
   corePlatformConfig = {};
 
@@ -30,13 +30,13 @@ in rec {
             , hypervisor ? false
             , cpu ? "cortex-a57"
             , isCorePlatform ? false
-            , mkSeL4LoaderWithPayloadArgs ? loader: [ "-kernel" loader ]
+            , mkSeL4KernelWithPayloadArgs ? loader: [ "-kernel" loader ]
             }:
             let
               numCores = if smp then "2" else "1";
             in
               mkWorld {
-                inherit loaderConfig corePlatformConfig;
+                inherit kernelLoaderConfig corePlatformConfig;
                 inherit isCorePlatform;
                 kernelConfig = kernelConfigCommon // {
                   ARM_CPU = mkString cpu;
@@ -64,7 +64,7 @@ in rec {
                       "-cpu" cpu "-smp" numCores "-m" "1024"
                       "-nographic"
                       "-serial" "mon:stdio"
-                  ] ++ mkSeL4LoaderWithPayloadArgs loader;
+                  ] ++ mkSeL4KernelWithPayloadArgs loader;
                 };
               };
         in rec {
@@ -77,12 +77,12 @@ in rec {
             mcs = true;
             isCorePlatform = true;
             cpu = "cortex-a53";
-            mkSeL4LoaderWithPayloadArgs = loader: [ "-device" "loader,file=${loader},addr=0x70000000,cpu-num=0" ];
+            mkSeL4KernelWithPayloadArgs = loader: [ "-device" "loader,file=${loader},addr=0x70000000,cpu-num=0" ];
           };
         };
 
       bcm2711 = mkWorld {
-        inherit loaderConfig;
+        inherit kernelLoaderConfig;
         kernelConfig = kernelConfigCommon // {
           ARM_CPU = mkString "cortex-a57";
           KernelArch = mkString "arm";
@@ -100,7 +100,7 @@ in rec {
       default = spike;
 
       spike = mkWorld {
-        inherit loaderConfig;
+        inherit kernelLoaderConfig;
         kernelConfig = kernelConfigCommon // {
           KernelArch = mkString "riscv";
           KernelSel4Arch = mkString "riscv64";
@@ -115,7 +115,7 @@ in rec {
       default = spike;
 
       spike = mkWorld {
-        inherit loaderConfig;
+        inherit kernelLoaderConfig;
         kernelConfig = kernelConfigCommon // {
           KernelArch = mkString "riscv";
           KernelSel4Arch = mkString "riscv32";
@@ -130,7 +130,7 @@ in rec {
       default = pc99;
 
       pc99 = lib.fix (self: mkWorld {
-        inherit loaderConfig;
+        inherit kernelLoaderConfig;
         platformRequiresLoader = false;
         kernelConfig = kernelConfigCommon // {
           KernelArch = mkString "x86";
@@ -189,7 +189,7 @@ in rec {
               numCores = if smp then "2" else "1";
             in
               mkWorld {
-                inherit loaderConfig;
+                inherit kernelLoaderConfig;
                 isCorePlatform = false;
                 kernelConfig = kernelConfigCommon // {
                   ARM_CPU = mkString cpu;

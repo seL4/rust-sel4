@@ -2340,7 +2340,7 @@ name = "sel4-immediate-sync-once-cell"
 version = "0.1.0"
 
 [[package]]
-name = "sel4-loader"
+name = "sel4-kernel-loader"
 version = "0.1.0"
 dependencies = [
  "aarch64-cpu",
@@ -2355,9 +2355,9 @@ dependencies = [
  "quote",
  "sel4-build-env",
  "sel4-config",
- "sel4-loader-config-types",
- "sel4-loader-embed-page-tables",
- "sel4-loader-payload-types",
+ "sel4-kernel-loader-config-types",
+ "sel4-kernel-loader-embed-page-tables",
+ "sel4-kernel-loader-payload-types",
  "sel4-logging",
  "sel4-platform-info",
  "sel4-rustfmt-helper",
@@ -2368,7 +2368,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "sel4-loader-add-payload"
+name = "sel4-kernel-loader-add-payload"
 version = "0.1.0"
 dependencies = [
  "anyhow",
@@ -2377,8 +2377,8 @@ dependencies = [
  "heapless",
  "object",
  "postcard",
- "sel4-loader-config-types",
- "sel4-loader-payload-types",
+ "sel4-kernel-loader-config-types",
+ "sel4-kernel-loader-payload-types",
  "sel4-render-elf-with-data",
  "serde",
  "serde_json",
@@ -2386,14 +2386,14 @@ dependencies = [
 ]
 
 [[package]]
-name = "sel4-loader-config-types"
+name = "sel4-kernel-loader-config-types"
 version = "0.1.0"
 dependencies = [
  "serde",
 ]
 
 [[package]]
-name = "sel4-loader-embed-page-tables"
+name = "sel4-kernel-loader-embed-page-tables"
 version = "0.1.0"
 dependencies = [
  "proc-macro2",
@@ -2401,7 +2401,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "sel4-loader-payload-types"
+name = "sel4-kernel-loader-payload-types"
 version = "0.1.0"
 dependencies = [
  "heapless",

@@ -1,0 +1,9 @@
+[package]
+name = "sel4-kernel-loader-config-types"
+version = "0.1.0"
+authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
+edition = "2021"
+license = "BSD-2-Clause"
+
+[dependencies]
+serde = { version = "1.0.147", default-features = false, features = ["derive"] }

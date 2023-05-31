@@ -11,8 +11,8 @@
 }:
 
 let
-  loaderConfigEnvVars = lib.optionalAttrs (!worldConfig.isCorePlatform && worldConfig.loaderConfig != null) {
-    SEL4_LOADER_CONFIG = writeText "loader-config.json" (builtins.toJSON worldConfig.loaderConfig);
+  kernelLoaderConfigEnvVars = lib.optionalAttrs (!worldConfig.isCorePlatform && worldConfig.kernelLoaderConfig != null) {
+    SEL4_KERNEL_LOADER_CONFIG = writeText "loader-config.json" (builtins.toJSON worldConfig.kernelLoaderConfig);
     SEL4_APP = "${seL4ForBoot}/bin/kernel.elf"; # HACK
   };
 
@@ -22,7 +22,7 @@ let
   };
 
 in
-mkShell (seL4RustEnvVars // loaderConfigEnvVars // capdlEnvVars // {
+mkShell (seL4RustEnvVars // kernelLoaderConfigEnvVars // capdlEnvVars // {
   RUST_TARGET_PATH = toString (sources.srcRoot + "/support/targets");
 
   # TODO

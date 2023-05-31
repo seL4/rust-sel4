@@ -9,8 +9,8 @@ let
     sel4
     sel4cp
     sel4-root-task
-    sel4-loader
-    sel4-loader-add-payload
+    sel4-kernel-loader
+    sel4-kernel-loader-add-payload
     capdl-initializer
     capdl-initializer-add-spec
     capdl-initializer-with-embedded-spec
