@@ -107,7 +107,7 @@ let
                 padding: 15px;
               }
             }
-            ul.xxx {
+            ul.views {
               margin-bottom: 0;
             }
           </style>
@@ -128,25 +128,23 @@ let
                   (lib.forEach views (view: ''
                     <tr>
                       <td>
-                        <ul class=xxx>
-                          ${lib.concatStrings [
-                            (mkEntry ''
+                        <a href="./views/${view.id}/${view.targetName}/doc/${metaCrateName}/index.html">rustdoc</a>
+                        <ul class=views>
+                          ${lib.concatMapStrings mkEntry [
+                            ''
+                              runtime crate: ${if view.runtime == null then "(none)" else "<code>${view.runtime}</code>"}
+                            ''
+                            ''
+                              rustc target spec:
+                              <a href="${mkJSONDataURI view.targetJSON}">${view.targetName}.json</a>
+                            ''
+                            ''
                               seL4 config:
                               <code>SEL4_ARCH=${view.SEL4_ARCH}</code>,
                               <code>PLAT=${view.PLAT}</code>,
                               <code>KERNEL_MCS=${showBool view.KERNEL_MCS}</code>
                               <a href="${mkJSONDataURI view.seL4ConfigJSON}">(full seL4 config)</a>
-                            '')
-                            (mkEntry ''
-                              runtime crate: ${if view.runtime == null then "(none)" else "<code>${view.runtime}</code>"}
-                            '')
-                            (mkEntry ''
-                              rustc target spec:
-                              <a href="${mkJSONDataURI view.targetJSON}">${view.targetName}.json</a>
-                            '')
-                            (mkEntry ''
-                              <a href="./views/${view.id}/${view.targetName}/doc/${metaCrateName}/index.html">rustdoc</a>
-                            '')
+                            ''
                           ]}
                         </ul>
                       </td>

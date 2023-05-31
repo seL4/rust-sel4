@@ -10,6 +10,7 @@ includes:
 - A [CapDL](https://docs.sel4.systems/projects/capdl/)-based system initializer ([source and
   docs](./crates/capdl))
 - A loader for the seL4 kernel ([source and docs](./crates/sel4-kernel-loader))
+- Custom `rustc` target specifications for seL4 userspace ([JSON and docs](./support/targets))
 
 The [./hacking](./hacking) directory contains scripts for developing and testing these crates using
 Nix and, optionally, Docker.
@@ -65,10 +66,10 @@ information for locating these dependencies is passed to the dependant crates vi
 variables which are interpreted by `build.rs` scripts. Here is a list of environment variables that
 the crates which use them:
 
-- `sel4-config` and `sel4-sys` (whose dependants include `sel4`, `sel4cp`, and many more) use
-  `$SEL4_INCLUDE_DIRS`, defaulting to `$SEL4_PREFIX/libsel4/include` if `$SEL4_PREFIX` is set, which
-  must contain a colon-separated list of include paths for the libsel4 headers. See the the `sel4`
-  crate's rustdoc for more information.
+- `sel4-config` and `sel4-sys` (whose dependants include `sel4`, `sel4-root-task`, `sel4cp`, and
+  many more) use `$SEL4_INCLUDE_DIRS`, defaulting to `$SEL4_PREFIX/libsel4/include` if
+  `$SEL4_PREFIX` is set, which must contain a colon-separated list of include paths for the libsel4
+  headers. See the the `sel4` crate's rustdoc for more information.
 - `sel4-platform-info` (whose dependants include `sel4-kernel-loader`) uses `$SEL4_PLATFORM_INFO`,
   defaulting to `$SEL4_PREFIX/support/platform_gen.yaml` if `$SEL4_PREFIX` is set, which must
   contain the path of the `platform_gen.yaml` file from the seL4 kernel build system.
@@ -76,7 +77,7 @@ the crates which use them:
   `$SEL4_PREFIX` is set, which must contain the path of the seL4 kernel (as an ELF executable).
   Furthermore, if `$SEL4_KERNEL_LOADER_CONFIG` is set, then `sel4-kernel-loader` overrides the
   default configuration with one in the provided JSON file. Note that no configuration options are
-  actually implemented yet!
+  actually implemented yet.
 
 The best way to learn how to integrate these crates into your project is to check out these concrete
 examples of their use:
@@ -104,7 +105,8 @@ cd hacking/docker && make run && make exec
 ```
 
 Inside the container at the repository's top-level directory, build and simulate a simple seL4-based
-system with a root task written in Rust (this will take a few minutes):
+system with a [root task](./crates/examples/root-task/example-root-task) written in Rust (this will
+take a few minutes):
 
 ```
 make example

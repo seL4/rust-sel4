@@ -50,9 +50,12 @@ update-lockfile:
 check-lockfile:
 	cargo update -w --locked
 
+ rustc_target_spec_dir := support/targets
+
 .PHONY: generate-target-specs
 generate-target-specs:
-	cargo run -p sel4-generate-target-specs -- write --target-dir support/targets/ --all
+	rm -f $(rustc_target_spec_dir)/*.json && \
+		cargo run -p sel4-generate-target-specs -- write --target-dir $(rustc_target_spec_dir) --all
 
 .PHONY: check-generated-sources
 check-generated-sources:
