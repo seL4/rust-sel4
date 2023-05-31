@@ -36,8 +36,8 @@ This work is funded by the [seL4 Foundation](https://sel4.systems/Foundation/hom
 
 ##### Programs
 
-- [CapDL-based system initializer](./crates/capdl): A [CapDL](https://docs.sel4.systems/projects/capdl/)-based system initializer.
-- [Kernel loader](./crates/sel4-kernel-loader): A loader for the seL4 kernel, similar in purpose to [elfloader](https://github.com/seL4/seL4_tools/tree/master/elfloader-tool).
+- [`capdl-initializer`](./crates/capdl): A [CapDL](https://docs.sel4.systems/projects/capdl/)-based system initializer.
+- [`sel4-kernel-loader`](./crates/sel4-kernel-loader): A loader for the seL4 kernel, similar in purpose to [elfloader](https://github.com/seL4/seL4_tools/tree/master/elfloader-tool).
 
 ### Integrating these crates into your project
 

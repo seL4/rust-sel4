@@ -5,34 +5,40 @@ let
 
   views =
     let
-      f = { world, runtime, minimal }:
+      f = { id, world, runtime, minimal }:
         let
           view = world.docs.mkView { inherit runtime minimal; };
         in view // {
-          id = lib.substring 0 10 (builtins.hashString "sha256" (view.rustdoc.outPath));
+          inherit id;
         };
     in map f [
-      { world = pkgs.host.aarch64.none.this.worlds.default;
+      { id = "aarch64-root-task";
+        world = pkgs.host.aarch64.none.this.worlds.default;
         runtime = "sel4-root-task";
         minimal = false;
       }
-      { world = pkgs.host.aarch64.none.this.worlds.default;
+      { id = "aarch64-root-task-minimal";
+        world = pkgs.host.aarch64.none.this.worlds.default;
         runtime = "sel4-root-task";
         minimal = true;
       }
-      { world = pkgs.host.aarch64.none.this.worlds.qemu-arm-virt.sel4cp;
+      { id = "aarch64-sel4cp";
+        world = pkgs.host.aarch64.none.this.worlds.qemu-arm-virt.sel4cp;
         runtime = "sel4cp";
         minimal = false;
       }
-      { world = pkgs.host.aarch64.none.this.worlds.qemu-arm-virt.sel4cp;
+      { id = "aarch64-sel4cp-minimal";
+        world = pkgs.host.aarch64.none.this.worlds.qemu-arm-virt.sel4cp;
         runtime = "sel4cp";
         minimal = true;
       }
-      { world = pkgs.host.x86_64.none.this.worlds.default;
+      { id = "x86_64-root-task";
+        world = pkgs.host.x86_64.none.this.worlds.default;
         runtime = "sel4-root-task";
         minimal = false;
       }
-      { world = pkgs.host.riscv64.none.this.worlds.default;
+      { id = "riscv64-minimal";
+        world = pkgs.host.riscv64.none.this.worlds.default;
         runtime = null;
         minimal = true;
       }
@@ -108,7 +114,12 @@ let
         </head>
         <body>
           <div class="markdown-body">
-            <h1>Rustdoc for rust-seL4</h1>
+            <h1>
+              Rustdoc for
+              <a href="https://gitlab.com/coliasgroup/rust-seL4">
+                rust-seL4
+              </a>
+            </h1>
             @content@
             <h3>Views</h3>
             <p>
