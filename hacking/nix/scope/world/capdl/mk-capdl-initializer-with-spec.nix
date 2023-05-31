@@ -15,7 +15,7 @@ let
     inherit spec;
   };
 
-in lib.fix (self: runCommand "armed-capdl-initializer" {
+in lib.fix (self: runCommand "capdl-initializer-with-spec" {
 
   nativeBuildInputs = [
     capdl-initializer-add-spec

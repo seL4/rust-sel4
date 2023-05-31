@@ -99,43 +99,34 @@ self: with self;
     jq . $jsonPath > $out
   '';
 
-  ###
+  mkTask = callPackage ./mk-task.nix {};
 
-  mkLoader = { appELF }: mkLoaderWithSerialization {
-    app = appELF;
+  capdl-initializer = callPackage ./capdl/capdl-initializer.nix {};
+  objectSizes = callPackage ./capdl/object-sizes.nix {};
+  mkSmallCapDLInitializer = callPackage ./capdl/mk-small-capdl-initializer.nix {};
+  serializeCapDLSpec = callPackage ./capdl/serialize-capdl-spec.nix {};
+  dummyCapDLSpec = callPackage ./capdl/dummy-capdl-spec.nix {};
+  mkSimpleCompositionCapDLSpec = callPackage ./capdl/mk-simple-composition-capdl-spec.nix {};
+  mkCapDLInitializerWithSpec = callPackage ./capdl/mk-capdl-initializer-with-spec.nix {};
+
+  # mkCapDLInitializer = mkSmallCapDLInitializer;
+  mkCapDLInitializer = mkCapDLInitializerWithSpec;
+
+  sel4-loader = callPackage ./sel4-loader.nix {
+    inherit (worldConfig) loaderConfig;
   };
 
-  mkLoaderWithSerialization = callPackage ./mk-loader-with-serialization.nix {};
-
-  mkTask = callPackage ./mk-task.nix {};
+  mkSeL4LoaderWithPayload = { appELF } : callPackage ./mk-sel4-loader-with-payload.nix {} {
+    app = appELF;
+  };
 
   inherit (callPackage ./mk-instance.nix {})
     mkInstance mkCorePlatformInstance mkCapDLRootTask
   ;
 
-  loader-expecting-appended-payload = callPackage ./loader-expecting-appended-payload.nix {
-    inherit (worldConfig) loaderConfig;
-  };
-
-  capdl-initializer = callPackage ./capdl/capdl-initializer.nix {};
-  objectSizes = callPackage ./capdl/object-sizes.nix {};
-  mkSmallCapDLInitializer = callPackage ./capdl/mk-capdl-initializer.nix {};
-  serializeCapDLSpec = callPackage ./capdl/serialize-capdl-spec.nix {};
-  dummyCapDLSpec = callPackage ./capdl/dummy-spec.nix {};
-  mkSimpleCompositionCapDLSpec = callPackage ./capdl/mk-capdl-spec.nix {};
-
-  mkCapDLInitializer = callPackage ./capdl/mk-capdl-initializer-with-serialization.nix {};
-  # mkCapDLInitializer = mkSmallCapDLInitializer;
-
-  ###
+  instances = callPackage ./instances {};
 
   docs = callPackage ./docs.nix {};
 
-  ###
-
   shell = callPackage ./shell.nix {};
-
-  ###
-
-  instances = callPackage ./instances {};
 }

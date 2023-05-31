@@ -30,7 +30,7 @@ in rec {
             , hypervisor ? false
             , cpu ? "cortex-a57"
             , isCorePlatform ? false
-            , mkLoaderArgs ? loader: [ "-kernel" loader ]
+            , mkSeL4LoaderWithPayloadArgs ? loader: [ "-kernel" loader ]
             }:
             let
               numCores = if smp then "2" else "1";
@@ -64,7 +64,7 @@ in rec {
                       "-cpu" cpu "-smp" numCores "-m" "1024"
                       "-nographic"
                       "-serial" "mon:stdio"
-                  ] ++ mkLoaderArgs loader;
+                  ] ++ mkSeL4LoaderWithPayloadArgs loader;
                 };
               };
         in rec {
@@ -77,7 +77,7 @@ in rec {
             mcs = true;
             isCorePlatform = true;
             cpu = "cortex-a53";
-            mkLoaderArgs = loader: [ "-device" "loader,file=${loader},addr=0x70000000,cpu-num=0" ];
+            mkSeL4LoaderWithPayloadArgs = loader: [ "-device" "loader,file=${loader},addr=0x70000000,cpu-num=0" ];
           };
         };
 

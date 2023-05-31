@@ -1,6 +1,6 @@
 { lib, hostPlatform, buildPackages
 , writeScript, linkFarm
-, mkLoader
+, mkSeL4LoaderWithPayload
 , worldConfig
 , seL4ForBoot
 
@@ -20,7 +20,7 @@ let
 
     let
 
-      loader = mkLoader {
+      loader = mkSeL4LoaderWithPayload {
         appELF = rootTask.elf;
       };
 

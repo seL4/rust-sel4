@@ -7,14 +7,14 @@
 , kernelBinary
 , seL4ForBoot
 , sel4-loader-add-payload
-, loader-expecting-appended-payload
+, sel4-loader
 }:
 
 { seL4Prefix ? seL4ForBoot, app }:
 
 let
 
-in lib.fix (self: runCommand "loader-with-serialization" {
+in lib.fix (self: runCommand "sel4-loader-with-payload" {
 
   nativeBuildInputs = [
     sel4-loader-add-payload
@@ -23,7 +23,7 @@ in lib.fix (self: runCommand "loader-with-serialization" {
   passthru = {
     elf = self;
     split = {
-      full = loader-expecting-appended-payload.elf;
+      full = sel4-loader.elf;
       min = self;
     };
   };
@@ -31,7 +31,7 @@ in lib.fix (self: runCommand "loader-with-serialization" {
 } ''
   sel4-loader-add-payload \
     -v \
-    --loader ${loader-expecting-appended-payload.elf} \
+    --loader ${sel4-loader.elf} \
     --sel4-prefix ${seL4ForBoot} \
     --app ${app} \
     -o $out
