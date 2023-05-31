@@ -21,10 +21,10 @@ mk {
     sel4-logging
     sel4-sys
     sel4-root-task
-    sel4-backtrace
-    sel4-backtrace-types
-    sel4-backtrace-embedded-debug-info
-    sel4-backtrace-simple
+    # sel4-backtrace
+    # sel4-backtrace-types
+    # sel4-backtrace-embedded-debug-info
+    # sel4-backtrace-simple
     sel4cp
     sel4cp-postcard
     # capdl-types
@@ -33,9 +33,9 @@ mk {
     sel4-root-task = { features = [ "full" ]; optional = true; };
     sel4cp = { features = [ "full" ]; optional = true; };
     sel4cp-postcard = { optional = true; };
-    sel4-backtrace = { features = [ "full" ]; };
-    sel4-backtrace-types = { features = [ "full" ]; };
-    sel4-backtrace-simple = { features = [ "alloc" ]; };
+    # sel4-backtrace = { features = [ "full" ]; };
+    # sel4-backtrace-types = { features = [ "full" ]; };
+    # sel4-backtrace-simple = { features = [ "alloc" ]; };
     # capdl-types = { features = [ "sel4" "alloc" ]; };
   };
   nix.local.target."cfg(all(target_env = \"sel4\", not(target_thread_local)))".dependencies = with localCrates; [
