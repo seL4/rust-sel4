@@ -18,7 +18,6 @@ fn main(_: &sel4::BootInfo) -> ! {
     let _ = panicking::catch_unwind(|| {
         f();
     });
-    debug_println!("TEST_PASS");
 
     sel4::BootInfo::init_thread_tcb().tcb_suspend().unwrap();
     unreachable!()
@@ -33,11 +32,13 @@ fn g(_: &()) -> () {
     let bt = simple.collect();
     simple.send(&bt);
     assert!(bt.postamble.error.is_none());
-    assert_eq!(bt.entries.len(), 26);
+    assert_eq!(bt.entries.len(), 10);
 
     let mut s = String::new();
     collect(())
         .symbolize(&get_context().unwrap(), &mut s)
         .unwrap();
     debug_println!("{}", s);
+
+    debug_println!("TEST_PASS");
 }

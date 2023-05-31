@@ -93,6 +93,9 @@ in rec {
             orig = mkTask {
               rootCrate = crates.tests-root-task-backtrace;
               release = false;
+              extraProfile = {
+                opt-level = 2;
+              };
             };
           in {
             elf = embedDebugInfo orig.elf;
