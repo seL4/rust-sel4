@@ -13,24 +13,20 @@ let
         };
     in map f [
       { world = pkgs.host.aarch64.none.this.worlds.default;
-        runtime = null;
-        minimal = true;
+        runtime = "sel4-root-task";
+        minimal = false;
       }
       { world = pkgs.host.aarch64.none.this.worlds.default;
         runtime = "sel4-root-task";
         minimal = true;
       }
-      { world = pkgs.host.aarch64.none.this.worlds.default;
-        runtime = "sel4-root-task";
+      { world = pkgs.host.aarch64.none.this.worlds.qemu-arm-virt.sel4cp;
+        runtime = "sel4cp";
         minimal = false;
       }
       { world = pkgs.host.aarch64.none.this.worlds.qemu-arm-virt.sel4cp;
         runtime = "sel4cp";
         minimal = true;
-      }
-      { world = pkgs.host.aarch64.none.this.worlds.qemu-arm-virt.sel4cp;
-        runtime = "sel4cp";
-        minimal = false;
       }
       { world = pkgs.host.x86_64.none.this.worlds.default;
         runtime = "sel4-root-task";
@@ -124,16 +120,14 @@ let
                         <ul class=xxx>
                           ${lib.concatStrings [
                             (mkEntry ''
-                              <code>PLAT</code>: <code>${view.PLAT}</code>
+                              seL4 config:
+                              <code>SEL4_ARCH=${view.SEL4_ARCH}</code>,
+                              <code>PLAT=${view.PLAT}</code>,
+                              <code>KERNEL_MCS=${showBool view.KERNEL_MCS}</code>
+                              <a href="${mkJSONDataURI view.seL4ConfigJSON}">(full seL4 config)</a>
                             '')
                             (mkEntry ''
-                              <code>SEL4_ARCH</code>: <code>${view.SEL4_ARCH}</code>
-                            '')
-                            (mkEntry ''
-                              <code>KERNEL_MCS</code>: <code>${showBool view.KERNEL_MCS}</code>
-                            '')
-                            (mkEntry ''
-                              runtime: ${if view.runtime == null then "(none)" else "<code>${view.runtime}</code>"}
+                              runtime crate: ${if view.runtime == null then "(none)" else "<code>${view.runtime}</code>"}
                             '')
                             (mkEntry ''
                               rustc target spec:
@@ -141,9 +135,6 @@ let
                             '')
                             (mkEntry ''
                               <a href="./views/${view.id}/${view.targetName}/doc/${metaCrateName}/index.html">rustdoc</a>
-                            '')
-                            (mkEntry ''
-                              <a href="${mkJSONDataURI view.seL4ConfigJSON}">(full seL4 config)</a>
                             '')
                           ]}
                         </ul>
@@ -167,12 +158,14 @@ let
 
   mkJSONDataURI = file:
     let
-      b64Drv = pkgs.build.runCommand "x" {} ''
+      encodedDrv = pkgs.build.runCommand "x" {} ''
         base64 < ${file} > $out
       '';
-      b64 = builtins.readFile b64Drv;
+      encoded = builtins.readFile encodedDrv;
+      # mimeType = "text/plain;charset=utf-8";
+      mimeType = "application/json";
     in
-      "data:application/json;base64,${b64}";
+      "data:${mimeType};base64,${encoded}";
 
   showBool = x: if x then "true" else "false";
 
