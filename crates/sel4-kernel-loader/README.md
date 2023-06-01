@@ -1,7 +1,7 @@
-# Kernel Loader
+# Kernel loader
 
 `sel4-kernel-loader` is simlar in purpose to the upstream
-[elfloader](https://github.com/seL4/seL4_tools/tree/master/elfloader-tool). The main practical
+[`elfloader`](https://github.com/seL4/seL4_tools/tree/master/elfloader-tool). The main practical
 difference is how it fits into a build system, allowing for different approaches to distribution and
 integration. `elfloader` is a C program built using CMake and depends on the kernel+application
 payload at link-time. `sel4-kernel-loader` itself is just the loader without the payload, and thus
