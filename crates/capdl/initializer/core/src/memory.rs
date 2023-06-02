@@ -1,6 +1,6 @@
 use core::ops::Range;
 
-use sel4::{BootInfo, FrameType};
+use sel4::FrameType;
 
 use super::frame_types;
 
@@ -10,26 +10,35 @@ struct SmallPagePlaceHolder([u8; frame_types::FrameType0::FRAME_SIZE.bytes()]);
 static SMALL_PAGE_PLACEHOLDER: SmallPagePlaceHolder =
     SmallPagePlaceHolder([0; frame_types::FrameType0::FRAME_SIZE.bytes()]);
 
+pub(crate) fn get_user_image_frame_cap(
+    bootinfo: &sel4::BootInfo,
+    user_image_bounds: &Range<usize>,
+    addr: usize,
+) -> sel4::LocalCPtr<frame_types::FrameType0> {
+    assert_eq!(addr % frame_types::FrameType0::FRAME_SIZE.bytes(), 0);
+    let num_user_frames = bootinfo.user_image_frames().end - bootinfo.user_image_frames().start;
+    let user_image_footprint = coarsen_footprint(
+        user_image_bounds,
+        frame_types::FrameType0::FRAME_SIZE.bytes(),
+    );
+    assert_eq!(
+        user_image_footprint.len(),
+        num_user_frames * frame_types::FrameType0::FRAME_SIZE.bytes()
+    );
+    let ix = (addr - user_image_footprint.start) / frame_types::FrameType0::FRAME_SIZE.bytes();
+    let cap = sel4::BootInfo::init_cspace_local_cptr::<frame_types::FrameType0>(
+        bootinfo.user_image_frames().start + ix,
+    );
+    cap
+}
+
 pub(crate) fn init_copy_addrs(
-    bootinfo: &BootInfo,
+    bootinfo: &sel4::BootInfo,
     user_image_bounds: &Range<usize>,
 ) -> Result<(usize, usize), sel4::Error> {
     let small_frame_copy_addr = {
         let addr = addr_of_ref(&SMALL_PAGE_PLACEHOLDER);
-        assert_eq!(addr % frame_types::FrameType0::FRAME_SIZE.bytes(), 0);
-        let num_user_frames = bootinfo.user_image_frames().end - bootinfo.user_image_frames().start;
-        let user_image_footprint = coarsen_footprint(
-            user_image_bounds,
-            frame_types::FrameType0::FRAME_SIZE.bytes(),
-        );
-        assert_eq!(
-            user_image_footprint.len(),
-            num_user_frames * frame_types::FrameType0::FRAME_SIZE.bytes()
-        );
-        let ix = (addr - user_image_footprint.start) / frame_types::FrameType0::FRAME_SIZE.bytes();
-        let cap = BootInfo::init_cspace_local_cptr::<frame_types::FrameType0>(
-            bootinfo.user_image_frames().start + ix,
-        );
+        let cap = get_user_image_frame_cap(bootinfo, user_image_bounds, addr);
         cap.frame_unmap()?;
         addr
     };
