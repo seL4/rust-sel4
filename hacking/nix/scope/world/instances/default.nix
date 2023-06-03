@@ -140,7 +140,7 @@ in rec {
     capdl = {
       threads = mkInstance {
         rootTask = mkCapDLRootTask rec {
-          # small = true;
+          small = true;
           script = ../../../../../crates/private/tests/capdl/threads/cdl.py;
           config = {
             components = {

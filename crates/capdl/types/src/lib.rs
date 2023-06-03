@@ -10,8 +10,8 @@ extern crate alloc;
 use serde::{Deserialize, Serialize};
 
 mod cap_table;
-mod fill;
 mod footprint;
+mod frame_init;
 mod indirect;
 mod inspect;
 mod object_name;
@@ -24,21 +24,23 @@ mod traverse;
 mod when_sel4;
 
 pub use cap_table::{HasCapTable, PageTableEntry};
-pub use fill::{BytesContent, Content, IndirectBytesContent, SelfContainedContent};
 pub use footprint::Footprint;
+pub use frame_init::{
+    BytesContent, Content, Fill, FillEntry, FillEntryContent, FillEntryContentBootInfo,
+    FillEntryContentBootInfoId, IndirectBytesContent, SelfContainedContent,
+};
 pub use indirect::Indirect;
 pub use object_name::{IndirectObjectName, ObjectName, SelfContainedObjectName, Unnamed};
 pub use spec::{
-    cap, object, ASIDSlotEntry, Badge, CPtr, Cap, CapSlot, CapTableEntry, FillEntry,
-    FillEntryContent, FillEntryContentBootInfo, FillEntryContentBootInfoId, IRQEntry, NamedObject,
+    cap, object, ASIDSlotEntry, Badge, CPtr, Cap, CapSlot, CapTableEntry, IRQEntry, NamedObject,
     Object, ObjectId, Rights, Spec, TryFromCapError, TryFromObjectError, Word,
 };
 
 #[cfg(feature = "alloc")]
-pub use fill::{FileContent, FileContentRange};
+pub use frame_init::{FileContent, FileContentRange};
 
 #[cfg(feature = "deflate")]
-pub use fill::{DeflatedBytesContent, IndirectDeflatedBytesContent};
+pub use frame_init::{DeflatedBytesContent, IndirectDeflatedBytesContent};
 
 #[cfg(feature = "sel4")]
 pub use when_sel4::*;

@@ -3,7 +3,7 @@ use core::mem::size_of_val;
 #[cfg(feature = "alloc")]
 use alloc::string::String;
 
-use crate::fill::*;
+use crate::frame_init::*;
 use crate::indirect::*;
 use crate::object_name::*;
 use crate::spec::*;

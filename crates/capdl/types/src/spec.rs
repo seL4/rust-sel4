@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 
 use capdl_types_derive::{IsCap, IsObject, IsObjectWithCapTable};
 
-use crate::{HasCapTable, Indirect};
+use crate::{Fill, HasCapTable, Indirect};
 
 // TODO
 // Prepare for broader platform support:
@@ -132,44 +132,6 @@ pub struct Rights {
     pub grant_reply: bool,
 }
 
-#[derive(Debug, Clone, Eq, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub struct FillEntry<F> {
-    pub range: Range<usize>,
-    pub content: FillEntryContent<F>,
-}
-
-#[derive(Debug, Clone, Eq, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub enum FillEntryContent<F> {
-    Data(F),
-    BootInfo(FillEntryContentBootInfo),
-}
-
-impl<F> FillEntryContent<F> {
-    pub fn as_data(&self) -> Option<&F> {
-        match self {
-            Self::Data(data) => Some(data),
-            _ => None,
-        }
-    }
-}
-
-#[derive(Debug, Clone, Copy, Eq, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub struct FillEntryContentBootInfo {
-    pub id: FillEntryContentBootInfoId,
-    pub offset: usize,
-}
-
-#[derive(Debug, Clone, Copy, Eq, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub enum FillEntryContentBootInfoId {
-    Fdt,
-}
-
-// // //
-
 pub mod object {
     use super::*;
 
@@ -223,7 +185,7 @@ pub mod object {
     pub struct Frame<'a, F> {
         pub size_bits: usize,
         pub paddr: Option<usize>,
-        pub fill: Indirect<'a, [FillEntry<F>]>,
+        pub fill: Fill<'a, F>,
     }
 
     #[derive(Debug, Clone, Eq, PartialEq, IsObject, IsObjectWithCapTable)]
