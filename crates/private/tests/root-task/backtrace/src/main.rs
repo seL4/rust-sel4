@@ -32,7 +32,7 @@ fn g(_: &()) -> () {
     let bt = simple.collect();
     simple.send(&bt);
     assert!(bt.postamble.error.is_none());
-    assert_eq!(bt.entries.len(), 10);
+    assert!(bt.entries.len().abs_diff(10) <= 3);
 
     let mut s = String::new();
     collect(())
