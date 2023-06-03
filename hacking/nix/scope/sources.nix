@@ -22,7 +22,7 @@ let
 
   capdlCommon = {
     url = "https://gitlab.com/coliasgroup/capdl.git";
-    rev = "af3c4b937982bb003f5a7fecd2958e25f1cd84de";
+    rev = "63652ffc60e2fbc3f88c275429c1eeee66e3ac43";
     local = localRoot + "/capdl";
   };
 

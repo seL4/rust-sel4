@@ -333,7 +333,6 @@ name = "capdl-initializer"
 version = "0.1.0"
 dependencies = [
  "capdl-initializer-core",
- "capdl-initializer-types",
  "capdl-types",
  "log",
  "postcard",
@@ -349,7 +348,6 @@ name = "capdl-initializer-add-spec"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "capdl-initializer-types",
  "capdl-types",
  "clap 3.2.25",
  "fallible-iterator",
@@ -366,15 +364,6 @@ dependencies = [
  "capdl-types",
  "log",
  "sel4",
-]
-
-[[package]]
-name = "capdl-initializer-types"
-version = "0.1.0"
-dependencies = [
- "capdl-types",
- "postcard",
- "serde",
 ]
 
 [[package]]
@@ -426,9 +415,11 @@ version = "0.1.0"
 dependencies = [
  "capdl-types-derive",
  "cfg-if",
+ "log",
  "miniz_oxide 0.6.2",
  "sel4",
  "serde",
+ "serde_json",
 ]
 
 [[package]]

@@ -10,11 +10,11 @@ struct SmallPagePlaceHolder([u8; frame_types::FrameType0::FRAME_SIZE.bytes()]);
 static SMALL_PAGE_PLACEHOLDER: SmallPagePlaceHolder =
     SmallPagePlaceHolder([0; frame_types::FrameType0::FRAME_SIZE.bytes()]);
 
-pub(crate) fn get_user_image_frame_cap(
+pub(crate) fn get_user_image_frame_slot(
     bootinfo: &sel4::BootInfo,
     user_image_bounds: &Range<usize>,
     addr: usize,
-) -> sel4::LocalCPtr<frame_types::FrameType0> {
+) -> sel4::InitCSpaceSlot {
     assert_eq!(addr % frame_types::FrameType0::FRAME_SIZE.bytes(), 0);
     let num_user_frames = bootinfo.user_image_frames().end - bootinfo.user_image_frames().start;
     let user_image_footprint = coarsen_footprint(
@@ -26,10 +26,7 @@ pub(crate) fn get_user_image_frame_cap(
         num_user_frames * frame_types::FrameType0::FRAME_SIZE.bytes()
     );
     let ix = (addr - user_image_footprint.start) / frame_types::FrameType0::FRAME_SIZE.bytes();
-    let cap = sel4::BootInfo::init_cspace_local_cptr::<frame_types::FrameType0>(
-        bootinfo.user_image_frames().start + ix,
-    );
-    cap
+    bootinfo.user_image_frames().start + ix
 }
 
 pub(crate) fn init_copy_addrs(
@@ -38,7 +35,8 @@ pub(crate) fn init_copy_addrs(
 ) -> Result<(usize, usize), sel4::Error> {
     let small_frame_copy_addr = {
         let addr = addr_of_ref(&SMALL_PAGE_PLACEHOLDER);
-        let cap = get_user_image_frame_cap(bootinfo, user_image_bounds, addr);
+        let slot = get_user_image_frame_slot(bootinfo, user_image_bounds, addr);
+        let cap = sel4::BootInfo::init_cspace_local_cptr::<frame_types::FrameType0>(slot);
         cap.frame_unmap()?;
         addr
     };

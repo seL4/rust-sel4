@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 
 use capdl_types_derive::{IsCap, IsObject, IsObjectWithCapTable};
 
-use crate::{Fill, HasCapTable, Indirect};
+use crate::{FrameInit, HasCapTable, Indirect};
 
 // TODO
 // Prepare for broader platform support:
@@ -25,8 +25,8 @@ pub type CapTableEntry = (CapSlot, Cap);
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub struct Spec<'a, N, F> {
-    pub objects: Indirect<'a, [NamedObject<'a, N, F>]>,
+pub struct Spec<'a, N, D, M> {
+    pub objects: Indirect<'a, [NamedObject<'a, N, D, M>]>,
     pub irqs: Indirect<'a, [IRQEntry]>,
     pub asid_slots: Indirect<'a, [ASIDSlotEntry]>,
     pub root_objects: Range<ObjectId>,
@@ -51,14 +51,14 @@ pub struct UntypedCover {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub struct NamedObject<'a, N, F> {
+pub struct NamedObject<'a, N, D, M> {
     pub name: N,
-    pub object: Object<'a, F>,
+    pub object: Object<'a, D, M>,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub enum Object<'a, F> {
+pub enum Object<'a, D, M> {
     Untyped(object::Untyped),
     Endpoint,
     Notification,
@@ -66,7 +66,7 @@ pub enum Object<'a, F> {
     TCB(object::TCB<'a>),
     IRQ(object::IRQ<'a>),
     VCPU,
-    Frame(object::Frame<'a, F>),
+    Frame(object::Frame<'a, D, M>),
     PageTable(object::PageTable<'a>),
     ASIDPool(object::ASIDPool),
     ArmIRQ(object::ArmIRQ<'a>),
@@ -74,7 +74,7 @@ pub enum Object<'a, F> {
     Reply,
 }
 
-impl<'a, F> Object<'a, F> {
+impl<'a, D, M> Object<'a, D, M> {
     pub fn paddr(&self) -> Option<usize> {
         match self {
             Object::Untyped(obj) => obj.paddr,
@@ -182,10 +182,10 @@ pub mod object {
 
     #[derive(Debug, Clone, Eq, PartialEq, IsObject)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-    pub struct Frame<'a, F> {
+    pub struct Frame<'a, D, M> {
         pub size_bits: usize,
         pub paddr: Option<usize>,
-        pub fill: Fill<'a, F>,
+        pub init: FrameInit<'a, D, M>,
     }
 
     #[derive(Debug, Clone, Eq, PartialEq, IsObject, IsObjectWithCapTable)]

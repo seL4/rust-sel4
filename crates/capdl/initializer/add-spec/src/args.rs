@@ -1,7 +1,7 @@
 use anyhow::Result;
 use clap::{App, Arg, ArgAction};
 
-use crate::ObjectNamesLevel;
+use capdl_types::ObjectNamesLevel;
 
 #[derive(Debug)]
 pub struct Args {
@@ -10,6 +10,7 @@ pub struct Args {
     pub fill_dir_path: String,
     pub out_file_path: String,
     pub object_names_level: ObjectNamesLevel,
+    pub embed_frames: bool,
     pub verbose: bool,
 }
 
@@ -47,6 +48,12 @@ impl Args {
                     .value_name("OBJECT_NAMES_LEVEL")
                     .value_parser(clap::value_parser!(u32).range(..=2)),
             )
+            .arg(
+                Arg::new("embed_frames")
+                    .long("embed-frames")
+                    .value_name("EMBED_FRAMES")
+                    .action(ArgAction::SetTrue),
+            )
             .arg(Arg::new("verbose").short('v').action(ArgAction::SetTrue))
             .get_matches();
 
@@ -68,6 +75,8 @@ impl Args {
             })
             .unwrap_or(ObjectNamesLevel::JustTCBs);
 
+        let embed_frames = *matches.get_one::<bool>("embed_frames").unwrap();
+
         let verbose = *matches.get_one::<bool>("verbose").unwrap();
 
         Ok(Self {
@@ -76,6 +85,7 @@ impl Args {
             fill_dir_path,
             out_file_path,
             object_names_level,
+            embed_frames,
             verbose,
         })
     }

@@ -3,7 +3,7 @@
 mk {
   package.name = "capdl-embed-spec";
   dependencies = {
-    capdl-types.features = [ "alloc" "deflate" ];
+    capdl-types.features = [ "std" "deflate" ];
     hex = "0.4.3";
     syn = { version = versions.syn; features = [ "full" ]; };
     inherit (versions)

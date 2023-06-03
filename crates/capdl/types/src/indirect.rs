@@ -126,6 +126,16 @@ where
 
 impl<T: Eq + ?Sized> Eq for Indirect<'_, T> {}
 
+#[cfg(feature = "alloc")]
+impl<T> FromIterator<T> for Indirect<'_, [T]> {
+    fn from_iter<U>(iter: U) -> Self
+    where
+        U: IntoIterator<Item = T>,
+    {
+        Self::from_owned(iter.into_iter().collect())
+    }
+}
+
 #[cfg(feature = "serde")]
 impl<T: Serialize + ?Sized> Serialize for Indirect<'_, T> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {

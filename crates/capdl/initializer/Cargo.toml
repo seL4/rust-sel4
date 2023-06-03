@@ -7,7 +7,6 @@ license = "BSD-2-Clause"
 
 [dependencies]
 capdl-initializer-core = { path = "./core" }
-capdl-initializer-types = { path = "./types" }
 capdl-types = { path = "../types", features = ["alloc", "serde", "deflate"] }
 log = "0.4.17"
 postcard = { version = "1.0.2", default-features = false, features = ["alloc"] }

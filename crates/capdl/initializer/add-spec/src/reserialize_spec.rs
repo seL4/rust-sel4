@@ -1,69 +1,71 @@
-use std::collections::BTreeMap;
-use std::fs::File;
-use std::os::unix::fs::FileExt;
-use std::path::{Path, PathBuf};
+use std::ops::Range;
+use std::path::Path;
 
-use capdl_initializer_types::SpecForSerialization;
 use capdl_types::*;
 
-use crate::ObjectNamesLevel;
-
 pub fn reserialize_spec<'a>(
-    input_spec: &Spec<'a, String, FileContent>,
+    input_spec: &InputSpec,
     fill_dir_path: impl AsRef<Path>,
     object_names_level: &ObjectNamesLevel,
-) -> (SpecForSerialization<'a>, Vec<u8>) {
-    let mut open_files = BTreeMap::new();
-    input_spec
-        .traverse_fill(|content| {
-            if !open_files.contains_key(&content.file) {
-                open_files.insert(
-                    content.file.to_owned(),
-                    File::open(PathBuf::from(fill_dir_path.as_ref()).join(&content.file)).unwrap(),
-                );
-            }
-            Ok::<(), !>(())
-        })
-        .into_ok();
+    embed_frames: bool,
+    granule_size_bits: usize,
+) -> (SpecWithIndirection<'a>, Vec<u8>) {
+    let granule_size = 1 << granule_size_bits;
 
-    let mut fill = vec![];
-    let final_spec: SpecForSerialization<'a> = input_spec
-        .traverse_names_with_context(|obj, name| {
-            let name = match object_names_level {
-                ObjectNamesLevel::All => Some(name.clone()),
-                ObjectNamesLevel::JustTCBs => match obj {
-                    Object::TCB(_) => Some(name.clone()),
-                    _ => None,
-                },
-                ObjectNamesLevel::None => None,
-            };
-            let indirect_name = name.map(|s| {
-                let start = fill.len();
-                fill.extend(s.bytes());
-                let end = fill.len();
-                IndirectObjectName { range: start..end }
-            });
-            Ok::<_, !>(indirect_name)
+    let fill_map = input_spec.collect_fill(&[fill_dir_path]);
+
+    let mut sources = SourcesBuilder::new();
+    let final_spec: SpecWithIndirection<'a> = input_spec
+        .traverse_names_with_context::<_, !>(|named_obj| {
+            Ok(object_names_level
+                .apply(named_obj)
+                .map(|s| IndirectObjectName {
+                    range: sources.append(s.as_bytes()),
+                }))
         })
         .into_ok()
-        .traverse_fill_with_context(|length, entry| {
-            let mut uncompressed = vec![0; length];
-            open_files
-                .get(&entry.file)
-                .unwrap()
-                .read_exact_at(&mut uncompressed, entry.file_offset.try_into().unwrap())
-                .unwrap();
-            let compressed = DeflatedBytesContent::pack(&uncompressed);
-            let start = fill.len();
-            fill.extend(compressed);
-            let end = fill.len();
-            Ok::<_, !>(IndirectDeflatedBytesContent {
-                deflated_bytes_range: start..end,
+        .split_embedded_frames(embed_frames, granule_size_bits)
+        .traverse_data::<IndirectDeflatedBytesContent, !>(|key| {
+            let compressed = DeflatedBytesContent::pack(fill_map.get(key));
+            Ok(IndirectDeflatedBytesContent {
+                deflated_bytes_range: sources.append(&compressed),
             })
+        })
+        .into_ok()
+        .traverse_embedded_frames::<IndirectEmbeddedFrame, !>(|fill| {
+            sources.align_to(granule_size);
+            let range = sources.append(&fill_map.get_frame(granule_size, fill));
+            Ok(IndirectEmbeddedFrame::new(range.start))
         })
         .into_ok();
 
     let mut blob = postcard::to_allocvec(&final_spec).unwrap();
-    blob.extend(fill);
+    blob.extend(sources.build());
     (final_spec, blob)
+}
+
+struct SourcesBuilder {
+    buf: Vec<u8>,
+}
+
+impl SourcesBuilder {
+    fn new() -> Self {
+        Self { buf: vec![] }
+    }
+
+    fn build(self) -> Vec<u8> {
+        self.buf
+    }
+
+    fn align_to(&mut self, align: usize) {
+        assert!(align.is_power_of_two());
+        self.buf.resize(self.buf.len().next_multiple_of(align), 0);
+    }
+
+    fn append(&mut self, bytes: &[u8]) -> Range<usize> {
+        let start = self.buf.len();
+        self.buf.extend(bytes);
+        let end = self.buf.len();
+        start..end
+    }
 }

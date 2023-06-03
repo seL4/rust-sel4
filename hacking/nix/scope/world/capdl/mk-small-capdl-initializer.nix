@@ -46,6 +46,8 @@ in mkTask {
       CAPDL_SPEC_FILE = json;
       CAPDL_FILL_DIR = fill;
       CAPDL_OBJECT_NAMES_LEVEL = 2;
+      CAPDL_DEFLATE_FILL = 1;
+      CAPDL_EMBED_FRAMES = 1;
 
       passthru = (super.passthru or {}) // {
         inherit spec json fill;

@@ -7,8 +7,7 @@ license = "BSD-2-Clause"
 
 [dependencies]
 anyhow = "1.0.66"
-capdl-initializer-types = { path = "../types" }
-capdl-types = { path = "../../types", features = ["alloc", "serde", "deflate"] }
+capdl-types = { path = "../../types", features = ["std", "serde", "deflate"] }
 clap = "3.2.23"
 fallible-iterator = "0.2.0"
 object = { version = "0.31.0", features = ["all"] }

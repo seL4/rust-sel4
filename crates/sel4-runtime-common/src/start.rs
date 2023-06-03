@@ -1,3 +1,6 @@
+// TODO
+// - guard pages for stack?
+
 use core::arch::global_asm;
 use core::sync::Exclusive;
 

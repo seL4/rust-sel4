@@ -13,11 +13,15 @@ use core::ptr;
 use core::slice;
 
 use capdl_initializer_core::{Initializer, InitializerBuffers, PerObjectBuffer};
-use capdl_initializer_types::SpecWithSourcesForSerialization;
+use capdl_types::{
+    IndirectDeflatedBytesContent, IndirectEmbeddedFrame, IndirectObjectName, SpecWithIndirection,
+    SpecWithSources,
+};
 use sel4::BootInfo;
 use sel4_logging::{LevelFilter, Logger, LoggerBuilder};
 use sel4_root_task::root_task;
 
+// const LOG_LEVEL: LevelFilter = LevelFilter::Debug;
 const LOG_LEVEL: LevelFilter = LevelFilter::Info;
 
 static LOGGER: Logger = LoggerBuilder::const_default()
@@ -26,7 +30,7 @@ static LOGGER: Logger = LoggerBuilder::const_default()
     .write(|s| sel4::debug_print!("{}", s))
     .build();
 
-#[root_task]
+#[root_task(stack_size = 0x10000)]
 fn main(bootinfo: &BootInfo) -> ! {
     LOGGER.set().unwrap();
     let spec_with_sources = get_spec_with_sources();
@@ -67,18 +71,24 @@ static mut capdl_initializer_image_start: *mut u8 = ptr::null_mut();
 #[link_section = ".data"]
 static mut capdl_initializer_image_end: *mut u8 = ptr::null_mut();
 
-fn get_spec_with_sources<'a>() -> SpecWithSourcesForSerialization<'a> {
+fn get_spec_with_sources<'a>() -> SpecWithSources<
+    'a,
+    Option<IndirectObjectName>,
+    IndirectDeflatedBytesContent,
+    IndirectEmbeddedFrame,
+> {
     let blob = unsafe {
         slice::from_raw_parts(
             capdl_initializer_serialized_spec_start,
             capdl_initializer_serialized_spec_size,
         )
     };
-    let (spec, source) = postcard::take_from_bytes(blob).unwrap();
-    SpecWithSourcesForSerialization {
+    let (spec, source) = postcard::take_from_bytes::<SpecWithIndirection>(blob).unwrap();
+    SpecWithSources {
         spec,
         object_name_source: source,
         content_source: source,
+        embedded_frame_source: source,
     }
 }
 

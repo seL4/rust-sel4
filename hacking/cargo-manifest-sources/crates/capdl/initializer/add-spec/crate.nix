@@ -3,7 +3,7 @@
 mk {
   package.name = "capdl-initializer-add-spec";
   dependencies = {
-    capdl-types.features = [ "alloc" "serde" "deflate" ];
+    capdl-types.features = [ "std" "serde" "deflate" ];
     clap = "3.2.23";
     object = { version = versions.object; features = [ "all" ]; };
     postcard = postcardWith [ "alloc" ];
@@ -14,7 +14,6 @@ mk {
     ;
   };
   nix.local.dependencies = with localCrates; [
-    capdl-initializer-types
     capdl-types
     sel4-render-elf-with-data
   ];

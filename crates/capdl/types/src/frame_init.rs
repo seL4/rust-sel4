@@ -10,30 +10,196 @@ use alloc::{string::String, vec::Vec};
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::{Indirect, SelfContained};
+use crate::{object, Indirect, SelfContained};
 
-pub type Fill<'a, F> = Indirect<'a, [FillEntry<F>]>;
+// // //
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub struct FillEntry<F> {
-    pub range: Range<usize>,
-    pub content: FillEntryContent<F>,
+pub enum FrameInit<'a, D, T> {
+    Fill(Fill<'a, D>),
+    Embedded(T),
+}
+
+impl<'a, D, E> FrameInit<'a, D, E> {
+    pub const fn as_fill(&self) -> Option<&Fill<'a, D>> {
+        match self {
+            Self::Fill(fill) => Some(fill),
+            _ => None,
+        }
+    }
+
+    pub const fn as_embedded(&self) -> Option<&E> {
+        match self {
+            Self::Embedded(embedded) => Some(embedded),
+            _ => None,
+        }
+    }
+
+    pub const fn is_fill(&self) -> bool {
+        self.as_fill().is_some()
+    }
+
+    pub const fn is_embedded(&self) -> bool {
+        self.as_embedded().is_some()
+    }
+}
+
+impl<'a, D> FrameInit<'a, D, !> {
+    pub const fn as_fill_infallible(&self) -> &Fill<'a, D> {
+        match self {
+            Self::Fill(fill) => fill,
+            Self::Embedded(never) => *never,
+        }
+    }
+}
+
+impl<'a, D> object::Frame<'a, D, !> {
+    pub fn can_embed(&self, granule_size_bits: usize, is_root: bool) -> bool {
+        is_root
+            && self.paddr.is_none()
+            && self.size_bits == granule_size_bits
+            && !self.init.as_fill_infallible().is_empty()
+            && !self.init.as_fill_infallible().depends_on_bootinfo()
+    }
+}
+
+// // //
+
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub struct EmbeddedFrame {
+    ptr: *const u8,
+}
+
+impl EmbeddedFrame {
+    pub const fn new(ptr: *const u8) -> Self {
+        Self { ptr }
+    }
+
+    pub const fn ptr(&self) -> *const u8 {
+        self.ptr
+    }
+
+    pub const fn check(&self, frame_size: usize) {
+        assert!(self.ptr().is_aligned_to(frame_size));
+    }
+}
+
+unsafe impl Sync for EmbeddedFrame {}
+
+pub trait SelfContainedGetEmbeddedFrame {
+    fn self_contained_get_embedded_frame(&self) -> EmbeddedFrame;
+}
+
+impl SelfContainedGetEmbeddedFrame for EmbeddedFrame {
+    fn self_contained_get_embedded_frame(&self) -> EmbeddedFrame {
+        *self
+    }
+}
+
+pub trait GetEmbeddedFrame {
+    type Source: ?Sized;
+
+    fn get_embedded_frame(&self, source: &Self::Source) -> EmbeddedFrame;
+}
+
+impl<T: SelfContainedGetEmbeddedFrame> GetEmbeddedFrame for SelfContained<T> {
+    type Source = ();
+
+    fn get_embedded_frame(&self, _source: &Self::Source) -> EmbeddedFrame {
+        self.inner().self_contained_get_embedded_frame()
+    }
+}
+
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct IndirectEmbeddedFrame {
+    offset: usize,
+}
+
+impl IndirectEmbeddedFrame {
+    pub const fn new(offset: usize) -> Self {
+        Self { offset }
+    }
+
+    pub const fn offset(&self) -> usize {
+        self.offset
+    }
+}
+
+impl GetEmbeddedFrame for IndirectEmbeddedFrame {
+    type Source = [u8];
+
+    fn get_embedded_frame(&self, source: &Self::Source) -> EmbeddedFrame {
+        EmbeddedFrame::new(&source[self.offset()])
+    }
+}
+
+#[macro_export]
+macro_rules! embed_frame {
+    ($frame_size:expr, $content:expr) => {{
+        #[repr(C, align($frame_size))]
+        struct Aligned<T: ?Sized>(T);
+
+        const FRAME: &'static Aligned<[u8]> = &Aligned($content);
+
+        $crate::EmbeddedFrame::new(FRAME.0.as_ptr())
+    }};
+}
+
+// // //
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct Fill<'a, D> {
+    pub entries: Indirect<'a, [FillEntry<D>]>,
+}
+
+impl<'a, D> Fill<'a, D> {
+    pub fn depends_on_bootinfo(&self) -> bool {
+        self.entries.iter().any(|entry| entry.content.is_bootinfo())
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.entries.is_empty()
+    }
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub enum FillEntryContent<F> {
-    Data(F),
+pub struct FillEntry<D> {
+    pub range: Range<usize>,
+    pub content: FillEntryContent<D>,
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub enum FillEntryContent<D> {
+    Data(D),
     BootInfo(FillEntryContentBootInfo),
 }
 
-impl<F> FillEntryContent<F> {
-    pub fn as_data(&self) -> Option<&F> {
+impl<D> FillEntryContent<D> {
+    pub fn as_data(&self) -> Option<&D> {
         match self {
             Self::Data(data) => Some(data),
             _ => None,
         }
+    }
+
+    pub fn as_bootinfo(&self) -> Option<&FillEntryContentBootInfo> {
+        match self {
+            Self::BootInfo(info) => Some(info),
+            _ => None,
+        }
+    }
+
+    pub fn is_data(&self) -> bool {
+        self.as_data().is_some()
+    }
+
+    pub fn is_bootinfo(&self) -> bool {
+        self.as_bootinfo().is_some()
     }
 }
 

@@ -6,7 +6,7 @@ edition = "2021"
 license = "BSD-2-Clause"
 
 [dependencies]
-capdl-types = { path = "../types", features = ["alloc", "deflate"] }
+capdl-types = { path = "../types", features = ["std", "deflate"] }
 hex = "0.4.3"
 proc-macro2 = "1.0.50"
 quote = "1.0.23"

@@ -91,11 +91,6 @@
     ],
     "skip": false
   },
-  "capdl-initializer-types": {
-    "labels": {},
-    "requirements": {},
-    "skip": false
-  },
   "capdl-initializer-with-embedded-spec": {
     "labels": [
       "leaf"

@@ -2,7 +2,7 @@ use sel4::{ObjectBlueprint, ObjectBlueprintArch, ObjectBlueprintSeL4Arch, VMAttr
 
 use crate::{cap, Badge, Cap, FillEntryContentBootInfoId, Object, Rights};
 
-impl<'a, F> Object<'a, F> {
+impl<'a, D, M> Object<'a, D, M> {
     pub fn blueprint(&self) -> Option<ObjectBlueprint> {
         Some({
             #[sel4::sel4_cfg_match]

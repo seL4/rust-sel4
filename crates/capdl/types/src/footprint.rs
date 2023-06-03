@@ -25,6 +25,7 @@ impl Footprint for CapTableEntry {}
 impl Footprint for Word {}
 impl Footprint for IndirectBytesContent {}
 impl Footprint for IndirectObjectName {}
+impl Footprint for IndirectEmbeddedFrame {}
 
 #[cfg(feature = "deflate")]
 impl Footprint for IndirectDeflatedBytesContent {}
@@ -50,7 +51,7 @@ impl<'a, T: Footprint> Footprint for Indirect<'a, [T]> {
     }
 }
 
-impl<'a, N: Footprint, F: Footprint> Footprint for Spec<'a, N, F> {
+impl<'a, N: Footprint, D: Footprint, M: Footprint> Footprint for Spec<'a, N, D, M> {
     fn external_footprint(&self) -> usize {
         self.objects.external_footprint()
             + self.irqs.external_footprint()
@@ -58,19 +59,19 @@ impl<'a, N: Footprint, F: Footprint> Footprint for Spec<'a, N, F> {
     }
 }
 
-impl<'a, N: Footprint, F: Footprint> Footprint for NamedObject<'a, N, F> {
+impl<'a, N: Footprint, D: Footprint, M: Footprint> Footprint for NamedObject<'a, N, D, M> {
     fn external_footprint(&self) -> usize {
         self.name.external_footprint() + self.object.external_footprint()
     }
 }
 
-impl<'a, F: Footprint> Footprint for Object<'a, F> {
+impl<'a, D: Footprint, M: Footprint> Footprint for Object<'a, D, M> {
     fn external_footprint(&self) -> usize {
         match self {
             Self::CNode(obj) => obj.slots.external_footprint(),
             Self::TCB(obj) => obj.slots.external_footprint() + obj.extra.gprs.external_footprint(),
             Self::IRQ(obj) => obj.slots.external_footprint(),
-            Self::Frame(obj) => obj.fill.external_footprint(),
+            Self::Frame(obj) => obj.init.external_footprint(),
             Self::PageTable(obj) => obj.slots.external_footprint(),
             Self::ArmIRQ(obj) => obj.slots.external_footprint(),
             _ => 0,
@@ -78,13 +79,28 @@ impl<'a, F: Footprint> Footprint for Object<'a, F> {
     }
 }
 
-impl<F: Footprint> Footprint for FillEntry<F> {
+impl<'a, D: Footprint, M: Footprint> Footprint for FrameInit<'a, D, M> {
+    fn external_footprint(&self) -> usize {
+        match self {
+            Self::Fill(fill) => fill.external_footprint(),
+            Self::Embedded(embedded) => embedded.external_footprint(),
+        }
+    }
+}
+
+impl<'a, D: Footprint> Footprint for Fill<'a, D> {
+    fn external_footprint(&self) -> usize {
+        self.entries.external_footprint()
+    }
+}
+
+impl<D: Footprint> Footprint for FillEntry<D> {
     fn external_footprint(&self) -> usize {
         self.content.external_footprint()
     }
 }
 
-impl<F: Footprint> Footprint for FillEntryContent<F> {
+impl<D: Footprint> Footprint for FillEntryContent<D> {
     fn external_footprint(&self) -> usize {
         match self {
             Self::Data(data) => data.external_footprint(),

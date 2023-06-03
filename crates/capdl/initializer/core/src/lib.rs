@@ -3,7 +3,9 @@
 #![feature(const_trait_impl)]
 #![feature(int_roundings)]
 #![feature(never_type)]
+#![feature(pointer_is_aligned)]
 #![feature(proc_macro_hygiene)]
+#![feature(slice_ptr_len)]
 #![feature(stmt_expr_attributes)]
 #![feature(strict_provenance)]
 
@@ -36,35 +38,39 @@ pub use buffers::{InitializerBuffers, PerObjectBuffer};
 use cslot_allocator::{CSlotAllocator, CSlotAllocatorError};
 pub use error::CapDLInitializerError;
 use hold_slots::HoldSlots;
-use memory::init_copy_addrs;
+use memory::{get_user_image_frame_slot, init_copy_addrs};
 
 type Result<T> = result::Result<T, CapDLInitializerError>;
 
-pub struct Initializer<'a, N: ObjectName, F: Content, B> {
+pub struct Initializer<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B> {
     bootinfo: &'a BootInfo,
+    user_image_bounds: Range<usize>,
     small_frame_copy_addr: usize,
     large_frame_copy_addr: usize,
-    spec_with_sources: &'a SpecWithSources<'a, N, F>,
+    spec_with_sources: &'a SpecWithSources<'a, N, D, M>,
     cslot_allocator: &'a mut CSlotAllocator,
     buffers: &'a mut InitializerBuffers<B>,
 }
 
-impl<'a, N: ObjectName, F: Content, B: BorrowMut<[PerObjectBuffer]>> Initializer<'a, N, F, B> {
+impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObjectBuffer]>>
+    Initializer<'a, N, D, M, B>
+{
     pub fn initialize(
         bootinfo: &BootInfo,
-        own_footprint: Range<usize>,
-        spec_with_sources: &SpecWithSources<N, F>,
+        user_image_bounds: Range<usize>,
+        spec_with_sources: &SpecWithSources<N, D, M>,
         buffers: &mut InitializerBuffers<B>,
     ) -> Result<!> {
         info!("Starting CapDL initializer");
 
         let (small_frame_copy_addr, large_frame_copy_addr) =
-            init_copy_addrs(bootinfo, &own_footprint)?;
+            init_copy_addrs(bootinfo, &user_image_bounds)?;
 
         let mut cslot_allocator = CSlotAllocator::new(bootinfo.empty());
 
         Initializer {
             bootinfo,
+            user_image_bounds,
             small_frame_copy_addr,
             large_frame_copy_addr,
             spec_with_sources,
@@ -74,7 +80,7 @@ impl<'a, N: ObjectName, F: Content, B: BorrowMut<[PerObjectBuffer]>> Initializer
         .run()
     }
 
-    fn spec(&self) -> &'a Spec<'a, N, F> {
+    fn spec(&self) -> &'a Spec<'a, N, D, M> {
         &self.spec_with_sources.spec
     }
 
@@ -201,6 +207,23 @@ impl<'a, N: ObjectName, F: Content, B: BorrowMut<[PerObjectBuffer]>> Initializer
                     if !ut.is_device() {
                         for size_bits in (0..=max_size_bits).rev() {
                             let obj_id = &mut by_size_start[size_bits];
+                            // Skip embedded frames
+                            while *obj_id < by_size_end[size_bits] {
+                                if let Object::Frame(obj) = self.spec().object(*obj_id) {
+                                    if let FrameInit::Embedded(embedded) = &obj.init {
+                                        self.take_cap_for_embedded_frame(
+                                            *obj_id,
+                                            &embedded.get_embedded_frame(
+                                                &self.spec_with_sources.embedded_frame_source,
+                                            ),
+                                        )?;
+                                        *obj_id += 1;
+                                        continue;
+                                    }
+                                }
+                                break;
+                            }
+                            // Create a largest possible object that would fit
                             if *obj_id < by_size_end[size_bits] {
                                 let named_obj = &self.spec().named_object(*obj_id);
                                 let blueprint = named_obj.object.blueprint().unwrap();
@@ -350,6 +373,18 @@ impl<'a, N: ObjectName, F: Content, B: BorrowMut<[PerObjectBuffer]>> Initializer
         Ok(())
     }
 
+    fn take_cap_for_embedded_frame(
+        &mut self,
+        obj_id: ObjectId,
+        frame: &EmbeddedFrame,
+    ) -> Result<()> {
+        frame.check(frame_types::FrameType0::FRAME_SIZE.bytes());
+        let addr = frame.ptr().addr();
+        let slot = get_user_image_frame_slot(self.bootinfo, &self.user_image_bounds, addr);
+        self.set_orig_cslot(obj_id, slot);
+        Ok(())
+    }
+
     fn init_irqs(&mut self) -> Result<()> {
         debug!("Initializing IRQs");
 
@@ -395,26 +430,31 @@ impl<'a, N: ObjectName, F: Content, B: BorrowMut<[PerObjectBuffer]>> Initializer
 
     fn init_frames(&mut self) -> Result<()> {
         debug!("Initializing Frames");
-        for (obj_id, obj) in self.spec().filter_objects::<&object::Frame<F>>() {
+        for (obj_id, obj) in self.spec().filter_objects::<&object::Frame<'a, D, M>>() {
             // TODO make more platform-agnostic
-            match obj.size_bits {
-                frame_types::FRAME_SIZE_0_BITS => {
-                    let frame = self.orig_local_cptr::<frame_types::FrameType0>(obj_id);
-                    self.fill_frame(frame, &obj.fill)?;
-                }
-                frame_types::FRAME_SIZE_1_BITS => {
-                    let frame = self.orig_local_cptr::<frame_types::FrameType1>(obj_id);
-                    self.fill_frame(frame, &obj.fill)?;
-                }
-                _ => {
-                    panic!()
+            if let Some(fill) = obj.init.as_fill() {
+                let entries = &fill.entries;
+                if !entries.is_empty() {
+                    match obj.size_bits {
+                        frame_types::FRAME_SIZE_0_BITS => {
+                            let frame = self.orig_local_cptr::<frame_types::FrameType0>(obj_id);
+                            self.fill_frame(frame, entries)?;
+                        }
+                        frame_types::FRAME_SIZE_1_BITS => {
+                            let frame = self.orig_local_cptr::<frame_types::FrameType1>(obj_id);
+                            self.fill_frame(frame, entries)?;
+                        }
+                        _ => {
+                            panic!()
+                        }
+                    }
                 }
             }
         }
         Ok(())
     }
 
-    fn fill_frame<U: FrameType>(&self, frame: LocalCPtr<U>, fill: &[FillEntry<F>]) -> Result<()> {
+    fn fill_frame<U: FrameType>(&self, frame: LocalCPtr<U>, fill: &[FillEntry<D>]) -> Result<()> {
         frame.frame_map(
             BootInfo::init_thread_vspace(),
             self.copy_addr::<U>(),

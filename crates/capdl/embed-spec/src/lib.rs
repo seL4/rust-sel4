@@ -2,6 +2,10 @@
 #![feature(never_type)]
 #![feature(unwrap_infallible)]
 
+// TODO(nspin)
+// In a few cases, we use a local const declaration to appease the borrow checker.
+// Using an exposed constructor of `Indirect` would be one way around this.
+
 use std::borrow::Borrow;
 use std::borrow::Cow;
 use std::collections::BTreeMap;
@@ -12,53 +16,43 @@ use quote::{format_ident, quote, ToTokens};
 
 use capdl_types::*;
 
-// TODO(nspin)
-// In a few cases, we use a local const declaration to appease the borrow checker.
-// Using an exposed constructor of `Indirect` would be one way around this.
-
 pub struct Embedding<'a> {
     pub spec: Cow<'a, SpecForEmbedding<'a>>,
-    pub fill_map: Cow<'a, FillMap<'a>>,
+    pub fill_map: Cow<'a, FillMap>,
     pub object_names_level: ObjectNamesLevel,
     pub deflate_fill: bool,
+    pub granule_size_bits: usize,
 }
 
-pub type SpecForEmbedding<'a> = Spec<'a, String, FileContentRange>;
-
-pub type FillMap<'a> = BTreeMap<FileContentRange, Cow<'a, [u8]>>;
-
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
-pub enum ObjectNamesLevel {
-    All,
-    JustTCBs,
-    None,
-}
-
-type FillEntryContentId = String;
+pub type SpecForEmbedding<'a> = Spec<'a, String, FileContentRange, Fill<'a, FileContentRange>>;
 
 fn to_tokens_via_debug(value: impl fmt::Debug) -> TokenStream {
     format!("{:?}", value).parse::<TokenStream>().unwrap()
 }
 
 impl<'a> Embedding<'a> {
-    fn spec(&self) -> &SpecForEmbedding<'a> {
+    pub fn spec(&self) -> &SpecForEmbedding<'a> {
         self.spec.borrow()
     }
 
-    fn fill_map(&self) -> &FillMap<'a> {
+    pub fn fill_map(&self) -> &FillMap {
         self.fill_map.borrow()
     }
 
-    fn get_fill_map(&self, key: &FileContentRange) -> Option<&[u8]> {
-        self.fill_map().get(key).map(Borrow::borrow)
-    }
-
-    fn object_names_level(&self) -> ObjectNamesLevel {
+    pub fn object_names_level(&self) -> ObjectNamesLevel {
         self.object_names_level
     }
 
-    fn deflate_fill(&self) -> bool {
+    pub fn deflate_fill(&self) -> bool {
         self.deflate_fill
+    }
+
+    pub fn granule_size_bits(&self) -> usize {
+        self.granule_size_bits
+    }
+
+    pub fn granule_size(&self) -> usize {
+        1 << self.granule_size_bits()
     }
 
     //
@@ -82,32 +76,41 @@ impl<'a> Embedding<'a> {
         }
     }
 
-    fn embed_fill(&self, fill: &[FillEntry<FileContentRange>]) -> TokenStream {
-        let entries = fill.iter().map(|entry| {
-            let range = to_tokens_via_debug(&entry.range);
-            let content = match &entry.content {
-                FillEntryContent::Data(content_data) => {
-                    let inner_value = self
-                        .embedded_file_ident_from_id(&self.encode_fill_entry_to_id(&content_data));
-                    let outer_value = self.fill_value(inner_value);
+    fn embed_frame_init(&self, frame_init: &FrameInit<Ident, Ident>) -> TokenStream {
+        match frame_init {
+            FrameInit::Fill(fill) => {
+                let entries = fill.entries.iter().map(|entry| {
+                    let range = to_tokens_via_debug(&entry.range);
+                    let content = match &entry.content {
+                        FillEntryContent::Data(ident) => {
+                            let outer_value = self.fill_value(ident);
+                            quote! {
+                                FillEntryContent::Data(#outer_value)
+                            }
+                        }
+                        content @ FillEntryContent::BootInfo(_) => to_tokens_via_debug(content),
+                    };
                     quote! {
-                        FillEntryContent::Data(#outer_value)
+                        FillEntry {
+                            range: #range,
+                            content: #content,
+                        }
                     }
-                }
-                content @ FillEntryContent::BootInfo(_) => to_tokens_via_debug(content),
-            };
-            quote! {
-                FillEntry {
-                    range: #range,
-                    content: #content,
+                });
+                quote! {
+                    FrameInit::Fill(Fill {
+                        entries: {
+                            use FillEntryContent::*;
+                            use FillEntryContentBootInfoId::*;
+                            Indirect::from_borrowed([#(#entries,)*].as_slice())
+                        },
+                    })
                 }
             }
-        });
-        quote! {
-            {
-                use FillEntryContent::*;
-                use FillEntryContentBootInfoId::*;
-                Indirect::from_borrowed([#(#entries,)*].as_slice())
+            FrameInit::Embedded(ident) => {
+                quote! {
+                    FrameInit::Embedded(#ident)
+                }
             }
         }
     }
@@ -130,21 +133,7 @@ impl<'a> Embedding<'a> {
         expr_struct.to_token_stream()
     }
 
-    fn embed_object_with_fill(
-        &self,
-        obj: impl fmt::Debug,
-        fill: &[FillEntry<FileContentRange>],
-    ) -> TokenStream {
-        let mut expr_struct = syn::parse2::<syn::ExprStruct>(to_tokens_via_debug(&obj)).unwrap();
-        self.patch_field(
-            &mut expr_struct,
-            "fill",
-            syn::parse2::<syn::Expr>(self.embed_fill(fill)).unwrap(),
-        );
-        expr_struct.to_token_stream()
-    }
-
-    fn embed_object(&self, obj: &Object<FileContentRange>) -> TokenStream {
+    fn embed_object(&self, obj: &Object<Ident, Ident>) -> TokenStream {
         match obj {
             Object::CNode(obj) => {
                 let toks = self.embed_object_with_cap_table(obj);
@@ -196,7 +185,14 @@ impl<'a> Embedding<'a> {
                 quote!(Object::IRQ(object::#toks))
             }
             Object::Frame(obj) => {
-                let toks = self.embed_object_with_fill(obj, &obj.fill);
+                let mut expr_struct =
+                    syn::parse2::<syn::ExprStruct>(to_tokens_via_debug(&obj)).unwrap();
+                self.patch_field(
+                    &mut expr_struct,
+                    "init",
+                    syn::parse2::<syn::Expr>(self.embed_frame_init(&obj.init)).unwrap(),
+                );
+                let toks = expr_struct.to_token_stream();
                 quote!(Object::Frame(object::#toks))
             }
             Object::PageTable(obj) => {
@@ -259,7 +255,7 @@ impl<'a> Embedding<'a> {
         quote!(#prefix SelfContained<#inner>)
     }
 
-    fn name_value<F>(&self, obj: &Object<'a, F>, name: &str) -> TokenStream {
+    fn name_value<D, M>(&self, obj: &Object<'a, D, M>, name: &str) -> TokenStream {
         let inner = match self.object_names_level() {
             ObjectNamesLevel::All => quote!(#name),
             ObjectNamesLevel::JustTCBs => match obj {
@@ -309,125 +305,89 @@ impl<'a> Embedding<'a> {
         })(bytes)
     }
 
-    fn embed_objects(&self) -> TokenStream {
-        let toks = self
-            .spec()
-            .named_objects()
-            .map(|NamedObject { name, object }| {
-                let name = self.name_value(object, name);
-                let object = self.embed_object(object);
-                quote! {
-                    NamedObject {
-                        name: #name,
-                        object: #object,
-                    }
-                }
-            });
-        quote! {
-            [#(#toks,)*]
-        }
-    }
-
-    fn embed_irqs(&self) -> TokenStream {
-        let toks = to_tokens_via_debug(&self.spec().irqs);
-        quote! {
-            Indirect::from_borrowed(#toks.as_slice())
-        }
-    }
-
-    fn embed_root_objects(&self) -> TokenStream {
-        to_tokens_via_debug(&self.spec().root_objects)
-    }
-
-    fn embed_untyped_covers(&self) -> TokenStream {
-        let toks = to_tokens_via_debug(&self.spec().untyped_covers);
-        quote! {
-            Indirect::from_borrowed(#toks.as_slice())
-        }
-    }
-
-    fn embed_asid_slots(&self) -> TokenStream {
-        let toks = to_tokens_via_debug(&self.spec().asid_slots);
-        quote! {
-            Indirect::from_borrowed(#toks.as_slice())
-        }
-    }
-
-    fn encode_fill_entry_to_id(&self, fill_entry: &FileContentRange) -> FillEntryContentId {
-        let content_file = &fill_entry;
-        hex::encode(format!(
-            "{},{},{}",
-            content_file.file_range().start,
-            content_file.file_range().end,
-            content_file.file
-        ))
-    }
-
-    fn embedded_file_ident_from_id(&self, id: &FillEntryContentId) -> Ident {
-        format_ident!("embedded_file_{}", id)
-    }
-
-    fn embedded_file_fname_from_id(&self, id: &FillEntryContentId) -> String {
-        format!("fragment.{}.bin", id)
-    }
-
     // NOTE
     // I would prefer this to return just the rhs, but rustfmt wouldn't be able to format that
     pub fn embed(&self) -> (TokenStream, Vec<(String, Vec<u8>)>) {
-        let mut file_definition_toks = quote!();
-        let mut fills = BTreeMap::<FillEntryContentId, Vec<u8>>::new();
-        self.spec()
-            .traverse_fill(|content| {
-                let content_bytes = self.get_fill_map(content).unwrap();
-                let id = self.encode_fill_entry_to_id(content);
-                if !fills.contains_key(&id) {
-                    let ident = self.embedded_file_ident_from_id(&id);
-                    let fname = self.embedded_file_fname_from_id(&id);
-                    file_definition_toks.extend(quote! {
-                        #[allow(non_upper_case_globals)]
+        let prefix = self.qualification_prefix(true);
+
+        let mut file_inclusion_toks = quote!();
+        let mut files_for_inclusion = BTreeMap::<String, Vec<u8>>::new();
+        let mut embedded_frame_count = 0usize;
+        let spec = self
+            .spec()
+            .traverse_data::<Ident, !>(|data| {
+                let id = hex::encode_upper(format!(
+                    "{},{},{}",
+                    data.file_range().start,
+                    data.file_range().end,
+                    data.file
+                ));
+                let ident = format_ident!("CHUNK_{}", id);
+                let fname = format!("chunk.{}.bin", id);
+                if !files_for_inclusion.contains_key(&fname) {
+                    file_inclusion_toks.extend(quote! {
                         const #ident: &[u8] = include_bytes!(concat!(env!("OUT_DIR"), "/", #fname));
                     });
-                    let content = self.pack_fill(content_bytes);
-                    fills.insert(id, content);
+                    files_for_inclusion.insert(fname, self.pack_fill(self.fill_map.get(data)));
                 }
-                Ok::<(), !>(())
+                Ok(ident)
+            })
+            .into_ok()
+            .traverse_embedded_frames::<Ident, !>(|fill| {
+                let ident = format_ident!("FRAME_{}", embedded_frame_count);
+                let fname = format!("frame.{}.bin", embedded_frame_count);
+                file_inclusion_toks.extend(quote! {
+                    const #ident: #prefix SelfContained<#prefix EmbeddedFrame> = #prefix SelfContained::new(
+                        #prefix embed_frame!(4096, *include_bytes!(concat!(env!("OUT_DIR"), "/", #fname)))
+                    );
+                });
+                files_for_inclusion.insert(fname, self.fill_map.get_frame(self.granule_size(), fill));
+                embedded_frame_count += 1;
+                Ok(ident)
             })
             .into_ok();
 
         let types_mod = self.types_mod();
         let name_type = self.name_type(true);
         let fill_type = self.fill_type(true);
+        let embedded_frame_type = quote!(#prefix SelfContained<#prefix EmbeddedFrame>);
 
-        let objects = self.embed_objects();
-        let irqs = self.embed_irqs();
-        let root_objects = self.embed_root_objects();
-        let untyped_covers = self.embed_untyped_covers();
-        let asid_slots = self.embed_asid_slots();
+        let objects = spec.named_objects().map(|NamedObject { name, object }| {
+            let name = self.name_value(object, name);
+            let object = self.embed_object(object);
+            quote! {
+                NamedObject {
+                    name: #name,
+                    object: #object,
+                }
+            }
+        });
+
+        let irqs = to_tokens_via_debug(&spec.irqs);
+        let root_objects = to_tokens_via_debug(&spec.root_objects);
+        let untyped_covers = to_tokens_via_debug(&spec.untyped_covers);
+        let asid_slots = to_tokens_via_debug(&spec.asid_slots);
 
         let toks = quote! {
             #[allow(unused_imports)]
-            pub const SPEC: #types_mod::Spec<'static, #name_type, #fill_type> = {
+            pub const SPEC: #types_mod::Spec<'static, #name_type, #fill_type, #embedded_frame_type> = {
 
                 use #types_mod::*;
 
-                #file_definition_toks
+                #file_inclusion_toks
 
-                const NAMED_OBJECTS: &[NamedObject<#name_type, #fill_type>] = &#objects;
+                const NAMED_OBJECTS: &[NamedObject<#name_type, #fill_type, #embedded_frame_type>] = &[#(#objects,)*];
 
                 Spec {
                     objects: Indirect::from_borrowed(NAMED_OBJECTS),
-                    irqs: #irqs,
+                    irqs: Indirect::from_borrowed(#irqs.as_slice()),
                     root_objects: #root_objects,
-                    untyped_covers: #untyped_covers,
-                    asid_slots: #asid_slots,
+                    untyped_covers: Indirect::from_borrowed(#untyped_covers.as_slice()),
+                    asid_slots: Indirect::from_borrowed(#asid_slots.as_slice()),
                 }
             };
         };
 
-        let fills = fills
-            .into_iter()
-            .map(|(id, bytes)| (self.embedded_file_fname_from_id(&id), bytes))
-            .collect();
-        (toks, fills)
+        (toks, files_for_inclusion.into_iter().collect())
     }
 }

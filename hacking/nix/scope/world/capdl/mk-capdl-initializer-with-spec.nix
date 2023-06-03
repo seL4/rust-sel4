@@ -37,5 +37,6 @@ in lib.fix (self: runCommand "capdl-initializer-with-spec" {
     -f ${json} \
     -d ${fill} \
     --object-names-level 2 \
+    --embed-frames \
     -o $out
 '')

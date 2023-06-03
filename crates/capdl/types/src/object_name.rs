@@ -7,7 +7,7 @@ use alloc::string::String;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::SelfContained;
+use crate::{NamedObject, Object, SelfContained};
 
 pub trait SelfContainedObjectName {
     fn self_contained_object_name(&self) -> Option<&str>;
@@ -75,5 +75,27 @@ impl<T: ObjectName> ObjectName for Option<T> {
 
     fn object_name<'a>(&'a self, source: &'a Self::Source) -> Option<&'a str> {
         self.as_ref().and_then(|name| name.object_name(source))
+    }
+}
+
+// // //
+
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub enum ObjectNamesLevel {
+    All,
+    JustTCBs,
+    None,
+}
+
+impl ObjectNamesLevel {
+    pub fn apply<'a, 'b, N, D, M>(&self, named_obj: &'b NamedObject<'a, N, D, M>) -> Option<&'b N> {
+        match self {
+            Self::All => Some(&named_obj.name),
+            Self::JustTCBs => match &named_obj.object {
+                Object::TCB(_) => Some(&named_obj.name),
+                _ => None,
+            },
+            Self::None => None,
+        }
     }
 }

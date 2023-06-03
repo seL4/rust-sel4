@@ -15,7 +15,6 @@ mk {
   # };
   nix.local.dependencies = with localCrates; [
     capdl-initializer-core
-    capdl-initializer-types
     capdl-types
     sel4
     sel4-dlmalloc

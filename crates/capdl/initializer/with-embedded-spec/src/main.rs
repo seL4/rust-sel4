@@ -29,6 +29,7 @@ fn main(bootinfo: &BootInfo) -> ! {
         spec: SPEC,
         object_name_source: &trivial_source,
         content_source: &trivial_source,
+        embedded_frame_source: &trivial_source,
     };
     Initializer::initialize(&bootinfo, user_image_bounds(), &spec_with_sources, unsafe {
         &mut BUFFERS

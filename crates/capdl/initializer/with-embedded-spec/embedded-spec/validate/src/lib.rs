@@ -1,12 +1,12 @@
 #![feature(never_type)]
 #![feature(unwrap_infallible)]
 
-use std::fmt;
+use std::slice;
 
 use capdl_initializer_with_embedded_spec_build_env::get_embedding;
 use capdl_types::*;
 
-type SpecCommon<'a, N> = Spec<'a, N, Vec<u8>>;
+type SpecCommon = Spec<'static, Option<String>, Vec<u8>, Vec<u8>>;
 
 pub fn run(tell_cargo: bool) {
     let (embedding, footprint) = get_embedding();
@@ -15,26 +15,42 @@ pub fn run(tell_cargo: bool) {
         footprint.tell_cargo();
     }
 
-    let serialized = embedding
-        .spec
-        .traverse_fill(|content| Ok::<_, !>(embedding.fill_map.get(content).unwrap().to_vec()))
+    let embedded = &capdl_initializer_with_embedded_spec_embedded_spec::SPEC;
+    let adapted_embedded: SpecCommon = embedded
+        .traverse_names_with_context::<_, !>(|named_obj| {
+            Ok(named_obj.name.inner().to_common().map(ToOwned::to_owned))
+        })
+        .into_ok()
+        .traverse_data_with_context::<_, !>(|length, data| {
+            let mut buf = vec![0; length];
+            data.inner().self_contained_copy_out(&mut buf);
+            Ok(buf)
+        })
+        .into_ok()
+        .traverse_embedded_frames::<_, !>(|frame| {
+            Ok(unsafe {
+                slice::from_raw_parts(frame.inner().ptr(), embedding.granule_size()).to_vec()
+            })
+        })
         .into_ok();
 
-    compare(
-        &serialized,
-        &capdl_initializer_with_embedded_spec_embedded_spec::SPEC,
-    )
-}
+    let input = &embedding.spec;
+    let adapted_input: SpecCommon = input
+        .traverse_names_with_context::<_, !>(|named_obj| {
+            Ok(embedding
+                .object_names_level
+                .apply(named_obj)
+                .map(Clone::clone))
+        })
+        .into_ok()
+        .traverse_data::<_, !>(|key| Ok(embedding.fill_map.get(key).to_vec()))
+        .into_ok()
+        .traverse_embedded_frames::<_, !>(|fill| {
+            Ok(embedding.fill_map.get_frame(embedding.granule_size(), fill))
+        })
+        .into_ok();
 
-fn compare<'a, N: ObjectNameForComparison, F: SelfContainedContent>(
-    serialized: &Spec<'a, String, Vec<u8>>,
-    embedded: &Spec<'a, SelfContained<N>, SelfContained<F>>,
-) where
-    N::ComparisonPoint: fmt::Debug,
-{
-    let serialized = adapt_serialized::<N>(serialized);
-    let embedded = adapt_embedded(embedded);
-    if serialized != embedded {
+    if adapted_embedded != adapted_input {
         // NOTE for debugging:
         // std::fs::write("embedded.txt", format!("{:#?}", &embedded)).unwrap();
         // std::fs::write("serialized.txt", format!("{:#?}", &serialized)).unwrap();
@@ -42,67 +58,24 @@ fn compare<'a, N: ObjectNameForComparison, F: SelfContainedContent>(
     }
 }
 
-fn adapt_embedded<'a, N: ObjectNameForComparison, F: SelfContainedContent>(
-    spec: &Spec<'a, SelfContained<N>, SelfContained<F>>,
-) -> SpecCommon<'a, N::ComparisonPoint> {
-    spec.traverse(
-        |_object, name| Ok(name.inner().us()),
-        |length, content| {
-            let mut v = vec![0; length];
-            content.inner().self_contained_copy_out(&mut v);
-            Ok::<_, !>(v)
-        },
-    )
-    .into_ok()
-}
-
-fn adapt_serialized<'a, N: ObjectNameForComparison>(
-    spec: &Spec<'a, String, Vec<u8>>,
-) -> SpecCommon<'a, N::ComparisonPoint> {
-    spec.traverse_names(|name| Ok::<_, !>(N::them(name)))
-        .into_ok()
-}
-
 trait ObjectNameForComparison {
-    type ComparisonPoint: Clone + Eq + PartialEq;
-
-    fn us(&self) -> Self::ComparisonPoint;
-    fn them(them: &str) -> Self::ComparisonPoint;
+    fn to_common(&self) -> Option<&str>;
 }
 
 impl ObjectNameForComparison for Unnamed {
-    type ComparisonPoint = ();
-
-    fn us(&self) -> Self::ComparisonPoint {
-        ()
-    }
-
-    fn them(_them: &str) -> Self::ComparisonPoint {
-        ()
+    fn to_common(&self) -> Option<&str> {
+        None
     }
 }
 
-// TODO
 impl ObjectNameForComparison for Option<&str> {
-    type ComparisonPoint = ();
-
-    fn us(&self) -> Self::ComparisonPoint {
-        ()
-    }
-
-    fn them(_them: &str) -> Self::ComparisonPoint {
-        ()
+    fn to_common(&self) -> Option<&str> {
+        *self
     }
 }
 
 impl ObjectNameForComparison for &str {
-    type ComparisonPoint = String;
-
-    fn us(&self) -> Self::ComparisonPoint {
-        (*self).to_owned()
-    }
-
-    fn them(them: &str) -> Self::ComparisonPoint {
-        them.to_owned()
+    fn to_common(&self) -> Option<&str> {
+        Some(self)
     }
 }

@@ -7,7 +7,7 @@ mk {
     capdl-types
   ];
   dependencies = {
-    capdl-types.features = [ "alloc" "serde" ];
+    capdl-types.features = [ "std" "serde" ];
     inherit (versions) serde serde_json;
   };
   nix.meta.requirements = [ "linux" ];

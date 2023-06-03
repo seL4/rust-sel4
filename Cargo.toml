@@ -7,7 +7,6 @@ members = [
     "crates/capdl/initializer",
     "crates/capdl/initializer/add-spec",
     "crates/capdl/initializer/core",
-    "crates/capdl/initializer/types",
     "crates/capdl/initializer/with-embedded-spec",
     "crates/capdl/initializer/with-embedded-spec/build-env",
     "crates/capdl/initializer/with-embedded-spec/embedded-spec",
