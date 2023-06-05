@@ -101,7 +101,7 @@ pub mod _private {
 
     pub use crate::{declare_init, declare_protection_domain, entry::run_main};
 
-    pub const DEFAULT_STACK_SIZE: usize = 0x4000;
+    pub const DEFAULT_STACK_SIZE: usize = 0x10000;
 }
 
 sel4::config::sel4_cfg_if! {
