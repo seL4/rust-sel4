@@ -143,7 +143,7 @@ sel4_cfg_if! {
                     benchmark_reset_thread_utilisation,
                 };
 
-                #[cfg(DEBUG_BUILD)]
+                #[sel4_cfg(DEBUG_BUILD)]
                 pub use benchmark::{
                     benchmark_dump_all_thread_utilisation,
                     benchmark_reset_all_thread_utilisation,
