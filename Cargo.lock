@@ -316,24 +316,11 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "38fcc2979eff34a4b84e1cf9a1e3da42a7d44b3b690a40cdcb23e3d556cfb2e5"
 
 [[package]]
-name = "capdl-embed-spec"
-version = "0.1.0"
-dependencies = [
- "capdl-types",
- "hex 0.4.3",
- "proc-macro2",
- "quote",
- "serde",
- "serde_json",
- "syn 1.0.109",
-]
-
-[[package]]
 name = "capdl-initializer"
 version = "0.1.0"
 dependencies = [
  "capdl-initializer-core",
- "capdl-types",
+ "capdl-initializer-types",
  "log",
  "postcard",
  "sel4",
@@ -348,7 +335,7 @@ name = "capdl-initializer-add-spec"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "capdl-types",
+ "capdl-initializer-types",
  "clap 3.2.25",
  "fallible-iterator",
  "object",
@@ -361,59 +348,29 @@ dependencies = [
 name = "capdl-initializer-core"
 version = "0.1.0"
 dependencies = [
- "capdl-types",
+ "capdl-initializer-types",
  "log",
  "sel4",
 ]
 
 [[package]]
-name = "capdl-initializer-with-embedded-spec"
+name = "capdl-initializer-embed-spec"
 version = "0.1.0"
 dependencies = [
- "capdl-initializer-core",
- "capdl-initializer-with-embedded-spec-embedded-spec",
- "capdl-initializer-with-embedded-spec-embedded-spec-validate",
- "capdl-types",
- "sel4",
- "sel4-logging",
- "sel4-root-task",
-]
-
-[[package]]
-name = "capdl-initializer-with-embedded-spec-build-env"
-version = "0.1.0"
-dependencies = [
- "capdl-embed-spec",
- "capdl-types",
+ "capdl-initializer-types",
+ "hex 0.4.3",
+ "proc-macro2",
+ "quote",
  "serde",
  "serde_json",
+ "syn 1.0.109",
 ]
 
 [[package]]
-name = "capdl-initializer-with-embedded-spec-embedded-spec"
+name = "capdl-initializer-types"
 version = "0.1.0"
 dependencies = [
- "capdl-embed-spec",
- "capdl-initializer-with-embedded-spec-build-env",
- "capdl-types",
- "sel4-rustfmt-helper",
- "serde_json",
-]
-
-[[package]]
-name = "capdl-initializer-with-embedded-spec-embedded-spec-validate"
-version = "0.1.0"
-dependencies = [
- "capdl-initializer-with-embedded-spec-build-env",
- "capdl-initializer-with-embedded-spec-embedded-spec",
- "capdl-types",
-]
-
-[[package]]
-name = "capdl-types"
-version = "0.1.0"
-dependencies = [
- "capdl-types-derive",
+ "capdl-initializer-types-derive",
  "cfg-if",
  "log",
  "miniz_oxide 0.6.2",
@@ -423,13 +380,56 @@ dependencies = [
 ]
 
 [[package]]
-name = "capdl-types-derive"
+name = "capdl-initializer-types-derive"
 version = "0.1.0"
 dependencies = [
  "proc-macro2",
  "quote",
  "syn 1.0.109",
  "synstructure",
+]
+
+[[package]]
+name = "capdl-initializer-with-embedded-spec"
+version = "0.1.0"
+dependencies = [
+ "capdl-initializer-core",
+ "capdl-initializer-types",
+ "capdl-initializer-with-embedded-spec-embedded-spec",
+ "capdl-initializer-with-embedded-spec-embedded-spec-validate",
+ "sel4",
+ "sel4-logging",
+ "sel4-root-task",
+]
+
+[[package]]
+name = "capdl-initializer-with-embedded-spec-build-env"
+version = "0.1.0"
+dependencies = [
+ "capdl-initializer-embed-spec",
+ "capdl-initializer-types",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "capdl-initializer-with-embedded-spec-embedded-spec"
+version = "0.1.0"
+dependencies = [
+ "capdl-initializer-embed-spec",
+ "capdl-initializer-types",
+ "capdl-initializer-with-embedded-spec-build-env",
+ "sel4-rustfmt-helper",
+ "serde_json",
+]
+
+[[package]]
+name = "capdl-initializer-with-embedded-spec-embedded-spec-validate"
+version = "0.1.0"
+dependencies = [
+ "capdl-initializer-types",
+ "capdl-initializer-with-embedded-spec-build-env",
+ "capdl-initializer-with-embedded-spec-embedded-spec",
 ]
 
 [[package]]

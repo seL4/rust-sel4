@@ -1,0 +1,15 @@
+[package]
+name = "capdl-initializer-embed-spec"
+version = "0.1.0"
+authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
+edition = "2021"
+license = "BSD-2-Clause"
+
+[dependencies]
+capdl-initializer-types = { path = "../types", features = ["std", "deflate"] }
+hex = "0.4.3"
+proc-macro2 = "1.0.50"
+quote = "1.0.23"
+serde = "1.0.147"
+serde_json = "1.0.87"
+syn = { version = "1.0.107", features = ["full"] }

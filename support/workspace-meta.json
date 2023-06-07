@@ -58,13 +58,6 @@
     ],
     "skip": true
   },
-  "capdl-embed-spec": {
-    "labels": {},
-    "requirements": [
-      "linux"
-    ],
-    "skip": false
-  },
   "capdl-initializer": {
     "labels": [
       "leaf"
@@ -88,6 +81,25 @@
     "labels": {},
     "requirements": [
       "sel4"
+    ],
+    "skip": false
+  },
+  "capdl-initializer-embed-spec": {
+    "labels": {},
+    "requirements": [
+      "linux"
+    ],
+    "skip": false
+  },
+  "capdl-initializer-types": {
+    "labels": {},
+    "requirements": {},
+    "skip": false
+  },
+  "capdl-initializer-types-derive": {
+    "labels": {},
+    "requirements": [
+      "linux"
     ],
     "skip": false
   },
@@ -120,18 +132,6 @@
     "requirements": [
       "linux",
       "capdl-spec"
-    ],
-    "skip": false
-  },
-  "capdl-types": {
-    "labels": {},
-    "requirements": {},
-    "skip": false
-  },
-  "capdl-types-derive": {
-    "labels": {},
-    "requirements": [
-      "linux"
     ],
     "skip": false
   },
