@@ -30,6 +30,9 @@ self: with self; {
     pkgs.host.ia32.none.this.worlds.default.seL4
 
     pkgs.host.riscv64.noneWithLibc.gccMultiStdenvGeneric
+
+    example
+    example-rpi4-b-4gb
   ];
 
   everythingWithExcessList = lib.flatten [
@@ -83,5 +86,7 @@ self: with self; {
   );
 
   example = worlds.default.instances.examples.root-task.example-root-task.simulate;
+
+  example-rpi4-b-4gb = worlds.aarch64.bcm2711.instances.examples.root-task.example-root-task.bootCopied;
 
 }

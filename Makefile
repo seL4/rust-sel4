@@ -6,16 +6,18 @@ ifneq ($(J),)
 	jobs := -j$(J)
 endif
 
-nix_root = hacking/nix
+out := out
 
-nix_build = nix-build $(nix_root) $(keep_going) $(jobs)
+nix_root := hacking/nix
+
+nix_build := nix-build $(nix_root) $(keep_going) $(jobs)
 
 .PHONY: none
 none:
 
 .PHONY: clean
 clean:
-	rm -rf target
+	rm -rf $(out) target
 
 .PHONY: everything
 everything:
@@ -32,7 +34,11 @@ run-automated-tests:
 
 .PHONY: example
 example:
-	script=$$($(nix_build) -A example --no-out-link) && $$script
+	script=$$($(nix_build) -A $@ --no-out-link) && $$script
+
+.PHONY: example-rpi4-b-4gb
+example-rpi4-b-4gb:
+	$(nix_build) -A $@ -o $(out)/$@
 
 .PHONY: fmt
 fmt:

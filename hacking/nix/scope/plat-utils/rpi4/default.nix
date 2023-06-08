@@ -71,6 +71,10 @@ let
       ${extraCommands}
     '';
 
+  mkBootCopied = bootLinks: runCommand "boot" {} ''
+    cp -rL ${bootLinks} $out
+  '';
+
   defaultBootLinks = mkBootLinks {};
 
   mkInstanceForPlatform =
@@ -82,9 +86,10 @@ let
       boot = mkBootLinks {
         image = loader;
       };
+      bootCopied = mkBootCopied boot;
     in rec {
       attrs = {
-        inherit boot;
+        inherit boot bootCopied;
       };
       links = [
         { name = "boot";
