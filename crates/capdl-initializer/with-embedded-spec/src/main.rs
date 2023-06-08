@@ -6,8 +6,8 @@
 use core::ops::Range;
 
 use capdl_initializer_core::{Initializer, InitializerBuffers, PerObjectBuffer};
-use capdl_initializer_with_embedded_spec_embedded_spec::SPEC;
 use capdl_initializer_types::SpecWithSources;
+use capdl_initializer_with_embedded_spec_embedded_spec::SPEC;
 use sel4::BootInfo;
 use sel4_logging::{LevelFilter, Logger, LoggerBuilder};
 

@@ -3,8 +3,8 @@
 
 use std::slice;
 
-use capdl_initializer_with_embedded_spec_build_env::get_embedding;
 use capdl_initializer_types::*;
+use capdl_initializer_with_embedded_spec_build_env::get_embedding;
 
 type SpecCommon = Spec<'static, Option<String>, Vec<u8>, Vec<u8>>;
 
