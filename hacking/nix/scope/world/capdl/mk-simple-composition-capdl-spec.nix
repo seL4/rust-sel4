@@ -77,6 +77,5 @@ lib.fix (self: runCommand "manifest" {
 } ''
   export PYTHONPATH=$PYTHONPATH_:$PYTHONPATH
   export OUT_DIR=$out
-  echo $PYTHONPATH
   ${command}
 '')

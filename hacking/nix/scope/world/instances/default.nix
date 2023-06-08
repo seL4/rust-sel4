@@ -140,7 +140,7 @@ in rec {
     capdl = {
       threads = mkInstance {
         rootTask = mkCapDLRootTask rec {
-          # small = true;
+          small = true;
           script = ../../../../../crates/private/tests/capdl/threads/cdl.py;
           config = {
             components = {
@@ -159,7 +159,7 @@ in rec {
 
       utcover = mkInstance {
         rootTask = mkCapDLRootTask rec {
-          small = true;
+          # small = true;
           script = ../../../../../crates/private/tests/capdl/utcover/cdl.py;
           config = {
             components = {

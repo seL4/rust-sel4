@@ -22,7 +22,7 @@ let
 
   capdlCommon = {
     url = "https://gitlab.com/coliasgroup/capdl.git";
-    rev = "63652ffc60e2fbc3f88c275429c1eeee66e3ac43";
+    rev = "f47bacacb6f5cc81934b6ea3116ef95f27793195";
     local = localRoot + "/capdl";
   };
 
@@ -60,7 +60,6 @@ in rec {
     url = "https://gitlab.com/coliasgroup/sel4cp.git";
     rev = "e8d3350fb1f06c5ad3a436be1f09de89d97370e8"; # branch "rust-seL4-nix"
     local = localRoot + "/sel4cp";
-    # useLocal = true;
   };
 
   capdlTool = fetchGit (capdlCommon // {
@@ -69,7 +68,6 @@ in rec {
 
   pythonCapDLTool = fetchGit (capdlCommon // {
     andThen = "/python-capdl-tool";
-    useLocal = true;
   });
 
   objectSizes = fetchGit (capdlCommon // {
