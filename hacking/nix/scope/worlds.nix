@@ -84,13 +84,13 @@ in rec {
       bcm2711 = mkWorld {
         inherit kernelLoaderConfig;
         kernelConfig = kernelConfigCommon // {
-          ARM_CPU = mkString "cortex-a57";
           KernelArch = mkString "arm";
           KernelSel4Arch = mkString "aarch64";
           KernelPlatform = mkString "bcm2711";
           KernelArmHypervisorSupport = on;
-          # KernelMaxNumNodes = mkString "2"; # TODO
+          KernelMaxNumNodes = mkString "2"; # TODO
         };
+        mkInstanceForPlatform = platUtils.rpi4.mkInstanceForPlatform;
       };
     };
 
