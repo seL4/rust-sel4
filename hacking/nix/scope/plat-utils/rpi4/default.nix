@@ -17,41 +17,6 @@ let
 
   baseBootDir = "${firmware}/boot";
 
-  # raspios =
-  #   let
-  #     version = "2021-05-07";
-  #     vname = "buster";
-  #     date = "2021-05-28";
-  #     sha256 = "sha256-K2+FXT3FgTCJzQ8iE3c9wh898GZguJxuS3nJx/mtHaU=";
-  #     basename = "${version}-raspios-${vname}-armhf-lite";
-  #     imgName = "${basename}.img";
-  #     zip = fetchzip {
-  #       name = "raspios-${version}.img";
-  #       url = "http://downloads.raspberrypi.org/raspios_lite_armhf/images/raspios_lite_armhf-${date}/${basename}.zip";
-  #       inherit sha256;
-  #     };
-  #     img = "${zip}/${imgName}";
-  #   in
-  #     stdenvNoCC.mkDerivation rec {
-  #       name = "raspios-${version}-boot";
-  #       dontAddHostSuffix = true;
-
-  #       phases = [ "installPhase" ];
-
-  #       nativeBuildInputs = [
-  #         mtools utillinux
-  #       ];
-
-  #       installPhase = ''
-  #         sector=$(partx -g -r -n 1 -o START ${img})
-  #         bytes=$(($sector * 512))
-  #         # This usage is undocumented. I don't know how it works.
-  #         mcopy -i ${img}@@$bytes -sv ::. $out
-  #       '';
-  #     };
-
-  # baseBootDir = raspios;
-
   configTxt = writeText "config.txt" ''
     enable_uart=1
     arm_64bit=1
