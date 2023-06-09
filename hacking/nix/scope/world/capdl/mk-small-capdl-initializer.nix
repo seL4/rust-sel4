@@ -25,9 +25,11 @@ in mkTask {
 
   rustTargetInfo = seL4RustTargetInfoWithConfig { minimal = true; };
 
-  extraProfile = {
-    opt-level = 1; # bug on 2
-  };
+  # release = false;
+
+  # extraProfile = {
+  #   opt-level = 1; # bug on 2
+  # };
 
   features = [ "deflate" ];
 
@@ -38,8 +40,6 @@ in mkTask {
       modifications = seL4Modifications;
     }
   ];
-
-  # release = false;
 
   lastLayerModifications = crateUtils.composeModifications seL4Modifications (crateUtils.elaborateModifications {
     modifyDerivation = drv: drv.overrideAttrs (self: super: {

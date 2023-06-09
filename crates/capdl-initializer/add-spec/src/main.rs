@@ -38,6 +38,7 @@ fn main() -> Result<()> {
         object_names_level,
         embed_frames,
         GRANULE_SIZE_BITS,
+        args.verbose,
     );
 
     let footprint = final_spec.total_footprint();

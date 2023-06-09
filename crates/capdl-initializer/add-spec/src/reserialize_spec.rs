@@ -9,12 +9,14 @@ pub fn reserialize_spec<'a>(
     object_names_level: &ObjectNamesLevel,
     embed_frames: bool,
     granule_size_bits: usize,
+    verbose: bool,
 ) -> (SpecWithIndirection<'a>, Vec<u8>) {
     let granule_size = 1 << granule_size_bits;
 
     let fill_map = input_spec.collect_fill(&[fill_dir_path]);
 
     let mut sources = SourcesBuilder::new();
+    let mut num_embedded_frames = 0;
     let final_spec: SpecWithIndirection<'a> = input_spec
         .traverse_names_with_context::<_, !>(|named_obj| {
             Ok(object_names_level
@@ -33,11 +35,16 @@ pub fn reserialize_spec<'a>(
         })
         .into_ok()
         .traverse_embedded_frames::<IndirectEmbeddedFrame, !>(|fill| {
+            num_embedded_frames += 1;
             sources.align_to(granule_size);
             let range = sources.append(&fill_map.get_frame(granule_size, fill));
             Ok(IndirectEmbeddedFrame::new(range.start))
         })
         .into_ok();
+
+    if verbose {
+        eprintln!("embedded frames count: {}", num_embedded_frames);
+    }
 
     let mut blob = postcard::to_allocvec(&final_spec).unwrap();
     blob.extend(sources.build());

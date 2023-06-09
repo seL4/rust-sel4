@@ -47,7 +47,7 @@ pub use object_name::{
 };
 pub use spec::{
     cap, object, ASIDSlotEntry, Badge, CPtr, Cap, CapSlot, CapTableEntry, IRQEntry, NamedObject,
-    Object, ObjectId, Rights, Spec, TryFromCapError, TryFromObjectError, Word,
+    Object, ObjectId, Rights, Spec, TryFromCapError, TryFromObjectError, UntypedCover, Word,
 };
 
 #[cfg(feature = "alloc")]

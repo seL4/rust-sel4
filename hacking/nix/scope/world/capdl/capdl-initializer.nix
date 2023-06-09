@@ -20,9 +20,9 @@ in mkTask {
 
   # release = false;
 
-  extraProfile = {
-    opt-level = 1; # bug on 2
-  };
+  # extraProfile = {
+  #   opt-level = 1; # bug on 2
+  # };
 
   # layers = [
   #   crateUtils.defaultIntermediateLayer
