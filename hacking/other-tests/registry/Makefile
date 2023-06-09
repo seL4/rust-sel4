@@ -1,5 +1,14 @@
 root := ../../..
 
+.PHONY: clean
+clean:
+	rm -rf \
+		target \
+		Cargo.lock \
+		registry-link \
+	rm -rf \
+		~/.cargo/registry/*/-*
+
 .INTERMEDIATE: registry-link-intermediate
 registry-link-intermediate:
 	nix-build $(root) -A pkgs.build.this.registry.staticRegistry --out-link registry-link
@@ -10,8 +19,8 @@ registry-link: registry-link-intermediate
 shell:
 	nix-shell $(root) -A worlds.default.shell
 
-.PHONY: test
-test: registry-link
+.PHONY: test-build
+test-build: registry-link
 	RUST_TARGET_PATH=$(abspath $(root)/support/targets) \
 	CARGO_REGISTRIES_SEL4_INDEX=file://$(abspath registry-link)/index \
 		cargo build \
@@ -19,13 +28,8 @@ test: registry-link
 			-Z build-std-features=compiler-builtins-mem \
 			--target aarch64-sel4
 
-.PHONY: clean
-clean:
-	rm registry-link Cargo.lock
-	rm -rf ~/.cargo/registry/*/-*
-
-.PHONY: test2
-test2: registry-link
+.PHONY: test-install
+test-install: registry-link
 	RUST_TARGET_PATH=$(abspath $(root)/support/targets) \
 	CARGO_REGISTRIES_SEL4_INDEX=file://$(abspath registry-link)/index \
 		cargo install \
