@@ -6,6 +6,7 @@ edition = "2021"
 license = "BSD-2-Clause"
 
 [dependencies]
+mbedtls = { version = "0.9.1", default-features = false, features = ["no_std_deps"] }
 sel4 = { path = "../../../../sel4" }
 sel4-root-task = { path = "../../../../sel4-root-task" }
 

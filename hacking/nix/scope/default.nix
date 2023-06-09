@@ -1,6 +1,7 @@
 { lib, stdenv, buildPlatform, hostPlatform, targetPlatform
 , callPackage
 , linkFarm
+, overrideCC, libcCross
 , treeHelpers
 }:
 
@@ -205,5 +206,22 @@ superCallPackage ../rust-utils {} self //
   cargoManifestGenrationUtils = callPackage ../cargo-manifest-generation-utils {};
 
   generatedCargoManifests = callPackage ./generated-cargo-manifests {};
+
+  ### stdenv
+
+  stdenvWithLibc =
+    let
+      bintools = stdenv.cc.bintools.override {
+        libc = libcCross;
+        noLibc = false;
+      };
+    in
+      stdenv.override {
+        cc = stdenv.cc.override {
+          libc = libcCross;
+          noLibc = false;
+          inherit bintools;
+        };
+      };
 
 })
