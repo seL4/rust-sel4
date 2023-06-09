@@ -12,7 +12,7 @@ let
 
   rootCrate = crates.sel4-kernel-loader;
 
-  release = false;
+  release = true;
 
   profile = if release then "release" else "dev";
 
