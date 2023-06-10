@@ -1,0 +1,22 @@
+[package]
+name = "tests-capdl-virtio-net-components-test"
+version = "0.1.0"
+authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
+edition = "2021"
+license = "BSD-2-Clause"
+
+[dependencies]
+dlmalloc = "0.2.3"
+log = "0.4.17"
+sel4 = { path = "../../../../../../sel4" }
+sel4-logging = { path = "../../../../../../sel4-logging" }
+sel4-simple-task-runtime = { path = "../../../../../support/simple-task/sel4-simple-task-runtime" }
+sel4-sync = { path = "../../../../../../sel4-sync" }
+serde = { version = "1.0.147", default-features = false, features = ["alloc", "derive"] }
+
+[dependencies.sel4-simple-task-config-types]
+path = "../../../../../support/simple-task/sel4-simple-task-config-types"
+
+[dependencies.virtio-drivers]
+git = "https://github.com/rcore-os/virtio-drivers.git"
+rev = "b003840720ac1f6970f2945f443a56ae28a68a3a"

@@ -547,6 +547,15 @@
     ],
     "skip": false
   },
+  "tests-capdl-virtio-net-components-test": {
+    "labels": [
+      "leaf"
+    ],
+    "requirements": [
+      "sel4"
+    ],
+    "skip": false
+  },
   "tests-root-task-backtrace": {
     "labels": [
       "leaf"

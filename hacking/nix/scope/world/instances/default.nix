@@ -1,12 +1,17 @@
 { lib, hostPlatform, buildPackages
+, callPackage
 , writeScript, linkFarm
+
 , crates
+, crateUtils
+
 , mkTask, mkSeL4KernelWithPayload
 , embedDebugInfo
 , seL4RustTargetInfoWithConfig
 , worldConfig
-, callPackage
 , seL4ForBoot
+, seL4Config
+, seL4RustEnvVars
 
 , mkCapDLInitializer
 , mkSmallCapDLInitializer
@@ -174,6 +179,37 @@ in rec {
           };
         };
         isSupported = haveFullRuntime;
+        canAutomate = true;
+      };
+
+      virtio-net = mkInstance {
+        rootTask = mkCapDLRootTask rec {
+          # small = true;
+          script = ../../../../../crates/private/tests/capdl/virtio-net/cdl.py;
+          config = {
+            components = {
+              example_component.image = passthru.test.elf;
+            };
+          };
+          passthru = {
+            test = mkTask {
+              rootCrate = crates.tests-capdl-virtio-net-components-test;
+              release = false;
+              layers = [
+                crateUtils.defaultIntermediateLayer
+                {
+                  crates = [
+                    "sel4-simple-task-runtime"
+                  ];
+                  modifications = {
+                    modifyDerivation = drv: drv.overrideAttrs (self: super: seL4RustEnvVars);
+                  };
+                }
+              ];
+            };
+          };
+        };
+        isSupported = hostPlatform.isAarch64 && seL4Config.PLAT == "qemu-arm-virt";
         canAutomate = true;
       };
     };

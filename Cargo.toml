@@ -34,6 +34,7 @@ members = [
     "crates/private/support/simple-task/sel4-simple-task-threading",
     "crates/private/tests/capdl/threads/components/test",
     "crates/private/tests/capdl/utcover/components/test",
+    "crates/private/tests/capdl/virtio-net/components/test",
     "crates/private/tests/root-task/backtrace",
     "crates/private/tests/root-task/c",
     "crates/private/tests/root-task/config",
