@@ -1,0 +1,52 @@
+[package]
+name = "tests-capdl-http-server-components-test"
+version = "0.1.0"
+authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
+edition = "2021"
+license = "BSD-2-Clause"
+
+[dependencies]
+dlmalloc = "0.2.3"
+futures = { version = "0.3.28", default-features = false, features = ["async-await", "alloc"] }
+log = "0.4.17"
+sel4 = { path = "../../../../../../sel4" }
+sel4-bounce-buffer-allocator = { path = "../../../../../../sel4-bounce-buffer-allocator" }
+sel4-logging = { path = "../../../../../../sel4-logging" }
+sel4-simple-task-runtime = { path = "../../../../../support/simple-task/sel4-simple-task-runtime" }
+sel4-sync = { path = "../../../../../../sel4-sync" }
+serde = { version = "1.0.147", default-features = false, features = ["alloc", "derive"] }
+
+[dependencies.sel4-async-single-threaded-executor]
+path = "../../../../../../sel4-async/single-threaded-executor"
+
+[dependencies.sel4-simple-task-config-types]
+path = "../../../../../support/simple-task/sel4-simple-task-config-types"
+
+[dependencies.smoltcp]
+version = "0.9.1"
+default-features = false
+features = [
+    "log",
+    "medium-ethernet",
+    "medium-ip",
+    "medium-ieee802154",
+    "proto-ipv4",
+    "proto-igmp",
+    "proto-dhcpv4",
+    "proto-ipv6",
+    "proto-dns",
+    "proto-ipv4-fragmentation",
+    "proto-sixlowpan-fragmentation",
+    "socket-raw",
+    "socket-icmp",
+    "socket-udp",
+    "socket-tcp",
+    "socket-dhcpv4",
+    "socket-dns",
+    "socket-mdns",
+    "async"
+]
+
+[dependencies.virtio-drivers]
+git = "https://github.com/nspin/virtio-drivers.git"
+rev = "409ee723c92adf309e825a7b87f53049707ed306"

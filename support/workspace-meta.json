@@ -176,6 +176,11 @@
     ],
     "skip": false
   },
+  "sel4-async-single-threaded-executor": {
+    "labels": {},
+    "requirements": {},
+    "skip": false
+  },
   "sel4-backtrace": {
     "labels": {},
     "requirements": [
@@ -228,6 +233,11 @@
     "requirements": [
       "sel4"
     ],
+    "skip": false
+  },
+  "sel4-bounce-buffer-allocator": {
+    "labels": {},
+    "requirements": {},
     "skip": false
   },
   "sel4-build-env": {
@@ -529,6 +539,15 @@
     ],
     "skip": true
   },
+  "tests-capdl-http-server-components-test": {
+    "labels": [
+      "leaf"
+    ],
+    "requirements": [
+      "sel4"
+    ],
+    "skip": false
+  },
   "tests-capdl-threads-components-test": {
     "labels": [
       "leaf"
@@ -539,15 +558,6 @@
     "skip": false
   },
   "tests-capdl-utcover-components-test": {
-    "labels": [
-      "leaf"
-    ],
-    "requirements": [
-      "sel4"
-    ],
-    "skip": false
-  },
-  "tests-capdl-virtio-net-components-test": {
     "labels": [
       "leaf"
     ],

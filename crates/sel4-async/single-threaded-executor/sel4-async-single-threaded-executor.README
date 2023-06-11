@@ -1,0 +1,5 @@
+The 'sel4-async-single-threaded-executor' crate is derived, with significant modification, from:
+
+https://github.com/rust-lang/futures-rs/tree/master/futures-executor
+
+See sel4-async-single-threaded-executor.LICENSE-{MIT,APACHE} for copyright information.

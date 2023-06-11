@@ -41,6 +41,7 @@ in rec {
     tests.root-task.panicking.unwind.withAlloc
     tests.root-task.panicking.unwind.withoutAlloc
     tests.root-task.c.instance
+    tests.capdl.http-server
     tests.capdl.threads
     tests.capdl.utcover
     sel4cp.hello.system
@@ -182,10 +183,10 @@ in rec {
         canAutomate = true;
       };
 
-      virtio-net = mkInstance {
+      http-server = mkInstance {
         rootTask = mkCapDLRootTask rec {
           # small = true;
-          script = ../../../../../crates/private/tests/capdl/virtio-net/cdl.py;
+          script = ../../../../../crates/private/tests/capdl/http-server/cdl.py;
           config = {
             components = {
               example_component.image = passthru.test.elf;
@@ -193,7 +194,7 @@ in rec {
           };
           passthru = {
             test = mkTask {
-              rootCrate = crates.tests-capdl-virtio-net-components-test;
+              rootCrate = crates.tests-capdl-http-server-components-test;
               release = false;
               layers = [
                 crateUtils.defaultIntermediateLayer
@@ -209,8 +210,10 @@ in rec {
             };
           };
         };
-        isSupported = hostPlatform.isAarch64 && seL4Config.PLAT == "qemu-arm-virt";
-        canAutomate = true;
+        isSupported = hostPlatform.isAarch64 && !isCorePlatform && seL4Config.PLAT == "qemu-arm-virt";
+        # canAutomate = true;
+        # isSupported = false;
+        canAutomate = false;
       };
     };
   };

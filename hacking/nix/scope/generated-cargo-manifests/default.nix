@@ -42,7 +42,9 @@ let
 
   localCratePathAttrs = lib.mapAttrs (_: crate: crate.path) crates;
 
-  externalCratePathAttrs = {};
+  externalCratePathAttrs = {
+    # "virtio-drivers" = "tmp/virtio-drivers";
+  };
 
   cratePathAttrs = localCratePathAttrs // externalCratePathAttrs;
 
@@ -74,6 +76,7 @@ let
         anyhow = "1.0.66";
         cfg-if = "1.0.0";
         fallible-iterator = "0.2.0";
+        futures = "0.3.28";
         heapless = "0.7.16";
         log = "0.4.17";
         num_enum = "0.5.9";

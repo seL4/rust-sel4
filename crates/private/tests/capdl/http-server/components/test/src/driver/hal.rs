@@ -70,10 +70,15 @@ unsafe impl Hal for HalImpl {
 
     unsafe fn share(buffer: NonNull<[u8]>, _direction: BufferDirection) -> PhysAddr {
         let vaddr = buffer.as_ptr() as *mut u8 as usize;
-        virt_to_phys(vaddr)
+        let paddr = virt_to_phys(vaddr);
+        trace!("share DMA: buffer={:#x?}, paddr={:#x}", buffer, paddr);
+        paddr
     }
 
-    unsafe fn unshare(_paddr: PhysAddr, _buffer: NonNull<[u8]>, _direction: BufferDirection) {}
+    unsafe fn unshare(paddr: PhysAddr, buffer: NonNull<[u8]>, _direction: BufferDirection) {
+        trace!("unshare DMA: paddr={:#x}, buffer={:#x?}", paddr, buffer);
+        // trace!("unshare DMA: buffer value={:x?}", buffer.as_ref());
+    }
 }
 
 fn virt_to_phys(vaddr: usize) -> PhysAddr {
