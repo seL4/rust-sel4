@@ -1,106 +1,78 @@
 #![no_std]
 #![feature(allocator_api)]
 #![feature(btreemap_alloc)]
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
+#![feature(int_roundings)]
+#![feature(pointer_is_aligned)]
+#![feature(slice_ptr_get)]
+#![feature(strict_provenance)]
 
 extern crate alloc;
 
-use alloc::alloc::Global;
-use alloc::collections::BTreeMap;
-use alloc::vec::Vec;
-use core::alloc::{Allocator, Layout};
+use core::alloc::Layout;
+use core::ptr::NonNull;
 
 type Offset = usize;
 type Size = usize;
 type Align = usize;
 
-struct AbstractBounceBufferAllocator<A: Allocator + Clone = Global> {
-    align: Align,
-    holes_by_offset: BTreeMap<Offset, Size, A>,
-    holes_by_size: BTreeMap<Size, Vec<Offset, A>, A>,
+mod basic;
+mod bump;
+
+pub use bump::Bump;
+
+const MIN_ALLOCATION_SIZE: Size = 1;
+
+pub trait AbstractBounceBufferAllocator {
+    type Error;
+
+    fn allocate(&mut self, layout: Layout) -> Result<Offset, Self::Error>;
+
+    fn deallocate(&mut self, offset: Offset);
 }
 
-struct AbstractBlock {
-    offset: Offset,
-    size: Size,
+pub struct BounceBufferAllocator<T> {
+    abstract_allocator: T,
+    region: NonNull<[u8]>,
+    max_alignment: Align,
 }
 
-struct AbstractSubBlock {
-    offset: Offset,
-    size: Size,
-}
+unsafe impl<T: Send> Send for BounceBufferAllocator<T> {}
 
-enum Error {}
-
-impl AbstractBounceBufferAllocator {
-    fn new(size: Size, align: Align) -> Self {
-        Self::new_in(Global, size, align)
-    }
-}
-
-impl<A: Allocator + Clone> AbstractBounceBufferAllocator<A> {
-    fn new_in(alloc: A, size: Size, align: Align) -> Self {
-        let offset = 0;
-        let mut holes_by_offset = BTreeMap::new_in(alloc.clone());
-        holes_by_offset.insert(offset, size);
-        let mut holes_by_size = BTreeMap::new_in(alloc.clone());
-        holes_by_size.insert(size, {
-            let mut v = Vec::new_in(alloc.clone());
-            v.push(offset);
-            v
-        });
+impl<T> BounceBufferAllocator<T> {
+    pub unsafe fn new(abstract_allocator: T, region: NonNull<[u8]>, max_alignment: Align) -> Self {
+        assert!(max_alignment.is_power_of_two());
+        assert!(region.as_ptr().is_aligned_to(max_alignment));
         Self {
-            align,
-            holes_by_offset,
-            holes_by_size,
+            abstract_allocator,
+            region,
+            max_alignment,
         }
     }
-
-    fn allocate(&mut self, layout: Layout) -> Result<AbstractBlock, Error> {
-        todo!()
-    }
-
-    fn deallocate(&mut self, sub_block: AbstractSubBlock) {
-        todo!()
-    }
 }
 
-struct BounceBufferAllocator<A: Allocator + Clone = Global> {
-    concrete_basis: *mut [u8],
-    abstrat_allocator: AbstractBounceBufferAllocator<A>,
+impl<T: AbstractBounceBufferAllocator> BounceBufferAllocator<T> {
+    pub fn allocate(&mut self, layout: Layout) -> Result<NonNull<[u8]>, T::Error> {
+        assert!(layout.align() <= self.max_alignment);
+        assert!(layout.size() >= MIN_ALLOCATION_SIZE);
+        let offset = self.abstract_allocator.allocate(layout)?;
+        assert!(offset + layout.size() <= self.region.len());
+        let ptr = self
+            .region
+            .as_non_null_ptr()
+            .map_addr(|addr| addr.checked_add(offset).unwrap());
+        Ok(NonNull::slice_from_raw_parts(ptr, layout.size()))
+    }
+
+    pub fn allocate_zeroed(&mut self, layout: Layout) -> Result<NonNull<[u8]>, T::Error> {
+        let ptr = self.allocate(layout)?;
+        unsafe {
+            ptr.as_non_null_ptr().as_ptr().write_bytes(0, ptr.len());
+        }
+        Ok(ptr)
+    }
+
+    pub unsafe fn deallocate(&mut self, ptr: NonNull<u8>) {
+        let offset = ptr.addr().get() - self.region.as_non_null_ptr().addr().get();
+        self.abstract_allocator.deallocate(offset)
+    }
 }
-
-// impl BounceBufferAllocator {
-//     fn new(region: *mut [u8]) -> Self {
-//         Self::new_in(Global, size, align)
-//     }
-// }
-
-// impl<A: Allocator + Clone> AbstractBounceBufferAllocator<A> {
-//     fn new_in(alloc: A, size: Size, align: Align) -> Self {
-//         let offset = 0;
-//         let mut holes_by_offset = BTreeMap::new_in(alloc.clone());
-//         holes_by_offset.insert(offset, size);
-//         let mut holes_by_size = BTreeMap::new_in(alloc.clone());
-//         holes_by_size.insert(size, {
-//             let mut v = Vec::new_in(alloc.clone());
-//             v.push(offset);
-//             v
-//         });
-//         Self {
-//             align,
-//             holes_by_offset,
-//             holes_by_size,
-//         }
-//     }
-
-//     fn allocate(&mut self, layout: Layout) -> Result<AbstractBlock, Error> {
-//         todo!()
-//     }
-
-//     fn deallocate(&mut self, sub_block: AbstractSubBlock) {
-//         todo!()
-//     }
-// }

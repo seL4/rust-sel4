@@ -5,6 +5,8 @@
 #![feature(thread_local)]
 #![feature(btreemap_alloc)]
 #![feature(lazy_cell)]
+#![feature(strict_provenance)]
+#![feature(slice_ptr_get)]
 #![allow(unused_imports)]
 #![allow(unused_variables)]
 #![allow(dead_code)]
@@ -31,6 +33,7 @@ const LOG_LEVEL: LevelFilter = LevelFilter::Trace;
 
 static LOGGER: Logger = LoggerBuilder::const_default()
     .level_filter(LOG_LEVEL)
+    .filter(|meta| !meta.target().starts_with("sel4_sys"))
     .write(|s| sel4::debug_print!("{}", s))
     .build();
 

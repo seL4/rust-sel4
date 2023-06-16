@@ -31,7 +31,10 @@ const NET_QUEUE_SIZE: usize = 16;
 
 pub fn test_driver(config: &Config) {
     HalImpl::init(
-        config.dma_vaddr_range.start as *mut u8..config.dma_vaddr_range.end as *mut u8,
+        NonNull::slice_from_raw_parts(
+            NonNull::new(config.dma_vaddr_range.start as *mut _).unwrap(),
+            config.dma_vaddr_range.end - config.dma_vaddr_range.start,
+        ),
         config.dma_vaddr_to_paddr_offset,
     );
 
@@ -50,47 +53,36 @@ pub fn test_driver(config: &Config) {
                 );
                 assert_eq!(transport.device_type(), DeviceType::Network);
                 assert!(net
-                    .replace(VirtIONetRaw::new(transport).expect("failed to create net driver"))
+                    .replace(
+                        VirtIONet::new(transport, NET_BUFFER_LEN)
+                            .expect("failed to create net driver")
+                    )
                     .is_none())
             }
         }
     }
 
-    let mut net: VirtIONetRaw<HalImpl, MmioTransport, NET_QUEUE_SIZE> = net.unwrap();
+    let mut net: VirtIONet<HalImpl, MmioTransport, NET_QUEUE_SIZE> = net.unwrap();
 
     let event_nfn = config.event_nfn.get();
     loop {
-        // let (_, badge) = event_nfn.wait();
-        // info!("badge: {:x}", badge);
+        let (_, _badge) = event_nfn.wait();
 
-        // while net.can_receive() {
-        unsafe {
-            let (paddr, vaddr) = HalImpl::dma_alloc(1, BufferDirection::Both);
-            let buf = slice::from_raw_parts_mut(vaddr.as_ptr(), 4096);
-            let (n_header, n_packet) = net.receive_wait(buf).unwrap();
-            debug_println!("n_header: {n_header}, n_packet: {n_packet}");
-            // debug_println!("packet: {:02X?}", &buf[n_header..][..n_packet]);
-            for b in &buf[n_header..][..n_packet] {
+        while net.can_recv() {
+            let buf = net.receive().unwrap();
+            let packet = buf.packet();
+            debug_println!("packet:");
+            for b in packet.iter() {
                 debug_print!("{:02X} ", b);
             }
             debug_println!();
+            net.recycle_rx_buffer(buf).unwrap();
         }
-        // let buf = net.receive().unwrap();
-        // let packet = buf.packet();
-        // debug_println!("packet: {:X?}", packet);
-        // }
 
-        // for cap in config.irq_handlers.iter() {
-        //     cap.get().irq_handler_ack().unwrap();
-        // }
+        for cap in config.irq_handlers.iter() {
+            cap.get().irq_handler_ack().unwrap();
+        }
 
-        // net.ack_interrupt();
-
-        // unsafe {
-        //     let p = 0x62000000 as *mut u64;
-        //     *p = 0x13333337;
-        // };
+        net.ack_interrupt();
     }
-
-    // debug_println!("TEST_PASS");
 }

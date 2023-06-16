@@ -9,10 +9,10 @@ use alloc::rc::{Rc, Weak};
 use alloc::sync::Arc;
 use alloc::vec::Vec;
 use core::cell::{LazyCell, RefCell};
+use core::pin::Pin;
 use core::sync::atomic::{AtomicBool, Ordering};
 
 use futures::future::Future;
-use futures::pin_mut;
 use futures::stream::FuturesUnordered;
 use futures::stream::StreamExt;
 use futures::task::{waker_ref, ArcWake};
@@ -106,9 +106,7 @@ impl LocalPool {
         run_executor_until_stalled(|cx| self.poll_pool(cx))
     }
 
-    pub fn run_until_stalled<F: Future>(&mut self, future: F) -> Poll<F::Output> {
-        pin_mut!(future);
-
+    pub fn run_until_stalled<F: Future>(&mut self, mut future: Pin<&mut F>) -> Poll<F::Output> {
         run_executor_until_stalled(|cx| {
             {
                 // if our main task is done, so are we
@@ -170,9 +168,8 @@ impl Default for LocalPool {
 ///
 /// Use a [`LocalPool`](LocalPool) if you need finer-grained control over
 /// spawned tasks.
-pub fn run_until_stalled<F: Future>(f: F) -> Poll<F::Output> {
-    pin_mut!(f);
-    run_executor_until_stalled(|cx| f.as_mut().poll(cx))
+pub fn run_until_stalled<F: Future>(mut future: Pin<&mut F>) -> Poll<F::Output> {
+    run_executor_until_stalled(|cx| future.as_mut().poll(cx))
 }
 
 impl Spawn for LocalSpawner {

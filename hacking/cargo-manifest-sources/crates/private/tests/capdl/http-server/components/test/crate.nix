@@ -5,7 +5,6 @@ mk {
   dependencies = rec {
     inherit (versions) log;
     serde = serdeWith [ "alloc" "derive" ];
-    dlmalloc = "0.2.3";
 
     futures = {
       version = versions.futures;
@@ -31,16 +30,15 @@ mk {
       ];
     };
 
-    # virtio-drivers = "0.5.0";
     virtio-drivers = {
-      git = "https://github.com/nspin/virtio-drivers.git";
-      rev = "409ee723c92adf309e825a7b87f53049707ed306";
-      # default-features = false;
-
-      # git = "https://github.com/rcore-os/virtio-drivers.git";
-      # rev = "b003840720ac1f6970f2945f443a56ae28a68a3a";
+      version = "0.5.0";
     };
-    # virtio-drivers = { default-features = false; };
+
+    # virtio-drivers = {
+    #   git = "https://github.com/nspin/virtio-drivers.git";
+    #   rev = "409ee723c92adf309e825a7b87f53049707ed306"; # branch new-netdev
+    #   # default-features = false; # disable "alloc"
+    # };
   };
   nix.local.dependencies = with localCrates; [
     sel4
