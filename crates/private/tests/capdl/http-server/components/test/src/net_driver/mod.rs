@@ -32,15 +32,19 @@ const NET_QUEUE_SIZE: usize = 16;
 pub fn test_driver(config: &Config) {
     HalImpl::init(
         NonNull::slice_from_raw_parts(
-            NonNull::new(config.dma_vaddr_range.start as *mut _).unwrap(),
-            config.dma_vaddr_range.end - config.dma_vaddr_range.start,
+            NonNull::new(config.virtio_dma_vaddr_range.start as *mut _).unwrap(),
+            config.virtio_dma_vaddr_range.end - config.virtio_dma_vaddr_range.start,
         ),
-        config.dma_vaddr_to_paddr_offset,
+        config.virtio_dma_vaddr_to_paddr_offset,
     );
 
     let mut net = None;
 
-    for region in config.mmio_vaddr_range.clone().step_by(MMIO_REGION_SIZE) {
+    for region in config
+        .virtio_mmio_vaddr_range
+        .clone()
+        .step_by(MMIO_REGION_SIZE)
+    {
         let header = NonNull::new(region as *mut VirtIOHeader).unwrap();
         match unsafe { MmioTransport::new(header) } {
             Err(e) => warn!("Error creating VirtIO MMIO transport: {}", e),
@@ -79,7 +83,7 @@ pub fn test_driver(config: &Config) {
             net.recycle_rx_buffer(buf).unwrap();
         }
 
-        for cap in config.irq_handlers.iter() {
+        for cap in config.virtio_irq_handlers.iter() {
             cap.get().irq_handler_ack().unwrap();
         }
 

@@ -51,22 +51,46 @@ class TestComponent(ElfComponent):
             label='dma_frame',
             )
 
+        timer_mmio_paddr = 0x90d0000
+        self.pad_and_align_to_page()
+        timer_mmio_vaddr, _ = self.advance(4096)
+        self.map_page(
+            timer_mmio_vaddr,
+            paddr=timer_mmio_paddr,
+            device=True,
+            read=True, write=True, cached=False,
+            label='timer_mmio_frame',
+            )
+
+        TIMER_IRQ_BADGE = 60
+
+        timer_irq = spi_base + 0x0b
+        timer_irq_handler = self.alloc(
+            ObjectType.seL4_IRQHandler,
+            name='timer_irq_{}_handler'.format(timer_irq),
+            number=timer_irq, trigger=ARMIRQMode.seL4_ARM_IRQ_LEVEL,
+            notification=Cap(event_nfn, badge=1 << TIMER_IRQ_BADGE),
+            )
+
         self._arg = {
             'event_nfn': self.cspace().alloc(event_nfn, read=True),
-            'irq_range': {
+            'virtio_irq_range': {
                 'start': irq_range_start,
                 'end': irq_range_end,
                 },
-            'irq_handlers': [ self.cspace().alloc(irq_handler) for irq_handler in irq_handlers ],
-            'mmio_vaddr_range': {
+            'virtio_irq_handlers': [ self.cspace().alloc(irq_handler) for irq_handler in irq_handlers ],
+            'virtio_mmio_vaddr_range': {
                 'start': mmio_vaddr_range_start,
                 'end': mmio_vaddr_range_end,
                 },
-            'dma_vaddr_range': {
+            'virtio_dma_vaddr_range': {
                 'start': dma_vaddr_range_start,
                 'end': dma_vaddr_range_end,
                 },
-            'dma_vaddr_to_paddr_offset': dma_paddr_range_start - dma_vaddr_range_start,
+            'virtio_dma_vaddr_to_paddr_offset': dma_paddr_range_start - dma_vaddr_range_start,
+            'timer_mmio_vaddr': timer_mmio_vaddr,
+            'timer_freq': 24 * 10**6,
+            'timer_irq_handler': self.cspace().alloc(timer_irq_handler),
             }
 
     def arg_json(self):

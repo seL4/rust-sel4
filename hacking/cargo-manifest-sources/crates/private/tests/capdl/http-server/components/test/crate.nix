@@ -39,6 +39,8 @@ mk {
     #   rev = "409ee723c92adf309e825a7b87f53049707ed306"; # branch new-netdev
     #   # default-features = false; # disable "alloc"
     # };
+
+    tock-registers = "0.8.1";
   };
   nix.local.dependencies = with localCrates; [
     sel4

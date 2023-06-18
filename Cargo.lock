@@ -3289,6 +3289,7 @@ dependencies = [
  "sel4-sync",
  "serde",
  "smoltcp",
+ "tock-registers",
  "virtio-drivers",
 ]
 

@@ -41,4 +41,14 @@ assert !(super ? scopeName);
     enableMultilib = true;
   }));
 
+  qemu = super.qemu.overrideDerivation (attrs: {
+    patches = attrs.patches ++ [
+      (fetchurl {
+        url = "https://gitlab.com/coliasgroup/qemu/-/commit/cd3b78de4b5a8d7c79ae99dab2b5e0ab1ba0ffac.patch";
+        sha256 = "sha256-oIMAZ4lwS7AgqXN1HpOjbqEi4AjwRfsKciW9wCJUTQI=";
+      })
+      # (this.sources.srcRoot + "/tmp/qemu.patch")
+    ];
+  });
+
 }
