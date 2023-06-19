@@ -1,36 +1,24 @@
 #![no_std]
 #![no_main]
-#![feature(error_in_core)]
-#![feature(allocator_api)]
-#![feature(thread_local)]
-#![feature(btreemap_alloc)]
-#![feature(lazy_cell)]
-#![feature(strict_provenance)]
 #![feature(slice_ptr_get)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
-#![allow(dead_code)]
+#![feature(strict_provenance)]
 
 extern crate alloc;
 
-use alloc::vec::Vec;
-use core::alloc::{GlobalAlloc, Layout};
-use core::cell::RefCell;
 use core::ops::Range;
-use core::ptr::{self, NonNull};
-use core::slice;
 
-use log::{debug, info, trace, warn};
 use serde::{Deserialize, Serialize};
 
 use sel4_logging::{LevelFilter, Logger, LoggerBuilder};
 use sel4_simple_task_config_types::*;
-use sel4_simple_task_runtime::{debug_print, debug_println, main_json};
+use sel4_simple_task_runtime::{debug_println, main_json};
 
-mod net_driver;
+mod net;
+mod test;
 mod timer;
 
-const LOG_LEVEL: LevelFilter = LevelFilter::Trace;
+// const LOG_LEVEL: LevelFilter = LevelFilter::Trace;
+const LOG_LEVEL: LevelFilter = LevelFilter::Debug;
 
 static LOGGER: Logger = LoggerBuilder::const_default()
     .level_filter(LOG_LEVEL)
@@ -57,8 +45,16 @@ fn main(config: Config) {
 
     // debug_println!("{:#x?}", config);
 
-    net_driver::test_driver(&config);
-    // timer::test_driver(&config);
+    let mut timer = timer::init(&config);
+    let mut net = net::init(&config);
+
+    test::test(
+        config.event_nfn.get(),
+        &mut timer,
+        config.timer_irq_handler.get(),
+        &mut net,
+        config.virtio_net_irq_handler.get(),
+    );
 
     debug_println!("TEST_PASS");
 }

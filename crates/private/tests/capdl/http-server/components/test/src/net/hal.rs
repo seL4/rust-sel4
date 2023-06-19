@@ -1,9 +1,7 @@
-use core::alloc::{GlobalAlloc, Layout};
-use core::cell::RefCell;
-use core::ops::Range;
-use core::ptr::{self, NonNull};
+use core::alloc::Layout;
+use core::ptr::NonNull;
 
-use log::{debug, info, trace, warn};
+use log::trace;
 use virtio_drivers::{BufferDirection, Hal, PhysAddr, PAGE_SIZE};
 
 use sel4_bounce_buffer_allocator::{BounceBufferAllocator, Bump};
@@ -11,7 +9,7 @@ use sel4_sync::{GenericMutex, PanickingMutexSyncOps};
 
 const MAX_ALIGNMENT: usize = 4096;
 
-pub(crate) struct HalImpl;
+pub struct HalImpl;
 
 impl HalImpl {
     pub(crate) fn init(dma_region: NonNull<[u8]>, dma_vaddr_to_paddr_offset: isize) {
