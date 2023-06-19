@@ -41,14 +41,14 @@ static LOGGER: Logger = LoggerBuilder::const_default()
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Config {
     pub event_nfn: ConfigCPtr<Notification>,
-    pub virtio_irq_range: Range<usize>,
-    pub virtio_irq_handlers: Vec<ConfigCPtr<IRQHandler>>,
-    pub virtio_mmio_vaddr_range: Range<usize>,
-    pub virtio_dma_vaddr_range: Range<usize>,
-    pub virtio_dma_vaddr_to_paddr_offset: isize,
     pub timer_irq_handler: ConfigCPtr<IRQHandler>,
     pub timer_mmio_vaddr: usize,
     pub timer_freq: usize,
+    pub virtio_net_irq_handler: ConfigCPtr<IRQHandler>,
+    pub virtio_net_mmio_vaddr: usize,
+    pub virtio_net_mmio_offset: usize,
+    pub virtio_net_dma_vaddr_range: Range<usize>,
+    pub virtio_net_dma_vaddr_to_paddr_offset: isize,
 }
 
 #[main_json]

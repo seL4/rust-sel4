@@ -32,42 +32,21 @@ const NET_QUEUE_SIZE: usize = 16;
 pub fn test_driver(config: &Config) {
     HalImpl::init(
         NonNull::slice_from_raw_parts(
-            NonNull::new(config.virtio_dma_vaddr_range.start as *mut _).unwrap(),
-            config.virtio_dma_vaddr_range.end - config.virtio_dma_vaddr_range.start,
+            NonNull::new(config.virtio_net_dma_vaddr_range.start as *mut _).unwrap(),
+            config.virtio_net_dma_vaddr_range.end - config.virtio_net_dma_vaddr_range.start,
         ),
-        config.virtio_dma_vaddr_to_paddr_offset,
+        config.virtio_net_dma_vaddr_to_paddr_offset,
     );
 
-    let mut net = None;
-
-    for region in config
-        .virtio_mmio_vaddr_range
-        .clone()
-        .step_by(MMIO_REGION_SIZE)
-    {
-        let header = NonNull::new(region as *mut VirtIOHeader).unwrap();
-        match unsafe { MmioTransport::new(header) } {
-            Err(e) => warn!("Error creating VirtIO MMIO transport: {}", e),
-            Ok(transport) => {
-                info!(
-                    "Detected virtio MMIO device with vendor id {:#X}, device type {:?}, version {:?}, xxx {:#x?}",
-                    transport.vendor_id(),
-                    transport.device_type(),
-                    transport.version(),
-                    region,
-                );
-                assert_eq!(transport.device_type(), DeviceType::Network);
-                assert!(net
-                    .replace(
-                        VirtIONet::new(transport, NET_BUFFER_LEN)
-                            .expect("failed to create net driver")
-                    )
-                    .is_none())
-            }
-        }
-    }
-
-    let mut net: VirtIONet<HalImpl, MmioTransport, NET_QUEUE_SIZE> = net.unwrap();
+    let mut net: VirtIONet<HalImpl, MmioTransport, NET_QUEUE_SIZE> = {
+        let header = NonNull::new(
+            (config.virtio_net_mmio_vaddr + config.virtio_net_mmio_offset) as *mut VirtIOHeader,
+        )
+        .unwrap();
+        let transport = unsafe { MmioTransport::new(header) }.unwrap();
+        assert_eq!(transport.device_type(), DeviceType::Network);
+        VirtIONet::new(transport, NET_BUFFER_LEN).unwrap()
+    };
 
     let event_nfn = config.event_nfn.get();
     loop {
@@ -84,9 +63,11 @@ pub fn test_driver(config: &Config) {
             net.recycle_rx_buffer(buf).unwrap();
         }
 
-        for cap in config.virtio_irq_handlers.iter() {
-            cap.get().irq_handler_ack().unwrap();
-        }
+        config
+            .virtio_net_irq_handler
+            .get()
+            .irq_handler_ack()
+            .unwrap();
 
         net.ack_interrupt();
     }
