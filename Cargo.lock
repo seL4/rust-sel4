@@ -3289,8 +3289,17 @@ dependencies = [
  "sel4-sync",
  "serde",
  "smoltcp",
+ "tests-capdl-http-server-components-test-sp804-driver",
  "tock-registers",
  "virtio-drivers",
+]
+
+[[package]]
+name = "tests-capdl-http-server-components-test-sp804-driver"
+version = "0.1.0"
+dependencies = [
+ "log",
+ "tock-registers",
 ]
 
 [[package]]

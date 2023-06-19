@@ -14,6 +14,7 @@ sel4-logging = { path = "../../../../../../sel4-logging" }
 sel4-simple-task-runtime = { path = "../../../../../support/simple-task/sel4-simple-task-runtime" }
 sel4-sync = { path = "../../../../../../sel4-sync" }
 serde = { version = "1.0.147", default-features = false, features = ["alloc", "derive"] }
+tests-capdl-http-server-components-test-sp804-driver = { path = "./sp804-driver" }
 tock-registers = "0.8.1"
 virtio-drivers = { version = "0.5.0" }
 

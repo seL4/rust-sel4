@@ -28,7 +28,7 @@ use sel4_simple_task_config_types::*;
 use sel4_simple_task_runtime::{debug_print, debug_println, main_json};
 
 mod net_driver;
-mod timer_driver;
+mod timer;
 
 const LOG_LEVEL: LevelFilter = LevelFilter::Trace;
 
@@ -57,8 +57,8 @@ fn main(config: Config) {
 
     // debug_println!("{:#x?}", config);
 
-    // net_driver::test_driver(&config);
-    timer_driver::test_driver(&config);
+    net_driver::test_driver(&config);
+    // timer::test_driver(&config);
 
     debug_println!("TEST_PASS");
 }

@@ -50,10 +50,11 @@ pub fn test_driver(config: &Config) {
             Err(e) => warn!("Error creating VirtIO MMIO transport: {}", e),
             Ok(transport) => {
                 info!(
-                    "Detected virtio MMIO device with vendor id {:#X}, device type {:?}, version {:?}",
+                    "Detected virtio MMIO device with vendor id {:#X}, device type {:?}, version {:?}, xxx {:#x?}",
                     transport.vendor_id(),
                     transport.device_type(),
                     transport.version(),
+                    region,
                 );
                 assert_eq!(transport.device_type(), DeviceType::Network);
                 assert!(net

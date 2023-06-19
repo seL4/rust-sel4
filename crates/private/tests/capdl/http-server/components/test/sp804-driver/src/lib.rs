@@ -1,16 +1,12 @@
-use alloc::vec::Vec;
-use core::alloc::{GlobalAlloc, Layout};
-use core::cell::RefCell;
-use core::ops::Deref;
-use core::ops::Range;
-use core::ptr::{self, NonNull};
-use core::slice;
+#![no_std]
+
 use core::time::Duration;
 
-use log::{debug, info, trace, warn};
 use tock_registers::interfaces::ReadWriteable;
 
-use super::device::{Control, Device, Timer};
+mod device;
+
+pub use device::{Control, Device, Timer};
 
 pub struct Driver {
     device: Device,
@@ -32,25 +28,23 @@ impl Driver {
     }
 
     fn init(&mut self) {
-        self.timer_for_reading()
-            .control()
-            .modify(Control::TimerEn::Disabled);
-        self.timer_for_writing()
-            .control()
-            .modify(Control::TimerEn::Disabled);
-        let control_common = Control::TimerPre::Div256 + Control::TimerSize::Use32Bit;
+        let control_common =
+            Control::TimerEn::Disabled + Control::TimerPre::Div256 + Control::TimerSize::Use32Bit;
+
         self.timer_for_reading()
             .control()
             .modify(control_common + Control::IntEnable::Enabled);
         self.timer_for_reading().set_free_running_mode();
+        self.timer_for_reading().clear_interrupt();
+        self.timer_for_reading().set_load(!0);
+
         self.timer_for_writing()
             .control()
             .modify(control_common + Control::IntEnable::Disabled);
         self.timer_for_writing().set_one_shot_mode();
-        self.timer_for_reading().set_load(!0);
+        self.timer_for_writing().clear_interrupt();
         self.timer_for_writing().set_load(0);
-        self.handle_interrupt();
-        self.clear_timeout();
+
         self.timer_for_reading()
             .control()
             .modify(Control::TimerEn::Enabled);

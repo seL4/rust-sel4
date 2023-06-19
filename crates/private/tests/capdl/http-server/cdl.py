@@ -89,7 +89,8 @@ class TestComponent(ElfComponent):
                 },
             'virtio_dma_vaddr_to_paddr_offset': dma_paddr_range_start - dma_vaddr_range_start,
             'timer_mmio_vaddr': timer_mmio_vaddr,
-            'timer_freq': 24 * 10**6,
+            # 'timer_freq': 24 * 10**6,
+            'timer_freq': 10**6, # HACK
             'timer_irq_handler': self.cspace().alloc(timer_irq_handler),
             }
 

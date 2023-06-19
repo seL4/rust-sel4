@@ -50,6 +50,7 @@ mk {
     sel4-simple-task-config-types
     sel4-async-single-threaded-executor
     sel4-bounce-buffer-allocator
+    tests-capdl-http-server-components-test-sp804-driver
 
     # virtio-drivers
   ];

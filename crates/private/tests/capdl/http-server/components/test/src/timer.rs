@@ -15,10 +15,7 @@ use sel4_simple_task_runtime::{debug_print, debug_println};
 
 use crate::Config;
 
-mod device;
-mod driver;
-
-use driver::Driver;
+use tests_capdl_http_server_components_test_sp804_driver::Driver;
 
 pub fn test_driver(config: &Config) {
     let mut driver = unsafe {
@@ -29,18 +26,19 @@ pub fn test_driver(config: &Config) {
     };
     let event_nfn = config.event_nfn.get();
 
-    loop {
-        config.timer_irq_handler.get().irq_handler_ack().unwrap();
-        driver.handle_interrupt();
-        debug!("now: {:?}", driver.now());
-        driver.set_timeout(Duration::from_millis(10));
-        let (_, _badge) = event_nfn.wait();
-        debug!("x now: {:?}", driver.now());
-        config.timer_irq_handler.get().irq_handler_ack().unwrap();
-        driver.handle_interrupt();
-    }
+    // loop {
+    //     config.timer_irq_handler.get().irq_handler_ack().unwrap();
+    //     driver.handle_interrupt();
+    //     debug!("now: {:?}", driver.now());
+    //     driver.set_timeout(Duration::from_millis(10));
+    //     let (_, _badge) = event_nfn.wait();
+    //     debug!("x now: {:?}", driver.now());
+    //     config.timer_irq_handler.get().irq_handler_ack().unwrap();
+    //     driver.handle_interrupt();
+    // }
 
-    let d = Duration::from_millis(10);
+    // let d = Duration::from_millis(10);
+    let d = Duration::from_secs(1);
 
     let mut last = Duration::from_secs(0);
 
