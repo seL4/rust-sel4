@@ -81,14 +81,14 @@ impl Driver {
         self.ticks_to_duration(ticks)
     }
 
-    pub fn ticks_to_duration(&self, ticks: u64) -> Duration {
+    fn ticks_to_duration(&self, ticks: u64) -> Duration {
         Duration::from_nanos(
             u64::try_from((u128::from(ticks) * 1_000_000_000) / u128::from(self.scaled_freq()))
                 .unwrap(),
         )
     }
 
-    pub fn duration_to_ticks(&self, d: Duration) -> u128 {
+    fn duration_to_ticks(&self, d: Duration) -> u128 {
         (d.as_nanos() * u128::from(self.scaled_freq())) / 1_000_000_000
     }
 

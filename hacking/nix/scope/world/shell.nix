@@ -1,5 +1,6 @@
 { lib, stdenv, buildPackages
-, writeText, mkShell
+, writeText, emptyFile
+, mkShell
 , defaultRustToolchain
 , defaultRustTargetInfo
 , bareMetalRustTargetInfo
@@ -38,6 +39,9 @@ mkShell (seL4RustEnvVars // kernelLoaderConfigEnvVars // capdlEnvVars // {
   ];
 
   LIBCLANG_PATH = "${lib.getLib buildPackages.llvmPackages.libclang}/lib";
+
+  # HACK
+  CONTENT_CPIO = emptyFile;
 
   hardeningDisable = [ "all" ];
 

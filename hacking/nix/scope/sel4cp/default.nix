@@ -151,7 +151,7 @@ let
     } ''
       export PYTHONPATH=${tool}:$PYTHONPATH
       mkdir $out
-	    python3 -m sel4coreplat ${systemXML} \
+        python3 -m sel4coreplat ${systemXML} \
         --search-path ${searchPath} \
         --board $SEL4CP_BOARD \
         --config $SEL4CP_CONFIG \

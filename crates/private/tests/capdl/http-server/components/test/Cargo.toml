@@ -6,9 +6,13 @@ edition = "2021"
 license = "BSD-2-Clause"
 
 [dependencies]
+cpio_reader = "0.1.1"
 futures = { version = "0.3.28", default-features = false, features = ["async-await", "alloc"] }
+httparse = { version = "1.8.0", default-features = false }
 log = "0.4.17"
 sel4 = { path = "../../../../../../sel4" }
+sel4-async-network = { path = "../../../../../../sel4-async/network" }
+sel4-async-timers = { path = "../../../../../../sel4-async/timers" }
 sel4-bounce-buffer-allocator = { path = "../../../../../../sel4-bounce-buffer-allocator" }
 sel4-logging = { path = "../../../../../../sel4-logging" }
 sel4-simple-task-runtime = { path = "../../../../../support/simple-task/sel4-simple-task-runtime" }
@@ -17,6 +21,12 @@ serde = { version = "1.0.147", default-features = false, features = ["alloc", "d
 tests-capdl-http-server-components-test-sp804-driver = { path = "./sp804-driver" }
 tock-registers = "0.8.1"
 virtio-drivers = { version = "0.5.0" }
+
+[dependencies.embedded-exfat]
+git = "https://github.com/qiuchengxuan/exfat"
+rev = "64a72a9e260596a936ffed09e329b32333c42d92"
+default-features = false
+features = ["async"]
 
 [dependencies.sel4-async-single-threaded-executor]
 path = "../../../../../../sel4-async/single-threaded-executor"
@@ -28,7 +38,8 @@ path = "../../../../../support/simple-task/sel4-simple-task-config-types"
 version = "0.9.1"
 default-features = false
 features = [
-    "log",
+    "alloc",
+    "async",
     "medium-ethernet",
     "medium-ip",
     "medium-ieee802154",
@@ -46,5 +57,5 @@ features = [
     "socket-dhcpv4",
     "socket-dns",
     "socket-mdns",
-    "async"
+    "log"
 ]

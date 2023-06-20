@@ -1,0 +1,36 @@
+[package]
+name = "sel4-async-timers"
+version = "0.1.0"
+authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
+edition = "2021"
+license = "BSD-2-Clause"
+
+[dependencies]
+futures = { version = "0.3.28", default-features = false, features = ["alloc"] }
+log = "0.4.17"
+
+[dependencies.smoltcp]
+version = "0.9.1"
+default-features = false
+features = [
+    "alloc",
+    "async",
+    "medium-ethernet",
+    "medium-ip",
+    "medium-ieee802154",
+    "proto-ipv4",
+    "proto-igmp",
+    "proto-dhcpv4",
+    "proto-ipv6",
+    "proto-dns",
+    "proto-ipv4-fragmentation",
+    "proto-sixlowpan-fragmentation",
+    "socket-raw",
+    "socket-icmp",
+    "socket-udp",
+    "socket-tcp",
+    "socket-dhcpv4",
+    "socket-dns",
+    "socket-mdns",
+    "log"
+]

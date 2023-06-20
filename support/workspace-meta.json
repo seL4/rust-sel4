@@ -176,7 +176,17 @@
     ],
     "skip": false
   },
+  "sel4-async-network": {
+    "labels": {},
+    "requirements": {},
+    "skip": false
+  },
   "sel4-async-single-threaded-executor": {
+    "labels": {},
+    "requirements": {},
+    "skip": false
+  },
+  "sel4-async-timers": {
     "labels": {},
     "requirements": {},
     "skip": false

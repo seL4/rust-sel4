@@ -67,7 +67,7 @@ self: with self;
       let
         d = "${sel4cpForUserspace.sdk}/board/qemu_arm_virt/debug";
       in {
-	      SEL4_INCLUDE_DIRS = "${d}/include";
+          SEL4_INCLUDE_DIRS = "${d}/include";
       }
     else {
       SEL4_PREFIX = seL4ForUserspace;

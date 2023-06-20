@@ -1,6 +1,8 @@
 { lib, hostPlatform, buildPackages
 , callPackage
-, writeScript, linkFarm
+, writeScript, runCommand, linkFarm
+
+, cpio
 
 , crates
 , crateUtils
@@ -183,38 +185,62 @@ in rec {
         canAutomate = true;
       };
 
-      http-server = mkInstance {
-        rootTask = mkCapDLRootTask rec {
-          # small = true;
-          script = ../../../../../crates/private/tests/capdl/http-server/cdl.py;
-          config = {
-            components = {
-              example_component.image = passthru.test.elf;
-            };
+      http-server =
+        let
+          content = builtins.fetchGit {
+            url = "https://github.com/seL4/website_pr_hosting";
+            ref = "PR_280";
+            rev = "0a579415c4837c96c4d4629e4b4d4691aaff07ca";
           };
-          passthru = {
-            test = mkTask {
-              rootCrate = crates.tests-capdl-http-server-components-test;
-              release = false;
-              layers = [
-                crateUtils.defaultIntermediateLayer
-                {
-                  crates = [
-                    "sel4-simple-task-runtime"
+
+          contentCPIO = runCommand "x.cpio" {
+            nativeBuildInputs = [ cpio ];
+          } ''
+            cd ${content}/localhost \
+              && find . \( -not -name '*~' -and -not -name '*.mp4' -and -not -name '*.pdf' \) -print -depth \
+              | cpio -o -H newc > $out
+          '';
+
+        in
+          mkInstance {
+            rootTask = mkCapDLRootTask rec {
+              # small = true;
+              script = ../../../../../crates/private/tests/capdl/http-server/cdl.py;
+              config = {
+                components = {
+                  example_component.image = passthru.test.elf;
+                  example_component.heap_size = 1073741824 / 4;
+                };
+              };
+              passthru = {
+                inherit contentCPIO;
+                test = mkTask {
+                  rootCrate = crates.tests-capdl-http-server-components-test;
+                  # release = false;
+                  layers = [
+                    crateUtils.defaultIntermediateLayer
+                    {
+                      crates = [
+                        "sel4-simple-task-runtime"
+                      ];
+                      modifications = {
+                        modifyDerivation = drv: drv.overrideAttrs (self: super: seL4RustEnvVars);
+                      };
+                    }
                   ];
-                  modifications = {
-                    modifyDerivation = drv: drv.overrideAttrs (self: super: seL4RustEnvVars);
+                  lastLayerModifications = {
+                    modifyDerivation = drv: drv.overrideAttrs (self: super: {
+                      CONTENT_CPIO = contentCPIO;
+                    });
                   };
-                }
-              ];
+                };
+              };
             };
+            isSupported = hostPlatform.isAarch64 && !isCorePlatform && seL4Config.PLAT == "qemu-arm-virt";
+            # canAutomate = true;
+            # isSupported = false;
+            canAutomate = false;
           };
-        };
-        isSupported = hostPlatform.isAarch64 && !isCorePlatform && seL4Config.PLAT == "qemu-arm-virt";
-        # canAutomate = true;
-        # isSupported = false;
-        canAutomate = false;
-      };
     };
   };
 

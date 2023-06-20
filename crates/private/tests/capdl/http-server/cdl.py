@@ -57,15 +57,18 @@ class TestComponent(ElfComponent):
             label='virtio_net_mmio_frame',
             )
 
+        _, virtio_net_dma_vaddr_range_start = self.pad_and_align_to_larger_page()
         virtio_net_dma_paddr_range_start = 0x62000000
-        self.pad_and_align_to_larger_page()
-        virtio_net_dma_vaddr_range_start, virtio_net_dma_vaddr_range_end = self.advance(self.composition.kernel_config.larger_page_size())
-        self.map_larger_page(
-            virtio_net_dma_vaddr_range_start,
-            paddr=virtio_net_dma_paddr_range_start,
-            read=True, write=True, cached=True,
-            label='virtio_net_dma_frame',
-            )
+        for i in range(64):
+            paddr = virtio_net_dma_paddr_range_start + i * 2**21
+            vaddr, _ = self.advance(self.composition.kernel_config.larger_page_size())
+            self.map_larger_page(
+                vaddr,
+                paddr=paddr,
+                read=True, write=True, cached=True,
+                label='virtio_net_dma_region',
+                )
+        virtio_net_dma_vaddr_range_end = self.get_cursor()
 
         self._arg = {
             'event_nfn': self.cspace().alloc(event_nfn, read=True),

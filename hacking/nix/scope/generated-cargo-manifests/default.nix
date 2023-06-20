@@ -87,6 +87,7 @@ let
         serde = "1.0.147";
         serde_json = "1.0.87";
         serde_yaml = "0.9.14";
+        smoltcp = "0.9.1";
         syn = "1.0.107";
         synstructure = "0.12.6";
         tock-registers = "0.8.1";
@@ -111,6 +112,22 @@ let
         default-features = false;
         features = [ "unwinder" "fde-custom" "hide-trace" ] ++ features;
       };
+
+      smoltcpWith = features: {
+        version = versions.smoltcp;
+        default-features = false;
+        features = smoltcpCommonFeatures ++ features;
+      };
+
+      smoltcpCommonFeatures = [
+        "alloc"
+        "async"
+        "medium-ethernet" "medium-ip" "medium-ieee802154"
+        "proto-ipv4" "proto-igmp" "proto-dhcpv4" "proto-ipv6" "proto-dns"
+        "proto-ipv4-fragmentation" "proto-sixlowpan-fragmentation"
+        "socket-raw" "socket-icmp" "socket-udp" "socket-tcp" "socket-dhcpv4" "socket-dns" "socket-mdns"
+        "log"
+      ];
     };
 
   workspaceTOML = helpers.renderManifest {

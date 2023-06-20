@@ -1,4 +1,4 @@
-{ mk, localCrates, versions, serdeWith }:
+{ mk, localCrates, versions, serdeWith, smoltcpWith }:
 
 mk {
   package.name = "tests-capdl-http-server-components-test";
@@ -17,18 +17,7 @@ mk {
       ];
     };
 
-    smoltcp = {
-      version = "0.9.1";
-      default-features = false;
-      features = [
-        "log"
-        "medium-ethernet" "medium-ip" "medium-ieee802154"
-        "proto-ipv4" "proto-igmp" "proto-dhcpv4" "proto-ipv6" "proto-dns"
-        "proto-ipv4-fragmentation" "proto-sixlowpan-fragmentation"
-        "socket-raw" "socket-icmp" "socket-udp" "socket-tcp" "socket-dhcpv4" "socket-dns" "socket-mdns"
-        "async"
-      ];
-    };
+    smoltcp = smoltcpWith [];
 
     virtio-drivers = {
       version = "0.5.0";
@@ -40,7 +29,19 @@ mk {
     #   # default-features = false; # disable "alloc"
     # };
 
+    httparse = { version = "1.8.0"; default-features = false; };
+    cpio_reader = "0.1.1";
+
     tock-registers = "0.8.1";
+
+    # embedded-exfat = { version = "0.2.4"; default-features = false; features = [ "async" ]; };
+    embedded-exfat = {
+      # version = "0.2.4";
+      git = "https://github.com/qiuchengxuan/exfat";
+      rev = "64a72a9e260596a936ffed09e329b32333c42d92";
+      default-features = false;
+      features = [ "async" ];
+    };
   };
   nix.local.dependencies = with localCrates; [
     sel4
@@ -49,6 +50,8 @@ mk {
     sel4-simple-task-runtime
     sel4-simple-task-config-types
     sel4-async-single-threaded-executor
+    sel4-async-network
+    sel4-async-timers
     sel4-bounce-buffer-allocator
     tests-capdl-http-server-components-test-sp804-driver
 
