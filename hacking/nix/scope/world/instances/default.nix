@@ -244,8 +244,6 @@ in rec {
               "-blockdev" "node-name=blkdev0,read-only=on,driver=file,filename=${contentCPIO}"
             ];
             isSupported = hostPlatform.isAarch64 && !isCorePlatform && seL4Config.PLAT == "qemu-arm-virt";
-            # canAutomate = true;
-            # isSupported = false;
             canAutomate = false;
           };
     };
