@@ -14,7 +14,7 @@ const CONTENT_CPIO: &[u8] = include_bytes!(env!("CONTENT_CPIO"));
 
 const NUM_SIMULTANEOUS_CONNECTIONS: usize = 1000;
 
-pub async fn test(ctx: SharedNetwork, spawner: LocalSpawner) -> ! {
+pub async fn run_server(ctx: SharedNetwork, spawner: LocalSpawner) -> ! {
     for _ in 0..NUM_SIMULTANEOUS_CONNECTIONS {
         let ctx = ctx.clone();
         spawner

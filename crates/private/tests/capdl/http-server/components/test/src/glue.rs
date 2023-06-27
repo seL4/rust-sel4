@@ -10,50 +10,60 @@ use sel4_async_single_threaded_executor::{LocalPool, LocalSpawner};
 
 use tests_capdl_http_server_components_test_sp804_driver::Driver as TimerDriver;
 
-use crate::net::Net;
+use crate::DeviceImpl;
 
 const TIMER_IRQ_BADGE: sel4::Badge = 1 << 0;
 const VIRTIO_NET_IRQ_BADGE: sel4::Badge = 1 << 1;
 
-pub struct Ctx {
-    net: Net,
-    net_irq_handler: sel4::IRQHandler,
+pub struct Glue {
+    net_device: DeviceImpl,
     timer: TimerDriver,
+    net_irq_handler: sel4::IRQHandler,
     timer_irq_handler: sel4::IRQHandler,
     shared_network: SharedNetwork,
 }
 
-impl Ctx {
+impl Glue {
     pub fn new(
+        mut net_device: DeviceImpl,
         timer: TimerDriver,
-        timer_irq_handler: sel4::IRQHandler,
-        mut net: Net,
         net_irq_handler: sel4::IRQHandler,
+        timer_irq_handler: sel4::IRQHandler,
     ) -> Self {
         let mut config = Config::new();
         config.random_seed = 0;
-        if net.capabilities().medium == Medium::Ethernet {
-            config.hardware_addr = Some(HardwareAddress::Ethernet(net.mac_address()));
+        if net_device.capabilities().medium == Medium::Ethernet {
+            config.hardware_addr = Some(HardwareAddress::Ethernet(net_device.mac_address()));
         }
 
-        let shared_network = SharedNetwork::new(config, &mut net);
+        let shared_network = SharedNetwork::new(config, &mut net_device);
 
         Self {
+            net_device,
             timer,
-            timer_irq_handler,
-            net,
             net_irq_handler,
+            timer_irq_handler,
             shared_network,
         }
     }
 
-    pub fn now(&mut self) -> Instant {
+    fn now(&mut self) -> Instant {
         Instant::from_micros(i64::try_from(self.timer.now().as_micros()).unwrap())
     }
 
-    pub fn set_timeout(&mut self, d: Duration) {
+    fn set_timeout(&mut self, d: Duration) {
         self.timer
             .set_timeout(core::time::Duration::from_micros(d.micros()))
+    }
+
+    fn handle_net_interrupt(&mut self) {
+        self.net_device.ack_interrupt();
+        self.net_irq_handler.irq_handler_ack().unwrap();
+    }
+
+    fn handle_timer_interrupt(&mut self) {
+        self.timer.handle_interrupt();
+        self.timer_irq_handler.irq_handler_ack().unwrap();
     }
 
     pub fn run<T: Future<Output = !>>(
@@ -61,11 +71,8 @@ impl Ctx {
         event_nfn: sel4::Notification,
         f: impl FnOnce(SharedNetwork, LocalSpawner) -> T,
     ) -> ! {
-        self.net.device().borrow_mut().ack_interrupt();
-        self.net_irq_handler.irq_handler_ack().unwrap();
-
-        self.timer.handle_interrupt();
-        self.timer_irq_handler.irq_handler_ack().unwrap();
+        self.handle_net_interrupt();
+        self.handle_timer_interrupt();
 
         let mut local_pool = LocalPool::new();
         let spawner = local_pool.spawner();
@@ -76,40 +83,32 @@ impl Ctx {
         loop {
             loop {
                 let _ = local_pool.run_until_stalled(fut.as_mut());
-                let timestamp = self.now();
+                let now = self.now();
                 if !self
                     .shared_network
                     .inner()
                     .borrow_mut()
-                    .poll(timestamp, &mut self.net)
+                    .poll(now, &mut self.net_device)
                 {
                     break;
                 }
             }
 
-            let timestamp = self.now();
-            let delay = self
-                .shared_network
-                .inner()
-                .borrow_mut()
-                .poll_delay(timestamp);
-            if let Some(d) = delay {
-                log::trace!("poll delay: {:?}", d);
-                self.set_timeout(d);
+            let maybe_delay = {
+                let now = self.now();
+                self.shared_network.inner().borrow_mut().poll_delay(now)
+            };
+            if let Some(delay) = maybe_delay {
+                self.set_timeout(delay);
             }
 
             let (_, badge) = event_nfn.wait();
 
-            if badge & TIMER_IRQ_BADGE != 0 {
-                log::trace!("timer interrupt at now={:?}", self.now());
-                self.timer.handle_interrupt();
-                self.timer_irq_handler.irq_handler_ack().unwrap();
-            }
-
             if badge & VIRTIO_NET_IRQ_BADGE != 0 {
-                log::trace!("net interrupt at now={:?}", self.now());
-                self.net.device().borrow_mut().ack_interrupt();
-                self.net_irq_handler.irq_handler_ack().unwrap();
+                self.handle_net_interrupt();
+            }
+            if badge & TIMER_IRQ_BADGE != 0 {
+                self.handle_timer_interrupt();
             }
         }
     }

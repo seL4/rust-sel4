@@ -26,11 +26,15 @@ use sel4_simple_task_config_types::*;
 use sel4_simple_task_runtime::main_json;
 use tests_capdl_http_server_components_test_sp804_driver::Driver;
 
-mod ctx;
-mod net;
-mod test;
+mod glue;
+mod server;
+mod smoltcp_device_impl;
+mod virtio_drivers_hal_impl;
 
-use net::{HalImpl, Net};
+use glue::Glue;
+use server::run_server;
+use smoltcp_device_impl::DeviceImpl;
+use virtio_drivers_hal_impl::HalImpl;
 
 // const LOG_LEVEL: LevelFilter = LevelFilter::Trace;
 // const LOG_LEVEL: LevelFilter = LevelFilter::Debug;
@@ -79,24 +83,24 @@ fn main(config: Config) {
         config.virtio_net_dma_vaddr_to_paddr_offset,
     );
 
-    let net = {
+    let net_device = {
         let header = NonNull::new(
             (config.virtio_net_mmio_vaddr + config.virtio_net_mmio_offset) as *mut VirtIOHeader,
         )
         .unwrap();
         let transport = unsafe { MmioTransport::new(header) }.unwrap();
         assert_eq!(transport.device_type(), DeviceType::Network);
-        Net::new(VirtIONet::new(transport, NET_BUFFER_LEN).unwrap())
+        DeviceImpl::new(VirtIONet::new(transport, NET_BUFFER_LEN).unwrap())
     };
 
-    let this_ctx = ctx::Ctx::new(
+    let glue = Glue::new(
+        net_device,
         timer,
-        config.timer_irq_handler.get(),
-        net,
         config.virtio_net_irq_handler.get(),
+        config.timer_irq_handler.get(),
     );
 
-    this_ctx.run(config.event_nfn.get(), test::test);
+    glue.run(config.event_nfn.get(), run_server);
 
     // debug_println!("TEST_PASS");
 }
