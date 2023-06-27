@@ -213,44 +213,41 @@ impl Socket<tcp::Socket<'static>> {
 
     pub async fn send(&mut self, buffer: &[u8]) -> Result<(), TcpSocketError> {
         let mut pos = 0;
-
         while pos < buffer.len() {
-            let n = future::poll_fn(|cx| {
-                self.with_mut(|socket| {
-                    if socket.can_send() {
-                        Poll::Ready(
-                            socket
-                                .send_slice(&buffer[pos..])
-                                .map_err(TcpSocketError::SendError),
-                        )
-                    } else {
-                        let state = socket.state();
-
-                        match state {
-                            tcp::State::FinWait1
-                            | tcp::State::FinWait2
-                            | tcp::State::Closed
-                            | tcp::State::Closing
-                            | tcp::State::CloseWait
-                            | tcp::State::TimeWait => {
-                                Poll::Ready(Err(TcpSocketError::InvalidState(state)))
-                            }
-                            _ => {
-                                socket.register_send_waker(cx.waker());
-                                Poll::Pending
-                            }
-                        }
-                    }
-                })
-            })
-            .await?;
-
+            let n = self.send_some(&buffer[pos..]).await?;
             assert!(n > 0);
             pos += n;
         }
-
         assert_eq!(pos, buffer.len());
         Ok(())
+    }
+
+    pub async fn send_some(&mut self, buffer: &[u8]) -> Result<usize, TcpSocketError> {
+        future::poll_fn(|cx| {
+            self.with_mut(|socket| {
+                if socket.can_send() {
+                    Poll::Ready(socket.send_slice(buffer).map_err(TcpSocketError::SendError))
+                } else {
+                    let state = socket.state();
+
+                    match state {
+                        tcp::State::FinWait1
+                        | tcp::State::FinWait2
+                        | tcp::State::Closed
+                        | tcp::State::Closing
+                        | tcp::State::CloseWait
+                        | tcp::State::TimeWait => {
+                            Poll::Ready(Err(TcpSocketError::InvalidState(state)))
+                        }
+                        _ => {
+                            socket.register_send_waker(cx.waker());
+                            Poll::Pending
+                        }
+                    }
+                }
+            })
+        })
+        .await
     }
 
     pub async fn close(&mut self) -> Result<(), TcpSocketError> {
