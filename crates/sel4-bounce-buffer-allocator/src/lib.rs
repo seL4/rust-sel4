@@ -1,5 +1,6 @@
 #![no_std]
 #![feature(allocator_api)]
+#![feature(btree_cursors)]
 #![feature(btreemap_alloc)]
 #![feature(int_roundings)]
 #![feature(pointer_is_aligned)]
@@ -18,6 +19,7 @@ type Align = usize;
 mod basic;
 mod bump;
 
+pub use basic::Basic;
 pub use bump::Bump;
 
 const MIN_ALLOCATION_SIZE: Size = 1;
@@ -27,7 +29,7 @@ pub trait AbstractBounceBufferAllocator {
 
     fn allocate(&mut self, layout: Layout) -> Result<Offset, Self::Error>;
 
-    fn deallocate(&mut self, offset: Offset);
+    fn deallocate(&mut self, offset: Offset, size: Size);
 }
 
 pub struct BounceBufferAllocator<T> {
@@ -71,8 +73,8 @@ impl<T: AbstractBounceBufferAllocator> BounceBufferAllocator<T> {
         Ok(ptr)
     }
 
-    pub unsafe fn deallocate(&mut self, ptr: NonNull<u8>) {
+    pub unsafe fn deallocate(&mut self, ptr: NonNull<u8>, size: usize) {
         let offset = ptr.addr().get() - self.region.as_non_null_ptr().addr().get();
-        self.abstract_allocator.deallocate(offset)
+        self.abstract_allocator.deallocate(offset, size)
     }
 }

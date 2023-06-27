@@ -6,36 +6,86 @@ use alloc::alloc::Global;
 use alloc::collections::BTreeMap;
 use alloc::vec::Vec;
 use core::alloc::{Allocator, Layout};
+use core::ops::Bound;
 
-use crate::{Align, Offset, Size};
+use crate::{AbstractBounceBufferAllocator, Align, Offset, Size};
 
-struct Basic<A: Allocator + Clone = Global> {
-    holes_by_offset: BTreeMap<Offset, Size, A>,
-    holes_by_size: BTreeMap<Size, Vec<Offset, A>, A>,
+const GRANULE_SIZE: usize = 2048;
+
+pub struct Basic<A: Allocator + Clone = Global> {
+    holes: BTreeMap<Offset, Size, A>,
 }
 
-enum BasicAllocatorError {}
-
 impl Basic {
-    fn new(size: Size) -> Self {
+    pub fn new(size: Size) -> Self {
         Self::new_in(Global, size)
     }
 }
 
 impl<A: Allocator + Clone> Basic<A> {
-    fn new_in(alloc: A, size: Size) -> Self {
+    pub fn new_in(alloc: A, size: Size) -> Self {
+        assert_eq!(size % GRANULE_SIZE, 0);
         let offset = 0;
-        let mut holes_by_offset = BTreeMap::new_in(alloc.clone());
-        holes_by_offset.insert(offset, size);
-        let mut holes_by_size = BTreeMap::new_in(alloc.clone());
-        holes_by_size.insert(size, {
-            let mut v = Vec::new_in(alloc.clone());
-            v.push(offset);
-            v
-        });
-        Self {
-            holes_by_offset,
-            holes_by_size,
+        let mut holes = BTreeMap::new_in(alloc.clone());
+        holes.insert(offset, size);
+        Self { holes }
+    }
+}
+
+impl<A: Allocator + Clone> AbstractBounceBufferAllocator for Basic<A> {
+    type Error = ();
+
+    fn allocate(&mut self, layout: Layout) -> Result<Offset, Self::Error> {
+        let layout = Layout::from_size_align(
+            layout.size().next_multiple_of(GRANULE_SIZE),
+            layout.align().max(GRANULE_SIZE),
+        )
+        .unwrap();
+        let mut cursor = self.holes.lower_bound_mut(Bound::Unbounded);
+        loop {
+            if let Some((&hole_offset, &hole_size)) = cursor.key_value() {
+                let buffer_offset = hole_offset.next_multiple_of(layout.align());
+                if buffer_offset + layout.size() <= hole_offset + hole_size {
+                    cursor.remove_current();
+                    if hole_offset < buffer_offset {
+                        cursor.insert_before(hole_offset, buffer_offset - hole_offset);
+                    }
+                    if buffer_offset + layout.size() < hole_offset + hole_size {
+                        cursor.insert_before(
+                            buffer_offset + layout.size(),
+                            (hole_offset + hole_size) - (buffer_offset + layout.size()),
+                        );
+                    }
+                    return Ok(buffer_offset);
+                } else {
+                    cursor.move_next();
+                }
+            } else {
+                return Err(());
+            }
         }
+    }
+
+    fn deallocate(&mut self, offset: Offset, size: Size) {
+        assert_eq!(offset % GRANULE_SIZE, 0);
+        let size = size.next_multiple_of(GRANULE_SIZE);
+        let mut cursor = self.holes.upper_bound_mut(Bound::Included(&offset));
+        if let Some((&prev_hole_offset, prev_hole_size)) = cursor.key_value_mut() {
+            assert!(prev_hole_offset + *prev_hole_size <= offset);
+            if prev_hole_offset + *prev_hole_size == offset {
+                *prev_hole_size += size;
+                return;
+            }
+        }
+        cursor.move_next();
+        if let Some((&next_hole_offset, &next_hole_size)) = cursor.key_value() {
+            assert!(offset + size <= next_hole_offset);
+            if offset + size == next_hole_offset {
+                cursor.remove_current();
+                cursor.insert_before(offset, size + next_hole_size);
+                return;
+            }
+        }
+        cursor.insert_before(offset, size);
     }
 }

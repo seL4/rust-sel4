@@ -4,7 +4,7 @@ use core::ptr::NonNull;
 use log::trace;
 use virtio_drivers::{BufferDirection, Hal, PhysAddr, PAGE_SIZE};
 
-use sel4_bounce_buffer_allocator::{BounceBufferAllocator, Bump};
+use sel4_bounce_buffer_allocator::{Basic, BounceBufferAllocator};
 use sel4_sync::{GenericMutex, PanickingMutexSyncOps};
 
 const MAX_ALIGNMENT: usize = 4096;
@@ -22,7 +22,7 @@ impl HalImpl {
             let mut lock = BOUNCE_BUFFER_ALLOCATOR.lock();
             *lock = unsafe {
                 Some(BounceBufferAllocator::new(
-                    Bump::new(dma_region.len()),
+                    Basic::new(dma_region.len()),
                     dma_region,
                     MAX_ALIGNMENT,
                 ))
@@ -58,7 +58,7 @@ unsafe impl Hal for HalImpl {
         trace!("dealloc DMA: paddr={:#x}, pages={}", paddr, pages);
         {
             let mut lock = BOUNCE_BUFFER_ALLOCATOR.lock();
-            lock.as_mut().unwrap().deallocate(vaddr);
+            lock.as_mut().unwrap().deallocate(vaddr, pages * PAGE_SIZE);
         }
         0
     }
@@ -116,7 +116,7 @@ unsafe impl Hal for HalImpl {
             let mut lock = BOUNCE_BUFFER_ALLOCATOR.lock();
             lock.as_mut()
                 .unwrap()
-                .deallocate(bounce_buffer_ptr.as_non_null_ptr());
+                .deallocate(bounce_buffer_ptr.as_non_null_ptr(), bounce_buffer_ptr.len());
         }
     }
 }
@@ -136,5 +136,5 @@ static DMA_VADDR_TO_PADDR_OFFSET: GenericMutex<PanickingMutexSyncOps, Option<isi
 
 static BOUNCE_BUFFER_ALLOCATOR: GenericMutex<
     PanickingMutexSyncOps,
-    Option<BounceBufferAllocator<Bump>>,
+    Option<BounceBufferAllocator<Basic>>,
 > = GenericMutex::new(PanickingMutexSyncOps::new(), None);

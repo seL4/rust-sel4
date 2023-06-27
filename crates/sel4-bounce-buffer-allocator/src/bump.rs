@@ -27,5 +27,5 @@ impl AbstractBounceBufferAllocator for Bump {
         Ok(offset)
     }
 
-    fn deallocate(&mut self, _offset: Offset) {}
+    fn deallocate(&mut self, _offset: Offset, _size: Size) {}
 }
