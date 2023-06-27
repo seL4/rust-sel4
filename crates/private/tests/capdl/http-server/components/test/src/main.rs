@@ -4,6 +4,7 @@
 #![feature(strict_provenance)]
 #![feature(never_type)]
 #![feature(pattern)]
+#![feature(try_blocks)]
 
 extern crate alloc;
 
@@ -33,8 +34,8 @@ use net::{HalImpl, Net};
 
 // const LOG_LEVEL: LevelFilter = LevelFilter::Trace;
 // const LOG_LEVEL: LevelFilter = LevelFilter::Debug;
-const LOG_LEVEL: LevelFilter = LevelFilter::Info;
-// const LOG_LEVEL: LevelFilter = LevelFilter::Warn;
+// const LOG_LEVEL: LevelFilter = LevelFilter::Info;
+const LOG_LEVEL: LevelFilter = LevelFilter::Warn;
 
 static LOGGER: Logger = LoggerBuilder::const_default()
     .level_filter(LOG_LEVEL)
