@@ -64,9 +64,6 @@ in rec {
                       "-cpu" cpu "-smp" numCores "-m" "1024"
                       "-nographic"
                       "-serial" "mon:stdio"
-                      # TODO
-                      "-device" "virtio-net-device,netdev=netdev0"
-                      "-netdev" "user,id=netdev0,hostfwd=tcp::8000-:80"
                   ] ++ mkSeL4KernelWithPayloadArgs loader;
                 };
               };

@@ -197,7 +197,7 @@ in rec {
             nativeBuildInputs = [ cpio ];
           } ''
             cd ${content}/localhost \
-              && find . \( -not -name '*~' -and -not -name '*.mp4' -and -not -name '*.pdf' \) -print -depth \
+              && find . -print -depth \
               | cpio -o -H newc > $out
           '';
 
@@ -228,14 +228,21 @@ in rec {
                       };
                     }
                   ];
-                  lastLayerModifications = {
-                    modifyDerivation = drv: drv.overrideAttrs (self: super: {
-                      CONTENT_CPIO = contentCPIO;
-                    });
-                  };
+                  # lastLayerModifications = {
+                  #   modifyDerivation = drv: drv.overrideAttrs (self: super: {
+                  #     CONTENT_CPIO = contentCPIO;
+                  #   });
+                  # };
                 };
               };
             };
+            extraPlatformArgs.extraQemuArgs = [
+              "-device" "virtio-net-device,netdev=netdev0"
+              "-netdev" "user,id=netdev0,hostfwd=tcp::8000-:80"
+
+              "-device" "virtio-blk-device,drive=blkdev0"
+              "-blockdev" "node-name=blkdev0,read-only=on,driver=file,filename=${contentCPIO}"
+            ];
             isSupported = hostPlatform.isAarch64 && !isCorePlatform && seL4Config.PLAT == "qemu-arm-virt";
             # canAutomate = true;
             # isSupported = false;

@@ -3,7 +3,7 @@
 mk {
   package.name = "tests-capdl-http-server-components-test";
   dependencies = rec {
-    inherit (versions) log;
+    inherit (versions) log zerocopy;
     serde = serdeWith [ "alloc" "derive" ];
 
     futures = {
@@ -30,18 +30,20 @@ mk {
     # };
 
     httparse = { version = "1.8.0"; default-features = false; };
-    cpio_reader = "0.1.1";
+
+    hex = { version = "0.4.3"; default-features = false; };
+
+    async-unsync = { version = "0.2.2"; default-features = false; };
 
     tock-registers = "0.8.1";
 
-    # embedded-exfat = { version = "0.2.4"; default-features = false; features = [ "async" ]; };
-    embedded-exfat = {
-      # version = "0.2.4";
-      git = "https://github.com/qiuchengxuan/exfat";
-      rev = "64a72a9e260596a936ffed09e329b32333c42d92";
-      default-features = false;
-      features = [ "async" ];
-    };
+    # embedded-exfat = {
+    #   # version = "0.2.4";
+    #   git = "https://github.com/qiuchengxuan/exfat";
+    #   rev = "64a72a9e260596a936ffed09e329b32333c42d92";
+    #   default-features = false;
+    #   features = [ "async" ];
+    # };
   };
   nix.local.dependencies = with localCrates; [
     sel4

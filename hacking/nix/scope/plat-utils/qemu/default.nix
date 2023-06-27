@@ -50,6 +50,7 @@ in rec {
     { rootTask ? null
     , loader ? null
     , simpleAutomationParams ? null
+    , extraQemuArgs ? []
     }:
 
     let
@@ -57,7 +58,7 @@ in rec {
 
       simulate = writeScript "run.sh" ''
         #!${buildPackages.runtimeShell}
-        exec ${lib.concatStringsSep " " qemuCmd} "$@"
+        exec ${lib.concatStringsSep " " (qemuCmd ++ extraQemuArgs)} "$@"
       '';
 
       elaboratedSimpleAutomationParams =

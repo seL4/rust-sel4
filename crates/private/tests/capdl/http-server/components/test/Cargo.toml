@@ -6,8 +6,9 @@ edition = "2021"
 license = "BSD-2-Clause"
 
 [dependencies]
-cpio_reader = "0.1.1"
+async-unsync = { version = "0.2.2", default-features = false }
 futures = { version = "0.3.28", default-features = false, features = ["async-await", "alloc"] }
+hex = { version = "0.4.3", default-features = false }
 httparse = { version = "1.8.0", default-features = false }
 log = "0.4.17"
 sel4 = { path = "../../../../../../sel4" }
@@ -21,12 +22,7 @@ serde = { version = "1.0.147", default-features = false, features = ["alloc", "d
 tests-capdl-http-server-components-test-sp804-driver = { path = "./sp804-driver" }
 tock-registers = "0.8.1"
 virtio-drivers = { version = "0.5.0" }
-
-[dependencies.embedded-exfat]
-git = "https://github.com/qiuchengxuan/exfat"
-rev = "64a72a9e260596a936ffed09e329b32333c42d92"
-default-features = false
-features = ["async"]
+zerocopy = "0.6.1"
 
 [dependencies.sel4-async-single-threaded-executor]
 path = "../../../../../../sel4-async/single-threaded-executor"

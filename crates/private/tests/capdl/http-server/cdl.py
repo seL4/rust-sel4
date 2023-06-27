@@ -3,6 +3,7 @@ from capdl_simple_composition import BaseComposition, ElfComponent
 
 TIMER_IRQ_BADGE = 1 << 0
 VIRTIO_NET_IRQ_BADGE = 1 << 1
+VIRTIO_BLK_IRQ_BADGE = 1 << 2
 
 class TestComponent(ElfComponent):
 
@@ -45,30 +46,41 @@ class TestComponent(ElfComponent):
             notification=Cap(event_nfn, badge=VIRTIO_NET_IRQ_BADGE),
             )
 
-        virtio_net_mmio_paddr = 0xa003000
-        virtio_net_mmio_offset = 0xe00
-        self.pad_and_align_to_page()
-        virtio_net_mmio_vaddr, _ = self.advance(self.composition.kernel_config.page_size())
-        self.map_page(
-            virtio_net_mmio_vaddr,
-            paddr=virtio_net_mmio_paddr,
-            device=True,
-            read=True, write=True, cached=False,
-            label='virtio_net_mmio_frame',
+        virtio_blk_irq = spi_base + 0x2e
+        virtio_blk_irq_handler = self.alloc(
+            ObjectType.seL4_IRQHandler,
+            name='virtio_blk_irq_{}_handler'.format(virtio_blk_irq),
+            number=virtio_blk_irq, trigger=ARMIRQMode.seL4_ARM_IRQ_EDGE,
+            notification=Cap(event_nfn, badge=VIRTIO_BLK_IRQ_BADGE),
             )
 
-        _, virtio_net_dma_vaddr_range_start = self.pad_and_align_to_larger_page()
-        virtio_net_dma_paddr_range_start = 0x62000000
+        virtio_mmio_paddr = 0xa003000
+        self.pad_and_align_to_page()
+        virtio_mmio_vaddr, _ = self.advance(self.composition.kernel_config.page_size())
+        self.map_page(
+            virtio_mmio_vaddr,
+            paddr=virtio_mmio_paddr,
+            device=True,
+            read=True, write=True, cached=False,
+            label='virtio_mmio_frame',
+            )
+        virtio_net_mmio_vaddr = virtio_mmio_vaddr
+        virtio_blk_mmio_vaddr = virtio_mmio_vaddr
+        virtio_net_mmio_offset = 0xe00
+        virtio_blk_mmio_offset = 0xc00
+
+        _, virtio_dma_vaddr_range_start = self.pad_and_align_to_larger_page()
+        virtio_dma_paddr_range_start = 0x62000000
         for i in range(64):
-            paddr = virtio_net_dma_paddr_range_start + i * 2**21
+            paddr = virtio_dma_paddr_range_start + i * 2**21
             vaddr, _ = self.advance(self.composition.kernel_config.larger_page_size())
             self.map_larger_page(
                 vaddr,
                 paddr=paddr,
                 read=True, write=True, cached=True,
-                label='virtio_net_dma_region',
+                label='virtio_dma_region',
                 )
-        virtio_net_dma_vaddr_range_end = self.get_cursor()
+        virtio_dma_vaddr_range_end = self.get_cursor()
 
         self._arg = {
             'event_nfn': self.cspace().alloc(event_nfn, read=True),
@@ -78,11 +90,14 @@ class TestComponent(ElfComponent):
             'virtio_net_irq_handler': self.cspace().alloc(virtio_net_irq_handler),
             'virtio_net_mmio_vaddr': virtio_net_mmio_vaddr,
             'virtio_net_mmio_offset': virtio_net_mmio_offset,
-            'virtio_net_dma_vaddr_range': {
-                'start': virtio_net_dma_vaddr_range_start,
-                'end': virtio_net_dma_vaddr_range_end,
+            'virtio_blk_irq_handler': self.cspace().alloc(virtio_blk_irq_handler),
+            'virtio_blk_mmio_vaddr': virtio_blk_mmio_vaddr,
+            'virtio_blk_mmio_offset': virtio_blk_mmio_offset,
+            'virtio_dma_vaddr_range': {
+                'start': virtio_dma_vaddr_range_start,
+                'end': virtio_dma_vaddr_range_end,
                 },
-            'virtio_net_dma_vaddr_to_paddr_offset': virtio_net_dma_paddr_range_start - virtio_net_dma_vaddr_range_start,
+            'virtio_dma_vaddr_to_paddr_offset': virtio_dma_paddr_range_start - virtio_dma_vaddr_range_start,
             }
 
     def arg_json(self):

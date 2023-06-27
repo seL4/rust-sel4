@@ -10,15 +10,18 @@ use sel4_async_single_threaded_executor::{LocalPool, LocalSpawner};
 
 use tests_capdl_http_server_components_test_sp804_driver::Driver as TimerDriver;
 
-use crate::DeviceImpl;
+use crate::{CpioIOImpl, DeviceImpl};
 
 const TIMER_IRQ_BADGE: sel4::Badge = 1 << 0;
 const VIRTIO_NET_IRQ_BADGE: sel4::Badge = 1 << 1;
+const VIRTIO_BLK_IRQ_BADGE: sel4::Badge = 1 << 2;
 
 pub struct Glue {
     net_device: DeviceImpl,
+    blk_device: CpioIOImpl,
     timer: TimerDriver,
     net_irq_handler: sel4::IRQHandler,
+    blk_irq_handler: sel4::IRQHandler,
     timer_irq_handler: sel4::IRQHandler,
     shared_network: SharedNetwork,
 }
@@ -26,8 +29,10 @@ pub struct Glue {
 impl Glue {
     pub fn new(
         mut net_device: DeviceImpl,
+        blk_device: CpioIOImpl,
         timer: TimerDriver,
         net_irq_handler: sel4::IRQHandler,
+        blk_irq_handler: sel4::IRQHandler,
         timer_irq_handler: sel4::IRQHandler,
     ) -> Self {
         let mut config = Config::new();
@@ -40,8 +45,10 @@ impl Glue {
 
         Self {
             net_device,
+            blk_device,
             timer,
             net_irq_handler,
+            blk_irq_handler,
             timer_irq_handler,
             shared_network,
         }
@@ -61,6 +68,11 @@ impl Glue {
         self.net_irq_handler.irq_handler_ack().unwrap();
     }
 
+    fn handle_blk_interrupt(&mut self) {
+        self.blk_device.ack_interrupt();
+        self.blk_irq_handler.irq_handler_ack().unwrap();
+    }
+
     fn handle_timer_interrupt(&mut self) {
         self.timer.handle_interrupt();
         self.timer_irq_handler.irq_handler_ack().unwrap();
@@ -69,18 +81,30 @@ impl Glue {
     pub fn run<T: Future<Output = !>>(
         mut self,
         event_nfn: sel4::Notification,
-        f: impl FnOnce(SharedNetwork, LocalSpawner) -> T,
+        f: impl FnOnce(SharedNetwork, CpioIOImpl, LocalSpawner) -> T,
     ) -> ! {
         self.handle_net_interrupt();
+        self.handle_blk_interrupt();
         self.handle_timer_interrupt();
 
         let mut local_pool = LocalPool::new();
         let spawner = local_pool.spawner();
 
-        let fut = f(self.shared_network.clone(), spawner);
+        let fut = f(
+            self.shared_network.clone(),
+            self.blk_device.clone(),
+            spawner,
+        );
         futures::pin_mut!(fut);
 
         loop {
+            loop {
+                let _ = local_pool.run_until_stalled(fut.as_mut());
+                if !self.blk_device.poll() {
+                    break;
+                }
+            }
+
             loop {
                 let _ = local_pool.run_until_stalled(fut.as_mut());
                 let now = self.now();
@@ -106,6 +130,9 @@ impl Glue {
 
             if badge & VIRTIO_NET_IRQ_BADGE != 0 {
                 self.handle_net_interrupt();
+            }
+            if badge & VIRTIO_BLK_IRQ_BADGE != 0 {
+                self.handle_blk_interrupt();
             }
             if badge & TIMER_IRQ_BADGE != 0 {
                 self.handle_timer_interrupt();

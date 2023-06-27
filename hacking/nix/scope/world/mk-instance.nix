@@ -16,6 +16,7 @@ let
     { rootTask
     , isSupported, canAutomate ? false, automateTimeout ? defaultTimeout
     , extraLinks ? []
+    , extraPlatformArgs ? {}
     }:
 
     let
@@ -29,7 +30,7 @@ let
         loader = loader.elf;
       } // lib.optionalAttrs canAutomate {
         simpleAutomationParams.timeout = automateTimeout;
-      });
+      } // extraPlatformArgs);
 
     in rec {
       inherit rootTask isSupported canAutomate;
