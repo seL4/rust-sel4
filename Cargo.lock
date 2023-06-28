@@ -3367,7 +3367,6 @@ version = "0.1.0"
 dependencies = [
  "async-unsync",
  "futures",
- "hex 0.4.3",
  "httparse",
  "log",
  "sel4",
@@ -3382,9 +3381,18 @@ dependencies = [
  "sel4-sync",
  "serde",
  "smoltcp",
+ "tests-capdl-http-server-components-test-cpiofs",
  "tests-capdl-http-server-components-test-sp804-driver",
  "tock-registers",
  "virtio-drivers",
+]
+
+[[package]]
+name = "tests-capdl-http-server-components-test-cpiofs"
+version = "0.1.0"
+dependencies = [
+ "hex 0.4.3",
+ "log",
  "zerocopy",
 ]
 

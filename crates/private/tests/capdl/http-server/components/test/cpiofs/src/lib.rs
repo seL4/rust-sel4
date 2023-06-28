@@ -1,4 +1,8 @@
-#![allow(dead_code)]
+#![no_std]
+#![feature(async_fn_in_trait)]
+#![feature(int_roundings)]
+
+extern crate alloc;
 
 use alloc::collections::BTreeMap;
 use alloc::string::String;
@@ -72,7 +76,7 @@ impl EntryLocation {
         self.offset
     }
 
-    async fn read<T: IO>(&self, io: &T) -> Entry {
+    async fn read_entry<T: IO>(&self, io: &T) -> Entry {
         let mut header = Header::new_zeroed();
         io.read(self.offset(), header.as_bytes_mut()).await;
         header.check_magic();
@@ -103,7 +107,7 @@ impl Entry {
         }
     }
 
-    fn location(&self) -> &EntryLocation {
+    pub fn location(&self) -> &EntryLocation {
         &self.location
     }
 
@@ -144,17 +148,17 @@ pub trait IO {
     async fn read(&self, offset: usize, buffer: &mut [u8]);
 }
 
-pub struct CpioIndex<T> {
+pub struct Index<T> {
     entries: BTreeMap<String, EntryLocation>,
     io: T,
 }
 
-impl<T: IO> CpioIndex<T> {
+impl<T: IO> Index<T> {
     pub async fn create(io: T) -> Self {
         let mut entries = BTreeMap::new();
         let mut location = EntryLocation::first();
         loop {
-            let entry = location.read(&io).await;
+            let entry = location.read_entry(&io).await;
             let path = entry.read_name(&io).await;
             if path == END_OF_ARCHIVE {
                 break;
@@ -174,10 +178,10 @@ impl<T: IO> CpioIndex<T> {
     }
 
     pub async fn read_entry(&self, location: &EntryLocation) -> Entry {
-        location.read(&self.io).await
+        location.read_entry(&self.io).await
     }
 
-    pub async fn read(&self, entry: &Entry, offset_into_data: usize, buffer: &mut [u8]) {
+    pub async fn read_data(&self, entry: &Entry, offset_into_data: usize, buffer: &mut [u8]) {
         let offset = entry.data_offset() + offset_into_data;
         self.io.read(offset, buffer).await;
     }

@@ -10,15 +10,18 @@ use futures::task::LocalSpawnExt;
 
 use sel4_async_network::{SharedNetwork, TcpSocket, TcpSocketError};
 use sel4_async_single_threaded_executor::LocalSpawner;
-
-use crate::{CpioEntry, CpioEntryType, CpioIOImpl, CpioIndex};
+use tests_capdl_http_server_components_test_cpiofs as cpiofs;
 
 const PORT: u16 = 80;
 
 const NUM_SIMULTANEOUS_CONNECTIONS: usize = 1000;
 
-pub async fn run_server(ctx: SharedNetwork, blk_device: CpioIOImpl, spawner: LocalSpawner) -> ! {
-    let index = CpioIndex::create(blk_device).await;
+pub async fn run_server(
+    ctx: SharedNetwork,
+    blk_device: impl cpiofs::IO + Clone + 'static,
+    spawner: LocalSpawner,
+) -> ! {
+    let index = cpiofs::Index::create(blk_device).await;
 
     let server = Server {
         index: Rc::new(index),
@@ -43,11 +46,11 @@ pub async fn run_server(ctx: SharedNetwork, blk_device: CpioIOImpl, spawner: Loc
 }
 
 #[derive(Clone)]
-struct Server {
-    index: Rc<CpioIndex<CpioIOImpl>>,
+struct Server<T> {
+    index: Rc<cpiofs::Index<T>>,
 }
 
-impl Server {
+impl<T: cpiofs::IO> Server<T> {
     async fn use_socket(&self, mut socket: TcpSocket) -> Result<(), TcpSocketError> {
         let port = PORT;
         socket.accept(port).await?;
@@ -98,7 +101,7 @@ impl Server {
         &self,
         socket: &mut TcpSocket,
         content_type: &str,
-        entry: &CpioEntry,
+        entry: &cpiofs::Entry,
     ) -> Result<(), TcpSocketError> {
         self.start_response_headers(socket, 200, "OK").await?;
         self.send_response_header(socket, "Content-Type", content_type.as_bytes())
@@ -115,7 +118,7 @@ impl Server {
             let mut pos = 0;
             while pos < entry.data_size() {
                 let n = buf.len().min(entry.data_size() - pos);
-                self.index.read(entry, pos, &mut buf[..n]).await;
+                self.index.read_data(entry, pos, &mut buf[..n]).await;
                 socket.send(&buf[..n]).await?;
                 pos += n;
             }
@@ -204,7 +207,7 @@ impl Server {
             if let Some(location) = self.index.lookup(file_path) {
                 let entry = self.index.read_entry(location).await;
                 match entry.ty() {
-                    CpioEntryType::RegularFile => {
+                    cpiofs::EntryType::RegularFile => {
                         return RequestPathStatus::Ok {
                             file_path: file_path.to_owned(),
                             entry,
@@ -217,13 +220,13 @@ impl Server {
             if let Some(location) = self.index.lookup(normalized) {
                 let entry = self.index.read_entry(location).await;
                 match entry.ty() {
-                    CpioEntryType::RegularFile => {
+                    cpiofs::EntryType::RegularFile => {
                         return RequestPathStatus::Ok {
                             file_path: normalized.to_owned(),
                             entry,
                         };
                     }
-                    CpioEntryType::Directory => {
+                    cpiofs::EntryType::Directory => {
                         if !has_trailing_slash {
                             return RequestPathStatus::MovedPermanently {
                                 location: format!("{}/", request_path),
@@ -249,8 +252,13 @@ impl Server {
 
 #[derive(Debug)]
 enum RequestPathStatus {
-    Ok { file_path: String, entry: CpioEntry },
-    MovedPermanently { location: String },
+    Ok {
+        file_path: String,
+        entry: cpiofs::Entry,
+    },
+    MovedPermanently {
+        location: String,
+    },
     NotFound,
 }
 

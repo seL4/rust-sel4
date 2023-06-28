@@ -8,7 +8,6 @@ license = "BSD-2-Clause"
 [dependencies]
 async-unsync = { version = "0.2.2", default-features = false }
 futures = { version = "0.3.28", default-features = false, features = ["async-await", "alloc"] }
-hex = { version = "0.4.3", default-features = false }
 httparse = { version = "1.8.0", default-features = false }
 log = "0.4.17"
 sel4 = { path = "../../../../../../sel4" }
@@ -20,10 +19,10 @@ sel4-logging = { path = "../../../../../../sel4-logging" }
 sel4-simple-task-runtime = { path = "../../../../../support/simple-task/sel4-simple-task-runtime" }
 sel4-sync = { path = "../../../../../../sel4-sync" }
 serde = { version = "1.0.147", default-features = false, features = ["alloc", "derive"] }
+tests-capdl-http-server-components-test-cpiofs = { path = "./cpiofs" }
 tests-capdl-http-server-components-test-sp804-driver = { path = "./sp804-driver" }
 tock-registers = "0.8.1"
 virtio-drivers = { version = "0.5.0" }
-zerocopy = "0.6.1"
 
 [dependencies.sel4-async-single-threaded-executor]
 path = "../../../../../../sel4-async/single-threaded-executor"

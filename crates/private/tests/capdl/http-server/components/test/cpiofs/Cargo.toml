@@ -1,0 +1,11 @@
+[package]
+name = "tests-capdl-http-server-components-test-cpiofs"
+version = "0.1.0"
+authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
+edition = "2021"
+license = "BSD-2-Clause"
+
+[dependencies]
+hex = { version = "0.4.3", default-features = false }
+log = "0.4.17"
+zerocopy = "0.6.1"

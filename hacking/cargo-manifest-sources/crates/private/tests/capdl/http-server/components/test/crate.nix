@@ -3,7 +3,7 @@
 mk {
   package.name = "tests-capdl-http-server-components-test";
   dependencies = rec {
-    inherit (versions) log zerocopy;
+    inherit (versions) log;
     serde = serdeWith [ "alloc" "derive" ];
 
     futures = {
@@ -31,8 +31,6 @@ mk {
 
     httparse = { version = "1.8.0"; default-features = false; };
 
-    hex = { version = "0.4.3"; default-features = false; };
-
     async-unsync = { version = "0.2.2"; default-features = false; };
 
     tock-registers = "0.8.1";
@@ -48,6 +46,7 @@ mk {
     sel4-async-network
     sel4-async-timers
     sel4-bounce-buffer-allocator
+    tests-capdl-http-server-components-test-cpiofs
     tests-capdl-http-server-components-test-sp804-driver
 
     # virtio-drivers

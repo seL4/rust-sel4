@@ -29,15 +29,13 @@ use sel4_simple_task_config_types::*;
 use sel4_simple_task_runtime::main_json;
 use tests_capdl_http_server_components_test_sp804_driver::Driver;
 
-mod cpio;
-mod cpio_io_impl;
+mod cpiofs_io_impl;
 mod glue;
 mod server;
 mod smoltcp_device_impl;
 mod virtio_drivers_hal_impl;
 
-use cpio::{CpioIndex, Entry as CpioEntry, EntryType as CpioEntryType, IO as CpioIO};
-use cpio_io_impl::CpioIOImpl;
+use cpiofs_io_impl::CpiofsIOImpl;
 use glue::Glue;
 use server::run_server;
 use smoltcp_device_impl::DeviceImpl;
@@ -108,7 +106,7 @@ fn main(config: Config) -> ! {
         .unwrap();
         let transport = unsafe { MmioTransport::new(header) }.unwrap();
         assert_eq!(transport.device_type(), DeviceType::Block);
-        CpioIOImpl::new(VirtIOBlk::new(transport).unwrap())
+        CpiofsIOImpl::new(VirtIOBlk::new(transport).unwrap())
     };
 
     let glue = Glue::new(

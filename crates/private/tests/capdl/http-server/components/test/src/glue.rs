@@ -10,7 +10,7 @@ use sel4_async_single_threaded_executor::{LocalPool, LocalSpawner};
 
 use tests_capdl_http_server_components_test_sp804_driver::Driver as TimerDriver;
 
-use crate::{CpioIOImpl, DeviceImpl};
+use crate::{CpiofsIOImpl, DeviceImpl};
 
 const TIMER_IRQ_BADGE: sel4::Badge = 1 << 0;
 const VIRTIO_NET_IRQ_BADGE: sel4::Badge = 1 << 1;
@@ -18,7 +18,7 @@ const VIRTIO_BLK_IRQ_BADGE: sel4::Badge = 1 << 2;
 
 pub struct Glue {
     net_device: DeviceImpl,
-    blk_device: CpioIOImpl,
+    blk_device: CpiofsIOImpl,
     timer: TimerDriver,
     net_irq_handler: sel4::IRQHandler,
     blk_irq_handler: sel4::IRQHandler,
@@ -29,7 +29,7 @@ pub struct Glue {
 impl Glue {
     pub fn new(
         mut net_device: DeviceImpl,
-        blk_device: CpioIOImpl,
+        blk_device: CpiofsIOImpl,
         timer: TimerDriver,
         net_irq_handler: sel4::IRQHandler,
         blk_irq_handler: sel4::IRQHandler,
@@ -81,7 +81,7 @@ impl Glue {
     pub fn run<T: Future<Output = !>>(
         mut self,
         event_nfn: sel4::Notification,
-        f: impl FnOnce(SharedNetwork, CpioIOImpl, LocalSpawner) -> T,
+        f: impl FnOnce(SharedNetwork, CpiofsIOImpl, LocalSpawner) -> T,
     ) -> ! {
         self.handle_net_interrupt();
         self.handle_blk_interrupt();

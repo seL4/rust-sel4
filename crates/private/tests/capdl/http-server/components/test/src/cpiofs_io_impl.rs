@@ -7,26 +7,28 @@ use async_unsync::semaphore::Semaphore;
 use futures::prelude::*;
 use virtio_drivers::{device::blk::*, transport::mmio::MmioTransport};
 
-use crate::{CpioIO, HalImpl};
+use tests_capdl_http_server_components_test_cpiofs::IO;
+
+use crate::HalImpl;
 
 // HACK hard-coded in virtio-drivers
 const QUEUE_SIZE: usize = 4;
 
 #[derive(Clone)]
-pub struct CpioIOImpl {
-    pub inner: Rc<RefCell<CpioIOImplInner>>,
+pub struct CpiofsIOImpl {
+    pub inner: Rc<RefCell<CpiofsIOImplInner>>,
 }
 
-pub struct CpioIOImplInner {
+pub struct CpiofsIOImplInner {
     driver: VirtIOBlk<HalImpl, MmioTransport>,
     pending: BTreeMap<u16, Option<Waker>>,
     queue_guard: Rc<Semaphore>,
 }
 
-impl CpioIOImpl {
+impl CpiofsIOImpl {
     pub fn new(virtio_blk: VirtIOBlk<HalImpl, MmioTransport>) -> Self {
         Self {
-            inner: Rc::new(RefCell::new(CpioIOImplInner {
+            inner: Rc::new(RefCell::new(CpiofsIOImplInner {
                 driver: virtio_blk,
                 pending: BTreeMap::new(),
                 queue_guard: Rc::new(Semaphore::new(QUEUE_SIZE)),
@@ -91,7 +93,7 @@ impl CpioIOImpl {
     }
 }
 
-impl CpioIO for CpioIOImpl {
+impl IO for CpiofsIOImpl {
     async fn read(&self, offset: usize, buf: &mut [u8]) {
         let mut block_buf = [0; SECTOR_SIZE];
         let start_offset = offset;

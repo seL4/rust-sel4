@@ -33,6 +33,7 @@ members = [
     "crates/private/support/simple-task/sel4-simple-task-runtime/macros",
     "crates/private/support/simple-task/sel4-simple-task-threading",
     "crates/private/tests/capdl/http-server/components/test",
+    "crates/private/tests/capdl/http-server/components/test/cpiofs",
     "crates/private/tests/capdl/http-server/components/test/sp804-driver",
     "crates/private/tests/capdl/threads/components/test",
     "crates/private/tests/capdl/utcover/components/test",
