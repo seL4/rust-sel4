@@ -79,7 +79,7 @@ impl Server {
         socket: &mut TcpSocket,
         request_path: &str,
     ) -> Result<(), TcpSocketError> {
-        match self.lookup_request_path(request_path) {
+        match self.lookup_request_path(request_path).await {
             RequestPathStatus::Ok { file_path, entry } => {
                 let content_type = content_type_from_name(&file_path).unwrap();
                 self.serve_file(socket, content_type, &entry).await?;
@@ -193,7 +193,7 @@ impl Server {
         Ok(())
     }
 
-    fn lookup_request_path(&self, request_path: &str) -> RequestPathStatus {
+    async fn lookup_request_path(&self, request_path: &str) -> RequestPathStatus {
         if !"/".is_prefix_of(request_path) {
             return RequestPathStatus::NotFound;
         }
@@ -201,7 +201,8 @@ impl Server {
         let normalized = request_path.trim_matches('/');
         if normalized.len() == 0 {
             let file_path = "index.html";
-            if let Some(entry) = self.index.lookup(file_path) {
+            if let Some(location) = self.index.lookup(file_path) {
+                let entry = self.index.read_entry(location).await;
                 match entry.ty() {
                     CpioEntryType::RegularFile => {
                         return RequestPathStatus::Ok {
@@ -213,7 +214,8 @@ impl Server {
                 }
             }
         } else {
-            if let Some(entry) = self.index.lookup(normalized) {
+            if let Some(location) = self.index.lookup(normalized) {
+                let entry = self.index.read_entry(location).await;
                 match entry.ty() {
                     CpioEntryType::RegularFile => {
                         return RequestPathStatus::Ok {
@@ -228,12 +230,11 @@ impl Server {
                             };
                         }
                         let normalized_with_index_html = format!("{}/index.html", normalized);
-                        if let Some(entry_with_index_html) =
-                            self.index.lookup(&normalized_with_index_html)
-                        {
+                        if let Some(location) = self.index.lookup(&normalized_with_index_html) {
+                            let entry = self.index.read_entry(location).await;
                             return RequestPathStatus::Ok {
                                 file_path: normalized_with_index_html,
-                                entry: entry_with_index_html,
+                                entry,
                             };
                         }
                     }
@@ -247,14 +248,9 @@ impl Server {
 }
 
 #[derive(Debug)]
-enum RequestPathStatus<'a> {
-    Ok {
-        file_path: String,
-        entry: &'a CpioEntry,
-    },
-    MovedPermanently {
-        location: String,
-    },
+enum RequestPathStatus {
+    Ok { file_path: String, entry: CpioEntry },
+    MovedPermanently { location: String },
     NotFound,
 }
 
