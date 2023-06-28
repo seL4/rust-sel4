@@ -1,5 +1,5 @@
-use alloc::format;
 use alloc::rc::Rc;
+use alloc::string::ToString;
 use alloc::vec;
 use core::str::pattern::Pattern;
 
@@ -16,9 +16,11 @@ const PORT: u16 = 80;
 const NUM_SIMULTANEOUS_CONNECTIONS: usize = 1000;
 
 pub async fn run_server(ctx: SharedNetwork, blk_device: CpioIOImpl, spawner: LocalSpawner) -> ! {
-    let ix = CpioIndex::create(blk_device).await;
+    let index = CpioIndex::create(blk_device).await;
 
-    let server = Server { ix: Rc::new(ix) };
+    let server = Server {
+        index: Rc::new(index),
+    };
 
     for _ in 0..NUM_SIMULTANEOUS_CONNECTIONS {
         let ctx = ctx.clone();
@@ -40,7 +42,7 @@ pub async fn run_server(ctx: SharedNetwork, blk_device: CpioIOImpl, spawner: Loc
 
 #[derive(Clone)]
 struct Server {
-    ix: Rc<CpioIndex<CpioIOImpl>>,
+    index: Rc<CpioIndex<CpioIOImpl>>,
 }
 
 impl Server {
@@ -59,14 +61,13 @@ impl Server {
             let n = socket.recv(&mut buf[i..]).await?;
             assert_ne!(n, 0);
             i += n;
-            if is_request_complete(&buf) {
+            if is_request_complete(&buf[..i]) {
                 break;
             }
         }
         let mut headers = [httparse::EMPTY_HEADER; 32];
         let mut req = httparse::Request::new(&mut headers);
         assert!(req.parse(&buf).unwrap().is_complete());
-        log::info!("request: {:?}", req);
         self.handle_request(socket, req.path.unwrap()).await?;
         Ok(())
     }
@@ -78,13 +79,10 @@ impl Server {
     ) -> Result<(), TcpSocketError> {
         match self.find_file(request_path) {
             Some((name, entry)) => {
-                log::info!("serving file at {:?}", name);
                 let content_type = content_type_from_name(name).unwrap();
                 self.serve_file(socket, content_type, entry).await?;
-                log::info!("done serving file at {:?}", name);
             }
             None => {
-                log::info!("not found: {:?}", request_path);
                 self.serve_not_found(socket).await?;
             }
         }
@@ -97,20 +95,22 @@ impl Server {
         content_type: &str,
         entry: &CpioEntry,
     ) -> Result<(), TcpSocketError> {
-        socket.send(b"HTTP/1.1 200 OK\r\n").await?;
-        socket
-            .send(format!("Content-Type: {}\r\n", content_type).as_bytes())
+        self.start_response_headers(socket, 200, "OK").await?;
+        self.send_response_header(socket, "Content-Type", content_type.as_bytes())
             .await?;
-        socket
-            .send(format!("Content-Length: {}\r\n", entry.data_size()).as_bytes())
-            .await?;
-        socket.send(b"\r\n").await?;
+        self.send_response_header(
+            socket,
+            "Content-Length",
+            entry.data_size().to_string().as_bytes(),
+        )
+        .await?;
+        self.finish_response_headers(socket).await?;
         {
             let mut buf = vec![0; 2048];
             let mut pos = 0;
             while pos < entry.data_size() {
                 let n = buf.len().min(entry.data_size() - pos);
-                self.ix.read(entry, pos, &mut buf[..n]).await;
+                self.index.read(entry, pos, &mut buf[..n]).await;
                 socket.send(&buf[..n]).await?;
                 pos += n;
             }
@@ -119,26 +119,60 @@ impl Server {
     }
 
     async fn serve_not_found(&self, socket: &mut TcpSocket) -> Result<(), TcpSocketError> {
-        let content = b"Not Found";
-        socket.send(b"HTTP/1.1 404 Not Found\r\n").await?;
-        socket
-            .send(b"Content-Type: text/plain; charset=utf-8\r\n")
+        let phrase = "Not Found";
+        self.start_response_headers(socket, 404, phrase).await?;
+        self.send_response_header(socket, "Content-Type", b"test/plain")
             .await?;
-        socket
-            .send(format!("Content-Length: {}\r\n", content.len()).as_bytes())
-            .await?;
-        socket.send(b"\r\n").await?;
-        socket.send(content).await?;
+        self.send_response_header(
+            socket,
+            "Content-Length",
+            phrase.len().to_string().as_bytes(),
+        )
+        .await?;
+        self.finish_response_headers(socket).await?;
+        socket.send(phrase.as_bytes()).await?;
         Ok(())
     }
 
     fn find_file(&self, request_path: &str) -> Option<(&str, &CpioEntry)> {
-        for (entry_path, entry) in self.ix.entries().iter() {
+        for (entry_path, entry) in self.index.entries().iter() {
             if file_path_matches_request_path(entry_path, request_path) {
                 return Some((entry_path, entry));
             }
         }
         None
+    }
+
+    async fn start_response_headers(
+        &self,
+        socket: &mut TcpSocket,
+        status_code: usize,
+        reason_phrase: &str,
+    ) -> Result<(), TcpSocketError> {
+        socket.send(b"HTTP/1.1 ").await?;
+        socket.send(&status_code.to_string().as_bytes()).await?;
+        socket.send(b" ").await?;
+        socket.send(reason_phrase.as_bytes()).await?;
+        socket.send(b"\r\n").await?;
+        Ok(())
+    }
+
+    async fn send_response_header(
+        &self,
+        socket: &mut TcpSocket,
+        name: &str,
+        value: &[u8],
+    ) -> Result<(), TcpSocketError> {
+        socket.send(name.as_bytes()).await?;
+        socket.send(b": ").await?;
+        socket.send(value).await?;
+        socket.send(b"\r\n").await?;
+        Ok(())
+    }
+
+    async fn finish_response_headers(&self, socket: &mut TcpSocket) -> Result<(), TcpSocketError> {
+        socket.send(b"\r\n").await?;
+        Ok(())
     }
 }
 

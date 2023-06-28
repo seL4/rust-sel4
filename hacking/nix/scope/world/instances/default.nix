@@ -209,14 +209,13 @@ in rec {
               config = {
                 components = {
                   example_component.image = passthru.test.elf;
-                  example_component.heap_size = 1073741824 / 4;
+                  example_component.heap_size = 256 * 1048576; # 256MB
                 };
               };
               passthru = {
                 inherit contentCPIO;
                 test = mkTask {
                   rootCrate = crates.tests-capdl-http-server-components-test;
-                  # release = false;
                   layers = [
                     crateUtils.defaultIntermediateLayer
                     {
@@ -228,11 +227,6 @@ in rec {
                       };
                     }
                   ];
-                  # lastLayerModifications = {
-                  #   modifyDerivation = drv: drv.overrideAttrs (self: super: {
-                  #     CONTENT_CPIO = contentCPIO;
-                  #   });
-                  # };
                 };
               };
             };
