@@ -36,14 +36,6 @@ mk {
     async-unsync = { version = "0.2.2"; default-features = false; };
 
     tock-registers = "0.8.1";
-
-    # embedded-exfat = {
-    #   # version = "0.2.4";
-    #   git = "https://github.com/qiuchengxuan/exfat";
-    #   rev = "64a72a9e260596a936ffed09e329b32333c42d92";
-    #   default-features = false;
-    #   features = [ "async" ];
-    # };
   };
   nix.local.dependencies = with localCrates; [
     sel4
