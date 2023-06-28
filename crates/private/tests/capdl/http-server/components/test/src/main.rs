@@ -2,10 +2,10 @@
 #![no_main]
 #![feature(async_fn_in_trait)]
 #![feature(int_roundings)]
-#![feature(slice_ptr_get)]
-#![feature(strict_provenance)]
 #![feature(never_type)]
 #![feature(pattern)]
+#![feature(slice_ptr_get)]
+#![feature(strict_provenance)]
 #![feature(try_blocks)]
 
 extern crate alloc;

@@ -26,7 +26,7 @@ impl HexEncodedU32 {
 
 #[repr(C)]
 #[derive(Debug, Clone, AsBytes, FromBytes)]
-pub struct Header {
+struct Header {
     c_magic: [u8; 6],
     c_ino: HexEncodedU32,
     c_mode: HexEncodedU32,

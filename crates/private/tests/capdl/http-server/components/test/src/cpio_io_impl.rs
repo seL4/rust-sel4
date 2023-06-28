@@ -7,8 +7,7 @@ use async_unsync::semaphore::Semaphore;
 use futures::prelude::*;
 use virtio_drivers::{device::blk::*, transport::mmio::MmioTransport};
 
-use crate::CpioIO;
-use crate::HalImpl;
+use crate::{CpioIO, HalImpl};
 
 // HACK hard-coded in virtio-drivers
 const QUEUE_SIZE: usize = 4;
@@ -36,8 +35,7 @@ impl CpioIOImpl {
     }
 
     pub fn ack_interrupt(&self) {
-        let _success = self.inner.borrow_mut().driver.ack_interrupt();
-        // assert!(success);
+        let _ = self.inner.borrow_mut().driver.ack_interrupt();
     }
 
     pub fn poll(&self) -> bool {
@@ -57,25 +55,22 @@ impl CpioIOImpl {
         false
     }
 
-    pub async fn read_block(&self, block_id: usize, buf: &mut [u8]) {
+    pub async fn read_block(&self, block_id: usize, buf: &mut [u8; SECTOR_SIZE]) {
         let sem = self.inner.borrow().queue_guard.clone();
         let permit = sem.acquire().await;
         let mut req = BlkReq::default();
         let mut resp = BlkResp::default();
-        let token = {
-            let mut inner = self.inner.borrow_mut();
-            unsafe {
-                inner
-                    .driver
-                    .read_block_nb(block_id, &mut req, buf, &mut resp)
-                    .unwrap()
-            }
+        let token = unsafe {
+            self.inner
+                .borrow_mut()
+                .driver
+                .read_block_nb(block_id, &mut req, buf, &mut resp)
+                .unwrap()
         };
         self.inner.borrow_mut().pending.insert(token, None);
         future::poll_fn(|cx| {
             let mut inner = self.inner.borrow_mut();
-            let entry = inner.pending.entry(token);
-            match entry {
+            match inner.pending.entry(token) {
                 btree_map::Entry::Vacant(_) => {
                     unsafe {
                         inner
@@ -92,7 +87,7 @@ impl CpioIOImpl {
             }
         })
         .await;
-        drop(permit); // unecessary
+        drop(permit); // is this necessary?
     }
 }
 

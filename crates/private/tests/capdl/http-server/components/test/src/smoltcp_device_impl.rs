@@ -28,8 +28,7 @@ impl DeviceImpl {
     }
 
     pub fn ack_interrupt(&self) {
-        let _success = self.shared_driver().borrow_mut().ack_interrupt();
-        // assert!(success);
+        let _ = self.shared_driver().borrow_mut().ack_interrupt();
     }
 
     pub fn mac_address(&self) -> EthernetAddress {

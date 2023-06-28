@@ -49,6 +49,7 @@ mk {
     sel4
     sel4-sync
     sel4-logging
+    sel4-immediate-sync-once-cell
     sel4-simple-task-runtime
     sel4-simple-task-config-types
     sel4-async-single-threaded-executor

@@ -15,6 +15,7 @@ sel4 = { path = "../../../../../../sel4" }
 sel4-async-network = { path = "../../../../../../sel4-async/network" }
 sel4-async-timers = { path = "../../../../../../sel4-async/timers" }
 sel4-bounce-buffer-allocator = { path = "../../../../../../sel4-bounce-buffer-allocator" }
+sel4-immediate-sync-once-cell = { path = "../../../../../../sel4-immediate-sync-once-cell" }
 sel4-logging = { path = "../../../../../../sel4-logging" }
 sel4-simple-task-runtime = { path = "../../../../../support/simple-task/sel4-simple-task-runtime" }
 sel4-sync = { path = "../../../../../../sel4-sync" }

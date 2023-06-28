@@ -1,22 +1,28 @@
 use core::alloc::Layout;
 use core::ptr::NonNull;
 
-use log::trace;
 use virtio_drivers::{BufferDirection, Hal, PhysAddr, PAGE_SIZE};
 
 use sel4_bounce_buffer_allocator::{Basic, BounceBufferAllocator};
+use sel4_immediate_sync_once_cell::ImmediateSyncOnceCell;
 use sel4_sync::{GenericMutex, PanickingMutexSyncOps};
 
 const MAX_ALIGNMENT: usize = 4096;
+
+static DMA_VADDR_TO_PADDR_OFFSET: ImmediateSyncOnceCell<isize> = ImmediateSyncOnceCell::new();
+
+static BOUNCE_BUFFER_ALLOCATOR: GenericMutex<
+    PanickingMutexSyncOps,
+    Option<BounceBufferAllocator<Basic>>,
+> = GenericMutex::new(PanickingMutexSyncOps::new(), None);
 
 pub struct HalImpl;
 
 impl HalImpl {
     pub(crate) fn init(dma_region: NonNull<[u8]>, dma_vaddr_to_paddr_offset: isize) {
-        {
-            let mut lock = DMA_VADDR_TO_PADDR_OFFSET.lock();
-            *lock = Some(dma_vaddr_to_paddr_offset);
-        }
+        DMA_VADDR_TO_PADDR_OFFSET
+            .set(dma_vaddr_to_paddr_offset)
+            .unwrap();
 
         {
             let mut lock = BOUNCE_BUFFER_ALLOCATOR.lock();
@@ -45,17 +51,10 @@ unsafe impl Hal for HalImpl {
                 .as_non_null_ptr()
         };
         let paddr = virt_to_phys(ptr.addr().get());
-        trace!(
-            "alloc DMA: paddr={:#x}, vaddr={:#x?}, pages={}",
-            paddr,
-            ptr,
-            pages
-        );
         (paddr, ptr)
     }
 
-    unsafe fn dma_dealloc(paddr: PhysAddr, vaddr: NonNull<u8>, pages: usize) -> i32 {
-        trace!("dealloc DMA: paddr={:#x}, pages={}", paddr, pages);
+    unsafe fn dma_dealloc(_paddr: PhysAddr, vaddr: NonNull<u8>, pages: usize) -> i32 {
         {
             let mut lock = BOUNCE_BUFFER_ALLOCATOR.lock();
             lock.as_mut().unwrap().deallocate(vaddr, pages * PAGE_SIZE);
@@ -87,22 +86,10 @@ unsafe impl Hal for HalImpl {
             }
         }
         let paddr = virt_to_phys(bounce_buffer_ptr.addr().get());
-        trace!(
-            "share DMA: buffer={:#x?}, paddr={:#x}, direction={:?}",
-            buffer,
-            paddr,
-            direction
-        );
         paddr
     }
 
     unsafe fn unshare(paddr: PhysAddr, mut buffer: NonNull<[u8]>, direction: BufferDirection) {
-        trace!(
-            "unshare DMA: paddr={:#x}, buffer={:#x?}, direction={:?}",
-            paddr,
-            buffer,
-            direction
-        );
         let bounce_buffer_ptr = NonNull::slice_from_raw_parts(
             NonNull::new(phys_to_virt(paddr) as *mut _).unwrap(),
             buffer.len(),
@@ -122,19 +109,11 @@ unsafe impl Hal for HalImpl {
 }
 
 fn virt_to_phys(vaddr: usize) -> PhysAddr {
-    usize::try_from(isize::try_from(vaddr).unwrap() + DMA_VADDR_TO_PADDR_OFFSET.lock().unwrap())
+    usize::try_from(isize::try_from(vaddr).unwrap() + DMA_VADDR_TO_PADDR_OFFSET.get().unwrap())
         .unwrap()
 }
 
 fn phys_to_virt(paddr: PhysAddr) -> usize {
-    usize::try_from(isize::try_from(paddr).unwrap() - DMA_VADDR_TO_PADDR_OFFSET.lock().unwrap())
+    usize::try_from(isize::try_from(paddr).unwrap() - DMA_VADDR_TO_PADDR_OFFSET.get().unwrap())
         .unwrap()
 }
-
-static DMA_VADDR_TO_PADDR_OFFSET: GenericMutex<PanickingMutexSyncOps, Option<isize>> =
-    GenericMutex::new(PanickingMutexSyncOps::new(), None);
-
-static BOUNCE_BUFFER_ALLOCATOR: GenericMutex<
-    PanickingMutexSyncOps,
-    Option<BounceBufferAllocator<Basic>>,
-> = GenericMutex::new(PanickingMutexSyncOps::new(), None);
