@@ -69,6 +69,15 @@ impl Entry {
         self.header().file_size()
     }
 
+    pub fn ty(&self) -> EntryType {
+        match self.header().c_mode.get() & 0o0170000 {
+            0o0120000 => EntryType::SymbolicLink,
+            0o0100000 => EntryType::RegularFile,
+            0o0040000 => EntryType::Directory,
+            _ => panic!(),
+        }
+    }
+
     fn header(&self) -> &Header {
         &self.header
     }
@@ -98,6 +107,13 @@ impl Entry {
         assert_eq!(buf.pop().unwrap(), 0);
         String::from_utf8(buf).unwrap()
     }
+}
+
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub enum EntryType {
+    RegularFile,
+    Directory,
+    SymbolicLink,
 }
 
 pub trait IO {

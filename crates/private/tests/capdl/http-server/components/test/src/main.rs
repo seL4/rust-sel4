@@ -36,7 +36,7 @@ mod server;
 mod smoltcp_device_impl;
 mod virtio_drivers_hal_impl;
 
-use cpio::{CpioIndex, Entry as CpioEntry, IO as CpioIO};
+use cpio::{CpioIndex, Entry as CpioEntry, EntryType as CpioEntryType, IO as CpioIO};
 use cpio_io_impl::CpioIOImpl;
 use glue::Glue;
 use server::run_server;

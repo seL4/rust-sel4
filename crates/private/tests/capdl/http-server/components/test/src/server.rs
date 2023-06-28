@@ -1,5 +1,7 @@
+use alloc::borrow::ToOwned;
+use alloc::format;
 use alloc::rc::Rc;
-use alloc::string::ToString;
+use alloc::string::{String, ToString};
 use alloc::vec;
 use core::str::pattern::Pattern;
 
@@ -9,7 +11,7 @@ use futures::task::LocalSpawnExt;
 use sel4_async_network::{SharedNetwork, TcpSocket, TcpSocketError};
 use sel4_async_single_threaded_executor::LocalSpawner;
 
-use crate::{CpioEntry, CpioIOImpl, CpioIndex};
+use crate::{CpioEntry, CpioEntryType, CpioIOImpl, CpioIndex};
 
 const PORT: u16 = 80;
 
@@ -77,12 +79,15 @@ impl Server {
         socket: &mut TcpSocket,
         request_path: &str,
     ) -> Result<(), TcpSocketError> {
-        match self.find_file(request_path) {
-            Some((name, entry)) => {
-                let content_type = content_type_from_name(name).unwrap();
-                self.serve_file(socket, content_type, entry).await?;
+        match self.lookup_request_path(request_path) {
+            RequestPathStatus::Ok { file_path, entry } => {
+                let content_type = content_type_from_name(&file_path).unwrap();
+                self.serve_file(socket, content_type, &entry).await?;
             }
-            None => {
+            RequestPathStatus::MovedPermanently { location } => {
+                self.serve_moved_permanently(socket, &location).await?;
+            }
+            RequestPathStatus::NotFound => {
                 self.serve_not_found(socket).await?;
             }
         }
@@ -118,10 +123,32 @@ impl Server {
         Ok(())
     }
 
+    async fn serve_moved_permanently(
+        &self,
+        socket: &mut TcpSocket,
+        location: &str,
+    ) -> Result<(), TcpSocketError> {
+        let phrase = "Moved Permanently";
+        self.start_response_headers(socket, 301, phrase).await?;
+        self.send_response_header(socket, "Content-Type", b"text/plain")
+            .await?;
+        self.send_response_header(
+            socket,
+            "Content-Length",
+            phrase.len().to_string().as_bytes(),
+        )
+        .await?;
+        self.send_response_header(socket, "Location", location.as_bytes())
+            .await?;
+        self.finish_response_headers(socket).await?;
+        socket.send(phrase.as_bytes()).await?;
+        Ok(())
+    }
+
     async fn serve_not_found(&self, socket: &mut TcpSocket) -> Result<(), TcpSocketError> {
         let phrase = "Not Found";
         self.start_response_headers(socket, 404, phrase).await?;
-        self.send_response_header(socket, "Content-Type", b"test/plain")
+        self.send_response_header(socket, "Content-Type", b"text/plain")
             .await?;
         self.send_response_header(
             socket,
@@ -132,15 +159,6 @@ impl Server {
         self.finish_response_headers(socket).await?;
         socket.send(phrase.as_bytes()).await?;
         Ok(())
-    }
-
-    fn find_file(&self, request_path: &str) -> Option<(&str, &CpioEntry)> {
-        for (entry_path, entry) in self.index.entries().iter() {
-            if file_path_matches_request_path(entry_path, request_path) {
-                return Some((entry_path, entry));
-            }
-        }
-        None
     }
 
     async fn start_response_headers(
@@ -174,34 +192,76 @@ impl Server {
         socket.send(b"\r\n").await?;
         Ok(())
     }
+
+    fn lookup_request_path(&self, request_path: &str) -> RequestPathStatus {
+        if !"/".is_prefix_of(request_path) {
+            return RequestPathStatus::NotFound;
+        }
+        let has_trailing_slash = "/".is_suffix_of(request_path);
+        let normalized = request_path.trim_matches('/');
+        if normalized.len() == 0 {
+            let file_path = "index.html";
+            if let Some(entry) = self.index.lookup(file_path) {
+                match entry.ty() {
+                    CpioEntryType::RegularFile => {
+                        return RequestPathStatus::Ok {
+                            file_path: file_path.to_owned(),
+                            entry,
+                        };
+                    }
+                    _ => {}
+                }
+            }
+        } else {
+            if let Some(entry) = self.index.lookup(normalized) {
+                match entry.ty() {
+                    CpioEntryType::RegularFile => {
+                        return RequestPathStatus::Ok {
+                            file_path: normalized.to_owned(),
+                            entry,
+                        };
+                    }
+                    CpioEntryType::Directory => {
+                        if !has_trailing_slash {
+                            return RequestPathStatus::MovedPermanently {
+                                location: format!("{}/", request_path),
+                            };
+                        }
+                        let normalized_with_index_html = format!("{}/index.html", normalized);
+                        if let Some(entry_with_index_html) =
+                            self.index.lookup(&normalized_with_index_html)
+                        {
+                            return RequestPathStatus::Ok {
+                                file_path: normalized_with_index_html,
+                                entry: entry_with_index_html,
+                            };
+                        }
+                    }
+                    // TODO handle symlinks
+                    _ => {}
+                }
+            }
+        }
+        RequestPathStatus::NotFound
+    }
+}
+
+#[derive(Debug)]
+enum RequestPathStatus<'a> {
+    Ok {
+        file_path: String,
+        entry: &'a CpioEntry,
+    },
+    MovedPermanently {
+        location: String,
+    },
+    NotFound,
 }
 
 fn is_request_complete(buf: &[u8]) -> bool {
     let mut headers = [httparse::EMPTY_HEADER; 32];
     let mut req = httparse::Request::new(&mut headers);
     req.parse(buf).unwrap().is_complete()
-}
-
-fn file_path_matches_request_path(file_path: &str, request_path: &str) -> bool {
-    let path_after_leading_slash = request_path.strip_prefix("/").unwrap();
-    if path_after_leading_slash == "" && file_path == "index.html" {
-        return true;
-    }
-    if let Some(entry_name_before_slash_index_html) = file_path.strip_suffix("/index.html") {
-        if let Some(path_after_leading_slash_and_before_trailing_slash) =
-            path_after_leading_slash.strip_suffix("/")
-        {
-            if entry_name_before_slash_index_html
-                == path_after_leading_slash_and_before_trailing_slash
-            {
-                return true;
-            }
-        }
-    }
-    if file_path == path_after_leading_slash {
-        return true;
-    };
-    false
 }
 
 fn content_type_from_name(name: &str) -> Option<&'static str> {
