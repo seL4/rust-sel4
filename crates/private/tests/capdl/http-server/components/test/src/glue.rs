@@ -7,14 +7,19 @@ use smoltcp::wire::HardwareAddress;
 
 use sel4_async_network::SharedNetwork;
 use sel4_async_single_threaded_executor::{LocalPool, LocalSpawner};
-
+use tests_capdl_http_server_components_test_cpiofs as cpiofs;
 use tests_capdl_http_server_components_test_sp804_driver::Driver as TimerDriver;
 
-use crate::{CpiofsBlockIOImpl, CpiofsIOImpl, DeviceImpl};
+use crate::{CpiofsBlockIOImpl, DeviceImpl, BLOCK_SIZE};
 
 const TIMER_IRQ_BADGE: sel4::Badge = 1 << 0;
 const VIRTIO_NET_IRQ_BADGE: sel4::Badge = 1 << 1;
 const VIRTIO_BLK_IRQ_BADGE: sel4::Badge = 1 << 2;
+
+type CpiofsIOImpl =
+    cpiofs::BlockIOAdapter<cpiofs::CachedBlockIO<CpiofsBlockIOImpl, BLOCK_SIZE>, BLOCK_SIZE>;
+
+const BLOCK_CACHE_SIZE_IN_BLOCKS: usize = 128;
 
 pub struct Glue {
     net_device: DeviceImpl,
@@ -92,7 +97,10 @@ impl Glue {
 
         let fut = f(
             self.shared_network.clone(),
-            CpiofsIOImpl::new(self.blk_device.clone()),
+            cpiofs::BlockIOAdapter::new(cpiofs::CachedBlockIO::new(
+                self.blk_device.clone(),
+                BLOCK_CACHE_SIZE_IN_BLOCKS,
+            )),
             spawner,
         );
         futures::pin_mut!(fut);

@@ -18,14 +18,12 @@ const NUM_SIMULTANEOUS_CONNECTIONS: usize = 1000;
 
 pub async fn run_server(
     ctx: SharedNetwork,
-    blk_device: impl cpiofs::IO + Clone + 'static,
+    blk_device: impl cpiofs::IO + 'static,
     spawner: LocalSpawner,
 ) -> ! {
     let index = cpiofs::Index::create(blk_device).await;
 
-    let server = Server {
-        index: Rc::new(index),
-    };
+    let server = Rc::new(Server { index });
 
     for _ in 0..NUM_SIMULTANEOUS_CONNECTIONS {
         let ctx = ctx.clone();
@@ -45,9 +43,8 @@ pub async fn run_server(
     future::pending().await
 }
 
-#[derive(Clone)]
 struct Server<T> {
-    index: Rc<cpiofs::Index<T>>,
+    index: cpiofs::Index<T>,
 }
 
 impl<T: cpiofs::IO> Server<T> {

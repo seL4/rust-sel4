@@ -7,14 +7,14 @@ use async_unsync::semaphore::Semaphore;
 use futures::prelude::*;
 use virtio_drivers::{device::blk::*, transport::mmio::MmioTransport};
 
-use tests_capdl_http_server_components_test_cpiofs::{BlockIO, BlockIOAdapter};
+use tests_capdl_http_server_components_test_cpiofs::BlockIO;
 
 use crate::HalImpl;
 
+pub const BLOCK_SIZE: usize = SECTOR_SIZE;
+
 // HACK hard-coded in virtio-drivers
 const QUEUE_SIZE: usize = 4;
-
-pub type CpiofsIOImpl = BlockIOAdapter<CpiofsBlockIOImpl, SECTOR_SIZE>;
 
 #[derive(Clone)]
 pub struct CpiofsBlockIOImpl {
@@ -60,8 +60,8 @@ impl CpiofsBlockIOImpl {
     }
 }
 
-impl BlockIO<SECTOR_SIZE> for CpiofsBlockIOImpl {
-    async fn read_block(&self, block_id: usize, buf: &mut [u8; SECTOR_SIZE]) {
+impl BlockIO<BLOCK_SIZE> for CpiofsBlockIOImpl {
+    async fn read_block(&self, block_id: usize, buf: &mut [u8; BLOCK_SIZE]) {
         let sem = self.inner.borrow().queue_guard.clone();
         let permit = sem.acquire().await;
         let mut req = BlkReq::default();

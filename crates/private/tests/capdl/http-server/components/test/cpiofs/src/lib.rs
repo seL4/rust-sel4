@@ -7,10 +7,13 @@ extern crate alloc;
 use alloc::collections::BTreeMap;
 use alloc::string::String;
 use alloc::vec;
+use core::cell::RefCell;
 use core::marker::PhantomData;
 use core::mem;
+use core::num::NonZeroUsize;
 
 use hex::FromHex;
+use lru::LruCache;
 use zerocopy::{AsBytes, FromBytes};
 
 const CPIO_ALIGN: usize = 4;
@@ -178,23 +181,25 @@ impl<T: IO> Index<T> {
         location.read_entry(&self.io).await
     }
 
-    pub async fn read_data(&self, entry: &Entry, offset_into_data: usize, buffer: &mut [u8]) {
+    pub async fn read_data(&self, entry: &Entry, offset_into_data: usize, buf: &mut [u8]) {
         let offset = entry.data_offset() + offset_into_data;
-        self.io.read(offset, buffer).await;
+        self.io.read(offset, buf).await;
     }
 }
 
 pub trait IO {
-    async fn read(&self, offset: usize, buffer: &mut [u8]);
+    async fn read(&self, offset: usize, buf: &mut [u8]);
 }
 
 // NOTE: type gymnastics due to current limitations of generic_const_exprs
 
+pub type BlockId = usize;
+
 pub trait BlockIO<const BLOCK_SIZE: usize> {
-    async fn read_block(&self, block_id: usize, block_buffer: &mut [u8; BLOCK_SIZE]);
+    async fn read_block(&self, block_id: usize, buf: &mut [u8; BLOCK_SIZE]);
 }
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug)]
 pub struct BlockIOAdapter<T, const BLOCK_SIZE: usize> {
     inner: T,
     _phantom: PhantomData<[(); BLOCK_SIZE]>,
@@ -236,5 +241,48 @@ impl<const BLOCK_SIZE: usize, T: BlockIO<BLOCK_SIZE>> IO for BlockIOAdapter<T, B
             buf[this_start_offset - start_offset..this_end_offset - start_offset]
                 .copy_from_slice(&block_buf[this_start_offset % BLOCK_SIZE..][..this_len]);
         }
+    }
+}
+
+#[derive(Debug)]
+pub struct CachedBlockIO<T, const BLOCK_SIZE: usize> {
+    inner: T,
+    lru: RefCell<LruCache<BlockId, [u8; BLOCK_SIZE]>>,
+}
+
+impl<T, const BLOCK_SIZE: usize> CachedBlockIO<T, BLOCK_SIZE> {
+    pub fn new(inner: T, cache_size_in_blocks: usize) -> Self {
+        Self {
+            inner,
+            lru: RefCell::new(LruCache::new(
+                NonZeroUsize::new(cache_size_in_blocks).unwrap(),
+            )),
+        }
+    }
+
+    pub fn inner(&self) -> &T {
+        &self.inner
+    }
+
+    pub fn inner_mut(&mut self) -> &mut T {
+        &mut self.inner
+    }
+
+    pub fn into_inner(self) -> T {
+        self.inner
+    }
+}
+
+impl<T: BlockIO<BLOCK_SIZE>, const BLOCK_SIZE: usize> BlockIO<BLOCK_SIZE>
+    for CachedBlockIO<T, BLOCK_SIZE>
+{
+    async fn read_block(&self, block_id: usize, buf: &mut [u8; BLOCK_SIZE]) {
+        // odd control flow to avoid holding core::cell::RefMut across await
+        if let Some(block) = self.lru.borrow_mut().get(&block_id) {
+            *buf = block.clone();
+            return;
+        }
+        self.inner().read_block(block_id, buf).await;
+        let _ = self.lru.borrow_mut().put(block_id, buf.clone());
     }
 }
