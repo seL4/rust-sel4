@@ -35,7 +35,7 @@ mod server;
 mod smoltcp_device_impl;
 mod virtio_drivers_hal_impl;
 
-use cpiofs_io_impl::CpiofsIOImpl;
+use cpiofs_io_impl::{CpiofsBlockIOImpl, CpiofsIOImpl};
 use glue::Glue;
 use server::run_server;
 use smoltcp_device_impl::DeviceImpl;
@@ -106,7 +106,7 @@ fn main(config: Config) -> ! {
         .unwrap();
         let transport = unsafe { MmioTransport::new(header) }.unwrap();
         assert_eq!(transport.device_type(), DeviceType::Block);
-        CpiofsIOImpl::new(VirtIOBlk::new(transport).unwrap())
+        CpiofsBlockIOImpl::new(VirtIOBlk::new(transport).unwrap())
     };
 
     let glue = Glue::new(

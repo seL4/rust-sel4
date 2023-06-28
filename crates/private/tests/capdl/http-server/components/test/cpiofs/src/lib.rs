@@ -7,6 +7,7 @@ extern crate alloc;
 use alloc::collections::BTreeMap;
 use alloc::string::String;
 use alloc::vec;
+use core::marker::PhantomData;
 use core::mem;
 
 use hex::FromHex;
@@ -144,10 +145,6 @@ pub enum EntryType {
     SymbolicLink,
 }
 
-pub trait IO {
-    async fn read(&self, offset: usize, buffer: &mut [u8]);
-}
-
 pub struct Index<T> {
     entries: BTreeMap<String, EntryLocation>,
     io: T,
@@ -184,5 +181,60 @@ impl<T: IO> Index<T> {
     pub async fn read_data(&self, entry: &Entry, offset_into_data: usize, buffer: &mut [u8]) {
         let offset = entry.data_offset() + offset_into_data;
         self.io.read(offset, buffer).await;
+    }
+}
+
+pub trait IO {
+    async fn read(&self, offset: usize, buffer: &mut [u8]);
+}
+
+// NOTE: type gymnastics due to current limitations of generic_const_exprs
+
+pub trait BlockIO<const BLOCK_SIZE: usize> {
+    async fn read_block(&self, block_id: usize, block_buffer: &mut [u8; BLOCK_SIZE]);
+}
+
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub struct BlockIOAdapter<T, const BLOCK_SIZE: usize> {
+    inner: T,
+    _phantom: PhantomData<[(); BLOCK_SIZE]>,
+}
+
+impl<T, const BLOCK_SIZE: usize> BlockIOAdapter<T, BLOCK_SIZE> {
+    pub fn new(inner: T) -> Self {
+        Self {
+            inner,
+            _phantom: PhantomData,
+        }
+    }
+
+    pub fn inner(&self) -> &T {
+        &self.inner
+    }
+
+    pub fn inner_mut(&mut self) -> &mut T {
+        &mut self.inner
+    }
+
+    pub fn into_inner(self) -> T {
+        self.inner
+    }
+}
+
+impl<const BLOCK_SIZE: usize, T: BlockIO<BLOCK_SIZE>> IO for BlockIOAdapter<T, BLOCK_SIZE> {
+    async fn read(&self, offset: usize, buf: &mut [u8]) {
+        let mut block_buf = [0; BLOCK_SIZE];
+        let start_offset = offset;
+        let end_offset = offset + buf.len();
+        let start_block_id = start_offset / BLOCK_SIZE;
+        let end_block_id = end_offset.next_multiple_of(BLOCK_SIZE) / BLOCK_SIZE;
+        for block_id in start_block_id..end_block_id {
+            self.inner.read_block(block_id, &mut block_buf).await;
+            let this_start_offset = start_offset.max(block_id * BLOCK_SIZE);
+            let this_end_offset = end_offset.min((block_id + 1) * BLOCK_SIZE);
+            let this_len = this_end_offset - this_start_offset;
+            buf[this_start_offset - start_offset..this_end_offset - start_offset]
+                .copy_from_slice(&block_buf[this_start_offset % BLOCK_SIZE..][..this_len]);
+        }
     }
 }

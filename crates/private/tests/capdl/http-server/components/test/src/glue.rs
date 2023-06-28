@@ -10,7 +10,7 @@ use sel4_async_single_threaded_executor::{LocalPool, LocalSpawner};
 
 use tests_capdl_http_server_components_test_sp804_driver::Driver as TimerDriver;
 
-use crate::{CpiofsIOImpl, DeviceImpl};
+use crate::{CpiofsBlockIOImpl, CpiofsIOImpl, DeviceImpl};
 
 const TIMER_IRQ_BADGE: sel4::Badge = 1 << 0;
 const VIRTIO_NET_IRQ_BADGE: sel4::Badge = 1 << 1;
@@ -18,7 +18,7 @@ const VIRTIO_BLK_IRQ_BADGE: sel4::Badge = 1 << 2;
 
 pub struct Glue {
     net_device: DeviceImpl,
-    blk_device: CpiofsIOImpl,
+    blk_device: CpiofsBlockIOImpl,
     timer: TimerDriver,
     net_irq_handler: sel4::IRQHandler,
     blk_irq_handler: sel4::IRQHandler,
@@ -29,7 +29,7 @@ pub struct Glue {
 impl Glue {
     pub fn new(
         mut net_device: DeviceImpl,
-        blk_device: CpiofsIOImpl,
+        blk_device: CpiofsBlockIOImpl,
         timer: TimerDriver,
         net_irq_handler: sel4::IRQHandler,
         blk_irq_handler: sel4::IRQHandler,
@@ -92,7 +92,7 @@ impl Glue {
 
         let fut = f(
             self.shared_network.clone(),
-            self.blk_device.clone(),
+            CpiofsIOImpl::new(self.blk_device.clone()),
             spawner,
         );
         futures::pin_mut!(fut);
