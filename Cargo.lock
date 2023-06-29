@@ -3400,6 +3400,7 @@ dependencies = [
 name = "tests-capdl-http-server-components-test-cpiofs"
 version = "0.1.0"
 dependencies = [
+ "futures",
  "hex 0.4.3",
  "log",
  "lru",
