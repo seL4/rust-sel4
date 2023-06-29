@@ -50,10 +50,10 @@ impl CpiofsBlockIOImpl {
                     waker.wake();
                     return true;
                 } else {
-                    log::warn!("token={} had no waker", token);
+                    log::warn!("token={} has no waker", token);
                 }
             } else {
-                log::warn!("token={} was not pending", token);
+                log::warn!("token={} is not pending", token);
             }
         }
         false

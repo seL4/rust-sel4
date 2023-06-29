@@ -33,7 +33,7 @@ pub async fn run_server(
                 loop {
                     let socket = ctx.new_tcp_socket();
                     if let Err(err) = server.use_socket(socket).await {
-                        log::warn!("err: {:?}", err);
+                        log::warn!("error: {err:?}");
                     }
                 }
             })
@@ -63,14 +63,21 @@ impl<T: cpiofs::IO> Server<T> {
             let n = socket.recv(&mut buf[i..]).await?;
             assert_ne!(n, 0);
             i += n;
-            if is_request_complete(&buf[..i]) {
+            if is_request_complete(&buf[..i]).unwrap_or(false) {
                 break;
             }
         }
         let mut headers = [httparse::EMPTY_HEADER; 32];
         let mut req = httparse::Request::new(&mut headers);
-        assert!(req.parse(&buf).unwrap().is_complete());
-        self.handle_request(socket, req.path.unwrap()).await?;
+        match req.parse(&buf) {
+            Ok(status) => {
+                assert!(status.is_complete());
+                self.handle_request(socket, req.path.unwrap()).await?;
+            }
+            Err(err) => {
+                log::warn!("error parsing request: {err:?}");
+            }
+        }
         Ok(())
     }
 
@@ -81,7 +88,7 @@ impl<T: cpiofs::IO> Server<T> {
     ) -> Result<(), TcpSocketError> {
         match self.lookup_request_path(request_path).await {
             RequestPathStatus::Ok { file_path, entry } => {
-                let content_type = content_type_from_name(&file_path).unwrap();
+                let content_type = content_type_from_name(&file_path);
                 self.serve_file(socket, content_type, &entry).await?;
             }
             RequestPathStatus::MovedPermanently { location } => {
@@ -259,20 +266,22 @@ enum RequestPathStatus {
     NotFound,
 }
 
-fn is_request_complete(buf: &[u8]) -> bool {
+fn is_request_complete(buf: &[u8]) -> Result<bool, httparse::Error> {
     let mut headers = [httparse::EMPTY_HEADER; 32];
     let mut req = httparse::Request::new(&mut headers);
-    req.parse(buf).unwrap().is_complete()
+    req.parse(buf).map(|status| status.is_complete())
 }
 
-fn content_type_from_name(name: &str) -> Option<&'static str> {
+fn content_type_from_name(name: &str) -> &'static str {
     for (ext, ty) in MIME_ASSOCS {
         if ext.is_suffix_of(name) {
-            return Some(ty);
+            return ty;
         }
     }
-    None
+    DEFAULT_MIME_TYPE
 }
+
+const DEFAULT_MIME_TYPE: &str = "application/octet-stream";
 
 const MIME_ASSOCS: &[(&str, &str)] = &[
     (".css", "text/css"),
