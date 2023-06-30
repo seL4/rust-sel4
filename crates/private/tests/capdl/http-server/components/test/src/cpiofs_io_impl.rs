@@ -8,7 +8,7 @@ use virtio_drivers::{device::blk::*, transport::mmio::MmioTransport};
 
 use tests_capdl_http_server_components_test_cpiofs::BlockIO;
 
-use crate::{HalImpl, Requests};
+use crate::{HalImpl, RequestStatuses};
 
 pub const BLOCK_SIZE: usize = SECTOR_SIZE;
 
@@ -22,7 +22,7 @@ pub struct CpiofsBlockIOImpl {
 
 pub struct CpiofsBlockIOImplInner {
     driver: VirtIOBlk<HalImpl, MmioTransport>,
-    requests: Requests<u16, ()>,
+    request_statuses: RequestStatuses<u16, ()>,
     queue_guard: Rc<Semaphore>,
 }
 
@@ -31,7 +31,7 @@ impl CpiofsBlockIOImpl {
         Self {
             inner: Rc::new(RefCell::new(CpiofsBlockIOImplInner {
                 driver: virtio_blk,
-                requests: Requests::new(),
+                request_statuses: RequestStatuses::new(),
                 queue_guard: Rc::new(Semaphore::new(QUEUE_SIZE)),
             })),
         }
@@ -44,7 +44,7 @@ impl CpiofsBlockIOImpl {
     pub fn poll(&self) -> bool {
         let mut inner = self.inner.borrow_mut();
         if let Some(token) = inner.driver.peek_used() {
-            inner.requests.mark_complete(&token, ());
+            inner.request_statuses.mark_complete(&token, ()).unwrap();
             true
         } else {
             false
@@ -65,10 +65,14 @@ impl BlockIO<BLOCK_SIZE> for CpiofsBlockIOImpl {
                 .read_block_nb(block_id, &mut req, buf, &mut resp)
                 .unwrap()
         };
-        self.inner.borrow_mut().requests.add(token);
+        self.inner.borrow_mut().request_statuses.add(token).unwrap();
         future::poll_fn(|cx| {
             let mut inner = self.inner.borrow_mut();
-            inner.requests.poll(&token, cx.waker()).ready()?;
+            inner
+                .request_statuses
+                .poll(&token, cx.waker())
+                .unwrap()
+                .ready()?;
             unsafe {
                 inner
                     .driver

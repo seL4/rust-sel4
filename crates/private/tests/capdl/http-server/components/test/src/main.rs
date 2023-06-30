@@ -2,6 +2,7 @@
 #![no_main]
 #![feature(async_fn_in_trait)]
 #![feature(int_roundings)]
+#![feature(map_try_insert)]
 #![feature(never_type)]
 #![feature(pattern)]
 #![feature(poll_ready)]
@@ -32,14 +33,14 @@ use tests_capdl_http_server_components_test_sp804_driver::Driver;
 
 mod cpiofs_io_impl;
 mod glue;
-mod requests;
+mod request_statuses;
 mod server;
 mod smoltcp_device_impl;
 mod virtio_drivers_hal_impl;
 
 use cpiofs_io_impl::{CpiofsBlockIOImpl, BLOCK_SIZE};
 use glue::Glue;
-use requests::Requests;
+use request_statuses::RequestStatuses;
 use server::run_server;
 use smoltcp_device_impl::DeviceImpl;
 use virtio_drivers_hal_impl::HalImpl;
