@@ -34,6 +34,19 @@ impl DeviceImpl {
     pub fn mac_address(&self) -> EthernetAddress {
         EthernetAddress(self.shared_driver().borrow().mac_address())
     }
+
+    fn new_rx_token(&self, rx_buffer: RxBuffer) -> RxToken {
+        RxToken {
+            buffer: rx_buffer,
+            shared_driver: self.shared_driver().clone(),
+        }
+    }
+
+    fn new_tx_token(&self) -> TxToken {
+        TxToken {
+            shared_driver: self.shared_driver().clone(),
+        }
+    }
 }
 
 impl Device for DeviceImpl {
@@ -49,14 +62,8 @@ impl Device for DeviceImpl {
     fn receive(&mut self, _timestamp: Instant) -> Option<(Self::RxToken<'_>, Self::TxToken<'_>)> {
         let mut driver = self.shared_driver().borrow_mut();
         if driver.can_recv() {
-            let rx_buffer = driver.receive().unwrap();
-            let rx_token = RxToken {
-                buffer: rx_buffer,
-                shared_driver: self.shared_driver().clone(),
-            };
-            let tx_token = TxToken {
-                shared_driver: self.shared_driver().clone(),
-            };
+            let rx_token = self.new_rx_token(driver.receive().unwrap());
+            let tx_token = self.new_tx_token();
             Some((rx_token, tx_token))
         } else {
             None
@@ -64,9 +71,7 @@ impl Device for DeviceImpl {
     }
 
     fn transmit(&mut self, _timestamp: Instant) -> Option<Self::TxToken<'_>> {
-        Some(TxToken {
-            shared_driver: self.shared_driver().clone(),
-        })
+        Some(self.new_tx_token())
     }
 }
 

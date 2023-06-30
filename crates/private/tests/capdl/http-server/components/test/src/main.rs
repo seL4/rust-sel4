@@ -4,6 +4,7 @@
 #![feature(int_roundings)]
 #![feature(never_type)]
 #![feature(pattern)]
+#![feature(poll_ready)]
 #![feature(slice_ptr_get)]
 #![feature(strict_provenance)]
 #![feature(try_blocks)]
@@ -31,12 +32,14 @@ use tests_capdl_http_server_components_test_sp804_driver::Driver;
 
 mod cpiofs_io_impl;
 mod glue;
+mod requests;
 mod server;
 mod smoltcp_device_impl;
 mod virtio_drivers_hal_impl;
 
 use cpiofs_io_impl::{CpiofsBlockIOImpl, BLOCK_SIZE};
 use glue::Glue;
+use requests::Requests;
 use server::run_server;
 use smoltcp_device_impl::DeviceImpl;
 use virtio_drivers_hal_impl::HalImpl;

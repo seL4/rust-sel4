@@ -1,7 +1,6 @@
-use alloc::collections::{btree_map, BTreeMap};
 use alloc::rc::Rc;
 use core::cell::RefCell;
-use core::task::{Poll, Waker};
+use core::task::Poll;
 
 use async_unsync::semaphore::Semaphore;
 use futures::prelude::*;
@@ -9,7 +8,7 @@ use virtio_drivers::{device::blk::*, transport::mmio::MmioTransport};
 
 use tests_capdl_http_server_components_test_cpiofs::BlockIO;
 
-use crate::HalImpl;
+use crate::{HalImpl, Requests};
 
 pub const BLOCK_SIZE: usize = SECTOR_SIZE;
 
@@ -23,7 +22,7 @@ pub struct CpiofsBlockIOImpl {
 
 pub struct CpiofsBlockIOImplInner {
     driver: VirtIOBlk<HalImpl, MmioTransport>,
-    pending: BTreeMap<u16, Option<Waker>>,
+    requests: Requests<u16, ()>,
     queue_guard: Rc<Semaphore>,
 }
 
@@ -32,7 +31,7 @@ impl CpiofsBlockIOImpl {
         Self {
             inner: Rc::new(RefCell::new(CpiofsBlockIOImplInner {
                 driver: virtio_blk,
-                pending: BTreeMap::new(),
+                requests: Requests::new(),
                 queue_guard: Rc::new(Semaphore::new(QUEUE_SIZE)),
             })),
         }
@@ -45,18 +44,11 @@ impl CpiofsBlockIOImpl {
     pub fn poll(&self) -> bool {
         let mut inner = self.inner.borrow_mut();
         if let Some(token) = inner.driver.peek_used() {
-            if let Some(pending) = inner.pending.remove(&token) {
-                if let Some(waker) = pending {
-                    waker.wake();
-                    return true;
-                } else {
-                    log::warn!("token={} has no waker", token);
-                }
-            } else {
-                log::warn!("token={} is not pending", token);
-            }
+            inner.requests.mark_complete(&token, ());
+            true
+        } else {
+            false
         }
-        false
     }
 }
 
@@ -73,24 +65,17 @@ impl BlockIO<BLOCK_SIZE> for CpiofsBlockIOImpl {
                 .read_block_nb(block_id, &mut req, buf, &mut resp)
                 .unwrap()
         };
-        self.inner.borrow_mut().pending.insert(token, None);
+        self.inner.borrow_mut().requests.add(token);
         future::poll_fn(|cx| {
             let mut inner = self.inner.borrow_mut();
-            match inner.pending.entry(token) {
-                btree_map::Entry::Vacant(_) => {
-                    unsafe {
-                        inner
-                            .driver
-                            .complete_read_block(token, &req, buf, &mut resp)
-                            .unwrap();
-                    }
-                    Poll::Ready(())
-                }
-                btree_map::Entry::Occupied(mut occupied) => {
-                    occupied.insert(Some(cx.waker().clone()));
-                    Poll::Pending
-                }
+            inner.requests.poll(&token, cx.waker()).ready()?;
+            unsafe {
+                inner
+                    .driver
+                    .complete_read_block(token, &req, buf, &mut resp)
+                    .unwrap();
             }
+            Poll::Ready(())
         })
         .await;
         drop(permit); // is this necessary?
