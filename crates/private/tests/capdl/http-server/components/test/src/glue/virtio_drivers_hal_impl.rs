@@ -16,7 +16,7 @@ static BOUNCE_BUFFER_ALLOCATOR: GenericMutex<
     Option<BounceBufferAllocator<Basic>>,
 > = GenericMutex::new(PanickingMutexSyncOps::new(), None);
 
-pub struct HalImpl;
+pub(crate) struct HalImpl;
 
 impl HalImpl {
     pub(crate) fn init(dma_region: NonNull<[u8]>, dma_vaddr_to_paddr_offset: isize) {

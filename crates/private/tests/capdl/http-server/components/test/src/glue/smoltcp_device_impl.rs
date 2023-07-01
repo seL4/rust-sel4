@@ -10,14 +10,14 @@ use crate::HalImpl;
 
 const NET_QUEUE_SIZE: usize = 16;
 
-pub type SharedVirtIONet = Rc<RefCell<VirtIONet<HalImpl, MmioTransport, NET_QUEUE_SIZE>>>;
+type SharedVirtIONet = Rc<RefCell<VirtIONet<HalImpl, MmioTransport, NET_QUEUE_SIZE>>>;
 
-pub struct DeviceImpl {
+pub(crate) struct DeviceImpl {
     shared_driver: SharedVirtIONet,
 }
 
 impl DeviceImpl {
-    pub fn new(virtio_net: VirtIONet<HalImpl, MmioTransport, NET_QUEUE_SIZE>) -> Self {
+    pub(crate) fn new(virtio_net: VirtIONet<HalImpl, MmioTransport, NET_QUEUE_SIZE>) -> Self {
         Self {
             shared_driver: Rc::new(RefCell::new(virtio_net)),
         }
@@ -27,11 +27,11 @@ impl DeviceImpl {
         &self.shared_driver
     }
 
-    pub fn ack_interrupt(&self) {
+    pub(crate) fn ack_interrupt(&self) {
         let _ = self.shared_driver().borrow_mut().ack_interrupt();
     }
 
-    pub fn mac_address(&self) -> EthernetAddress {
+    pub(crate) fn mac_address(&self) -> EthernetAddress {
         EthernetAddress(self.shared_driver().borrow().mac_address())
     }
 
@@ -75,7 +75,7 @@ impl Device for DeviceImpl {
     }
 }
 
-pub struct RxToken {
+pub(crate) struct RxToken {
     buffer: RxBuffer,
     shared_driver: SharedVirtIONet,
 }
@@ -94,7 +94,7 @@ impl phy::RxToken for RxToken {
     }
 }
 
-pub struct TxToken {
+pub(crate) struct TxToken {
     shared_driver: SharedVirtIONet,
 }
 

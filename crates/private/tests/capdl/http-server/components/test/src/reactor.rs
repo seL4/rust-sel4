@@ -21,7 +21,7 @@ type CpiofsIOImpl =
 
 const BLOCK_CACHE_SIZE_IN_BLOCKS: usize = 128;
 
-pub struct Glue {
+pub(crate) struct Reactor {
     net_device: DeviceImpl,
     blk_device: CpiofsBlockIOImpl,
     timer: TimerDriver,
@@ -31,8 +31,8 @@ pub struct Glue {
     shared_network: SharedNetwork,
 }
 
-impl Glue {
-    pub fn new(
+impl Reactor {
+    pub(crate) fn new(
         mut net_device: DeviceImpl,
         blk_device: CpiofsBlockIOImpl,
         timer: TimerDriver,
@@ -83,7 +83,7 @@ impl Glue {
         self.timer_irq_handler.irq_handler_ack().unwrap();
     }
 
-    pub fn run<T: Future<Output = !>>(
+    pub(crate) fn run<T: Future<Output = !>>(
         mut self,
         event_nfn: sel4::Notification,
         f: impl FnOnce(SharedNetwork, CpiofsIOImpl, LocalSpawner) -> T,

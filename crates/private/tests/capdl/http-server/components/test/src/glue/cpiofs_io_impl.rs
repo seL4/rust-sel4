@@ -11,24 +11,24 @@ use tests_capdl_http_server_components_test_cpiofs::BlockIO;
 
 use crate::HalImpl;
 
-pub const BLOCK_SIZE: usize = SECTOR_SIZE;
+pub(crate) const BLOCK_SIZE: usize = SECTOR_SIZE;
 
 // HACK hard-coded in virtio-drivers
 const QUEUE_SIZE: usize = 4;
 
 #[derive(Clone)]
-pub struct CpiofsBlockIOImpl {
-    pub inner: Rc<RefCell<CpiofsBlockIOImplInner>>,
+pub(crate) struct CpiofsBlockIOImpl {
+    inner: Rc<RefCell<CpiofsBlockIOImplInner>>,
 }
 
-pub struct CpiofsBlockIOImplInner {
+struct CpiofsBlockIOImplInner {
     driver: VirtIOBlk<HalImpl, MmioTransport>,
     request_statuses: RequestStatuses<u16, ()>,
     queue_guard: Rc<Semaphore>,
 }
 
 impl CpiofsBlockIOImpl {
-    pub fn new(virtio_blk: VirtIOBlk<HalImpl, MmioTransport>) -> Self {
+    pub(crate) fn new(virtio_blk: VirtIOBlk<HalImpl, MmioTransport>) -> Self {
         Self {
             inner: Rc::new(RefCell::new(CpiofsBlockIOImplInner {
                 driver: virtio_blk,
@@ -38,11 +38,11 @@ impl CpiofsBlockIOImpl {
         }
     }
 
-    pub fn ack_interrupt(&self) {
+    pub(crate) fn ack_interrupt(&self) {
         let _ = self.inner.borrow_mut().driver.ack_interrupt();
     }
 
-    pub fn poll(&self) -> bool {
+    pub(crate) fn poll(&self) -> bool {
         let mut inner = self.inner.borrow_mut();
         if let Some(token) = inner.driver.peek_used() {
             inner.request_statuses.mark_complete(&token, ()).unwrap();

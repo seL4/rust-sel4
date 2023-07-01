@@ -30,17 +30,13 @@ use sel4_simple_task_config_types::*;
 use sel4_simple_task_runtime::main_json;
 use tests_capdl_http_server_components_test_sp804_driver::Driver;
 
-mod cpiofs_io_impl;
 mod glue;
+mod reactor;
 mod server;
-mod smoltcp_device_impl;
-mod virtio_drivers_hal_impl;
 
-use cpiofs_io_impl::{CpiofsBlockIOImpl, BLOCK_SIZE};
-use glue::Glue;
+use glue::{CpiofsBlockIOImpl, DeviceImpl, HalImpl, BLOCK_SIZE};
+use reactor::Reactor;
 use server::run_server;
-use smoltcp_device_impl::DeviceImpl;
-use virtio_drivers_hal_impl::HalImpl;
 
 // const LOG_LEVEL: LevelFilter = LevelFilter::Trace;
 // const LOG_LEVEL: LevelFilter = LevelFilter::Debug;
@@ -110,7 +106,7 @@ fn main(config: Config) -> ! {
         CpiofsBlockIOImpl::new(VirtIOBlk::new(transport).unwrap())
     };
 
-    let glue = Glue::new(
+    let reactor = Reactor::new(
         net_device,
         blk_device,
         timer,
@@ -119,5 +115,5 @@ fn main(config: Config) -> ! {
         config.timer_irq_handler.get(),
     );
 
-    glue.run(config.event_nfn.get(), run_server)
+    reactor.run(config.event_nfn.get(), run_server)
 }
