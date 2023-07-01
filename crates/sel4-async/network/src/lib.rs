@@ -1,24 +1,21 @@
 #![no_std]
-#![allow(dead_code)]
-#![allow(unused_imports)]
 
 extern crate alloc;
 
 use alloc::rc::Rc;
 use alloc::vec;
 use core::cell::RefCell;
-use core::future::Future;
 use core::marker::PhantomData;
 use core::task::Poll;
 
 use futures::prelude::*;
-use log::{debug, info, trace, warn};
+use log::info;
 use smoltcp::{
-    iface::{self, Config, Context, Interface, SocketHandle, SocketSet},
-    phy::{Device, Medium},
+    iface::{Config, Context, Interface, SocketHandle, SocketSet},
+    phy::Device,
     socket::{dhcpv4, tcp, AnySocket},
     time::{Duration, Instant},
-    wire::{HardwareAddress, IpCidr, Ipv4Address, Ipv4Cidr},
+    wire::{IpCidr, Ipv4Address, Ipv4Cidr},
 };
 
 pub(crate) const DEFAULT_KEEP_ALIVE_INTERVAL: u64 = 75000;
