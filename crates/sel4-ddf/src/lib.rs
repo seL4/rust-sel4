@@ -104,10 +104,12 @@ pub struct ExternallySharedRingBuffer {
 impl ExternallySharedRingBuffer {
     pub const SIZE: usize = 512;
 
-    pub unsafe fn new(ptr: *mut RingBuffer) -> Self {
-        Self {
-            inner: ExternallyShared::new(ptr.as_mut().unwrap()),
-        }
+    pub unsafe fn new(inner: ExternallyShared<&'static mut RingBuffer>) -> Self {
+        Self { inner }
+    }
+
+    pub unsafe fn from_ptr(ptr: *mut RingBuffer) -> Self {
+        Self::new(ExternallyShared::new(ptr.as_mut().unwrap()))
     }
 
     fn write_index(&self) -> Wrapping<u32> {
@@ -132,12 +134,17 @@ impl ExternallySharedRingBuffer {
     }
 
     fn descriptor(&mut self, index: Wrapping<u32>) -> ExternallyShared<&mut Descriptor> {
-        let linear_index = usize::try_from(index.0).unwrap() % Self::SIZE;
+        let linear_index = usize::try_from(Self::residue(index).0).unwrap();
         self.inner.map_mut(|r| &mut r.descriptors[linear_index])
     }
 
-    fn has_nonzero_residue(length: Wrapping<u32>) -> bool {
-        length % Wrapping(u32::try_from(Self::SIZE).unwrap()) != Wrapping(0)
+    fn residue(n: Wrapping<u32>) -> Wrapping<u32> {
+        let size = Wrapping(u32::try_from(Self::SIZE).unwrap());
+        n % size
+    }
+
+    fn has_nonzero_residue(n: Wrapping<u32>) -> bool {
+        Self::residue(n) != Wrapping(0)
     }
 
     pub fn is_empty(&self) -> bool {
