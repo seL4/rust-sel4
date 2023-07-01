@@ -1,0 +1,11 @@
+[package]
+name = "sel4-ddf"
+version = "0.1.0"
+authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
+edition = "2021"
+license = "BSD-2-Clause"
+
+[dependencies]
+log = "0.4.17"
+sel4-externally-shared = { path = "../sel4-externally-shared" }
+zerocopy = "0.6.1"

@@ -57,6 +57,7 @@ members = [
     "crates/sel4-backtrace/simple",
     "crates/sel4-backtrace/types",
     "crates/sel4-bounce-buffer-allocator",
+    "crates/sel4-ddf",
     "crates/sel4-dlmalloc",
     "crates/sel4-externally-shared",
     "crates/sel4-generate-target-specs",

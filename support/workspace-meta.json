@@ -296,6 +296,11 @@
     ],
     "skip": false
   },
+  "sel4-ddf": {
+    "labels": {},
+    "requirements": {},
+    "skip": false
+  },
   "sel4-dlmalloc": {
     "labels": {},
     "requirements": [
