@@ -2561,6 +2561,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "sel4-async-request-statuses"
+version = "0.1.0"
+
+[[package]]
 name = "sel4-async-single-threaded-executor"
 version = "0.1.0"
 dependencies = [
@@ -3380,6 +3384,7 @@ dependencies = [
  "log",
  "sel4",
  "sel4-async-network",
+ "sel4-async-request-statuses",
  "sel4-async-single-threaded-executor",
  "sel4-async-timers",
  "sel4-bounce-buffer-allocator",

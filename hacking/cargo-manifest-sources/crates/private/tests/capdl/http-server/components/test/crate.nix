@@ -45,6 +45,7 @@ mk {
     sel4-async-single-threaded-executor
     sel4-async-network
     sel4-async-timers
+    sel4-async-request-statuses
     sel4-bounce-buffer-allocator
     tests-capdl-http-server-components-test-cpiofs
     tests-capdl-http-server-components-test-sp804-driver

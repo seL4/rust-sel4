@@ -1,3 +1,8 @@
+#![no_std]
+#![feature(map_try_insert)]
+
+extern crate alloc;
+
 use alloc::collections::BTreeMap;
 use core::mem;
 use core::task::{Poll, Waker};

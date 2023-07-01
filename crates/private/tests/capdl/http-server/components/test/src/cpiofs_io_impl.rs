@@ -6,9 +6,10 @@ use async_unsync::semaphore::Semaphore;
 use futures::prelude::*;
 use virtio_drivers::{device::blk::*, transport::mmio::MmioTransport};
 
+use sel4_async_request_statuses::RequestStatuses;
 use tests_capdl_http_server_components_test_cpiofs::BlockIO;
 
-use crate::{HalImpl, RequestStatuses};
+use crate::HalImpl;
 
 pub const BLOCK_SIZE: usize = SECTOR_SIZE;
 

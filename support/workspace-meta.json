@@ -181,6 +181,11 @@
     "requirements": {},
     "skip": false
   },
+  "sel4-async-request-statuses": {
+    "labels": {},
+    "requirements": {},
+    "skip": false
+  },
   "sel4-async-single-threaded-executor": {
     "labels": {},
     "requirements": {},

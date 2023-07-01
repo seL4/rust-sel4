@@ -12,6 +12,7 @@ httparse = { version = "1.8.0", default-features = false }
 log = "0.4.17"
 sel4 = { path = "../../../../../../sel4" }
 sel4-async-network = { path = "../../../../../../sel4-async/network" }
+sel4-async-request-statuses = { path = "../../../../../../sel4-async/request-statuses" }
 sel4-async-timers = { path = "../../../../../../sel4-async/timers" }
 sel4-bounce-buffer-allocator = { path = "../../../../../../sel4-bounce-buffer-allocator" }
 sel4-immediate-sync-once-cell = { path = "../../../../../../sel4-immediate-sync-once-cell" }
