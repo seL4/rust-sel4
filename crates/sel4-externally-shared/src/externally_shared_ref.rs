@@ -82,7 +82,10 @@ where
     ///   while this `ExternallySharedRef` exists, the memory the pointer points to _must not get mutated_.
     ///   If the given `access` parameter allows write access, the pointer _must not get read
     ///   either_ while this `ExternallySharedRef` exists.
-    pub const unsafe fn new_restricted<A>(access: A, pointer: NonNull<T>) -> ExternallySharedRef<'a, T, A>
+    pub const unsafe fn new_restricted<A>(
+        access: A,
+        pointer: NonNull<T>,
+    ) -> ExternallySharedRef<'a, T, A>
     where
         A: Access,
     {

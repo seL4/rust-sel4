@@ -74,8 +74,9 @@ impl<'a, T, A> ExternallySharedPtr<'a, [T], A> {
     {
         let ptr = self.as_raw_ptr().as_ptr() as *mut T;
         let len = self.len();
-        (0..len)
-            .map(move |i| unsafe { ExternallySharedPtr::new_generic(NonNull::new_unchecked(ptr.add(i))) })
+        (0..len).map(move |i| unsafe {
+            ExternallySharedPtr::new_generic(NonNull::new_unchecked(ptr.add(i)))
+        })
     }
 
     /// Copies all elements from `self` into `dst`, using memcpy.
@@ -123,10 +124,8 @@ impl<'a, T, A> ExternallySharedPtr<'a, [T], A> {
             "destination and source slices have different lengths"
         );
         unsafe {
-            dst.as_mut_ptr().copy_from_nonoverlapping(
-                self.pointer.as_mut_ptr(),
-                len,
-            );
+            dst.as_mut_ptr()
+                .copy_from_nonoverlapping(self.pointer.as_mut_ptr(), len);
         }
     }
 
@@ -174,10 +173,9 @@ impl<'a, T, A> ExternallySharedPtr<'a, [T], A> {
             "destination and source slices have different lengths"
         );
         unsafe {
-            self.pointer.as_mut_ptr().copy_from_nonoverlapping(
-                src.as_ptr(),
-                len,
-            );
+            self.pointer
+                .as_mut_ptr()
+                .copy_from_nonoverlapping(src.as_ptr(), len);
         }
     }
 
@@ -224,10 +222,10 @@ impl<'a, T, A> ExternallySharedPtr<'a, [T], A> {
         let count = src_end - src_start;
         assert!(dest <= len - count, "dest is out of bounds");
         unsafe {
-            self.pointer.as_mut_ptr().add(dest).copy_from(
-                self.pointer.as_mut_ptr().add(src_start),
-                count,
-            );
+            self.pointer
+                .as_mut_ptr()
+                .add(dest)
+                .copy_from(self.pointer.as_mut_ptr().add(src_start), count);
         }
     }
 
@@ -241,7 +239,13 @@ impl<'a, T, A> ExternallySharedPtr<'a, [T], A> {
     ///
     /// Panics if `mid > len`.
     ///
-    pub fn split_at(self, mid: usize) -> (ExternallySharedPtr<'a, [T], A>, ExternallySharedPtr<'a, [T], A>)
+    pub fn split_at(
+        self,
+        mid: usize,
+    ) -> (
+        ExternallySharedPtr<'a, [T], A>,
+        ExternallySharedPtr<'a, [T], A>,
+    )
     where
         A: Access,
     {
@@ -254,7 +258,10 @@ impl<'a, T, A> ExternallySharedPtr<'a, [T], A> {
     unsafe fn split_at_unchecked(
         self,
         mid: usize,
-    ) -> (ExternallySharedPtr<'a, [T], A>, ExternallySharedPtr<'a, [T], A>)
+    ) -> (
+        ExternallySharedPtr<'a, [T], A>,
+        ExternallySharedPtr<'a, [T], A>,
+    )
     where
         A: Access,
     {
@@ -277,7 +284,10 @@ impl<'a, T, A> ExternallySharedPtr<'a, [T], A> {
     #[allow(clippy::type_complexity)]
     pub fn as_chunks<const N: usize>(
         self,
-    ) -> (ExternallySharedPtr<'a, [[T; N]], A>, ExternallySharedPtr<'a, [T], A>)
+    ) -> (
+        ExternallySharedPtr<'a, [[T; N]], A>,
+        ExternallySharedPtr<'a, [T], A>,
+    )
     where
         A: Access,
     {
@@ -360,7 +370,9 @@ impl<A> ExternallySharedPtr<'_, [u8], A> {
         A: Writable,
     {
         unsafe {
-            self.pointer.as_mut_ptr().write_bytes(value, self.pointer.len());
+            self.pointer
+                .as_mut_ptr()
+                .write_bytes(value, self.pointer.len());
         }
     }
 }

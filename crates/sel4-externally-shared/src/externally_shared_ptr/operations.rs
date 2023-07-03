@@ -1,7 +1,4 @@
-use core::{
-    marker::PhantomData,
-    ptr::NonNull,
-};
+use core::{marker::PhantomData, ptr::NonNull};
 
 use crate::{
     access::{Access, ReadOnly, ReadWrite, Readable, Writable, WriteOnly},
@@ -42,7 +39,10 @@ where
     /// ## Safety
     ///
     /// The requirements for [`Self::new`] apply to this function too.
-    pub const unsafe fn new_restricted<A>(access: A, pointer: NonNull<T>) -> ExternallySharedPtr<'a, T, A>
+    pub const unsafe fn new_restricted<A>(
+        access: A,
+        pointer: NonNull<T>,
+    ) -> ExternallySharedPtr<'a, T, A>
     where
         A: Access,
     {
@@ -50,7 +50,9 @@ where
         unsafe { Self::new_generic(pointer) }
     }
 
-    pub(super) const unsafe fn new_generic<A>(pointer: NonNull<T>) -> ExternallySharedPtr<'a, T, A> {
+    pub(super) const unsafe fn new_generic<A>(
+        pointer: NonNull<T>,
+    ) -> ExternallySharedPtr<'a, T, A> {
         ExternallySharedPtr {
             pointer,
             reference: PhantomData,

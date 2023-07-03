@@ -40,7 +40,8 @@ fn test_access() {
     );
     unsafe { ExternallySharedPtr::new_restricted(ReadWrite, NonNull::from(&mut val)) }.write(50);
     assert_eq!(val, 50);
-    unsafe { ExternallySharedPtr::new_restricted(ReadWrite, NonNull::from(&mut val)) }.update(|i| i + 1);
+    unsafe { ExternallySharedPtr::new_restricted(ReadWrite, NonNull::from(&mut val)) }
+        .update(|i| i + 1);
     assert_eq!(val, 51);
 
     // ReadOnly and WriteOnly
