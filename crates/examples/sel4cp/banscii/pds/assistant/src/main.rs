@@ -11,9 +11,7 @@ use core::fmt::Write;
 use core::mem;
 use core::str;
 
-use sel4cp::memory_region::{
-    memory_region_symbol, MemoryRegion, MemoryRegionData, ReadOnly, ReadWrite,
-};
+use sel4cp::memory_region::{memory_region_symbol, ExternallySharedRef, ReadOnly, ReadWrite};
 use sel4cp::message::{MessageInfo, NoMessageLabel, NoMessageValue, StatusMessageLabel};
 use sel4cp::{protection_domain, Channel, Handler};
 
@@ -31,20 +29,16 @@ const MAX_SUBJECT_LEN: usize = 16;
 #[protection_domain(heap_size = 0x10000)]
 fn init() -> impl Handler {
     let region_in = unsafe {
-        MemoryRegion::<[u8], ReadOnly>::new(
-            memory_region_symbol!(region_in_start: *const u8),
-            REGION_SIZE,
+        ExternallySharedRef::<'static, [u8]>::new_read_only(
+            memory_region_symbol!(region_in_start: *mut [u8], n = REGION_SIZE),
         )
-    }
-    .data();
+    };
 
     let region_out = unsafe {
-        MemoryRegion::<[u8], ReadWrite>::new(
-            memory_region_symbol!(region_out_start: *mut u8),
-            REGION_SIZE,
+        ExternallySharedRef::<'static, [u8]>::new(
+            memory_region_symbol!(region_out_start: *mut [u8], n = REGION_SIZE),
         )
-    }
-    .data();
+    };
 
     prompt();
 
@@ -56,8 +50,8 @@ fn init() -> impl Handler {
 }
 
 struct ThisHandler {
-    region_in: MemoryRegionData<[u8], ReadOnly>,
-    region_out: MemoryRegionData<[u8], ReadWrite>,
+    region_in: ExternallySharedRef<'static, [u8], ReadOnly>,
+    region_out: ExternallySharedRef<'static, [u8], ReadWrite>,
     buffer: Vec<u8>,
 }
 
@@ -119,7 +113,8 @@ impl ThisHandler {
         let draft_end = draft_start + draft_size;
 
         self.region_out
-            .index_mut(draft_start..draft_end)
+            .as_mut_ptr()
+            .index(draft_start..draft_end)
             .copy_from_slice(&draft.pixel_data);
 
         let msg_info = TALENT.pp_call(MessageInfo::send(
@@ -141,11 +136,13 @@ impl ThisHandler {
 
         let pixel_data = self
             .region_in
+            .as_ptr()
             .index(msg.masterpiece_start..msg.masterpiece_start + msg.masterpiece_size)
             .copy_to_vec();
 
         let signature = self
             .region_in
+            .as_ptr()
             .index(msg.signature_start..msg.signature_start + msg.signature_size)
             .copy_to_vec();
 

@@ -6,9 +6,7 @@
 
 extern crate alloc;
 
-use sel4cp::memory_region::{
-    memory_region_symbol, MemoryRegion, MemoryRegionData, ReadOnly, ReadWrite,
-};
+use sel4cp::memory_region::{memory_region_symbol, ExternallySharedRef, ReadOnly, ReadWrite};
 use sel4cp::message::{MessageInfo, NoMessageValue, StatusMessageLabel};
 use sel4cp::{protection_domain, Channel, Handler};
 
@@ -26,20 +24,16 @@ const REGION_SIZE: usize = 0x4_000;
 #[protection_domain(heap_size = 0x10000)]
 fn init() -> ThisHandler {
     let region_in = unsafe {
-        MemoryRegion::<[u8], ReadOnly>::new(
-            memory_region_symbol!(region_in_start: *const u8),
-            REGION_SIZE,
+        ExternallySharedRef::<'static, [u8]>::new_read_only(
+            memory_region_symbol!(region_in_start: *mut [u8], n = REGION_SIZE),
         )
-    }
-    .data();
+    };
 
     let region_out = unsafe {
-        MemoryRegion::<[u8], ReadWrite>::new(
-            memory_region_symbol!(region_out_start: *mut u8),
-            REGION_SIZE,
+        ExternallySharedRef::<'static, [u8]>::new(
+            memory_region_symbol!(region_out_start: *mut [u8], n = REGION_SIZE),
         )
-    }
-    .data();
+    };
 
     ThisHandler {
         region_in,
@@ -48,8 +42,8 @@ fn init() -> ThisHandler {
 }
 
 struct ThisHandler {
-    region_in: MemoryRegionData<[u8], ReadOnly>,
-    region_out: MemoryRegionData<[u8], ReadWrite>,
+    region_in: ExternallySharedRef<'static, [u8], ReadOnly>,
+    region_out: ExternallySharedRef<'static, [u8], ReadWrite>,
 }
 
 impl Handler for ThisHandler {
@@ -67,6 +61,7 @@ impl Handler for ThisHandler {
                     let draft_width = msg.width;
                     let draft = self
                         .region_in
+                        .as_ptr()
                         .index(msg.draft_start..msg.draft_start + msg.draft_size)
                         .copy_to_vec();
 
@@ -77,7 +72,8 @@ impl Handler for ThisHandler {
                     let masterpiece_end = masterpiece_start + masterpiece_size;
 
                     self.region_out
-                        .index_mut(masterpiece_start..masterpiece_end)
+                        .as_mut_ptr()
+                        .index(masterpiece_start..masterpiece_end)
                         .copy_from_slice(&masterpiece.pixel_data);
 
                     let signature = cryptographic_secrets::sign(&masterpiece.pixel_data);
@@ -88,7 +84,8 @@ impl Handler for ThisHandler {
                     let signature_end = signature_start + signature_size;
 
                     self.region_out
-                        .index_mut(signature_start..signature_end)
+                        .as_mut_ptr()
+                        .index(signature_start..signature_end)
                         .copy_from_slice(&signature);
 
                     MessageInfo::send(

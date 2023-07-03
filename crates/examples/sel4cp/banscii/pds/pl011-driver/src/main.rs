@@ -2,12 +2,10 @@
 #![no_main]
 #![feature(never_type)]
 
-use core::ptr;
-
 use heapless::Deque;
 
 use sel4cp::message::{MessageInfo, NoMessageValue, StatusMessageLabel};
-use sel4cp::{protection_domain, Channel, Handler};
+use sel4cp::{memory_region_symbol, protection_domain, Channel, Handler};
 
 use banscii_pl011_driver_interface_types::*;
 
@@ -18,13 +16,13 @@ use device::{Pl011Device, Pl011RegisterBlock};
 const DEVICE: Channel = Channel::new(0);
 const ASSISTANT: Channel = Channel::new(1);
 
-#[no_mangle]
-#[link_section = ".data"]
-static mut pl011_register_block: *const Pl011RegisterBlock = ptr::null();
-
 #[protection_domain]
 fn init() -> ThisHandler {
-    let device = unsafe { Pl011Device::new(pl011_register_block) };
+    let device = unsafe {
+        Pl011Device::new(
+            memory_region_symbol!(pl011_register_block: *mut Pl011RegisterBlock).as_ptr(),
+        )
+    };
     device.init();
     ThisHandler {
         device,
