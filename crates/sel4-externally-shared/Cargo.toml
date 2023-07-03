@@ -8,3 +8,7 @@ license = "MIT OR Apache-2.0"
 [features]
 alloc = []
 unstable = []
+very_unstable = ["unstable"]
+
+[dev-dependencies]
+rand = "0.8.3"
