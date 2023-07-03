@@ -7,10 +7,10 @@ use core::{
 
 use crate::{
     access::{Access, Readable, Writable},
-    VolatilePtr,
+    ExternallySharedPtr,
 };
 
-impl<'a, T, A> VolatilePtr<'a, [T], A> {
+impl<'a, T, A> ExternallySharedPtr<'a, [T], A> {
     /// Returns the length of the slice.
     pub fn len(self) -> usize {
         self.pointer.len()
@@ -23,7 +23,7 @@ impl<'a, T, A> VolatilePtr<'a, [T], A> {
 
     /// Applies the index operation on the wrapped slice.
     ///
-    /// Returns a shared `Volatile` reference to the resulting subslice.
+    /// Returns a shared `ExternallySharedPtr` reference to the resulting subslice.
     ///
     /// This is a convenience method for the `map(|slice| slice.index(index))` operation, so it
     /// has the same behavior as the indexing operation on slice (e.g. panic if index is
@@ -34,28 +34,28 @@ impl<'a, T, A> VolatilePtr<'a, [T], A> {
     /// Accessing a single slice element:
     ///
     /// ```
-    /// use volatile::VolatilePtr;
+    /// use volatile::ExternallySharedPtr;
     /// use core::ptr::NonNull;
     ///
     /// let array = [1, 2, 3];
     /// let slice = &array[..];
-    /// let volatile = unsafe { VolatilePtr::new_read_only(NonNull::from(slice)) };
+    /// let volatile = unsafe { ExternallySharedPtr::new_read_only(NonNull::from(slice)) };
     /// assert_eq!(volatile.index(1).read(), 2);
     /// ```
     ///
     /// Accessing a subslice:
     ///
     /// ```
-    /// use volatile::VolatilePtr;
+    /// use volatile::ExternallySharedPtr;
     /// use core::ptr::NonNull;
     ///
     /// let array = [1, 2, 3];
     /// let slice = &array[..];
-    /// let volatile = unsafe { VolatilePtr::new_read_only(NonNull::from(slice)) };
+    /// let volatile = unsafe { ExternallySharedPtr::new_read_only(NonNull::from(slice)) };
     /// let subslice = volatile.index(1..);
     /// assert_eq!(subslice.index(0).read(), 2);
     /// ```
-    pub fn index<I>(self, index: I) -> VolatilePtr<'a, <I as SliceIndex<[T]>>::Output, A>
+    pub fn index<I>(self, index: I) -> ExternallySharedPtr<'a, <I as SliceIndex<[T]>>::Output, A>
     where
         I: SliceIndex<[T]> + SliceIndex<[()]> + Clone,
         A: Access,
@@ -66,14 +66,14 @@ impl<'a, T, A> VolatilePtr<'a, [T], A> {
     }
 
     /// Returns an iterator over the slice.
-    pub fn iter(self) -> impl Iterator<Item = VolatilePtr<'a, T, A>>
+    pub fn iter(self) -> impl Iterator<Item = ExternallySharedPtr<'a, T, A>>
     where
         A: Access,
     {
         let ptr = self.as_raw_ptr().as_ptr() as *mut T;
         let len = self.len();
         (0..len)
-            .map(move |i| unsafe { VolatilePtr::new_generic(NonNull::new_unchecked(ptr.add(i))) })
+            .map(move |i| unsafe { ExternallySharedPtr::new_generic(NonNull::new_unchecked(ptr.add(i))) })
     }
 
     /// Copies all elements from `self` into `dst`, using a volatile memcpy.
@@ -92,13 +92,13 @@ impl<'a, T, A> VolatilePtr<'a, [T], A> {
     /// Copying two elements from a volatile slice:
     ///
     /// ```
-    /// use volatile::VolatilePtr;
+    /// use volatile::ExternallySharedPtr;
     /// use core::ptr::NonNull;
     ///
     /// let src = [1, 2];
-    /// // the `Volatile` type does not work with arrays, so convert `src` to a slice
+    /// // the `ExternallySharedPtr` type does not work with arrays, so convert `src` to a slice
     /// let slice = &src[..];
-    /// let volatile = unsafe { VolatilePtr::new_read_only(NonNull::from(slice)) };
+    /// let volatile = unsafe { ExternallySharedPtr::new_read_only(NonNull::from(slice)) };
     /// let mut dst = [5, 0, 0];
     ///
     /// // Because the slices have to be the same length,
@@ -148,14 +148,14 @@ impl<'a, T, A> VolatilePtr<'a, [T], A> {
     /// Copying two elements from a slice into a volatile slice:
     ///
     /// ```
-    /// use volatile::VolatilePtr;
+    /// use volatile::ExternallySharedPtr;
     /// use core::ptr::NonNull;
     ///
     /// let src = [1, 2, 3, 4];
     /// let mut dst = [0, 0];
-    /// // the `Volatile` type does not work with arrays, so convert `dst` to a slice
+    /// // the `ExternallySharedPtr` type does not work with arrays, so convert `dst` to a slice
     /// let slice = &mut dst[..];
-    /// let mut volatile = unsafe { VolatilePtr::new(NonNull::from(slice)) };
+    /// let mut volatile = unsafe { ExternallySharedPtr::new(NonNull::from(slice)) };
     /// // Because the slices have to be the same length,
     /// // we slice the source slice from four elements
     /// // to two. It will panic if we don't do this.
@@ -208,12 +208,12 @@ impl<'a, T, A> VolatilePtr<'a, [T], A> {
     ///
     /// ```
     /// extern crate core;
-    /// use volatile::VolatilePtr;
+    /// use volatile::ExternallySharedPtr;
     /// use core::ptr::NonNull;
     ///
     /// let mut byte_array = *b"Hello, World!";
     /// let mut slice: &mut [u8] = &mut byte_array[..];
-    /// let mut volatile = unsafe { VolatilePtr::new(NonNull::from(slice)) };
+    /// let mut volatile = unsafe { ExternallySharedPtr::new(NonNull::from(slice)) };
     /// volatile.copy_within(1..5, 8);
     ///
     /// assert_eq!(&byte_array, b"Hello, Wello!");
@@ -251,7 +251,7 @@ impl<'a, T, A> VolatilePtr<'a, [T], A> {
     ///
     /// Panics if `mid > len`.
     ///
-    pub fn split_at(self, mid: usize) -> (VolatilePtr<'a, [T], A>, VolatilePtr<'a, [T], A>)
+    pub fn split_at(self, mid: usize) -> (ExternallySharedPtr<'a, [T], A>, ExternallySharedPtr<'a, [T], A>)
     where
         A: Access,
     {
@@ -264,15 +264,15 @@ impl<'a, T, A> VolatilePtr<'a, [T], A> {
     unsafe fn split_at_unchecked(
         self,
         mid: usize,
-    ) -> (VolatilePtr<'a, [T], A>, VolatilePtr<'a, [T], A>)
+    ) -> (ExternallySharedPtr<'a, [T], A>, ExternallySharedPtr<'a, [T], A>)
     where
         A: Access,
     {
         // SAFETY: Caller has to check that `0 <= mid <= self.len()`
         unsafe {
             (
-                VolatilePtr::new_generic((self.pointer).get_unchecked_mut(..mid)),
-                VolatilePtr::new_generic((self.pointer).get_unchecked_mut(mid..)),
+                ExternallySharedPtr::new_generic((self.pointer).get_unchecked_mut(..mid)),
+                ExternallySharedPtr::new_generic((self.pointer).get_unchecked_mut(mid..)),
             )
         }
     }
@@ -287,7 +287,7 @@ impl<'a, T, A> VolatilePtr<'a, [T], A> {
     #[allow(clippy::type_complexity)]
     pub fn as_chunks<const N: usize>(
         self,
-    ) -> (VolatilePtr<'a, [[T; N]], A>, VolatilePtr<'a, [T], A>)
+    ) -> (ExternallySharedPtr<'a, [[T; N]], A>, ExternallySharedPtr<'a, [T], A>)
     where
         A: Access,
     {
@@ -308,7 +308,7 @@ impl<'a, T, A> VolatilePtr<'a, [T], A> {
     /// This may only be called when
     /// - The slice splits exactly into `N`-element chunks (aka `self.len() % N == 0`).
     /// - `N != 0`.
-    pub unsafe fn as_chunks_unchecked<const N: usize>(self) -> VolatilePtr<'a, [[T; N]], A>
+    pub unsafe fn as_chunks_unchecked<const N: usize>(self) -> ExternallySharedPtr<'a, [[T; N]], A>
     where
         A: Access,
     {
@@ -324,12 +324,12 @@ impl<'a, T, A> VolatilePtr<'a, [T], A> {
             new_len,
         ))
         .unwrap();
-        unsafe { VolatilePtr::new_generic(pointer) }
+        unsafe { ExternallySharedPtr::new_generic(pointer) }
     }
 }
 
 /// Methods for volatile byte slices
-impl<A> VolatilePtr<'_, [u8], A> {
+impl<A> ExternallySharedPtr<'_, [u8], A> {
     /// Sets all elements of the byte slice to the given `value` using a volatile `memset`.
     ///
     /// This method is similar to the `slice::fill` method of the standard library, with the
@@ -343,11 +343,11 @@ impl<A> VolatilePtr<'_, [u8], A> {
     /// ## Example
     ///
     /// ```rust
-    /// use volatile::VolatilePtr;
+    /// use volatile::ExternallySharedPtr;
     /// use core::ptr::NonNull;
     ///
     /// let mut vec = vec![0; 10];
-    /// let mut buf = unsafe { VolatilePtr::new(NonNull::from(vec.as_mut_slice())) };
+    /// let mut buf = unsafe { ExternallySharedPtr::new(NonNull::from(vec.as_mut_slice())) };
     /// buf.fill(1);
     /// assert_eq!(unsafe { buf.as_raw_ptr().as_mut() }, &mut vec![1; 10]);
     /// ```
@@ -365,7 +365,7 @@ impl<A> VolatilePtr<'_, [u8], A> {
 ///
 /// These methods are only available with the `unstable` feature enabled (requires a nightly
 /// Rust compiler).
-impl<'a, T, A, const N: usize> VolatilePtr<'a, [T; N], A> {
+impl<'a, T, A, const N: usize> ExternallySharedPtr<'a, [T; N], A> {
     /// Converts an array pointer to a slice pointer.
     ///
     /// This makes it possible to use the methods defined on slices.
@@ -375,21 +375,21 @@ impl<'a, T, A, const N: usize> VolatilePtr<'a, [T; N], A> {
     /// Copying two elements from a volatile array reference using `copy_into_slice`:
     ///
     /// ```
-    /// use volatile::VolatilePtr;
+    /// use volatile::ExternallySharedPtr;
     /// use core::ptr::NonNull;
     ///
     /// let src = [1, 2];
-    /// let volatile = unsafe { VolatilePtr::new_read_only(NonNull::from(&src)) };
+    /// let volatile = unsafe { ExternallySharedPtr::new_read_only(NonNull::from(&src)) };
     /// let mut dst = [0, 0];
     ///
-    /// // convert the `Volatile<&[i32; 2]>` array reference to a `Volatile<&[i32]>` slice
+    /// // convert the `ExternallySharedPtr<&[i32; 2]>` array reference to a `ExternallySharedPtr<&[i32]>` slice
     /// let volatile_slice = volatile.as_slice();
     /// // we can now use the slice methods
     /// volatile_slice.copy_into_slice(&mut dst);
     ///
     /// assert_eq!(dst, [1, 2]);
     /// ```
-    pub fn as_slice(self) -> VolatilePtr<'a, [T], A>
+    pub fn as_slice(self) -> ExternallySharedPtr<'a, [T], A>
     where
         A: Access,
     {

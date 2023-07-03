@@ -1,6 +1,6 @@
 use crate::{
     access::{ReadOnly, ReadWrite, WriteOnly},
-    map_field, VolatilePtr,
+    map_field, ExternallySharedPtr,
 };
 use core::ptr::NonNull;
 
@@ -8,7 +8,7 @@ use core::ptr::NonNull;
 fn test_read() {
     let val = 42;
     assert_eq!(
-        unsafe { VolatilePtr::new_read_only(NonNull::from(&val)) }.read(),
+        unsafe { ExternallySharedPtr::new_read_only(NonNull::from(&val)) }.read(),
         42
     );
 }
@@ -16,7 +16,7 @@ fn test_read() {
 #[test]
 fn test_write() {
     let mut val = 50;
-    let volatile = unsafe { VolatilePtr::new(NonNull::from(&mut val)) };
+    let volatile = unsafe { ExternallySharedPtr::new(NonNull::from(&mut val)) };
     volatile.write(50);
     assert_eq!(val, 50);
 }
@@ -24,7 +24,7 @@ fn test_write() {
 #[test]
 fn test_update() {
     let mut val = 42;
-    let volatile = unsafe { VolatilePtr::new(NonNull::from(&mut val)) };
+    let volatile = unsafe { ExternallySharedPtr::new(NonNull::from(&mut val)) };
     volatile.update(|v| v + 1);
     assert_eq!(val, 43);
 }
@@ -35,20 +35,20 @@ fn test_access() {
 
     // ReadWrite
     assert_eq!(
-        unsafe { VolatilePtr::new_restricted(ReadWrite, NonNull::from(&mut val)) }.read(),
+        unsafe { ExternallySharedPtr::new_restricted(ReadWrite, NonNull::from(&mut val)) }.read(),
         42
     );
-    unsafe { VolatilePtr::new_restricted(ReadWrite, NonNull::from(&mut val)) }.write(50);
+    unsafe { ExternallySharedPtr::new_restricted(ReadWrite, NonNull::from(&mut val)) }.write(50);
     assert_eq!(val, 50);
-    unsafe { VolatilePtr::new_restricted(ReadWrite, NonNull::from(&mut val)) }.update(|i| i + 1);
+    unsafe { ExternallySharedPtr::new_restricted(ReadWrite, NonNull::from(&mut val)) }.update(|i| i + 1);
     assert_eq!(val, 51);
 
     // ReadOnly and WriteOnly
     assert_eq!(
-        unsafe { VolatilePtr::new_restricted(ReadOnly, NonNull::from(&mut val)) }.read(),
+        unsafe { ExternallySharedPtr::new_restricted(ReadOnly, NonNull::from(&mut val)) }.read(),
         51
     );
-    unsafe { VolatilePtr::new_restricted(WriteOnly, NonNull::from(&mut val)) }.write(12);
+    unsafe { ExternallySharedPtr::new_restricted(WriteOnly, NonNull::from(&mut val)) }.write(12);
     assert_eq!(val, 12);
 }
 
@@ -64,7 +64,7 @@ fn test_struct() {
         field_1: 60,
         field_2: true,
     };
-    let volatile = unsafe { VolatilePtr::new(NonNull::from(&mut val)) };
+    let volatile = unsafe { ExternallySharedPtr::new(NonNull::from(&mut val)) };
     unsafe {
         volatile.map(|s| NonNull::new(core::ptr::addr_of_mut!((*s.as_ptr()).field_1)).unwrap())
     }
@@ -95,7 +95,7 @@ fn test_struct_macro() {
         field_1: 60,
         field_2: true,
     };
-    let volatile = unsafe { VolatilePtr::new(NonNull::from(&mut val)) };
+    let volatile = unsafe { ExternallySharedPtr::new(NonNull::from(&mut val)) };
     let field_1 = map_field!(volatile.field_1);
     field_1.update(|v| v + 1);
     let field_2 = map_field!(volatile.field_2);
@@ -114,7 +114,7 @@ fn test_struct_macro() {
 #[test]
 fn test_slice() {
     let val: &mut [u32] = &mut [1, 2, 3];
-    let volatile = unsafe { VolatilePtr::new(NonNull::from(val)) };
+    let volatile = unsafe { ExternallySharedPtr::new(NonNull::from(val)) };
     volatile.index(0).update(|v| v + 1);
 
     let mut dst = [0; 3];
@@ -127,7 +127,7 @@ fn test_slice() {
 #[should_panic]
 fn test_bounds_check_1() {
     let val: &mut [u32] = &mut [1, 2, 3];
-    let volatile = unsafe { VolatilePtr::new(NonNull::from(val)) };
+    let volatile = unsafe { ExternallySharedPtr::new(NonNull::from(val)) };
     volatile.index(3);
 }
 
@@ -136,7 +136,7 @@ fn test_bounds_check_1() {
 #[should_panic]
 fn test_bounds_check_2() {
     let val: &mut [u32] = &mut [1, 2, 3];
-    let volatile = unsafe { VolatilePtr::new(NonNull::from(val)) };
+    let volatile = unsafe { ExternallySharedPtr::new(NonNull::from(val)) };
     #[allow(clippy::reversed_empty_ranges)]
     volatile.index(2..1);
 }
@@ -146,7 +146,7 @@ fn test_bounds_check_2() {
 #[should_panic]
 fn test_bounds_check_3() {
     let val: &mut [u32] = &mut [1, 2, 3];
-    let volatile = unsafe { VolatilePtr::new(NonNull::from(val)) };
+    let volatile = unsafe { ExternallySharedPtr::new(NonNull::from(val)) };
     volatile.index(4..); // `3..` is is still ok (see next test)
 }
 
@@ -154,7 +154,7 @@ fn test_bounds_check_3() {
 #[test]
 fn test_bounds_check_4() {
     let val: &mut [u32] = &mut [1, 2, 3];
-    let volatile = unsafe { VolatilePtr::new(NonNull::from(val)) };
+    let volatile = unsafe { ExternallySharedPtr::new(NonNull::from(val)) };
     assert_eq!(volatile.index(3..).len(), 0);
 }
 
@@ -163,7 +163,7 @@ fn test_bounds_check_4() {
 #[should_panic]
 fn test_bounds_check_5() {
     let val: &mut [u32] = &mut [1, 2, 3];
-    let volatile = unsafe { VolatilePtr::new(NonNull::from(val)) };
+    let volatile = unsafe { ExternallySharedPtr::new(NonNull::from(val)) };
     volatile.index(..4);
 }
 
@@ -171,7 +171,7 @@ fn test_bounds_check_5() {
 #[test]
 fn test_chunks() {
     let val: &mut [u32] = &mut [1, 2, 3, 4, 5, 6];
-    let volatile = unsafe { VolatilePtr::new(NonNull::from(val)) };
+    let volatile = unsafe { ExternallySharedPtr::new(NonNull::from(val)) };
     let chunks = volatile.as_chunks().0;
     chunks.index(1).write([10, 11, 12]);
     assert_eq!(chunks.index(0).read(), [1, 2, 3]);

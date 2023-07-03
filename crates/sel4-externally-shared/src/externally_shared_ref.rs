@@ -1,10 +1,10 @@
 use crate::{
     access::{Access, Copyable, ReadOnly, ReadWrite, WriteOnly},
-    externally_shared_ptr::VolatilePtr,
+    externally_shared_ptr::ExternallySharedPtr,
 };
 use core::{fmt, marker::PhantomData, ptr::NonNull};
 
-/// Volatile pointer type that respects Rust's aliasing rules.
+/// Externally shared pointer type that respects Rust's aliasing rules.
 ///
 /// This pointer type behaves similar to Rust's reference types:
 ///
@@ -12,9 +12,9 @@ use core::{fmt, marker::PhantomData, ptr::NonNull};
 /// - only read-only types implement [`Clone`] and [`Copy`]
 /// - [`Send`] and [`Sync`] are implemented if `T: Sync`
 ///
-/// To perform volatile operations on `VolatileRef` types, use the [`as_ptr`][Self::as_ptr]
+/// To perform volatile operations on `ExternallySharedRef` types, use the [`as_ptr`][Self::as_ptr]
 /// or [`as_mut_ptr`](Self::as_mut_ptr) methods to create a temporary
-/// [`VolatilePtr`][crate::VolatilePtr] instance.
+/// [`ExternallySharedPtr`][crate::ExternallySharedPtr] instance.
 ///
 /// Since not all volatile resources (e.g. memory mapped device registers) are both readable
 /// and writable, this type supports limiting the allowed access types through an optional second
@@ -23,7 +23,7 @@ use core::{fmt, marker::PhantomData, ptr::NonNull};
 ///
 /// The size of this struct is the same as the size of the contained reference.
 #[repr(transparent)]
-pub struct VolatileRef<'a, T, A = ReadWrite>
+pub struct ExternallySharedRef<'a, T, A = ReadWrite>
 where
     T: ?Sized,
 {
@@ -34,14 +34,14 @@ where
 
 /// Constructor functions.
 ///
-/// These functions construct new `VolatileRef` values. While the `new`
-/// function creates a `VolatileRef` instance with unrestricted access, there
+/// These functions construct new `ExternallySharedRef` values. While the `new`
+/// function creates a `ExternallySharedRef` instance with unrestricted access, there
 /// are also functions for creating read-only or write-only instances.
-impl<'a, T> VolatileRef<'a, T>
+impl<'a, T> ExternallySharedRef<'a, T>
 where
     T: ?Sized,
 {
-    /// Turns the given pointer into a `VolatileRef`.
+    /// Turns the given pointer into a `ExternallySharedRef`.
     ///
     /// ## Safety
     ///
@@ -50,13 +50,13 @@ where
     /// - The pointer must point to an initialized instance of T.
     /// - You must enforce Rust’s aliasing rules, since the returned lifetime 'a is arbitrarily
     ///   chosen and does not necessarily reflect the actual lifetime of the data. In particular,
-    ///   while this `VolatileRef` exists, the memory the pointer points to must not get accessed
+    ///   while this `ExternallySharedRef` exists, the memory the pointer points to must not get accessed
     ///   (_read or written_) through any other pointer.
     pub unsafe fn new(pointer: NonNull<T>) -> Self {
-        unsafe { VolatileRef::new_restricted(ReadWrite, pointer) }
+        unsafe { ExternallySharedRef::new_restricted(ReadWrite, pointer) }
     }
 
-    /// Turns the given pointer into a read-only `VolatileRef`.
+    /// Turns the given pointer into a read-only `ExternallySharedRef`.
     ///
     /// ## Safety
     ///
@@ -65,12 +65,12 @@ where
     /// - The pointer must point to an initialized instance of T.
     /// - You must enforce Rust’s aliasing rules, since the returned lifetime 'a is arbitrarily
     ///   chosen and does not necessarily reflect the actual lifetime of the data. In particular,
-    ///   while this `VolatileRef` exists, the memory the pointer points to _must not get mutated_.
-    pub const unsafe fn new_read_only(pointer: NonNull<T>) -> VolatileRef<'a, T, ReadOnly> {
+    ///   while this `ExternallySharedRef` exists, the memory the pointer points to _must not get mutated_.
+    pub const unsafe fn new_read_only(pointer: NonNull<T>) -> ExternallySharedRef<'a, T, ReadOnly> {
         unsafe { Self::new_restricted(ReadOnly, pointer) }
     }
 
-    /// Turns the given pointer into a `VolatileRef` instance with the given access.
+    /// Turns the given pointer into a `ExternallySharedRef` instance with the given access.
     ///
     /// ## Safety
     ///
@@ -79,10 +79,10 @@ where
     /// - The pointer must point to an initialized instance of T.
     /// - You must enforce Rust’s aliasing rules, since the returned lifetime 'a is arbitrarily
     ///   chosen and does not necessarily reflect the actual lifetime of the data. In particular,
-    ///   while this `VolatileRef` exists, the memory the pointer points to _must not get mutated_.
+    ///   while this `ExternallySharedRef` exists, the memory the pointer points to _must not get mutated_.
     ///   If the given `access` parameter allows write access, the pointer _must not get read
-    ///   either_ while this `VolatileRef` exists.
-    pub const unsafe fn new_restricted<A>(access: A, pointer: NonNull<T>) -> VolatileRef<'a, T, A>
+    ///   either_ while this `ExternallySharedRef` exists.
+    pub const unsafe fn new_restricted<A>(access: A, pointer: NonNull<T>) -> ExternallySharedRef<'a, T, A>
     where
         A: Access,
     {
@@ -90,21 +90,21 @@ where
         unsafe { Self::new_generic(pointer) }
     }
 
-    /// Creates a `VolatileRef` from the given shared reference.
+    /// Creates a `ExternallySharedRef` from the given shared reference.
     ///
     /// **Note:** This function is only intended for testing, not for accessing real volatile
     /// data. The reason is that the `&mut T` argument is considered _dereferenceable_ by Rust,
     /// so the compiler is allowed to insert non-volatile reads. This might lead to undesired
     /// (or even undefined?) behavior when accessing volatile data. So to be safe, only create
     /// raw pointers to volatile data and use the [`Self::new`] constructor instead.
-    pub fn from_ref(reference: &'a T) -> VolatileRef<'a, T, ReadOnly>
+    pub fn from_ref(reference: &'a T) -> ExternallySharedRef<'a, T, ReadOnly>
     where
         T: 'a,
     {
-        unsafe { VolatileRef::new_restricted(ReadOnly, reference.into()) }
+        unsafe { ExternallySharedRef::new_restricted(ReadOnly, reference.into()) }
     }
 
-    /// Creates a `VolatileRef` from the given mutable reference.
+    /// Creates a `ExternallySharedRef` from the given mutable reference.
     ///
     /// **Note:** This function is only intended for testing, not for accessing real volatile
     /// data. The reason is that the `&mut T` argument is considered _dereferenceable_ by Rust,
@@ -115,11 +115,11 @@ where
     where
         T: 'a,
     {
-        unsafe { VolatileRef::new(reference.into()) }
+        unsafe { ExternallySharedRef::new(reference.into()) }
     }
 
-    const unsafe fn new_generic<A>(pointer: NonNull<T>) -> VolatileRef<'a, T, A> {
-        VolatileRef {
+    const unsafe fn new_generic<A>(pointer: NonNull<T>) -> ExternallySharedRef<'a, T, A> {
+        ExternallySharedRef {
             pointer,
             reference: PhantomData,
             access: PhantomData,
@@ -127,47 +127,47 @@ where
     }
 }
 
-impl<'a, T, A> VolatileRef<'a, T, A>
+impl<'a, T, A> ExternallySharedRef<'a, T, A>
 where
     T: ?Sized,
 {
-    /// Borrows this `VolatileRef` as a read-only [`VolatilePtr`].
+    /// Borrows this `ExternallySharedRef` as a read-only [`ExternallySharedPtr`].
     ///
     /// Use this method to do (partial) volatile reads of the referenced data.
-    pub fn as_ptr(&self) -> VolatilePtr<'_, T, A::RestrictShared>
+    pub fn as_ptr(&self) -> ExternallySharedPtr<'_, T, A::RestrictShared>
     where
         A: Access,
     {
-        unsafe { VolatilePtr::new_restricted(Default::default(), self.pointer) }
+        unsafe { ExternallySharedPtr::new_restricted(Default::default(), self.pointer) }
     }
 
-    /// Borrows this `VolatileRef` as a mutable [`VolatilePtr`].
+    /// Borrows this `ExternallySharedRef` as a mutable [`ExternallySharedPtr`].
     ///
     /// Use this method to do (partial) volatile reads or writes of the referenced data.
-    pub fn as_mut_ptr(&mut self) -> VolatilePtr<'_, T, A>
+    pub fn as_mut_ptr(&mut self) -> ExternallySharedPtr<'_, T, A>
     where
         A: Access,
     {
-        unsafe { VolatilePtr::new_restricted(Default::default(), self.pointer) }
+        unsafe { ExternallySharedPtr::new_restricted(Default::default(), self.pointer) }
     }
 
-    /// Converts this `VolatileRef` into a [`VolatilePtr`] with full access without shortening
+    /// Converts this `ExternallySharedRef` into a [`ExternallySharedPtr`] with full access without shortening
     /// the lifetime.
     ///
-    /// Use this method when you need a [`VolatilePtr`] instance that lives for the full
+    /// Use this method when you need a [`ExternallySharedPtr`] instance that lives for the full
     /// lifetime `'a`.
     ///
-    /// This method consumes the `VolatileRef`.
-    pub fn into_ptr(self) -> VolatilePtr<'a, T, A>
+    /// This method consumes the `ExternallySharedRef`.
+    pub fn into_ptr(self) -> ExternallySharedPtr<'a, T, A>
     where
         A: Access,
     {
-        unsafe { VolatilePtr::new_restricted(Default::default(), self.pointer) }
+        unsafe { ExternallySharedPtr::new_restricted(Default::default(), self.pointer) }
     }
 }
 
 /// Methods for restricting access.
-impl<'a, T> VolatileRef<'a, T, ReadWrite>
+impl<'a, T> ExternallySharedRef<'a, T, ReadWrite>
 where
     T: ?Sized,
 {
@@ -176,18 +176,18 @@ where
     /// ## Example
     ///
     /// ```
-    /// use volatile::VolatileRef;
+    /// use volatile::ExternallySharedRef;
     /// use core::ptr::NonNull;
     ///
     /// let mut value: i16 = -4;
-    /// let mut volatile = VolatileRef::from_mut_ref(&mut value);
+    /// let mut volatile = ExternallySharedRef::from_mut_ref(&mut value);
     ///
     /// let read_only = volatile.read_only();
     /// assert_eq!(read_only.as_ptr().read(), -4);
     /// // read_only.as_ptr().write(10); // compile-time error
     /// ```
-    pub fn read_only(self) -> VolatileRef<'a, T, ReadOnly> {
-        unsafe { VolatileRef::new_restricted(ReadOnly, self.pointer) }
+    pub fn read_only(self) -> ExternallySharedRef<'a, T, ReadOnly> {
+        unsafe { ExternallySharedRef::new_restricted(ReadOnly, self.pointer) }
     }
 
     /// Restricts access permissions to write-only.
@@ -197,23 +197,23 @@ where
     /// Creating a write-only reference to a struct field:
     ///
     /// ```
-    /// use volatile::{VolatileRef};
+    /// use volatile::{ExternallySharedRef};
     /// use core::ptr::NonNull;
     ///
     /// #[derive(Clone, Copy)]
     /// struct Example { field_1: u32, field_2: u8, }
     /// let mut value = Example { field_1: 15, field_2: 255 };
-    /// let mut volatile = VolatileRef::from_mut_ref(&mut value);
+    /// let mut volatile = ExternallySharedRef::from_mut_ref(&mut value);
     ///
     /// let write_only = volatile.write_only();
     /// // write_only.as_ptr().read(); // compile-time error
     /// ```
-    pub fn write_only(self) -> VolatileRef<'a, T, WriteOnly> {
-        unsafe { VolatileRef::new_restricted(WriteOnly, self.pointer) }
+    pub fn write_only(self) -> ExternallySharedRef<'a, T, WriteOnly> {
+        unsafe { ExternallySharedRef::new_restricted(WriteOnly, self.pointer) }
     }
 }
 
-impl<'a, T, A> Clone for VolatileRef<'a, T, A>
+impl<'a, T, A> Clone for ExternallySharedRef<'a, T, A>
 where
     T: ?Sized,
     A: Access + Copyable,
@@ -227,22 +227,22 @@ where
     }
 }
 
-impl<'a, T, A> Copy for VolatileRef<'a, T, A>
+impl<'a, T, A> Copy for ExternallySharedRef<'a, T, A>
 where
     T: ?Sized,
     A: Access + Copyable,
 {
 }
 
-unsafe impl<T, A> Send for VolatileRef<'_, T, A> where T: Sync {}
-unsafe impl<T, A> Sync for VolatileRef<'_, T, A> where T: Sync {}
+unsafe impl<T, A> Send for ExternallySharedRef<'_, T, A> where T: Sync {}
+unsafe impl<T, A> Sync for ExternallySharedRef<'_, T, A> where T: Sync {}
 
-impl<T, A> fmt::Debug for VolatileRef<'_, T, A>
+impl<T, A> fmt::Debug for ExternallySharedRef<'_, T, A>
 where
     T: Copy + fmt::Debug + ?Sized,
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_struct("VolatileRef")
+        f.debug_struct("ExternallySharedRef")
             .field("pointer", &self.pointer)
             .field("access", &self.access)
             .finish()

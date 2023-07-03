@@ -5,27 +5,27 @@ use core::{
 
 use crate::{
     access::{Access, ReadOnly, ReadWrite, Readable, Writable, WriteOnly},
-    VolatilePtr,
+    ExternallySharedPtr,
 };
 
 /// Constructor functions.
 ///
-/// These functions construct new `VolatilePtr` values. While the `new`
-/// function creates a `VolatilePtr` instance with unrestricted access, there
+/// These functions construct new `ExternallySharedPtr` values. While the `new`
+/// function creates a `ExternallySharedPtr` instance with unrestricted access, there
 /// are also functions for creating read-only or write-only instances.
-impl<'a, T> VolatilePtr<'a, T>
+impl<'a, T> ExternallySharedPtr<'a, T>
 where
     T: ?Sized,
 {
-    /// Turns the given pointer into a `VolatilePtr`.
+    /// Turns the given pointer into a `ExternallySharedPtr`.
     ///
     /// ## Safety
     ///
     /// - The given pointer must be valid.
     /// - No other thread must have access to the given pointer. This must remain true
-    ///   for the whole lifetime of the `VolatilePtr`.
-    pub unsafe fn new(pointer: NonNull<T>) -> VolatilePtr<'a, T, ReadWrite> {
-        unsafe { VolatilePtr::new_restricted(ReadWrite, pointer) }
+    ///   for the whole lifetime of the `ExternallySharedPtr`.
+    pub unsafe fn new(pointer: NonNull<T>) -> ExternallySharedPtr<'a, T, ReadWrite> {
+        unsafe { ExternallySharedPtr::new_restricted(ReadWrite, pointer) }
     }
 
     /// Creates a new read-only volatile pointer from the given raw pointer.
@@ -33,7 +33,7 @@ where
     /// ## Safety
     ///
     /// The requirements for [`Self::new`] apply to this function too.
-    pub const unsafe fn new_read_only(pointer: NonNull<T>) -> VolatilePtr<'a, T, ReadOnly> {
+    pub const unsafe fn new_read_only(pointer: NonNull<T>) -> ExternallySharedPtr<'a, T, ReadOnly> {
         unsafe { Self::new_restricted(ReadOnly, pointer) }
     }
 
@@ -42,7 +42,7 @@ where
     /// ## Safety
     ///
     /// The requirements for [`Self::new`] apply to this function too.
-    pub const unsafe fn new_restricted<A>(access: A, pointer: NonNull<T>) -> VolatilePtr<'a, T, A>
+    pub const unsafe fn new_restricted<A>(access: A, pointer: NonNull<T>) -> ExternallySharedPtr<'a, T, A>
     where
         A: Access,
     {
@@ -50,8 +50,8 @@ where
         unsafe { Self::new_generic(pointer) }
     }
 
-    pub(super) const unsafe fn new_generic<A>(pointer: NonNull<T>) -> VolatilePtr<'a, T, A> {
-        VolatilePtr {
+    pub(super) const unsafe fn new_generic<A>(pointer: NonNull<T>) -> ExternallySharedPtr<'a, T, A> {
+        ExternallySharedPtr {
             pointer,
             reference: PhantomData,
             access: PhantomData,
@@ -59,7 +59,7 @@ where
     }
 }
 
-impl<'a, T, A> VolatilePtr<'a, T, A>
+impl<'a, T, A> ExternallySharedPtr<'a, T, A>
 where
     T: ?Sized,
 {
@@ -73,12 +73,12 @@ where
     /// ## Examples
     ///
     /// ```rust
-    /// use volatile::{VolatilePtr, access};
+    /// use volatile::{ExternallySharedPtr, access};
     /// use core::ptr::NonNull;
     ///
     /// let value = 42;
     /// let pointer = unsafe {
-    ///     VolatilePtr::new_restricted(access::ReadOnly, NonNull::from(&value))
+    ///     ExternallySharedPtr::new_restricted(access::ReadOnly, NonNull::from(&value))
     /// };
     /// assert_eq!(pointer.read(), 42);
     /// ```
@@ -99,11 +99,11 @@ where
     /// ## Example
     ///
     /// ```rust
-    /// use volatile::VolatilePtr;
+    /// use volatile::ExternallySharedPtr;
     /// use core::ptr::NonNull;
     ///
     /// let mut value = 42;
-    /// let mut volatile = unsafe { VolatilePtr::new((&mut value).into()) };
+    /// let mut volatile = unsafe { ExternallySharedPtr::new((&mut value).into()) };
     /// volatile.write(50);
     ///
     /// assert_eq!(volatile.read(), 50);
@@ -123,11 +123,11 @@ where
     /// the target.
     ///
     /// ```rust
-    /// use volatile::VolatilePtr;
+    /// use volatile::ExternallySharedPtr;
     /// use core::ptr::NonNull;
     ///
     /// let mut value = 42;
-    /// let mut volatile = unsafe { VolatilePtr::new((&mut value).into()) };
+    /// let mut volatile = unsafe { ExternallySharedPtr::new((&mut value).into()) };
     /// volatile.update(|val| val + 1);
     ///
     /// assert_eq!(volatile.read(), 43);
@@ -147,11 +147,11 @@ where
     /// ## Example
     ///
     /// ```
-    /// use volatile::VolatilePtr;
+    /// use volatile::ExternallySharedPtr;
     /// use core::ptr::NonNull;
     ///
     /// let mut value = 42;
-    /// let mut volatile = unsafe { VolatilePtr::new((&mut value).into()) };
+    /// let mut volatile = unsafe { ExternallySharedPtr::new((&mut value).into()) };
     /// volatile.write(50);
     /// let unwrapped: *mut i32 = volatile.as_raw_ptr().as_ptr();
     ///
@@ -161,7 +161,7 @@ where
         self.pointer
     }
 
-    /// Constructs a new `VolatilePtr` by mapping the wrapped pointer.
+    /// Constructs a new `ExternallySharedPtr` by mapping the wrapped pointer.
     ///
     /// This method is useful for accessing only a part of a volatile value, e.g. a subslice or
     /// a struct field. For struct field access, there is also the safe
@@ -172,12 +172,12 @@ where
     /// Accessing a struct field:
     ///
     /// ```
-    /// use volatile::VolatilePtr;
+    /// use volatile::ExternallySharedPtr;
     /// use core::ptr::NonNull;
     ///
     /// struct Example { field_1: u32, field_2: u8, }
     /// let mut value = Example { field_1: 15, field_2: 255 };
-    /// let mut volatile = unsafe { VolatilePtr::new((&mut value).into()) };
+    /// let mut volatile = unsafe { ExternallySharedPtr::new((&mut value).into()) };
     ///
     /// // construct a volatile pointer to a field
     /// let field_2 = unsafe { volatile.map(|ptr| NonNull::new(core::ptr::addr_of_mut!((*ptr.as_ptr()).field_2)).unwrap()) };
@@ -187,11 +187,11 @@ where
     /// Don't misuse this method to do a non-volatile read of the referenced value:
     ///
     /// ```
-    /// use volatile::VolatilePtr;
+    /// use volatile::ExternallySharedPtr;
     /// use core::ptr::NonNull;
     ///
     /// let mut value = 5;
-    /// let mut volatile = unsafe { VolatilePtr::new((&mut value).into()) };
+    /// let mut volatile = unsafe { ExternallySharedPtr::new((&mut value).into()) };
     ///
     /// // DON'T DO THIS:
     /// let mut readout = 0;
@@ -204,18 +204,18 @@ where
     /// ## Safety
     ///
     /// The pointer returned by `f` must satisfy the requirements of [`Self::new`].
-    pub unsafe fn map<F, U>(self, f: F) -> VolatilePtr<'a, U, A>
+    pub unsafe fn map<F, U>(self, f: F) -> ExternallySharedPtr<'a, U, A>
     where
         F: FnOnce(NonNull<T>) -> NonNull<U>,
         A: Access,
         U: ?Sized,
     {
-        unsafe { VolatilePtr::new_restricted(A::default(), f(self.pointer)) }
+        unsafe { ExternallySharedPtr::new_restricted(A::default(), f(self.pointer)) }
     }
 }
 
 /// Methods for restricting access.
-impl<'a, T> VolatilePtr<'a, T, ReadWrite>
+impl<'a, T> ExternallySharedPtr<'a, T, ReadWrite>
 where
     T: ?Sized,
 {
@@ -224,18 +224,18 @@ where
     /// ## Example
     ///
     /// ```
-    /// use volatile::VolatilePtr;
+    /// use volatile::ExternallySharedPtr;
     /// use core::ptr::NonNull;
     ///
     /// let mut value: i16 = -4;
-    /// let mut volatile = unsafe { VolatilePtr::new((&mut value).into()) };
+    /// let mut volatile = unsafe { ExternallySharedPtr::new((&mut value).into()) };
     ///
     /// let read_only = volatile.read_only();
     /// assert_eq!(read_only.read(), -4);
     /// // read_only.write(10); // compile-time error
     /// ```
-    pub fn read_only(self) -> VolatilePtr<'a, T, ReadOnly> {
-        unsafe { VolatilePtr::new_restricted(ReadOnly, self.pointer) }
+    pub fn read_only(self) -> ExternallySharedPtr<'a, T, ReadOnly> {
+        unsafe { ExternallySharedPtr::new_restricted(ReadOnly, self.pointer) }
     }
 
     /// Restricts access permissions to write-only.
@@ -245,19 +245,19 @@ where
     /// Creating a write-only pointer to a struct field:
     ///
     /// ```
-    /// use volatile::{VolatilePtr, map_field};
+    /// use volatile::{ExternallySharedPtr, map_field};
     /// use core::ptr::NonNull;
     ///
     /// struct Example { field_1: u32, field_2: u8, }
     /// let mut value = Example { field_1: 15, field_2: 255 };
-    /// let mut volatile = unsafe { VolatilePtr::new((&mut value).into()) };
+    /// let mut volatile = unsafe { ExternallySharedPtr::new((&mut value).into()) };
     ///
     /// // construct a volatile write-only pointer to `field_2`
     /// let mut field_2 = map_field!(volatile.field_2).write_only();
     /// field_2.write(14);
     /// // field_2.read(); // compile-time error
     /// ```
-    pub fn write_only(self) -> VolatilePtr<'a, T, WriteOnly> {
-        unsafe { VolatilePtr::new_restricted(WriteOnly, self.pointer) }
+    pub fn write_only(self) -> ExternallySharedPtr<'a, T, WriteOnly> {
+        unsafe { ExternallySharedPtr::new_restricted(WriteOnly, self.pointer) }
     }
 }

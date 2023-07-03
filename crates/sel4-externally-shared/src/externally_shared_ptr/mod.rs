@@ -25,7 +25,7 @@ mod very_unstable;
 ///
 /// The size of this struct is the same as the size of the contained reference.
 #[repr(transparent)]
-pub struct VolatilePtr<'a, T, A = ReadWrite>
+pub struct ExternallySharedPtr<'a, T, A = ReadWrite>
 where
     T: ?Sized,
 {
@@ -34,9 +34,9 @@ where
     access: PhantomData<A>,
 }
 
-impl<'a, T, A> Copy for VolatilePtr<'a, T, A> where T: ?Sized {}
+impl<'a, T, A> Copy for ExternallySharedPtr<'a, T, A> where T: ?Sized {}
 
-impl<T, A> Clone for VolatilePtr<'_, T, A>
+impl<T, A> Clone for ExternallySharedPtr<'_, T, A>
 where
     T: ?Sized,
 {
@@ -45,12 +45,12 @@ where
     }
 }
 
-impl<T, A> fmt::Debug for VolatilePtr<'_, T, A>
+impl<T, A> fmt::Debug for ExternallySharedPtr<'_, T, A>
 where
     T: Copy + fmt::Debug + ?Sized,
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_struct("VolatilePtr")
+        f.debug_struct("ExternallySharedPtr")
             .field("pointer", &self.pointer)
             .field("access", &self.access)
             .finish()

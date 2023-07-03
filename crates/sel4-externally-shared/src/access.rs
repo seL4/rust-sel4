@@ -31,7 +31,7 @@ pub trait Writable: Access {
     }
 }
 
-/// Implemented for access types that permit copying of `VolatileRef`.
+/// Implemented for access types that permit copying of `ExternallySharedRef`.
 pub trait Copyable {
     /// Ensures that this trait cannot be implemented outside of this crate.
     fn _private() -> _Private {
