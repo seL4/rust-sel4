@@ -1,7 +1,7 @@
 { mk, localCrates, versions }:
 
 mk {
-  package.name = "sel4-ddf";
+  package.name = "sel4-shared-ring-buffer";
   dependencies = rec {
     inherit (versions) log zerocopy;
   };

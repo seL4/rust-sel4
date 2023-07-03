@@ -8,18 +8,13 @@ use zerocopy::{AsBytes, FromBytes};
 use sel4_externally_shared::ExternallyShared;
 
 pub struct RingBuffers<F> {
-    free: ExternallySharedRingBuffer,
-    used: ExternallySharedRingBuffer,
+    free: RingBuffer,
+    used: RingBuffer,
     notify: F,
 }
 
 impl<F> RingBuffers<F> {
-    pub fn new(
-        free: ExternallySharedRingBuffer,
-        used: ExternallySharedRingBuffer,
-        notify: F,
-        initialize: bool,
-    ) -> Self {
+    pub fn new(free: RingBuffer, used: RingBuffer, notify: F, initialize: bool) -> Self {
         let mut this = Self { free, used, notify };
         if initialize {
             this.free_mut().initialize();
@@ -28,19 +23,19 @@ impl<F> RingBuffers<F> {
         this
     }
 
-    pub fn free(&self) -> &ExternallySharedRingBuffer {
+    pub fn free(&self) -> &RingBuffer {
         &self.free
     }
 
-    pub fn used(&self) -> &ExternallySharedRingBuffer {
+    pub fn used(&self) -> &RingBuffer {
         &self.used
     }
 
-    pub fn free_mut(&mut self) -> &mut ExternallySharedRingBuffer {
+    pub fn free_mut(&mut self) -> &mut RingBuffer {
         &mut self.free
     }
 
-    pub fn used_mut(&mut self) -> &mut ExternallySharedRingBuffer {
+    pub fn used_mut(&mut self) -> &mut RingBuffer {
         &mut self.used
     }
 }
@@ -59,10 +54,10 @@ impl<F: FnMut() -> R, R> RingBuffers<F> {
 
 #[repr(C)]
 #[derive(Copy, Clone, Debug, AsBytes, FromBytes)]
-pub struct RingBuffer {
+pub struct RawRingBuffer {
     write_index: u32,
     read_index: u32,
-    descriptors: [Descriptor; ExternallySharedRingBuffer::SIZE],
+    descriptors: [Descriptor; RingBuffer::SIZE],
 }
 
 #[repr(C)]
@@ -97,18 +92,18 @@ impl Descriptor {
     }
 }
 
-pub struct ExternallySharedRingBuffer {
-    inner: ExternallyShared<&'static mut RingBuffer>,
+pub struct RingBuffer {
+    inner: ExternallyShared<&'static mut RawRingBuffer>,
 }
 
-impl ExternallySharedRingBuffer {
+impl RingBuffer {
     pub const SIZE: usize = 512;
 
-    pub unsafe fn new(inner: ExternallyShared<&'static mut RingBuffer>) -> Self {
+    pub unsafe fn new(inner: ExternallyShared<&'static mut RawRingBuffer>) -> Self {
         Self { inner }
     }
 
-    pub unsafe fn from_ptr(ptr: *mut RingBuffer) -> Self {
+    pub unsafe fn from_ptr(ptr: *mut RawRingBuffer) -> Self {
         Self::new(ExternallyShared::new(ptr.as_mut().unwrap()))
     }
 

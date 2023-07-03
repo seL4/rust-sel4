@@ -2705,15 +2705,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "sel4-ddf"
-version = "0.1.0"
-dependencies = [
- "log",
- "sel4-externally-shared",
- "zerocopy",
-]
-
-[[package]]
 name = "sel4-dlmalloc"
 version = "0.1.0"
 dependencies = [
@@ -2905,6 +2896,15 @@ name = "sel4-rustfmt-helper"
 version = "0.1.0"
 dependencies = [
  "which 4.4.0",
+]
+
+[[package]]
+name = "sel4-shared-ring-buffer"
+version = "0.1.0"
+dependencies = [
+ "log",
+ "sel4-externally-shared",
+ "zerocopy",
 ]
 
 [[package]]

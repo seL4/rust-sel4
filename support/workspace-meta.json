@@ -296,11 +296,6 @@
     ],
     "skip": false
   },
-  "sel4-ddf": {
-    "labels": {},
-    "requirements": {},
-    "skip": false
-  },
   "sel4-dlmalloc": {
     "labels": {},
     "requirements": [
@@ -450,6 +445,11 @@
     "requirements": [
       "linux"
     ],
+    "skip": false
+  },
+  "sel4-shared-ring-buffer": {
+    "labels": {},
+    "requirements": {},
     "skip": false
   },
   "sel4-simple-task-config-types": {
