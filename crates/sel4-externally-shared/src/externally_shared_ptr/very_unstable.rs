@@ -23,7 +23,7 @@ where
     }
 }
 
-/// Methods for volatile slices
+/// Methods for externally shared slices
 #[cfg(feature = "unstable")]
 impl<'a, T, A> ExternallySharedPtr<'a, [T], A> {
     /// Compile-time evaluable variant of [`Self::index`].

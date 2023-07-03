@@ -1,6 +1,6 @@
 use core::{
     marker::PhantomData,
-    ptr::{NonNull},
+    ptr::NonNull,
 };
 
 use crate::{
@@ -28,7 +28,7 @@ where
         unsafe { ExternallySharedPtr::new_restricted(ReadWrite, pointer) }
     }
 
-    /// Creates a new read-only volatile pointer from the given raw pointer.
+    /// Creates a new read-only wrapped pointer from the given raw pointer.
     ///
     /// ## Safety
     ///
@@ -37,7 +37,7 @@ where
         unsafe { Self::new_restricted(ReadOnly, pointer) }
     }
 
-    /// Creates a new volatile pointer with restricted access from the given raw pointer.
+    /// Creates a new wrapped pointer with restricted access from the given raw pointer.
     ///
     /// ## Safety
     ///
@@ -63,17 +63,12 @@ impl<'a, T, A> ExternallySharedPtr<'a, T, A>
 where
     T: ?Sized,
 {
-    /// Performs a volatile read of the contained value.
-    ///
-    /// Returns a copy of the read value. Volatile reads are guaranteed not to be optimized
-    /// away by the compiler, but by themselves do not have atomic ordering
-    /// guarantees. To also get atomicity, consider looking at the `Atomic` wrapper types of
-    /// the standard/`core` library.
+    /// Performs a read of the contained value.
     ///
     /// ## Examples
     ///
     /// ```rust
-    /// use volatile::{ExternallySharedPtr, access};
+    /// use sel4_externally_shared::{ExternallySharedPtr, access};
     /// use core::ptr::NonNull;
     ///
     /// let value = 42;
@@ -90,23 +85,19 @@ where
         unsafe { self.pointer.as_ptr().read() }
     }
 
-    /// Performs a volatile write, setting the contained value to the given `value`.
-    ///
-    /// Volatile writes are guaranteed to not be optimized away by the compiler, but by
-    /// themselves do not have atomic ordering guarantees. To also get atomicity, consider
-    /// looking at the `Atomic` wrapper types of the standard/`core` library.
+    /// Performs a write, setting the contained value to the given `value`.
     ///
     /// ## Example
     ///
     /// ```rust
-    /// use volatile::ExternallySharedPtr;
+    /// use sel4_externally_shared::ExternallySharedPtr;
     /// use core::ptr::NonNull;
     ///
     /// let mut value = 42;
-    /// let mut volatile = unsafe { ExternallySharedPtr::new((&mut value).into()) };
-    /// volatile.write(50);
+    /// let mut shared = unsafe { ExternallySharedPtr::new((&mut value).into()) };
+    /// shared.write(50);
     ///
-    /// assert_eq!(volatile.read(), 50);
+    /// assert_eq!(shared.read(), 50);
     /// ```
     pub fn write(self, value: T)
     where
@@ -116,21 +107,21 @@ where
         unsafe { self.pointer.as_ptr().write(value) };
     }
 
-    /// Updates the contained value using the given closure and volatile instructions.
+    /// Updates the contained value using the given closure.
     ///
-    /// Performs a volatile read of the contained value, passes it to the
-    /// function `f`, and then performs a volatile write of the returned value back to
+    /// Performs a read of the contained value, passes it to the
+    /// function `f`, and then performs a write of the returned value back to
     /// the target.
     ///
     /// ```rust
-    /// use volatile::ExternallySharedPtr;
+    /// use sel4_externally_shared::ExternallySharedPtr;
     /// use core::ptr::NonNull;
     ///
     /// let mut value = 42;
-    /// let mut volatile = unsafe { ExternallySharedPtr::new((&mut value).into()) };
-    /// volatile.update(|val| val + 1);
+    /// let mut shared = unsafe { ExternallySharedPtr::new((&mut value).into()) };
+    /// shared.update(|val| val + 1);
     ///
-    /// assert_eq!(volatile.read(), 43);
+    /// assert_eq!(shared.read(), 43);
     /// ```
     pub fn update<F>(self, f: F)
     where
@@ -147,15 +138,15 @@ where
     /// ## Example
     ///
     /// ```
-    /// use volatile::ExternallySharedPtr;
+    /// use sel4_externally_shared::ExternallySharedPtr;
     /// use core::ptr::NonNull;
     ///
     /// let mut value = 42;
-    /// let mut volatile = unsafe { ExternallySharedPtr::new((&mut value).into()) };
-    /// volatile.write(50);
-    /// let unwrapped: *mut i32 = volatile.as_raw_ptr().as_ptr();
+    /// let mut shared = unsafe { ExternallySharedPtr::new((&mut value).into()) };
+    /// shared.write(50);
+    /// let unwrapped: *mut i32 = shared.as_raw_ptr().as_ptr();
     ///
-    /// assert_eq!(unsafe { *unwrapped }, 50); // non volatile access, be careful!
+    /// assert_eq!(unsafe { *unwrapped }, 50);
     /// ```
     pub fn as_raw_ptr(self) -> NonNull<T> {
         self.pointer
@@ -163,7 +154,7 @@ where
 
     /// Constructs a new `ExternallySharedPtr` by mapping the wrapped pointer.
     ///
-    /// This method is useful for accessing only a part of a volatile value, e.g. a subslice or
+    /// This method is useful for accessing only a part of a value, e.g. a subslice or
     /// a struct field. For struct field access, there is also the safe
     /// [`map_field`][crate::map_field] macro that wraps this function.
     ///
@@ -172,31 +163,31 @@ where
     /// Accessing a struct field:
     ///
     /// ```
-    /// use volatile::ExternallySharedPtr;
+    /// use sel4_externally_shared::ExternallySharedPtr;
     /// use core::ptr::NonNull;
     ///
     /// struct Example { field_1: u32, field_2: u8, }
     /// let mut value = Example { field_1: 15, field_2: 255 };
-    /// let mut volatile = unsafe { ExternallySharedPtr::new((&mut value).into()) };
+    /// let mut shared = unsafe { ExternallySharedPtr::new((&mut value).into()) };
     ///
-    /// // construct a volatile pointer to a field
-    /// let field_2 = unsafe { volatile.map(|ptr| NonNull::new(core::ptr::addr_of_mut!((*ptr.as_ptr()).field_2)).unwrap()) };
+    /// // construct a wrapped pointer to a field
+    /// let field_2 = unsafe { shared.map(|ptr| NonNull::new(core::ptr::addr_of_mut!((*ptr.as_ptr()).field_2)).unwrap()) };
     /// assert_eq!(field_2.read(), 255);
     /// ```
     ///
-    /// Don't misuse this method to do a non-volatile read of the referenced value:
+    /// Don't misuse this method to do a read of the referenced value:
     ///
     /// ```
-    /// use volatile::ExternallySharedPtr;
+    /// use sel4_externally_shared::ExternallySharedPtr;
     /// use core::ptr::NonNull;
     ///
     /// let mut value = 5;
-    /// let mut volatile = unsafe { ExternallySharedPtr::new((&mut value).into()) };
+    /// let mut shared = unsafe { ExternallySharedPtr::new((&mut value).into()) };
     ///
     /// // DON'T DO THIS:
     /// let mut readout = 0;
-    /// unsafe { volatile.map(|value| {
-    ///    readout = *value.as_ptr(); // non-volatile read, might lead to bugs
+    /// unsafe { shared.map(|value| {
+    ///    readout = *value.as_ptr();
     ///    value
     /// })};
     /// ```
@@ -224,13 +215,13 @@ where
     /// ## Example
     ///
     /// ```
-    /// use volatile::ExternallySharedPtr;
+    /// use sel4_externally_shared::ExternallySharedPtr;
     /// use core::ptr::NonNull;
     ///
     /// let mut value: i16 = -4;
-    /// let mut volatile = unsafe { ExternallySharedPtr::new((&mut value).into()) };
+    /// let mut shared = unsafe { ExternallySharedPtr::new((&mut value).into()) };
     ///
-    /// let read_only = volatile.read_only();
+    /// let read_only = shared.read_only();
     /// assert_eq!(read_only.read(), -4);
     /// // read_only.write(10); // compile-time error
     /// ```
@@ -245,15 +236,15 @@ where
     /// Creating a write-only pointer to a struct field:
     ///
     /// ```
-    /// use volatile::{ExternallySharedPtr, map_field};
+    /// use sel4_externally_shared::{ExternallySharedPtr, map_field};
     /// use core::ptr::NonNull;
     ///
     /// struct Example { field_1: u32, field_2: u8, }
     /// let mut value = Example { field_1: 15, field_2: 255 };
-    /// let mut volatile = unsafe { ExternallySharedPtr::new((&mut value).into()) };
+    /// let mut shared = unsafe { ExternallySharedPtr::new((&mut value).into()) };
     ///
-    /// // construct a volatile write-only pointer to `field_2`
-    /// let mut field_2 = map_field!(volatile.field_2).write_only();
+    /// // construct a wrapped write-only pointer to `field_2`
+    /// let mut field_2 = map_field!(shared.field_2).write_only();
     /// field_2.write(14);
     /// // field_2.read(); // compile-time error
     /// ```

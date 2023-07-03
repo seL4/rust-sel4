@@ -12,11 +12,11 @@ use core::{fmt, marker::PhantomData, ptr::NonNull};
 /// - only read-only types implement [`Clone`] and [`Copy`]
 /// - [`Send`] and [`Sync`] are implemented if `T: Sync`
 ///
-/// To perform volatile operations on `ExternallySharedRef` types, use the [`as_ptr`][Self::as_ptr]
+/// To perform pointer operations on `ExternallySharedRef` types, use the [`as_ptr`][Self::as_ptr]
 /// or [`as_mut_ptr`](Self::as_mut_ptr) methods to create a temporary
 /// [`ExternallySharedPtr`][crate::ExternallySharedPtr] instance.
 ///
-/// Since not all volatile resources (e.g. memory mapped device registers) are both readable
+/// Since not all externallyshared resources (e.g. memory mapped device registers) are both readable
 /// and writable, this type supports limiting the allowed access types through an optional second
 /// generic parameter `A` that can be one of `ReadWrite`, `ReadOnly`, or `WriteOnly`. It defaults
 /// to `ReadWrite`, which allows all operations.
@@ -92,11 +92,7 @@ where
 
     /// Creates a `ExternallySharedRef` from the given shared reference.
     ///
-    /// **Note:** This function is only intended for testing, not for accessing real volatile
-    /// data. The reason is that the `&mut T` argument is considered _dereferenceable_ by Rust,
-    /// so the compiler is allowed to insert non-volatile reads. This might lead to undesired
-    /// (or even undefined?) behavior when accessing volatile data. So to be safe, only create
-    /// raw pointers to volatile data and use the [`Self::new`] constructor instead.
+    /// **Note:** This function is only intended for testing.
     pub fn from_ref(reference: &'a T) -> ExternallySharedRef<'a, T, ReadOnly>
     where
         T: 'a,
@@ -106,11 +102,7 @@ where
 
     /// Creates a `ExternallySharedRef` from the given mutable reference.
     ///
-    /// **Note:** This function is only intended for testing, not for accessing real volatile
-    /// data. The reason is that the `&mut T` argument is considered _dereferenceable_ by Rust,
-    /// so the compiler is allowed to insert non-volatile reads. This might lead to undesired
-    /// (or even undefined?) behavior when accessing volatile data. So to be safe, only create
-    /// raw pointers to volatile data and use the [`Self::new`] constructor instead.
+    /// **Note:** This function is only intended for testing.
     pub fn from_mut_ref(reference: &'a mut T) -> Self
     where
         T: 'a,
@@ -133,7 +125,7 @@ where
 {
     /// Borrows this `ExternallySharedRef` as a read-only [`ExternallySharedPtr`].
     ///
-    /// Use this method to do (partial) volatile reads of the referenced data.
+    /// Use this method to do (partial) reads of the referenced data.
     pub fn as_ptr(&self) -> ExternallySharedPtr<'_, T, A::RestrictShared>
     where
         A: Access,
@@ -143,7 +135,7 @@ where
 
     /// Borrows this `ExternallySharedRef` as a mutable [`ExternallySharedPtr`].
     ///
-    /// Use this method to do (partial) volatile reads or writes of the referenced data.
+    /// Use this method to do (partial) reads or writes of the referenced data.
     pub fn as_mut_ptr(&mut self) -> ExternallySharedPtr<'_, T, A>
     where
         A: Access,
@@ -176,13 +168,13 @@ where
     /// ## Example
     ///
     /// ```
-    /// use volatile::ExternallySharedRef;
+    /// use sel4_externally_shared::ExternallySharedRef;
     /// use core::ptr::NonNull;
     ///
     /// let mut value: i16 = -4;
-    /// let mut volatile = ExternallySharedRef::from_mut_ref(&mut value);
+    /// let mut shared = ExternallySharedRef::from_mut_ref(&mut value);
     ///
-    /// let read_only = volatile.read_only();
+    /// let read_only = shared.read_only();
     /// assert_eq!(read_only.as_ptr().read(), -4);
     /// // read_only.as_ptr().write(10); // compile-time error
     /// ```
@@ -197,15 +189,15 @@ where
     /// Creating a write-only reference to a struct field:
     ///
     /// ```
-    /// use volatile::{ExternallySharedRef};
+    /// use sel4_externally_shared::{ExternallySharedRef};
     /// use core::ptr::NonNull;
     ///
     /// #[derive(Clone, Copy)]
     /// struct Example { field_1: u32, field_2: u8, }
     /// let mut value = Example { field_1: 15, field_2: 255 };
-    /// let mut volatile = ExternallySharedRef::from_mut_ref(&mut value);
+    /// let mut shared = ExternallySharedRef::from_mut_ref(&mut value);
     ///
-    /// let write_only = volatile.write_only();
+    /// let write_only = shared.write_only();
     /// // write_only.as_ptr().read(); // compile-time error
     /// ```
     pub fn write_only(self) -> ExternallySharedRef<'a, T, WriteOnly> {

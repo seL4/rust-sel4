@@ -33,25 +33,25 @@ impl<'a, T, A> ExternallySharedPtr<'a, [T], A> {
     /// Accessing a single slice element:
     ///
     /// ```
-    /// use volatile::ExternallySharedPtr;
+    /// use sel4_externally_shared::ExternallySharedPtr;
     /// use core::ptr::NonNull;
     ///
     /// let array = [1, 2, 3];
     /// let slice = &array[..];
-    /// let volatile = unsafe { ExternallySharedPtr::new_read_only(NonNull::from(slice)) };
-    /// assert_eq!(volatile.index(1).read(), 2);
+    /// let shared = unsafe { ExternallySharedPtr::new_read_only(NonNull::from(slice)) };
+    /// assert_eq!(shared.index(1).read(), 2);
     /// ```
     ///
     /// Accessing a subslice:
     ///
     /// ```
-    /// use volatile::ExternallySharedPtr;
+    /// use sel4_externally_shared::ExternallySharedPtr;
     /// use core::ptr::NonNull;
     ///
     /// let array = [1, 2, 3];
     /// let slice = &array[..];
-    /// let volatile = unsafe { ExternallySharedPtr::new_read_only(NonNull::from(slice)) };
-    /// let subslice = volatile.index(1..);
+    /// let shared = unsafe { ExternallySharedPtr::new_read_only(NonNull::from(slice)) };
+    /// let subslice = shared.index(1..);
     /// assert_eq!(subslice.index(0).read(), 2);
     /// ```
     pub fn index<I>(self, index: I) -> ExternallySharedPtr<'a, <I as SliceIndex<[T]>>::Output, A>
@@ -75,7 +75,7 @@ impl<'a, T, A> ExternallySharedPtr<'a, [T], A> {
             .map(move |i| unsafe { ExternallySharedPtr::new_generic(NonNull::new_unchecked(ptr.add(i))) })
     }
 
-    /// Copies all elements from `self` into `dst`, using a volatile memcpy.
+    /// Copies all elements from `self` into `dst`, using memcpy.
     ///
     /// The length of `dst` must be the same as `self`.
     ///
@@ -88,22 +88,22 @@ impl<'a, T, A> ExternallySharedPtr<'a, [T], A> {
     ///
     /// ## Examples
     ///
-    /// Copying two elements from a volatile slice:
+    /// Copying two elements from a wrapped slice:
     ///
     /// ```
-    /// use volatile::ExternallySharedPtr;
+    /// use sel4_externally_shared::ExternallySharedPtr;
     /// use core::ptr::NonNull;
     ///
     /// let src = [1, 2];
     /// // the `ExternallySharedPtr` type does not work with arrays, so convert `src` to a slice
     /// let slice = &src[..];
-    /// let volatile = unsafe { ExternallySharedPtr::new_read_only(NonNull::from(slice)) };
+    /// let shared = unsafe { ExternallySharedPtr::new_read_only(NonNull::from(slice)) };
     /// let mut dst = [5, 0, 0];
     ///
     /// // Because the slices have to be the same length,
     /// // we slice the destination slice from three elements
     /// // to two. It will panic if we don't do this.
-    /// volatile.copy_into_slice(&mut dst[1..]);
+    /// shared.copy_into_slice(&mut dst[1..]);
     ///
     /// assert_eq!(src, [1, 2]);
     /// assert_eq!(dst, [5, 1, 2]);
@@ -127,12 +127,9 @@ impl<'a, T, A> ExternallySharedPtr<'a, [T], A> {
         }
     }
 
-    /// Copies all elements from `src` into `self`, using a volatile memcpy.
+    /// Copies all elements from `src` into `self`, using memcpy.
     ///
     /// The length of `src` must be the same as `self`.
-    ///
-    /// This method is similar to the `slice::copy_from_slice` method of the standard library. The
-    /// difference is that this method performs a volatile copy.
     ///
     /// The method is only available with the `unstable` feature enabled (requires a nightly
     /// Rust compiler).
@@ -143,21 +140,21 @@ impl<'a, T, A> ExternallySharedPtr<'a, [T], A> {
     ///
     /// ## Examples
     ///
-    /// Copying two elements from a slice into a volatile slice:
+    /// Copying two elements from a slice into a wrapped slice:
     ///
     /// ```
-    /// use volatile::ExternallySharedPtr;
+    /// use sel4_externally_shared::ExternallySharedPtr;
     /// use core::ptr::NonNull;
     ///
     /// let src = [1, 2, 3, 4];
     /// let mut dst = [0, 0];
     /// // the `ExternallySharedPtr` type does not work with arrays, so convert `dst` to a slice
     /// let slice = &mut dst[..];
-    /// let mut volatile = unsafe { ExternallySharedPtr::new(NonNull::from(slice)) };
+    /// let mut shared = unsafe { ExternallySharedPtr::new(NonNull::from(slice)) };
     /// // Because the slices have to be the same length,
     /// // we slice the source slice from four elements
     /// // to two. It will panic if we don't do this.
-    /// volatile.copy_from_slice(&src[2..]);
+    /// shared.copy_from_slice(&src[2..]);
     ///
     /// assert_eq!(src, [1, 2, 3, 4]);
     /// assert_eq!(dst, [3, 4]);
@@ -181,15 +178,11 @@ impl<'a, T, A> ExternallySharedPtr<'a, [T], A> {
         }
     }
 
-    /// Copies elements from one part of the slice to another part of itself, using a
-    /// volatile `memmove`.
+    /// Copies elements from one part of the slice to another part of itself, using `memmove`.
     ///
     /// `src` is the range within `self` to copy from. `dest` is the starting index of the
     /// range within `self` to copy to, which will have the same length as `src`. The two ranges
     /// may overlap. The ends of the two ranges must be less than or equal to `self.len()`.
-    ///
-    /// This method is similar to the `slice::copy_within` method of the standard library. The
-    /// difference is that this method performs a volatile copy.
     ///
     /// This method is only available with the `unstable` feature enabled (requires a nightly
     /// Rust compiler).
@@ -205,13 +198,13 @@ impl<'a, T, A> ExternallySharedPtr<'a, [T], A> {
     ///
     /// ```
     /// extern crate core;
-    /// use volatile::ExternallySharedPtr;
+    /// use sel4_externally_shared::ExternallySharedPtr;
     /// use core::ptr::NonNull;
     ///
     /// let mut byte_array = *b"Hello, World!";
     /// let mut slice: &mut [u8] = &mut byte_array[..];
-    /// let mut volatile = unsafe { ExternallySharedPtr::new(NonNull::from(slice)) };
-    /// volatile.copy_within(1..5, 8);
+    /// let mut shared = unsafe { ExternallySharedPtr::new(NonNull::from(slice)) };
+    /// shared.copy_within(1..5, 8);
     ///
     /// assert_eq!(&byte_array, b"Hello, Wello!");
     pub fn copy_within(self, src: impl RangeBounds<usize>, dest: usize)
@@ -227,8 +220,6 @@ impl<'a, T, A> ExternallySharedPtr<'a, [T], A> {
         } = range(src, ..len);
         let count = src_end - src_start;
         assert!(dest <= len - count, "dest is out of bounds");
-        // SAFETY: the conditions for `volatile_copy_memory` have all been checked above,
-        // as have those for `ptr::add`.
         unsafe {
             self.pointer.as_mut_ptr().add(dest).copy_from(
                 self.pointer.as_mut_ptr().add(src_start),
@@ -324,14 +315,9 @@ impl<'a, T, A> ExternallySharedPtr<'a, [T], A> {
     }
 }
 
-/// Methods for volatile byte slices
+/// Methods for wrapped byte slices
 impl<A> ExternallySharedPtr<'_, [u8], A> {
-    /// Sets all elements of the byte slice to the given `value` using a volatile `memset`.
-    ///
-    /// This method is similar to the `slice::fill` method of the standard library, with the
-    /// difference that this method performs a volatile write operation. Another difference
-    /// is that this method is only available for byte slices (not general `&mut [T]` slices)
-    /// because there currently isn't a instrinsic function that allows non-`u8` values.
+    /// Sets all elements of the byte slice to the given `value` using `memset`.
     ///
     /// This method is only available with the `unstable` feature enabled (requires a nightly
     /// Rust compiler).
@@ -339,7 +325,7 @@ impl<A> ExternallySharedPtr<'_, [u8], A> {
     /// ## Example
     ///
     /// ```rust
-    /// use volatile::ExternallySharedPtr;
+    /// use sel4_externally_shared::ExternallySharedPtr;
     /// use core::ptr::NonNull;
     ///
     /// let mut vec = vec![0; 10];
@@ -368,20 +354,20 @@ impl<'a, T, A, const N: usize> ExternallySharedPtr<'a, [T; N], A> {
     ///
     /// ## Example
     ///
-    /// Copying two elements from a volatile array reference using `copy_into_slice`:
+    /// Copying two elements from an array reference using `copy_into_slice`:
     ///
     /// ```
-    /// use volatile::ExternallySharedPtr;
+    /// use sel4_externally_shared::ExternallySharedPtr;
     /// use core::ptr::NonNull;
     ///
     /// let src = [1, 2];
-    /// let volatile = unsafe { ExternallySharedPtr::new_read_only(NonNull::from(&src)) };
+    /// let shared = unsafe { ExternallySharedPtr::new_read_only(NonNull::from(&src)) };
     /// let mut dst = [0, 0];
     ///
     /// // convert the `ExternallySharedPtr<&[i32; 2]>` array reference to a `ExternallySharedPtr<&[i32]>` slice
-    /// let volatile_slice = volatile.as_slice();
+    /// let shared_slice = shared.as_slice();
     /// // we can now use the slice methods
-    /// volatile_slice.copy_into_slice(&mut dst);
+    /// shared_slice.copy_into_slice(&mut dst);
     ///
     /// assert_eq!(dst, [1, 2]);
     /// ```
