@@ -4,6 +4,9 @@ use core::{
     slice::{range, SliceIndex},
 };
 
+#[cfg(feature = "alloc")]
+use alloc::vec::Vec;
+
 use crate::{
     access::{Access, Readable, Writable},
     ExternallySharedPtr,
@@ -312,6 +315,25 @@ impl<'a, T, A> ExternallySharedPtr<'a, [T], A> {
         ))
         .unwrap();
         unsafe { ExternallySharedPtr::new_generic(pointer) }
+    }
+
+    /// Copies all elements from `self` into a `Vec`.
+    #[cfg(feature = "alloc")]
+    pub fn copy_to_vec(&self) -> Vec<T>
+    where
+        T: Copy,
+    {
+        let src = self.pointer.as_mut_ptr();
+        let n = self.pointer.len();
+        let mut v = Vec::with_capacity(n);
+        // SAFETY:
+        // allocated above with the capacity of `src`, and initialize to `src.len()` in
+        // ptr::copy_to_non_overlapping below.
+        unsafe {
+            src.copy_to_nonoverlapping(v.as_mut_ptr(), n);
+            v.set_len(n);
+        }
+        v
     }
 }
 

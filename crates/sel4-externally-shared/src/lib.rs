@@ -14,6 +14,9 @@
 #![warn(missing_docs)]
 #![deny(unsafe_op_in_unsafe_fn)]
 
+#[cfg(feature = "alloc")]
+extern crate alloc;
+
 pub use externally_shared_ptr::ExternallySharedPtr;
 pub use externally_shared_ref::ExternallySharedRef;
 
