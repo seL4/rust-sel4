@@ -5,6 +5,7 @@
 //! latter behaves like a Rust reference type.
 
 #![no_std]
+#![cfg_attr(feature = "unstable", feature(atomic_from_ptr))]
 #![cfg_attr(feature = "unstable", feature(core_intrinsics))]
 #![cfg_attr(feature = "unstable", feature(slice_range))]
 #![cfg_attr(feature = "unstable", feature(slice_ptr_get))]
