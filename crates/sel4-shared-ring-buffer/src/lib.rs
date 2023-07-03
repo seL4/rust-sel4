@@ -2,7 +2,7 @@
 
 use core::num::Wrapping;
 use core::ptr::NonNull;
-use core::sync::atomic::{fence, Ordering};
+use core::sync::atomic::Ordering;
 
 use zerocopy::{AsBytes, FromBytes};
 
@@ -160,10 +160,11 @@ impl<'a> RingBuffer<'a> {
         if self.is_full() {
             return Err(Error::RingIsFull);
         }
-        let index = self.write_index();
-        self.descriptor(index).write(desc);
-        release();
-        self.set_write_index(index + Wrapping(1));
+        self.descriptor(self.write_index()).write(desc);
+        {
+            let ptr = self.inner.as_mut_ptr();
+            map_field!(ptr.write_index).with_atomic(|x| x.fetch_add(1, Ordering::Release));
+        }
         Ok(())
     }
 
@@ -171,16 +172,13 @@ impl<'a> RingBuffer<'a> {
         if self.is_empty() {
             return Err(Error::RingIsEmpty);
         }
-        let index = self.read_index();
-        let desc = self.descriptor(index).read();
-        release();
-        self.set_read_index(index + Wrapping(1));
+        let desc = self.descriptor(self.read_index()).read();
+        {
+            let ptr = self.inner.as_mut_ptr();
+            map_field!(ptr.read_index).with_atomic(|x| x.fetch_add(1, Ordering::Release));
+        }
         Ok(desc)
     }
-}
-
-fn release() {
-    fence(Ordering::Release);
 }
 
 pub enum Error {
