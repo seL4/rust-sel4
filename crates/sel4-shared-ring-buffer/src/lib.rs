@@ -1,20 +1,21 @@
 #![no_std]
 
 use core::num::Wrapping;
+use core::ptr::NonNull;
 use core::sync::atomic::{fence, Ordering};
 
 use zerocopy::{AsBytes, FromBytes};
 
-use sel4_externally_shared::ExternallyShared;
+use sel4_externally_shared::{map_field, ExternallySharedPtr, ExternallySharedRef};
 
-pub struct RingBuffers<F> {
-    free: RingBuffer,
-    used: RingBuffer,
+pub struct RingBuffers<'a, F> {
+    free: RingBuffer<'a>,
+    used: RingBuffer<'a>,
     notify: F,
 }
 
-impl<F> RingBuffers<F> {
-    pub fn new(free: RingBuffer, used: RingBuffer, notify: F, initialize: bool) -> Self {
+impl<'a, F> RingBuffers<'a, F> {
+    pub fn new(free: RingBuffer<'a>, used: RingBuffer<'a>, notify: F, initialize: bool) -> Self {
         let mut this = Self { free, used, notify };
         if initialize {
             this.free_mut().initialize();
@@ -23,30 +24,30 @@ impl<F> RingBuffers<F> {
         this
     }
 
-    pub fn free(&self) -> &RingBuffer {
+    pub fn free(&self) -> &RingBuffer<'a> {
         &self.free
     }
 
-    pub fn used(&self) -> &RingBuffer {
+    pub fn used(&self) -> &RingBuffer<'a> {
         &self.used
     }
 
-    pub fn free_mut(&mut self) -> &mut RingBuffer {
+    pub fn free_mut(&mut self) -> &mut RingBuffer<'a> {
         &mut self.free
     }
 
-    pub fn used_mut(&mut self) -> &mut RingBuffer {
+    pub fn used_mut(&mut self) -> &mut RingBuffer<'a> {
         &mut self.used
     }
 }
 
-impl<F: Fn() -> R, R> RingBuffers<F> {
+impl<'a, F: Fn() -> R, R> RingBuffers<'a, F> {
     pub fn notify(&self) -> R {
         (self.notify)()
     }
 }
 
-impl<F: FnMut() -> R, R> RingBuffers<F> {
+impl<'a, F: FnMut() -> R, R> RingBuffers<'a, F> {
     pub fn notify_mut(&mut self) -> R {
         (self.notify)()
     }
@@ -92,35 +93,39 @@ impl Descriptor {
     }
 }
 
-pub struct RingBuffer {
-    inner: ExternallyShared<&'static mut RawRingBuffer>,
+pub struct RingBuffer<'a> {
+    inner: ExternallySharedRef<'a, RawRingBuffer>,
 }
 
-impl RingBuffer {
+impl<'a> RingBuffer<'a> {
     pub const SIZE: usize = 512;
 
-    pub unsafe fn new(inner: ExternallyShared<&'static mut RawRingBuffer>) -> Self {
+    pub unsafe fn new(inner: ExternallySharedRef<'a, RawRingBuffer>) -> Self {
         Self { inner }
     }
 
-    pub unsafe fn from_ptr(ptr: *mut RawRingBuffer) -> Self {
-        Self::new(ExternallyShared::new(ptr.as_mut().unwrap()))
+    pub unsafe fn from_ptr(ptr: NonNull<RawRingBuffer>) -> Self {
+        Self::new(ExternallySharedRef::new(ptr))
     }
 
     fn write_index(&self) -> Wrapping<u32> {
-        Wrapping(self.inner.map(|r| &r.write_index).read())
+        let ptr = self.inner.as_ptr();
+        Wrapping(map_field!(ptr.write_index).read())
     }
 
     fn read_index(&self) -> Wrapping<u32> {
-        Wrapping(self.inner.map(|r| &r.read_index).read())
+        let ptr = self.inner.as_ptr();
+        Wrapping(map_field!(ptr.read_index).read())
     }
 
     fn set_write_index(&mut self, index: Wrapping<u32>) {
-        self.inner.map_mut(|r| &mut r.write_index).write(index.0)
+        let ptr = self.inner.as_mut_ptr();
+        map_field!(ptr.write_index).write(index.0)
     }
 
     fn set_read_index(&mut self, index: Wrapping<u32>) {
-        self.inner.map_mut(|r| &mut r.read_index).write(index.0)
+        let ptr = self.inner.as_mut_ptr();
+        map_field!(ptr.read_index).write(index.0)
     }
 
     fn initialize(&mut self) {
@@ -128,9 +133,10 @@ impl RingBuffer {
         self.set_read_index(Wrapping(0));
     }
 
-    fn descriptor(&mut self, index: Wrapping<u32>) -> ExternallyShared<&mut Descriptor> {
+    fn descriptor(&mut self, index: Wrapping<u32>) -> ExternallySharedPtr<'_, Descriptor> {
         let linear_index = usize::try_from(Self::residue(index).0).unwrap();
-        self.inner.map_mut(|r| &mut r.descriptors[linear_index])
+        let ptr = self.inner.as_mut_ptr();
+        map_field!(ptr.descriptors).as_slice().index(linear_index)
     }
 
     fn residue(n: Wrapping<u32>) -> Wrapping<u32> {
