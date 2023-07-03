@@ -1,5 +1,4 @@
 use core::{
-    intrinsics,
     ops::{Range, RangeBounds},
     ptr::{self, NonNull},
     slice::{range, SliceIndex},
@@ -121,8 +120,7 @@ impl<'a, T, A> ExternallySharedPtr<'a, [T], A> {
             "destination and source slices have different lengths"
         );
         unsafe {
-            intrinsics::volatile_copy_nonoverlapping_memory(
-                dst.as_mut_ptr(),
+            dst.as_mut_ptr().copy_from_nonoverlapping(
                 self.pointer.as_mut_ptr(),
                 len,
             );
@@ -176,8 +174,7 @@ impl<'a, T, A> ExternallySharedPtr<'a, [T], A> {
             "destination and source slices have different lengths"
         );
         unsafe {
-            intrinsics::volatile_copy_nonoverlapping_memory(
-                self.pointer.as_mut_ptr(),
+            self.pointer.as_mut_ptr().copy_from_nonoverlapping(
                 src.as_ptr(),
                 len,
             );
@@ -233,8 +230,7 @@ impl<'a, T, A> ExternallySharedPtr<'a, [T], A> {
         // SAFETY: the conditions for `volatile_copy_memory` have all been checked above,
         // as have those for `ptr::add`.
         unsafe {
-            intrinsics::volatile_copy_memory(
-                self.pointer.as_mut_ptr().add(dest),
+            self.pointer.as_mut_ptr().add(dest).copy_from(
                 self.pointer.as_mut_ptr().add(src_start),
                 count,
             );
@@ -356,7 +352,7 @@ impl<A> ExternallySharedPtr<'_, [u8], A> {
         A: Writable,
     {
         unsafe {
-            intrinsics::volatile_set_memory(self.pointer.as_mut_ptr(), value, self.pointer.len());
+            self.pointer.as_mut_ptr().write_bytes(value, self.pointer.len());
         }
     }
 }

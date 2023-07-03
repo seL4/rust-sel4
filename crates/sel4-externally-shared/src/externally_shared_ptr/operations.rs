@@ -1,6 +1,6 @@
 use core::{
     marker::PhantomData,
-    ptr::{self, NonNull},
+    ptr::{NonNull},
 };
 
 use crate::{
@@ -87,7 +87,7 @@ where
         T: Copy,
         A: Readable,
     {
-        unsafe { ptr::read_volatile(self.pointer.as_ptr()) }
+        unsafe { self.pointer.as_ptr().read() }
     }
 
     /// Performs a volatile write, setting the contained value to the given `value`.
@@ -113,7 +113,7 @@ where
         T: Copy,
         A: Writable,
     {
-        unsafe { ptr::write_volatile(self.pointer.as_ptr(), value) };
+        unsafe { self.pointer.as_ptr().write(value) };
     }
 
     /// Updates the contained value using the given closure and volatile instructions.
