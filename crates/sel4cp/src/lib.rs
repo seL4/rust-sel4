@@ -8,6 +8,7 @@
 #![feature(never_type)]
 #![feature(pointer_is_aligned)]
 #![feature(proc_macro_hygiene)]
+#![feature(slice_ptr_get)]
 #![feature(stmt_expr_attributes)]
 #![feature(unwrap_infallible)]
 
