@@ -1,6 +1,6 @@
 use crate::{
     access::{Access, Copyable, ReadOnly, ReadWrite, WriteOnly},
-    volatile_ptr::VolatilePtr,
+    externally_shared_ptr::VolatilePtr,
 };
 use core::{fmt, marker::PhantomData, ptr::NonNull};
 

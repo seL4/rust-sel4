@@ -41,9 +41,9 @@
 #![warn(missing_docs)]
 #![deny(unsafe_op_in_unsafe_fn)]
 
-pub use volatile_ptr::VolatilePtr;
-pub use volatile_ref::VolatileRef;
+pub use externally_shared_ptr::VolatilePtr;
+pub use externally_shared_ref::VolatileRef;
 
 pub mod access;
-mod volatile_ptr;
-mod volatile_ref;
+mod externally_shared_ptr;
+mod externally_shared_ref;
