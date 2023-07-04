@@ -50,6 +50,13 @@ impl<T> BounceBufferAllocator<T> {
             max_alignment,
         }
     }
+
+    pub fn ptr_to_offset(&self, ptr: NonNull<u8>) -> Offset {
+        assert!(ptr >= self.region.as_non_null_ptr());
+        let offset = ptr.addr().get() - self.region.as_non_null_ptr().addr().get();
+        assert!(offset <= self.region.len());
+        offset
+    }
 }
 
 impl<T: AbstractBounceBufferAllocator> BounceBufferAllocator<T> {
@@ -73,8 +80,8 @@ impl<T: AbstractBounceBufferAllocator> BounceBufferAllocator<T> {
         Ok(ptr)
     }
 
-    pub unsafe fn deallocate(&mut self, ptr: NonNull<u8>, size: usize) {
-        let offset = ptr.addr().get() - self.region.as_non_null_ptr().addr().get();
-        self.abstract_allocator.deallocate(offset, size)
+    pub unsafe fn deallocate(&mut self, ptr: NonNull<[u8]>) {
+        let offset = self.ptr_to_offset(ptr.as_non_null_ptr());
+        self.abstract_allocator.deallocate(offset, ptr.len())
     }
 }

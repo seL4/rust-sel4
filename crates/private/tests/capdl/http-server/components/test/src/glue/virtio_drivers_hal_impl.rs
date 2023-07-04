@@ -57,7 +57,9 @@ unsafe impl Hal for HalImpl {
     unsafe fn dma_dealloc(_paddr: PhysAddr, vaddr: NonNull<u8>, pages: usize) -> i32 {
         {
             let mut lock = BOUNCE_BUFFER_ALLOCATOR.lock();
-            lock.as_mut().unwrap().deallocate(vaddr, pages * PAGE_SIZE);
+            lock.as_mut()
+                .unwrap()
+                .deallocate(NonNull::slice_from_raw_parts(vaddr, pages * PAGE_SIZE));
         }
         0
     }
@@ -101,9 +103,7 @@ unsafe impl Hal for HalImpl {
         }
         {
             let mut lock = BOUNCE_BUFFER_ALLOCATOR.lock();
-            lock.as_mut()
-                .unwrap()
-                .deallocate(bounce_buffer_ptr.as_non_null_ptr(), bounce_buffer_ptr.len());
+            lock.as_mut().unwrap().deallocate(bounce_buffer_ptr);
         }
     }
 }
