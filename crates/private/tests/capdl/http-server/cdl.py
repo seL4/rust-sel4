@@ -97,7 +97,7 @@ class TestComponent(ElfComponent):
                 'start': virtio_dma_vaddr_range_start,
                 'end': virtio_dma_vaddr_range_end,
                 },
-            'virtio_dma_vaddr_to_paddr_offset': virtio_dma_paddr_range_start - virtio_dma_vaddr_range_start,
+            'virtio_dma_paddr': virtio_dma_paddr_range_start,
             }
 
     def arg_json(self):

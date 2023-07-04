@@ -28,6 +28,10 @@ virtio-drivers = { version = "0.5.0" }
 [dependencies.sel4-async-single-threaded-executor]
 path = "../../../../../../sel4-async/single-threaded-executor"
 
+[dependencies.sel4-externally-shared]
+path = "../../../../../../sel4-externally-shared"
+features = ["unstable"]
+
 [dependencies.sel4-simple-task-config-types]
 path = "../../../../../support/simple-task/sel4-simple-task-config-types"
 

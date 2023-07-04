@@ -3,6 +3,8 @@
 mk {
   package.name = "tests-capdl-http-server-components-test";
   dependencies = rec {
+    sel4-externally-shared.features = [ "unstable" ];
+
     inherit (versions) log;
     serde = serdeWith [ "alloc" "derive" ];
 
@@ -47,6 +49,7 @@ mk {
     sel4-async-timers
     sel4-async-request-statuses
     sel4-bounce-buffer-allocator
+    sel4-externally-shared
     tests-capdl-http-server-components-test-cpiofs
     tests-capdl-http-server-components-test-sp804-driver
 

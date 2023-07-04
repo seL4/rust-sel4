@@ -62,7 +62,7 @@ pub struct Config {
     pub virtio_blk_mmio_vaddr: usize,
     pub virtio_blk_mmio_offset: usize,
     pub virtio_dma_vaddr_range: Range<usize>,
-    pub virtio_dma_vaddr_to_paddr_offset: isize,
+    pub virtio_dma_paddr: usize,
 }
 
 const NET_BUFFER_LEN: usize = 2048;
@@ -79,11 +79,9 @@ fn main(config: Config) -> ! {
     };
 
     HalImpl::init(
-        NonNull::slice_from_raw_parts(
-            NonNull::new(config.virtio_dma_vaddr_range.start as *mut _).unwrap(),
-            config.virtio_dma_vaddr_range.end - config.virtio_dma_vaddr_range.start,
-        ),
-        config.virtio_dma_vaddr_to_paddr_offset,
+        config.virtio_dma_vaddr_range.len(),
+        config.virtio_dma_vaddr_range.start,
+        config.virtio_dma_paddr,
     );
 
     let net_device = {
