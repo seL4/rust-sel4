@@ -33,11 +33,6 @@
 //! `SEL4_INCLUDE_DIRS` is set, then its value is interpreted as a colon-separated list of include
 //! paths for the libsel4 headers. Otherwise, if `SEL4_PREFIX` is set, then
 //! `$SEL4_PREFIX/libsel4/include` is used.
-//!
-//! #### Note
-//!
-//! For now, this crate depends on some build system-related patches to the seL4 kernel. These
-//! patches can be found in [this branch](https://gitlab.com/coliasgroup/seL4/-/tree/rust).
 
 #![no_std]
 #![feature(array_methods)]

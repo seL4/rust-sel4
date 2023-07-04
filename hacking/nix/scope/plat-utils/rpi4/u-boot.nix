@@ -26,11 +26,6 @@ stdenv.mkDerivation rec {
     sha256 = "sha256-k4CgiG6rOdgex+YxMRXqyJF7NFqAN9R+UKc3Y/+7jV0=";
   };
 
-  # src = builtins.fetchGit {
-  #   url = "https://gitlab.com/coliasgroup/icecap/u-boot.git";
-  #   rev = "6e73588b00397be29e2b91d279062e9372dc8092"; # branch icecap
-  # };
-
   depsBuildBuild = [
     buildPackages.stdenv.cc
   ];
