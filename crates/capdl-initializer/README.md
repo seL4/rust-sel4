@@ -22,7 +22,7 @@ Here is an example of how to build and use this crate. First, independantly of t
 build the initializer and accompanying CLI tool:
 
 ```bash
-url="https://gitlab.com/coliasgroup/rust-seL4"
+url="https://github.com/coliasgroup/rust-seL4"
 
 RUST_TARGET_PATH=$my_rust_target_path \
 SEL4_PREFIX=$my_sel4_prefix \
@@ -42,7 +42,7 @@ cargo install \
 ```
 
 Later, prepare the initializer by adding the CapDL spec. `capdl-initializer-add-spec` takes a CapDL
-spec in JSON format. [This branch](https://gitlab.com/coliasgroup/capdl/-/tree/coliasgroup) of the
+spec in JSON format. [This branch](https://github.com/coliasgroup/capdl/tree/coliasgroup) of the
 parse-capDL tool is capable of translating a `.cdl` file to JSON.
 
 ```bash
@@ -64,7 +64,7 @@ independantly of the spec and then adding the spec later, the spec is provided t
 script at compile time via environment variables.
 
 ```bash
-url="https://gitlab.com/coliasgroup/rust-seL4"
+url="https://github.com/coliasgroup/rust-seL4"
 
 RUST_TARGET_PATH=$my_rust_target_path \
 SEL4_PREFIX=$my_sel4_prefix \

@@ -2,11 +2,10 @@ let
 
   defaultNixpkgsSource =
     let
-      repo = "nixpkgs";
       rev = "69c254b384fd1d2b5a032ef8177482639289b541";
     in
       builtins.fetchTarball {
-        url = "https://gitlab.com/coliasgroup/${repo}/-/archive/${rev}/${repo}-${rev}.tar.gz";
+        url = "https://github.com/coliasgroup/nixpkgs/archive/refs/tags/keep/${builtins.substring 0 32 rev}.tar.gz";
         sha256 = "02s4hzjxx4dc0qmlkk4igkivb4zk6brb25skxl6m385fkvw1n6sw";
       };
 

@@ -116,7 +116,7 @@ let
           <div class="markdown-body">
             <h1>
               Rustdoc for
-              <a href="https://gitlab.com/coliasgroup/rust-seL4">
+              <a href="https://github.com/coliasgroup/rust-seL4">
                 rust-seL4
               </a>
             </h1>

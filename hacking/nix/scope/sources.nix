@@ -21,7 +21,7 @@ let
       base + andThen;
 
   capdlCommon = {
-    url = "https://gitlab.com/coliasgroup/capdl.git";
+    url = "https://github.com/coliasgroup/capdl.git";
     rev = "f47bacacb6f5cc81934b6ea3116ef95f27793195";
     local = localRoot + "/capdl";
   };
@@ -39,25 +39,25 @@ in rec {
 
   seL4 = {
     rust = fetchGit {
-      url = "https://gitlab.com/coliasgroup/seL4.git";
+      url = "https://github.com/coliasgroup/seL4.git";
       rev = "656f11fd66139e1102c8bae0b07639a2ada9af78"; # branch "rust"
       local = localRoot + "/seL4";
       # useLocal = true;
     };
 
     rust-sel4cp = fetchGit {
-      url = "https://gitlab.com/coliasgroup/seL4.git";
+      url = "https://github.com/coliasgroup/seL4.git";
       rev = "fc80c9ad05d33e77a6b850dae8eb4b8317ec32a1"; # branch "rust-sel4cp"
     };
 
     rust-sel4test = fetchGit {
-      url = "https://gitlab.com/coliasgroup/seL4.git";
+      url = "https://github.com/coliasgroup/seL4.git";
       rev = "e98505aaf5373d1ffc0ee363fbc8182c5795ef2c"; # rust-sel4test
     };
   };
 
   sel4cp = fetchGit {
-    url = "https://gitlab.com/coliasgroup/sel4cp.git";
+    url = "https://github.com/coliasgroup/sel4cp.git";
     rev = "e8d3350fb1f06c5ad3a436be1f09de89d97370e8"; # branch "rust-seL4-nix"
     local = localRoot + "/sel4cp";
   };
