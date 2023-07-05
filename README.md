@@ -82,10 +82,10 @@ the crates which use them:
 The best way to learn how to integrate these crates into your project is to check out these concrete
 examples of their use:
 
-- Simple root task: https://gitlab.com/coliasgroup/rust-seL4-demos/simple-root-task-demo.git
-- Using the seL4 Core Platform: https://gitlab.com/coliasgroup/rust-seL4-demos/simple-sel4cp-demo
+- Simple root task: https://github.com/coliasgroup/rust-seL4-root-task-demo
+- Using the seL4 Core Platform: https://github.com/coliasgroup/rust-seL4-sel4cp-demo
 - Using the CapDL-based system initializer:
-  https://gitlab.com/coliasgroup/rust-seL4-demos/simple-capdl-initializer-demo
+  https://github.com/coliasgroup/rust-seL4-advanced-capdl-initializer-demo
 
 ### Quick start for running the tests in this repository
 
