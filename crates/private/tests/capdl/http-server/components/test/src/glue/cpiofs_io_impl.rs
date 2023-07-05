@@ -44,12 +44,13 @@ impl CpiofsBlockIOImpl {
 
     pub(crate) fn poll(&self) -> bool {
         let mut inner = self.inner.borrow_mut();
-        if let Some(token) = inner.driver.peek_used() {
-            inner.request_statuses.mark_complete(&token, ()).unwrap();
-            true
-        } else {
-            false
-        }
+        inner
+            .driver
+            .peek_used()
+            .map(|token| {
+                inner.request_statuses.mark_complete(&token, ()).unwrap();
+            })
+            .is_some()
     }
 }
 

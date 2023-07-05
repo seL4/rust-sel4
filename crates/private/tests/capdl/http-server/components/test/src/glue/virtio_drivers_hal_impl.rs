@@ -108,17 +108,18 @@ unsafe impl Hal for HalImpl {
 
 fn with_bounce_buffer_ptr<F, R>(bounce_buffer: Range<usize>, f: F) -> R
 where
-    F: for<'a> FnOnce(ExternallySharedPtr<'a, [u8]>) -> R,
+    F: FnOnce(ExternallySharedPtr<'_, [u8]>) -> R,
 {
     f(dma_region().as_mut_ptr().index(bounce_buffer))
 }
 
 fn dma_region() -> ExternallySharedRef<'static, [u8]> {
     let vaddr_range = DMA_REGION_VADDR_RANGE.get().unwrap();
-    let ptr = NonNull::slice_from_raw_parts(
-        NonNull::new(ptr::from_exposed_addr_mut::<u8>(vaddr_range.start)).unwrap(),
+    let ptr = NonNull::new(ptr::from_raw_parts_mut(
+        ptr::from_exposed_addr_mut(vaddr_range.start),
         vaddr_range.len(),
-    );
+    ))
+    .unwrap();
     unsafe { ExternallySharedRef::new(ptr) }
 }
 
