@@ -8,9 +8,7 @@ endif
 
 out := out
 
-nix_root := hacking/nix
-
-nix_build := nix-build $(nix_root) $(keep_going) $(jobs)
+nix_build := nix-build $(keep_going) $(jobs)
 
 .PHONY: none
 none:
@@ -56,7 +54,7 @@ update-lockfile:
 check-lockfile:
 	cargo update -w --locked
 
- rustc_target_spec_dir := support/targets
+rustc_target_spec_dir := support/targets
 
 .PHONY: generate-target-specs
 generate-target-specs:
@@ -66,6 +64,7 @@ generate-target-specs:
 .PHONY: check-generated-sources
 check-generated-sources:
 	script=$$($(nix_build) -A generatedSources.check --no-out-link) && $$script
+	cargo update -w --locked
 
 .PHONY: update-generated-sources
 update-generated-sources:

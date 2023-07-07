@@ -84,8 +84,6 @@ examples of their use:
 
 - Simple root task: https://github.com/coliasgroup/rust-seL4-root-task-demo
 - Using the seL4 Core Platform: https://github.com/coliasgroup/rust-seL4-sel4cp-demo
-- Using the CapDL-based system initializer:
-  https://github.com/coliasgroup/rust-seL4-advanced-capdl-initializer-demo
 
 ### Quick start for running the tests in this repository
 
