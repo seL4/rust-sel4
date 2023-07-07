@@ -165,10 +165,10 @@ let
       src = workspaceTOML;
       justCheckEquivalenceWith = helpers.checkTOMLEquivalence;
     };
-    "support/workspace-meta.json" = {
-      src = metaJSON;
-      justCheckEquivalenceWith = null;
-    };
+    # "support/workspace-meta.json" = {
+    #   src = metaJSON;
+    #   justCheckEquivalenceWith = null;
+    # };
   } // lib.mapAttrs' (_: crate: {
     name = "${crate.path}/Cargo.toml";
     value = {
