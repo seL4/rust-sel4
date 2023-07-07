@@ -14,8 +14,6 @@ mk {
       features = [
         "async-await"
         "alloc"
-        # "unstable"
-        # "bilock"
       ];
     };
 
@@ -30,8 +28,6 @@ mk {
     #   rev = "409ee723c92adf309e825a7b87f53049707ed306"; # branch new-netdev
     #   # default-features = false; # disable "alloc"
     # };
-
-    httparse = { version = "1.8.0"; default-features = false; };
 
     async-unsync = { version = "0.2.2"; default-features = false; };
 
@@ -52,6 +48,7 @@ mk {
     sel4-externally-shared
     tests-capdl-http-server-components-test-cpiofs
     tests-capdl-http-server-components-test-sp804-driver
+    tests-capdl-http-server-components-test-server-core
 
     # virtio-drivers
   ];

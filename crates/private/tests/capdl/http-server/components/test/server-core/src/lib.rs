@@ -1,3 +1,8 @@
+#![no_std]
+#![feature(pattern)]
+
+extern crate alloc;
+
 use alloc::borrow::ToOwned;
 use alloc::format;
 use alloc::rc::Rc;

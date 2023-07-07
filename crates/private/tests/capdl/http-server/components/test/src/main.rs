@@ -29,15 +29,14 @@ use virtio_drivers::{
 use sel4_logging::{LevelFilter, Logger, LoggerBuilder};
 use sel4_simple_task_config_types::*;
 use sel4_simple_task_runtime::main_json;
+use tests_capdl_http_server_components_test_server_core::run_server;
 use tests_capdl_http_server_components_test_sp804_driver::Driver;
 
 mod glue;
 mod reactor;
-mod server;
 
 use glue::{CpiofsBlockIOImpl, DeviceImpl, HalImpl, BLOCK_SIZE};
 use reactor::Reactor;
-use server::run_server;
 
 // const LOG_LEVEL: LevelFilter = LevelFilter::Trace;
 // const LOG_LEVEL: LevelFilter = LevelFilter::Debug;

@@ -573,6 +573,11 @@
     "requirements": {},
     "skip": false
   },
+  "tests-capdl-http-server-components-test-server-core": {
+    "labels": {},
+    "requirements": {},
+    "skip": false
+  },
   "tests-capdl-http-server-components-test-sp804-driver": {
     "labels": {},
     "requirements": {},
