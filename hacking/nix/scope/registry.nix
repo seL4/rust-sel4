@@ -44,7 +44,7 @@ let
 
   cratesIOIndex = builtins.fetchGit {
     url = "https://github.com/rust-lang/crates.io-index.git";
-    rev = "a9fa59fed6d9f887b5d9f5ae92a947d94f6064c9";
+    rev = "4dd500cfd31cc7ac2afb68f9a8263d072ac0fc42";
   };
 
   cratesIOIndexBundle = runCommand "crates-io-index.bundle" {
