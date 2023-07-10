@@ -17,30 +17,17 @@ let
 in rec {
 
   automateQemuSimple = { simulate, timeout }:
-    writeScript "automate-qemu" ''
-      #!${buildPackages.runtimeShell}
-      set -eu
+    let
+      py = buildPackages.python3.withPackages (pkgs: [
+        pkgs.pexpect
+      ]);
+    in
+      writeScript "automate-qemu" ''
+        #!${buildPackages.runtimeShell}
+        set -eu
 
-      script=${simulate}
-      timeout_=${toString timeout}
-
-      echo "running '$script' with timeout ''${timeout_}s"
-
-      # the odd structure of this next part is due to bash's limitations on
-      # pipes, process substition, and coprocesses.
-
-      coproc $script < /dev/null
-      result=$( \
-        timeout $timeout_ bash -c \
-          'head -n1 <(bash -c "tee >(cat >&2)" | grep -E -a --line-buffered --only-matching "TEST_(PASS|FAIL)")' \
-          <&''${COPROC[0]} \
-          || true
-      )
-      kill $COPROC_PID
-
-      echo "result: '$result'"
-      [ "$result" == "TEST_PASS" ]
-    '';
+        ${py}/bin/python3 ${./automate_simple.py} --simulate ${simulate} --timeout ${toString timeout}
+      '';
 
   mkMkInstanceForPlatform =
     { mkQemuCmd
