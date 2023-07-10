@@ -11,7 +11,11 @@ use core::fmt::Write;
 use core::mem;
 use core::str;
 
-use sel4cp::memory_region::{memory_region_symbol, ExternallySharedRef, ReadOnly, ReadWrite};
+use sel4_externally_shared::{
+    access::{ReadOnly, ReadWrite},
+    ExternallySharedRef,
+};
+use sel4cp::memory_region::memory_region_symbol;
 use sel4cp::message::{MessageInfo, NoMessageLabel, NoMessageValue, StatusMessageLabel};
 use sel4cp::{protection_domain, Channel, Handler};
 

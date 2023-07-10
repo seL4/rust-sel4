@@ -100,7 +100,7 @@ pub struct RingBuffer<'a> {
 impl<'a> RingBuffer<'a> {
     pub const SIZE: usize = 512;
 
-    pub unsafe fn new(inner: ExternallySharedRef<'a, RawRingBuffer>) -> Self {
+    pub fn new(inner: ExternallySharedRef<'a, RawRingBuffer>) -> Self {
         Self { inner }
     }
 

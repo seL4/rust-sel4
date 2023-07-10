@@ -10,5 +10,9 @@ banscii-artist-interface-types = { path = "./interface-types" }
 rsa = { version = "0.8.1", default-features = false, features = ["pem", "sha2"] }
 sel4cp = { path = "../../../../../sel4cp", default-features = false, features = ["alloc"] }
 
+[dependencies.sel4-externally-shared]
+path = "../../../../../sel4-externally-shared"
+features = ["unstable", "alloc"]
+
 [build-dependencies]
 rsa = "0.8.1"

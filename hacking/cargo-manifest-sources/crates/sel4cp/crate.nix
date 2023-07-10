@@ -6,7 +6,6 @@ mk {
     num_enum = { version = versions.num_enum; default-features = false; };
     sel4-runtime-common.features = [ "tls" "unwinding" "start" "static-heap" ];
     sel4.features = [ "single-threaded" ];
-    sel4-externally-shared.features = [ "unstable" ];
     inherit (versions) cfg-if zerocopy;
   };
   features = {
@@ -21,8 +20,6 @@ mk {
       "sel4-panicking/unwinding"
     ];
     alloc = [
-      "zerocopy/alloc"
-      "sel4-externally-shared/alloc"
       "sel4-panicking/alloc"
     ];
   };

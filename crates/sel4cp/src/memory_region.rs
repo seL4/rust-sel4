@@ -3,11 +3,6 @@
 use core::mem;
 use core::ptr::NonNull;
 
-pub use zerocopy::{AsBytes, FromBytes};
-
-pub use sel4_externally_shared::access::{ReadOnly, ReadWrite};
-pub use sel4_externally_shared::{ExternallySharedPtr, ExternallySharedRef};
-
 /// Declares a symbol via which the `sel4cp` tool can inject a memory region's address, and returns
 /// the memory region's address at runtime.
 ///
@@ -57,14 +52,14 @@ macro_rules! memory_region_symbol {
 
 pub use memory_region_symbol;
 
-pub fn checked_cast_memory_region<T: Sized>(bytes_ptr: NonNull<[u8]>) -> NonNull<T> {
+pub fn cast_memory_region_checked<T: Sized>(bytes_ptr: NonNull<[u8]>) -> NonNull<T> {
     let ptr = bytes_ptr.cast::<T>();
     assert!(ptr.as_ptr().is_aligned());
     assert!(mem::size_of::<T>() <= bytes_ptr.len());
     ptr
 }
 
-pub fn checked_cast_memory_region_to_slice<T: Sized>(bytes_ptr: NonNull<[u8]>) -> NonNull<[T]> {
+pub fn cast_memory_region_to_slice_checked<T: Sized>(bytes_ptr: NonNull<[u8]>) -> NonNull<[T]> {
     let ptr = bytes_ptr.cast::<T>();
     assert!(ptr.as_ptr().is_aligned());
     assert!(bytes_ptr.len() % mem::size_of::<T>() == 0);
