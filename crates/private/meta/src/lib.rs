@@ -27,10 +27,19 @@ macro_rules! maybe {
     } => {
         #[cfg(not($condition))]
         use absent as $i;
-        #[doc(hidden)]
+        // #[doc(hidden)]
         #[cfg($condition)]
         pub use $i;
     };
+}
+
+macro_rules! definitely {
+    ($($i:ident)*) => {
+        $(
+            // #[doc(hidden)]
+            pub use $i;
+        )*
+    }
 }
 
 macro_rules! mutually_exclusive {
@@ -54,20 +63,11 @@ mutually_exclusive! {
 /// Placeholder for crates which are not part of this view.
 pub mod absent {}
 
-#[doc(hidden)]
-pub use sel4;
-
-#[doc(hidden)]
-pub use sel4_config;
-
-#[doc(hidden)]
-pub use sel4_logging;
-
-#[doc(hidden)]
-pub use sel4_sync;
-
-#[doc(hidden)]
-pub use sel4_sys;
+definitely! {
+    sel4
+    sel4_config
+    sel4_sys
+}
 
 maybe! {
     #[cfg(all(
@@ -85,4 +85,15 @@ maybe! {
 maybe! {
     #[cfg(feature = "sel4cp")]
     sel4cp
+}
+
+definitely! {
+    sel4_sync
+    sel4_logging
+    sel4_externally_shared
+    sel4_shared_ring_buffer
+    sel4_bounce_buffer_allocator
+    sel4_async_network
+    sel4_async_request_statuses
+    sel4_async_single_threaded_executor
 }

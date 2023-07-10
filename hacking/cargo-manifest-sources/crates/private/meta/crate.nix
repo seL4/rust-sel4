@@ -5,10 +5,19 @@ mk {
   nix.local.dependencies = with localCrates; [
     sel4
     sel4-config
+    sel4-sys
+
     sel4-sync
     sel4-logging
-    sel4-sys
+    sel4-externally-shared
+    sel4-shared-ring-buffer
+    sel4-bounce-buffer-allocator
+    sel4-async-network
+    sel4-async-request-statuses
+    sel4-async-single-threaded-executor
+
     sel4-root-task
+
     sel4cp
     sel4cp-postcard
   ];
