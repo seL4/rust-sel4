@@ -1,8 +1,10 @@
 #![no_std]
-#![feature(const_mut_refs)]
+#![feature(const_slice_from_raw_parts_mut)]
+#![feature(slice_ptr_get)]
+#![feature(slice_ptr_len)]
 
 use core::alloc::{GlobalAlloc, Layout};
-use core::cell::RefCell;
+use core::cell::{RefCell, UnsafeCell};
 use core::ops::Range;
 use core::ptr;
 
@@ -10,34 +12,27 @@ use dlmalloc::{Allocator as DlmallocAllocator, Dlmalloc};
 
 use sel4_sync::{GenericMutex, MutexSyncOps};
 
-// TODO
-// Is this alignment necessary?
-// If so, it should depend on configuration.
+// TODO alignment should depend on configuration
 #[repr(C, align(4096))]
-pub struct StaticHeap<const N: usize>([u8; N]);
+pub struct StaticHeap<const N: usize>(UnsafeCell<[u8; N]>);
 
 impl<const N: usize> StaticHeap<N> {
     pub const fn new() -> Self {
-        Self([0; N])
+        Self(UnsafeCell::new([0; N]))
     }
 
-    // NOTE
-    // Should be &mut self, but that would cause #![feature(const_mut_refs)] to be required for
-    // crates using the macro in this crate.
     pub const fn bounds(&self) -> ConstantStaticHeapBounds {
-        // HACK see above
-        let range = self.0.as_ptr_range();
-        ConstantStaticHeapBounds::new(range.start.cast_mut()..range.end.cast_mut())
+        ConstantStaticHeapBounds::new(ptr::slice_from_raw_parts_mut(self.0.get().cast(), N))
     }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct ConstantStaticHeapBounds(Range<*mut u8>);
+pub struct ConstantStaticHeapBounds(*mut [u8]);
 
 unsafe impl Send for ConstantStaticHeapBounds {}
 
 impl ConstantStaticHeapBounds {
-    pub const fn new(inner: Range<*mut u8>) -> Self {
+    pub const fn new(inner: *mut [u8]) -> Self {
         Self(inner)
     }
 }
@@ -90,17 +85,17 @@ unsafe impl<O: MutexSyncOps, T: DlmallocAllocator> GlobalAlloc for DlmallocGloba
 }
 
 pub trait StaticHeapBounds {
-    fn bounds(&self) -> Range<*mut u8>;
+    fn bounds(&self) -> *mut [u8];
 }
 
 impl StaticHeapBounds for ConstantStaticHeapBounds {
-    fn bounds(&self) -> Range<*mut u8> {
-        self.0.clone()
+    fn bounds(&self) -> *mut [u8] {
+        self.0
     }
 }
 
-impl<T: Fn() -> Range<*mut u8>> StaticHeapBounds for T {
-    fn bounds(&self) -> Range<*mut u8> {
+impl<T: Fn() -> *mut [u8]> StaticHeapBounds for T {
+    fn bounds(&self) -> *mut [u8] {
         (self)()
     }
 }
@@ -128,7 +123,12 @@ impl<T: StaticHeapBounds> StaticDlmallocAllocatorState<T> {
     fn as_free(&mut self) -> &mut Range<*mut u8> {
         if let StaticDlmallocAllocatorState::Uninitialized { get_initial_bounds } = self {
             *self = StaticDlmallocAllocatorState::Initialized {
-                free: get_initial_bounds.bounds(),
+                free: {
+                    let raw_slice = get_initial_bounds.bounds();
+                    let start = raw_slice.as_mut_ptr();
+                    let end = start.wrapping_add(raw_slice.len());
+                    start..end
+                },
             };
         }
         if let StaticDlmallocAllocatorState::Initialized { free } = self {
@@ -174,7 +174,7 @@ unsafe impl<T: StaticHeapBounds + Send> DlmallocAllocator for StaticDlmallocAllo
     }
 
     fn page_size(&self) -> usize {
-        // TODO depend on configuration
+        // TODO should depend on configuration
         4096
     }
 }

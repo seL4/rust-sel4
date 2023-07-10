@@ -2,22 +2,20 @@
 // - guard pages for stack?
 
 use core::arch::global_asm;
+use core::cell::UnsafeCell;
 use core::sync::Exclusive;
 
+// TODO alignment should depend on configuration
 #[repr(C, align(16))]
-pub struct Stack<const N: usize>([u8; N]);
+pub struct Stack<const N: usize>(UnsafeCell<[u8; N]>);
 
 impl<const N: usize> Stack<N> {
     pub const fn new() -> Self {
-        Self([0; N])
+        Self(UnsafeCell::new([0; N]))
     }
 
-    // NOTE
-    // Should be &mut self, but that would cause #![feature(const_mut_refs)] to be required for
-    // crates using the macro in this crate.
     pub const fn top(&self) -> StackTop {
-        // HACK see above
-        StackTop(Exclusive::new(self.0.as_ptr_range().end.cast_mut()))
+        StackTop(Exclusive::new(self.0.get().cast::<u8>().wrapping_add(N)))
     }
 }
 

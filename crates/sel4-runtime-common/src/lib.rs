@@ -8,8 +8,10 @@ mod start;
 #[cfg(feature = "static-heap")]
 mod static_heap;
 
+#[cfg(any(feature = "tls", features = "unwinding"))]
 mod phdrs;
 
+#[cfg(any(feature = "tls", features = "unwinding"))]
 pub use phdrs::*;
 
 #[doc(hidden)]
