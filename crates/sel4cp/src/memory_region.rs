@@ -11,22 +11,22 @@ use core::ptr::NonNull;
 /// ```rust
 /// #[macro_export]
 /// macro_rules! memory_region_symbol {
-///    ($(#[$attrs:meta])* $symbol:ident: *mut [$ty:ty], n = $n:expr) => {{
-///        core::ptr::NonNull::slice_from_raw_parts(
-///            $crate::memory_region_symbol!($(#[$attrs])* $symbol: *mut $ty),
-///            $n,
-///        )
-///    }};
-///    ($(#[$attrs:meta])* $symbol:ident: *mut $ty:ty) => {{
-///        $(#[$attrs])*
-///        #[no_mangle]
-///        #[link_section = ".data"]
-///        static mut $symbol: *mut $ty = core::ptr::null_mut();
+///     ($(#[$attrs:meta])* $symbol:ident: *mut [$ty:ty], n = $n:expr) => {{
+///         core::ptr::NonNull::slice_from_raw_parts(
+///             $crate::memory_region_symbol!($(#[$attrs])* $symbol: *mut $ty),
+///             $n,
+///         )
+///     }};
+///     ($(#[$attrs:meta])* $symbol:ident: *mut $ty:ty) => {{
+///         $(#[$attrs])*
+///         #[no_mangle]
+///         #[link_section = ".data"]
+///         static mut $symbol: *mut $ty = core::ptr::null_mut();
 ///
-///        core::ptr::NonNull::new($symbol).unwrap_or_else(|| {
-///            panic!("{} is null", stringify!($symbol))
-///        })
-///    }};
+///         core::ptr::NonNull::new($symbol).unwrap_or_else(|| {
+///             panic!("{} is null", stringify!($symbol))
+///         })
+///     }};
 /// }
 /// ```
 ///
@@ -63,8 +63,8 @@ use core::ptr::NonNull;
 ///
 /// // won't be optimized away
 /// memory_region_symbol! {
-///    #[used(linker)]
-///    region_addr: *mut Foo
+///     #[used(linker)]
+///     region_addr: *mut Foo
 /// }
 /// ```
 #[macro_export]
