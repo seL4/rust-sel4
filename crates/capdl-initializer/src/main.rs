@@ -98,25 +98,22 @@ fn user_image_bounds() -> Range<usize> {
     }
 }
 
-fn static_heap_bounds() -> Range<*mut u8> {
+fn static_heap_bounds() -> *mut [u8] {
     unsafe {
-        capdl_initializer_heap_start
-            ..capdl_initializer_heap_start
-                .byte_offset(capdl_initializer_heap_size.try_into().unwrap())
+        ptr::slice_from_raw_parts_mut(
+            capdl_initializer_heap_start,
+            capdl_initializer_heap_size.try_into().unwrap(),
+        )
     }
 }
 
 mod heap {
-    use core::ops::Range;
-
     use sel4_dlmalloc::StaticDlmallocGlobalAlloc;
     use sel4_sync::PanickingMutexSyncOps;
 
     use super::static_heap_bounds;
 
     #[global_allocator]
-    static GLOBAL_ALLOCATOR: StaticDlmallocGlobalAlloc<
-        PanickingMutexSyncOps,
-        fn() -> Range<*mut u8>,
-    > = StaticDlmallocGlobalAlloc::new(PanickingMutexSyncOps::new(), static_heap_bounds);
+    static GLOBAL_ALLOCATOR: StaticDlmallocGlobalAlloc<PanickingMutexSyncOps, fn() -> *mut [u8]> =
+        StaticDlmallocGlobalAlloc::new(PanickingMutexSyncOps::new(), static_heap_bounds);
 }

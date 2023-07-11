@@ -14,7 +14,6 @@
 extern crate alloc;
 
 use core::ffi::{c_char, c_void};
-use core::ops::Range;
 use core::ptr;
 use core::slice;
 
@@ -134,10 +133,12 @@ fn panic_hook(info: &ExternalPanicInfo<'_>) {
     get_backtracing().collect_and_send();
 }
 
-fn get_static_heap_bounds() -> Range<*mut u8> {
+fn get_static_heap_bounds() -> *mut [u8] {
     let addrs = CONFIG.get().unwrap().static_heap().unwrap();
-    ptr::from_exposed_addr_mut(addrs.start.try_into().unwrap())
-        ..ptr::from_exposed_addr_mut(addrs.end.try_into().unwrap())
+    ptr::slice_from_raw_parts_mut(
+        ptr::from_exposed_addr_mut(addrs.start.try_into().unwrap()),
+        (addrs.end - addrs.start).try_into().unwrap(),
+    )
 }
 
 fn get_static_heap_mutex_notification() -> sel4::Notification {
