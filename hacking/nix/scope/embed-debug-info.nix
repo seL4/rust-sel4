@@ -1,12 +1,12 @@
 { lib, runCommandCC
-, sel4-embed-debug-info
+, sel4-backtrace-embedded-debug-cli
 }:
 
 elf:
 
 runCommandCC "elf" {
   nativeBuildInputs = [
-    sel4-embed-debug-info
+    sel4-backtrace-embedded-debug-cli
   ];
 } ''
   $OBJCOPY --only-keep-debug ${elf} dbg.elf

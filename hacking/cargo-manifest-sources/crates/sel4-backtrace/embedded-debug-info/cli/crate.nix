@@ -1,7 +1,7 @@
 { mk, localCrates }:
 
 mk {
-  package.name = "sel4-embed-debug-info";
+  package.name = "sel4-backtrace-embedded-debug-info-cli";
   dependencies = {
     clap = "3.2.23";
   };

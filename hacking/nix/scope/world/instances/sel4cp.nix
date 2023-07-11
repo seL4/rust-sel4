@@ -87,7 +87,7 @@ in {
   tests = {
     passive-server-with-deferred-action =
       let
-        mkCrateName = role: "tests-sel4cp-passive-server-with-deferred-action-pd-${role}";
+        mkCrateName = role: "tests-sel4cp-passive-server-with-deferred-action-pds-${role}";
       in
         rec {
           pds = {

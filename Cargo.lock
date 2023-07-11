@@ -2610,12 +2610,32 @@ dependencies = [
 ]
 
 [[package]]
+name = "sel4-backtrace-cli"
+version = "0.1.0"
+dependencies = [
+ "addr2line",
+ "clap 3.2.25",
+ "hex 0.4.3",
+ "memmap",
+ "object",
+ "sel4-backtrace-types",
+]
+
+[[package]]
 name = "sel4-backtrace-embedded-debug-info"
 version = "0.1.0"
 dependencies = [
  "addr2line",
  "object",
  "sel4-backtrace-addr2line-context-helper",
+]
+
+[[package]]
+name = "sel4-backtrace-embedded-debug-info-cli"
+version = "0.1.0"
+dependencies = [
+ "clap 3.2.25",
+ "sel4-render-elf-with-data",
 ]
 
 [[package]]
@@ -2719,14 +2739,6 @@ version = "0.1.0"
 dependencies = [
  "dlmalloc",
  "sel4-sync",
-]
-
-[[package]]
-name = "sel4-embed-debug-info"
-version = "0.1.0"
-dependencies = [
- "clap 3.2.25",
- "sel4-render-elf-with-data",
 ]
 
 [[package]]
@@ -2961,6 +2973,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "sel4-simple-task-runtime-config-cli"
+version = "0.1.0"
+dependencies = [
+ "sel4-simple-task-runtime-config-types",
+ "serde_json",
+]
+
+[[package]]
 name = "sel4-simple-task-runtime-config-types"
 version = "0.1.0"
 dependencies = [
@@ -2978,31 +2998,11 @@ dependencies = [
 ]
 
 [[package]]
-name = "sel4-simple-task-serialize-runtime-config"
-version = "0.1.0"
-dependencies = [
- "sel4-simple-task-runtime-config-types",
- "serde_json",
-]
-
-[[package]]
 name = "sel4-simple-task-threading"
 version = "0.1.0"
 dependencies = [
  "sel4",
  "sel4-panicking",
-]
-
-[[package]]
-name = "sel4-symbolize-backtrace"
-version = "0.1.0"
-dependencies = [
- "addr2line",
- "clap 3.2.25",
- "hex 0.4.3",
- "memmap",
- "object",
- "sel4-backtrace-types",
 ]
 
 [[package]]
@@ -3544,14 +3544,14 @@ dependencies = [
 ]
 
 [[package]]
-name = "tests-sel4cp-passive-server-with-deferred-action-pd-client"
+name = "tests-sel4cp-passive-server-with-deferred-action-pds-client"
 version = "0.1.0"
 dependencies = [
  "sel4cp",
 ]
 
 [[package]]
-name = "tests-sel4cp-passive-server-with-deferred-action-pd-server"
+name = "tests-sel4cp-passive-server-with-deferred-action-pds-server"
 version = "0.1.0"
 dependencies = [
  "sel4cp",

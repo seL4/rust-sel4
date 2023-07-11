@@ -2,11 +2,11 @@
 <system>
 
     <protection_domain name="client" priority="253">
-        <program_image path="tests-sel4cp-passive-server-with-deferred-action-pd-client.elf" />
+        <program_image path="client.elf" />
     </protection_domain>
 
     <protection_domain name="server" priority="254" passive="true">
-        <program_image path="tests-sel4cp-passive-server-with-deferred-action-pd-server.elf" />
+        <program_image path="server.elf" />
     </protection_domain>
 
     <channel>

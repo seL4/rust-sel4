@@ -1,7 +1,7 @@
 { mk, localCrates, versions }:
 
 mk {
-  package.name = "sel4-symbolize-backtrace";
+  package.name = "sel4-backtrace-cli";
   dependencies = {
     sel4-backtrace-types.features = [ "full" ];
     addr2line = "0.20.0";

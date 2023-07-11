@@ -144,10 +144,10 @@ superCallPackage ../rust-utils {} self //
     release = false;
   };
 
-  sel4-embed-debug-info = mkTool crates.sel4-embed-debug-info;
-  sel4-symbolize-backtrace = mkTool crates.sel4-symbolize-backtrace;
+  sel4-backtrace-embedded-debug-cli = mkTool crates.sel4-backtrace-embedded-debug-info-cli;
+  sel4-backtrace-cli = mkTool crates.sel4-backtrace-cli;
   capdl-initializer-add-spec = mkTool crates.capdl-initializer-add-spec;
-  sel4-simple-task-serialize-runtime-config = mkTool crates.sel4-simple-task-serialize-runtime-config;
+  sel4-simple-task-runtime-config-cli = mkTool crates.sel4-simple-task-runtime-config-cli;
   sel4-kernel-loader-add-payload = mkTool crates.sel4-kernel-loader-add-payload;
 
   embedDebugInfo = callPackage ./embed-debug-info.nix {};

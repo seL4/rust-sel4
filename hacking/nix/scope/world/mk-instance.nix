@@ -38,7 +38,7 @@ let
 
       symbolizeRootTaskBacktrace = writeScript "x.sh" ''
         #!${buildPackages.runtimeShell}
-        exec ${buildPackages.this.sel4-symbolize-backtrace}/bin/sel4-symbolize-backtrace -f ${rootTask.elf} "$@"
+        exec ${buildPackages.this.sel4-backtrace-cli}/bin/sel4-symbolize-backtrace -f ${rootTask.elf} "$@"
       '';
 
       links = linkFarm "links" (

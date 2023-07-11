@@ -18,7 +18,7 @@ rec {
 
   dummyLibInSrc = dummyInSrc "lib.rs" dummyLib;
   dummyMainWithStdInSrc = dummyInSrc "main.rs" dummyMainWithStd;
-  dummyMainWithOrWithoutStdInSrc = dummyInSrc "main.rs" dummyMainWithOrWithoutStdInSrc;
+  dummyMainWithOrWithoutStdInSrc = dummyInSrc "main.rs" dummyMainWithOrWithoutStd;
 
   dummyInSrc = name: path:
     let
@@ -293,12 +293,19 @@ rec {
 
       dummyPatchedManifest = clobber [
         manifestWithPatchedPathDependencies
-        {
-          lib.path = dummyLibInSrc;
-        }
         (lib.optionalAttrs hasAnyBuildScript {
           package.build = dummyMainWithStdInSrc;
         })
+        {
+          lib.path = dummyLibInSrc;
+        }
+        {
+          bin = lib.forEach (manifest.bin or []) (bin:
+            bin // {
+              path = dummyMainWithOrWithoutStdInSrc;
+            }
+          );
+        }
       ];
 
       real = if resolveLinks then realResolved else realUnresolved;

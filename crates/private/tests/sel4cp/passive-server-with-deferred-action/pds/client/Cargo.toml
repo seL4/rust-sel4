@@ -1,5 +1,5 @@
 [package]
-name = "tests-sel4cp-passive-server-with-deferred-action-pd-client"
+name = "tests-sel4cp-passive-server-with-deferred-action-pds-client"
 version = "0.1.0"
 authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
 edition = "2021"

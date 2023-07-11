@@ -1,5 +1,5 @@
 [package]
-name = "sel4-symbolize-backtrace"
+name = "sel4-backtrace-cli"
 version = "0.1.0"
 authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
 edition = "2021"
@@ -11,4 +11,4 @@ clap = "3.2.23"
 hex = "0.4.3"
 memmap = "0.7.0"
 object = "0.31.0"
-sel4-backtrace-types = { path = "../../types", features = ["full"] }
+sel4-backtrace-types = { path = "../types", features = ["full"] }

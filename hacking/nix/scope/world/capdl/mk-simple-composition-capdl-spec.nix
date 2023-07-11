@@ -7,7 +7,7 @@
 , seL4ForUserspace
 , objectSizes
 
-, sel4-simple-task-serialize-runtime-config
+, sel4-simple-task-runtime-config-cli
 }:
 
 { config
@@ -46,7 +46,7 @@ in
 lib.fix (self: runCommand "manifest" {
 
   nativeBuildInputs = [
-    sel4-simple-task-serialize-runtime-config
+    sel4-simple-task-runtime-config-cli
   ] ++ (with python3Packages; [
     future six
     aenum sortedcontainers

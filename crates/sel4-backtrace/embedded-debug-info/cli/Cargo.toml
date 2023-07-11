@@ -1,5 +1,5 @@
 [package]
-name = "sel4-embed-debug-info"
+name = "sel4-backtrace-embedded-debug-info-cli"
 version = "0.1.0"
 authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
 edition = "2021"
@@ -7,4 +7,4 @@ license = "BSD-2-Clause"
 
 [dependencies]
 clap = "3.2.23"
-sel4-render-elf-with-data = { path = "../../../../sel4-render-elf-with-data" }
+sel4-render-elf-with-data = { path = "../../../sel4-render-elf-with-data" }
