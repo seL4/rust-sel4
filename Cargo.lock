@@ -3060,7 +3060,6 @@ dependencies = [
 name = "sel4cp-hello"
 version = "0.1.0"
 dependencies = [
- "sel4",
  "sel4cp",
 ]
 
@@ -3542,6 +3541,20 @@ version = "0.1.0"
 dependencies = [
  "sel4",
  "sel4-root-task",
+]
+
+[[package]]
+name = "tests-sel4cp-passive-server-with-deferred-action-pd-client"
+version = "0.1.0"
+dependencies = [
+ "sel4cp",
+]
+
+[[package]]
+name = "tests-sel4cp-passive-server-with-deferred-action-pd-server"
+version = "0.1.0"
+dependencies = [
+ "sel4cp",
 ]
 
 [[package]]

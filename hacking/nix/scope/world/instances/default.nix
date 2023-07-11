@@ -46,8 +46,9 @@ in rec {
     tests.capdl.http-server
     tests.capdl.threads
     tests.capdl.utcover
-    sel4cp.hello.system
-    sel4cp.banscii.system
+    sel4cp.examples.hello.system
+    sel4cp.examples.banscii.system
+    sel4cp.tests.passive-server-with-deferred-action.system
     examples.root-task.example-root-task
     examples.root-task.example-root-task-without-runtime
   ];

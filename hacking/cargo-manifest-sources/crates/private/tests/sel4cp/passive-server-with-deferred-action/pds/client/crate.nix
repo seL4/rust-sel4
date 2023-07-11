@@ -1,7 +1,7 @@
 { mk, localCrates }:
 
 mk {
-  package.name = "sel4cp-hello";
+  package.name = "tests-sel4cp-passive-server-with-deferred-action-pd-client";
   nix.local.dependencies = with localCrates; [
     sel4cp
   ];

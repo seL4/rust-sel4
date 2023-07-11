@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<system>
+
+    <protection_domain name="client" priority="253">
+        <program_image path="tests-sel4cp-passive-server-with-deferred-action-pd-client.elf" />
+    </protection_domain>
+
+    <protection_domain name="server" priority="254" passive="true">
+        <program_image path="tests-sel4cp-passive-server-with-deferred-action-pd-server.elf" />
+    </protection_domain>
+
+    <channel>
+        <end pd="client" id="0" />
+        <end pd="server" id="0" />
+    </channel>
+
+</system>

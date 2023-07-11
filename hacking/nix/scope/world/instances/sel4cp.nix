@@ -31,54 +31,87 @@ let
   inherit (worldConfig) isCorePlatform;
 
 in {
-  hello = rec {
-    pds = {
-      hello = mkPD rec {
-        rootCrate = crates.sel4cp-hello;
-        release = false;
+  examples = {
+    hello = rec {
+      pds = {
+        hello = mkPD rec {
+          rootCrate = crates.sel4cp-hello;
+          release = false;
+        };
+      };
+      system = mkCorePlatformInstance {
+        system = sel4cp.mkSystem {
+          searchPath = "${pds.hello}/bin";
+          systemXML = sources.srcRoot + "/crates/examples/sel4cp/hello/hello.system";
+        };
+        isSupported = isCorePlatform;
       };
     };
-    system = mkCorePlatformInstance {
-      system = sel4cp.mkSystem {
-        searchPath = "${pds.hello}/bin";
-        systemXML = sources.srcRoot + "/crates/examples/sel4cp/hello/hello.system";
-      };
-      isSupported = isCorePlatform;
-    };
-  };
 
-  banscii = rec {
-    pds = {
-      pl011-driver = mkPD rec {
-        rootCrate = crates.banscii-pl011-driver;
-      };
-      assistant = mkPD rec {
-        rootCrate = crates.banscii-assistant;
-        rustTargetInfo = seL4RustTargetInfoWithConfig { cp = true; minimal = false; };
-      };
-      artist = mkPD rec {
-        rootCrate = crates.banscii-artist;
-        extraProfile = {
-          # For RSA key generation
-          build-override = {
-            opt-level = 2;
+    banscii = rec {
+      pds = {
+        pl011-driver = mkPD rec {
+          rootCrate = crates.banscii-pl011-driver;
+        };
+        assistant = mkPD rec {
+          rootCrate = crates.banscii-assistant;
+          rustTargetInfo = seL4RustTargetInfoWithConfig { cp = true; minimal = false; };
+        };
+        artist = mkPD rec {
+          rootCrate = crates.banscii-artist;
+          extraProfile = {
+            # For RSA key generation
+            build-override = {
+              opt-level = 2;
+            };
           };
         };
       };
-    };
-    system = mkCorePlatformInstance {
-      system = sel4cp.mkSystem {
-        searchPath = symlinkJoin {
-          name = "x";
-          paths = [
-            "${pds.pl011-driver}/bin"
-            "${pds.assistant}/bin"
-            "${pds.artist}/bin"
-          ];
+      system = mkCorePlatformInstance {
+        system = sel4cp.mkSystem {
+          searchPath = symlinkJoin {
+            name = "x";
+            paths = [
+              "${pds.pl011-driver}/bin"
+              "${pds.assistant}/bin"
+              "${pds.artist}/bin"
+            ];
+          };
+          systemXML = sources.srcRoot + "/crates/examples/sel4cp/banscii/banscii.system";
         };
-        systemXML = sources.srcRoot + "/crates/examples/sel4cp/banscii/banscii.system";
+        isSupported = isCorePlatform;
       };
-      isSupported = isCorePlatform;
     };
+  };
+
+  tests = {
+    passive-server-with-deferred-action =
+      let
+        mkCrateName = role: "tests-sel4cp-passive-server-with-deferred-action-pd-${role}";
+      in
+        rec {
+          pds = {
+            client = mkPD rec {
+              rootCrate = crates.${mkCrateName "client"};
+            };
+            server = mkPD rec {
+              rootCrate = crates.${mkCrateName "server"};
+            };
+          };
+          system = mkCorePlatformInstance {
+            system = sel4cp.mkSystem {
+              searchPath = symlinkJoin {
+                name = "x";
+                paths = [
+                  "${pds.client}/bin"
+                  "${pds.server}/bin"
+                ];
+              };
+              systemXML = sources.srcRoot + "/crates/private/tests/sel4cp/passive-server-with-deferred-action/x.system";
+            };
+            isSupported = isCorePlatform;
+            canAutomate = true;
+          };
+        };
   };
 }
