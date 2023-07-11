@@ -11,6 +11,7 @@
 #![feature(slice_ptr_get)]
 #![feature(stmt_expr_attributes)]
 #![feature(unwrap_infallible)]
+#![feature(used_with_arg)]
 
 //! A foundation for pure-Rust [seL4 Core Platform](https://github.com/BreakawayConsulting/sel4cp)
 //! protection domains.

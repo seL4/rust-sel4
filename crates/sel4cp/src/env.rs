@@ -9,6 +9,7 @@ pub(crate) unsafe fn get_ipc_buffer() -> sel4::IPCBuffer {
 }
 
 #[no_mangle]
+#[used(linker)]
 #[link_section = ".data"]
 static mut passive: bool = false; // just a placeholder
 
@@ -18,6 +19,7 @@ pub fn pd_is_passive() -> bool {
 }
 
 #[no_mangle]
+#[used(linker)]
 #[link_section = ".data"]
 static sel4cp_name: [u8; 16] = [0; 16];
 
