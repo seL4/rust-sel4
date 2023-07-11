@@ -28,7 +28,7 @@ sel4-reserve-tls-on-stack = { path = "../../../../sel4-reserve-tls-on-stack" }
 sel4-runtime-common = { path = "../../../../sel4-runtime-common", features = ["tls", "unwinding"] }
 sel4-simple-task-runtime-config-types = { path = "./config/types" }
 sel4-simple-task-runtime-macros = { path = "./macros" }
-sel4-simple-task-threading = { path = "../sel4-simple-task-threading" }
+sel4-simple-task-threading = { path = "../threading" }
 sel4-sync = { path = "../../../../sel4-sync" }
 serde = { version = "1.0.147", default-features = false, features = [] }
 serde_json = { version = "1.0.87", default-features = false, optional = true }

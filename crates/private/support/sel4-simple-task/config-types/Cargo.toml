@@ -11,4 +11,4 @@ serde = { version = "1.0.147", default-features = false, features = ["derive"] }
 
 [target."cfg(target_env = \"sel4\")".dependencies]
 sel4 = { path = "../../../../sel4" }
-sel4-simple-task-threading = { path = "../sel4-simple-task-threading" }
+sel4-simple-task-threading = { path = "../threading" }

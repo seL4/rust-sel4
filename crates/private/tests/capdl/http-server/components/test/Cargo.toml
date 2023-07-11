@@ -16,7 +16,8 @@ sel4-async-timers = { path = "../../../../../../sel4-async/timers" }
 sel4-bounce-buffer-allocator = { path = "../../../../../../sel4-bounce-buffer-allocator" }
 sel4-immediate-sync-once-cell = { path = "../../../../../../sel4-immediate-sync-once-cell" }
 sel4-logging = { path = "../../../../../../sel4-logging" }
-sel4-simple-task-runtime = { path = "../../../../../support/simple-task/sel4-simple-task-runtime" }
+sel4-simple-task-config-types = { path = "../../../../../support/sel4-simple-task/config-types" }
+sel4-simple-task-runtime = { path = "../../../../../support/sel4-simple-task/runtime" }
 sel4-sync = { path = "../../../../../../sel4-sync" }
 serde = { version = "1.0.147", default-features = false, features = ["alloc", "derive"] }
 tests-capdl-http-server-components-test-cpiofs = { path = "./cpiofs" }
@@ -31,9 +32,6 @@ path = "../../../../../../sel4-async/single-threaded-executor"
 [dependencies.sel4-externally-shared]
 path = "../../../../../../sel4-externally-shared"
 features = ["unstable"]
-
-[dependencies.sel4-simple-task-config-types]
-path = "../../../../../support/simple-task/sel4-simple-task-config-types"
 
 [dependencies.smoltcp]
 version = "0.9.1"
