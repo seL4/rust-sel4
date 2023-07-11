@@ -6,6 +6,8 @@ use crate::cspace::{
 use crate::message::MessageInfo;
 use crate::pd_is_passive;
 
+const EVENT_TYPE_MASK: sel4::Word = 1 << (sel4::WORD_SIZE - 1);
+
 /// Trait for the application-specific part of a protection domain's main loop.
 pub trait Handler {
     /// Error type returned by this protection domain's entrypoints.
@@ -66,7 +68,7 @@ pub(crate) fn run_handler<T: Handler>(mut handler: T) -> Result<!, T::Error> {
 
         let tag = MessageInfo::from_sel4(tag);
 
-        let is_endpoint = badge & (1 << (sel4::WORD_SIZE - 1)) != 0;
+        let is_endpoint = badge & EVENT_TYPE_MASK != 0;
 
         if is_endpoint {
             let channel_index = badge & (sel4::Word::try_from(sel4::WORD_SIZE).unwrap() - 1);
@@ -85,6 +87,10 @@ pub(crate) fn run_handler<T: Handler>(mut handler: T) -> Result<!, T::Error> {
             .take_deferred_action()
             .as_ref()
             .map(DeferredAction::prepare);
+
+        if prepared_deferred_action.is_some() && is_endpoint {
+            panic!("handler yielded deferred action after call to 'protected()'");
+        }
     }
 }
 
