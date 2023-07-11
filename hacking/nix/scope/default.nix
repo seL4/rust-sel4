@@ -136,8 +136,6 @@ superCallPackage ../rust-utils {} self //
   ### misc tools
 
   cargo-index = callPackage ./tools/cargo-index.nix {};
-  pyoxidizer = callPackage ./tools/pyoxidizer/pyoxidizer.nix {};
-  pyoxidizerBroken = callPackage ./tools/pyoxidizer/pyoxidizer-broken.nix {};
 
   ### local tools
 
