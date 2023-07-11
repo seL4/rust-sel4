@@ -3,22 +3,34 @@
 #![allow(non_upper_case_globals)]
 #![allow(unused_imports)]
 
-//! ### Application-facing crates
+//! ### General crates
 //!
 //! - [`sel4`]: Straightforward, pure-Rust bindings to the seL4 API.
-//! - [`sel4_config`]: Macros and constants corresponding to the seL4 kernel configuration. Can be used by all targets (i.e. in all of: application code, build scripts, and build-time tools).
-//! - [`sel4_platform_info`]: Constants corresponding to the contents of `platform_info.h`. Can be used by all targets.
-//! - [`sel4_sync`]: Synchronization constructs using seL4 IPC. Currently only supports notification-based mutexes.
+//! - [`sel4_sys`]: Raw bindings to the seL4 API, generated from the libsel4 headers and interface
+//!   definition files. This crate is not intended to be used directly by application code, but
+//!   rather serve as a basis for the `sel4` crate's implementation.
+//! - [`sel4_config`]: Macros and constants corresponding to the seL4 kernel configuration. Can be
+//!   used by all targets (i.e. in all of: application code, build scripts, and build-time tools).
+//! - [`sel4_platform_info`]: Constants corresponding to the contents of `platform_info.h`. Can be
+//!   used by all targets.
+//! - [`sel4_sync`]: Synchronization constructs using seL4 IPC. Currently only supports
+//!   notification-based mutexes.
 //! - [`sel4_logging`]: Log implementation for the [`log`] crate.
+//! - [`sel4_shared_ring_buffer`]: Implementation of shared data structures used in the [seL4 Device
+//!   Driver Framework](https://github.com/lucypa/sDDF).
+//! - [`sel4_async_network`], [`sel4_async_request_statuses`], and
+//!       [`sel4_async_single_threaded_executor`]: Crates for leveraging async Rust in seL4
+//!       userspace.
 //!
-//! ### Runtimes
+//! ### Runtime crates
 //!
-//! - [`sel4_root_task`]: A runtime for root tasks which supports thread-local storage and unwinding, and provides a global allocator.
-//! - [`sel4cp`]: A runtime for the seL4 Core Platform.
-//!
-//! ### Other crates of interest
-//!
-//! - [`sel4_sys`]: Raw bindings to the seL4 API, generated from the libsel4 headers and interface definition files. The [`sel4`] crate's implementation is based on this crate.
+//! - **Root task**:
+//!   - [`sel4_root_task`]: A runtime for root tasks that supports thread-local storage and
+//!     unwinding, and provides a global allocator.
+//! - **seL4 Core Platform**:
+//!   - [`sel4cp`]: A runtime for [seL4 Core
+//!     Platform](https://github.com/BreakawayConsulting/sel4cp) protection domains, including an
+//!     implementation of libsel4cp and abstractions for IPC.
 
 macro_rules! maybe {
     {
