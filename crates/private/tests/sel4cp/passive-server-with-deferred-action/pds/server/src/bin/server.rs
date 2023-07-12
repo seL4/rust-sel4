@@ -2,26 +2,26 @@
 #![no_main]
 #![feature(never_type)]
 
-use sel4cp::{protection_domain, Channel, DeferredAction, Handler};
+use sel4cp::{protection_domain, Channel, DeferredAction, DeferredActionSlot, Handler};
 
 const CLIENT: Channel = Channel::new(0);
 
 #[protection_domain]
 fn init() -> impl Handler {
     ThisHandler {
-        deferred_action: None,
+        deferred_action: DeferredActionSlot::new(),
     }
 }
 
 struct ThisHandler {
-    deferred_action: Option<DeferredAction>,
+    deferred_action: DeferredActionSlot,
 }
 
 impl Handler for ThisHandler {
     type Error = !;
 
     fn notified(&mut self, _channel: Channel) -> Result<(), Self::Error> {
-        self.deferred_action = Some(CLIENT.defer_notify());
+        self.deferred_action.defer(CLIENT.defer_notify()).unwrap();
         Ok(())
     }
 

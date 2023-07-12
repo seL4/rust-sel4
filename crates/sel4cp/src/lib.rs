@@ -56,7 +56,9 @@ pub mod memory_region;
 pub mod message;
 pub mod panicking;
 
-pub use cspace::{Channel, DeferredAction, DeferredActionInterface, IrqAckError};
+pub use cspace::{
+    Channel, DeferredAction, DeferredActionInterface, DeferredActionSlot, IrqAckError,
+};
 pub use env::{pd_is_passive, pd_name};
 pub use handler::{Handler, NullHandler};
 

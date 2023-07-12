@@ -89,12 +89,6 @@ pub enum DeferredActionInterface {
     IrqAck,
 }
 
-#[derive(Debug, Clone, Eq, PartialEq)]
-pub(crate) struct PreparedDeferredAction {
-    cptr: sel4::Unspecified,
-    msg_info: sel4::MessageInfo,
-}
-
 impl DeferredAction {
     pub fn new(channel: Channel, interface: DeferredActionInterface) -> Self {
         Self { channel, interface }
@@ -106,6 +100,13 @@ impl DeferredAction {
 
     pub fn interface(&self) -> DeferredActionInterface {
         self.interface
+    }
+
+    pub fn execute_now(self) -> Result<(), IrqAckError> {
+        match self.interface() {
+            DeferredActionInterface::Notify => Ok(self.channel().notify()),
+            DeferredActionInterface::IrqAck => self.channel().irq_ack(),
+        }
     }
 
     pub(crate) fn prepare(&self) -> PreparedDeferredAction {
@@ -124,6 +125,12 @@ impl DeferredAction {
     }
 }
 
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub(crate) struct PreparedDeferredAction {
+    cptr: sel4::Unspecified,
+    msg_info: sel4::MessageInfo,
+}
+
 impl PreparedDeferredAction {
     pub(crate) fn new(cptr: sel4::Unspecified, msg_info: sel4::MessageInfo) -> Self {
         Self { cptr, msg_info }
@@ -135,6 +142,27 @@ impl PreparedDeferredAction {
 
     pub(crate) fn msg_info(&self) -> sel4::MessageInfo {
         self.msg_info.clone() // TODO
+    }
+}
+
+pub struct DeferredActionSlot {
+    inner: Option<DeferredAction>,
+}
+
+impl DeferredActionSlot {
+    pub const fn new() -> Self {
+        Self { inner: None }
+    }
+
+    pub fn take(&mut self) -> Option<DeferredAction> {
+        self.inner.take()
+    }
+
+    pub fn defer(&mut self, action: DeferredAction) -> Result<(), IrqAckError> {
+        self.inner
+            .replace(action)
+            .map(DeferredAction::execute_now)
+            .unwrap_or(Ok(()))
     }
 }
 
