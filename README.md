@@ -29,7 +29,7 @@ This work is funded by the [seL4 Foundation](https://sel4.systems/Foundation/hom
 - [`sel4`](./crates/sel4): Straightforward, pure-Rust bindings to the seL4 API.
 - [`sel4-sys`](./crates/sel4/sys): Raw bindings to the seL4 API, generated from the libsel4 headers
   and interface definition files. This crate is not intended to be used directly by application
-  code, but rather serve as a basis for the `sel4` crate's implementation.
+  code, but rather serves as a basis for the `sel4` crate's implementation.
 - [`sel4-config`](./crates/sel4/config): Macros and constants corresponding to the seL4 kernel
   configuration. Can be used by all targets (i.e. in all of: application code, build scripts, and
   build-time tools).
@@ -39,6 +39,8 @@ This work is funded by the [seL4 Foundation](https://sel4.systems/Foundation/hom
   supports notification-based mutexes.
 - [`sel4-logging`](./crates/sel4-logging): Log implementation for the
   [`log`](https://crates.io/crates/log) crate.
+- [`sel4-externally-shared`](./crates/sel4-externally-shared): Abstractions for interacting with
+  data structures in shared memory.
 - [`sel4-shared-ring-buffer`](./crates/sel4-shared-ring-buffer): Implementation of shared data
   structures used in the [seL4 Device Driver Framework](https://github.com/lucypa/sDDF).
 - [`sel4-async-*`](./crates/sel4-async): Crates for leveraging async Rust in seL4 userspace.

@@ -13,4 +13,4 @@ The difference between the `*-sel4cp` targets and the `*-sel4` ones is that the 
 include a linker script fragment to add the `__sel4_ipc_buffer_obj` symbol required by the `sel4cp`
 tool.
 
-Note that options whose value does not deviate from the default are absent in these JSON files.
+Note that options whose values do not deviate from the default are absent in these JSON files.
