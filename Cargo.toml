@@ -2,6 +2,8 @@
 
 resolver = "2"
 
+default-members = []
+
 members = [
     "crates/examples/root-task/example-root-task",
     "crates/examples/root-task/example-root-task-without-runtime",

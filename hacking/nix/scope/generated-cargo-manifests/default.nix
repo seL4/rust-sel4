@@ -135,6 +135,7 @@ let
     manifest = {
       workspace = {
         resolver = "2";
+        default-members = [];
         members = lib.naturalSort (lib.attrValues cratePathAttrs);
       };
     };
