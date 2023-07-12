@@ -20,11 +20,11 @@ use core::sync::atomic::{self, Ordering};
 #[allow(unused_imports)]
 use log::{debug, info, trace};
 
-use sel4_capdl_initializer_types::*;
 use sel4::{
     cap_type, AbsoluteCPtr, BootInfo, CNodeCapData, CPtr, CapRights, CapType, FrameSize, FrameType,
     InitCSpaceSlot, LocalCPtr, ObjectBlueprint, Untyped, UserContext,
 };
+use sel4_capdl_initializer_types::*;
 
 mod arch;
 mod buffers;

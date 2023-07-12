@@ -5,10 +5,10 @@
 
 use core::ops::Range;
 
+use sel4::BootInfo;
 use sel4_capdl_initializer_core::{Initializer, InitializerBuffers, PerObjectBuffer};
 use sel4_capdl_initializer_types::SpecWithSources;
 use sel4_capdl_initializer_with_embedded_spec_embedded_spec::SPEC;
-use sel4::BootInfo;
 use sel4_logging::{LevelFilter, Logger, LoggerBuilder};
 
 const LOG_LEVEL: LevelFilter = LevelFilter::Info;

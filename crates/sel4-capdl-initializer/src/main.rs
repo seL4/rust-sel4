@@ -12,12 +12,12 @@ use core::ops::Range;
 use core::ptr;
 use core::slice;
 
+use sel4::BootInfo;
 use sel4_capdl_initializer_core::{Initializer, InitializerBuffers, PerObjectBuffer};
 use sel4_capdl_initializer_types::{
     IndirectDeflatedBytesContent, IndirectEmbeddedFrame, IndirectObjectName, SpecWithIndirection,
     SpecWithSources,
 };
-use sel4::BootInfo;
 use sel4_logging::{LevelFilter, Logger, LoggerBuilder};
 use sel4_root_task::root_task;
 
@@ -94,7 +94,8 @@ fn get_spec_with_sources<'a>() -> SpecWithSources<
 
 fn user_image_bounds() -> Range<usize> {
     unsafe {
-        sel4_capdl_initializer_image_start.expose_addr()..sel4_capdl_initializer_image_end.expose_addr()
+        sel4_capdl_initializer_image_start.expose_addr()
+            ..sel4_capdl_initializer_image_end.expose_addr()
     }
 }
 

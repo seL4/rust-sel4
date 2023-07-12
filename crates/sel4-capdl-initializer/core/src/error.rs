@@ -1,8 +1,8 @@
 use crate::CSlotAllocatorError;
-use sel4_capdl_initializer_types::*;
 use core::convert::Infallible;
 use core::fmt;
 use core::num::TryFromIntError;
+use sel4_capdl_initializer_types::*;
 
 #[derive(Debug)]
 pub enum CapDLInitializerError {
