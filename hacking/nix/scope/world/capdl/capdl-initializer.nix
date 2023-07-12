@@ -14,7 +14,7 @@ let
 
 in mkTask {
 
-  rootCrate = crates.capdl-initializer;
+  rootCrate = crates.sel4-capdl-initializer;
 
   rustTargetInfo = seL4RustTargetInfoWithConfig { minimal = true; };
 
@@ -27,7 +27,7 @@ in mkTask {
   # layers = [
   #   crateUtils.defaultIntermediateLayer
   #   {
-  #     crates = [ "capdl-initializer-core" ];
+  #     crates = [ "sel4-capdl-initializer-core" ];
   #     modifications = seL4Modifications;
   #   }
   # ];

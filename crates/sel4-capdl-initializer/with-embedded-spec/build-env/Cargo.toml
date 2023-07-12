@@ -1,0 +1,12 @@
+[package]
+name = "sel4-capdl-initializer-with-embedded-spec-build-env"
+version = "0.1.0"
+authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
+edition = "2021"
+license = "BSD-2-Clause"
+
+[dependencies]
+sel4-capdl-initializer-embed-spec = { path = "../../embed-spec" }
+sel4-capdl-initializer-types = { path = "../../types", features = ["std", "serde"] }
+serde = "1.0.147"
+serde_json = "1.0.87"

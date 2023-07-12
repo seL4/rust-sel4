@@ -11,9 +11,9 @@ let
     sel4-root-task
     sel4-kernel-loader
     sel4-kernel-loader-add-payload
-    capdl-initializer
-    capdl-initializer-add-spec
-    capdl-initializer-with-embedded-spec
+    sel4-capdl-initializer
+    sel4-capdl-initializer-add-spec
+    sel4-capdl-initializer-with-embedded-spec
   ];
 
   cratesForDistribution = crateUtils.getClosureOfCrates rootCratesForDistribution;

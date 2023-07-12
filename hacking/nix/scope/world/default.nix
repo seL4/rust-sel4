@@ -101,13 +101,13 @@ self: with self;
 
   mkTask = callPackage ./mk-task.nix {};
 
-  capdl-initializer = callPackage ./capdl/capdl-initializer.nix {};
+  sel4-capdl-initializer = callPackage ./capdl/sel4-capdl-initializer.nix {};
   objectSizes = callPackage ./capdl/object-sizes.nix {};
-  mkSmallCapDLInitializer = callPackage ./capdl/mk-small-capdl-initializer.nix {};
+  mkSmallCapDLInitializer = callPackage ./capdl/mk-small-sel4-capdl-initializer.nix {};
   serializeCapDLSpec = callPackage ./capdl/serialize-capdl-spec.nix {};
   dummyCapDLSpec = callPackage ./capdl/dummy-capdl-spec.nix {};
   mkSimpleCompositionCapDLSpec = callPackage ./capdl/mk-simple-composition-capdl-spec.nix {};
-  mkCapDLInitializerWithSpec = callPackage ./capdl/mk-capdl-initializer-with-spec.nix {};
+  mkCapDLInitializerWithSpec = callPackage ./capdl/mk-sel4-capdl-initializer-with-spec.nix {};
 
   # mkCapDLInitializer = mkSmallCapDLInitializer;
   mkCapDLInitializer = mkCapDLInitializerWithSpec;

@@ -1,0 +1,14 @@
+[package]
+name = "sel4-capdl-initializer-with-embedded-spec-embedded-spec-validate"
+version = "0.1.0"
+authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
+edition = "2021"
+license = "BSD-2-Clause"
+
+[features]
+deflate = ["sel4-capdl-initializer-with-embedded-spec-embedded-spec/deflate"]
+
+[dependencies]
+sel4-capdl-initializer-types = { path = "../../../types" }
+sel4-capdl-initializer-with-embedded-spec-build-env = { path = "../../build-env" }
+sel4-capdl-initializer-with-embedded-spec-embedded-spec = { path = ".." }

@@ -38,4 +38,4 @@ test-install: registry-link
 			--target aarch64-sel4-minimal \
 			--registry sel4 \
 			--config .cargo/config \
-			capdl-initializer
+			sel4-capdl-initializer

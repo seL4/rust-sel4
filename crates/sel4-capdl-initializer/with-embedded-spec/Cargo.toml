@@ -1,0 +1,29 @@
+[package]
+name = "sel4-capdl-initializer-with-embedded-spec"
+version = "0.1.0"
+authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
+edition = "2021"
+license = "BSD-2-Clause"
+
+[features]
+deflate = [
+    "sel4-capdl-initializer-with-embedded-spec-embedded-spec/deflate",
+    "sel4-capdl-initializer-with-embedded-spec-embedded-spec-validate/deflate"
+]
+
+[dependencies]
+sel4 = { path = "../../sel4" }
+sel4-capdl-initializer-core = { path = "../core" }
+sel4-capdl-initializer-types = { path = "../types" }
+sel4-capdl-initializer-with-embedded-spec-embedded-spec = { path = "./embedded-spec" }
+sel4-logging = { path = "../../sel4-logging" }
+
+[dependencies.sel4-root-task]
+path = "../../sel4-root-task"
+default-features = false
+features = ["single-threaded"]
+
+[build-dependencies]
+
+[build-dependencies.sel4-capdl-initializer-with-embedded-spec-embedded-spec-validate]
+path = "./embedded-spec/validate"

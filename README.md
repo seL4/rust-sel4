@@ -8,7 +8,7 @@ includes:
 - A runtime for [seL4 Core Platform protection](https://github.com/BreakawayConsulting/sel4cp)
   domains ([source](./crates/sel4cp))
 - A [CapDL](https://docs.sel4.systems/projects/capdl/)-based system initializer ([source and
-  docs](./crates/capdl-initializer))
+  docs](./crates/sel4-capdl-initializer))
 - A loader for the seL4 kernel ([source and docs](./crates/sel4-kernel-loader))
 - Custom `rustc` target specifications for seL4 userspace ([JSON and docs](./support/targets))
 - Many more crates for use in seL4 userspace
@@ -55,7 +55,7 @@ This work is funded by the [seL4 Foundation](https://sel4.systems/Foundation/hom
 
 ##### Programs
 
-- [`capdl-initializer`](./crates/capdl-initializer): A
+- [`sel4-capdl-initializer`](./crates/sel4-capdl-initializer): A
   [CapDL](https://docs.sel4.systems/projects/capdl/)-based system initializer.
 - [`sel4-kernel-loader`](./crates/sel4-kernel-loader): A loader for the seL4 kernel, similar in
   purpose to [elfloader](https://github.com/seL4/seL4_tools/tree/master/elfloader-tool).
