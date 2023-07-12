@@ -49,6 +49,7 @@ in rec {
     sel4cp.examples.hello.system
     sel4cp.examples.banscii.system
     sel4cp.tests.passive-server-with-deferred-action.system
+    examples.root-task.hello
     examples.root-task.example-root-task
     examples.root-task.example-root-task-without-runtime
   ];
@@ -248,6 +249,25 @@ in rec {
 
   examples = {
     root-task = {
+      hello = mkInstance {
+        rootTask = mkTask {
+          rootCrate = crates.hello;
+          release = false;
+        };
+        isSupported = haveFullRuntime;
+      };
+    };
+
+    root-task = {
+      example-root-task = mkInstance {
+        rootTask = mkTask {
+          rootCrate = crates.example-root-task;
+          release = false;
+        };
+        isSupported = haveFullRuntime;
+        canAutomate = true;
+      };
+
       example-root-task-without-runtime = mkInstance {
         rootTask = mkTask {
           rootCrate = crates.example-root-task-without-runtime;
@@ -255,15 +275,6 @@ in rec {
           rustTargetInfo = seL4RustTargetInfoWithConfig { minimal = true; };
         };
         isSupported = haveMinimalRuntime;
-        canAutomate = true;
-      };
-
-      example-root-task = mkInstance {
-        rootTask = mkTask {
-          rootCrate = crates.example-root-task;
-          release = false;
-        };
-        isSupported = haveFullRuntime;
         canAutomate = true;
       };
     };
