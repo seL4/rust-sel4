@@ -59,7 +59,7 @@ in rec {
   sel4cp = fetchGit {
     url = "https://github.com/coliasgroup/sel4cp.git";
     rev = "e8d3350fb1f06c5ad3a436be1f09de89d97370e8"; # branch "rust-seL4-nix"
-    local = localRoot + "/sel4cp";
+    # local = localRoot + "/sel4cp";
   };
 
   capdlTool = fetchGit (capdlCommon // {
