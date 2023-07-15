@@ -3,6 +3,8 @@
 , linkFarm
 , overrideCC, libcCross
 , treeHelpers
+, fetchurl
+, qemu
 }:
 
 let
@@ -204,6 +206,42 @@ superCallPackage ../rust-utils {} self //
   cargoManifestGenrationUtils = callPackage ../cargo-manifest-generation-utils {};
 
   generatedCargoManifests = callPackage ./generated-cargo-manifests {};
+
+  ### QEMU
+
+  qemuForSeL4 = (qemu.override {
+    hostCpuTargets = [
+      "arm-softmmu"
+      "aarch64-softmmu"
+      "riscv32-softmmu"
+      "riscv64-softmmu"
+      "i386-softmmu"
+      "x86_64-softmmu"
+    ];
+    guestAgentSupport = false;
+    numaSupport = false;
+    seccompSupport = false;
+    alsaSupport = false;
+    pulseSupport = false;
+    sdlSupport = false;
+    jackSupport = false;
+    gtkSupport = false;
+    vncSupport = false;
+    smartcardSupport = false;
+    spiceSupport = false;
+    ncursesSupport = false;
+    usbredirSupport = false;
+    libiscsiSupport = false;
+    tpmSupport = false;
+    uringSupport = false;
+  }).overrideDerivation (attrs: {
+    patches = attrs.patches ++ [
+      (fetchurl {
+        url = "https://github.com/coliasgroup/qemu/commit/cd3b78de4b5a8d7c79ae99dab2b5e0ab1ba0ffac.patch";
+        sha256 = "sha256-bDmMyelaMCJWhr88XIKEBNMZP3VcBD3mOXhOWal3IBw=";
+      })
+    ];
+  });
 
   ### stdenv
 

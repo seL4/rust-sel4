@@ -17,6 +17,7 @@ let
     , isSupported, canAutomate ? false, automateTimeout ? defaultTimeout
     , extraLinks ? []
     , extraPlatformArgs ? {}
+    , extraAttrs ? {}
     }:
 
     let
@@ -51,7 +52,7 @@ let
         { name = "symbolize-root-task-backtrace"; path = symbolizeRootTaskBacktrace; }
       ] ++ extraLinks ++ (rootTask.extraLinks or []));
 
-    } // instanceForPlatform.attrs;
+    } // instanceForPlatform.attrs // extraAttrs;
 
   mkCorePlatformInstance =
     { system

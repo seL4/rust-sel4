@@ -59,7 +59,7 @@ in rec {
                   mkQemuCmd = loader: [
                     # NOTE
                     # virtualization=on even when hypervisor to test loader dropping exception level
-                    "${pkgsBuildBuild.qemu}/bin/qemu-system-aarch64"
+                    "${pkgsBuildBuild.this.qemuForSeL4}/bin/qemu-system-aarch64"
                       "-machine" "virt${lib.optionalString el2 ",virtualization=on"}"
                       "-cpu" cpu "-smp" numCores "-m" "1024"
                       "-nographic"
@@ -164,7 +164,7 @@ in rec {
                 (enable "lm")
               ];
             in task: [
-              "${pkgsBuildBuild.qemu}/bin/qemu-system-${if is64bit then "x86_64" else "i386"}"
+              "${pkgsBuildBuild.this.qemuForSeL4}/bin/qemu-system-${if is64bit then "x86_64" else "i386"}"
                 "-cpu" "Nehalem,${opts},enforce"
                 "-m" "size=512M"
                 "-nographic"
@@ -204,7 +204,7 @@ in rec {
                   mkQemuCmd = loader: [
                     # NOTE
                     # virtualization=on even when hypervisor to test loader dropping exception level
-                    "${pkgsBuildBuild.qemu}/bin/qemu-system-aarch32"
+                    "${pkgsBuildBuild.this.qemuForSeL4}/bin/qemu-system-aarch32"
                       "-machine" "virt"
                       "-cpu" cpu "-smp" numCores "-m" "1024"
                       "-nographic"

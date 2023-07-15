@@ -43,31 +43,61 @@ self: with self; {
   everything = pkgs.build.writeText "everything" (toString everythingList);
   everythingWithExcess = pkgs.build.writeText "everything" (toString everythingWithExcessList);
 
-  runAutomatedTests = mkRunAutomatedTests
-    (lib.flatten
+  fastAutomatedTests =
+    lib.flatten
       (lib.forEach worldsForEverythingInstances (world:
         lib.forEach world.instances.subsets.canAutomate (instance: {
           name = "unnamed"; # TODO
           script = instance.automate;
         })
       ))
-    );
+    ;
+
+  slowAutomatedTests = map (x: {
+    name = "sel4test";
+    script = x.this.sel4test.automate;
+  }) [
+    pkgs.host.aarch64.linux
+    pkgs.host.aarch32.linux
+    pkgs.host.riscv64.noneWithLibc
+    pkgs.host.riscv32.noneWithLibc
+    pkgs.host.x86_64.linux
+    pkgs.host.ia32.linux
+  ];
+
+  runAutomatedTests = mkRunAutomatedTests (lib.concatLists [
+    fastAutomatedTests
+    slowAutomatedTests
+  ]);
 
   mkRunAutomatedTests = tests:
     with pkgs.build;
-    writeScript "run-all" ''
-      #!${runtimeShell}
-      set -e
+    let
+      raw = writeScript "run-all" ''
+        #!${runtimeShell}
+        set -e
 
-      ${lib.concatStrings (lib.forEach tests ({ name, script }: ''
-        echo "<<< running case: ${name} >>>"
-        ${script}
-      ''))}
+        ${lib.concatStrings (lib.forEach tests ({ name, script }: ''
+          echo "<<< running case: ${name} >>>"
+          ${script}
+        ''))}
 
-      echo
-      echo '# All tests passed.'
-      echo
-    '';
+        echo
+        echo '# All tests passed.'
+        echo
+      '';
+
+      inIsolation = runCommand "tests" {} ''
+        ${raw}
+        touch $out
+      '';
+    in
+      raw
+      # TODO
+      # {
+      #   inherit raw inIsolation;
+      # }
+    ;
 
   docs = import ./docs {
     inherit lib pkgs;

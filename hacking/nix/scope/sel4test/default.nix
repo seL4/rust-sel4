@@ -1,11 +1,11 @@
 { stdenv, lib
 , buildPackages, buildPlatform, hostPlatform
-, writeText, linkFarm
+, writeText, writeScript, linkFarm
 , fetchRepoProject
 , cmake, ninja
 , libxml2, dtc, cpio, protobuf
 , python3Packages
-, qemu
+, qemuForSeL4
 , git
 , gccMultiStdenvGeneric
 , sources
@@ -125,86 +125,113 @@ let
       | sed -rn 's,^.* T (__.*)$,\1,p' > $out
   '';
 
-in
-thisStdenv.mkDerivation {
-  name = "sel4test";
-
-  src = fetchRepoProject {
+  tests = thisStdenv.mkDerivation {
     name = "sel4test";
-    manifest = "https://github.com/seL4/sel4test-manifest.git";
-    rev = "cfc1195ba8fd0de1a0e179aef1314b8f402ff74c";
-    sha256 = "sha256-JspN1A/w5XIV+XCj5/oj7NABsKXVdr+UZOTJWvfJPUY=";
+
+    src = fetchRepoProject {
+      name = "sel4test";
+      manifest = "https://github.com/seL4/sel4test-manifest.git";
+      rev = "cfc1195ba8fd0de1a0e179aef1314b8f402ff74c";
+      sha256 = "sha256-JspN1A/w5XIV+XCj5/oj7NABsKXVdr+UZOTJWvfJPUY=";
+    };
+
+    LIBCLANG_PATH = "${lib.getLib buildPackages.llvmPackages.libclang}/lib";
+
+    depsBuildBuild = lib.optionals (buildPlatform != hostPlatform) [
+      buildPackages.stdenv.cc
+      # NOTE: cause drv.__spliced.buildBuild to be used to work around splicing issue
+      qemuForSeL4
+    ];
+
+    nativeBuildInputs = [
+      cmake ninja
+      libxml2 dtc cpio protobuf
+      git
+      defaultRustToolchain
+    ] ++ (with python3Packages; [
+      aenum plyplus pyelftools simpleeval
+      sel4-deps
+      buildPackages.python3Packages.protobuf
+    ]);
+
+    hardeningDisable = [ "all" ];
+
+    postPatch = ''
+      rm -r kernel
+      cp -r --no-preserve=ownership ${kernelSrc} kernel
+      chmod -R +w kernel
+
+      # patchShebangs can't handle env -S
+      rm kernel/configs/*_verified.cmake
+      rm tools/seL4/cmake-tool/helpers/cmakerepl
+
+      patchShebangs --build .
+
+      # HACK
+      rm projects/musllibc/.git
+
+      # HACK
+      sed -i 's,--enable-static,--enable-static --disable-visibility,' \
+        projects/musllibc/Makefile
+
+      # HACK
+      sed -i 's,tput reset,true,' \
+        tools/seL4/cmake-tool/simulate_scripts/simulate.py
+
+    '' + lib.optionalString hostPlatform.isRiscV64 ''
+      # HACK
+      sed -i 's|test_bad_instruction, true|test_bad_instruction, false|' \
+        projects/sel4test/apps/sel4test-tests/src/tests/faults.c
+
+      sed -i 's|printf("Bootstrapping kernel\\n");|printf("Bootstrapping kernel %lx\\n", v_entry);|' \
+        kernel/src/arch/riscv/kernel/boot.c
+    '';
+
+    configurePhase = ''
+      mkdir build
+      cd build
+      ../init-build.sh ${lib.concatStringsSep " " initBuildArgs}
+    '';
+
+    buildPhase = ''
+      ninja
+    '';
+
+    installPhase = ''
+      cd ..
+      mv build $out
+      rm -rf $out/libsel4/rust/target
+    '';
+
+    dontFixup = true;
+
+    enableParallelBuilding = true;
+
+    passthru = {
+      inherit automate;
+    };
   };
 
-  LIBCLANG_PATH = "${lib.getLib buildPackages.llvmPackages.libclang}/lib";
+  automate =
+    let
+      py = buildPackages.python3.withPackages (pkgs: [
+        pkgs.pexpect
+      ]);
+    in
+      (writeScript "automate" ''
+        #!${buildPackages.runtimeShell}
+        set -eu
 
-  depsBuildBuild = lib.optionals (buildPlatform != hostPlatform) [
-    buildPackages.stdenv.cc
-    # NOTE: cause drv.__spliced.buildBuild to be used to work around splicing issue
-    qemu
-  ];
+        export PATH=$PATH:${qemuForSeL4.__spliced.buildBuild or qemuForSeL4}/bin
 
-  nativeBuildInputs = [
-    cmake ninja
-    libxml2 dtc cpio protobuf
-    git
-    defaultRustToolchain
-  ] ++ (with python3Packages; [
-    aenum plyplus pyelftools simpleeval
-    sel4-deps
-    buildPackages.python3Packages.protobuf
-  ]);
+        ${py}/bin/python3 ${./automate.py} ${tests}
+      '').overrideAttrs (attrs: {
+        passthru = (attrs.passthru or {}) //  {
+          testMeta = {
+            name = "sel4test-${seL4Arch}";
+          };
+        };
+      });
 
-  hardeningDisable = [ "all" ];
-
-  postPatch = ''
-    rm -r kernel
-    cp -r --no-preserve=ownership ${kernelSrc} kernel
-    chmod -R +w kernel
-
-    # patchShebangs can't handle env -S
-    rm kernel/configs/*_verified.cmake
-    rm tools/seL4/cmake-tool/helpers/cmakerepl
-
-    patchShebangs --build .
-
-    # HACK
-    rm projects/musllibc/.git
-
-    # HACK
-    sed -i 's,--enable-static,--enable-static --disable-visibility,' \
-      projects/musllibc/Makefile
-
-    # HACK
-    sed -i 's,tput reset,true,' \
-      tools/seL4/cmake-tool/simulate_scripts/simulate.py
-
-  '' + lib.optionalString hostPlatform.isRiscV64 ''
-    # HACK
-    sed -i 's|test_bad_instruction, true|test_bad_instruction, false|' \
-      projects/sel4test/apps/sel4test-tests/src/tests/faults.c
-
-    sed -i 's|printf("Bootstrapping kernel\\n");|printf("Bootstrapping kernel %lx\\n", v_entry);|' \
-      kernel/src/arch/riscv/kernel/boot.c
-  '';
-
-  configurePhase = ''
-    mkdir build
-    cd build
-    ../init-build.sh ${lib.concatStringsSep " " initBuildArgs}
-  '';
-
-  buildPhase = ''
-    ninja
-  '';
-
-  installPhase = ''
-    cd ..
-    mv build $out
-    rm -rf $out/libsel4/rust/target
-  '';
-
-  dontFixup = true;
-
-  enableParallelBuilding = true;
-}
+in
+  tests

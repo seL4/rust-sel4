@@ -5,7 +5,7 @@
 , cmake, ninja
 , dtc, libxml2
 , python3Packages
-, qemu
+, qemuForSeL4
 , newlib
 , sources
 }:
@@ -69,7 +69,7 @@ let
 
     depsBuildBuild = [
       # NOTE: cause drv.__spliced.buildBuild to be used to work around splicing issue
-      qemu
+      qemuForSeL4
     ];
 
     dontConfigure = true;

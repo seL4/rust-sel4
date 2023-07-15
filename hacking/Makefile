@@ -4,12 +4,16 @@ hacking_dir = .
 .PHONY: none
 none:
 
-.PHONY: check
-check:
+.PHONY: quick-check
+quick-check:
 	$(MAKE) -C $(top_level_dir) check-generated-sources
 	$(MAKE) -C $(top_level_dir) fmt-check
 	$(MAKE) -C $(hacking_dir) check-generic-formatting
 	$(MAKE) -C $(top_level_dir) run-automated-tests
+
+.PHONY: check
+check:
+	$(MAKE) -C $(hacking_dir) quick-check
 	$(MAKE) -C $(top_level_dir) everything-with-excess
 
 .PHONY: check-generic-formatting

@@ -1,18 +1,20 @@
 import sys
 import argparse
 import pexpect
+from pathlib import Path
+
+TIMEOUT = 60 * 5
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--simulate')
-    parser.add_argument('--timeout', type=int)
+    parser.add_argument('dir', type=Path)
     args = parser.parse_args()
     run(args)
 
 def run(args):
-    child = pexpect.spawn(args.simulate, encoding='utf-8')
+    child = pexpect.spawn(str(args.dir / 'simulate'), cwd=args.dir, encoding='utf-8')
     child.logfile = sys.stdout
-    ix = child.expect(['TEST_PASS', 'TEST_FAIL', pexpect.TIMEOUT], timeout=args.timeout)
+    ix = child.expect(['All is well in the universe', 'halting...', pexpect.TIMEOUT], timeout=TIMEOUT)
     print()
     if ix != 0:
         if ix == 1:
