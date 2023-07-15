@@ -50,9 +50,9 @@ in rec {
     tests.capdl.http-server
     tests.capdl.threads
     tests.capdl.utcover
-    sel4cp.examples.hello.system
-    sel4cp.examples.banscii.system
-    sel4cp.tests.passive-server-with-deferred-action.system
+    sel4cp.examples.hello
+    sel4cp.examples.banscii
+    sel4cp.tests.passive-server-with-deferred-action
     examples.root-task.hello
     examples.root-task.example-root-task
     examples.root-task.example-root-task-without-runtime
@@ -207,7 +207,7 @@ in rec {
     };
   };
 
-  sel4cp = callPackage ./sel4cp.nix {
+  sel4cp = callPackage ./sel4cp {
     inherit maybe;
     inherit canSimulate;
   };
