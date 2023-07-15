@@ -83,12 +83,6 @@ in
         writeScript "automate" ''
           #!${buildPackages.runtimeShell}
           set -eu
-
           ${py}/bin/python3 ${./automate.py} ${self.simulate}
         '';
-
-    automateInIsolation = runCommand "test" {} ''
-      ${automate}
-      touch $out
-    '';
   })
