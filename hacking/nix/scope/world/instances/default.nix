@@ -26,15 +26,13 @@
 }:
 
 let
-  inherit (worldConfig) isCorePlatform;
+  inherit (worldConfig) isCorePlatform canSimulate;
 
   haveFullRuntime = !isCorePlatform && (hostPlatform.isAarch64 || hostPlatform.isx86_64);
   haveMinimalRuntime = haveFullRuntime;
   haveKernelLoader = hostPlatform.isAarch64;
 
   maybe = condition: v: if condition then v else null;
-
-  isQEMU = true;
 
 in rec {
 
@@ -71,7 +69,7 @@ in rec {
           rootCrate = crates.tests-root-task-loader;
           release = false;
         };
-        extraPlatformArgs = lib.optionalAttrs isQEMU  {
+        extraPlatformArgs = lib.optionalAttrs canSimulate  {
           canAutomateSimply = true;
         };
       });
@@ -81,7 +79,7 @@ in rec {
           rootCrate = crates.tests-root-task-core-libs;
           release = false;
         };
-        extraPlatformArgs = lib.optionalAttrs isQEMU  {
+        extraPlatformArgs = lib.optionalAttrs canSimulate  {
           canAutomateSimply = true;
         };
       });
@@ -91,7 +89,7 @@ in rec {
           rootCrate = crates.tests-root-task-config;
           release = false;
         };
-        extraPlatformArgs = lib.optionalAttrs isQEMU  {
+        extraPlatformArgs = lib.optionalAttrs canSimulate  {
           canAutomateSimply = true;
         };
       });
@@ -101,7 +99,7 @@ in rec {
           rootCrate = crates.tests-root-task-tls;
           release = false;
         };
-        extraPlatformArgs = lib.optionalAttrs isQEMU  {
+        extraPlatformArgs = lib.optionalAttrs canSimulate  {
           canAutomateSimply = true;
         };
       });
@@ -120,7 +118,7 @@ in rec {
             elf = embedDebugInfo orig.elf;
             inherit orig;
           };
-        extraPlatformArgs = lib.optionalAttrs isQEMU  {
+        extraPlatformArgs = lib.optionalAttrs canSimulate  {
           canAutomateSimply = true;
         };
       });
@@ -148,13 +146,13 @@ in rec {
                       panic = panicStrategyName;
                     };
                   };
-                  extraPlatformArgs = lib.optionalAttrs isQEMU  {
+                  extraPlatformArgs = lib.optionalAttrs canSimulate  {
                     canAutomateSimply = panicStrategyName == "unwind";
                   };
                 })));
 
-      c = maybe haveFullRuntime (callPackage ./c.nix {
-        # inherit isQEMU;
+      c = maybe (haveFullRuntime && hostPlatform.isAarch64) (callPackage ./c.nix {
+        # inherit canSimulate;
       });
     };
 
@@ -174,7 +172,7 @@ in rec {
             };
           };
         };
-        extraPlatformArgs = lib.optionalAttrs isQEMU  {
+        extraPlatformArgs = lib.optionalAttrs canSimulate  {
           canAutomateSimply = true;
         };
       });
@@ -195,7 +193,7 @@ in rec {
             };
           };
         };
-        extraPlatformArgs = lib.optionalAttrs isQEMU  {
+        extraPlatformArgs = lib.optionalAttrs canSimulate  {
           canAutomateSimply = true;
         };
       });
@@ -204,14 +202,14 @@ in rec {
         maybe
           (hostPlatform.isAarch64 && !isCorePlatform && seL4Config.PLAT == "qemu-arm-virt")
           (callPackage ./http-server {
-            inherit isQEMU;
+            inherit canSimulate;
           });
     };
   };
 
   sel4cp = callPackage ./sel4cp.nix {
     inherit maybe;
-    inherit isQEMU;
+    inherit canSimulate;
   };
 
   examples = {
@@ -230,7 +228,7 @@ in rec {
           rootCrate = crates.example-root-task;
           release = false;
         };
-        extraPlatformArgs = lib.optionalAttrs isQEMU  {
+        extraPlatformArgs = lib.optionalAttrs canSimulate  {
           canAutomateSimply = true;
         };
       });
@@ -241,7 +239,7 @@ in rec {
           release = false;
           rustTargetInfo = seL4RustTargetInfoWithConfig { minimal = true; };
         };
-        extraPlatformArgs = lib.optionalAttrs isQEMU  {
+        extraPlatformArgs = lib.optionalAttrs canSimulate  {
           canAutomateSimply = true;
         };
       });

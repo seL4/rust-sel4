@@ -13,6 +13,7 @@ let
     , kernelConfig ? null
     , kernelLoaderConfig ? null
     , corePlatformConfig ? null
+    , canSimulate ? false
     , platformRequiresLoader ? true
     , mkInstanceForPlatform ? _: { attrs = {}; links = []; }
     }:
@@ -21,6 +22,7 @@ let
         kernelConfig
         kernelLoaderConfig
         corePlatformConfig
+        canSimulate
         platformRequiresLoader
         mkInstanceForPlatform
       ;

@@ -12,7 +12,7 @@
 , worldConfig
 
 , maybe
-, isQEMU
+, canSimulate
 }:
 
 let
@@ -110,7 +110,7 @@ in {
               };
               systemXML = sources.srcRoot + "/crates/private/tests/sel4cp/passive-server-with-deferred-action/x.system";
             };
-            extraPlatformArgs = lib.optionalAttrs isQEMU  {
+            extraPlatformArgs = lib.optionalAttrs canSimulate  {
               canAutomateSimply = true;
             };
           });

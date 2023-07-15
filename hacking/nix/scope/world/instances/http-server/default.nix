@@ -15,7 +15,7 @@
 , mkCapDLRootTask
 , mkTask
 
-, isQEMU
+, canSimulate
 }:
 
 let
@@ -63,7 +63,7 @@ in
         };
       };
     };
-    extraPlatformArgs = lib.optionalAttrs isQEMU {
+    extraPlatformArgs = lib.optionalAttrs canSimulate {
       extraQemuArgs = [
         "-device" "virtio-net-device,netdev=netdev0"
         "-netdev" "user,id=netdev0,hostfwd=tcp::8000-:80"
@@ -72,7 +72,7 @@ in
         "-blockdev" "node-name=blkdev0,read-only=on,driver=file,filename=${contentCPIO}"
       ];
     };
-  } // lib.optionalAttrs isQEMU rec {
+  } // lib.optionalAttrs canSimulate rec {
     automate =
       let
         py = buildPackages.python3.withPackages (pkgs: [

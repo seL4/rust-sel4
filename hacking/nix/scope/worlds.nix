@@ -55,6 +55,7 @@ in rec {
                 } // lib.optionalAttrs hypervisor {
                   KernelArmHypervisorSupport = on;
                 };
+                canSimulate = true;
                 mkInstanceForPlatform = platUtils.qemu.mkMkInstanceForPlatform {
                   mkQemuCmd = loader: [
                     # NOTE
@@ -107,6 +108,7 @@ in rec {
           KernelSel4Arch = mkString "riscv64";
           KernelPlatform = mkString "spike";
         };
+        canSimulate = true;
       };
     };
 
@@ -122,6 +124,7 @@ in rec {
           KernelSel4Arch = mkString "riscv32";
           KernelPlatform = mkString "spike";
         };
+        canSimulate = true;
       };
     };
 
@@ -145,6 +148,7 @@ in rec {
           KernelIOMMU = off;
           KernelFPU = mkString "FXSAVE";
         };
+        canSimulate = true;
         mkInstanceForPlatform = platUtils.qemu.mkMkInstanceForPlatform {
           platformRequiresLoader = false;
           mkQemuCmd =
