@@ -18,7 +18,7 @@ def main():
 def run(args):
     child = pexpect.spawn(args.simulate, encoding='utf-8')
     child.logfile = sys.stdout
-    child.expect(['CapDL initializer done, suspending'], timeout=5)
+    child.expect('CapDL initializer done, suspending', timeout=5)
     # child.interact()
 
     time.sleep(3)
