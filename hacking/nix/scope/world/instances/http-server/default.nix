@@ -14,6 +14,8 @@
 , mkInstance
 , mkCapDLRootTask
 , mkTask
+
+, isQEMU
 }:
 
 let
@@ -32,8 +34,8 @@ let
       && find . -print -depth \
       | cpio -o -H newc > $out
   '';
-
-  instance = mkInstance {
+in
+  lib.fix (self: mkInstance {
     rootTask = mkCapDLRootTask rec {
       # small = true;
       script = sources.srcRoot + "/crates/private/tests/capdl/http-server/cdl.py";
@@ -61,36 +63,32 @@ let
         };
       };
     };
-    extraPlatformArgs.extraQemuArgs = [
-      "-device" "virtio-net-device,netdev=netdev0"
-      "-netdev" "user,id=netdev0,hostfwd=tcp::8000-:80"
+    extraPlatformArgs = lib.optionalAttrs isQEMU {
+      extraQemuArgs = [
+        "-device" "virtio-net-device,netdev=netdev0"
+        "-netdev" "user,id=netdev0,hostfwd=tcp::8000-:80"
 
-      "-device" "virtio-blk-device,drive=blkdev0"
-      "-blockdev" "node-name=blkdev0,read-only=on,driver=file,filename=${contentCPIO}"
-    ];
-    isSupported = hostPlatform.isAarch64 && !isCorePlatform && seL4Config.PLAT == "qemu-arm-virt";
-    canAutomate = false;
-  };
+        "-device" "virtio-blk-device,drive=blkdev0"
+        "-blockdev" "node-name=blkdev0,read-only=on,driver=file,filename=${contentCPIO}"
+      ];
+    };
+  } // lib.optionalAttrs isQEMU rec {
+    automate =
+      let
+        py = buildPackages.python3.withPackages (pkgs: [
+          pkgs.pexpect
+          pkgs.requests
+        ]);
+      in
+        writeScript "automate" ''
+          #!${buildPackages.runtimeShell}
+          set -eu
 
-  automate =
-    let
-      py = buildPackages.python3.withPackages (pkgs: [
-        pkgs.pexpect
-        pkgs.requests
-      ]);
-    in
-      writeScript "automate" ''
-        #!${buildPackages.runtimeShell}
-        set -eu
+          ${py}/bin/python3 ${./automate.py} ${self.simulate}
+        '';
 
-        ${py}/bin/python3 ${./automate.py} ${instance.links}/simulate
-      '';
-
-  automateInIsolation = runCommand "test" {} ''
-    ${automate}
-    touch $out
-  '';
-
-in {
-  inherit instance automate automateInIsolation;
-}
+    automateInIsolation = runCommand "test" {} ''
+      ${automate}
+      touch $out
+    '';
+  })

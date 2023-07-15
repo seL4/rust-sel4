@@ -14,10 +14,8 @@ let
 
   mkInstance =
     { rootTask
-    , isSupported, canAutomate ? false, automateTimeout ? defaultTimeout
     , extraLinks ? []
     , extraPlatformArgs ? {}
-    , extraAttrs ? {}
     }:
 
     let
@@ -29,53 +27,51 @@ let
       instanceForPlatform = worldConfig.mkInstanceForPlatform ({
         rootTask = rootTask.elf;
         loader = loader.elf;
-      } // lib.optionalAttrs canAutomate {
-        simpleAutomationParams.timeout = automateTimeout;
       } // extraPlatformArgs);
 
     in rec {
-      inherit rootTask isSupported canAutomate;
-      inherit loader instanceForPlatform;
+      inherit loader rootTask instanceForPlatform;
 
       symbolizeRootTaskBacktrace = writeScript "x.sh" ''
         #!${buildPackages.runtimeShell}
         exec ${buildPackages.this.sel4-backtrace-cli}/bin/sel4-symbolize-backtrace -f ${rootTask.elf} "$@"
       '';
 
-      links = linkFarm "links" (
+      links = linkFarm "links" (lib.concatLists [
         instanceForPlatform.links
-        ++ lib.optionals worldConfig.platformRequiresLoader [
-        { name = "loader.elf"; path = loader.elf; }
-      ] ++ [
-        { name = "kernel.elf"; path = "${seL4ForBoot}/bin/kernel.elf"; }
-        { name = "root-task.elf"; path = rootTask.elf; }
-        { name = "symbolize-root-task-backtrace"; path = symbolizeRootTaskBacktrace; }
-      ] ++ extraLinks ++ (rootTask.extraLinks or []));
+        (lib.optionals worldConfig.platformRequiresLoader [
+          { name = "loader.elf"; path = loader.elf; }
+        ])
+        [
+          { name = "kernel.elf"; path = "${seL4ForBoot}/bin/kernel.elf"; }
+          { name = "root-task.elf"; path = rootTask.elf; }
+          { name = "symbolize-root-task-backtrace"; path = symbolizeRootTaskBacktrace; }
+        ]
+        extraLinks
+        (rootTask.extraLinks or [])
+      ]);
 
-    } // instanceForPlatform.attrs // extraAttrs;
+    } // instanceForPlatform.attrs;
 
   mkCorePlatformInstance =
     { system
-    , isSupported, canAutomate ? false, automateTimeout ? defaultTimeout
     , extraLinks ? []
+    , extraPlatformArgs ? {}
     }:
 
     let
-
-      inherit (system) loader;
-
       instanceForPlatform = worldConfig.mkInstanceForPlatform ({
-        inherit loader;
-      } // lib.optionalAttrs canAutomate {
-        simpleAutomationParams.timeout = automateTimeout;
-      });
+        inherit (system) loader;
+      } // extraPlatformArgs);
 
     in rec {
       inherit system instanceForPlatform;
-      inherit isSupported canAutomate;
 
-      links = linkFarm "links" (
-        instanceForPlatform.links ++ extraLinks ++ system.links);
+      links = linkFarm "links" (lib.concatLists [
+        instanceForPlatform.links
+        extraLinks
+        system.links
+      ]);
 
     } // instanceForPlatform.attrs;
 
@@ -95,15 +91,15 @@ let
         extraLinks = [
           { name = "cdl"; path = spec; }
         ] ++ lib.optionals (!small) [
-          { name = "x.elf"; path = self.loader.split.full; }
+          { name = "initializer.full.elf"; path = self.initializer.split.full; }
         ];
       }
       // (if small then {
-        loader = mkSmallCapDLInitializer spec.cdl;
-        elf = loader.elf;
+        initializer = mkSmallCapDLInitializer spec.cdl;
+        elf = initializer.elf;
       } else {
-        loader = mkCapDLInitializer spec.cdl;
-        elf = loader.elf;
+        initializer = mkCapDLInitializer spec.cdl;
+        elf = initializer.elf;
       })
       // passthru
     );

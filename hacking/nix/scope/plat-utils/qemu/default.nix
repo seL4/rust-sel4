@@ -36,7 +36,8 @@ in rec {
 
     { rootTask ? null
     , loader ? null
-    , simpleAutomationParams ? null
+    , canAutomateSimply ? false
+    , simpleAutomationParams ? if canAutomateSimply then {} else null
     , extraQemuArgs ? []
     }:
 

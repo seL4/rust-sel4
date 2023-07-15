@@ -10,6 +10,9 @@
 , seL4RustTargetInfoWithConfig
 , mkCorePlatformInstance
 , worldConfig
+
+, maybe
+, isQEMU
 }:
 
 let
@@ -39,13 +42,12 @@ in {
           release = false;
         };
       };
-      system = mkCorePlatformInstance {
+      system = maybe isCorePlatform (mkCorePlatformInstance {
         system = sel4cp.mkSystem {
           searchPath = "${pds.hello}/bin";
           systemXML = sources.srcRoot + "/crates/examples/sel4cp/hello/hello.system";
         };
-        isSupported = isCorePlatform;
-      };
+      });
     };
 
     banscii = rec {
@@ -67,7 +69,7 @@ in {
           };
         };
       };
-      system = mkCorePlatformInstance {
+      system = maybe isCorePlatform (mkCorePlatformInstance {
         system = sel4cp.mkSystem {
           searchPath = symlinkJoin {
             name = "x";
@@ -79,8 +81,7 @@ in {
           };
           systemXML = sources.srcRoot + "/crates/examples/sel4cp/banscii/banscii.system";
         };
-        isSupported = isCorePlatform;
-      };
+      });
     };
   };
 
@@ -98,7 +99,7 @@ in {
               rootCrate = crates.${mkCrateName "server"};
             };
           };
-          system = mkCorePlatformInstance {
+          system = maybe isCorePlatform (mkCorePlatformInstance {
             system = sel4cp.mkSystem {
               searchPath = symlinkJoin {
                 name = "x";
@@ -109,9 +110,10 @@ in {
               };
               systemXML = sources.srcRoot + "/crates/private/tests/sel4cp/passive-server-with-deferred-action/x.system";
             };
-            isSupported = isCorePlatform;
-            canAutomate = true;
-          };
+            extraPlatformArgs = lib.optionalAttrs isQEMU  {
+              canAutomateSimply = true;
+            };
+          });
         };
   };
 }

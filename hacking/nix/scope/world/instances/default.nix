@@ -32,9 +32,13 @@ let
   haveMinimalRuntime = haveFullRuntime;
   haveKernelLoader = hostPlatform.isAarch64;
 
+  maybe = condition: v: if condition then v else null;
+
+  isQEMU = true;
+
 in rec {
 
-  all = [
+  all = lib.filter (v: v != null) [
     tests.root-task.loader
     tests.root-task.core-libs
     tests.root-task.config
@@ -44,8 +48,8 @@ in rec {
     tests.root-task.panicking.abort.withoutAlloc
     tests.root-task.panicking.unwind.withAlloc
     tests.root-task.panicking.unwind.withoutAlloc
-    tests.root-task.c.instance
-    tests.capdl.http-server.instance
+    tests.root-task.c
+    tests.capdl.http-server
     tests.capdl.threads
     tests.capdl.utcover
     sel4cp.examples.hello.system
@@ -57,49 +61,53 @@ in rec {
   ];
 
   subsets = rec {
-    supported = lib.filter (instance: instance.isSupported) all;
-    canAutomate = lib.filter (instance: instance.canAutomate) supported;
+    supported = all;
+    canAutomate = lib.filter (instance: (instance.automate or null) != null) supported;
   };
 
   tests = {
     root-task = {
-      loader = mkInstance {
+      loader = maybe (haveKernelLoader && haveFullRuntime) (mkInstance {
         rootTask = mkTask {
           rootCrate = crates.tests-root-task-loader;
           release = false;
         };
-        isSupported = haveKernelLoader && haveFullRuntime;
-        canAutomate = true;
-      };
+        extraPlatformArgs = lib.optionalAttrs isQEMU  {
+          canAutomateSimply = true;
+        };
+      });
 
-      core-libs = mkInstance {
+      core-libs = maybe haveFullRuntime (mkInstance {
         rootTask = mkTask {
           rootCrate = crates.tests-root-task-core-libs;
           release = false;
         };
-        isSupported = haveFullRuntime;
-        canAutomate = true;
-      };
+        extraPlatformArgs = lib.optionalAttrs isQEMU  {
+          canAutomateSimply = true;
+        };
+      });
 
-      config = mkInstance {
+      config = maybe haveFullRuntime (mkInstance {
         rootTask = mkTask {
           rootCrate = crates.tests-root-task-config;
           release = false;
         };
-        isSupported = haveFullRuntime;
-        canAutomate = true;
-      };
+        extraPlatformArgs = lib.optionalAttrs isQEMU  {
+          canAutomateSimply = true;
+        };
+      });
 
-      tls = mkInstance {
+      tls = maybe haveFullRuntime (mkInstance {
         rootTask = mkTask {
           rootCrate = crates.tests-root-task-tls;
           release = false;
         };
-        isSupported = haveFullRuntime;
-        canAutomate = true;
-      };
+        extraPlatformArgs = lib.optionalAttrs isQEMU  {
+          canAutomateSimply = true;
+        };
+      });
 
-      backtrace = mkInstance {
+      backtrace = maybe haveFullRuntime (mkInstance {
         rootTask =
           let
             orig = mkTask {
@@ -113,9 +121,10 @@ in rec {
             elf = embedDebugInfo orig.elf;
             inherit orig;
           };
-        isSupported = haveFullRuntime;
-        canAutomate = true;
-      };
+        extraPlatformArgs = lib.optionalAttrs isQEMU  {
+          canAutomateSimply = true;
+        };
+      });
 
       panicking =
         let
@@ -131,7 +140,7 @@ in rec {
           lib.flip lib.mapAttrs panicStrategy
             (panicStrategyName: _:
               lib.flip lib.mapAttrs alloc
-                (_: allocFeatures: mkInstance {
+                (_: allocFeatures: maybe haveFullRuntime (mkInstance {
                   rootTask = mkTask {
                     rootCrate = crates.tests-root-task-panicking;
                     release = false;
@@ -140,17 +149,18 @@ in rec {
                       panic = panicStrategyName;
                     };
                   };
-                  isSupported = haveFullRuntime;
-                  canAutomate = panicStrategyName == "unwind";
-                }));
+                  extraPlatformArgs = lib.optionalAttrs isQEMU  {
+                    canAutomateSimply = panicStrategyName == "unwind";
+                  };
+                })));
 
-      c = callPackage ./c.nix {
-        inherit mkInstance;
-      };
+      c = maybe haveFullRuntime (callPackage ./c.nix {
+        # inherit isQEMU;
+      });
     };
 
     capdl = {
-      threads = mkInstance {
+      threads = maybe haveFullRuntime (mkInstance {
         rootTask = mkCapDLRootTask rec {
           small = true;
           script = sources.srcRoot + "/crates/private/tests/capdl/threads/cdl.py";
@@ -165,11 +175,12 @@ in rec {
             };
           };
         };
-        isSupported = haveFullRuntime;
-        canAutomate = true;
-      };
+        extraPlatformArgs = lib.optionalAttrs isQEMU  {
+          canAutomateSimply = true;
+        };
+      });
 
-      utcover = mkInstance {
+      utcover = maybe haveFullRuntime (mkInstance {
         rootTask = mkCapDLRootTask rec {
           # small = true;
           script = sources.srcRoot + "/crates/private/tests/capdl/utcover/cdl.py";
@@ -185,48 +196,56 @@ in rec {
             };
           };
         };
-        isSupported = haveFullRuntime;
-        canAutomate = true;
-      };
+        extraPlatformArgs = lib.optionalAttrs isQEMU  {
+          canAutomateSimply = true;
+        };
+      });
 
-      http-server = callPackage ./http-server {
-
-      };
+      http-server =
+        maybe
+          (hostPlatform.isAarch64 && !isCorePlatform && seL4Config.PLAT == "qemu-arm-virt")
+          (callPackage ./http-server {
+            inherit isQEMU;
+          });
     };
   };
 
-  sel4cp = callPackage ./sel4cp.nix {};
+  sel4cp = callPackage ./sel4cp.nix {
+    inherit maybe;
+    inherit isQEMU;
+  };
 
   examples = {
     root-task = {
-      hello = mkInstance {
+      hello = maybe haveFullRuntime (mkInstance {
         rootTask = mkTask {
           rootCrate = crates.hello;
           release = false;
         };
-        isSupported = haveFullRuntime;
-      };
+      });
     };
 
     root-task = {
-      example-root-task = mkInstance {
+      example-root-task = maybe haveFullRuntime (mkInstance {
         rootTask = mkTask {
           rootCrate = crates.example-root-task;
           release = false;
         };
-        isSupported = haveFullRuntime;
-        canAutomate = true;
-      };
+        extraPlatformArgs = lib.optionalAttrs isQEMU  {
+          canAutomateSimply = true;
+        };
+      });
 
-      example-root-task-without-runtime = mkInstance {
+      example-root-task-without-runtime = maybe haveMinimalRuntime (mkInstance {
         rootTask = mkTask {
           rootCrate = crates.example-root-task-without-runtime;
           release = false;
           rustTargetInfo = seL4RustTargetInfoWithConfig { minimal = true; };
         };
-        isSupported = haveMinimalRuntime;
-        canAutomate = true;
-      };
+        extraPlatformArgs = lib.optionalAttrs isQEMU  {
+          canAutomateSimply = true;
+        };
+      });
     };
   };
 }
