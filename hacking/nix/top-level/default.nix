@@ -42,8 +42,15 @@ self: with self; {
     html
   ];
 
+  everythingElseForCIList = lib.flatten [
+    html
+    example
+    example-rpi4-b-4gb
+  ];
+
   everything = pkgs.build.writeText "everything" (toString everythingList);
-  everythingWithExcess = pkgs.build.writeText "everything" (toString everythingWithExcessList);
+  everythingWithExcess = pkgs.build.writeText "everything-with-excess" (toString everythingWithExcessList);
+  everythingForCI = pkgs.build.writeText "everything-else-for-ci" (toString everythingElseForCIList);
 
   fastAutomatedTests =
     lib.concatLists

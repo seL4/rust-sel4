@@ -65,6 +65,10 @@ everything:
 everything-with-excess:
 	$(nix_build) -A everythingWithExcess --no-out-link
 
+.PHONY: everything-else-for-ci
+everything-else-for-ci:
+	$(nix_build) -A everythingElseForCI --no-out-link
+
 try_restore_terminal := tput smam 2> /dev/null || true
 
 .PHONY: run-automated-tests
@@ -98,4 +102,4 @@ exhaustive-check: check-source
 .PHONY:	ci-check
 ci-check: check-source
 	$(MAKE) run-automated-tests
-	$(MAKE) everything
+	$(MAKE) everything-else-for-ci
