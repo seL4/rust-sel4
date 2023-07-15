@@ -10,19 +10,21 @@ self: with self; {
     pkgs.host.aarch64.none.this.worlds.qemu-arm-virt.sel4cp
   ];
 
+  sel4testInstances = (map (x: x.this.sel4test) [
+    pkgs.host.aarch64.linux
+    pkgs.host.aarch32.linux
+    pkgs.host.riscv64.noneWithLibc
+    pkgs.host.riscv32.noneWithLibc
+    pkgs.host.x86_64.linux
+    pkgs.host.ia32.linux
+  ]);
+
   everythingList = lib.flatten [
     (lib.forEach worldsForEverythingInstances (world:
-      map (instance: instance.links) world.instances.subsets.supported
+      map (instance: instance.links) world.instances.all
     ))
 
-    (map (x: x.this.sel4test) [
-      pkgs.host.aarch64.linux
-      pkgs.host.aarch32.linux
-      pkgs.host.riscv64.noneWithLibc
-      pkgs.host.riscv32.noneWithLibc
-      pkgs.host.x86_64.linux
-      pkgs.host.ia32.linux
-    ])
+    sel4testInstances
 
     pkgs.host.aarch32.none.this.worlds.default.seL4
     pkgs.host.riscv64.none.this.worlds.default.seL4
@@ -44,60 +46,50 @@ self: with self; {
   everythingWithExcess = pkgs.build.writeText "everything" (toString everythingWithExcessList);
 
   fastAutomatedTests =
-    lib.flatten
-      (lib.forEach worldsForEverythingInstances (world:
-        lib.forEach world.instances.subsets.canAutomate (instance: {
-          name = "unnamed"; # TODO
-          script = instance.automate;
-        })
-      ))
-    ;
+    lib.concatLists
+      (lib.forEach worldsForEverythingInstances
+        (world: world.instances.allAutomationScripts));
 
-  slowAutomatedTests = map (x: {
-    name = "sel4test";
-    script = x.this.sel4test.automate;
-  }) [
-    pkgs.host.aarch64.linux
-    pkgs.host.aarch32.linux
-    pkgs.host.riscv64.noneWithLibc
-    pkgs.host.riscv32.noneWithLibc
-    pkgs.host.x86_64.linux
-    pkgs.host.ia32.linux
-  ];
+  slowAutomatedTests = map (x: x.automate) sel4testInstances;
 
   runAutomatedTests = mkRunAutomatedTests (lib.concatLists [
     fastAutomatedTests
     slowAutomatedTests
   ]);
 
-  mkRunAutomatedTests = tests:
+  witnessAutomatedTests = mkWitnessAutomatedTests (lib.concatLists [
+    fastAutomatedTests
+    slowAutomatedTests
+  ]);
+
+  mkRunAutomatedTests = scripts:
     with pkgs.build;
-    let
-      raw = writeScript "run-all" ''
-        #!${runtimeShell}
-        set -e
+    writeScript "run-tests" ''
+      #!${runtimeShell}
+      set -eu
 
-        ${lib.concatStrings (lib.forEach tests ({ name, script }: ''
-          echo "<<< running case: ${name} >>>"
-          ${script}
-        ''))}
+      ${lib.concatStrings (lib.forEach scripts (script: ''
+        echo "<<< running case: ${script.testMeta.name or "unnamed"} >>>"
+        ${script}
+      ''))}
 
-        echo
-        echo '# All tests passed.'
-        echo
-      '';
+      echo
+      echo '# All tests passed.'
+      echo
+    '';
 
-      inIsolation = runCommand "tests" {} ''
-        ${raw}
-        touch $out
-      '';
-    in
-      raw
-      # TODO
-      # {
-      #   inherit raw inIsolation;
-      # }
-    ;
+  mkWitnessAutomatedTest = script:
+    with pkgs.build;
+    runCommand "witness-${script.testMeta.name or "unnamed"}" {} ''
+      ${script}
+      touch $out
+    '';
+
+  mkWitnessAutomatedTests = scripts:
+    with pkgs.build;
+    writeText "witness-tests" (lib.concatStrings (
+      map mkWitnessAutomatedTest scripts
+    ));
 
   docs = import ./docs {
     inherit lib pkgs;

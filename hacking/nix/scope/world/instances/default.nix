@@ -60,10 +60,9 @@ in rec {
     examples.root-task.example-root-task-without-runtime
   ];
 
-  subsets = rec {
-    supported = all;
-    canAutomate = lib.filter (instance: (instance.automate or null) != null) supported;
-  };
+  allAutomationScripts = map
+    (instance: instance.automate)
+    (lib.filter (instance: (instance.automate or null) != null) all);
 
   tests = {
     root-task = {

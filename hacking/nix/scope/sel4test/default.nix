@@ -226,12 +226,11 @@ let
 
         ${py}/bin/python3 ${./automate.py} ${tests}
       '').overrideAttrs (attrs: {
-        # TODO
-        # passthru = (attrs.passthru or {}) //  {
-        #   testMeta = {
-        #     name = "sel4test-${seL4Arch}";
-        #   };
-        # };
+        passthru = (attrs.passthru or {}) //  {
+          testMeta = {
+            name = "sel4test-${seL4Arch}";
+          };
+        };
       });
 
 in

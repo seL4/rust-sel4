@@ -28,7 +28,12 @@ everything-with-excess:
 .PHONY: run-automated-tests
 run-automated-tests:
 	script=$$($(nix_build) -A runAutomatedTests --no-out-link) && $$script
-	tput smam
+	tput smam || true
+
+.PHONY: witness-automated-tests
+witness-automated-tests:
+	$(nix_build) -A witnessAutomatedTests --no-out-link
+	tput smam || true
 
 .PHONY: example
 example:
