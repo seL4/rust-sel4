@@ -1,6 +1,6 @@
 { lib, stdenv
 , buildPackages, pkgsBuildBuild
-, linkFarm, symlinkJoin, writeText, runCommand
+, linkFarm, symlinkJoin, writeText, writeScript, runCommand
 , callPackage
 , sel4cp
 , mkTask
@@ -37,7 +37,7 @@ let
   };
 
 in
-mkCorePlatformInstance {
+lib.fix (self: mkCorePlatformInstance {
   system = sel4cp.mkSystem {
     searchPath = symlinkJoin {
       name = "x";
@@ -51,4 +51,16 @@ mkCorePlatformInstance {
   };
 } // {
   inherit pds;
-}
+} // lib.optionalAttrs canSimulate rec {
+  automate =
+    let
+      py = buildPackages.python3.withPackages (pkgs: [
+        pkgs.pexpect
+      ]);
+    in
+      writeScript "automate" ''
+        #!${buildPackages.runtimeShell}
+        set -eu
+        ${py}/bin/python3 ${./automate.py} ${self.simulate}
+      '';
+})
