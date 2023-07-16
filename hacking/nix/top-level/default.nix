@@ -50,7 +50,7 @@ self: with self; {
 
   everything = pkgs.build.writeText "everything" (toString everythingList);
   everythingWithExcess = pkgs.build.writeText "everything-with-excess" (toString everythingWithExcessList);
-  everythingForCI = pkgs.build.writeText "everything-else-for-ci" (toString everythingElseForCIList);
+  everythingElseForCI = pkgs.build.writeText "everything-else-for-ci" (toString everythingElseForCIList);
 
   fastAutomatedTests =
     lib.concatLists
