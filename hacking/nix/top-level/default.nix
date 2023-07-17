@@ -20,6 +20,9 @@ self: with self; {
   ]);
 
   everythingList = lib.flatten [
+    generatedSources.check
+    pkgs.build.this.vendoredTopLevelLockfile.vendoredSourcesDirectory
+
     (lib.forEach worldsForEverythingInstances (world:
       map (instance: instance.links) world.instances.all
     ))
