@@ -149,11 +149,11 @@ impl<'a> RingBuffer<'a> {
     }
 
     pub fn is_empty(&self) -> bool {
-        Self::has_nonzero_residue(self.write_index() - self.read_index())
+        !Self::has_nonzero_residue(self.write_index() - self.read_index())
     }
 
     pub fn is_full(&self) -> bool {
-        Self::has_nonzero_residue(self.write_index() - self.read_index() + Wrapping(1))
+        !Self::has_nonzero_residue(self.write_index() - self.read_index() + Wrapping(1))
     }
 
     pub fn enqueue(&mut self, desc: Descriptor) -> Result<(), Error> {
@@ -181,6 +181,7 @@ impl<'a> RingBuffer<'a> {
     }
 }
 
+#[derive(Debug)]
 pub enum Error {
     RingIsFull,
     RingIsEmpty,
