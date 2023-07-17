@@ -16,7 +16,7 @@ in
 
   vendorLockfile = callBuildBuildPackage ./vendor-lockfile.nix {};
 
-  crateUtils = callBuildBuildPackage ./crate-utils.nix {};
+  crateUtils = callPackage ./crate-utils.nix {};
 
   toTOMLFile = callBuildBuildPackage ./to-toml-file.nix {};
 
