@@ -18,6 +18,11 @@ let
 in
 
 let
+  # HACK: unify across cross pkgsets
+  callBuildBuildPackage = self.otherSplices.selfBuildBuild.callPackage;
+in
+
+let
   fenixRev = "a9a262cbec1f1c3f771071fd1a246ee05811f5a1";
   fenixSource = fetchTarball "https://github.com/nix-community/fenix/archive/${fenixRev}.tar.gz";
   fenix = import fenixSource {};
@@ -133,7 +138,7 @@ superCallPackage ../rust-utils {} self //
 
   ### upstream tools
 
-  capdl-tool = callPackage ./capdl-tool {};
+  capdl-tool = callBuildBuildPackage ./capdl-tool {};
 
   ### misc tools
 

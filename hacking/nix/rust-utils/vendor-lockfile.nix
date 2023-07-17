@@ -6,11 +6,6 @@
 , buildPackages
 }:
 
-let
-  # HACK unify across cross package sets
-  inherit (buildPackages) runCommand linkFarm;
-in
-
 { lockfileContents ? null
 , lockfile ? null
 , fetchGitSubmodules ? false
