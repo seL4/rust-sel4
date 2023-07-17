@@ -10,11 +10,43 @@ rec {
 
   ensureDot = s: if lib.hasPrefix "." s then s else "./${s}";
 
-  pathBetween = here: there: import (runCommand "path-between.nix" {
-    nativeBuildInputs = [ python3 ];
-  } ''
-    python3 -c 'from os.path import relpath; print("\"{}\"".format(relpath("${there}", "${here}")))' > $out
-  '');
+  simplePathSegs = path:
+    let
+      segs = lib.splitString "/" path;
+    in
+      assert segs != [];
+      assert lib.length segs == 1 || lib.all (seg: seg != []) (lib.tail segs);
+      assert lib.all (seg: seg != "." && seg != "..") segs;
+      segs;
+
+  takeWhile = pred:
+    let
+      f = acc: xs:
+        if xs == []
+        then acc
+        else (
+          let
+            x = lib.head xs;
+            xs' = lib.tail xs;
+          in
+            if pred x then f (acc ++ [x]) xs' else acc
+        );
+    in
+      f [];
+
+  pathBetween = a: b:
+    let
+      aSegs = simplePathSegs a;
+      bSegs = simplePathSegs b;
+    in
+    assert (lib.head aSegs == "") == (lib.head bSegs == "");
+    let
+      commonPrefixLen = lib.length (takeWhile lib.id (lib.zipListsWith (x: y: x == y) aSegs bSegs));
+      aDeviatingSegs = lib.drop commonPrefixLen aSegs;
+      bDeviatingSegs = lib.drop commonPrefixLen bSegs;
+      relSegs = lib.genList (lib.const "..") (lib.length aDeviatingSegs) ++ bDeviatingSegs;
+    in
+      lib.concatStringsSep "/" relSegs;
 
   mkCrate =
     let
