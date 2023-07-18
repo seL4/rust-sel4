@@ -87,7 +87,7 @@ self: with self;
 
   seL4Config =
     let
-      f = seg: builtins.fromJSON (builtins.readFile (symlinkToRegularFile "x.json" "${seL4IncludeDir}/${seg}/gen_config.json"));
+      f = seg: builtins.fromJSON (builtins.readFile (symlinkToRegularFile "${seg}-gen_config.json" "${seL4IncludeDir}/${seg}/gen_config.json"));
     in
       f "kernel" // f "sel4";
 
