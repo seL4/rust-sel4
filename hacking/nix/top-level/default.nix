@@ -19,9 +19,19 @@ self: with self; {
     pkgs.host.ia32.linux
   ]);
 
-  everythingList = lib.flatten [
-    generatedSources.check
+  forCache = lib.flatten [
+    pkgs.host.riscv64.noneWithLibc.gccMultiStdenvGeneric
+    pkgs.build.this.qemuForSeL4
+    pkgs.build.this.cargoManifestGenrationUtils.rustfmtWithTOMLSupport
+    pkgs.build.this.capdl-tool
     pkgs.build.this.vendoredTopLevelLockfile.vendoredSourcesDirectory
+
+    # unecessary
+    generatedSources.check
+  ];
+
+  everythingList = lib.flatten [
+    forCache
 
     (lib.forEach worldsForEverythingInstances (world:
       map (instance: instance.links) world.instances.all
@@ -33,8 +43,6 @@ self: with self; {
     pkgs.host.riscv64.none.this.worlds.default.seL4
     pkgs.host.riscv32.none.this.worlds.default.seL4
     pkgs.host.ia32.none.this.worlds.default.seL4
-
-    pkgs.host.riscv64.noneWithLibc.gccMultiStdenvGeneric
 
     example
     example-rpi4-b-4gb
