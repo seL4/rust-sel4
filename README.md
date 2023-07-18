@@ -120,5 +120,5 @@ Also inside the container at the repository's top-level directory, build and run
 repository's automated tests:
 
 ```
-make run-automated-tests
+make run-tests
 ```
