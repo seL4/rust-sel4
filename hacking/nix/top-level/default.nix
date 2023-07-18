@@ -1,4 +1,10 @@
-self: with self; {
+self: with self;
+
+let
+
+  aggregate = name: drvs: pkgs.build.writeText "aggregate-${name}" (toString (lib.flatten drvs));
+
+in {
 
   generatedSources = {
     inherit (pkgs.build.this.generatedCargoManifests) update check;
@@ -19,7 +25,7 @@ self: with self; {
     pkgs.host.ia32.linux
   ]);
 
-  forCache = lib.flatten [
+  prerequisites = aggregate "prerequisites" [
     pkgs.host.riscv64.noneWithLibc.gccMultiStdenvGeneric
     pkgs.build.this.qemuForSeL4
     pkgs.build.this.cargoManifestGenrationUtils.rustfmtWithTOMLSupport
@@ -30,9 +36,7 @@ self: with self; {
     generatedSources.check
   ];
 
-  everythingList = lib.flatten [
-    forCache
-
+  incremental = aggregate "incremental" [
     (lib.forEach worldsForEverythingInstances (world:
       map (instance: instance.links) world.instances.all
     ))
@@ -48,46 +52,60 @@ self: with self; {
     example-rpi4-b-4gb
   ];
 
-  everythingWithExcessList = lib.flatten [
+  nonIncremental = aggregate "non-incremental" [
+    html
+  ];
+
+  excess = aggregate "excess" [
+  ];
+
+  everythingExceptNonIncremental = aggregate "everything-except-non-incremental" [
+    prerequisites
+    incremental
+  ];
+
+  everything = aggregate "everything" [
+    everythingExceptNonIncremental
+    nonIncremental
+  ];
+
+  everythingWithExcess = aggregate "everything-with-excess" [
     everything
-    html
+    excess
   ];
 
-  everythingElseForCIList = lib.flatten [
-    html
-    example
-    example-rpi4-b-4gb
-  ];
+  fastTests =
+    lib.forEach worldsForEverythingInstances
+      (world: world.instances.allAutomationScripts);
 
-  everything = pkgs.build.writeText "everything" (toString everythingList);
-  everythingWithExcess = pkgs.build.writeText "everything-with-excess" (toString everythingWithExcessList);
-  everythingElseForCI = pkgs.build.writeText "everything-else-for-ci" (toString everythingElseForCIList);
+  slowTests = map (x: x.automate) sel4testInstances;
 
-  fastAutomatedTests =
-    lib.concatLists
-      (lib.forEach worldsForEverythingInstances
-        (world: world.instances.allAutomationScripts));
-
-  slowAutomatedTests = map (x: x.automate) sel4testInstances;
-
-  runAutomatedTests = mkRunAutomatedTests (lib.concatLists [
-    fastAutomatedTests
-    slowAutomatedTests
+  runFastTests = mkRunTests (lib.flatten [
+    fastTests
   ]);
 
-  witnessAutomatedTests = mkWitnessAutomatedTests (lib.concatLists [
-    fastAutomatedTests
-    slowAutomatedTests
+  witnessFastTests = mkWitnessTests (lib.flatten [
+    fastTests
   ]);
 
-  mkRunAutomatedTests = scripts:
+  runTests = mkRunTests (lib.flatten [
+    fastTests
+    slowTests
+  ]);
+
+  witnessTests = mkWitnessTests (lib.flatten [
+    fastTests
+    slowTests
+  ]);
+
+  mkRunTests = scripts:
     with pkgs.build;
     writeScript "run-tests" ''
       #!${runtimeShell}
       set -eu
 
       ${lib.concatStrings (lib.forEach scripts (script: ''
-        echo "<<< running case: ${script.testMeta.name or "unnamed"} >>>"
+        echo "<<< running test: ${script.testMeta.name or "unnamed"} >>>"
         ${script}
       ''))}
 
@@ -96,26 +114,20 @@ self: with self; {
       echo
     '';
 
-  mkWitnessAutomatedTest = script:
-    with pkgs.build;
-    runCommand "witness-${script.testMeta.name or "unnamed"}" {} ''
+  mkWitnessTest = script:
+    pkgs.build.runCommand "witness-${script.testMeta.name or "unnamed"}" {} ''
       ${script}
       touch $out
     '';
 
-  mkWitnessAutomatedTests = scripts:
-    with pkgs.build;
-    writeText "witness-tests" (lib.concatStrings (
-      map mkWitnessAutomatedTest scripts
-    ));
+  mkWitnessTests = scripts:
+    pkgs.build.writeText "witness-tests" (lib.concatStrings (map mkWitnessTest scripts));
 
   docs = import ./docs {
     inherit lib pkgs;
   };
 
   inherit (docs) html;
-
-  # convenience
 
   worlds = lib.fix (self: {
     default = self.aarch64.default;

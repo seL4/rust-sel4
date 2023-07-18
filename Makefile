@@ -46,8 +46,8 @@ check-lockfile:
 fmt:
 	cargo fmt --all
 
-.PHONY: fmt-check
-fmt-check:
+.PHONY: check-fmt
+check-fmt:
 	cargo fmt --all -- --check
 
 .PHONY: check-generic-formatting
@@ -55,7 +55,33 @@ check-generic-formatting:
 	./hacking/scripts/check-generic-formatting.sh
 
 .PHONY: check-source
-check-source: check-generated-sources fmt-check check-generic-formatting
+check-source: check-generated-sources check-fmt check-generic-formatting
+
+try_restore_terminal := tput smam 2> /dev/null || true
+
+.PHONY: run-tests
+run-tests:
+	script=$$($(nix_build) -A runTests --no-out-link) && $$script
+	$(try_restore_terminal)
+
+.PHONY: run-fast-tests
+run-fast-tests:
+	script=$$($(nix_build) -A runFastTests --no-out-link) && $$script
+	$(try_restore_terminal)
+
+.PHONY: witness-tests
+witness-tests:
+	$(nix_build) -A witnessTests --no-out-link
+	$(try_restore_terminal)
+
+.PHONY: witness-fast-tests
+witness-fast-tests:
+	$(nix_build) -A witnessFastTests --no-out-link
+	$(try_restore_terminal)
+
+.PHONY: everything-except-non-incremental
+everything-except-non-incremental:
+	$(nix_build) -A everythingExceptNonIncremental --no-out-link
 
 .PHONY: everything
 everything:
@@ -65,22 +91,6 @@ everything:
 everything-with-excess:
 	$(nix_build) -A everythingWithExcess --no-out-link
 
-.PHONY: everything-else-for-ci
-everything-else-for-ci:
-	$(nix_build) -A everythingElseForCI --no-out-link
-
-try_restore_terminal := tput smam 2> /dev/null || true
-
-.PHONY: run-automated-tests
-run-automated-tests:
-	script=$$($(nix_build) -A runAutomatedTests --no-out-link) && $$script
-	$(try_restore_terminal)
-
-.PHONY: witness-automated-tests
-witness-automated-tests:
-	$(nix_build) -A witnessAutomatedTests --no-out-link
-	$(try_restore_terminal)
-
 .PHONY: example
 example:
 	script=$$($(nix_build) -A $@ --no-out-link) && $$script
@@ -89,17 +99,17 @@ example:
 example-rpi4-b-4gb:
 	$(nix_build) -A $@ -o $(out)/$@
 
-.PHONY: check
-check: check-source
-	$(MAKE) witness-automated-tests
+.PHONY: check-fast
+check-fast: check-source
+	$(MAKE) witness-fast-tests
+	$(MAKE) everything-fast
+
+.PHONY: check-exhaustively
+check-exhaustively: check-source
+	$(MAKE) witness-tests
 	$(MAKE) everything
 
-.PHONY: exhaustive-check
-exhaustive-check: check-source
-	$(MAKE) witness-automated-tests
-	$(MAKE) everything-with-excess
-
-.PHONY:	ci-check
-ci-check: check-source
-	$(MAKE) run-automated-tests
-	$(MAKE) everything-else-for-ci
+.PHONY: check-oneshot
+check-oneshot: check-source
+	$(MAKE) run-tests
+	$(MAKE) everything

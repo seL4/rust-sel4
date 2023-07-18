@@ -4,6 +4,7 @@ on:
   workflow_dispatch:
 jobs:
   check-everything:
+    name: Check everything
     runs-on: ubuntu-latest
     steps:
       - name: Prepare to maximize build space
@@ -23,4 +24,4 @@ jobs:
         with:
           nix_path: nixpkgs=channel:nixos-unstable
       - name: Run checks
-        run: (make ci-check && df -h) || (df -h && false)
+        run: make -C hacking/ci/github-actions check
