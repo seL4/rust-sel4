@@ -5,4 +5,7 @@ none:
 
 .PHONY: check
 check:
-	($(MAKE) -C $(root_dir) check-oneshot && df -h) || (df -h && false)
+	$(MAKE) -C $(root_dir) check-oneshot
+
+	# For debugging and monitoring disk usage
+	# ($(MAKE) -C $(root_dir) check-oneshot && df -h) || (df -h && false)
