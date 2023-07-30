@@ -20,7 +20,7 @@ This work is funded by the [seL4 Foundation](https://sel4.systems/Foundation/hom
 
 ### Rendered rustdoc
 
-[https://coliasgroup.com/rust-seL4-html/](https://coliasgroup.com/rust-seL4-html/)
+[https://coliasgroup.com/rust-seL4/](https://coliasgroup.com/rust-seL4/)
 
 ### Overview of crates
 
