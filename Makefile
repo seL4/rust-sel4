@@ -17,6 +17,9 @@ none:
 clean:
 	rm -rf $(out) target
 
+$(out):
+	mkdir -p $@
+
 rustc_target_spec_dir := support/targets
 
 .PHONY: generate-target-specs
@@ -90,6 +93,17 @@ everything:
 .PHONY: everything-with-excess
 everything-with-excess:
 	$(nix_build) -A everythingWithExcess --no-out-link
+
+.PHONY: html-links
+html-links:
+	$(nix_build) -A html -o $(out)/$@
+
+.PHONY: html
+html: | $(out)
+	src=$$($(nix_build) -A html --no-out-link) && \
+	dst=$(out)/html && \
+	rm -rf $$dst && \
+	cp -rL --no-preserve=owner,mode $$src $$dst
 
 .PHONY: example
 example:
