@@ -37,7 +37,8 @@ assert !(super ? scopeName);
     (callPackage ./python-overrides.nix {})
   ];
 
-  gccMultiStdenvGeneric = overrideCC stdenv (buildPackages.wrapCC (stdenv.cc.cc.override {
+  # HACK: something wrong with multilib for riscv beyond gcc11 in nixpkgs
+  gccMultiStdenvGeneric = overrideCC stdenv (buildPackages.wrapCC (gcc11Stdenv.cc.cc.override {
     enableMultilib = true;
   }));
 
