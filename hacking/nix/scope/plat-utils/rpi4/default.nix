@@ -1,4 +1,4 @@
-{ lib, callPackage
+{ lib, hostPlatform, callPackage
 , runCommand, writeText
 , fetchFromGitHub
 , ubootTools
@@ -19,8 +19,9 @@ let
 
   configTxt = writeText "config.txt" ''
     enable_uart=1
-    arm_64bit=1
+    arm_64bit=${if hostPlatform.is32bit then "0" else "1"}
   '';
+    # for debugging:
     # start_debug=1
     # uart_2ndstage=1
 
@@ -47,6 +48,8 @@ let
       ${uBootEnvTxt}
   '';
 
+  kernelFileName = "kernel${if hostPlatform.is32bit then "7l" else "8"}.img";
+
   mkBootLinks =
     { image ? null
     , extraCommands ? ""
@@ -60,7 +63,7 @@ let
       ln -sf ${configTxt} $out/config.txt
 
       rm $out/kernel*.img
-      ln -s ${uBootBin} $out/kernel8.img
+      ln -s ${uBootBin} $out/${kernelFileName}
 
       ln -s ${uBootEnv} $out/uboot.env
 

@@ -51,8 +51,7 @@ stdenv.mkDerivation rec {
   ] ++ makeTargets;
 
   installPhase = ''
-    mkdir $out
-    cp ${lib.concatStringsSep " " filesToInstall} $out
+    install -D -t $out ${lib.concatStringsSep " " filesToInstall}
   '';
 
   dontStrip = true;
