@@ -32,6 +32,10 @@ in {
     pkgs.build.this.capdl-tool
     pkgs.build.this.vendoredTopLevelLockfile.vendoredSourcesDirectory
 
+    (lib.forEach (with pkgs.host; [ aarch64 aarch32 ]) (arch:
+      arch.none.this.platUtils.rpi4.defaultBootLinks
+    ))
+
     # unecessary
     generatedSources.check
   ];
