@@ -8,12 +8,7 @@ use std::fs;
 use std::path::Path;
 
 use rustc_target::json::ToJson;
-use rustc_target::spec::Cc;
-use rustc_target::spec::LinkerFlavor;
-use rustc_target::spec::Lld;
-use rustc_target::spec::PanicStrategy;
-use rustc_target::spec::Target;
-use rustc_target::spec::TargetTriple;
+use rustc_target::spec::{Cc, CodeModel, LinkerFlavor, Lld, PanicStrategy, Target, TargetTriple};
 
 use clap::{Arg, ArgAction, Command};
 
@@ -60,7 +55,7 @@ impl Config {
                 let options = &mut target.options;
                 options.position_independent_executables = false;
                 options.static_position_independent_executables = false;
-                // options.code_model = None; // TODO
+                options.code_model = Some(CodeModel::Small);
                 target
             }
         };
