@@ -27,10 +27,18 @@ let
       };
     }
     {
-      profile.${profile} = {
-        codegen-units = 1;
-        incremental = false;
-      } // extraProfile;
+      profile.${profile} = crateUtils.clobber [
+        {
+          codegen-units = 1;
+          incremental = false;
+          build-override = {
+            opt-level = 0;
+            debug = false;
+            strip = true;
+          };
+        }
+        extraProfile
+      ];
     }
   ];
 
