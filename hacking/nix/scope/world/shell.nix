@@ -4,6 +4,7 @@
 , defaultRustToolchain
 , defaultRustTargetInfo
 , bareMetalRustTargetInfo
+, libclangPath
 , sources
 , dummyCapDLSpec, serializeCapDLSpec
 , seL4RustEnvVars
@@ -33,7 +34,7 @@ mkShell (seL4RustEnvVars // kernelLoaderConfigEnvVars // capdlEnvVars // {
     "-Z" "build-std-features=compiler-builtins-mem"
   ];
 
-  LIBCLANG_PATH = "${lib.getLib buildPackages.llvmPackages.libclang}/lib";
+  LIBCLANG_PATH = libclangPath;
 
   hardeningDisable = [ "all" ];
 

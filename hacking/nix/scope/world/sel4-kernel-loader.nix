@@ -1,6 +1,7 @@
 { lib, buildPackages, writeText
 , buildCrateInLayersHere, buildSysroot, crateUtils
 , crates, bareMetalRustTargetInfo
+, libclangPath
 , seL4RustEnvVars, seL4ForBoot, seL4ForUserspace
 , kernelLoaderConfig
 }:
@@ -53,7 +54,7 @@ buildCrateInLayersHere {
       ];
     };
     modifyDerivation = drv: drv.overrideAttrs (self: super: {
-      LIBCLANG_PATH = "${lib.getLib buildPackages.llvmPackages.libclang}/lib";
+      LIBCLANG_PATH = libclangPath;
 
       dontStrip = true;
       dontPatchELF = true;

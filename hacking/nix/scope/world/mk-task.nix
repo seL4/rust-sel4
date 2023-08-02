@@ -2,6 +2,7 @@
 , buildCrateInLayersHere, buildSysroot, crateUtils
 , crates
 , defaultRustTargetInfo
+, libclangPath
 , seL4RustEnvVars
 } @ scopeArgs:
 
@@ -49,7 +50,7 @@ let
       # TODO
       # hardeningDisable = [ "all" ];
 
-      LIBCLANG_PATH = "${lib.getLib buildPackages.llvmPackages.libclang}/lib";
+      LIBCLANG_PATH = libclangPath;
 
       dontStrip = true;
       dontPatchELF = true;

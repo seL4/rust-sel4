@@ -5,6 +5,7 @@
 , crateUtils
 , defaultRustToolchain
 , defaultRustTargetInfo
+, libclangPath
 , vendorLockfile, pruneLockfile
 , crates
 , buildSysroot
@@ -145,7 +146,7 @@ let
         nativeBuildInputs = [ rsync rustToolchain ];
 
         RUST_TARGET_PATH = rustTargetPath;
-        LIBCLANG_PATH = "${lib.getLib buildPackages.llvmPackages.libclang}/lib";
+        LIBCLANG_PATH = libclangPath;
       } // seL4RustEnvVars)  ''
         target_dir=$(pwd)/target
 

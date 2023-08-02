@@ -1,4 +1,6 @@
-{ lib, stdenv, buildPlatform, hostPlatform, targetPlatform
+{ lib, stdenv
+, buildPlatform, hostPlatform, targetPlatform
+, pkgsBuildBuild
 , callPackage
 , linkFarm
 , overrideCC, libcCross
@@ -135,6 +137,9 @@ superCallPackage ../rust-utils {} self //
   topLevelLockfile = sources.srcRoot + "/Cargo.lock";
 
   vendoredTopLevelLockfile = vendorLockfile { lockfile = topLevelLockfile; };
+
+  # HACK: reduce closure size, llvm now depends on targetPackage
+  libclangPath = "${lib.getLib pkgsBuildBuild.llvmPackages.libclang}/lib";
 
   ### upstream tools
 

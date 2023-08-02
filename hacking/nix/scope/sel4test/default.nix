@@ -12,6 +12,7 @@
 , crateUtils
 , defaultRustToolchain
 , bareMetalRustTargetInfo
+, libclangPath
 , vendoredTopLevelLockfile
 , buildSysroot
 , crates
@@ -135,7 +136,7 @@ let
       sha256 = "sha256-JspN1A/w5XIV+XCj5/oj7NABsKXVdr+UZOTJWvfJPUY=";
     };
 
-    LIBCLANG_PATH = "${lib.getLib buildPackages.llvmPackages.libclang}/lib";
+    LIBCLANG_PATH = libclangPath;
 
     depsBuildBuild = lib.optionals (buildPlatform != hostPlatform) [
       buildPackages.stdenv.cc
