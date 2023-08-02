@@ -30,9 +30,9 @@ build:
 initialize-volume: build
 	if [ -z "$$(docker volume ls -q -f "name=^$(nix_root_volume_name)$$")" ]; then \
 		docker volume create --label $(label) $(nix_root_volume_name) && \
-		docker run --privileged --rm --label $(label) -w /home/x \
+		docker run --privileged --rm --label $(label) -w /tmp \
 			$(statefulness_docker_run_args) \
-			$(image_tag) flock /nix/.installed.lock bash /setup.sh; \
+			$(image_tag) flock /nix/.installed.lock bash setup.sh; \
 	fi
 
 .PHONY: run
@@ -48,7 +48,7 @@ exec:
 
 .PHONY: show-nix-root
 show-nix-root:
-	docker inspect rust-seL4-nix-root --format='{{.Mountpoint}}'
+	docker inspect $(nix_root_volume_name) --format='{{.Mountpoint}}'
 
 .PHONY: rm-container
 rm-container:

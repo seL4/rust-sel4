@@ -1,3 +1,14 @@
+export USER=$(whoami)
+
+nix_profile_src=$HOME/.nix-profile
+nix_profile_dst=$XDG_STATE_HOME/nix/profiles/profile
+
+if [ ! -L "$nix_profile_src" ]; then
+    ln -s $nix_profile_dst $nix_profile_src
+fi
+
+. "$nix_profile_src/etc/profile.d/nix.sh"
+
 for f in ~/.bash_completion.d/*; do
   . $f
 done

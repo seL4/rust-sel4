@@ -1,8 +1,7 @@
 set -e
 
 if [ ! -f /nix/.installed ]; then
-    echo "Installing Nix..."
-    bash /install-nix.sh
+    curl -L https://nixos.org/nix/install | \
+        sh -s -- --yes --no-channel-add --no-modify-profile
     touch /nix/.installed
-    echo "Done"
 fi
