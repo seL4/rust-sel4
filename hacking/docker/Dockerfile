@@ -29,10 +29,6 @@ RUN echo ". ~/.bashrc_extra" >> .bashrc
 
 WORKDIR /tmp
 
-# For persistent Nix git cache and profile state
-ENV XDG_CACHE_HOME=/nix/cache
-ENV XDG_STATE_HOME=/nix/state
-
 ENV NIX_BUILD_SHELL=bash
 
 ARG STATEFUL
