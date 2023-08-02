@@ -85,3 +85,9 @@ runCommand "sysroot" {
   mkdir -p $d
   mv target/${rustTargetInfo.name}/${if release then "release" else "debug"}/deps/* $d
 ''
+
+# TODO
+# rel=lib/rustlib/${buildPlatform.config}/bin
+# d=$out/$rel
+# mkdir -p $d
+# ln -s ${rustToolchain}/$rel/* $d

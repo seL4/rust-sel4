@@ -28,7 +28,9 @@ mkInstance {
         nativeBuildInputs = super.nativeBuildInputs ++ [
           cmake
         ];
+        # NIX_DEBUG = 2;
       });
+      # extraCargoFlags = [ "--verbose" ];
       modifyConfig = old: lib.recursiveUpdate old {
         target.${defaultRustTargetInfo.name} = {
           rustflags = (old.target.${defaultRustTargetInfo.name}.rustflags or []) ++ [
@@ -36,10 +38,21 @@ mkInstance {
             "-C" "link-arg=-L${libcDir}/lib"
 
             # TODO
+            # NOTE: won't work because cross gcc always uses hard-coded --with-ld
+
             # "-C" "linker-flavor=gcc"
             # "-C" "link-arg=-nostartfiles"
             # "-C" "default-linker-libraries=on"
+
             # "-Z" "gcc-ld=lld"
+            # (or)
+            # "-Z" "unstable-options"
+            # "-C" "link-self-contained=+linker"
+            # (or)
+            # "-Z" "unstable-options"
+            # "-C" "linker-flavor=gnu-lld-cc"
+
+            # "-Z" "verbose"
           ];
         };
       };
