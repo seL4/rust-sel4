@@ -83,7 +83,7 @@ impl<'a> Impls<'a> {
         let mut helper = Helper::new(self);
         match_expr
             .arms
-            .drain_filter(|arm| !helper.process_attrs(&mut arm.attrs));
+            .retain_mut(|arm| helper.process_attrs(&mut arm.attrs));
         helper.first_err_or(match_expr)
     }
 }
@@ -131,7 +131,7 @@ impl<'a> Helper<'a> {
     fn process_attrs(&mut self, attrs: &mut Vec<syn::Attribute>) -> bool /* keep */ {
         let synthetic_attr = self.impls.synthetic_attr();
         let keep = attrs
-            .drain_filter(|attr| attr.path.is_ident(&format_ident!("{}", synthetic_attr)))
+            .extract_if(|attr| attr.path.is_ident(&format_ident!("{}", synthetic_attr)))
             .all(|attr| match attr.parse_args::<syn::NestedMeta>() {
                 Ok(expr) => {
                     let r = self.impls.eval_nested_meta(&expr);

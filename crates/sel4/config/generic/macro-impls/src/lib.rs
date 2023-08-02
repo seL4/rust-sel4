@@ -1,4 +1,4 @@
-#![feature(drain_filter)]
+#![feature(extract_if)]
 
 mod attr_macros;
 mod cfg_if;

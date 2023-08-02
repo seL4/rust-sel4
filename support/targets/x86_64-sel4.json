@@ -12,6 +12,7 @@
   "linker-flavor": "ld.lld",
   "llvm-target": "x86_64-unknown-none-elf",
   "max-atomic-width": 64,
+  "plt-by-default": false,
   "relro-level": "full",
   "stack-probes": {
     "kind": "inline-or-call",

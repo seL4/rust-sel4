@@ -1,6 +1,6 @@
 use alloc::rc::Rc;
 use core::cell::RefCell;
-use core::task::Poll;
+use core::task::{ready, Poll};
 
 use async_unsync::semaphore::Semaphore;
 use futures::prelude::*;
@@ -70,11 +70,7 @@ impl BlockIO<BLOCK_SIZE> for CpiofsBlockIOImpl {
         self.inner.borrow_mut().request_statuses.add(token).unwrap();
         future::poll_fn(|cx| {
             let mut inner = self.inner.borrow_mut();
-            inner
-                .request_statuses
-                .poll(&token, cx.waker())
-                .unwrap()
-                .ready()?;
+            ready!(inner.request_statuses.poll(&token, cx.waker()).unwrap());
             unsafe {
                 inner
                     .driver

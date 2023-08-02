@@ -4,7 +4,6 @@
 #![feature(int_roundings)]
 #![feature(never_type)]
 #![feature(pattern)]
-#![feature(poll_ready)]
 #![feature(ptr_metadata)]
 #![feature(slice_ptr_get)]
 #![feature(strict_provenance)]
