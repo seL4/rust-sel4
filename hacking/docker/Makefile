@@ -2,19 +2,18 @@ STATEFUL ?= $(if $(findstring Linux,$(shell uname -s)),0,1)
 
 work_root := ../..
 
-label := rust-sel4
-image_repository := $(label)
-image_tag := $(image_repository)
-container_name := $(label)
-nix_root_volume_name := $(label)-nix-root
-dockerfile := Dockerfile
+id := rust-sel4
+label := $(id)
+image_tag := $(id)
+container_name := $(id)
+volume_name := $(id)-nix-root
 
 uid := $(shell id -u)
 gid := $(shell id -g)
 
 ifneq ($(STATEFUL),1)
 	statefulness_run_prerequisites := initialize-volume
-	statefulness_docker_run_args := --mount type=volume,src=$(nix_root_volume_name),dst=/nix
+	statefulness_docker_run_args := --mount type=volume,src=$(volume_name),dst=/nix
 endif
 
 .PHONY: none
@@ -24,12 +23,12 @@ none:
 build:
 	docker build \
 		--build-arg UID=$(uid) --build-arg GID=$(gid) --build-arg STATEFUL=$(STATEFUL) \
-		--label $(label) -t $(image_tag) -f $(dockerfile) .
+		--label $(label) -t $(image_tag) .
 
 .PHONY: initialize-volume
 initialize-volume: build
-	if [ -z "$$(docker volume ls -q -f "name=^$(nix_root_volume_name)$$")" ]; then \
-		docker volume create --label $(label) $(nix_root_volume_name) && \
+	if [ -z "$$(docker volume ls -q -f "name=^$(volume_name)$$")" ]; then \
+		docker volume create --label $(label) $(volume_name) && \
 		docker run --privileged --rm --label $(label) -w /tmp \
 			$(statefulness_docker_run_args) \
 			$(image_tag) flock /nix/.installed.lock bash setup.sh; \
@@ -48,7 +47,7 @@ exec:
 
 .PHONY: show-nix-root
 show-nix-root:
-	docker inspect $(nix_root_volume_name) --format='{{.Mountpoint}}'
+	docker inspect $(volume_name) --format='{{.Mountpoint}}'
 
 .PHONY: rm-container
 rm-container:
@@ -58,6 +57,6 @@ rm-container:
 
 .PHONY: rm-volume
 rm-volume:
-	for volume in $$(docker volume ls -q -f "name=^$(nix_root_volume_name)$$"); do \
+	for volume in $$(docker volume ls -q -f "name=^$(volume_name)$$"); do \
 		docker volume rm $$volume; \
 	done
