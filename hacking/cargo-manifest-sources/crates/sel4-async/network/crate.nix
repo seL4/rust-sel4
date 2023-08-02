@@ -11,6 +11,8 @@ mk {
         "alloc"
       ];
     };
-    smoltcp = smoltcpWith [];
+    smoltcp = smoltcpWith [
+      # "verbose"
+    ];
   };
 }

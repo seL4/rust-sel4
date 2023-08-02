@@ -3,6 +3,7 @@
 
 use core::ffi::{c_char, CStr};
 
+use sel4_newlib as _;
 use sel4_root_task::{debug_println, root_task};
 
 extern "C" {

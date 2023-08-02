@@ -1,0 +1,24 @@
+[package]
+name = "sel4-newlib"
+version = "0.1.0"
+authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
+edition = "2021"
+license = "BSD-2-Clause"
+
+[features]
+__trunctfdf2 = []
+_exit = []
+_sbrk = []
+_write = []
+all-symbols = ["_exit", "_sbrk", "_write", "__trunctfdf2"]
+default = ["detect-libc"]
+detect-libc = []
+nosys = []
+
+[dependencies]
+log = "0.4.17"
+sel4-immediate-sync-once-cell = { path = "../sel4-immediate-sync-once-cell" }
+sel4-panicking-env = { path = "../sel4-panicking/env", optional = true }
+
+[build-dependencies]
+cc = "1.0.82"

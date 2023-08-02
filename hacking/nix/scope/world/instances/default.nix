@@ -152,7 +152,7 @@ in rec {
                 })));
 
       c = maybe (haveFullRuntime && hostPlatform.isAarch64) (callPackage ./c.nix {
-        # inherit canSimulate;
+        inherit canSimulate;
       });
     };
 

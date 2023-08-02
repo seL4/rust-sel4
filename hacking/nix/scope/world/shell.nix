@@ -10,6 +10,12 @@
 , seL4RustEnvVars
 , worldConfig
 , seL4ForBoot
+, crateUtils
+
+, hostPlatform
+, cmake
+, perl
+, python3Packages
 }:
 
 let
@@ -22,6 +28,7 @@ let
     CAPDL_FILL_DIR = dummyCapDLSpec.passthru.fill;
   };
 
+  libcDir = "${stdenv.cc.libc}/${hostPlatform.config}";
 in
 mkShell (seL4RustEnvVars // kernelLoaderConfigEnvVars // capdlEnvVars // {
   # TODO
@@ -38,8 +45,14 @@ mkShell (seL4RustEnvVars // kernelLoaderConfigEnvVars // capdlEnvVars // {
 
   hardeningDisable = [ "all" ];
 
+  "BINDGEN_EXTRA_CLANG_ARGS_${defaultRustTargetInfo.name}" = [ "-I${libcDir}/include" ];
+
   nativeBuildInputs = [
     defaultRustToolchain
+    cmake
+    perl
+    python3Packages.jsonschema
+    python3Packages.jinja2
   ];
 
   depsBuildBuild = [

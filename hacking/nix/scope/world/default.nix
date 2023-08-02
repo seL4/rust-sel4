@@ -3,6 +3,7 @@
 , runCommand, runCommandCC
 , jq
 , symlinkToRegularFile
+, crateUtils
 , mkSeL4
 , mkSeL4CorePlatform
 }:
@@ -74,6 +75,10 @@ self: with self;
     else {
       SEL4_PREFIX = seL4ForUserspace;
     };
+
+  seL4Modifications = crateUtils.elaborateModifications {
+    modifyDerivation = drv: drv.overrideAttrs (self: super: seL4RustEnvVars);
+  };
 
   kernelBinary = assert !worldConfig.isCorePlatform; "${seL4ForBoot}/bin/kernel.elf";
 

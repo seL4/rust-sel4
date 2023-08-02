@@ -6,8 +6,9 @@ edition = "2021"
 license = "BSD-2-Clause"
 
 [dependencies]
-mbedtls = { version = "0.9.1", default-features = false, features = ["no_std_deps"] }
 sel4 = { path = "../../../../sel4" }
+sel4-async-network-mbedtls = { path = "../../../../sel4-async/network/mbedtls" }
+sel4-newlib = { path = "../../../../sel4-newlib" }
 sel4-root-task = { path = "../../../../sel4-root-task" }
 
 [build-dependencies]

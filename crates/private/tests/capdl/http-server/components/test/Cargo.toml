@@ -34,7 +34,7 @@ path = "../../../../../../sel4-externally-shared"
 features = ["unstable"]
 
 [dependencies.smoltcp]
-version = "0.9.1"
+version = "0.10.0"
 default-features = false
 features = [
     "alloc",

@@ -44,6 +44,9 @@ let
 
   externalCratePathAttrs = {
     # "virtio-drivers" = "tmp/virtio-drivers";
+    # "mbedtls" = "tmp/rust-mbedtls/mbedtls";
+    # "mbedtls-sys-auto" = "tmp/rust-mbedtls/mbedtls-sys";
+    # "mbedtls-platform-support" = "tmp/rust-mbedtls/mbedtls-platform-support";
   };
 
   cratePathAttrs = localCratePathAttrs // externalCratePathAttrs;
@@ -87,13 +90,33 @@ let
         serde = "1.0.147";
         serde_json = "1.0.87";
         serde_yaml = "0.9.14";
-        smoltcp = "0.9.1";
+        smoltcp = "0.10.0";
         syn = "1.0.107";
         synstructure = "0.12.6";
         tock-registers = "0.8.1";
         unwinding = "0.1.6";
         zerocopy = "0.6.1";
       };
+
+      mbedtlsSource = {
+        git = "https://github.com/nspin/rust-mbedtls";
+        tag = "keep/b106b115554c38559f0451a00be5de23";
+      };
+
+      mbedtlsWith = features: (mbedtlsSource // {
+        default-features = false;
+        features = [ "no_std_deps" ] ++ features;
+      });
+
+      mbedtlsSysAutoWith = features: (mbedtlsSource // {
+        default-features = false;
+        inherit features;
+      });
+
+      mbedtlsPlatformSupportWith = features: (mbedtlsSource // {
+        default-features = false;
+        inherit features;
+      });
 
       serdeWith = features: {
         version = versions.serde;

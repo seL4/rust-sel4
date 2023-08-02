@@ -37,6 +37,25 @@ let
         "assets"
       ];
     };
+    tests-capdl-http-server-components-test-server-core = {
+      resolveLinks = true;
+      extraPaths = [
+        "support"
+      ];
+    };
+    # mbedtls-sys-auto = {
+    #   extraPaths = [
+    #     "build"
+    #     "vendor"
+    #   ];
+    # };
+    # mbedtls = {
+    #   extraPaths = [
+    #     "benches"
+    #     "examples"
+    #     "tests"
+    #   ];
+    # };
   };
 
   crates = lib.listToAttrs (lib.forEach workspaceMemberPaths (cratePath: rec {

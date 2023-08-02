@@ -4,7 +4,7 @@
 , mkTask, crates
 , serializeCapDLSpec
 , crateUtils
-, seL4RustEnvVars
+, seL4Modifications
 , seL4RustTargetInfoWithConfig
 }:
 
@@ -13,10 +13,6 @@
 let
   json = serializeCapDLSpec {
     inherit spec;
-  };
-
-  seL4Modifications = crateUtils.elaborateModifications {
-    modifyDerivation = drv: drv.overrideAttrs (self: super: seL4RustEnvVars);
   };
 
 in mkTask {

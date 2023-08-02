@@ -1,15 +1,17 @@
-{ lib, hostPlatform, buildPackages
+{ lib, stdenv, hostPlatform, buildPackages
 , runCommand, writeScript
 , fetchgit
 , cpio
+, cmake, perl, python3Packages
 
 , crates
 , crateUtils
 , sources
 
-, seL4RustEnvVars
+, seL4Modifications
 , seL4Config
 , worldConfig
+, defaultRustTargetInfo
 
 , mkInstance
 , mkCapDLRootTask
@@ -34,6 +36,8 @@ let
       && find . -print -depth \
       | cpio -o -H newc > $out
   '';
+
+  libcDir = "${stdenv.cc.libc}/${hostPlatform.config}";
 in
   lib.fix (self: mkInstance {
     rootTask = mkCapDLRootTask rec {
@@ -55,11 +59,21 @@ in
               crates = [
                 "sel4-simple-task-runtime"
               ];
-              modifications = {
-                modifyDerivation = drv: drv.overrideAttrs (self: super: seL4RustEnvVars);
-              };
+              modifications = seL4Modifications;
             }
           ];
+          commonModifications = {
+            modifyDerivation = drv: drv.overrideAttrs (self: super: {
+              "BINDGEN_EXTRA_CLANG_ARGS_${defaultRustTargetInfo.name}" = [ "-I${libcDir}/include" ];
+              nativeBuildInputs = super.nativeBuildInputs ++ [
+                cmake
+                perl
+                python3Packages.jsonschema
+                python3Packages.jinja2
+              ];
+            });
+          };
+          lastLayerModifications = seL4Modifications;
         };
       };
     };

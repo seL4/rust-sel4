@@ -14,6 +14,8 @@ rec {
 
   clobber = lib.fold lib.recursiveUpdate {};
 
+  toUpperWithUnderscores = s: lib.replaceStrings ["-"] ["_"] (lib.toUpper s);
+
   ###
 
   dummyLibInSrc = dummyInSrc "lib.rs" dummyLib;
@@ -292,7 +294,11 @@ rec {
       realPatchedManifest = manifestWithPatchedPathDependencies;
 
       dummyPatchedManifest = clobber [
-        manifestWithPatchedPathDependencies
+        (removeAttrs manifestWithPatchedPathDependencies [
+          "test"
+          "bench"
+          "example"
+        ])
         (lib.optionalAttrs hasAnyBuildScript {
           package.build = dummyMainWithStdInSrc;
         })

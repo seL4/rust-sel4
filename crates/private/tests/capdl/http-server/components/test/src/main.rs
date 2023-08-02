@@ -39,8 +39,8 @@ use reactor::Reactor;
 
 // const LOG_LEVEL: LevelFilter = LevelFilter::Trace;
 // const LOG_LEVEL: LevelFilter = LevelFilter::Debug;
-// const LOG_LEVEL: LevelFilter = LevelFilter::Info;
-const LOG_LEVEL: LevelFilter = LevelFilter::Warn;
+const LOG_LEVEL: LevelFilter = LevelFilter::Info;
+// const LOG_LEVEL: LevelFilter = LevelFilter::Warn;
 
 static LOGGER: Logger = LoggerBuilder::const_default()
     .level_filter(LOG_LEVEL)

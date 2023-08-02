@@ -77,6 +77,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "annotate-snippets"
+version = "0.9.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c3b9d411ecbaf79885c6df4d75fff75858d5995ff25385657a28af47e82f9c36"
+dependencies = [
+ "unicode-width",
+ "yansi-term",
+]
+
+[[package]]
 name = "anstream"
 version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -281,6 +291,7 @@ version = "0.65.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cfdf7b466f9a4903edc73f95d6d2bcd5baf8ae620638762244d3f60143643cc5"
 dependencies = [
+ "annotate-snippets",
  "bitflags 1.3.2",
  "cexpr",
  "clang-sys",
@@ -465,9 +476,9 @@ dependencies = [
 
 [[package]]
 name = "cc"
-version = "1.0.80"
+version = "1.0.82"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "51f1226cd9da55587234753d1245dd5b132343ea240f26b6a9003d68706141ba"
+checksum = "305fe645edc1442a0fa8b6726ba61d422798d37a52e12eaecf4b022ebbb88f01"
 dependencies = [
  "jobserver",
  "libc",
@@ -1528,9 +1539,8 @@ checksum = "0ca88d725a0a943b096803bd34e73a4437208b6077654cc4ecb2947a5f91618d"
 
 [[package]]
 name = "mbedtls"
-version = "0.9.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "77f2c88dbe2fcc6fddc0dc33eb2694471fef46f48b2081996335adb2f8085c53"
+version = "0.11.0"
+source = "git+https://github.com/nspin/rust-mbedtls?tag=keep/b106b115554c38559f0451a00be5de23#b106b115554c38559f0451a00be5de234c1169d8"
 dependencies = [
  "bitflags 1.3.2",
  "byteorder",
@@ -1545,22 +1555,22 @@ dependencies = [
 
 [[package]]
 name = "mbedtls-platform-support"
-version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "85be113c8c2dc54cc6a5fba20130c7128f78dcb3ed0bb6797427333fa8cdb54d"
+version = "0.3.0"
+source = "git+https://github.com/nspin/rust-mbedtls?tag=keep/b106b115554c38559f0451a00be5de23#b106b115554c38559f0451a00be5de234c1169d8"
 dependencies = [
  "cc",
  "cfg-if",
  "chrono",
  "mbedtls-sys-auto",
- "spin 0.4.10",
+ "once_cell",
+ "spin 0.5.2",
+ "zeroize",
 ]
 
 [[package]]
 name = "mbedtls-sys-auto"
-version = "2.28.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4fe62c26febfff31e5ece6c342e20b1b356fbbf5a5c112f781bee30ae6381499"
+version = "3.5.0-alpha.3+0b3de6f"
+source = "git+https://github.com/nspin/rust-mbedtls?tag=keep/b106b115554c38559f0451a00be5de23#b106b115554c38559f0451a00be5de234c1169d8"
 dependencies = [
  "bindgen 0.65.1",
  "cc",
@@ -2336,6 +2346,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "sel4-async-network-mbedtls"
+version = "0.1.0"
+dependencies = [
+ "futures",
+ "log",
+ "mbedtls",
+ "rand",
+ "sel4-async-network",
+]
+
+[[package]]
 name = "sel4-async-request-statuses"
 version = "0.1.0"
 
@@ -2717,6 +2738,16 @@ name = "sel4-logging"
 version = "0.1.0"
 dependencies = [
  "log",
+]
+
+[[package]]
+name = "sel4-newlib"
+version = "0.1.0"
+dependencies = [
+ "cc",
+ "log",
+ "sel4-immediate-sync-once-cell",
+ "sel4-panicking-env",
 ]
 
 [[package]]
@@ -3108,9 +3139,9 @@ checksum = "62bb4feee49fdd9f707ef802e22365a35de4b7b299de4763d44bfea899442ff9"
 
 [[package]]
 name = "smoltcp"
-version = "0.9.1"
+version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7e9786ac45091b96f946693e05bfa4d8ca93e2d3341237d97a380107a6b38dea"
+checksum = "8d2e3a36ac8fea7b94e666dfa3871063d6e0a5c9d5d4fec9a1a6b7b6760f0229"
 dependencies = [
  "bitflags 1.3.2",
  "byteorder",
@@ -3130,12 +3161,6 @@ dependencies = [
  "libc",
  "winapi",
 ]
-
-[[package]]
-name = "spin"
-version = "0.4.10"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ceac490aa12c567115b40b7b7fceca03a6c9d53d5defea066123debc83c5dc1f"
 
 [[package]]
 name = "spin"
@@ -3318,7 +3343,12 @@ dependencies = [
  "httparse",
  "log",
  "sel4-async-network",
+ "sel4-async-network-mbedtls",
  "sel4-async-single-threaded-executor",
+ "sel4-async-timers",
+ "sel4-newlib",
+ "sel4-panicking-env",
+ "smoltcp",
  "tests-capdl-http-server-components-test-cpiofs",
 ]
 
@@ -3370,8 +3400,9 @@ version = "0.1.0"
 dependencies = [
  "cc",
  "glob",
- "mbedtls",
  "sel4",
+ "sel4-async-network-mbedtls",
+ "sel4-newlib",
  "sel4-root-task",
 ]
 
@@ -4007,6 +4038,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d7d8a75eaf6557bb84a65ace8609883db44a29951042ada9b393151532e41fcb"
 dependencies = [
  "xml-rs",
+]
+
+[[package]]
+name = "yansi-term"
+version = "0.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fe5c30ade05e61656247b2e334a031dfd0cc466fadef865bdcdea8d537951bf1"
+dependencies = [
+ "winapi",
 ]
 
 [[package]]

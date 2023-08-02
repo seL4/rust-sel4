@@ -2,15 +2,6 @@
 
 mk {
   package.name = "tests-root-task-c";
-  dependencies = {
-    mbedtls = {
-      version = "0.9.1";
-      # git = "https://github.com/fortanix/rust-mbedtls";
-      # rev = "07e2cf171b538b188501c1faa9dfdc2b92299ed2";
-      default-features = false;
-      features = [ "no_std_deps" ];
-    };
-  };
   build-dependencies = {
     cc = "1.0.76";
     glob = "0.3.0";
@@ -18,6 +9,8 @@ mk {
   nix.local.dependencies = with localCrates; [
     sel4
     sel4-root-task
+    sel4-async-network-mbedtls
+    sel4-newlib
   ];
   nix.meta.labels = [ "leaf" ];
   nix.meta.requirements = [ "sel4" ];

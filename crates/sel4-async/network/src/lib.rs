@@ -4,6 +4,7 @@ extern crate alloc;
 
 use alloc::rc::Rc;
 use alloc::vec;
+use alloc::vec::Vec;
 use core::cell::RefCell;
 use core::marker::PhantomData;
 use core::task::Poll;
@@ -13,9 +14,9 @@ use log::info;
 use smoltcp::{
     iface::{Config, Context, Interface, SocketHandle, SocketSet},
     phy::Device,
-    socket::{dhcpv4, tcp, AnySocket},
+    socket::{dhcpv4, dns, tcp, AnySocket},
     time::{Duration, Instant},
-    wire::{IpCidr, Ipv4Address, Ipv4Cidr},
+    wire::{DnsQueryType, IpAddress, IpCidr, IpEndpoint, IpListenEndpoint, Ipv4Address, Ipv4Cidr},
 };
 
 pub(crate) const DEFAULT_KEEP_ALIVE_INTERVAL: u64 = 75000;
@@ -29,9 +30,16 @@ pub struct SharedNetwork {
 pub struct SharedNetworkInner {
     iface: Interface,
     socket_set: SocketSet<'static>,
-    // TODO add static alternative
+    dns_socket_handle: SocketHandle,
     dhcp_socket_handle: SocketHandle,
-    // TODO add list of DNS servers
+    dhcp_overrides: DhcpOverrides,
+}
+
+#[derive(Default)]
+pub struct DhcpOverrides {
+    pub address: Option<Ipv4Cidr>,
+    pub router: Option<Option<Ipv4Address>>,
+    pub dns_servers: Option<Vec<Ipv4Address>>,
 }
 
 pub type TcpSocket = Socket<tcp::Socket<'static>>;
@@ -44,23 +52,44 @@ pub struct Socket<T> {
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum TcpSocketError {
-    InvalidState(tcp::State),
+    InvalidState(tcp::State), // TODO just use InvalidState variants of below errors?
     RecvError(tcp::RecvError),
     SendError(tcp::SendError),
+    ConnectError(tcp::ConnectError),
+}
+
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub enum DnsError {
+    StartQueryError(dns::StartQueryError),
+    GetQueryResultError(dns::GetQueryResultError),
 }
 
 impl SharedNetwork {
-    pub fn new<D: Device + ?Sized>(config: Config, device: &mut D) -> Self {
-        let iface = Interface::new(config, device);
+    pub fn new<D: Device + ?Sized>(
+        config: Config,
+        dhcp_overrides: DhcpOverrides,
+        device: &mut D,
+        instant: Instant,
+    ) -> Self {
+        let iface = Interface::new(config, device, instant);
         let mut socket_set = SocketSet::new(vec![]);
+        let dns_socket = dns::Socket::new(&[], vec![]);
+        let dns_socket_handle = socket_set.add(dns_socket);
         let dhcp_socket = dhcpv4::Socket::new();
         let dhcp_socket_handle = socket_set.add(dhcp_socket);
+
+        let mut this = SharedNetworkInner {
+            iface,
+            socket_set,
+            dns_socket_handle,
+            dhcp_socket_handle,
+            dhcp_overrides,
+        };
+
+        this.apply_dhcp_overrides();
+
         Self {
-            inner: Rc::new(RefCell::new(SharedNetworkInner {
-                iface,
-                socket_set,
-                dhcp_socket_handle,
-            })),
+            inner: Rc::new(RefCell::new(this)),
         }
     }
 
@@ -93,6 +122,38 @@ impl SharedNetwork {
             _phantom: PhantomData,
         }
     }
+
+    pub async fn dns_query(
+        &self,
+        name: &str,
+        query_type: DnsQueryType,
+    ) -> Result<Vec<IpAddress>, DnsError> {
+        let query_handle = {
+            let inner = &mut *self.inner.borrow_mut();
+            inner
+                .socket_set
+                .get_mut::<dns::Socket>(inner.dns_socket_handle)
+                .start_query(inner.iface.context(), name, query_type)
+                .map_err(DnsError::StartQueryError)?
+        };
+        future::poll_fn(|cx| {
+            let inner = &mut *self.inner.borrow_mut();
+            let socket = inner
+                .socket_set
+                .get_mut::<dns::Socket>(inner.dns_socket_handle);
+            match socket.get_query_result(query_handle) {
+                Err(dns::GetQueryResultError::Pending) => {
+                    socket.register_query_waker(query_handle, cx.waker());
+                    Poll::Pending
+                }
+                r => Poll::Ready(
+                    r.map(|heapless_vec| heapless_vec.to_vec())
+                        .map_err(DnsError::GetQueryResultError),
+                ),
+            }
+        })
+        .await
+    }
 }
 
 impl<T: AnySocket<'static>> Socket<T> {
@@ -117,6 +178,40 @@ impl<T: AnySocket<'static>> Socket<T> {
 }
 
 impl Socket<tcp::Socket<'static>> {
+    pub async fn connect<T, U>(
+        &mut self,
+        remote_endpoint: T,
+        local_endpoint: U,
+    ) -> Result<(), TcpSocketError>
+    where
+        T: Into<IpEndpoint>,
+        U: Into<IpListenEndpoint>,
+    {
+        self.with_and_context_mut(|cx, socket| socket.connect(cx, remote_endpoint, local_endpoint))
+            .map_err(TcpSocketError::ConnectError)?;
+
+        future::poll_fn(|cx| {
+            self.with_mut(|socket| {
+                let state = socket.state();
+                match state {
+                    tcp::State::Closed | tcp::State::TimeWait => {
+                        Poll::Ready(Err(TcpSocketError::InvalidState(state)))
+                    }
+                    tcp::State::Listen => {
+                        // TODO handle differently
+                        Poll::Ready(Err(TcpSocketError::InvalidState(state)))
+                    }
+                    tcp::State::SynSent | tcp::State::SynReceived => {
+                        socket.register_send_waker(cx.waker());
+                        Poll::Pending
+                    }
+                    _ => Poll::Ready(Ok(())),
+                }
+            })
+        })
+        .await
+    }
+
     pub async fn accept_with_keep_alive(
         &mut self,
         port: u16,
@@ -175,37 +270,40 @@ impl Socket<tcp::Socket<'static>> {
 
     pub async fn recv(&mut self, buffer: &mut [u8]) -> Result<usize, TcpSocketError> {
         future::poll_fn(|cx| {
-            self.with_mut(|socket| {
-                if socket.can_recv() {
-                    Poll::Ready(
-                        socket
-                            .recv_slice(buffer)
-                            .map_err(TcpSocketError::RecvError)
-                            .map(|n| {
-                                assert!(n > 0);
-                                n
-                            }),
-                    )
-                } else {
-                    let state = socket.state();
-                    match state {
-                        tcp::State::FinWait1
-                        | tcp::State::FinWait2
-                        | tcp::State::Closed
-                        | tcp::State::Closing
-                        | tcp::State::CloseWait
-                        | tcp::State::TimeWait => {
-                            Poll::Ready(Err(TcpSocketError::InvalidState(state)))
-                        }
-                        _ => {
-                            socket.register_recv_waker(cx.waker());
-                            Poll::Pending
-                        }
-                    }
-                }
-            })
+            let r = self.recv_poll_fn(buffer);
+            if r.is_pending() {
+                self.with_mut(|socket| socket.register_recv_waker(cx.waker()));
+            }
+            r
         })
         .await
+    }
+
+    pub fn recv_poll_fn(&mut self, buffer: &mut [u8]) -> Poll<Result<usize, TcpSocketError>> {
+        self.with_mut(|socket| {
+            if socket.can_recv() {
+                Poll::Ready(
+                    socket
+                        .recv_slice(buffer)
+                        .map_err(TcpSocketError::RecvError)
+                        .map(|n| {
+                            assert!(n > 0);
+                            n
+                        }),
+                )
+            } else {
+                let state = socket.state();
+                match state {
+                    tcp::State::FinWait1
+                    | tcp::State::FinWait2
+                    | tcp::State::Closed
+                    | tcp::State::Closing
+                    | tcp::State::CloseWait
+                    | tcp::State::TimeWait => Poll::Ready(Err(TcpSocketError::InvalidState(state))),
+                    _ => Poll::Pending,
+                }
+            }
+        })
     }
 
     pub async fn send(&mut self, buffer: &[u8]) -> Result<(), TcpSocketError> {
@@ -221,30 +319,33 @@ impl Socket<tcp::Socket<'static>> {
 
     pub async fn send_some(&mut self, buffer: &[u8]) -> Result<usize, TcpSocketError> {
         future::poll_fn(|cx| {
-            self.with_mut(|socket| {
-                if socket.can_send() {
-                    Poll::Ready(socket.send_slice(buffer).map_err(TcpSocketError::SendError))
-                } else {
-                    let state = socket.state();
-
-                    match state {
-                        tcp::State::FinWait1
-                        | tcp::State::FinWait2
-                        | tcp::State::Closed
-                        | tcp::State::Closing
-                        | tcp::State::CloseWait
-                        | tcp::State::TimeWait => {
-                            Poll::Ready(Err(TcpSocketError::InvalidState(state)))
-                        }
-                        _ => {
-                            socket.register_send_waker(cx.waker());
-                            Poll::Pending
-                        }
-                    }
-                }
-            })
+            let r = self.send_some_poll_fn(buffer);
+            if r.is_pending() {
+                self.with_mut(|socket| socket.register_send_waker(cx.waker()));
+            }
+            r
         })
         .await
+    }
+
+    pub fn send_some_poll_fn(&mut self, buffer: &[u8]) -> Poll<Result<usize, TcpSocketError>> {
+        self.with_mut(|socket| {
+            if socket.can_send() {
+                Poll::Ready(socket.send_slice(buffer).map_err(TcpSocketError::SendError))
+            } else {
+                let state = socket.state();
+
+                match state {
+                    tcp::State::FinWait1
+                    | tcp::State::FinWait2
+                    | tcp::State::Closed
+                    | tcp::State::Closing
+                    | tcp::State::CloseWait
+                    | tcp::State::TimeWait => Poll::Ready(Err(TcpSocketError::InvalidState(state))),
+                    _ => Poll::Pending,
+                }
+            }
+        })
     }
 
     pub async fn close(&mut self) -> Result<(), TcpSocketError> {
@@ -301,6 +402,14 @@ impl<T> Drop for Socket<T> {
 }
 
 impl SharedNetworkInner {
+    pub fn dhcp_socket_mut(&mut self) -> &mut dhcpv4::Socket<'static> {
+        self.socket_set.get_mut(self.dhcp_socket_handle)
+    }
+
+    pub fn dns_socket_mut(&mut self) -> &mut dns::Socket<'static> {
+        self.socket_set.get_mut(self.dns_socket_handle)
+    }
+
     pub fn poll_delay(&mut self, timestamp: Instant) -> Option<Duration> {
         self.iface.poll_delay(timestamp, &mut self.socket_set)
     }
@@ -315,48 +424,118 @@ impl SharedNetworkInner {
 
     // TODO should dhcp events instead just be monitored in a task?
     fn poll_dhcp(&mut self) {
-        if let Some(event) = self
-            .socket_set
-            .get_mut::<dhcpv4::Socket>(self.dhcp_socket_handle)
+        self.dhcp_socket_mut()
             .poll()
-        {
-            match event {
+            .map(free_dhcp_event)
+            .map(|event| match event {
                 dhcpv4::Event::Configured(config) => {
-                    info!("DHCP config acquired!");
-                    info!("IP address:      {}", config.address);
-                    self.iface.update_ip_addrs(|addrs| {
-                        if let Some(dest) = addrs.iter_mut().next() {
-                            *dest = IpCidr::Ipv4(config.address);
-                        } else if addrs.push(IpCidr::Ipv4(config.address)).is_err() {
-                            info!("Unable to update IP address");
-                        }
-                    });
-                    if let Some(router) = config.router {
-                        info!("Default gateway: {}", router);
-                        self.iface
-                            .routes_mut()
-                            .add_default_ipv4_route(router)
-                            .unwrap();
-                    } else {
-                        info!("Default gateway: None");
-                        self.iface.routes_mut().remove_default_ipv4_route();
+                    info!("DHCP config acquired");
+                    if self.dhcp_overrides.address.is_none() {
+                        self.set_address(config.address);
                     }
-
-                    for (i, s) in config.dns_servers.iter().enumerate() {
-                        info!("DNS server {}:    {}", i, s);
+                    if self.dhcp_overrides.router.is_none() {
+                        self.set_router(config.router);
+                    }
+                    if self.dhcp_overrides.dns_servers.is_none() {
+                        self.set_dns_servers(&config.dns_servers);
                     }
                 }
                 dhcpv4::Event::Deconfigured => {
-                    info!("DHCP lost config!");
-                    let cidr = Ipv4Cidr::new(Ipv4Address::UNSPECIFIED, 0);
-                    self.iface.update_ip_addrs(|addrs| {
-                        if let Some(dest) = addrs.iter_mut().next() {
-                            *dest = IpCidr::Ipv4(cidr);
-                        }
-                    });
-                    self.iface.routes_mut().remove_default_ipv4_route();
+                    info!("DHCP config lost");
+                    if self.dhcp_overrides.address.is_none() {
+                        self.clear_address();
+                    }
+                    if self.dhcp_overrides.router.is_none() {
+                        self.clear_router();
+                    }
+                    if self.dhcp_overrides.dns_servers.is_none() {
+                        self.clear_dns_servers();
+                    }
                 }
+            });
+    }
+
+    fn set_address(&mut self, address: Ipv4Cidr) {
+        let address = IpCidr::Ipv4(address);
+        info!("IP address: {}", address);
+        self.iface.update_ip_addrs(|addrs| {
+            if let Some(dest) = addrs.iter_mut().next() {
+                *dest = address;
+            } else {
+                addrs.push(address).unwrap();
             }
+        });
+    }
+
+    fn clear_address(&mut self) {
+        let cidr = Ipv4Cidr::new(Ipv4Address::UNSPECIFIED, 0);
+        self.iface.update_ip_addrs(|addrs| {
+            if let Some(dest) = addrs.iter_mut().next() {
+                *dest = IpCidr::Ipv4(cidr);
+            }
+        });
+    }
+
+    fn set_router(&mut self, router: Option<Ipv4Address>) {
+        if let Some(router) = router {
+            info!("Default gateway: {}", router);
+            self.iface
+                .routes_mut()
+                .add_default_ipv4_route(router)
+                .unwrap();
+        } else {
+            info!("Default gateway: (none)");
+            self.iface.routes_mut().remove_default_ipv4_route();
         }
+    }
+
+    fn clear_router(&mut self) {
+        self.iface.routes_mut().remove_default_ipv4_route();
+    }
+
+    fn set_dns_servers(&mut self, dns_servers: &[Ipv4Address]) {
+        for (i, s) in dns_servers.iter().enumerate() {
+            info!("DNS server {}: {}", i, s);
+        }
+        let dns_servers = dns_servers
+            .iter()
+            .copied()
+            .map(From::from)
+            .collect::<Vec<_>>();
+        self.dns_socket_mut().update_servers(&dns_servers);
+    }
+
+    fn clear_dns_servers(&mut self) {
+        self.dns_socket_mut().update_servers(&[]);
+    }
+
+    fn apply_dhcp_overrides(&mut self) {
+        if let Some(address) = self.dhcp_overrides.address {
+            self.set_address(address);
+        }
+        if let Some(router) = self.dhcp_overrides.router {
+            self.set_router(router);
+        }
+        if let Some(dns_servers) = self.dhcp_overrides.dns_servers.clone() {
+            // lazy, appease borrow checker
+            self.set_dns_servers(&dns_servers);
+        }
+    }
+}
+
+fn free_dhcp_event<'a>(event: dhcpv4::Event<'a>) -> dhcpv4::Event<'static> {
+    match event {
+        dhcpv4::Event::Deconfigured => dhcpv4::Event::Deconfigured,
+        dhcpv4::Event::Configured(config) => dhcpv4::Event::Configured(free_dhcp_config(config)),
+    }
+}
+
+fn free_dhcp_config<'a>(config: dhcpv4::Config<'a>) -> dhcpv4::Config<'static> {
+    dhcpv4::Config {
+        server: config.server,
+        address: config.address,
+        router: config.router,
+        dns_servers: config.dns_servers,
+        packet: None,
     }
 }

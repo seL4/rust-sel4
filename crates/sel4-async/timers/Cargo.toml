@@ -10,7 +10,7 @@ futures = { version = "0.3.28", default-features = false, features = ["alloc"] }
 log = "0.4.17"
 
 [dependencies.smoltcp]
-version = "0.9.1"
+version = "0.10.0"
 default-features = false
 features = [
     "alloc",

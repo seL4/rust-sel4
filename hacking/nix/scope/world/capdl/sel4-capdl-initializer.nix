@@ -3,16 +3,11 @@
 , objectSizes
 , mkTask, crates
 , crateUtils
-, seL4RustEnvVars
+, seL4Modifications
 , seL4RustTargetInfoWithConfig
 }:
 
-let
-  seL4Modifications = crateUtils.elaborateModifications {
-    modifyDerivation = drv: drv.overrideAttrs (self: super: seL4RustEnvVars);
-  };
-
-in mkTask {
+mkTask {
 
   rootCrate = crates.sel4-capdl-initializer;
 

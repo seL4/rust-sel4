@@ -15,28 +15,34 @@ use futures::task::LocalSpawnExt;
 
 use sel4_async_network::{SharedNetwork, TcpSocket, TcpSocketError};
 use sel4_async_single_threaded_executor::LocalSpawner;
+use sel4_async_timers::SharedTimers;
 use tests_capdl_http_server_components_test_cpiofs as cpiofs;
+
+mod client_test;
 
 const PORT: u16 = 80;
 
 const NUM_SIMULTANEOUS_CONNECTIONS: usize = 1000;
 
 pub async fn run_server(
-    ctx: SharedNetwork,
+    network_ctx: SharedNetwork,
+    timers_ctx: SharedTimers,
     blk_device: impl cpiofs::IO + 'static,
     spawner: LocalSpawner,
 ) -> ! {
+    client_test::run(network_ctx.clone(), timers_ctx.clone()).await;
+
     let index = cpiofs::Index::create(blk_device).await;
 
     let server = Rc::new(Server { index });
 
     for _ in 0..NUM_SIMULTANEOUS_CONNECTIONS {
-        let ctx = ctx.clone();
+        let network_ctx = network_ctx.clone();
         let server = server.clone();
         spawner
             .spawn_local(async move {
                 loop {
-                    let socket = ctx.new_tcp_socket();
+                    let socket = network_ctx.new_tcp_socket();
                     if let Err(err) = server.use_socket(socket).await {
                         log::warn!("error: {err:?}");
                     }

@@ -1,11 +1,13 @@
 { lib, stdenv, hostPlatform
-, cmake
+, cmake, perl, python3Packages
 
-, crates
-, mkTask
+, crateUtils, crates
+, mkTask, seL4Modifications
 , defaultRustTargetInfo
 
 , mkInstance
+
+, canSimulate
 }:
 
 let
@@ -18,22 +20,30 @@ mkInstance {
 
     release = false;
 
+    layers = [
+      crateUtils.defaultIntermediateLayer
+      {
+        crates = [
+          "sel4"
+          "sel4-root-task"
+        ];
+        modifications = seL4Modifications;
+      }
+    ];
+
     commonModifications = {
       modifyDerivation = drv: drv.overrideAttrs (self: super: {
-        NIX_LDFLAGS_AFTER = [ "-lnosys" ]; # appease CMake's compiler test
         BINDGEN_EXTRA_CLANG_ARGS = [ "-I${libcDir}/include" ];
         nativeBuildInputs = super.nativeBuildInputs ++ [
           cmake
+          perl
+          python3Packages.jsonschema
+          python3Packages.jinja2
         ];
-        # NIX_DEBUG = 2;
       });
-      # extraCargoFlags = [ "--verbose" ];
       modifyConfig = old: lib.recursiveUpdate old {
         target.${defaultRustTargetInfo.name} = {
           rustflags = (old.target.${defaultRustTargetInfo.name}.rustflags or []) ++ [
-            "-C" "link-arg=-lc"
-            "-C" "link-arg=-L${libcDir}/lib"
-
             # TODO
             # NOTE: won't work because cross gcc always uses hard-coded --with-ld
 
@@ -54,7 +64,17 @@ mkInstance {
         };
       };
     };
+
+    lastLayerModifications = crateUtils.composeModifications seL4Modifications (crateUtils.elaborateModifications {
+      modifyDerivation = drv: drv.overrideAttrs (self: super: {
+        # NIX_LDFLAGS_AFTER = [ "-lnosys" ]; # NOTE: appease CMake's compiler test
+        # NIX_DEBUG = 2;
+      });
+      # extraCargoFlags = [ "--verbose" ];
+    });
   };
 
-  # canAutomate = true;
+  extraPlatformArgs = lib.optionalAttrs canSimulate  {
+    canAutomateSimply = true;
+  };
 }

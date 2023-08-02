@@ -13,6 +13,8 @@ use dlmalloc::{Allocator as DlmallocAllocator, Dlmalloc};
 use sel4_sync::{GenericMutex, MutexSyncOps};
 
 // TODO alignment should depend on configuration
+// TODO does this alignment provide any benefit?
+// TODO use SyncUnsafeCell
 #[repr(C, align(4096))]
 pub struct StaticHeap<const N: usize>(UnsafeCell<[u8; N]>);
 

@@ -5,8 +5,9 @@ use smoltcp::phy::{Device, Medium};
 use smoltcp::time::{Duration, Instant};
 use smoltcp::wire::HardwareAddress;
 
-use sel4_async_network::SharedNetwork;
+use sel4_async_network::{DhcpOverrides, SharedNetwork};
 use sel4_async_single_threaded_executor::{LocalPool, LocalSpawner};
+use sel4_async_timers::SharedTimers;
 use tests_capdl_http_server_components_test_cpiofs as cpiofs;
 use tests_capdl_http_server_components_test_sp804_driver::Driver as TimerDriver;
 
@@ -29,24 +30,33 @@ pub(crate) struct Reactor {
     blk_irq_handler: sel4::IRQHandler,
     timer_irq_handler: sel4::IRQHandler,
     shared_network: SharedNetwork,
+    shared_timers: SharedTimers,
 }
 
 impl Reactor {
     pub(crate) fn new(
         mut net_device: DeviceImpl,
         blk_device: CpiofsBlockIOImpl,
-        timer: TimerDriver,
+        mut timer: TimerDriver,
         net_irq_handler: sel4::IRQHandler,
         blk_irq_handler: sel4::IRQHandler,
         timer_irq_handler: sel4::IRQHandler,
     ) -> Self {
-        let mut config = Config::new();
+        assert_eq!(net_device.capabilities().medium, Medium::Ethernet);
+        let hardware_addr = HardwareAddress::Ethernet(net_device.mac_address());
+        let mut config = Config::new(hardware_addr);
         config.random_seed = 0;
-        if net_device.capabilities().medium == Medium::Ethernet {
-            config.hardware_addr = Some(HardwareAddress::Ethernet(net_device.mac_address()));
-        }
 
-        let shared_network = SharedNetwork::new(config, &mut net_device);
+        let now = Self::now_with_timer_driver(&mut timer);
+
+        let shared_network = SharedNetwork::new(
+            config,
+            DhcpOverrides::default(),
+            &mut net_device,
+            now.clone(),
+        );
+
+        let shared_timers = SharedTimers::new(now.clone());
 
         Self {
             net_device,
@@ -56,11 +66,16 @@ impl Reactor {
             blk_irq_handler,
             timer_irq_handler,
             shared_network,
+            shared_timers,
         }
     }
 
     fn now(&mut self) -> Instant {
-        Instant::from_micros(i64::try_from(self.timer.now().as_micros()).unwrap())
+        Self::now_with_timer_driver(&mut self.timer)
+    }
+
+    fn now_with_timer_driver(timer: &mut TimerDriver) -> Instant {
+        Instant::from_micros(i64::try_from(timer.now().as_micros()).unwrap())
     }
 
     fn set_timeout(&mut self, d: Duration) {
@@ -86,7 +101,7 @@ impl Reactor {
     pub(crate) fn run<T: Future<Output = !>>(
         mut self,
         event_nfn: sel4::Notification,
-        f: impl FnOnce(SharedNetwork, CpiofsIOImpl, LocalSpawner) -> T,
+        f: impl FnOnce(SharedNetwork, SharedTimers, CpiofsIOImpl, LocalSpawner) -> T,
     ) -> ! {
         self.handle_net_interrupt();
         self.handle_blk_interrupt();
@@ -97,6 +112,7 @@ impl Reactor {
 
         let fut = f(
             self.shared_network.clone(),
+            self.shared_timers.clone(),
             cpiofs::BlockIOAdapter::new(cpiofs::CachedBlockIO::new(
                 self.blk_device.clone(),
                 BLOCK_CACHE_SIZE_IN_BLOCKS,
@@ -108,30 +124,25 @@ impl Reactor {
         loop {
             loop {
                 let _ = local_pool.run_until_stalled(fut.as_mut());
-                if !self.blk_device.poll() {
-                    break;
-                }
-            }
-
-            loop {
-                let _ = local_pool.run_until_stalled(fut.as_mut());
                 let now = self.now();
-                if !self
+                let mut activity = false;
+                activity |= self.blk_device.poll();
+                activity |= self
                     .shared_network
                     .inner()
                     .borrow_mut()
-                    .poll(now, &mut self.net_device)
-                {
+                    .poll(now, &mut self.net_device);
+                activity |= self.shared_timers.inner().borrow_mut().poll(now);
+                if !activity {
+                    let delays = &[
+                        self.shared_network.inner().borrow_mut().poll_delay(now),
+                        self.shared_timers.inner().borrow_mut().poll_delay(now),
+                    ];
+                    if let Some(delay) = delays.iter().filter_map(Option::as_ref).min() {
+                        self.set_timeout(delay.clone());
+                    }
                     break;
                 }
-            }
-
-            let maybe_delay = {
-                let now = self.now();
-                self.shared_network.inner().borrow_mut().poll_delay(now)
-            };
-            if let Some(delay) = maybe_delay {
-                self.set_timeout(delay);
             }
 
             let (_, badge) = event_nfn.wait();
