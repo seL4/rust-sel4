@@ -29,8 +29,6 @@ RUN echo ". ~/.bashrc_extra" >> .bashrc
 
 WORKDIR /tmp
 
-ENV NIX_BUILD_SHELL=bash
-
 ARG STATEFUL
 
 COPY setup.sh .
@@ -38,5 +36,7 @@ COPY setup.sh .
 RUN if [ "$STATEFUL" = "1" ]; then bash setup.sh; fi
 
 COPY nix.conf /etc/nix/
+
+ENV NIX_BUILD_SHELL=bash
 
 WORKDIR /work
