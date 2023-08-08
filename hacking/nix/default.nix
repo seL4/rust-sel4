@@ -31,32 +31,63 @@ let
       host =
         let
           # Avoid cache misses in cases where buildPlatform == hostPlatform
-          guard = config: if config == this.pkgs.build.hostPlatform.config then null else { inherit config; };
+          guard = attrs:
+            if attrs == builtins.intersectAttrs attrs this.pkgs.build.hostPlatform
+            then null
+            else attrs
+          ;
+          mkLeafWithGuard = attrs: mkLeaf (guard attrs);
         in {
           aarch64 = {
-            none = mkLeaf (guard "aarch64-none-elf");
-            linux = mkLeaf (guard "aarch64-unknown-linux-gnu");
-            linuxMusl = mkLeaf (guard "aarch64-unknown-linux-musl");
+            none = mkLeafWithGuard {
+              config = "aarch64-none-elf";
+            };
+            linux = mkLeafWithGuard {
+              config = "aarch64-unknown-linux-gnu";
+            };
+            linuxMusl = mkLeafWithGuard {
+              config = "aarch64-unknown-linux-musl";
+            };
           };
           aarch32 = {
-            none = mkLeaf (guard "arm-none-eabi");
-            linux = mkLeaf (guard "armv7l-unknown-linux-gnueabihf");
+            none = mkLeafWithGuard {
+              config = "arm-none-eabi";
+            };
+            linux = mkLeafWithGuard {
+              config = "armv7l-unknown-linux-gnueabihf";
+            };
           };
           riscv64 = {
-            none = mkLeaf (guard "riscv64-none-elf");
-            linux = mkLeaf (guard "riscv64-unknown-linux-gnu");
+            none = mkLeafWithGuard {
+              config = "riscv64-none-elf";
+            };
+            linux = mkLeafWithGuard {
+              config = "riscv64-unknown-linux-gnu";
+            };
           };
           riscv32 = {
-            none = mkLeaf (guard "riscv32-none-elf");
-            linux = mkLeaf (guard "riscv32-unknown-linux-gnu");
+            none = mkLeafWithGuard {
+              config = "riscv32-none-elf";
+            };
+            linux = mkLeafWithGuard {
+              config = "riscv32-unknown-linux-gnu";
+            };
           };
           x86_64 = {
-            none = mkLeaf (guard "x86_64-elf");
-            linux = mkLeaf (guard "x86_64-unknown-linux-gnu");
+            none = mkLeafWithGuard {
+              config = "x86_64-elf";
+            };
+            linux = mkLeafWithGuard {
+              config = "x86_64-unknown-linux-gnu";
+            };
           };
           ia32 = {
-            none = mkLeaf (guard "i686-elf");
-            linux = mkLeaf (guard "i686-unknown-linux-gnu");
+            none = mkLeafWithGuard {
+              config = "i686-elf";
+            };
+            linux = mkLeafWithGuard {
+              config = "i686-unknown-linux-gnu";
+            };
           };
         };
     };
