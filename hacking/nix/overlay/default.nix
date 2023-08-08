@@ -24,14 +24,6 @@ assert !(super ? scopeName);
         })
       ;
 
-  stdenv =
-    if super.stdenv.hostPlatform.isNone && !(super.stdenv.hostPlatform.this.noneWithLibc or false)
-    then
-      # Use toolchain without newlib. This is equivalent to crossLibcStdenv.
-      super.overrideCC super.stdenv super.crossLibcStdenv.cc
-    else
-      super.stdenv;
-
   # Add Python packages needed by the seL4 ecosystem
   pythonPackagesExtensions = super.pythonPackagesExtensions ++ [
     (callPackage ./python-overrides.nix {})

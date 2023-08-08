@@ -17,16 +17,17 @@ in {
   ];
 
   sel4testInstances = (map (x: x.this.sel4test) [
-    pkgs.host.aarch64.linux
-    pkgs.host.aarch32.linux
-    pkgs.host.riscv64.noneWithLibc
-    pkgs.host.riscv32.noneWithLibc
+    pkgs.host.aarch64.none
+    pkgs.host.aarch32.none
+    pkgs.host.riscv64.none
+    pkgs.host.riscv32.none
+    # TODO figure out why none doesn't work
     pkgs.host.x86_64.linux
     pkgs.host.ia32.linux
   ]);
 
   prerequisites = aggregate "prerequisites" [
-    pkgs.host.riscv64.noneWithLibc.gccMultiStdenvGeneric
+    pkgs.host.riscv64.none.gccMultiStdenvGeneric
     pkgs.build.this.qemuForSeL4
     pkgs.build.this.cargoManifestGenrationUtils.rustfmtWithTOMLSupport
     pkgs.build.this.capdl-tool

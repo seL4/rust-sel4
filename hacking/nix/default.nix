@@ -44,16 +44,10 @@ let
           };
           riscv64 = {
             none = mkLeaf (guard "riscv64-none-elf");
-            noneWithLibc = mkLeaf (guard "riscv64-none-elf" // {
-              this.noneWithLibc = true;
-            });
             linux = mkLeaf (guard "riscv64-unknown-linux-gnu");
           };
           riscv32 = {
             none = mkLeaf (guard "riscv32-none-elf");
-            noneWithLibc = mkLeaf (guard "riscv32-none-elf" // {
-              this.noneWithLibc = true;
-            });
             linux = mkLeaf (guard "riscv32-unknown-linux-gnu");
           };
           x86_64 = {

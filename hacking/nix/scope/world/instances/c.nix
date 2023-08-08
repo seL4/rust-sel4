@@ -4,19 +4,16 @@
 , crates
 , mkTask
 , defaultRustTargetInfo
-, stdenvWithLibc
 
 , mkInstance
 }:
 
 let
-  libcDir = "${stdenvWithLibc.cc.libc}/${hostPlatform.config}";
+  libcDir = "${stdenv.cc.libc}/${hostPlatform.config}";
 
 in
 mkInstance {
   rootTask = mkTask rec {
-    stdenv = stdenvWithLibc;
-
     rootCrate = crates.tests-root-task-c;
 
     release = false;

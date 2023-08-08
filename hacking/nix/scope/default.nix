@@ -95,7 +95,7 @@ superCallPackage ../rust-utils {} self //
     riscv64 = "riscv64imac-unknown-none-elf"; # gc?
     riscv32 = "riscv32imac-unknown-none-elf"; # gc?
     x86_64 = "x86_64-unknown-none";
-    ia32 = "i686-unknown-linux-gnu";
+    ia32 = "i686-unknown-linux-gnu"; # HACK
   }."${seL4Arch}";
 
   mkBuiltinRustTargetInfo = name: {
@@ -248,22 +248,5 @@ superCallPackage ../rust-utils {} self //
       })
     ];
   });
-
-  ### stdenv
-
-  stdenvWithLibc =
-    let
-      bintools = stdenv.cc.bintools.override {
-        libc = libcCross;
-        noLibc = false;
-      };
-    in
-      stdenv.override {
-        cc = stdenv.cc.override {
-          libc = libcCross;
-          noLibc = false;
-          inherit bintools;
-        };
-      };
 
 })
