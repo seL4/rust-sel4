@@ -165,13 +165,13 @@ impl ssl::Io for TcpSocketWrapper {
 
 pub fn wrap_entropy_callback<F>(f: F) -> impl EntropyCallback
 where
-    F: Fn(&mut [u8]) -> Result<(), ()> + Send + Sync,
+    F: Fn(&mut [u8]) -> TlsResult<()> + Send + Sync,
 {
     move |data, len| {
         let buf = unsafe { slice::from_raw_parts_mut(data, len) };
         match f(buf) {
             Ok(_) => 0,
-            Err(_) => codes::EntropySourceFailed.into(),
+            Err(err) => err.to_int(),
         }
     }
 }
