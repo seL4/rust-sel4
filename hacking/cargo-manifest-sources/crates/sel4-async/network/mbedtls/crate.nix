@@ -24,7 +24,7 @@ mk {
   };
   nix.local.dependencies = with localCrates; [
     sel4-async-network
-    # mbedtls
+    mbedtls
   ];
   nix.meta.requirements = [ "sel4" ];
   nix.meta.skip = true;

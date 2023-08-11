@@ -44,9 +44,9 @@ let
 
   externalCratePathAttrs = {
     # "virtio-drivers" = "tmp/virtio-drivers";
-    # "mbedtls" = "tmp/rust-mbedtls/mbedtls";
-    # "mbedtls-sys-auto" = "tmp/rust-mbedtls/mbedtls-sys";
-    # "mbedtls-platform-support" = "tmp/rust-mbedtls/mbedtls-platform-support";
+    "mbedtls" = "tmp/rust-mbedtls/mbedtls";
+    "mbedtls-sys-auto" = "tmp/rust-mbedtls/mbedtls-sys";
+    "mbedtls-platform-support" = "tmp/rust-mbedtls/mbedtls-platform-support";
   };
 
   cratePathAttrs = localCratePathAttrs // externalCratePathAttrs;
@@ -99,8 +99,8 @@ let
       };
 
       mbedtlsSource = {
-        git = "https://github.com/nspin/rust-mbedtls";
-        tag = "keep/b106b115554c38559f0451a00be5de23";
+        # git = "https://github.com/nspin/rust-mbedtls";
+        # tag = "keep/b106b115554c38559f0451a00be5de23";
       };
 
       mbedtlsWith = features: (mbedtlsSource // {

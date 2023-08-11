@@ -7,6 +7,9 @@ mk {
     sel4-root-task
     sel4-logging
     sel4-newlib
+    mbedtls
+    mbedtls-platform-support
+    mbedtls-sys-auto
   ];
   dependencies = {
     inherit (versions) log;

@@ -43,19 +43,19 @@ let
         "support"
       ];
     };
-    # mbedtls-sys-auto = {
-    #   extraPaths = [
-    #     "build"
-    #     "vendor"
-    #   ];
-    # };
-    # mbedtls = {
-    #   extraPaths = [
-    #     "benches"
-    #     "examples"
-    #     "tests"
-    #   ];
-    # };
+    mbedtls-sys-auto = {
+      extraPaths = [
+        "build"
+        "vendor"
+      ];
+    };
+    mbedtls = {
+      extraPaths = [
+        "benches"
+        "examples"
+        "tests"
+      ];
+    };
   };
 
   crates = lib.listToAttrs (lib.forEach workspaceMemberPaths (cratePath: rec {
