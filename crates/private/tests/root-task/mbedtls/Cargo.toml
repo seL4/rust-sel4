@@ -1,0 +1,34 @@
+[package]
+name = "tests-root-task-mbedtls"
+version = "0.1.0"
+authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
+edition = "2021"
+license = "BSD-2-Clause"
+
+[dependencies]
+log = "0.4.17"
+sel4 = { path = "../../../../sel4" }
+sel4-logging = { path = "../../../../sel4-logging" }
+sel4-root-task = { path = "../../../../sel4-root-task" }
+
+[dependencies.mbedtls]
+git = "https://github.com/nspin/rust-mbedtls"
+tag = "keep/b106b115554c38559f0451a00be5de23"
+default-features = false
+features = ["no_std_deps", "debug"]
+
+[dependencies.mbedtls-platform-support]
+git = "https://github.com/nspin/rust-mbedtls"
+tag = "keep/b106b115554c38559f0451a00be5de23"
+default-features = false
+features = []
+
+[dependencies.mbedtls-sys-auto]
+git = "https://github.com/nspin/rust-mbedtls"
+tag = "keep/b106b115554c38559f0451a00be5de23"
+default-features = false
+features = []
+
+[dependencies.sel4-newlib]
+path = "../../../../sel4-newlib"
+features = ["nosys", "all-symbols", "sel4-panicking-env"]

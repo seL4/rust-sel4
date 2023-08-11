@@ -36,6 +36,7 @@ members = [
     "crates/private/tests/root-task/config",
     "crates/private/tests/root-task/core-libs",
     "crates/private/tests/root-task/loader",
+    "crates/private/tests/root-task/mbedtls",
     "crates/private/tests/root-task/panicking",
     "crates/private/tests/root-task/tls",
     "crates/private/tests/sel4cp/passive-server-with-deferred-action/pds/client",

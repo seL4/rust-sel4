@@ -3435,6 +3435,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "tests-root-task-mbedtls"
+version = "0.1.0"
+dependencies = [
+ "log",
+ "mbedtls",
+ "mbedtls-platform-support",
+ "mbedtls-sys-auto",
+ "sel4",
+ "sel4-logging",
+ "sel4-newlib",
+ "sel4-root-task",
+]
+
+[[package]]
 name = "tests-root-task-panicking"
 version = "0.1.0"
 dependencies = [

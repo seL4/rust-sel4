@@ -1,8 +1,9 @@
-{ lib, hostPlatform, buildPackages
+{ lib, stdenv, hostPlatform, buildPackages
 , callPackage
 , writeScript, runCommand, linkFarm
 
 , cpio
+, cmake, perl, python3Packages
 
 , sources
 
@@ -11,7 +12,7 @@
 
 , mkTask, mkSeL4KernelWithPayload
 , embedDebugInfo
-, seL4RustTargetInfoWithConfig
+, seL4RustTargetInfoWithConfig, defaultRustTargetInfo
 , worldConfig
 , seL4ForBoot
 , seL4Config
@@ -150,6 +151,30 @@ in rec {
                     canAutomateSimply = panicStrategyName == "unwind";
                   };
                 })));
+
+      mbedtls = maybe haveFullRuntime (mkInstance {
+        rootTask = mkTask {
+          rootCrate = crates.tests-root-task-mbedtls;
+          release = false;
+          # extraProfile = {
+          #   opt-level = 2;
+          # };
+          commonModifications = {
+            modifyDerivation = drv: drv.overrideAttrs (self: super: {
+              BINDGEN_EXTRA_CLANG_ARGS = [ "-I${stdenv.cc.libc}/${hostPlatform.config}/include" ];
+              nativeBuildInputs = super.nativeBuildInputs ++ [
+                cmake
+                perl
+                python3Packages.jsonschema
+                python3Packages.jinja2
+              ];
+            });
+          };
+        };
+        extraPlatformArgs = lib.optionalAttrs canSimulate  {
+          canAutomateSimply = true;
+        };
+      });
 
       c = maybe (haveFullRuntime && hostPlatform.isAarch64) (callPackage ./c.nix {
         inherit canSimulate;
