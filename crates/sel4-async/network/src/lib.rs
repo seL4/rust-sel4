@@ -7,7 +7,7 @@ use alloc::vec;
 use alloc::vec::Vec;
 use core::cell::RefCell;
 use core::marker::PhantomData;
-use core::task::Poll;
+use core::task::{self, Poll};
 
 use futures::prelude::*;
 use log::info;
@@ -269,17 +269,14 @@ impl Socket<tcp::Socket<'static>> {
     }
 
     pub async fn recv(&mut self, buffer: &mut [u8]) -> Result<usize, TcpSocketError> {
-        future::poll_fn(|cx| {
-            let r = self.recv_poll_fn(buffer);
-            if r.is_pending() {
-                self.with_mut(|socket| socket.register_recv_waker(cx.waker()));
-            }
-            r
-        })
-        .await
+        future::poll_fn(|cx| self.poll_recv(cx, buffer)).await
     }
 
-    pub fn recv_poll_fn(&mut self, buffer: &mut [u8]) -> Poll<Result<usize, TcpSocketError>> {
+    pub fn poll_recv(
+        &mut self,
+        cx: &mut task::Context<'_>,
+        buffer: &mut [u8],
+    ) -> Poll<Result<usize, TcpSocketError>> {
         self.with_mut(|socket| {
             if socket.can_recv() {
                 Poll::Ready(
@@ -287,7 +284,7 @@ impl Socket<tcp::Socket<'static>> {
                         .recv_slice(buffer)
                         .map_err(TcpSocketError::RecvError)
                         .map(|n| {
-                            assert!(n > 0);
+                            assert!(n > 0); // check assumption about smoltcp
                             n
                         }),
                 )
@@ -300,7 +297,10 @@ impl Socket<tcp::Socket<'static>> {
                     | tcp::State::Closing
                     | tcp::State::CloseWait
                     | tcp::State::TimeWait => Poll::Ready(Err(TcpSocketError::InvalidState(state))),
-                    _ => Poll::Pending,
+                    _ => {
+                        socket.register_recv_waker(cx.waker());
+                        Poll::Pending
+                    }
                 }
             }
         })
@@ -318,23 +318,19 @@ impl Socket<tcp::Socket<'static>> {
     }
 
     pub async fn send(&mut self, buffer: &[u8]) -> Result<usize, TcpSocketError> {
-        future::poll_fn(|cx| {
-            let r = self.send_poll_fn(buffer);
-            if r.is_pending() {
-                self.with_mut(|socket| socket.register_send_waker(cx.waker()));
-            }
-            r
-        })
-        .await
+        future::poll_fn(|cx| self.poll_send(cx, buffer)).await
     }
 
-    pub fn send_poll_fn(&mut self, buffer: &[u8]) -> Poll<Result<usize, TcpSocketError>> {
+    pub fn poll_send(
+        &mut self,
+        cx: &mut task::Context<'_>,
+        buffer: &[u8],
+    ) -> Poll<Result<usize, TcpSocketError>> {
         self.with_mut(|socket| {
             if socket.can_send() {
                 Poll::Ready(socket.send_slice(buffer).map_err(TcpSocketError::SendError))
             } else {
                 let state = socket.state();
-
                 match state {
                     tcp::State::FinWait1
                     | tcp::State::FinWait2
@@ -342,7 +338,10 @@ impl Socket<tcp::Socket<'static>> {
                     | tcp::State::Closing
                     | tcp::State::CloseWait
                     | tcp::State::TimeWait => Poll::Ready(Err(TcpSocketError::InvalidState(state))),
-                    _ => Poll::Pending,
+                    _ => {
+                        socket.register_send_waker(cx.waker());
+                        Poll::Pending
+                    }
                 }
             }
         })
