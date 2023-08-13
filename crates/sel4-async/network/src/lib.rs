@@ -309,7 +309,7 @@ impl Socket<tcp::Socket<'static>> {
     pub async fn send_all(&mut self, buffer: &[u8]) -> Result<(), TcpSocketError> {
         let mut pos = 0;
         while pos < buffer.len() {
-            let n = self.send_some(&buffer[pos..]).await?;
+            let n = self.send(&buffer[pos..]).await?;
             assert!(n > 0);
             pos += n;
         }
@@ -317,9 +317,9 @@ impl Socket<tcp::Socket<'static>> {
         Ok(())
     }
 
-    pub async fn send_some(&mut self, buffer: &[u8]) -> Result<usize, TcpSocketError> {
+    pub async fn send(&mut self, buffer: &[u8]) -> Result<usize, TcpSocketError> {
         future::poll_fn(|cx| {
-            let r = self.send_some_poll_fn(buffer);
+            let r = self.send_poll_fn(buffer);
             if r.is_pending() {
                 self.with_mut(|socket| socket.register_send_waker(cx.waker()));
             }
@@ -328,7 +328,7 @@ impl Socket<tcp::Socket<'static>> {
         .await
     }
 
-    pub fn send_some_poll_fn(&mut self, buffer: &[u8]) -> Poll<Result<usize, TcpSocketError>> {
+    pub fn send_poll_fn(&mut self, buffer: &[u8]) -> Poll<Result<usize, TcpSocketError>> {
         self.with_mut(|socket| {
             if socket.can_send() {
                 Poll::Ready(socket.send_slice(buffer).map_err(TcpSocketError::SendError))

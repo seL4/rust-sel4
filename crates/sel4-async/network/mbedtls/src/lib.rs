@@ -83,7 +83,7 @@ impl ContextWrapper {
         .await
     }
 
-    pub async fn send_some(&mut self, buf: &[u8]) -> TlsResult<usize> {
+    pub async fn send(&mut self, buf: &[u8]) -> TlsResult<usize> {
         future::poll_fn(|cx| {
             let r = self.context_mut().async_write(buf);
             self.result_to_poll(r, cx)
@@ -94,7 +94,7 @@ impl ContextWrapper {
     pub async fn send_all(&mut self, buffer: &[u8]) -> TlsResult<()> {
         let mut pos = 0;
         while pos < buffer.len() {
-            let n = self.send_some(&buffer[pos..]).await?;
+            let n = self.send(&buffer[pos..]).await?;
             assert!(n > 0); // check assumption about mbedtls API
             pos += n;
         }
@@ -155,7 +155,7 @@ impl ssl::Io for TcpSocketWrapper {
     }
 
     fn send(&mut self, buf: &[u8]) -> TlsResult<usize> {
-        match self.socket_mut().send_some_poll_fn(buf) {
+        match self.socket_mut().send_poll_fn(buf) {
             Poll::Ready(Ok(ok)) => Ok(ok),
             Poll::Ready(Err(_)) => Err(codes::NetSendFailed.into()),
             Poll::Pending => Err(codes::SslWantWrite.into()),
