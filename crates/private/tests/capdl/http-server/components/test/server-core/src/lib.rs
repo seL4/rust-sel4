@@ -13,6 +13,9 @@ use core::str::pattern::Pattern;
 use futures::prelude::*;
 use futures::task::LocalSpawnExt;
 
+use mbedtls::ssl::async_io::{AsyncIo, AsyncIoExt, ClosedError};
+
+use sel4_async_network_mbedtls::{mbedtls, TcpSocketWrapper};
 use sel4_async_network::{SharedNetwork, TcpSocket, TcpSocketError};
 use sel4_async_single_threaded_executor::LocalSpawner;
 use sel4_async_timers::SharedTimers;
@@ -59,19 +62,20 @@ struct Server<T> {
 }
 
 impl<T: cpiofs::IO> Server<T> {
-    async fn use_socket(&self, mut socket: TcpSocket) -> Result<(), TcpSocketError> {
+    async fn use_socket(&self, socket: TcpSocket) -> Result<(), ClosedError<TcpSocketError>> {
         let port = PORT;
-        socket.accept(port).await?;
-        self.handle_connection(&mut socket).await?;
-        socket.close().await?;
+        let mut conn = TcpSocketWrapper::new(socket);
+        conn.inner_mut().accept(port).await?;
+        self.handle_connection(&mut conn).await?;
+        conn.inner_mut().close().await?;
         Ok(())
     }
 
-    async fn handle_connection(&self, socket: &mut TcpSocket) -> Result<(), TcpSocketError> {
+    async fn handle_connection<U: AsyncIo>(&self, conn: &mut U) -> Result<(), ClosedError<U::Error>> {
         let mut buf = vec![0; 1024 * 16];
         let mut i = 0;
         loop {
-            let n = socket.recv(&mut buf[i..]).await?;
+            let n = conn.recv(&mut buf[i..]).await?;
             assert_ne!(n, 0);
             i += n;
             if is_request_complete(&buf[..i]).unwrap_or(false) {
@@ -83,7 +87,7 @@ impl<T: cpiofs::IO> Server<T> {
         match req.parse(&buf) {
             Ok(status) => {
                 assert!(status.is_complete());
-                self.handle_request(socket, req.path.unwrap()).await?;
+                self.handle_request(conn, req.path.unwrap()).await?;
             }
             Err(err) => {
                 log::warn!("error parsing request: {err:?}");
@@ -92,122 +96,122 @@ impl<T: cpiofs::IO> Server<T> {
         Ok(())
     }
 
-    async fn handle_request(
+    async fn handle_request<U: AsyncIo>(
         &self,
-        socket: &mut TcpSocket,
+        conn: &mut U,
         request_path: &str,
-    ) -> Result<(), TcpSocketError> {
+    ) -> Result<(), ClosedError<U::Error>> {
         match self.lookup_request_path(request_path).await {
             RequestPathStatus::Ok { file_path, entry } => {
                 let content_type = content_type_from_name(&file_path);
-                self.serve_file(socket, content_type, &entry).await?;
+                self.serve_file(conn, content_type, &entry).await?;
             }
             RequestPathStatus::MovedPermanently { location } => {
-                self.serve_moved_permanently(socket, &location).await?;
+                self.serve_moved_permanently(conn, &location).await?;
             }
             RequestPathStatus::NotFound => {
-                self.serve_not_found(socket).await?;
+                self.serve_not_found(conn).await?;
             }
         }
         Ok(())
     }
 
-    async fn serve_file(
+    async fn serve_file<U: AsyncIo>(
         &self,
-        socket: &mut TcpSocket,
+        conn: &mut U,
         content_type: &str,
         entry: &cpiofs::Entry,
-    ) -> Result<(), TcpSocketError> {
-        self.start_response_headers(socket, 200, "OK").await?;
-        self.send_response_header(socket, "Content-Type", content_type.as_bytes())
+    ) -> Result<(), ClosedError<U::Error>> {
+        self.start_response_headers(conn, 200, "OK").await?;
+        self.send_response_header(conn, "Content-Type", content_type.as_bytes())
             .await?;
         self.send_response_header(
-            socket,
+            conn,
             "Content-Length",
             entry.data_size().to_string().as_bytes(),
         )
         .await?;
-        self.finish_response_headers(socket).await?;
+        self.finish_response_headers(conn).await?;
         {
             let mut buf = vec![0; 2048];
             let mut pos = 0;
             while pos < entry.data_size() {
                 let n = buf.len().min(entry.data_size() - pos);
                 self.index.read_data(entry, pos, &mut buf[..n]).await;
-                socket.send_all(&buf[..n]).await?;
+                conn.send_all(&buf[..n]).await?;
                 pos += n;
             }
         }
         Ok(())
     }
 
-    async fn serve_moved_permanently(
+    async fn serve_moved_permanently<U: AsyncIo>(
         &self,
-        socket: &mut TcpSocket,
+        conn: &mut U,
         location: &str,
-    ) -> Result<(), TcpSocketError> {
+    ) -> Result<(), ClosedError<U::Error>> {
         let phrase = "Moved Permanently";
-        self.start_response_headers(socket, 301, phrase).await?;
-        self.send_response_header(socket, "Content-Type", b"text/plain")
+        self.start_response_headers(conn, 301, phrase).await?;
+        self.send_response_header(conn, "Content-Type", b"text/plain")
             .await?;
         self.send_response_header(
-            socket,
+            conn,
             "Content-Length",
             phrase.len().to_string().as_bytes(),
         )
         .await?;
-        self.send_response_header(socket, "Location", location.as_bytes())
+        self.send_response_header(conn, "Location", location.as_bytes())
             .await?;
-        self.finish_response_headers(socket).await?;
-        socket.send_all(phrase.as_bytes()).await?;
+        self.finish_response_headers(conn).await?;
+        conn.send_all(phrase.as_bytes()).await?;
         Ok(())
     }
 
-    async fn serve_not_found(&self, socket: &mut TcpSocket) -> Result<(), TcpSocketError> {
+    async fn serve_not_found<U: AsyncIo>(&self, conn: &mut U) -> Result<(), ClosedError<U::Error>> {
         let phrase = "Not Found";
-        self.start_response_headers(socket, 404, phrase).await?;
-        self.send_response_header(socket, "Content-Type", b"text/plain")
+        self.start_response_headers(conn, 404, phrase).await?;
+        self.send_response_header(conn, "Content-Type", b"text/plain")
             .await?;
         self.send_response_header(
-            socket,
+            conn,
             "Content-Length",
             phrase.len().to_string().as_bytes(),
         )
         .await?;
-        self.finish_response_headers(socket).await?;
-        socket.send_all(phrase.as_bytes()).await?;
+        self.finish_response_headers(conn).await?;
+        conn.send_all(phrase.as_bytes()).await?;
         Ok(())
     }
 
-    async fn start_response_headers(
+    async fn start_response_headers<U: AsyncIo>(
         &self,
-        socket: &mut TcpSocket,
+        conn: &mut U,
         status_code: usize,
         reason_phrase: &str,
-    ) -> Result<(), TcpSocketError> {
-        socket.send_all(b"HTTP/1.1 ").await?;
-        socket.send_all(&status_code.to_string().as_bytes()).await?;
-        socket.send_all(b" ").await?;
-        socket.send_all(reason_phrase.as_bytes()).await?;
-        socket.send_all(b"\r\n").await?;
+    ) -> Result<(), ClosedError<U::Error>> {
+        conn.send_all(b"HTTP/1.1 ").await?;
+        conn.send_all(&status_code.to_string().as_bytes()).await?;
+        conn.send_all(b" ").await?;
+        conn.send_all(reason_phrase.as_bytes()).await?;
+        conn.send_all(b"\r\n").await?;
         Ok(())
     }
 
-    async fn send_response_header(
+    async fn send_response_header<U: AsyncIo>(
         &self,
-        socket: &mut TcpSocket,
+        conn: &mut U,
         name: &str,
         value: &[u8],
-    ) -> Result<(), TcpSocketError> {
-        socket.send_all(name.as_bytes()).await?;
-        socket.send_all(b": ").await?;
-        socket.send_all(value).await?;
-        socket.send_all(b"\r\n").await?;
+    ) -> Result<(), ClosedError<U::Error>> {
+        conn.send_all(name.as_bytes()).await?;
+        conn.send_all(b": ").await?;
+        conn.send_all(value).await?;
+        conn.send_all(b"\r\n").await?;
         Ok(())
     }
 
-    async fn finish_response_headers(&self, socket: &mut TcpSocket) -> Result<(), TcpSocketError> {
-        socket.send_all(b"\r\n").await?;
+    async fn finish_response_headers<U: AsyncIo>(&self, conn: &mut U) -> Result<(), ClosedError<U::Error>> {
+        conn.send_all(b"\r\n").await?;
         Ok(())
     }
 
