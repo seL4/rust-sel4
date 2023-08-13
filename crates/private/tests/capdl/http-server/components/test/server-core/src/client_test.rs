@@ -7,12 +7,13 @@ use smoltcp::time::Duration;
 use smoltcp::wire::DnsQueryType;
 
 use mbedtls::rng::CtrDrbg;
-use mbedtls::ssl::config::{Endpoint, Preset, Transport};
 use mbedtls::ssl::{Config, Context};
+use mbedtls::ssl::async_io::AsyncIoExt;
+use mbedtls::ssl::config::{Endpoint, Preset, Transport};
 
 use sel4_async_network::SharedNetwork;
 use sel4_async_network_mbedtls::{
-    insecure_dummy_entropy, mbedtls, seed_insecure_dummy_entropy, ContextWrapper, TcpSocketWrapper,
+    insecure_dummy_entropy, mbedtls, seed_insecure_dummy_entropy, TcpSocketWrapper,
 };
 use sel4_async_timers::SharedTimers;
 use sel4_panicking_env::debug_print;
@@ -63,9 +64,9 @@ pub async fn run(network_ctx: SharedNetwork, timers_ctx: SharedTimers) {
         this
     };
 
-    let mut ctx = ContextWrapper::new(Context::new(Arc::new(config)));
+    let mut ctx = Context::new(Arc::new(config));
 
-    ctx.establish(TcpSocketWrapper::new(socket), None)
+    ctx.establish_async(TcpSocketWrapper::new(socket), None)
         .await
         .unwrap();
 
@@ -80,8 +81,8 @@ pub async fn run(network_ctx: SharedNetwork, timers_ctx: SharedTimers) {
         log::info!("{}", str::from_utf8(&buf[..n]).unwrap());
     }
 
-    ctx.close().await.unwrap();
-
+    ctx.close_async().await.unwrap();
+    ctx.take_io().unwrap().inner_mut().close().await.unwrap();
     drop(ctx);
 
     log::info!("client test complete");
