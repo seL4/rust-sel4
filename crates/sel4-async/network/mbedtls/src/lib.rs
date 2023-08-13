@@ -91,7 +91,7 @@ impl ContextWrapper {
         .await
     }
 
-    pub async fn send(&mut self, buffer: &[u8]) -> TlsResult<()> {
+    pub async fn send_all(&mut self, buffer: &[u8]) -> TlsResult<()> {
         let mut pos = 0;
         while pos < buffer.len() {
             let n = self.send_some(&buffer[pos..]).await?;

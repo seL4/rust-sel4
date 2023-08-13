@@ -306,7 +306,7 @@ impl Socket<tcp::Socket<'static>> {
         })
     }
 
-    pub async fn send(&mut self, buffer: &[u8]) -> Result<(), TcpSocketError> {
+    pub async fn send_all(&mut self, buffer: &[u8]) -> Result<(), TcpSocketError> {
         let mut pos = 0;
         while pos < buffer.len() {
             let n = self.send_some(&buffer[pos..]).await?;

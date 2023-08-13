@@ -69,7 +69,7 @@ pub async fn run(network_ctx: SharedNetwork, timers_ctx: SharedTimers) {
         .await
         .unwrap();
 
-    ctx.send(b"GET / HTTP/1.1\r\n\r\n").await.unwrap();
+    ctx.send_all(b"GET / HTTP/1.1\r\n\r\n").await.unwrap();
 
     let mut buf = vec![0; 4096];
     loop {

@@ -134,7 +134,7 @@ impl<T: cpiofs::IO> Server<T> {
             while pos < entry.data_size() {
                 let n = buf.len().min(entry.data_size() - pos);
                 self.index.read_data(entry, pos, &mut buf[..n]).await;
-                socket.send(&buf[..n]).await?;
+                socket.send_all(&buf[..n]).await?;
                 pos += n;
             }
         }
@@ -159,7 +159,7 @@ impl<T: cpiofs::IO> Server<T> {
         self.send_response_header(socket, "Location", location.as_bytes())
             .await?;
         self.finish_response_headers(socket).await?;
-        socket.send(phrase.as_bytes()).await?;
+        socket.send_all(phrase.as_bytes()).await?;
         Ok(())
     }
 
@@ -175,7 +175,7 @@ impl<T: cpiofs::IO> Server<T> {
         )
         .await?;
         self.finish_response_headers(socket).await?;
-        socket.send(phrase.as_bytes()).await?;
+        socket.send_all(phrase.as_bytes()).await?;
         Ok(())
     }
 
@@ -185,11 +185,11 @@ impl<T: cpiofs::IO> Server<T> {
         status_code: usize,
         reason_phrase: &str,
     ) -> Result<(), TcpSocketError> {
-        socket.send(b"HTTP/1.1 ").await?;
-        socket.send(&status_code.to_string().as_bytes()).await?;
-        socket.send(b" ").await?;
-        socket.send(reason_phrase.as_bytes()).await?;
-        socket.send(b"\r\n").await?;
+        socket.send_all(b"HTTP/1.1 ").await?;
+        socket.send_all(&status_code.to_string().as_bytes()).await?;
+        socket.send_all(b" ").await?;
+        socket.send_all(reason_phrase.as_bytes()).await?;
+        socket.send_all(b"\r\n").await?;
         Ok(())
     }
 
@@ -199,15 +199,15 @@ impl<T: cpiofs::IO> Server<T> {
         name: &str,
         value: &[u8],
     ) -> Result<(), TcpSocketError> {
-        socket.send(name.as_bytes()).await?;
-        socket.send(b": ").await?;
-        socket.send(value).await?;
-        socket.send(b"\r\n").await?;
+        socket.send_all(name.as_bytes()).await?;
+        socket.send_all(b": ").await?;
+        socket.send_all(value).await?;
+        socket.send_all(b"\r\n").await?;
         Ok(())
     }
 
     async fn finish_response_headers(&self, socket: &mut TcpSocket) -> Result<(), TcpSocketError> {
-        socket.send(b"\r\n").await?;
+        socket.send_all(b"\r\n").await?;
         Ok(())
     }
 
