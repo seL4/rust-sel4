@@ -1,4 +1,4 @@
-{ mk, localCrates, versions, smoltcpWith }:
+{ mk, localCrates, versions, smoltcpWith, mbedtlsWith }:
 
 mk {
   package.name = "tests-capdl-http-server-components-test-server-core";
@@ -18,13 +18,7 @@ mk {
 
     smoltcp = smoltcpWith [];
 
-    sel4-newlib = {
-      features = [
-        "nosys"
-        "all-symbols"
-        "sel4-panicking-env"
-      ];
-    };
+    mbedtls = mbedtlsWith [];
   };
   nix.local.dependencies = with localCrates; [
     sel4-async-single-threaded-executor
@@ -32,7 +26,10 @@ mk {
     sel4-async-network-mbedtls
     sel4-async-timers
     sel4-panicking-env
-    sel4-newlib
     tests-capdl-http-server-components-test-cpiofs
+    mbedtls
   ];
+  features = {
+    debug = [ "mbedtls/debug" ];
+  };
 }

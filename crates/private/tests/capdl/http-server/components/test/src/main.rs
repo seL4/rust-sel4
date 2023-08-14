@@ -37,6 +37,9 @@ mod reactor;
 use glue::{CpiofsBlockIOImpl, DeviceImpl, HalImpl, BLOCK_SIZE};
 use reactor::Reactor;
 
+const CERT_PEM: &str = concat!(include_str!(concat!(env!("OUT_DIR"), "/cert.pem")), "\0");
+const PRIV_PEM: &str = concat!(include_str!(concat!(env!("OUT_DIR"), "/priv.pem")), "\0");
+
 // const LOG_LEVEL: LevelFilter = LevelFilter::Trace;
 // const LOG_LEVEL: LevelFilter = LevelFilter::Debug;
 const LOG_LEVEL: LevelFilter = LevelFilter::Info;
@@ -69,6 +72,8 @@ const NET_BUFFER_LEN: usize = 2048;
 #[main_json]
 fn main(config: Config) -> ! {
     LOGGER.set().unwrap();
+
+    setup_newlib();
 
     let timer = unsafe {
         Driver::new(
@@ -112,5 +117,31 @@ fn main(config: Config) -> ! {
         config.timer_irq_handler.get(),
     );
 
-    reactor.run(config.event_nfn.get(), run_server)
+    reactor.run(
+        config.event_nfn.get(),
+        |network_ctx, timers_ctx, blk_device, spawner| {
+            run_server(
+                network_ctx,
+                timers_ctx,
+                blk_device,
+                spawner,
+                CERT_PEM,
+                PRIV_PEM,
+            )
+        },
+    )
+}
+
+fn setup_newlib() {
+    use sel4_newlib::*;
+
+    set_static_heap_for_sbrk({
+        static HEAP: StaticHeap<{ 1024 * 1024 }> = StaticHeap::new();
+        &HEAP
+    });
+
+    let mut impls = Implementations::default();
+    impls._sbrk = Some(sbrk_with_static_heap);
+    impls._write = Some(write_with_debug_put_char);
+    set_implementations(impls)
 }

@@ -14,4 +14,4 @@ sel4-async-network = { path = ".." }
 [dependencies.mbedtls]
 path = "../../../../tmp/rust-mbedtls/mbedtls"
 default-features = false
-features = ["no_std_deps", "debug"]
+features = ["no_std_deps"]

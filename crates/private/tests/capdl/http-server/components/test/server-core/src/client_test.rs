@@ -1,4 +1,3 @@
-use alloc::borrow::Cow;
 use alloc::sync::Arc;
 use alloc::vec;
 use core::str;
@@ -7,40 +6,17 @@ use smoltcp::time::Duration;
 use smoltcp::wire::DnsQueryType;
 
 use mbedtls::rng::CtrDrbg;
-use mbedtls::ssl::{Config, Context};
 use mbedtls::ssl::async_io::AsyncIoExt;
 use mbedtls::ssl::config::{Endpoint, Preset, Transport};
+use mbedtls::ssl::{Config, Context};
 
 use sel4_async_network::SharedNetwork;
-use sel4_async_network_mbedtls::{
-    insecure_dummy_entropy, mbedtls, seed_insecure_dummy_entropy, TcpSocketWrapper,
-};
+use sel4_async_network_mbedtls::{insecure_dummy_rng, DbgCallbackBuilder, TcpSocketWrapper};
 use sel4_async_timers::SharedTimers;
-use sel4_panicking_env::debug_print;
 
 const CA_LIST: &[u8] = concat!(include_str!("../support/cacert.pem"), "\0").as_bytes();
 
 pub async fn run(network_ctx: SharedNetwork, timers_ctx: SharedTimers) {
-    {
-        use sel4_newlib::*;
-
-        set_static_heap_for_sbrk({
-            static HEAP: StaticHeap<{ 1024 * 1024 }> = StaticHeap::new();
-            &HEAP
-        });
-
-        let mut impls = Implementations::default();
-        impls._sbrk = Some(sbrk_with_static_heap);
-        impls._write = Some(write_with_debug_put_char);
-        set_implementations(impls)
-    }
-
-    unsafe {
-        mbedtls::set_global_debug_threshold(3);
-    }
-
-    seed_insecure_dummy_entropy(0);
-
     timers_ctx.sleep(Duration::from_secs(1)).await;
 
     let query = network_ctx
@@ -51,18 +27,19 @@ pub async fn run(network_ctx: SharedNetwork, timers_ctx: SharedTimers) {
     let mut socket = network_ctx.new_tcp_socket();
     socket.connect((query[0], 443), 44445).await.unwrap();
 
-    let config = {
-        let mut this = Config::new(Endpoint::Client, Transport::Stream, Preset::Default);
-        let entropy = Arc::new(insecure_dummy_entropy());
-        let rng = Arc::new(CtrDrbg::new(entropy, None).unwrap());
-        this.set_rng(rng);
-        this.set_dbg_callback(dbg_callback_brief);
-        this.set_ca_list(
-            Arc::new(mbedtls::x509::Certificate::from_pem_multiple(CA_LIST).unwrap()),
-            None,
-        );
-        this
-    };
+    let entropy = Arc::new(insecure_dummy_rng());
+    let rng = Arc::new(CtrDrbg::new(entropy, None).unwrap());
+    let mut config = Config::new(Endpoint::Client, Transport::Stream, Preset::Default);
+    config.set_rng(rng);
+    config.set_dbg_callback(
+        DbgCallbackBuilder::default()
+            .forward_log_level(log::Level::Warn)
+            .build(),
+    );
+    config.set_ca_list(
+        Arc::new(mbedtls::x509::Certificate::from_pem_multiple(CA_LIST).unwrap()),
+        None,
+    );
 
     let mut ctx = Context::new(Arc::new(config));
 
@@ -86,14 +63,4 @@ pub async fn run(network_ctx: SharedNetwork, timers_ctx: SharedTimers) {
     drop(ctx);
 
     log::info!("client test complete");
-}
-
-fn dbg_callback_brief(_level: i32, _file: Cow<'_, str>, _line: i32, message: Cow<'_, str>) {
-    debug_print!("{}", message);
-}
-
-#[allow(dead_code)]
-fn dbg_callback_detailed(level: i32, file: Cow<'_, str>, line: i32, message: Cow<'_, str>) {
-    let prefix = "[mbedtls]";
-    log::info!("{}({}) {}:{} {}", prefix, level, file, line, message);
 }

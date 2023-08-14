@@ -21,7 +21,7 @@ sel4-simple-task-runtime = { path = "../../../../../support/sel4-simple-task/run
 sel4-sync = { path = "../../../../../../sel4-sync" }
 serde = { version = "1.0.147", default-features = false, features = ["alloc", "derive"] }
 tests-capdl-http-server-components-test-cpiofs = { path = "./cpiofs" }
-tests-capdl-http-server-components-test-server-core = { path = "./server-core" }
+tests-capdl-http-server-components-test-server-core = { path = "./server-core", features = [] }
 tests-capdl-http-server-components-test-sp804-driver = { path = "./sp804-driver" }
 tock-registers = "0.8.1"
 virtio-drivers = { version = "0.5.0" }
@@ -32,6 +32,10 @@ path = "../../../../../../sel4-async/single-threaded-executor"
 [dependencies.sel4-externally-shared]
 path = "../../../../../../sel4-externally-shared"
 features = ["unstable"]
+
+[dependencies.sel4-newlib]
+path = "../../../../../../sel4-newlib"
+features = ["nosys", "all-symbols", "sel4-panicking-env"]
 
 [dependencies.smoltcp]
 version = "0.10.0"
@@ -58,3 +62,6 @@ features = [
     "socket-mdns",
     "log"
 ]
+
+[build-dependencies]
+rcgen = "0.11.1"

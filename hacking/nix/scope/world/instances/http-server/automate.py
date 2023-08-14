@@ -4,7 +4,8 @@ import argparse
 import pexpect
 from requests import Session
 
-URL_BASE = 'http://localhost:8000'
+HTTP_URL_BASE = 'http://localhost:8080'
+HTTPS_URL_BASE = 'https://localhost:8443'
 
 def mk_url(path):
     return URL_BASE + path
@@ -23,10 +24,12 @@ def run(args):
 
     time.sleep(3)
 
-    sess = Session()
-    r = sess.get(mk_url('/About/'), timeout=5)
-    print(r.status_code)
-    r.raise_for_status()
+    for url_base in [HTTP_URL_BASE, HTTPS_URL_BASE]:
+        sess = Session()
+        url = url_base + '/About/'
+        r = sess.get(url, verify=False, timeout=5)
+        print(r.status_code)
+        r.raise_for_status()
 
 if __name__ == '__main__':
     main()

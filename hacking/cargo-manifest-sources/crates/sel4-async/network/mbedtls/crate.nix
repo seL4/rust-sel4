@@ -18,9 +18,7 @@ mk {
         "small_rng"
       ];
     };
-    mbedtls = mbedtlsWith [
-      "debug"
-    ];
+    mbedtls = mbedtlsWith [];
   };
   nix.local.dependencies = with localCrates; [
     sel4-async-network

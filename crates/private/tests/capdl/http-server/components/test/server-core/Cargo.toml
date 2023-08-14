@@ -5,6 +5,9 @@ authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
 edition = "2021"
 license = "BSD-2-Clause"
 
+[features]
+debug = ["mbedtls/debug"]
+
 [dependencies]
 futures = { version = "0.3.28", default-features = false, features = ["async-await", "alloc"] }
 httparse = { version = "1.8.0", default-features = false }
@@ -15,12 +18,13 @@ sel4-async-timers = { path = "../../../../../../../sel4-async/timers" }
 sel4-panicking-env = { path = "../../../../../../../sel4-panicking/env" }
 tests-capdl-http-server-components-test-cpiofs = { path = "../cpiofs" }
 
+[dependencies.mbedtls]
+path = "../../../../../../../../tmp/rust-mbedtls/mbedtls"
+default-features = false
+features = ["no_std_deps"]
+
 [dependencies.sel4-async-single-threaded-executor]
 path = "../../../../../../../sel4-async/single-threaded-executor"
-
-[dependencies.sel4-newlib]
-path = "../../../../../../../sel4-newlib"
-features = ["nosys", "all-symbols", "sel4-panicking-env"]
 
 [dependencies.smoltcp]
 version = "0.10.0"

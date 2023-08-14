@@ -81,7 +81,7 @@ in
     extraPlatformArgs = lib.optionalAttrs canSimulate {
       extraQemuArgs = [
         "-device" "virtio-net-device,netdev=netdev0"
-        "-netdev" "user,id=netdev0,hostfwd=tcp::8000-:80"
+        "-netdev" "user,id=netdev0,hostfwd=tcp::8080-:80,hostfwd=tcp::8443-:443"
 
         "-device" "virtio-blk-device,drive=blkdev0"
         "-blockdev" "node-name=blkdev0,read-only=on,driver=file,filename=${contentCPIO}"

@@ -5,7 +5,16 @@ mk {
   dependencies = rec {
     sel4-externally-shared.features = [ "unstable" ];
 
+    sel4-newlib = {
+      features = [
+        "nosys"
+        "all-symbols"
+        "sel4-panicking-env"
+      ];
+    };
+
     inherit (versions) log;
+
     serde = serdeWith [ "alloc" "derive" ];
 
     futures = {
@@ -32,6 +41,13 @@ mk {
     async-unsync = { version = "0.2.2"; default-features = false; };
 
     tock-registers = "0.8.1";
+
+    tests-capdl-http-server-components-test-server-core.features = [
+      # "debug"
+    ];
+  };
+  build-dependencies = {
+    rcgen = "0.11.1";
   };
   nix.local.dependencies = with localCrates; [
     sel4
@@ -44,6 +60,7 @@ mk {
     sel4-async-network
     sel4-async-timers
     sel4-async-request-statuses
+    sel4-newlib
     sel4-bounce-buffer-allocator
     sel4-externally-shared
     tests-capdl-http-server-components-test-cpiofs
