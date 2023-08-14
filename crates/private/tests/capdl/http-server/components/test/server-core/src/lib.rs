@@ -20,7 +20,6 @@ use sel4_async_single_threaded_executor::LocalSpawner;
 use sel4_async_timers::SharedTimers;
 use tests_capdl_http_server_components_test_cpiofs as cpiofs;
 
-mod client_test;
 mod server;
 
 use server::Server;
@@ -34,7 +33,7 @@ type SocketUser = Box<dyn Fn(TcpSocketWrapper) -> LocalBoxFuture<'static, ()>>;
 
 pub async fn run_server<T: cpiofs::IO + 'static>(
     network_ctx: SharedNetwork,
-    timers_ctx: SharedTimers,
+    _timers_ctx: SharedTimers,
     blk_device: T,
     spawner: LocalSpawner,
     cert_pem: &str,
@@ -46,8 +45,6 @@ pub async fn run_server<T: cpiofs::IO + 'static>(
     }
 
     seed_insecure_dummy_rng(0);
-
-    client_test::run(network_ctx.clone(), timers_ctx.clone()).await;
 
     let index = cpiofs::Index::create(blk_device).await;
 
