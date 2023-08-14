@@ -35,10 +35,7 @@ impl<'a, D, M> Object<'a, D, M> {
                     let level = obj.level.unwrap();
                     assert_eq!(obj.is_root, level == 0); // sanity check
                     match level {
-                        0 => ObjectBlueprintSeL4Arch::PGD.into(),
-                        1 => ObjectBlueprintSeL4Arch::PUD.into(),
-                        2 => ObjectBlueprintArch::PD.into(),
-                        3 => ObjectBlueprintArch::PT.into(),
+                        0..3 => ObjectBlueprintSeL4Arch::PT.into(),
                         _ => panic!(),
                     }
                 }

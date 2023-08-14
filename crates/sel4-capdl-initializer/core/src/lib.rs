@@ -422,8 +422,8 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
             .spec()
             .filter_objects_with::<&object::PageTable>(|obj| obj.is_root)
         {
-            let pgd = self.orig_local_cptr::<cap_type::VSpace>(obj_id);
-            BootInfo::init_thread_asid_pool().asid_pool_assign(pgd)?;
+            let vspace = self.orig_local_cptr::<cap_type::VSpace>(obj_id);
+            BootInfo::init_thread_asid_pool().asid_pool_assign(vspace)?;
         }
         Ok(())
     }
@@ -514,17 +514,17 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
         {
             let vspace = self.orig_local_cptr::<cap_type::VSpace>(obj_id);
             for (i, cap) in obj.page_tables() {
-                let pud = self.orig_local_cptr::<cap_type::PUD>(cap.object);
-                let vaddr = i << cap_type::PUD::SPAN_BITS;
-                pud.pud_map(vspace, vaddr, cap.vm_attributes())?;
+                let pt_level_one = self.orig_local_cptr::<cap_type::PT>(cap.object);
+                let vaddr = i << cap_type::PT::SPAN_BITS;
+                pt_level_one.pt_map(vspace, vaddr, cap.vm_attributes())?;
                 for (i, cap) in self
                     .spec()
                     .lookup_object::<&object::PageTable>(cap.object)?
                     .page_tables()
                 {
-                    let pd = self.orig_local_cptr::<cap_type::PD>(cap.object);
-                    let vaddr = vaddr + (i << cap_type::PD::SPAN_BITS);
-                    pd.pd_map(vspace, vaddr, cap.vm_attributes())?;
+                    let pt_level_two = self.orig_local_cptr::<cap_type::PT>(cap.object);
+                    let vaddr = vaddr + (i << cap_type::PT::SPAN_BITS);
+                    pt_level_two.pt_map(vspace, vaddr, cap.vm_attributes())?;
                     for (i, cap) in self
                         .spec()
                         .lookup_object::<&object::PageTable>(cap.object)?
@@ -543,8 +543,9 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
                                 )?;
                             }
                             PageTableEntry::PageTable(cap) => {
-                                let pt = self.orig_local_cptr::<cap_type::PT>(cap.object);
-                                pt.pt_map(vspace, vaddr, cap.vm_attributes())?;
+                                let pt_level_three =
+                                    self.orig_local_cptr::<cap_type::PT>(cap.object);
+                                pt_level_three.pt_map(vspace, vaddr, cap.vm_attributes())?;
                                 for (i, cap) in self
                                     .spec()
                                     .lookup_object::<&object::PageTable>(cap.object)?

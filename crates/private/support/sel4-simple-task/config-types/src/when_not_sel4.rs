@@ -21,9 +21,6 @@ dummies! {
     SmallPage
     LargePage
     HugePage
-    PGD
-    PUD
-    PD
     PT
     IRQControl
     IRQHandler
