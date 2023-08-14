@@ -64,6 +64,7 @@ in
           ];
           commonModifications = {
             modifyDerivation = drv: drv.overrideAttrs (self: super: {
+              HOST_CC = "${buildPackages.stdenv.cc.targetPrefix}gcc";
               "BINDGEN_EXTRA_CLANG_ARGS_${defaultRustTargetInfo.name}" = [ "-I${libcDir}/include" ];
               nativeBuildInputs = super.nativeBuildInputs ++ [
                 cmake

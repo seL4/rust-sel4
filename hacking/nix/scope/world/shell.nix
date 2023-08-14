@@ -41,11 +41,13 @@ mkShell (seL4RustEnvVars // kernelLoaderConfigEnvVars // capdlEnvVars // {
     "-Z" "build-std-features=compiler-builtins-mem"
   ];
 
+  HOST_CC = "${buildPackages.stdenv.cc.targetPrefix}gcc";
+
   LIBCLANG_PATH = libclangPath;
 
-  hardeningDisable = [ "all" ];
-
   "BINDGEN_EXTRA_CLANG_ARGS_${defaultRustTargetInfo.name}" = [ "-I${libcDir}/include" ];
+
+  hardeningDisable = [ "all" ];
 
   nativeBuildInputs = [
     defaultRustToolchain
