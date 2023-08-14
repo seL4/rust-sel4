@@ -100,7 +100,7 @@ let
 
       mbedtlsSource = {
         # git = "https://github.com/nspin/rust-mbedtls";
-        # tag = "keep/b106b115554c38559f0451a00be5de23";
+        # tag = "keep/3e9a1f479833515d6edcfda78a215815";
       };
 
       mbedtlsWith = features: (mbedtlsSource // {
