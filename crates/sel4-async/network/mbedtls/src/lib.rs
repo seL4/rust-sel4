@@ -15,11 +15,14 @@ use core::task::{Context, Poll};
 use rand::rngs::SmallRng;
 use rand::{RngCore, SeedableRng};
 
+use mbedtls::alloc::List;
 use mbedtls::error::Result as TlsResult;
 use mbedtls::ssl::async_io::AsyncIo;
 use mbedtls::ssl::config::DbgCallback;
+use mbedtls::x509::Certificate;
 
 use sel4_async_network::{TcpSocket, TcpSocketError};
+use sel4_async_network_mbedtls_mozilla_ca_list::CA_LIST;
 
 // re-export
 pub use mbedtls;
@@ -56,6 +59,10 @@ impl AsyncIo for TcpSocketWrapper {
     fn poll_send(&mut self, cx: &mut Context<'_>, buf: &[u8]) -> Poll<Result<usize, Self::Error>> {
         self.inner_mut().poll_send(cx, buf)
     }
+}
+
+pub fn get_mozilla_ca_list() -> List<Certificate> {
+    Certificate::from_pem_multiple(CA_LIST).unwrap()
 }
 
 pub fn wrap_rng_callback<F>(f: F) -> impl Fn(*mut c_uchar, size_t) -> c_int + Send + Sync

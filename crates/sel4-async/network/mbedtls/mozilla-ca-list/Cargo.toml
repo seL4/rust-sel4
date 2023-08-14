@@ -1,0 +1,6 @@
+[package]
+name = "sel4-async-network-mbedtls-mozilla-ca-list"
+version = "0.1.0"
+authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
+edition = "2021"
+license = "MPL-2.0"

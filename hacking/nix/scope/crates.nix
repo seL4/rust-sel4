@@ -37,12 +37,6 @@ let
         "assets"
       ];
     };
-    tests-capdl-http-server-components-test-server-core = {
-      resolveLinks = true;
-      extraPaths = [
-        "support"
-      ];
-    };
     mbedtls-sys-auto = {
       extraPaths = [
         "build"

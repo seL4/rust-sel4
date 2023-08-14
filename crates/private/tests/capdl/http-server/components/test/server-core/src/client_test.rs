@@ -11,10 +11,10 @@ use mbedtls::ssl::config::{Endpoint, Preset, Transport};
 use mbedtls::ssl::{Config, Context};
 
 use sel4_async_network::SharedNetwork;
-use sel4_async_network_mbedtls::{insecure_dummy_rng, DbgCallbackBuilder, TcpSocketWrapper};
+use sel4_async_network_mbedtls::{
+    get_mozilla_ca_list, insecure_dummy_rng, DbgCallbackBuilder, TcpSocketWrapper,
+};
 use sel4_async_timers::SharedTimers;
-
-const CA_LIST: &[u8] = concat!(include_str!("../support/cacert.pem"), "\0").as_bytes();
 
 pub async fn run(network_ctx: SharedNetwork, timers_ctx: SharedTimers) {
     timers_ctx.sleep(Duration::from_secs(1)).await;
@@ -36,10 +36,7 @@ pub async fn run(network_ctx: SharedNetwork, timers_ctx: SharedTimers) {
             .forward_log_level(log::Level::Warn)
             .build(),
     );
-    config.set_ca_list(
-        Arc::new(mbedtls::x509::Certificate::from_pem_multiple(CA_LIST).unwrap()),
-        None,
-    );
+    config.set_ca_list(Arc::new(get_mozilla_ca_list()), None);
 
     let mut ctx = Context::new(Arc::new(config));
 

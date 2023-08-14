@@ -44,6 +44,7 @@ members = [
     "crates/sel4",
     "crates/sel4-async/network",
     "crates/sel4-async/network/mbedtls",
+    "crates/sel4-async/network/mbedtls/mozilla-ca-list",
     "crates/sel4-async/request-statuses",
     "crates/sel4-async/single-threaded-executor",
     "crates/sel4-async/timers",

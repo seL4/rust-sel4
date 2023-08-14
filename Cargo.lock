@@ -2707,7 +2707,12 @@ dependencies = [
  "mbedtls",
  "rand 0.8.5",
  "sel4-async-network",
+ "sel4-async-network-mbedtls-mozilla-ca-list",
 ]
+
+[[package]]
+name = "sel4-async-network-mbedtls-mozilla-ca-list"
+version = "0.1.0"
 
 [[package]]
 name = "sel4-async-request-statuses"
