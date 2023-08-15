@@ -13,6 +13,7 @@ sel4-async-network = { path = ".." }
 sel4-async-network-mbedtls-mozilla-ca-list = { path = "./mozilla-ca-list" }
 
 [dependencies.mbedtls]
-path = "../../../../tmp/rust-mbedtls/mbedtls"
+git = "https://github.com/nspin/rust-mbedtls"
+tag = "keep/6eef662dbf636d1ccf86078143b6854f"
 default-features = false
 features = ["no_std_deps"]

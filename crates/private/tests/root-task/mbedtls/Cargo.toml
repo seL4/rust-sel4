@@ -12,17 +12,20 @@ sel4-logging = { path = "../../../../sel4-logging" }
 sel4-root-task = { path = "../../../../sel4-root-task" }
 
 [dependencies.mbedtls]
-path = "../../../../../tmp/rust-mbedtls/mbedtls"
+git = "https://github.com/nspin/rust-mbedtls"
+tag = "keep/6eef662dbf636d1ccf86078143b6854f"
 default-features = false
 features = ["no_std_deps", "debug"]
 
 [dependencies.mbedtls-platform-support]
-path = "../../../../../tmp/rust-mbedtls/mbedtls-platform-support"
+git = "https://github.com/nspin/rust-mbedtls"
+tag = "keep/6eef662dbf636d1ccf86078143b6854f"
 default-features = false
 features = []
 
 [dependencies.mbedtls-sys-auto]
-path = "../../../../../tmp/rust-mbedtls/mbedtls-sys"
+git = "https://github.com/nspin/rust-mbedtls"
+tag = "keep/6eef662dbf636d1ccf86078143b6854f"
 default-features = false
 features = []
 

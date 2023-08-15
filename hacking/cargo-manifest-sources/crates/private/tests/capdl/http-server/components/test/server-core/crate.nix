@@ -27,7 +27,7 @@ mk {
     sel4-async-timers
     sel4-panicking-env
     tests-capdl-http-server-components-test-cpiofs
-    mbedtls
+    # mbedtls
   ];
   features = {
     debug = [ "mbedtls/debug" ];

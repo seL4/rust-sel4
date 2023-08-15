@@ -19,7 +19,8 @@ sel4-panicking-env = { path = "../../../../../../../sel4-panicking/env" }
 tests-capdl-http-server-components-test-cpiofs = { path = "../cpiofs" }
 
 [dependencies.mbedtls]
-path = "../../../../../../../../tmp/rust-mbedtls/mbedtls"
+git = "https://github.com/nspin/rust-mbedtls"
+tag = "keep/6eef662dbf636d1ccf86078143b6854f"
 default-features = false
 features = ["no_std_deps"]
 

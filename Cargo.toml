@@ -103,7 +103,4 @@ members = [
     "crates/sel4cp",
     "crates/sel4cp/macros",
     "crates/sel4cp/postcard",
-    "tmp/rust-mbedtls/mbedtls",
-    "tmp/rust-mbedtls/mbedtls-platform-support",
-    "tmp/rust-mbedtls/mbedtls-sys",
 ]
