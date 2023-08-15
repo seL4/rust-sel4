@@ -11,10 +11,7 @@
 
 extern crate alloc;
 
-use core::ops::Range;
 use core::ptr::NonNull;
-
-use serde::{Deserialize, Serialize};
 
 use virtio_drivers::{
     device::blk::*,
@@ -26,8 +23,7 @@ use virtio_drivers::{
 };
 
 use sel4_logging::{LevelFilter, Logger, LoggerBuilder};
-use sel4_simple_task_config_types::*;
-use sel4_simple_task_runtime::main_json;
+use sel4cp::{memory_region_symbol, protection_domain, var, Channel, Handler};
 use tests_capdl_http_server_components_http_server_core::run_server;
 use tests_capdl_http_server_components_timer_driver_sp804_driver::Driver;
 
@@ -51,74 +47,61 @@ static LOGGER: Logger = LoggerBuilder::const_default()
     .write(|s| sel4::debug_print!("{}", s))
     .build();
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct Config {
-    pub event_nfn: ConfigCPtr<Notification>,
-    pub timer_irq_handler: ConfigCPtr<IRQHandler>,
-    pub timer_mmio_vaddr: usize,
-    pub timer_freq: usize,
-    pub virtio_net_irq_handler: ConfigCPtr<IRQHandler>,
-    pub virtio_net_mmio_vaddr: usize,
-    pub virtio_net_mmio_offset: usize,
-    pub virtio_blk_irq_handler: ConfigCPtr<IRQHandler>,
-    pub virtio_blk_mmio_vaddr: usize,
-    pub virtio_blk_mmio_offset: usize,
-    pub virtio_dma_vaddr_range: Range<usize>,
-    pub virtio_dma_paddr: usize,
-}
-
 const NET_BUFFER_LEN: usize = 2048;
 
-#[main_json]
-fn main(config: Config) -> ! {
+const TIMER_DEVICE: Channel = Channel::new(0);
+const BLK_DEVICE: Channel = Channel::new(1);
+const NET_DEVICE: Channel = Channel::new(2);
+
+#[protection_domain(
+    heap_size = 16 * 1024 * 1024,
+)]
+fn init() -> impl Handler {
     LOGGER.set().unwrap();
 
     setup_newlib();
 
     let timer = unsafe {
         Driver::new(
-            config.timer_mmio_vaddr as *mut (),
-            config.timer_freq.try_into().unwrap(),
+            memory_region_symbol!(sp804_mmio_vaddr: *mut ()).as_ptr(),
+            var!(timer_freq).try_into().unwrap(),
         )
     };
 
     HalImpl::init(
-        config.virtio_dma_vaddr_range.len(),
-        config.virtio_dma_vaddr_range.start,
-        config.virtio_dma_paddr,
+        var!(virtio_dma_size),
+        var!(virtio_dma_vaddr),
+        var!(virtio_dma_paddr),
     );
 
+    let virtio_mmio_vaddr = var!(virtio_mmio_vaddr);
+    let virtio_net_mmio_offset = var!(virtio_net_mmio_offset);
+
     let net_device = {
-        let header = NonNull::new(
-            (config.virtio_net_mmio_vaddr + config.virtio_net_mmio_offset) as *mut VirtIOHeader,
-        )
-        .unwrap();
+        let header =
+            NonNull::new((virtio_mmio_vaddr + virtio_net_mmio_offset) as *mut VirtIOHeader)
+                .unwrap();
         let transport = unsafe { MmioTransport::new(header) }.unwrap();
         assert_eq!(transport.device_type(), DeviceType::Network);
         DeviceImpl::new(VirtIONet::new(transport, NET_BUFFER_LEN).unwrap())
     };
 
     let blk_device = {
-        let header = NonNull::new(
-            (config.virtio_blk_mmio_vaddr + config.virtio_blk_mmio_offset) as *mut VirtIOHeader,
-        )
-        .unwrap();
+        let header =
+            NonNull::new((virtio_mmio_vaddr + var!(virtio_blk_mmio_offset)) as *mut VirtIOHeader)
+                .unwrap();
         let transport = unsafe { MmioTransport::new(header) }.unwrap();
         assert_eq!(transport.device_type(), DeviceType::Block);
         CpiofsBlockIOImpl::new(VirtIOBlk::new(transport).unwrap())
     };
 
-    let reactor = Reactor::new(
+    Reactor::new(
         net_device,
         blk_device,
         timer,
-        config.virtio_net_irq_handler.get(),
-        config.virtio_blk_irq_handler.get(),
-        config.timer_irq_handler.get(),
-    );
-
-    reactor.run(
-        config.event_nfn.get(),
+        NET_DEVICE,
+        BLK_DEVICE,
+        TIMER_DEVICE,
         |network_ctx, timers_ctx, blk_device, spawner| {
             run_server(
                 network_ctx,

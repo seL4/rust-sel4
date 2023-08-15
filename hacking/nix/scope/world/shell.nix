@@ -8,6 +8,7 @@
 , sources
 , dummyCapDLSpec, serializeCapDLSpec
 , seL4RustEnvVars
+, seL4RustTargetInfoWithConfig
 , worldConfig
 , seL4ForBoot
 , crateUtils
@@ -29,8 +30,19 @@ let
   };
 
   libcDir = "${stdenv.cc.libc}/${hostPlatform.config}";
+
+  bindgenEnvVars =
+    let
+      targets = lib.flatten (
+        lib.forEach [ true false ] (cp:
+          lib.forEach [ true false ] (minimal:
+            seL4RustTargetInfoWithConfig { inherit cp minimal; })));
+    in lib.listToAttrs (lib.forEach targets (target: {
+      name = "BINDGEN_EXTRA_CLANG_ARGS_${target.name}";
+      value = [ "-I${libcDir}/include" ];
+    }));
 in
-mkShell (seL4RustEnvVars // kernelLoaderConfigEnvVars // capdlEnvVars // {
+mkShell (seL4RustEnvVars // kernelLoaderConfigEnvVars // capdlEnvVars // bindgenEnvVars // {
   # TODO
   RUST_SEL4_TARGET = defaultRustTargetInfo.name;
 
@@ -44,8 +56,6 @@ mkShell (seL4RustEnvVars // kernelLoaderConfigEnvVars // capdlEnvVars // {
   HOST_CC = "${buildPackages.stdenv.cc.targetPrefix}gcc";
 
   LIBCLANG_PATH = libclangPath;
-
-  "BINDGEN_EXTRA_CLANG_ARGS_${defaultRustTargetInfo.name}" = [ "-I${libcDir}/include" ];
 
   hardeningDisable = [ "all" ];
 

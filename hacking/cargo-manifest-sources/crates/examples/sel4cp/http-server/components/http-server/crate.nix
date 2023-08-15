@@ -3,8 +3,6 @@
 mk {
   package.name = "tests-capdl-http-server-components-http-server";
   dependencies = rec {
-    sel4-externally-shared.features = [ "unstable" ];
-
     sel4-newlib = {
       features = [
         "nosys"
@@ -45,6 +43,9 @@ mk {
     tests-capdl-http-server-components-http-server-core.features = [
       # "debug"
     ];
+
+    sel4cp = { default-features = false; features = [ "alloc" ]; };
+    sel4-externally-shared.features = [ "unstable" "alloc" ];
   };
   build-dependencies = {
     rcgen = "0.11.1";
@@ -54,8 +55,8 @@ mk {
     sel4-sync
     sel4-logging
     sel4-immediate-sync-once-cell
-    sel4-simple-task-runtime
-    sel4-simple-task-config-types
+    sel4cp
+    sel4-externally-shared
     sel4-async-single-threaded-executor
     sel4-async-network
     sel4-async-timers

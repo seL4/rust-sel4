@@ -11,7 +11,6 @@
 , mkCorePlatformInstance
 , worldConfig
 
-, maybe
 , canSimulate
 , mkPD
 }:

@@ -48,11 +48,11 @@ in rec {
     tests.root-task.panicking.unwind.withAlloc
     tests.root-task.panicking.unwind.withoutAlloc
     tests.root-task.c
-    tests.capdl.http-server
     tests.capdl.threads
     tests.capdl.utcover
     sel4cp.examples.hello
     sel4cp.examples.banscii
+    sel4cp.examples.http-server
     sel4cp.tests.passive-server-with-deferred-action
     examples.root-task.hello
     examples.root-task.example-root-task
@@ -222,13 +222,6 @@ in rec {
           canAutomateSimply = true;
         };
       });
-
-      http-server =
-        maybe
-          (hostPlatform.isAarch64 && !isCorePlatform && seL4Config.PLAT == "qemu-arm-virt")
-          (callPackage ./http-server {
-            inherit canSimulate;
-          });
     };
   };
 

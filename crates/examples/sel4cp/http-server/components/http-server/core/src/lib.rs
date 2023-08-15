@@ -27,7 +27,7 @@ use server::Server;
 const HTTP_PORT: u16 = 80;
 const HTTPS_PORT: u16 = 443;
 
-const NUM_SIMULTANEOUS_CONNECTIONS: usize = 100;
+const NUM_SIMULTANEOUS_CONNECTIONS: usize = 32;
 
 type SocketUser = Box<dyn Fn(TcpSocketWrapper) -> LocalBoxFuture<'static, ()>>;
 
@@ -88,7 +88,7 @@ pub async fn run_server<T: cpiofs::IO + 'static>(
                     let f = f.clone();
                     async move {
                         loop {
-                            let socket = network_ctx.new_tcp_socket();
+                            let socket = network_ctx.new_tcp_socket_with_buffer_sizes(8192, 65535);
                             f(TcpSocketWrapper::new(socket)).await;
                         }
                     }

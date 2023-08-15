@@ -10,6 +10,7 @@
 , seL4RustTargetInfoWithConfig
 , mkCorePlatformInstance
 , worldConfig
+, seL4Config
 
 , maybe
 , canSimulate
@@ -55,9 +56,17 @@ in {
     );
 
     banscii = maybe isCorePlatform (callPackage ./banscii {
-      inherit maybe canSimulate;
+      inherit canSimulate;
       inherit mkPD;
     });
+
+    http-server =
+      maybe
+        (isCorePlatform && seL4Config.PLAT == "qemu-arm-virt")
+        (callPackage ./http-server {
+          inherit canSimulate;
+          inherit mkPD;
+        });
   };
 
   tests = {

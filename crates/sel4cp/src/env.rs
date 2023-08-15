@@ -34,3 +34,19 @@ pub fn pd_name() -> &'static str {
         .to_str()
         .unwrap_or_else(&on_err)
 }
+
+#[macro_export]
+macro_rules! var {
+    ($(#[$attrs:meta])* $symbol:ident) => {{
+        $(#[$attrs])*
+        #[no_mangle]
+        #[link_section = ".data"]
+        static mut $symbol: usize = 0;
+
+        unsafe {
+            $symbol
+        }
+    }};
+}
+
+pub use var;

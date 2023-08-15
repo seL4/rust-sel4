@@ -1,4 +1,8 @@
+use alloc::boxed::Box;
 use core::future::Future;
+use core::pin::Pin;
+
+use futures::future::LocalBoxFuture;
 
 use smoltcp::iface::Config;
 use smoltcp::phy::{Device, Medium};
@@ -13,10 +17,6 @@ use tests_capdl_http_server_components_timer_driver_sp804_driver::Driver as Time
 
 use crate::{CpiofsBlockIOImpl, DeviceImpl, BLOCK_SIZE};
 
-const TIMER_IRQ_BADGE: sel4::Badge = 1 << 0;
-const VIRTIO_NET_IRQ_BADGE: sel4::Badge = 1 << 1;
-const VIRTIO_BLK_IRQ_BADGE: sel4::Badge = 1 << 2;
-
 type CpiofsIOImpl =
     cpiofs::BlockIOAdapter<cpiofs::CachedBlockIO<CpiofsBlockIOImpl, BLOCK_SIZE>, BLOCK_SIZE>;
 
@@ -26,21 +26,24 @@ pub(crate) struct Reactor {
     net_device: DeviceImpl,
     blk_device: CpiofsBlockIOImpl,
     timer: TimerDriver,
-    net_irq_handler: sel4::IRQHandler,
-    blk_irq_handler: sel4::IRQHandler,
-    timer_irq_handler: sel4::IRQHandler,
+    net_irq_channel: sel4cp::Channel,
+    blk_irq_channel: sel4cp::Channel,
+    timer_irq_channel: sel4cp::Channel,
     shared_network: SharedNetwork,
     shared_timers: SharedTimers,
+    local_pool: LocalPool,
+    fut: LocalBoxFuture<'static, !>,
 }
 
 impl Reactor {
-    pub(crate) fn new(
+    pub(crate) fn new<T: Future<Output = !> + 'static>(
         mut net_device: DeviceImpl,
         blk_device: CpiofsBlockIOImpl,
         mut timer: TimerDriver,
-        net_irq_handler: sel4::IRQHandler,
-        blk_irq_handler: sel4::IRQHandler,
-        timer_irq_handler: sel4::IRQHandler,
+        net_irq_channel: sel4cp::Channel,
+        blk_irq_channel: sel4cp::Channel,
+        timer_irq_channel: sel4cp::Channel,
+        f: impl FnOnce(SharedNetwork, SharedTimers, CpiofsIOImpl, LocalSpawner) -> T,
     ) -> Self {
         assert_eq!(net_device.capabilities().medium, Medium::Ethernet);
         let hardware_addr = HardwareAddress::Ethernet(net_device.mac_address());
@@ -58,16 +61,39 @@ impl Reactor {
 
         let shared_timers = SharedTimers::new(now.clone());
 
-        Self {
+        let local_pool = LocalPool::new();
+        let spawner = local_pool.spawner();
+
+        let fut = Box::pin(f(
+            shared_network.clone(),
+            shared_timers.clone(),
+            cpiofs::BlockIOAdapter::new(cpiofs::CachedBlockIO::new(
+                blk_device.clone(),
+                BLOCK_CACHE_SIZE_IN_BLOCKS,
+            )),
+            spawner,
+        ));
+
+        let mut this = Self {
             net_device,
             blk_device,
             timer,
-            net_irq_handler,
-            blk_irq_handler,
-            timer_irq_handler,
+            net_irq_channel,
+            blk_irq_channel,
+            timer_irq_channel,
             shared_network,
             shared_timers,
-        }
+            local_pool,
+            fut,
+        };
+
+        this.handle_net_interrupt();
+        this.handle_blk_interrupt();
+        this.handle_timer_interrupt();
+
+        this.react();
+
+        this
     }
 
     fn now(&mut self) -> Instant {
@@ -85,77 +111,59 @@ impl Reactor {
 
     fn handle_net_interrupt(&mut self) {
         self.net_device.ack_interrupt();
-        self.net_irq_handler.irq_handler_ack().unwrap();
+        self.net_irq_channel.irq_ack().unwrap();
     }
 
     fn handle_blk_interrupt(&mut self) {
         self.blk_device.ack_interrupt();
-        self.blk_irq_handler.irq_handler_ack().unwrap();
+        self.blk_irq_channel.irq_ack().unwrap();
     }
 
     fn handle_timer_interrupt(&mut self) {
         self.timer.handle_interrupt();
-        self.timer_irq_handler.irq_handler_ack().unwrap();
+        self.timer_irq_channel.irq_ack().unwrap();
     }
 
-    pub(crate) fn run<T: Future<Output = !>>(
-        mut self,
-        event_nfn: sel4::Notification,
-        f: impl FnOnce(SharedNetwork, SharedTimers, CpiofsIOImpl, LocalSpawner) -> T,
-    ) -> ! {
-        self.handle_net_interrupt();
-        self.handle_blk_interrupt();
-        self.handle_timer_interrupt();
-
-        let mut local_pool = LocalPool::new();
-        let spawner = local_pool.spawner();
-
-        let fut = f(
-            self.shared_network.clone(),
-            self.shared_timers.clone(),
-            cpiofs::BlockIOAdapter::new(cpiofs::CachedBlockIO::new(
-                self.blk_device.clone(),
-                BLOCK_CACHE_SIZE_IN_BLOCKS,
-            )),
-            spawner,
-        );
-        futures::pin_mut!(fut);
-
+    fn react(&mut self) {
         loop {
-            loop {
-                let _ = local_pool.run_until_stalled(fut.as_mut());
-                let now = self.now();
-                let mut activity = false;
-                activity |= self.blk_device.poll();
-                activity |= self
-                    .shared_network
-                    .inner()
-                    .borrow_mut()
-                    .poll(now, &mut self.net_device);
-                activity |= self.shared_timers.inner().borrow_mut().poll(now);
-                if !activity {
-                    let delays = &[
-                        self.shared_network.inner().borrow_mut().poll_delay(now),
-                        self.shared_timers.inner().borrow_mut().poll_delay(now),
-                    ];
-                    if let Some(delay) = delays.iter().filter_map(Option::as_ref).min() {
-                        self.set_timeout(delay.clone());
-                    }
-                    break;
+            let _ = self.local_pool.run_until_stalled(Pin::new(&mut self.fut));
+            let now = self.now();
+            let mut activity = false;
+            activity |= self.blk_device.poll();
+            activity |= self
+                .shared_network
+                .inner()
+                .borrow_mut()
+                .poll(now, &mut self.net_device);
+            activity |= self.shared_timers.inner().borrow_mut().poll(now);
+            if !activity {
+                let delays = &[
+                    self.shared_network.inner().borrow_mut().poll_delay(now),
+                    self.shared_timers.inner().borrow_mut().poll_delay(now),
+                ];
+                if let Some(delay) = delays.iter().filter_map(Option::as_ref).min() {
+                    self.set_timeout(delay.clone());
                 }
-            }
-
-            let (_, badge) = event_nfn.wait();
-
-            if badge & VIRTIO_NET_IRQ_BADGE != 0 {
-                self.handle_net_interrupt();
-            }
-            if badge & VIRTIO_BLK_IRQ_BADGE != 0 {
-                self.handle_blk_interrupt();
-            }
-            if badge & TIMER_IRQ_BADGE != 0 {
-                self.handle_timer_interrupt();
+                break;
             }
         }
+    }
+}
+
+impl sel4cp::Handler for Reactor {
+    type Error = !;
+
+    fn notified(&mut self, channel: sel4cp::Channel) -> Result<(), Self::Error> {
+        if channel == self.net_irq_channel {
+            self.handle_net_interrupt();
+        } else if channel == self.blk_irq_channel {
+            self.handle_blk_interrupt();
+        } else if channel == self.timer_irq_channel {
+            self.handle_timer_interrupt();
+        }
+
+        self.react();
+
+        Ok(())
     }
 }
