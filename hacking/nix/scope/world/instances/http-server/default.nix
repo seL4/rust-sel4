@@ -42,7 +42,7 @@ in
   lib.fix (self: mkInstance {
     rootTask = mkCapDLRootTask rec {
       # small = true;
-      script = sources.srcRoot + "/crates/private/tests/capdl/http-server/cdl.py";
+      script = sources.srcRoot + "/crates/examples/sel4cp/http-server/cdl.py";
       config = {
         components = {
           example_component.image = passthru.test.elf;
