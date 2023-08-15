@@ -8,8 +8,8 @@ use smoltcp::wire::HardwareAddress;
 use sel4_async_network::{DhcpOverrides, SharedNetwork};
 use sel4_async_single_threaded_executor::{LocalPool, LocalSpawner};
 use sel4_async_timers::SharedTimers;
-use tests_capdl_http_server_components_test_cpiofs as cpiofs;
-use tests_capdl_http_server_components_test_sp804_driver::Driver as TimerDriver;
+use tests_capdl_http_server_components_http_server_cpiofs as cpiofs;
+use tests_capdl_http_server_components_timer_driver_sp804_driver::Driver as TimerDriver;
 
 use crate::{CpiofsBlockIOImpl, DeviceImpl, BLOCK_SIZE};
 

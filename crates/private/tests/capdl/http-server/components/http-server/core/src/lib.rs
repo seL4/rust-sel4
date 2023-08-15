@@ -18,7 +18,7 @@ use sel4_async_network_mbedtls::{
 };
 use sel4_async_single_threaded_executor::LocalSpawner;
 use sel4_async_timers::SharedTimers;
-use tests_capdl_http_server_components_test_cpiofs as cpiofs;
+use tests_capdl_http_server_components_http_server_cpiofs as cpiofs;
 
 mod server;
 

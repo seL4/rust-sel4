@@ -1,7 +1,7 @@
 { mk, localCrates, versions, smoltcpWith, mbedtlsWith }:
 
 mk {
-  package.name = "tests-capdl-http-server-components-test-server-core";
+  package.name = "tests-capdl-http-server-components-http-server-core";
   dependencies = {
     inherit (versions) log;
 
@@ -26,7 +26,7 @@ mk {
     sel4-async-network-mbedtls
     sel4-async-timers
     sel4-panicking-env
-    tests-capdl-http-server-components-test-cpiofs
+    tests-capdl-http-server-components-http-server-cpiofs
     # mbedtls
   ];
   features = {

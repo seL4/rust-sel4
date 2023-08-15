@@ -28,8 +28,8 @@ use virtio_drivers::{
 use sel4_logging::{LevelFilter, Logger, LoggerBuilder};
 use sel4_simple_task_config_types::*;
 use sel4_simple_task_runtime::main_json;
-use tests_capdl_http_server_components_test_server_core::run_server;
-use tests_capdl_http_server_components_test_sp804_driver::Driver;
+use tests_capdl_http_server_components_http_server_core::run_server;
+use tests_capdl_http_server_components_timer_driver_sp804_driver::Driver;
 
 mod glue;
 mod reactor;

@@ -1,5 +1,5 @@
 [package]
-name = "tests-capdl-http-server-components-test-server-core"
+name = "tests-capdl-http-server-components-http-server-core"
 version = "0.1.0"
 authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
 edition = "2021"
@@ -16,7 +16,7 @@ sel4-async-network = { path = "../../../../../../../sel4-async/network" }
 sel4-async-network-mbedtls = { path = "../../../../../../../sel4-async/network/mbedtls" }
 sel4-async-timers = { path = "../../../../../../../sel4-async/timers" }
 sel4-panicking-env = { path = "../../../../../../../sel4-panicking/env" }
-tests-capdl-http-server-components-test-cpiofs = { path = "../cpiofs" }
+tests-capdl-http-server-components-http-server-cpiofs = { path = "../cpiofs" }
 
 [dependencies.mbedtls]
 git = "https://github.com/nspin/rust-mbedtls"

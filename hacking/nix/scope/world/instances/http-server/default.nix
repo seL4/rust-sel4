@@ -52,7 +52,7 @@ in
       passthru = {
         inherit contentCPIO;
         test = mkTask {
-          rootCrate = crates.tests-capdl-http-server-components-test;
+          rootCrate = crates.tests-capdl-http-server-components-http-server;
           layers = [
             crateUtils.defaultIntermediateLayer
             {

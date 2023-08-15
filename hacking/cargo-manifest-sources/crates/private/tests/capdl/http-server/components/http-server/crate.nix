@@ -1,7 +1,7 @@
 { mk, localCrates, versions, serdeWith, smoltcpWith }:
 
 mk {
-  package.name = "tests-capdl-http-server-components-test";
+  package.name = "tests-capdl-http-server-components-http-server";
   dependencies = rec {
     sel4-externally-shared.features = [ "unstable" ];
 
@@ -42,7 +42,7 @@ mk {
 
     tock-registers = "0.8.1";
 
-    tests-capdl-http-server-components-test-server-core.features = [
+    tests-capdl-http-server-components-http-server-core.features = [
       # "debug"
     ];
   };
@@ -63,9 +63,9 @@ mk {
     sel4-newlib
     sel4-bounce-buffer-allocator
     sel4-externally-shared
-    tests-capdl-http-server-components-test-cpiofs
-    tests-capdl-http-server-components-test-sp804-driver
-    tests-capdl-http-server-components-test-server-core
+    tests-capdl-http-server-components-http-server-core
+    tests-capdl-http-server-components-http-server-cpiofs
+    tests-capdl-http-server-components-timer-driver-sp804-driver
 
     # virtio-drivers
   ];
