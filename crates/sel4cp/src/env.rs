@@ -1,3 +1,5 @@
+use core::str;
+
 use sel4_immutable_cell::ImmutableCell;
 
 use crate::abort;
@@ -27,14 +29,15 @@ static sel4cp_name: ImmutableCell<[u8; 16]> = ImmutableCell::new([0; 16]);
 
 /// Returns the name of this projection domain.
 pub fn pd_name() -> &'static str {
-    // abort to avoid recursive panic
-    fn on_err<T, U>(_: T) -> U {
+    let all_bytes = sel4cp_name.get();
+    let bytes = match core::ffi::CStr::from_bytes_until_nul(all_bytes) {
+        Ok(cstr) => cstr.to_bytes(),
+        Err(_) => all_bytes,
+    };
+    str::from_utf8(bytes).unwrap_or_else(|_| {
+        // abort to avoid recursive panic
         abort!("invalid embedded protection domain name");
-    }
-    core::ffi::CStr::from_bytes_until_nul(sel4cp_name.get())
-        .unwrap_or_else(&on_err)
-        .to_str()
-        .unwrap_or_else(&on_err)
+    })
 }
 
 #[macro_export]

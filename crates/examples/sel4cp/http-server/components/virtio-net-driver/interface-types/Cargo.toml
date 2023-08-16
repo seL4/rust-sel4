@@ -1,0 +1,10 @@
+[package]
+name = "tests-capdl-http-server-components-virtio-net-driver-interface-types"
+version = "0.1.0"
+authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
+edition = "2021"
+license = "BSD-2-Clause"
+
+[dependencies]
+num_enum = { version = "0.5.9", default-features = false }
+zerocopy = "0.6.1"

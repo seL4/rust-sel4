@@ -13,24 +13,31 @@ extern crate alloc;
 
 use core::ptr::NonNull;
 
+use smoltcp::iface::Config;
+use smoltcp::phy::{Device, Medium};
+use smoltcp::wire::{EthernetAddress, HardwareAddress};
 use virtio_drivers::{
     device::blk::*,
-    device::net::*,
     transport::{
         mmio::{MmioTransport, VirtIOHeader},
         DeviceType, Transport,
     },
 };
 
+use sel4_externally_shared::ExternallySharedRef;
 use sel4_logging::{LevelFilter, Logger, LoggerBuilder};
-use sel4cp::{protection_domain, var, Channel, Handler};
+use sel4_shared_ring_buffer::{RingBuffer, RingBuffers};
+use sel4cp::{memory_region_symbol, protection_domain, var, Channel, Handler};
+
 use tests_capdl_http_server_components_http_server_core::run_server;
 
 mod glue;
+mod net_client;
 mod reactor;
 mod timer_client;
 
-use glue::{CpiofsBlockIOImpl, DeviceImpl, HalImpl, BLOCK_SIZE};
+use glue::{CpiofsBlockIOImpl, DeviceImpl, VirtioBlkHalImpl, BLOCK_SIZE};
+use net_client::NetClient;
 use reactor::Reactor;
 use timer_client::TimerClient;
 
@@ -48,11 +55,9 @@ static LOGGER: Logger = LoggerBuilder::const_default()
     .write(|s| sel4::debug_print!("{}", s))
     .build();
 
-const NET_BUFFER_LEN: usize = 2048;
-
 const TIMER_DRIVER: Channel = Channel::new(0);
 const BLK_DEVICE: Channel = Channel::new(1);
-const NET_DEVICE: Channel = Channel::new(2);
+const NET_DRIVER: Channel = Channel::new(2);
 
 #[protection_domain(
     heap_size = 16 * 1024 * 1024,
@@ -62,29 +67,61 @@ fn init() -> impl Handler {
 
     setup_newlib();
 
-    let timer = TimerClient::new(TIMER_DRIVER);
+    let timer_client = TimerClient::new(TIMER_DRIVER);
+    let net_client = NetClient::new(NET_DRIVER);
 
-    HalImpl::init(
-        *var!(virtio_dma_size: usize = 0),
-        *var!(virtio_dma_vaddr: usize = 0),
-        *var!(virtio_dma_paddr: usize = 0),
+    let notify_net = || {
+        NET_DRIVER.notify();
+        Ok::<_, !>(())
+    };
+
+    let net_device = DeviceImpl::new(
+        unsafe {
+            ExternallySharedRef::<'static, _>::new(
+                memory_region_symbol!(virtio_net_dma_vaddr: *mut [u8], n = *var!(virtio_net_dma_size: usize = 0)),
+            )
+        },
+        *var!(virtio_net_dma_paddr: usize = 0),
+        unsafe {
+            RingBuffers::new(
+                RingBuffer::from_ptr(memory_region_symbol!(virtio_net_rx_free: *mut _)),
+                RingBuffer::from_ptr(memory_region_symbol!(virtio_net_rx_used: *mut _)),
+                notify_net,
+                true,
+            )
+        },
+        unsafe {
+            RingBuffers::new(
+                RingBuffer::from_ptr(memory_region_symbol!(virtio_net_tx_free: *mut _)),
+                RingBuffer::from_ptr(memory_region_symbol!(virtio_net_tx_used: *mut _)),
+                notify_net,
+                true,
+            )
+        },
+        16,
+        2048,
+        1500,
     );
 
-    let virtio_mmio_vaddr = var!(virtio_mmio_vaddr: usize = 0);
-    let virtio_net_mmio_offset = var!(virtio_net_mmio_offset: usize = 0);
-
-    let net_device = {
-        let header =
-            NonNull::new((virtio_mmio_vaddr + virtio_net_mmio_offset) as *mut VirtIOHeader)
-                .unwrap();
-        let transport = unsafe { MmioTransport::new(header) }.unwrap();
-        assert_eq!(transport.device_type(), DeviceType::Network);
-        DeviceImpl::new(VirtIONet::new(transport, NET_BUFFER_LEN).unwrap())
+    let net_config = {
+        assert_eq!(net_device.capabilities().medium, Medium::Ethernet);
+        let mac_address = EthernetAddress(net_client.get_mac_address().0);
+        let hardware_addr = HardwareAddress::Ethernet(mac_address);
+        let mut this = Config::new(hardware_addr);
+        this.random_seed = 0;
+        this
     };
+
+    VirtioBlkHalImpl::init(
+        *var!(virtio_blk_dma_size: usize = 0),
+        *var!(virtio_blk_dma_vaddr: usize = 0),
+        *var!(virtio_blk_dma_paddr: usize = 0),
+    );
 
     let blk_device = {
         let header = NonNull::new(
-            (virtio_mmio_vaddr + var!(virtio_blk_mmio_offset: usize = 0)) as *mut VirtIOHeader,
+            (var!(virtio_blk_mmio_vaddr: usize = 0) + var!(virtio_blk_mmio_offset: usize = 0))
+                as *mut VirtIOHeader,
         )
         .unwrap();
         let transport = unsafe { MmioTransport::new(header) }.unwrap();
@@ -93,10 +130,11 @@ fn init() -> impl Handler {
     };
 
     Reactor::new(
+        net_config,
         net_device,
         blk_device,
-        timer,
-        NET_DEVICE,
+        timer_client,
+        NET_DRIVER,
         BLK_DEVICE,
         TIMER_DRIVER,
         |network_ctx, timers_ctx, blk_device, spawner| {

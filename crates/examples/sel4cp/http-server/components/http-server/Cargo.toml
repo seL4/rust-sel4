@@ -16,6 +16,7 @@ sel4-async-timers = { path = "../../../../../sel4-async/timers" }
 sel4-bounce-buffer-allocator = { path = "../../../../../sel4-bounce-buffer-allocator" }
 sel4-immediate-sync-once-cell = { path = "../../../../../sel4-immediate-sync-once-cell" }
 sel4-logging = { path = "../../../../../sel4-logging" }
+sel4-shared-ring-buffer = { path = "../../../../../sel4-shared-ring-buffer" }
 sel4-sync = { path = "../../../../../sel4-sync" }
 sel4cp = { path = "../../../../../sel4cp", default-features = false, features = ["alloc"] }
 serde = { version = "1.0.147", default-features = false, features = ["alloc", "derive"] }
@@ -63,6 +64,9 @@ features = [
 
 [dependencies.tests-capdl-http-server-components-sp804-driver-interface-types]
 path = "../sp804-driver/interface-types"
+
+[dependencies.tests-capdl-http-server-components-virtio-net-driver-interface-types]
+path = "../virtio-net-driver/interface-types"
 
 [build-dependencies]
 rcgen = "0.11.1"

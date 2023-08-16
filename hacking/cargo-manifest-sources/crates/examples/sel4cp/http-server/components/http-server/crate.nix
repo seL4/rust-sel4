@@ -63,10 +63,11 @@ mk {
     sel4-async-request-statuses
     sel4-newlib
     sel4-bounce-buffer-allocator
-    sel4-externally-shared
+    sel4-shared-ring-buffer
     tests-capdl-http-server-components-http-server-core
     tests-capdl-http-server-components-http-server-cpiofs
     tests-capdl-http-server-components-sp804-driver-interface-types
+    tests-capdl-http-server-components-virtio-net-driver-interface-types
 
     # virtio-drivers
   ];

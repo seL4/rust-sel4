@@ -36,7 +36,7 @@ pub struct BounceBufferAllocator<T> {
 }
 
 impl<T> BounceBufferAllocator<T> {
-    pub unsafe fn new(abstract_allocator: T, max_alignment: Align) -> Self {
+    pub fn new(abstract_allocator: T, max_alignment: Align) -> Self {
         assert!(max_alignment.is_power_of_two());
         Self {
             abstract_allocator,
@@ -62,7 +62,7 @@ impl<T: AbstractBounceBufferAllocator> BounceBufferAllocator<T> {
         Ok(start..end)
     }
 
-    pub unsafe fn deallocate(&mut self, buffer: Range<Offset>) {
+    pub fn deallocate(&mut self, buffer: Range<Offset>) {
         self.abstract_allocator
             .deallocate(buffer.start, buffer.len())
     }

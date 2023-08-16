@@ -5,9 +5,7 @@ use core::pin::Pin;
 use futures::future::LocalBoxFuture;
 
 use smoltcp::iface::Config;
-use smoltcp::phy::{Device, Medium};
 use smoltcp::time::{Duration, Instant};
-use smoltcp::wire::HardwareAddress;
 
 use sel4_async_network::{DhcpOverrides, SharedNetwork};
 use sel4_async_single_threaded_executor::{LocalPool, LocalSpawner};
@@ -25,9 +23,9 @@ pub(crate) struct Reactor {
     net_device: DeviceImpl,
     blk_device: CpiofsBlockIOImpl,
     timer: TimerClient,
-    net_irq_channel: sel4cp::Channel,
+    net_driver_channel: sel4cp::Channel,
     blk_irq_channel: sel4cp::Channel,
-    timer_irq_channel: sel4cp::Channel,
+    timer_driver_channel: sel4cp::Channel,
     shared_network: SharedNetwork,
     shared_timers: SharedTimers,
     local_pool: LocalPool,
@@ -36,23 +34,19 @@ pub(crate) struct Reactor {
 
 impl Reactor {
     pub(crate) fn new<T: Future<Output = !> + 'static>(
+        net_config: Config,
         mut net_device: DeviceImpl,
         blk_device: CpiofsBlockIOImpl,
         mut timer: TimerClient,
-        net_irq_channel: sel4cp::Channel,
+        net_driver_channel: sel4cp::Channel,
         blk_irq_channel: sel4cp::Channel,
-        timer_irq_channel: sel4cp::Channel,
+        timer_driver_channel: sel4cp::Channel,
         f: impl FnOnce(SharedNetwork, SharedTimers, CpiofsIOImpl, LocalSpawner) -> T,
     ) -> Self {
-        assert_eq!(net_device.capabilities().medium, Medium::Ethernet);
-        let hardware_addr = HardwareAddress::Ethernet(net_device.mac_address());
-        let mut config = Config::new(hardware_addr);
-        config.random_seed = 0;
-
         let now = Self::now_with_timer_client(&mut timer);
 
         let shared_network = SharedNetwork::new(
-            config,
+            net_config,
             DhcpOverrides::default(),
             &mut net_device,
             now.clone(),
@@ -77,9 +71,9 @@ impl Reactor {
             net_device,
             blk_device,
             timer,
-            net_irq_channel,
+            net_driver_channel,
             blk_irq_channel,
-            timer_irq_channel,
+            timer_driver_channel,
             shared_network,
             shared_timers,
             local_pool,
@@ -108,8 +102,7 @@ impl Reactor {
     }
 
     fn handle_net_interrupt(&mut self) {
-        self.net_device.ack_interrupt();
-        self.net_irq_channel.irq_ack().unwrap();
+        self.net_device.handle_notification();
     }
 
     fn handle_blk_interrupt(&mut self) {
@@ -149,11 +142,11 @@ impl sel4cp::Handler for Reactor {
     type Error = !;
 
     fn notified(&mut self, channel: sel4cp::Channel) -> Result<(), Self::Error> {
-        if channel == self.net_irq_channel {
+        if channel == self.net_driver_channel {
             self.handle_net_interrupt();
         } else if channel == self.blk_irq_channel {
             self.handle_blk_interrupt();
-        } else if channel == self.timer_irq_channel {
+        } else if channel == self.timer_driver_channel {
             self.handle_timer_interrupt();
         }
 

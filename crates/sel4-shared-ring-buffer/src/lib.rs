@@ -62,7 +62,7 @@ pub struct RawRingBuffer {
 }
 
 #[repr(C)]
-#[derive(Copy, Clone, Debug, AsBytes, FromBytes)]
+#[derive(Copy, Clone, Debug, PartialOrd, Ord, PartialEq, Eq, AsBytes, FromBytes)]
 pub struct Descriptor {
     encoded_addr: usize,
     len: u32,
@@ -181,7 +181,7 @@ impl<'a> RingBuffer<'a> {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone, PartialOrd, Ord, PartialEq, Eq)]
 pub enum Error {
     RingIsFull,
     RingIsEmpty,

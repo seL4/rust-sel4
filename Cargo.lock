@@ -3387,6 +3387,7 @@ dependencies = [
  "sel4-immediate-sync-once-cell",
  "sel4-logging",
  "sel4-newlib",
+ "sel4-shared-ring-buffer",
  "sel4-sync",
  "sel4cp",
  "serde",
@@ -3394,6 +3395,7 @@ dependencies = [
  "tests-capdl-http-server-components-http-server-core",
  "tests-capdl-http-server-components-http-server-cpiofs",
  "tests-capdl-http-server-components-sp804-driver-interface-types",
+ "tests-capdl-http-server-components-virtio-net-driver-interface-types",
  "tock-registers",
  "virtio-drivers",
 ]
@@ -3445,6 +3447,34 @@ dependencies = [
 
 [[package]]
 name = "tests-capdl-http-server-components-sp804-driver-interface-types"
+version = "0.1.0"
+dependencies = [
+ "num_enum",
+ "zerocopy",
+]
+
+[[package]]
+name = "tests-capdl-http-server-components-virtio-net-driver"
+version = "0.1.0"
+dependencies = [
+ "bitflags 1.3.2",
+ "log",
+ "sel4",
+ "sel4-bounce-buffer-allocator",
+ "sel4-externally-shared",
+ "sel4-immediate-sync-once-cell",
+ "sel4-logging",
+ "sel4-shared-ring-buffer",
+ "sel4-sync",
+ "sel4cp",
+ "tests-capdl-http-server-components-virtio-net-driver-interface-types",
+ "virtio-drivers",
+ "volatile",
+ "zerocopy",
+]
+
+[[package]]
+name = "tests-capdl-http-server-components-virtio-net-driver-interface-types"
 version = "0.1.0"
 dependencies = [
  "num_enum",
@@ -3821,6 +3851,12 @@ dependencies = [
  "log",
  "zerocopy",
 ]
+
+[[package]]
+name = "volatile"
+version = "0.5.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9eaac9f9d9b7ae00cdd43e21b15e58ccacd903e6d29131d7536765a61969d25e"
 
 [[package]]
 name = "vte"

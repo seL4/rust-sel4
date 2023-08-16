@@ -9,7 +9,7 @@ use virtio_drivers::{device::blk::*, transport::mmio::MmioTransport};
 use sel4_async_request_statuses::RequestStatuses;
 use tests_capdl_http_server_components_http_server_cpiofs::BlockIO;
 
-use crate::HalImpl;
+use crate::VirtioBlkHalImpl;
 
 pub(crate) const BLOCK_SIZE: usize = SECTOR_SIZE;
 
@@ -22,13 +22,13 @@ pub(crate) struct CpiofsBlockIOImpl {
 }
 
 struct CpiofsBlockIOImplInner {
-    driver: VirtIOBlk<HalImpl, MmioTransport>,
+    driver: VirtIOBlk<VirtioBlkHalImpl, MmioTransport>,
     request_statuses: RequestStatuses<u16, ()>,
     queue_guard: Rc<Semaphore>,
 }
 
 impl CpiofsBlockIOImpl {
-    pub(crate) fn new(virtio_blk: VirtIOBlk<HalImpl, MmioTransport>) -> Self {
+    pub(crate) fn new(virtio_blk: VirtIOBlk<VirtioBlkHalImpl, MmioTransport>) -> Self {
         Self {
             inner: Rc::new(RefCell::new(CpiofsBlockIOImplInner {
                 driver: virtio_blk,

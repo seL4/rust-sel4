@@ -12,6 +12,11 @@
 let
   defaultTimeout = 30;
 
+  symbolizeBacktraceLinksEntry = {
+    name = "sel4-symbolize-backtrace";
+    path = "${buildPackages.this.sel4-backtrace-cli}/bin/sel4-symbolize-backtrace";
+  };
+
   mkInstance =
     { rootTask
     , extraLinks ? []
@@ -43,6 +48,7 @@ let
           { name = "loader.elf"; path = loader.elf; }
         ])
         [
+          symbolizeBacktraceLinksEntry
           { name = "kernel.elf"; path = "${seL4ForBoot}/bin/kernel.elf"; }
           { name = "root-task.elf"; path = rootTask.elf; }
           { name = "symbolize-root-task-backtrace"; path = symbolizeRootTaskBacktrace; }
@@ -68,6 +74,9 @@ let
       inherit system instanceForPlatform;
 
       links = linkFarm "links" (lib.concatLists [
+        [
+          symbolizeBacktraceLinksEntry
+        ]
         instanceForPlatform.links
         extraLinks
         system.links

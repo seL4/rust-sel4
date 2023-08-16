@@ -71,6 +71,10 @@ let
       rootCrate = crates.tests-capdl-http-server-components-sp804-driver;
       inherit rustTargetInfo;
     };
+    virtio-net-driver = mkPD {
+      rootCrate = crates.tests-capdl-http-server-components-virtio-net-driver;
+      inherit rustTargetInfo;
+    };
   };
 
 in
@@ -81,6 +85,7 @@ lib.fix (self: mkCorePlatformInstance {
       paths = [
         "${pds.http-server}/bin"
         "${pds.sp804-driver}/bin"
+        "${pds.virtio-net-driver}/bin"
       ];
     };
     systemXML = sources.srcRoot + "/crates/examples/sel4cp/http-server/http-server.system";

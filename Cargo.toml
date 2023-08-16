@@ -23,6 +23,8 @@ members = [
     "crates/examples/sel4cp/http-server/components/sp804-driver",
     "crates/examples/sel4cp/http-server/components/sp804-driver/core",
     "crates/examples/sel4cp/http-server/components/sp804-driver/interface-types",
+    "crates/examples/sel4cp/http-server/components/virtio-net-driver",
+    "crates/examples/sel4cp/http-server/components/virtio-net-driver/interface-types",
     "crates/private/meta",
     "crates/private/support/cargo-helpers",
     "crates/private/support/sel4-simple-task/config-types",
