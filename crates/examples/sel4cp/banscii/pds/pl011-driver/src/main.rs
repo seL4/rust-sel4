@@ -7,32 +7,25 @@ use heapless::Deque;
 use sel4cp::message::{MessageInfo, NoMessageValue, StatusMessageLabel};
 use sel4cp::{memory_region_symbol, protection_domain, Channel, Handler};
 
+use banscii_pl011_driver_core::Driver;
 use banscii_pl011_driver_interface_types::*;
-
-mod device;
-
-use device::{Pl011Device, Pl011RegisterBlock};
 
 const DEVICE: Channel = Channel::new(0);
 const ASSISTANT: Channel = Channel::new(1);
 
 #[protection_domain]
 fn init() -> ThisHandler {
-    let device = unsafe {
-        Pl011Device::new(
-            memory_region_symbol!(pl011_register_block: *mut Pl011RegisterBlock).as_ptr(),
-        )
-    };
-    device.init();
+    let driver =
+        unsafe { Driver::new(memory_region_symbol!(pl011_register_block: *mut ()).as_ptr()) };
     ThisHandler {
-        device,
+        driver,
         buffer: Deque::new(),
         notify: true,
     }
 }
 
 struct ThisHandler {
-    device: Pl011Device,
+    driver: Driver,
     buffer: Deque<u8, 256>,
     notify: bool,
 }
@@ -43,12 +36,12 @@ impl Handler for ThisHandler {
     fn notified(&mut self, channel: Channel) -> Result<(), Self::Error> {
         match channel {
             DEVICE => {
-                while let Some(c) = self.device.get_char() {
+                while let Some(c) = self.driver.get_char() {
                     if self.buffer.push_back(c).is_err() {
                         break;
                     }
                 }
-                self.device.handle_irq();
+                self.driver.handle_interrupt();
                 DEVICE.irq_ack().unwrap();
                 if self.notify {
                     ASSISTANT.notify();
@@ -71,7 +64,7 @@ impl Handler for ThisHandler {
             ASSISTANT => match msg_info.label().try_into().ok() {
                 Some(RequestTag::PutChar) => match msg_info.recv() {
                     Ok(PutCharRequest { val }) => {
-                        self.device.put_char(val);
+                        self.driver.put_char(val);
                         MessageInfo::send(StatusMessageLabel::Ok, NoMessageValue)
                     }
                     Err(_) => MessageInfo::send(StatusMessageLabel::Error, NoMessageValue),

@@ -242,9 +242,16 @@ dependencies = [
 name = "banscii-pl011-driver"
 version = "0.1.0"
 dependencies = [
+ "banscii-pl011-driver-core",
  "banscii-pl011-driver-interface-types",
  "heapless",
  "sel4cp",
+]
+
+[[package]]
+name = "banscii-pl011-driver-core"
+version = "0.1.0"
+dependencies = [
  "tock-registers",
 ]
 

@@ -14,6 +14,7 @@ members = [
     "crates/examples/sel4cp/banscii/pds/assistant/core",
     "crates/examples/sel4cp/banscii/pds/assistant/core/test",
     "crates/examples/sel4cp/banscii/pds/pl011-driver",
+    "crates/examples/sel4cp/banscii/pds/pl011-driver/core",
     "crates/examples/sel4cp/banscii/pds/pl011-driver/interface-types",
     "crates/examples/sel4cp/hello/pds/hello",
     "crates/examples/sel4cp/http-server/components/http-server",

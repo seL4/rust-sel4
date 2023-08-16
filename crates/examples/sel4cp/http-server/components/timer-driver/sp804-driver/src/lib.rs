@@ -6,7 +6,7 @@ use tock_registers::interfaces::ReadWriteable;
 
 mod device;
 
-pub use device::{Control, Device, Timer};
+use device::{Control, Device, Timer};
 
 pub struct Driver {
     device: Device,

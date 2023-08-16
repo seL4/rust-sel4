@@ -6,7 +6,7 @@ use tock_registers::{register_bitfields, register_structs};
 
 register_structs! {
     #[allow(non_snake_case)]
-    pub Pl011RegisterBlock {
+    pub RegisterBlock {
         (0x000 => DR: ReadWrite<u8>),
         (0x001 => _reserved0),
         (0x018 => FR: ReadOnly<u32, FR::Register>),
@@ -35,16 +35,16 @@ register_bitfields! {
     ],
 }
 
-pub struct Pl011Device {
-    ptr: *const Pl011RegisterBlock,
+pub struct Device {
+    ptr: *mut RegisterBlock,
 }
 
-impl Pl011Device {
-    pub unsafe fn new(ptr: *const Pl011RegisterBlock) -> Self {
+impl Device {
+    pub unsafe fn new(ptr: *mut RegisterBlock) -> Self {
         Self { ptr }
     }
 
-    fn ptr(&self) -> *const Pl011RegisterBlock {
+    fn ptr(&self) -> *mut RegisterBlock {
         self.ptr
     }
 
@@ -53,7 +53,9 @@ impl Pl011Device {
     }
 
     pub fn put_char(&self, c: u8) {
-        while self.FR.matches_all(FR::TXFF::SET) {}
+        while self.FR.matches_all(FR::TXFF::SET) {
+            core::hint::spin_loop();
+        }
         self.DR.set(c)
     }
 
@@ -65,13 +67,13 @@ impl Pl011Device {
         }
     }
 
-    pub fn handle_irq(&self) {
+    pub fn clear_all_interrupts(&self) {
         self.ICR.write(ICR::ALL::SET);
     }
 }
 
-impl Deref for Pl011Device {
-    type Target = Pl011RegisterBlock;
+impl Deref for Device {
+    type Target = RegisterBlock;
 
     fn deref(&self) -> &Self::Target {
         unsafe { &*self.ptr() }

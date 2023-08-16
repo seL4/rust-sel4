@@ -86,6 +86,7 @@ pub struct Timer {
     ptr: *const TimerRegisterBlock,
 }
 
+#[allow(dead_code)]
 impl Timer {
     pub unsafe fn new(ptr: *const TimerRegisterBlock) -> Self {
         Self { ptr }

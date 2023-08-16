@@ -4,10 +4,11 @@ mk {
   package.name = "banscii-pl011-driver";
   dependencies = {
     sel4cp.default-features = false;
-    inherit (versions) heapless tock-registers;
+    inherit (versions) heapless;
   };
   nix.local.dependencies = with localCrates; [
     sel4cp
+    banscii-pl011-driver-core
     banscii-pl011-driver-interface-types
   ];
   nix.meta.labels = [ "leaf" ];

@@ -6,7 +6,7 @@ edition = "2021"
 license = "BSD-2-Clause"
 
 [dependencies]
+banscii-pl011-driver-core = { path = "./core" }
 banscii-pl011-driver-interface-types = { path = "./interface-types" }
 heapless = "0.7.16"
 sel4cp = { path = "../../../../../sel4cp", default-features = false }
-tock-registers = "0.8.1"
