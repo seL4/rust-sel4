@@ -29,6 +29,7 @@ mk {
     sel4-panicking-env
     sel4-runtime-common
     sel4-immediate-sync-once-cell
+    sel4-immutable-cell
     sel4cp-macros
     sel4-externally-shared
   ];

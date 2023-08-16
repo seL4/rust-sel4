@@ -2726,6 +2726,10 @@ name = "sel4-immediate-sync-once-cell"
 version = "0.1.0"
 
 [[package]]
+name = "sel4-immutable-cell"
+version = "0.1.0"
+
+[[package]]
 name = "sel4-kernel-loader"
 version = "0.1.0"
 dependencies = [
@@ -3024,6 +3028,7 @@ dependencies = [
  "sel4",
  "sel4-externally-shared",
  "sel4-immediate-sync-once-cell",
+ "sel4-immutable-cell",
  "sel4-panicking",
  "sel4-panicking-env",
  "sel4-runtime-common",

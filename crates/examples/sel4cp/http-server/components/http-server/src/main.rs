@@ -64,18 +64,18 @@ fn init() -> impl Handler {
     let timer = unsafe {
         Driver::new(
             memory_region_symbol!(sp804_mmio_vaddr: *mut ()).as_ptr(),
-            var!(timer_freq).try_into().unwrap(),
+            var!(timer_freq: usize = 0).clone().try_into().unwrap(),
         )
     };
 
     HalImpl::init(
-        var!(virtio_dma_size),
-        var!(virtio_dma_vaddr),
-        var!(virtio_dma_paddr),
+        *var!(virtio_dma_size: usize = 0),
+        *var!(virtio_dma_vaddr: usize = 0),
+        *var!(virtio_dma_paddr: usize = 0),
     );
 
-    let virtio_mmio_vaddr = var!(virtio_mmio_vaddr);
-    let virtio_net_mmio_offset = var!(virtio_net_mmio_offset);
+    let virtio_mmio_vaddr = var!(virtio_mmio_vaddr: usize = 0);
+    let virtio_net_mmio_offset = var!(virtio_net_mmio_offset: usize = 0);
 
     let net_device = {
         let header =
@@ -87,9 +87,10 @@ fn init() -> impl Handler {
     };
 
     let blk_device = {
-        let header =
-            NonNull::new((virtio_mmio_vaddr + var!(virtio_blk_mmio_offset)) as *mut VirtIOHeader)
-                .unwrap();
+        let header = NonNull::new(
+            (virtio_mmio_vaddr + var!(virtio_blk_mmio_offset: usize = 0)) as *mut VirtIOHeader,
+        )
+        .unwrap();
         let transport = unsafe { MmioTransport::new(header) }.unwrap();
         assert_eq!(transport.device_type(), DeviceType::Block);
         CpiofsBlockIOImpl::new(VirtIOBlk::new(transport).unwrap())

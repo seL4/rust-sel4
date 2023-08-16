@@ -101,6 +101,8 @@ macro_rules! declare_protection_domain {
 // For macros
 #[doc(hidden)]
 pub mod _private {
+    pub use sel4_immutable_cell::ImmutableCell;
+
     pub use sel4_runtime_common::{declare_stack, declare_static_heap};
 
     pub use crate::{declare_init, declare_protection_domain, entry::run_main};
