@@ -3393,7 +3393,7 @@ dependencies = [
  "smoltcp",
  "tests-capdl-http-server-components-http-server-core",
  "tests-capdl-http-server-components-http-server-cpiofs",
- "tests-capdl-http-server-components-timer-driver-sp804-driver",
+ "tests-capdl-http-server-components-sp804-driver-core",
  "tock-registers",
  "virtio-drivers",
 ]
@@ -3427,7 +3427,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "tests-capdl-http-server-components-timer-driver-sp804-driver"
+name = "tests-capdl-http-server-components-sp804-driver-core"
 version = "0.1.0"
 dependencies = [
  "log",

@@ -66,7 +66,7 @@ mk {
     sel4-externally-shared
     tests-capdl-http-server-components-http-server-core
     tests-capdl-http-server-components-http-server-cpiofs
-    tests-capdl-http-server-components-timer-driver-sp804-driver
+    tests-capdl-http-server-components-sp804-driver-core
 
     # virtio-drivers
   ];

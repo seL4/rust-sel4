@@ -25,7 +25,7 @@ use virtio_drivers::{
 use sel4_logging::{LevelFilter, Logger, LoggerBuilder};
 use sel4cp::{memory_region_symbol, protection_domain, var, Channel, Handler};
 use tests_capdl_http_server_components_http_server_core::run_server;
-use tests_capdl_http_server_components_timer_driver_sp804_driver::Driver;
+use tests_capdl_http_server_components_sp804_driver_core::Driver;
 
 mod glue;
 mod reactor;
