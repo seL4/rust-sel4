@@ -156,18 +156,6 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
             }
         }
 
-        // trace!("num_objs_with_paddr: {}", num_objs_with_paddr);
-
-        // for i in 0..sel4::WORD_SIZE {
-        //     trace!(
-        //         "by_size[{}]: {}..{} (n = {})",
-        //         i,
-        //         by_size_start[i],
-        //         by_size_end[i],
-        //         by_size_end[i] - by_size_start[i]
-        //     );
-        // }
-
         // In order to allocate objects which specify paddrs, we may have to
         // allocate dummies to manipulate watermarks. We must always retain at
         // least one reference to an object allocated from an untyped, or else
