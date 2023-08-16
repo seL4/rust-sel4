@@ -1,0 +1,11 @@
+[package]
+name = "tests-capdl-http-server-components-sp804-driver"
+version = "0.1.0"
+authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
+edition = "2021"
+license = "BSD-2-Clause"
+
+[dependencies]
+sel4cp = { path = "../../../../../sel4cp", default-features = false }
+tests-capdl-http-server-components-sp804-driver-core = { path = "./core" }
+tests-capdl-http-server-components-sp804-driver-interface-types = { path = "./interface-types" }

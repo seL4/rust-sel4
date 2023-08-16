@@ -67,6 +67,10 @@ let
       };
       lastLayerModifications = seL4Modifications;
     };
+    sp804-driver = mkPD {
+      rootCrate = crates.tests-capdl-http-server-components-sp804-driver;
+      inherit rustTargetInfo;
+    };
   };
 
 in
@@ -76,6 +80,7 @@ lib.fix (self: mkCorePlatformInstance {
       name = "x";
       paths = [
         "${pds.http-server}/bin"
+        "${pds.sp804-driver}/bin"
       ];
     };
     systemXML = sources.srcRoot + "/crates/examples/sel4cp/http-server/http-server.system";

@@ -5,22 +5,31 @@
     <memory_region name="virtio_mmio" size="0x1000" phys_addr="0xa003000" />
     <memory_region name="virtio_dma" size="0x8_000_000" />
 
-    <protection_domain name="http_server" priority="254">
+    <protection_domain name="http_server" priority="250">
         <program_image path="tests-capdl-http-server-components-http-server.elf" />
 
-        <map mr="sp804_mmio"  vaddr="0x2_000_000" perms="rw" cached="false" setvar_vaddr="sp804_mmio_vaddr" />
         <map mr="virtio_mmio" vaddr="0x2_001_000" perms="rw" cached="false" setvar_vaddr="virtio_mmio_vaddr" />
         <map mr="virtio_dma"  vaddr="0x3_000_000" perms="rw" cached="true"  setvar_vaddr="virtio_dma_vaddr" />
 
         <setvar symbol="virtio_dma_size" vaddr="0x8_000_000" />
         <setvar symbol="virtio_dma_paddr" region_paddr="virtio_dma" />
-        <setvar symbol="timer_freq" vaddr="1_000_000" />
         <setvar symbol="virtio_blk_mmio_offset" vaddr="0xc00" />
         <setvar symbol="virtio_net_mmio_offset" vaddr="0xe00" />
 
-        <irq irq="43" id="0" />
         <irq irq="78" id="1" />
         <irq irq="79" id="2" />
     </protection_domain>
+
+    <protection_domain name="timer_driver" priority="254" pp="true">
+        <program_image path="tests-capdl-http-server-components-sp804-driver.elf" />
+        <map mr="sp804_mmio"  vaddr="0x2_000_000" perms="rw" cached="false" setvar_vaddr="sp804_mmio_vaddr" />
+        <setvar symbol="timer_freq" vaddr="1_000_000" />
+        <irq irq="43" id="0" />
+    </protection_domain>
+
+    <channel>
+        <end pd="http_server" id="0" />
+        <end pd="timer_driver" id="1" />
+    </channel>
 
 </system>

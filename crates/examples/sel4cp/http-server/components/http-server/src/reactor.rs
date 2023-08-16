@@ -13,9 +13,8 @@ use sel4_async_network::{DhcpOverrides, SharedNetwork};
 use sel4_async_single_threaded_executor::{LocalPool, LocalSpawner};
 use sel4_async_timers::SharedTimers;
 use tests_capdl_http_server_components_http_server_cpiofs as cpiofs;
-use tests_capdl_http_server_components_sp804_driver_core::Driver as TimerDriver;
 
-use crate::{CpiofsBlockIOImpl, DeviceImpl, BLOCK_SIZE};
+use crate::{CpiofsBlockIOImpl, DeviceImpl, TimerClient, BLOCK_SIZE};
 
 type CpiofsIOImpl =
     cpiofs::BlockIOAdapter<cpiofs::CachedBlockIO<CpiofsBlockIOImpl, BLOCK_SIZE>, BLOCK_SIZE>;
@@ -25,7 +24,7 @@ const BLOCK_CACHE_SIZE_IN_BLOCKS: usize = 128;
 pub(crate) struct Reactor {
     net_device: DeviceImpl,
     blk_device: CpiofsBlockIOImpl,
-    timer: TimerDriver,
+    timer: TimerClient,
     net_irq_channel: sel4cp::Channel,
     blk_irq_channel: sel4cp::Channel,
     timer_irq_channel: sel4cp::Channel,
@@ -39,7 +38,7 @@ impl Reactor {
     pub(crate) fn new<T: Future<Output = !> + 'static>(
         mut net_device: DeviceImpl,
         blk_device: CpiofsBlockIOImpl,
-        mut timer: TimerDriver,
+        mut timer: TimerClient,
         net_irq_channel: sel4cp::Channel,
         blk_irq_channel: sel4cp::Channel,
         timer_irq_channel: sel4cp::Channel,
@@ -50,7 +49,7 @@ impl Reactor {
         let mut config = Config::new(hardware_addr);
         config.random_seed = 0;
 
-        let now = Self::now_with_timer_driver(&mut timer);
+        let now = Self::now_with_timer_client(&mut timer);
 
         let shared_network = SharedNetwork::new(
             config,
@@ -97,16 +96,15 @@ impl Reactor {
     }
 
     fn now(&mut self) -> Instant {
-        Self::now_with_timer_driver(&mut self.timer)
+        Self::now_with_timer_client(&mut self.timer)
     }
 
-    fn now_with_timer_driver(timer: &mut TimerDriver) -> Instant {
-        Instant::from_micros(i64::try_from(timer.now().as_micros()).unwrap())
+    fn now_with_timer_client(timer: &mut TimerClient) -> Instant {
+        Instant::from_micros(i64::try_from(timer.now()).unwrap())
     }
 
     fn set_timeout(&mut self, d: Duration) {
-        self.timer
-            .set_timeout(core::time::Duration::from_micros(d.micros()))
+        self.timer.set_timeout(d.micros())
     }
 
     fn handle_net_interrupt(&mut self) {
@@ -119,10 +117,7 @@ impl Reactor {
         self.blk_irq_channel.irq_ack().unwrap();
     }
 
-    fn handle_timer_interrupt(&mut self) {
-        self.timer.handle_interrupt();
-        self.timer_irq_channel.irq_ack().unwrap();
-    }
+    fn handle_timer_interrupt(&mut self) {}
 
     fn react(&mut self) {
         loop {

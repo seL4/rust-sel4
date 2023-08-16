@@ -3393,7 +3393,7 @@ dependencies = [
  "smoltcp",
  "tests-capdl-http-server-components-http-server-core",
  "tests-capdl-http-server-components-http-server-cpiofs",
- "tests-capdl-http-server-components-sp804-driver-core",
+ "tests-capdl-http-server-components-sp804-driver-interface-types",
  "tock-registers",
  "virtio-drivers",
 ]
@@ -3427,11 +3427,28 @@ dependencies = [
 ]
 
 [[package]]
+name = "tests-capdl-http-server-components-sp804-driver"
+version = "0.1.0"
+dependencies = [
+ "sel4cp",
+ "tests-capdl-http-server-components-sp804-driver-core",
+ "tests-capdl-http-server-components-sp804-driver-interface-types",
+]
+
+[[package]]
 name = "tests-capdl-http-server-components-sp804-driver-core"
 version = "0.1.0"
 dependencies = [
  "log",
  "tock-registers",
+]
+
+[[package]]
+name = "tests-capdl-http-server-components-sp804-driver-interface-types"
+version = "0.1.0"
+dependencies = [
+ "num_enum",
+ "zerocopy",
 ]
 
 [[package]]

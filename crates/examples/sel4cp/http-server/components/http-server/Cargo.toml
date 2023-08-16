@@ -21,7 +21,6 @@ sel4cp = { path = "../../../../../sel4cp", default-features = false, features = 
 serde = { version = "1.0.147", default-features = false, features = ["alloc", "derive"] }
 tests-capdl-http-server-components-http-server-core = { path = "./core", features = [] }
 tests-capdl-http-server-components-http-server-cpiofs = { path = "./cpiofs" }
-tests-capdl-http-server-components-sp804-driver-core = { path = "../sp804-driver/core" }
 tock-registers = "0.8.1"
 virtio-drivers = { version = "0.5.0" }
 
@@ -61,6 +60,9 @@ features = [
     "socket-mdns",
     "log"
 ]
+
+[dependencies.tests-capdl-http-server-components-sp804-driver-interface-types]
+path = "../sp804-driver/interface-types"
 
 [build-dependencies]
 rcgen = "0.11.1"

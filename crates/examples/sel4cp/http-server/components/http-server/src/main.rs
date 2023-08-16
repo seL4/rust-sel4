@@ -23,15 +23,16 @@ use virtio_drivers::{
 };
 
 use sel4_logging::{LevelFilter, Logger, LoggerBuilder};
-use sel4cp::{memory_region_symbol, protection_domain, var, Channel, Handler};
+use sel4cp::{protection_domain, var, Channel, Handler};
 use tests_capdl_http_server_components_http_server_core::run_server;
-use tests_capdl_http_server_components_sp804_driver_core::Driver;
 
 mod glue;
 mod reactor;
+mod timer_client;
 
 use glue::{CpiofsBlockIOImpl, DeviceImpl, HalImpl, BLOCK_SIZE};
 use reactor::Reactor;
+use timer_client::TimerClient;
 
 const CERT_PEM: &str = concat!(include_str!(concat!(env!("OUT_DIR"), "/cert.pem")), "\0");
 const PRIV_PEM: &str = concat!(include_str!(concat!(env!("OUT_DIR"), "/priv.pem")), "\0");
@@ -49,7 +50,7 @@ static LOGGER: Logger = LoggerBuilder::const_default()
 
 const NET_BUFFER_LEN: usize = 2048;
 
-const TIMER_DEVICE: Channel = Channel::new(0);
+const TIMER_DRIVER: Channel = Channel::new(0);
 const BLK_DEVICE: Channel = Channel::new(1);
 const NET_DEVICE: Channel = Channel::new(2);
 
@@ -61,12 +62,7 @@ fn init() -> impl Handler {
 
     setup_newlib();
 
-    let timer = unsafe {
-        Driver::new(
-            memory_region_symbol!(sp804_mmio_vaddr: *mut ()).as_ptr(),
-            var!(timer_freq: usize = 0).clone().try_into().unwrap(),
-        )
-    };
+    let timer = TimerClient::new(TIMER_DRIVER);
 
     HalImpl::init(
         *var!(virtio_dma_size: usize = 0),
@@ -102,7 +98,7 @@ fn init() -> impl Handler {
         timer,
         NET_DEVICE,
         BLK_DEVICE,
-        TIMER_DEVICE,
+        TIMER_DRIVER,
         |network_ctx, timers_ctx, blk_device, spawner| {
             run_server(
                 network_ctx,
