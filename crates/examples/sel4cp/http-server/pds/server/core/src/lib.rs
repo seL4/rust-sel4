@@ -32,9 +32,9 @@ const NUM_SIMULTANEOUS_CONNECTIONS: usize = 32;
 type SocketUser = Box<dyn Fn(TcpSocketWrapper) -> LocalBoxFuture<'static, ()>>;
 
 pub async fn run_server<T: cpiofs::IO + 'static>(
-    network_ctx: SharedNetwork,
     _timers_ctx: SharedTimers,
-    blk_device: T,
+    network_ctx: SharedNetwork,
+    fs_io: T,
     spawner: LocalSpawner,
     cert_pem: &str,
     priv_pem: &str,
@@ -46,7 +46,7 @@ pub async fn run_server<T: cpiofs::IO + 'static>(
 
     seed_insecure_dummy_rng(0);
 
-    let index = cpiofs::Index::create(blk_device).await;
+    let index = cpiofs::Index::create(fs_io).await;
 
     let server = Rc::new(Server::new(index));
 

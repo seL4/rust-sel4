@@ -20,30 +20,32 @@ type CpiofsIOImpl =
 const BLOCK_CACHE_SIZE_IN_BLOCKS: usize = 128;
 
 pub(crate) struct HandlerImpl {
-    net_device: DeviceImpl,
-    blk_device: CpiofsBlockIOImpl,
-    timer: TimerClient,
-    net_driver_channel: sel4cp::Channel,
-    blk_irq_channel: sel4cp::Channel,
     timer_driver_channel: sel4cp::Channel,
-    shared_network: SharedNetwork,
+    net_driver_channel: sel4cp::Channel,
+    virtio_blk_irq_channel: sel4cp::Channel,
+    timer: TimerClient,
+    net_device: DeviceImpl,
+    fs_block_io: CpiofsBlockIOImpl,
     shared_timers: SharedTimers,
+    shared_network: SharedNetwork,
     local_pool: LocalPool,
     fut: LocalBoxFuture<'static, !>,
 }
 
 impl HandlerImpl {
     pub(crate) fn new<T: Future<Output = !> + 'static>(
-        net_config: Config,
-        mut net_device: DeviceImpl,
-        blk_device: CpiofsBlockIOImpl,
-        mut timer: TimerClient,
-        net_driver_channel: sel4cp::Channel,
-        blk_irq_channel: sel4cp::Channel,
         timer_driver_channel: sel4cp::Channel,
-        f: impl FnOnce(SharedNetwork, SharedTimers, CpiofsIOImpl, LocalSpawner) -> T,
+        net_driver_channel: sel4cp::Channel,
+        virtio_blk_irq_channel: sel4cp::Channel,
+        mut timer: TimerClient,
+        mut net_device: DeviceImpl,
+        net_config: Config,
+        fs_block_io: CpiofsBlockIOImpl,
+        f: impl FnOnce(SharedTimers, SharedNetwork, CpiofsIOImpl, LocalSpawner) -> T,
     ) -> Self {
         let now = Self::now_with_timer_client(&mut timer);
+
+        let shared_timers = SharedTimers::new(now.clone());
 
         let shared_network = SharedNetwork::new(
             net_config,
@@ -52,37 +54,37 @@ impl HandlerImpl {
             now.clone(),
         );
 
-        let shared_timers = SharedTimers::new(now.clone());
-
         let local_pool = LocalPool::new();
         let spawner = local_pool.spawner();
 
+        let fs_io = cpiofs::BlockIOAdapter::new(cpiofs::CachedBlockIO::new(
+            fs_block_io.clone(),
+            BLOCK_CACHE_SIZE_IN_BLOCKS,
+        ));
+
         let fut = Box::pin(f(
-            shared_network.clone(),
             shared_timers.clone(),
-            cpiofs::BlockIOAdapter::new(cpiofs::CachedBlockIO::new(
-                blk_device.clone(),
-                BLOCK_CACHE_SIZE_IN_BLOCKS,
-            )),
+            shared_network.clone(),
+            fs_io,
             spawner,
         ));
 
         let mut this = Self {
-            net_device,
-            blk_device,
-            timer,
-            net_driver_channel,
-            blk_irq_channel,
             timer_driver_channel,
-            shared_network,
+            net_driver_channel,
+            virtio_blk_irq_channel,
+            timer,
+            net_device,
+            fs_block_io,
             shared_timers,
+            shared_network,
             local_pool,
             fut,
         };
 
-        this.handle_net_interrupt();
-        this.handle_blk_interrupt();
-        this.handle_timer_interrupt();
+        this.handle_timer_notification();
+        this.handle_net_notification();
+        this.handle_virtio_blk_interrupt();
 
         this.react();
 
@@ -101,33 +103,33 @@ impl HandlerImpl {
         self.timer.set_timeout(d.micros())
     }
 
-    fn handle_net_interrupt(&mut self) {
+    fn handle_timer_notification(&mut self) {}
+
+    fn handle_net_notification(&mut self) {
         self.net_device.handle_notification();
     }
 
-    fn handle_blk_interrupt(&mut self) {
-        self.blk_device.ack_interrupt();
-        self.blk_irq_channel.irq_ack().unwrap();
+    fn handle_virtio_blk_interrupt(&mut self) {
+        self.fs_block_io.ack_interrupt();
+        self.virtio_blk_irq_channel.irq_ack().unwrap();
     }
-
-    fn handle_timer_interrupt(&mut self) {}
 
     fn react(&mut self) {
         loop {
             let _ = self.local_pool.run_until_stalled(Pin::new(&mut self.fut));
             let now = self.now();
             let mut activity = false;
-            activity |= self.blk_device.poll();
+            activity |= self.shared_timers.inner().borrow_mut().poll(now);
             activity |= self
                 .shared_network
                 .inner()
                 .borrow_mut()
                 .poll(now, &mut self.net_device);
-            activity |= self.shared_timers.inner().borrow_mut().poll(now);
+            activity |= self.fs_block_io.poll();
             if !activity {
                 let delays = &[
-                    self.shared_network.inner().borrow_mut().poll_delay(now),
                     self.shared_timers.inner().borrow_mut().poll_delay(now),
+                    self.shared_network.inner().borrow_mut().poll_delay(now),
                 ];
                 if let Some(delay) = delays.iter().filter_map(Option::as_ref).min() {
                     self.set_timeout(delay.clone());
@@ -142,12 +144,12 @@ impl sel4cp::Handler for HandlerImpl {
     type Error = !;
 
     fn notified(&mut self, channel: sel4cp::Channel) -> Result<(), Self::Error> {
-        if channel == self.net_driver_channel {
-            self.handle_net_interrupt();
-        } else if channel == self.blk_irq_channel {
-            self.handle_blk_interrupt();
-        } else if channel == self.timer_driver_channel {
-            self.handle_timer_interrupt();
+        if channel == self.timer_driver_channel {
+            self.handle_timer_notification();
+        } else if channel == self.net_driver_channel {
+            self.handle_net_notification();
+        } else if channel == self.virtio_blk_irq_channel {
+            self.handle_virtio_blk_interrupt();
         }
 
         self.react();

@@ -59,7 +59,7 @@ static LOGGER: Logger = LoggerBuilder::const_default()
     .build();
 
 const TIMER_DRIVER: Channel = Channel::new(0);
-const BLK_DEVICE: Channel = Channel::new(1);
+const VIRTIO_BLK_DEVICE: Channel = Channel::new(1);
 const NET_DRIVER: Channel = Channel::new(2);
 
 #[protection_domain(
@@ -121,7 +121,7 @@ fn init() -> impl Handler {
         *var!(virtio_blk_dma_paddr: usize = 0),
     );
 
-    let blk_device = {
+    let fs_block_io = {
         let header = NonNull::new(
             (var!(virtio_blk_mmio_vaddr: usize = 0) + var!(virtio_blk_mmio_offset: usize = 0))
                 as *mut VirtIOHeader,
@@ -133,22 +133,15 @@ fn init() -> impl Handler {
     };
 
     HandlerImpl::new(
-        net_config,
-        net_device,
-        blk_device,
-        timer_client,
-        NET_DRIVER,
-        BLK_DEVICE,
         TIMER_DRIVER,
-        |network_ctx, timers_ctx, blk_device, spawner| {
-            run_server(
-                network_ctx,
-                timers_ctx,
-                blk_device,
-                spawner,
-                CERT_PEM,
-                PRIV_PEM,
-            )
+        NET_DRIVER,
+        VIRTIO_BLK_DEVICE,
+        timer_client,
+        net_device,
+        net_config,
+        fs_block_io,
+        |timers_ctx, network_ctx, fs_io, spawner| {
+            run_server(timers_ctx, network_ctx, fs_io, spawner, CERT_PEM, PRIV_PEM)
         },
     )
 }
