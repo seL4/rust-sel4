@@ -2918,6 +2918,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "sel4-shared-ring-buffer-smoltcp"
+version = "0.1.0"
+dependencies = [
+ "log",
+ "sel4-bounce-buffer-allocator",
+ "sel4-externally-shared",
+ "sel4-shared-ring-buffer",
+ "smoltcp",
+]
+
+[[package]]
 name = "sel4-simple-task-config-types"
 version = "0.1.0"
 dependencies = [
@@ -3069,6 +3080,7 @@ dependencies = [
  "sel4-logging",
  "sel4-newlib",
  "sel4-shared-ring-buffer",
+ "sel4-shared-ring-buffer-smoltcp",
  "sel4-sync",
  "sel4cp",
  "sel4cp-http-server-example-server-core",

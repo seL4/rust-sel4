@@ -17,6 +17,7 @@ sel4-bounce-buffer-allocator = { path = "../../../../../sel4-bounce-buffer-alloc
 sel4-immediate-sync-once-cell = { path = "../../../../../sel4-immediate-sync-once-cell" }
 sel4-logging = { path = "../../../../../sel4-logging" }
 sel4-shared-ring-buffer = { path = "../../../../../sel4-shared-ring-buffer" }
+sel4-shared-ring-buffer-smoltcp = { path = "../../../../../sel4-shared-ring-buffer/smoltcp" }
 sel4-sync = { path = "../../../../../sel4-sync" }
 sel4cp = { path = "../../../../../sel4cp", default-features = false, features = ["alloc"] }
 sel4cp-http-server-example-server-core = { path = "./core", features = [] }

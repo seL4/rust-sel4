@@ -27,6 +27,7 @@ use virtio_drivers::{
 use sel4_externally_shared::ExternallySharedRef;
 use sel4_logging::{LevelFilter, Logger, LoggerBuilder};
 use sel4_shared_ring_buffer::{RingBuffer, RingBuffers};
+use sel4_shared_ring_buffer_smoltcp::DeviceImpl;
 use sel4cp::{memory_region_symbol, protection_domain, var, Channel, Handler};
 
 use sel4cp_http_server_example_server_core::run_server;
@@ -36,7 +37,7 @@ mod net_client;
 mod reactor;
 mod timer_client;
 
-use glue::{CpiofsBlockIOImpl, DeviceImpl, VirtioBlkHalImpl, BLOCK_SIZE};
+use glue::{CpiofsBlockIOImpl, VirtioBlkHalImpl, BLOCK_SIZE};
 use net_client::NetClient;
 use reactor::Reactor;
 use timer_client::TimerClient;

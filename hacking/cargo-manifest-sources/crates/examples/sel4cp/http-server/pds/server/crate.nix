@@ -64,6 +64,7 @@ mk {
     sel4-newlib
     sel4-bounce-buffer-allocator
     sel4-shared-ring-buffer
+    sel4-shared-ring-buffer-smoltcp
     sel4cp-http-server-example-server-core
     sel4cp-http-server-example-server-cpiofs
     sel4cp-http-server-example-sp804-driver-interface-types

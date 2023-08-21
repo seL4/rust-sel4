@@ -1,3 +1,9 @@
+#![no_std]
+#![feature(never_type)]
+#![feature(strict_provenance)]
+
+extern crate alloc;
+
 use alloc::rc::Rc;
 use alloc::vec::Vec;
 use core::alloc::Layout;
