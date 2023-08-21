@@ -27,7 +27,7 @@ use virtio_drivers::{
     },
 };
 
-use tests_capdl_http_server_components_virtio_net_driver_interface_types::*;
+use sel4cp_http_server_example_virtio_net_driver_interface_types::*;
 
 const DEVICE: Channel = Channel::new(0);
 const CLIENT: Channel = Channel::new(1);

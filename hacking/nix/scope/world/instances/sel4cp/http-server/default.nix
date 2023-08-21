@@ -42,7 +42,7 @@ let
 
   pds = {
     http-server = mkPD {
-      rootCrate = crates.tests-capdl-http-server-components-http-server;
+      rootCrate = crates.sel4cp-http-server-example-server;
       layers = [
         crateUtils.defaultIntermediateLayer
         {
@@ -68,11 +68,11 @@ let
       lastLayerModifications = seL4Modifications;
     };
     sp804-driver = mkPD {
-      rootCrate = crates.tests-capdl-http-server-components-sp804-driver;
+      rootCrate = crates.sel4cp-http-server-example-sp804-driver;
       inherit rustTargetInfo;
     };
     virtio-net-driver = mkPD {
-      rootCrate = crates.tests-capdl-http-server-components-virtio-net-driver;
+      rootCrate = crates.sel4cp-http-server-example-virtio-net-driver;
       inherit rustTargetInfo;
     };
   };

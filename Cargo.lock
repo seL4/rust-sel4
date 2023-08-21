@@ -3051,6 +3051,118 @@ dependencies = [
 ]
 
 [[package]]
+name = "sel4cp-http-server-example-server"
+version = "0.1.0"
+dependencies = [
+ "async-unsync",
+ "futures",
+ "log",
+ "rcgen",
+ "sel4",
+ "sel4-async-network",
+ "sel4-async-request-statuses",
+ "sel4-async-single-threaded-executor",
+ "sel4-async-timers",
+ "sel4-bounce-buffer-allocator",
+ "sel4-externally-shared",
+ "sel4-immediate-sync-once-cell",
+ "sel4-logging",
+ "sel4-newlib",
+ "sel4-shared-ring-buffer",
+ "sel4-sync",
+ "sel4cp",
+ "sel4cp-http-server-example-server-core",
+ "sel4cp-http-server-example-server-cpiofs",
+ "sel4cp-http-server-example-sp804-driver-interface-types",
+ "sel4cp-http-server-example-virtio-net-driver-interface-types",
+ "serde",
+ "smoltcp",
+ "tock-registers",
+ "virtio-drivers",
+]
+
+[[package]]
+name = "sel4cp-http-server-example-server-core"
+version = "0.1.0"
+dependencies = [
+ "futures",
+ "httparse",
+ "log",
+ "mbedtls",
+ "sel4-async-network",
+ "sel4-async-network-mbedtls",
+ "sel4-async-single-threaded-executor",
+ "sel4-async-timers",
+ "sel4-panicking-env",
+ "sel4cp-http-server-example-server-cpiofs",
+ "smoltcp",
+]
+
+[[package]]
+name = "sel4cp-http-server-example-server-cpiofs"
+version = "0.1.0"
+dependencies = [
+ "futures",
+ "hex",
+ "log",
+ "lru",
+ "zerocopy",
+]
+
+[[package]]
+name = "sel4cp-http-server-example-sp804-driver"
+version = "0.1.0"
+dependencies = [
+ "sel4cp",
+ "sel4cp-http-server-example-sp804-driver-core",
+ "sel4cp-http-server-example-sp804-driver-interface-types",
+]
+
+[[package]]
+name = "sel4cp-http-server-example-sp804-driver-core"
+version = "0.1.0"
+dependencies = [
+ "log",
+ "tock-registers",
+]
+
+[[package]]
+name = "sel4cp-http-server-example-sp804-driver-interface-types"
+version = "0.1.0"
+dependencies = [
+ "num_enum",
+ "zerocopy",
+]
+
+[[package]]
+name = "sel4cp-http-server-example-virtio-net-driver"
+version = "0.1.0"
+dependencies = [
+ "bitflags 1.3.2",
+ "log",
+ "sel4",
+ "sel4-bounce-buffer-allocator",
+ "sel4-externally-shared",
+ "sel4-immediate-sync-once-cell",
+ "sel4-logging",
+ "sel4-shared-ring-buffer",
+ "sel4-sync",
+ "sel4cp",
+ "sel4cp-http-server-example-virtio-net-driver-interface-types",
+ "virtio-drivers",
+ "volatile",
+ "zerocopy",
+]
+
+[[package]]
+name = "sel4cp-http-server-example-virtio-net-driver-interface-types"
+version = "0.1.0"
+dependencies = [
+ "num_enum",
+ "zerocopy",
+]
+
+[[package]]
 name = "sel4cp-macros"
 version = "0.1.0"
 dependencies = [
@@ -3367,118 +3479,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "be55cf8942feac5c765c2c993422806843c9a9a45d4d5c407ad6dd2ea95eb9b6"
 dependencies = [
  "winapi-util",
-]
-
-[[package]]
-name = "tests-capdl-http-server-components-http-server"
-version = "0.1.0"
-dependencies = [
- "async-unsync",
- "futures",
- "log",
- "rcgen",
- "sel4",
- "sel4-async-network",
- "sel4-async-request-statuses",
- "sel4-async-single-threaded-executor",
- "sel4-async-timers",
- "sel4-bounce-buffer-allocator",
- "sel4-externally-shared",
- "sel4-immediate-sync-once-cell",
- "sel4-logging",
- "sel4-newlib",
- "sel4-shared-ring-buffer",
- "sel4-sync",
- "sel4cp",
- "serde",
- "smoltcp",
- "tests-capdl-http-server-components-http-server-core",
- "tests-capdl-http-server-components-http-server-cpiofs",
- "tests-capdl-http-server-components-sp804-driver-interface-types",
- "tests-capdl-http-server-components-virtio-net-driver-interface-types",
- "tock-registers",
- "virtio-drivers",
-]
-
-[[package]]
-name = "tests-capdl-http-server-components-http-server-core"
-version = "0.1.0"
-dependencies = [
- "futures",
- "httparse",
- "log",
- "mbedtls",
- "sel4-async-network",
- "sel4-async-network-mbedtls",
- "sel4-async-single-threaded-executor",
- "sel4-async-timers",
- "sel4-panicking-env",
- "smoltcp",
- "tests-capdl-http-server-components-http-server-cpiofs",
-]
-
-[[package]]
-name = "tests-capdl-http-server-components-http-server-cpiofs"
-version = "0.1.0"
-dependencies = [
- "futures",
- "hex",
- "log",
- "lru",
- "zerocopy",
-]
-
-[[package]]
-name = "tests-capdl-http-server-components-sp804-driver"
-version = "0.1.0"
-dependencies = [
- "sel4cp",
- "tests-capdl-http-server-components-sp804-driver-core",
- "tests-capdl-http-server-components-sp804-driver-interface-types",
-]
-
-[[package]]
-name = "tests-capdl-http-server-components-sp804-driver-core"
-version = "0.1.0"
-dependencies = [
- "log",
- "tock-registers",
-]
-
-[[package]]
-name = "tests-capdl-http-server-components-sp804-driver-interface-types"
-version = "0.1.0"
-dependencies = [
- "num_enum",
- "zerocopy",
-]
-
-[[package]]
-name = "tests-capdl-http-server-components-virtio-net-driver"
-version = "0.1.0"
-dependencies = [
- "bitflags 1.3.2",
- "log",
- "sel4",
- "sel4-bounce-buffer-allocator",
- "sel4-externally-shared",
- "sel4-immediate-sync-once-cell",
- "sel4-logging",
- "sel4-shared-ring-buffer",
- "sel4-sync",
- "sel4cp",
- "tests-capdl-http-server-components-virtio-net-driver-interface-types",
- "virtio-drivers",
- "volatile",
- "zerocopy",
-]
-
-[[package]]
-name = "tests-capdl-http-server-components-virtio-net-driver-interface-types"
-version = "0.1.0"
-dependencies = [
- "num_enum",
- "zerocopy",
 ]
 
 [[package]]

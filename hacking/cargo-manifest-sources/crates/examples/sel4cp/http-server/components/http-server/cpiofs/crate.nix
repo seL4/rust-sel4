@@ -1,7 +1,7 @@
 { mk, versions }:
 
 mk {
-  package.name = "tests-capdl-http-server-components-http-server-cpiofs";
+  package.name = "sel4cp-http-server-example-server-cpiofs";
   dependencies = rec {
     inherit (versions) log zerocopy;
     hex = { version = "0.4.3"; default-features = false; };

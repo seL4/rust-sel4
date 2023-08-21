@@ -1,7 +1,7 @@
 { mk, localCrates, versions }:
 
 mk {
-  package.name = "tests-capdl-http-server-components-virtio-net-driver";
+  package.name = "sel4cp-http-server-example-virtio-net-driver";
   dependencies = rec {
     inherit (versions) log;
 
@@ -33,6 +33,6 @@ mk {
     sel4-immediate-sync-once-cell
     sel4-shared-ring-buffer
     sel4-bounce-buffer-allocator
-    tests-capdl-http-server-components-virtio-net-driver-interface-types
+    sel4cp-http-server-example-virtio-net-driver-interface-types
   ];
 }

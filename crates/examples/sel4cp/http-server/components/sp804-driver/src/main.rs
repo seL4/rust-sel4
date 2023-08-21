@@ -7,8 +7,8 @@ use core::time::Duration;
 use sel4cp::message::{MessageInfo, NoMessageValue, StatusMessageLabel};
 use sel4cp::{memory_region_symbol, protection_domain, var, Channel, Handler};
 
-use tests_capdl_http_server_components_sp804_driver_core::Driver;
-use tests_capdl_http_server_components_sp804_driver_interface_types::*;
+use sel4cp_http_server_example_sp804_driver_core::Driver;
+use sel4cp_http_server_example_sp804_driver_interface_types::*;
 
 const DEVICE: Channel = Channel::new(0);
 const CLIENT: Channel = Channel::new(1);

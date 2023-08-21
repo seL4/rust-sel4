@@ -10,7 +10,7 @@ use smoltcp::time::{Duration, Instant};
 use sel4_async_network::{DhcpOverrides, SharedNetwork};
 use sel4_async_single_threaded_executor::{LocalPool, LocalSpawner};
 use sel4_async_timers::SharedTimers;
-use tests_capdl_http_server_components_http_server_cpiofs as cpiofs;
+use sel4cp_http_server_example_server_cpiofs as cpiofs;
 
 use crate::{CpiofsBlockIOImpl, DeviceImpl, TimerClient, BLOCK_SIZE};
 

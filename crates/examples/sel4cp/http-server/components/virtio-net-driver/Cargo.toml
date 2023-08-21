@@ -1,5 +1,5 @@
 [package]
-name = "tests-capdl-http-server-components-virtio-net-driver"
+name = "sel4cp-http-server-example-virtio-net-driver"
 version = "0.1.0"
 authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
 edition = "2021"
@@ -15,6 +15,7 @@ sel4-logging = { path = "../../../../../sel4-logging" }
 sel4-shared-ring-buffer = { path = "../../../../../sel4-shared-ring-buffer" }
 sel4-sync = { path = "../../../../../sel4-sync" }
 sel4cp = { path = "../../../../../sel4cp", default-features = false }
+sel4cp-http-server-example-virtio-net-driver-interface-types = { path = "./interface-types" }
 virtio-drivers = { version = "0.5.0", default-features = false, features = ["alloc"] }
 volatile = "0.5.1"
 zerocopy = "0.6.1"
@@ -22,6 +23,3 @@ zerocopy = "0.6.1"
 [dependencies.sel4-externally-shared]
 path = "../../../../../sel4-externally-shared"
 features = ["unstable", "alloc"]
-
-[dependencies.tests-capdl-http-server-components-virtio-net-driver-interface-types]
-path = "./interface-types"

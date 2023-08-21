@@ -7,7 +7,7 @@ use futures::prelude::*;
 use virtio_drivers::{device::blk::*, transport::mmio::MmioTransport};
 
 use sel4_async_request_statuses::RequestStatuses;
-use tests_capdl_http_server_components_http_server_cpiofs::BlockIO;
+use sel4cp_http_server_example_server_cpiofs::BlockIO;
 
 use crate::VirtioBlkHalImpl;
 

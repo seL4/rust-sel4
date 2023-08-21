@@ -1,6 +1,6 @@
 use sel4cp::message::{MessageInfo, NoMessageValue, StatusMessageLabel};
 
-use tests_capdl_http_server_components_virtio_net_driver_interface_types::*;
+use sel4cp_http_server_example_virtio_net_driver_interface_types::*;
 
 pub struct NetClient {
     channel: sel4cp::Channel,

@@ -29,7 +29,7 @@ use sel4_logging::{LevelFilter, Logger, LoggerBuilder};
 use sel4_shared_ring_buffer::{RingBuffer, RingBuffers};
 use sel4cp::{memory_region_symbol, protection_domain, var, Channel, Handler};
 
-use tests_capdl_http_server_components_http_server_core::run_server;
+use sel4cp_http_server_example_server_core::run_server;
 
 mod glue;
 mod net_client;

@@ -1,7 +1,7 @@
 { mk, localCrates, versions, serdeWith, smoltcpWith }:
 
 mk {
-  package.name = "tests-capdl-http-server-components-http-server";
+  package.name = "sel4cp-http-server-example-server";
   dependencies = rec {
     sel4-newlib = {
       features = [
@@ -40,7 +40,7 @@ mk {
 
     tock-registers = "0.8.1";
 
-    tests-capdl-http-server-components-http-server-core.features = [
+    sel4cp-http-server-example-server-core.features = [
       # "debug"
     ];
 
@@ -64,10 +64,10 @@ mk {
     sel4-newlib
     sel4-bounce-buffer-allocator
     sel4-shared-ring-buffer
-    tests-capdl-http-server-components-http-server-core
-    tests-capdl-http-server-components-http-server-cpiofs
-    tests-capdl-http-server-components-sp804-driver-interface-types
-    tests-capdl-http-server-components-virtio-net-driver-interface-types
+    sel4cp-http-server-example-server-core
+    sel4cp-http-server-example-server-cpiofs
+    sel4cp-http-server-example-sp804-driver-interface-types
+    sel4cp-http-server-example-virtio-net-driver-interface-types
 
     # virtio-drivers
   ];
