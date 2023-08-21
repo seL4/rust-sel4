@@ -33,22 +33,24 @@ use sel4cp::{memory_region_symbol, protection_domain, var, Channel, Handler};
 use sel4cp_http_server_example_server_core::run_server;
 
 mod glue;
+mod handler;
 mod net_client;
-mod reactor;
 mod timer_client;
 
 use glue::{CpiofsBlockIOImpl, VirtioBlkHalImpl, BLOCK_SIZE};
+use handler::HandlerImpl;
 use net_client::NetClient;
-use reactor::Reactor;
 use timer_client::TimerClient;
 
 const CERT_PEM: &str = concat!(include_str!(concat!(env!("OUT_DIR"), "/cert.pem")), "\0");
 const PRIV_PEM: &str = concat!(include_str!(concat!(env!("OUT_DIR"), "/priv.pem")), "\0");
 
-// const LOG_LEVEL: LevelFilter = LevelFilter::Trace;
-// const LOG_LEVEL: LevelFilter = LevelFilter::Debug;
-const LOG_LEVEL: LevelFilter = LevelFilter::Info;
-// const LOG_LEVEL: LevelFilter = LevelFilter::Warn;
+const LOG_LEVEL: LevelFilter = {
+    // LevelFilter::Trace
+    // LevelFilter::Debug
+    LevelFilter::Info
+    // LevelFilter::Warn
+};
 
 static LOGGER: Logger = LoggerBuilder::const_default()
     .level_filter(LOG_LEVEL)
@@ -130,7 +132,7 @@ fn init() -> impl Handler {
         CpiofsBlockIOImpl::new(VirtIOBlk::new(transport).unwrap())
     };
 
-    Reactor::new(
+    HandlerImpl::new(
         net_config,
         net_device,
         blk_device,

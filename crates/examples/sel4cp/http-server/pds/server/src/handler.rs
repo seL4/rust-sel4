@@ -19,7 +19,7 @@ type CpiofsIOImpl =
 
 const BLOCK_CACHE_SIZE_IN_BLOCKS: usize = 128;
 
-pub(crate) struct Reactor {
+pub(crate) struct HandlerImpl {
     net_device: DeviceImpl,
     blk_device: CpiofsBlockIOImpl,
     timer: TimerClient,
@@ -32,7 +32,7 @@ pub(crate) struct Reactor {
     fut: LocalBoxFuture<'static, !>,
 }
 
-impl Reactor {
+impl HandlerImpl {
     pub(crate) fn new<T: Future<Output = !> + 'static>(
         net_config: Config,
         mut net_device: DeviceImpl,
@@ -138,7 +138,7 @@ impl Reactor {
     }
 }
 
-impl sel4cp::Handler for Reactor {
+impl sel4cp::Handler for HandlerImpl {
     type Error = !;
 
     fn notified(&mut self, channel: sel4cp::Channel) -> Result<(), Self::Error> {
