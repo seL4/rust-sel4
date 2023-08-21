@@ -75,6 +75,10 @@ let
       rootCrate = crates.sel4cp-http-server-example-virtio-net-driver;
       inherit rustTargetInfo;
     };
+    virtio-blk-driver = mkPD {
+      rootCrate = crates.sel4cp-http-server-example-virtio-blk-driver;
+      inherit rustTargetInfo;
+    };
   };
 
 in
@@ -86,6 +90,7 @@ lib.fix (self: mkCorePlatformInstance {
         "${pds.http-server}/bin"
         "${pds.sp804-driver}/bin"
         "${pds.virtio-net-driver}/bin"
+        "${pds.virtio-blk-driver}/bin"
       ];
     };
     systemXML = sources.srcRoot + "/crates/examples/sel4cp/http-server/http-server.system";

@@ -20,9 +20,9 @@ static BOUNCE_BUFFER_ALLOCATOR: GenericMutex<
     Option<BounceBufferAllocator<Basic>>,
 > = GenericMutex::new(PanickingMutexSyncOps::new(), None);
 
-pub(crate) struct VirtioBlkHalImpl;
+pub(crate) struct HalImpl;
 
-impl VirtioBlkHalImpl {
+impl HalImpl {
     pub(crate) fn init(dma_region_size: usize, dma_region_vaddr: usize, dma_region_paddr: usize) {
         DMA_REGION_VADDR_RANGE
             .set(dma_region_vaddr..(dma_region_vaddr + dma_region_size))
@@ -40,7 +40,7 @@ impl VirtioBlkHalImpl {
     }
 }
 
-unsafe impl Hal for VirtioBlkHalImpl {
+unsafe impl Hal for HalImpl {
     fn dma_alloc(pages: usize, _direction: BufferDirection) -> (PhysAddr, NonNull<u8>) {
         assert!(pages > 0);
         let layout = Layout::from_size_align(pages * PAGE_SIZE, PAGE_SIZE).unwrap();

@@ -189,6 +189,8 @@ impl<T: IO> Index<T> {
     }
 }
 
+// TODO: should all of this be in a standalone crate?
+
 pub trait IO {
     async fn read(&self, offset: usize, buf: &mut [u8]);
 }

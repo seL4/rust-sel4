@@ -18,7 +18,7 @@ fn init() -> ThisHandler {
     let driver = unsafe {
         Driver::new(
             memory_region_symbol!(sp804_mmio_vaddr: *mut ()).as_ptr(),
-            var!(timer_freq: usize = 0).clone().try_into().unwrap(),
+            var!(freq: usize = 0).clone().try_into().unwrap(),
         )
     };
     ThisHandler { driver }

@@ -2918,6 +2918,29 @@ dependencies = [
 ]
 
 [[package]]
+name = "sel4-shared-ring-buffer-block-io"
+version = "0.1.0"
+dependencies = [
+ "async-unsync",
+ "futures",
+ "log",
+ "sel4-async-request-statuses",
+ "sel4-bounce-buffer-allocator",
+ "sel4-externally-shared",
+ "sel4-shared-ring-buffer",
+ "sel4-shared-ring-buffer-block-io-types",
+]
+
+[[package]]
+name = "sel4-shared-ring-buffer-block-io-types"
+version = "0.1.0"
+dependencies = [
+ "num_enum",
+ "sel4-shared-ring-buffer",
+ "zerocopy",
+]
+
+[[package]]
 name = "sel4-shared-ring-buffer-smoltcp"
 version = "0.1.0"
 dependencies = [
@@ -3080,6 +3103,8 @@ dependencies = [
  "sel4-logging",
  "sel4-newlib",
  "sel4-shared-ring-buffer",
+ "sel4-shared-ring-buffer-block-io",
+ "sel4-shared-ring-buffer-block-io-types",
  "sel4-shared-ring-buffer-smoltcp",
  "sel4-sync",
  "sel4cp",
@@ -3087,10 +3112,7 @@ dependencies = [
  "sel4cp-http-server-example-server-cpiofs",
  "sel4cp-http-server-example-sp804-driver-interface-types",
  "sel4cp-http-server-example-virtio-net-driver-interface-types",
- "serde",
  "smoltcp",
- "tock-registers",
- "virtio-drivers",
 ]
 
 [[package]]
@@ -3142,6 +3164,26 @@ name = "sel4cp-http-server-example-sp804-driver-interface-types"
 version = "0.1.0"
 dependencies = [
  "num_enum",
+ "zerocopy",
+]
+
+[[package]]
+name = "sel4cp-http-server-example-virtio-blk-driver"
+version = "0.1.0"
+dependencies = [
+ "bitflags 1.3.2",
+ "log",
+ "sel4",
+ "sel4-bounce-buffer-allocator",
+ "sel4-externally-shared",
+ "sel4-immediate-sync-once-cell",
+ "sel4-logging",
+ "sel4-shared-ring-buffer",
+ "sel4-shared-ring-buffer-block-io-types",
+ "sel4-sync",
+ "sel4cp",
+ "virtio-drivers",
+ "volatile",
  "zerocopy",
 ]
 

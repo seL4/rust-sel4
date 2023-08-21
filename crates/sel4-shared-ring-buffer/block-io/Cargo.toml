@@ -1,0 +1,16 @@
+[package]
+name = "sel4-shared-ring-buffer-block-io"
+version = "0.1.0"
+authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
+edition = "2021"
+license = "BSD-2-Clause"
+
+[dependencies]
+async-unsync = { version = "0.2.2", default-features = false }
+futures = { version = "0.3.28", default-features = false, features = ["async-await", "alloc"] }
+log = "0.4.17"
+sel4-async-request-statuses = { path = "../../sel4-async/request-statuses" }
+sel4-bounce-buffer-allocator = { path = "../../sel4-bounce-buffer-allocator" }
+sel4-externally-shared = { path = "../../sel4-externally-shared", features = ["unstable"] }
+sel4-shared-ring-buffer = { path = ".." }
+sel4-shared-ring-buffer-block-io-types = { path = "./types" }

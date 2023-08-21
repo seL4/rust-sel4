@@ -6,7 +6,7 @@ use core::ops::Range;
 use sel4_bounce_buffer_allocator::{Basic, BounceBufferAllocator};
 use sel4_externally_shared::ExternallySharedRef;
 use sel4_shared_ring_buffer::{
-    Descriptor, Error as SharedRingBuffersError, RingBuffer, RingBuffers,
+    Descriptor, Error as SharedRingBuffersError, RingBuffers, RING_BUFFER_SIZE,
 };
 
 pub(crate) struct Inner {
@@ -88,7 +88,7 @@ impl Inner {
         let tx_buffers = iter::repeat_with(|| TxBufferEntry {
             state: TxBufferState::Unclaimed,
         })
-        .take(RingBuffer::SIZE)
+        .take(RING_BUFFER_SIZE)
         .collect::<Vec<_>>();
 
         Self {
@@ -107,7 +107,9 @@ impl Inner {
         self.mtu
     }
 
-    pub(crate) fn handle_notification(&mut self) {
+    pub(crate) fn poll(&mut self) -> bool {
+        let mut notify_rx = false;
+
         while let Some(desc) = self
             .rx_ring_buffers
             .used_mut()
@@ -123,8 +125,14 @@ impl Inner {
             entry.state = RxBufferState::Used {
                 len: desc.len().try_into().unwrap(),
             };
+            notify_rx = true;
+        }
+
+        if notify_rx {
             self.rx_ring_buffers.notify().unwrap();
         }
+
+        let mut notify_tx = false;
 
         while let Some(desc) = self
             .tx_ring_buffers
@@ -143,8 +151,14 @@ impl Inner {
             };
             entry.state = TxBufferState::Unclaimed;
             self.bounce_buffer_allocator.deallocate(range);
+            notify_tx = true;
+        }
+
+        if notify_tx {
             self.tx_ring_buffers.notify().unwrap();
         }
+
+        notify_rx || notify_tx
     }
 
     fn lookup_rx_buffer_by_encoded_addr(&self, encoded_addr: usize) -> Option<RxBufferIndex> {

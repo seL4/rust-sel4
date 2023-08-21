@@ -11,33 +11,25 @@
 
 extern crate alloc;
 
-use core::ptr::NonNull;
-
 use smoltcp::iface::Config;
 use smoltcp::phy::{Device, Medium};
 use smoltcp::wire::{EthernetAddress, HardwareAddress};
-use virtio_drivers::{
-    device::blk::*,
-    transport::{
-        mmio::{MmioTransport, VirtIOHeader},
-        DeviceType, Transport,
-    },
-};
 
 use sel4_externally_shared::ExternallySharedRef;
 use sel4_logging::{LevelFilter, Logger, LoggerBuilder};
 use sel4_shared_ring_buffer::{RingBuffer, RingBuffers};
+use sel4_shared_ring_buffer_block_io::BlockIO as SharedRingBufferBlockIO;
 use sel4_shared_ring_buffer_smoltcp::DeviceImpl;
 use sel4cp::{memory_region_symbol, protection_domain, var, Channel, Handler};
 
 use sel4cp_http_server_example_server_core::run_server;
 
-mod glue;
+mod cpiofs_io_impl;
 mod handler;
 mod net_client;
 mod timer_client;
 
-use glue::{CpiofsBlockIOImpl, VirtioBlkHalImpl, BLOCK_SIZE};
+use cpiofs_io_impl::{CpiofsBlockIOImpl, BLOCK_SIZE};
 use handler::HandlerImpl;
 use net_client::NetClient;
 use timer_client::TimerClient;
@@ -59,8 +51,8 @@ static LOGGER: Logger = LoggerBuilder::const_default()
     .build();
 
 const TIMER_DRIVER: Channel = Channel::new(0);
-const VIRTIO_BLK_DEVICE: Channel = Channel::new(1);
-const NET_DRIVER: Channel = Channel::new(2);
+const NET_DRIVER: Channel = Channel::new(1);
+const BLOCK_DRIVER: Channel = Channel::new(2);
 
 #[protection_domain(
     heap_size = 16 * 1024 * 1024,
@@ -75,6 +67,11 @@ fn init() -> impl Handler {
 
     let notify_net = || {
         NET_DRIVER.notify();
+        Ok::<_, !>(())
+    };
+
+    let notify_block = || {
+        BLOCK_DRIVER.notify();
         Ok::<_, !>(())
     };
 
@@ -115,27 +112,27 @@ fn init() -> impl Handler {
         this
     };
 
-    VirtioBlkHalImpl::init(
-        *var!(virtio_blk_dma_size: usize = 0),
-        *var!(virtio_blk_dma_vaddr: usize = 0),
+    let fs_block_io = CpiofsBlockIOImpl::new(SharedRingBufferBlockIO::new(
+        unsafe {
+            ExternallySharedRef::<'static, _>::new(
+                memory_region_symbol!(virtio_blk_dma_vaddr: *mut [u8], n = *var!(virtio_blk_dma_size: usize = 0)),
+            )
+        },
         *var!(virtio_blk_dma_paddr: usize = 0),
-    );
-
-    let fs_block_io = {
-        let header = NonNull::new(
-            (var!(virtio_blk_mmio_vaddr: usize = 0) + var!(virtio_blk_mmio_offset: usize = 0))
-                as *mut VirtIOHeader,
-        )
-        .unwrap();
-        let transport = unsafe { MmioTransport::new(header) }.unwrap();
-        assert_eq!(transport.device_type(), DeviceType::Block);
-        CpiofsBlockIOImpl::new(VirtIOBlk::new(transport).unwrap())
-    };
+        unsafe {
+            RingBuffers::new(
+                RingBuffer::from_ptr(memory_region_symbol!(virtio_blk_free: *mut _)),
+                RingBuffer::from_ptr(memory_region_symbol!(virtio_blk_used: *mut _)),
+                notify_block,
+                true,
+            )
+        },
+    ));
 
     HandlerImpl::new(
         TIMER_DRIVER,
         NET_DRIVER,
-        VIRTIO_BLK_DEVICE,
+        BLOCK_DRIVER,
         timer_client,
         net_device,
         net_config,

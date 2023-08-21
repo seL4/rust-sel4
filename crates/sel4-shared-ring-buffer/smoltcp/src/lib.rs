@@ -50,8 +50,8 @@ impl DeviceImpl {
         &self.shared_inner
     }
 
-    pub fn handle_notification(&self) {
-        self.shared_inner().borrow_mut().handle_notification()
+    pub fn poll(&self) -> bool {
+        self.shared_inner().borrow_mut().poll()
     }
 
     fn new_rx_token(&self, rx_buffer: RxBufferIndex) -> RxToken {

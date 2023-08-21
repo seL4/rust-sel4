@@ -2,74 +2,104 @@
 <system>
 
     <memory_region name="sp804_mmio" size="0x1000" phys_addr="0x90d0000" />
+
     <memory_region name="virtio_mmio" size="0x1000" phys_addr="0xa003000" />
-    <memory_region name="virtio_blk_dma" size="0x1_000_000" />
+
     <memory_region name="virtio_net_dma" size="0x1_000_000" />
+    <memory_region name="virtio_blk_dma" size="0x1_000_000" />
+
     <memory_region name="virtio_net_dma_real" size="0x1_000_000" />
+    <memory_region name="virtio_blk_dma_real" size="0x1_000_000" />
 
     <memory_region name="virtio_net_rx_free" size="0x200_000" page_size="0x200_000"/>
     <memory_region name="virtio_net_rx_used" size="0x200_000" page_size="0x200_000"/>
     <memory_region name="virtio_net_tx_free" size="0x200_000" page_size="0x200_000"/>
     <memory_region name="virtio_net_tx_used" size="0x200_000" page_size="0x200_000"/>
 
+    <memory_region name="virtio_blk_free" size="0x200_000" page_size="0x200_000"/>
+    <memory_region name="virtio_blk_used" size="0x200_000" page_size="0x200_000"/>
+
     <protection_domain name="http_server" priority="250">
         <program_image path="sel4cp-http-server-example-server.elf" />
 
-        <map mr="virtio_mmio" vaddr="0x2_000_000" perms="rw" cached="false" setvar_vaddr="virtio_blk_mmio_vaddr" />
-        <map mr="virtio_blk_dma" vaddr="0x3_000_000" perms="rw" cached="true" setvar_vaddr="virtio_blk_dma_vaddr" />
         <map mr="virtio_net_dma" vaddr="0x4_000_000" perms="rw" cached="true" setvar_vaddr="virtio_net_dma_vaddr" />
+        <setvar symbol="virtio_net_dma_size" vaddr="0x1_000_000" />
+        <setvar symbol="virtio_net_dma_paddr" region_paddr="virtio_net_dma" />
 
         <map mr="virtio_net_rx_free" vaddr="0x6_000_000" perms="rw" cached="true" setvar_vaddr="virtio_net_rx_free" />
         <map mr="virtio_net_rx_used" vaddr="0x6_200_000" perms="rw" cached="true" setvar_vaddr="virtio_net_rx_used" />
         <map mr="virtio_net_tx_free" vaddr="0x6_400_000" perms="rw" cached="true" setvar_vaddr="virtio_net_tx_free" />
         <map mr="virtio_net_tx_used" vaddr="0x6_600_000" perms="rw" cached="true" setvar_vaddr="virtio_net_tx_used" />
 
+        <map mr="virtio_blk_dma" vaddr="0x3_000_000" perms="rw" cached="true" setvar_vaddr="virtio_blk_dma_vaddr" />
         <setvar symbol="virtio_blk_dma_size" vaddr="0x1_000_000" />
         <setvar symbol="virtio_blk_dma_paddr" region_paddr="virtio_blk_dma" />
-        <setvar symbol="virtio_blk_mmio_offset" vaddr="0xc00" />
 
-        <setvar symbol="virtio_net_dma_size" vaddr="0x1_000_000" />
-        <setvar symbol="virtio_net_dma_paddr" region_paddr="virtio_net_dma" />
-
-        <irq irq="78" id="1" />
+        <map mr="virtio_blk_free" vaddr="0x7_000_000" perms="rw" cached="true" setvar_vaddr="virtio_blk_free" />
+        <map mr="virtio_blk_used" vaddr="0x7_200_000" perms="rw" cached="true" setvar_vaddr="virtio_blk_used" />
     </protection_domain>
 
-    <protection_domain name="timer_driver" priority="254" pp="true">
+    <protection_domain name="sp804_driver" priority="254" pp="true">
         <program_image path="sel4cp-http-server-example-sp804-driver.elf" />
         <map mr="sp804_mmio"  vaddr="0x2_000_000" perms="rw" cached="false" setvar_vaddr="sp804_mmio_vaddr" />
         <irq irq="43" id="0" />
-        <setvar symbol="timer_freq" vaddr="1_000_000" />
+        <setvar symbol="freq" vaddr="1_000_000" />
     </protection_domain>
 
     <protection_domain name="virtio_net_driver" priority="253" pp="true">
         <program_image path="sel4cp-http-server-example-virtio-net-driver.elf" />
 
         <map mr="virtio_mmio" vaddr="0x2_000_000" perms="rw" cached="false" setvar_vaddr="virtio_net_mmio_vaddr" />
-        <map mr="virtio_net_dma_real" vaddr="0x4_000_000" perms="rw" cached="true" setvar_vaddr="virtio_net_dma_vaddr" />
-        <map mr="virtio_net_dma" vaddr="0x5_000_000" perms="rw" cached="true" setvar_vaddr="virtio_net_dma_fake_vaddr" />
+        <setvar symbol="virtio_net_mmio_offset" vaddr="0xe00" />
+
+        <map mr="virtio_net_dma" vaddr="0x3_000_000" perms="rw" cached="true" setvar_vaddr="virtio_net_dma_fake_vaddr" />
+        <setvar symbol="virtio_net_dma_fake_size" vaddr="0x1_000_000" />
+        <setvar symbol="virtio_net_dma_fake_paddr" region_paddr="virtio_net_dma" />
+
+        <map mr="virtio_net_dma_real" vaddr="0x4_000_000" perms="rw" cached="true" setvar_vaddr="virtio_net_dma_real_vaddr" />
+        <setvar symbol="virtio_net_dma_real_size" vaddr="0x1_000_000" />
+        <setvar symbol="virtio_net_dma_real_paddr" region_paddr="virtio_net_dma_real" />
 
         <map mr="virtio_net_rx_free" vaddr="0x6_000_000" perms="rw" cached="true" setvar_vaddr="virtio_net_rx_free" />
         <map mr="virtio_net_rx_used" vaddr="0x6_200_000" perms="rw" cached="true" setvar_vaddr="virtio_net_rx_used" />
         <map mr="virtio_net_tx_free" vaddr="0x6_400_000" perms="rw" cached="true" setvar_vaddr="virtio_net_tx_free" />
         <map mr="virtio_net_tx_used" vaddr="0x6_600_000" perms="rw" cached="true" setvar_vaddr="virtio_net_tx_used" />
 
-        <setvar symbol="virtio_net_dma_size" vaddr="0x1_000_000" />
-        <setvar symbol="virtio_net_dma_paddr" region_paddr="virtio_net_dma_real" />
-        <setvar symbol="virtio_net_mmio_offset" vaddr="0xe00" />
-
-        <setvar symbol="virtio_net_dma_fake_size" vaddr="0x1_000_000" />
-        <setvar symbol="virtio_net_dma_fake_paddr" region_paddr="virtio_net_dma" />
-
         <irq irq="79" id="0" />
+    </protection_domain>
+
+    <protection_domain name="virtio_blk_driver" priority="252">
+        <program_image path="sel4cp-http-server-example-virtio-blk-driver.elf" />
+
+        <map mr="virtio_mmio" vaddr="0x2_000_000" perms="rw" cached="false" setvar_vaddr="virtio_blk_mmio_vaddr" />
+        <setvar symbol="virtio_blk_mmio_offset" vaddr="0xc00" />
+
+        <map mr="virtio_blk_dma" vaddr="0x3_000_000" perms="rw" cached="true" setvar_vaddr="virtio_blk_dma_fake_vaddr" />
+        <setvar symbol="virtio_blk_dma_fake_size" vaddr="0x1_000_000" />
+        <setvar symbol="virtio_blk_dma_fake_paddr" region_paddr="virtio_blk_dma" />
+
+        <map mr="virtio_blk_dma_real" vaddr="0x4_000_000" perms="rw" cached="true" setvar_vaddr="virtio_blk_dma_real_vaddr" />
+        <setvar symbol="virtio_blk_dma_real_size" vaddr="0x1_000_000" />
+        <setvar symbol="virtio_blk_dma_real_paddr" region_paddr="virtio_blk_dma_real" />
+
+        <map mr="virtio_blk_free" vaddr="0x6_000_000" perms="rw" cached="true" setvar_vaddr="virtio_blk_free" />
+        <map mr="virtio_blk_used" vaddr="0x6_200_000" perms="rw" cached="true" setvar_vaddr="virtio_blk_used" />
+
+        <irq irq="78" id="0" />
     </protection_domain>
 
     <channel>
         <end pd="http_server" id="0" />
-        <end pd="timer_driver" id="1" />
+        <end pd="sp804_driver" id="1" />
+    </channel>
+
+    <channel>
+        <end pd="http_server" id="1" />
+        <end pd="virtio_net_driver" id="1" />
     </channel>
 
     <channel>
         <end pd="http_server" id="2" />
-        <end pd="virtio_net_driver" id="1" />
+        <end pd="virtio_blk_driver" id="1" />
     </channel>
 </system>

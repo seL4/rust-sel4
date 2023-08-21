@@ -39,9 +39,9 @@ use hal_impl::HalImpl;
 )]
 fn init() -> ThisHandler {
     HalImpl::init(
-        *var!(virtio_net_dma_size: usize = 0),
-        *var!(virtio_net_dma_vaddr: usize = 0),
-        *var!(virtio_net_dma_paddr: usize = 0),
+        *var!(virtio_net_dma_real_size: usize = 0),
+        *var!(virtio_net_dma_real_vaddr: usize = 0),
+        *var!(virtio_net_dma_real_paddr: usize = 0),
     );
 
     let mut dev = {

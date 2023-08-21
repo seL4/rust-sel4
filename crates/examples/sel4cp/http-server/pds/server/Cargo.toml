@@ -17,14 +17,12 @@ sel4-bounce-buffer-allocator = { path = "../../../../../sel4-bounce-buffer-alloc
 sel4-immediate-sync-once-cell = { path = "../../../../../sel4-immediate-sync-once-cell" }
 sel4-logging = { path = "../../../../../sel4-logging" }
 sel4-shared-ring-buffer = { path = "../../../../../sel4-shared-ring-buffer" }
+sel4-shared-ring-buffer-block-io = { path = "../../../../../sel4-shared-ring-buffer/block-io" }
 sel4-shared-ring-buffer-smoltcp = { path = "../../../../../sel4-shared-ring-buffer/smoltcp" }
 sel4-sync = { path = "../../../../../sel4-sync" }
 sel4cp = { path = "../../../../../sel4cp", default-features = false, features = ["alloc"] }
 sel4cp-http-server-example-server-core = { path = "./core", features = [] }
 sel4cp-http-server-example-server-cpiofs = { path = "./cpiofs" }
-serde = { version = "1.0.147", default-features = false, features = ["alloc", "derive"] }
-tock-registers = "0.8.1"
-virtio-drivers = { version = "0.5.0" }
 
 [dependencies.sel4-async-single-threaded-executor]
 path = "../../../../../sel4-async/single-threaded-executor"
@@ -36,6 +34,9 @@ features = ["unstable", "alloc"]
 [dependencies.sel4-newlib]
 path = "../../../../../sel4-newlib"
 features = ["nosys", "all-symbols", "sel4-panicking-env"]
+
+[dependencies.sel4-shared-ring-buffer-block-io-types]
+path = "../../../../../sel4-shared-ring-buffer/block-io/types"
 
 [dependencies.sel4cp-http-server-example-sp804-driver-interface-types]
 path = "../sp804-driver/interface-types"

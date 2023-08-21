@@ -3,17 +3,7 @@
 mk {
   package.name = "sel4cp-http-server-example-server";
   dependencies = rec {
-    sel4-newlib = {
-      features = [
-        "nosys"
-        "all-symbols"
-        "sel4-panicking-env"
-      ];
-    };
-
     inherit (versions) log;
-
-    serde = serdeWith [ "alloc" "derive" ];
 
     futures = {
       version = versions.futures;
@@ -26,19 +16,15 @@ mk {
 
     smoltcp = smoltcpWith [];
 
-    virtio-drivers = {
-      version = "0.5.0";
-    };
-
-    # virtio-drivers = {
-    #   git = "https://github.com/nspin/virtio-drivers.git";
-    #   rev = "409ee723c92adf309e825a7b87f53049707ed306"; # branch new-netdev
-    #   # default-features = false; # disable "alloc"
-    # };
-
     async-unsync = { version = "0.2.2"; default-features = false; };
 
-    tock-registers = "0.8.1";
+    sel4-newlib = {
+      features = [
+        "nosys"
+        "all-symbols"
+        "sel4-panicking-env"
+      ];
+    };
 
     sel4cp-http-server-example-server-core.features = [
       # "debug"
@@ -65,6 +51,8 @@ mk {
     sel4-bounce-buffer-allocator
     sel4-shared-ring-buffer
     sel4-shared-ring-buffer-smoltcp
+    sel4-shared-ring-buffer-block-io
+    sel4-shared-ring-buffer-block-io-types
     sel4cp-http-server-example-server-core
     sel4cp-http-server-example-server-cpiofs
     sel4cp-http-server-example-sp804-driver-interface-types

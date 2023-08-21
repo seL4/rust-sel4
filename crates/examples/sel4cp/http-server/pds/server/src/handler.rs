@@ -22,7 +22,7 @@ const BLOCK_CACHE_SIZE_IN_BLOCKS: usize = 128;
 pub(crate) struct HandlerImpl {
     timer_driver_channel: sel4cp::Channel,
     net_driver_channel: sel4cp::Channel,
-    virtio_blk_irq_channel: sel4cp::Channel,
+    block_driver_channel: sel4cp::Channel,
     timer: TimerClient,
     net_device: DeviceImpl,
     fs_block_io: CpiofsBlockIOImpl,
@@ -36,7 +36,7 @@ impl HandlerImpl {
     pub(crate) fn new<T: Future<Output = !> + 'static>(
         timer_driver_channel: sel4cp::Channel,
         net_driver_channel: sel4cp::Channel,
-        virtio_blk_irq_channel: sel4cp::Channel,
+        block_driver_channel: sel4cp::Channel,
         mut timer: TimerClient,
         mut net_device: DeviceImpl,
         net_config: Config,
@@ -72,7 +72,7 @@ impl HandlerImpl {
         let mut this = Self {
             timer_driver_channel,
             net_driver_channel,
-            virtio_blk_irq_channel,
+            block_driver_channel,
             timer,
             net_device,
             fs_block_io,
@@ -82,11 +82,7 @@ impl HandlerImpl {
             fut,
         };
 
-        this.handle_timer_notification();
-        this.handle_net_notification();
-        this.handle_virtio_blk_interrupt();
-
-        this.react();
+        this.react(true, true, true);
 
         this
     }
@@ -103,23 +99,19 @@ impl HandlerImpl {
         self.timer.set_timeout(d.micros())
     }
 
-    fn handle_timer_notification(&mut self) {}
-
-    fn handle_net_notification(&mut self) {
-        self.net_device.handle_notification();
-    }
-
-    fn handle_virtio_blk_interrupt(&mut self) {
-        self.fs_block_io.ack_interrupt();
-        self.virtio_blk_irq_channel.irq_ack().unwrap();
-    }
-
-    fn react(&mut self) {
+    // TODO focused polling using these args doesn't play nicely with "repoll" mechanism below
+    fn react(
+        &mut self,
+        _timer_notification: bool,
+        _net_notification: bool,
+        _block_notification: bool,
+    ) {
         loop {
             let _ = self.local_pool.run_until_stalled(Pin::new(&mut self.fut));
             let now = self.now();
             let mut activity = false;
             activity |= self.shared_timers.inner().borrow_mut().poll(now);
+            activity |= self.net_device.poll();
             activity |= self
                 .shared_network
                 .inner()
@@ -131,10 +123,17 @@ impl HandlerImpl {
                     self.shared_timers.inner().borrow_mut().poll_delay(now),
                     self.shared_network.inner().borrow_mut().poll_delay(now),
                 ];
+                let mut repoll = false;
                 if let Some(delay) = delays.iter().filter_map(Option::as_ref).min() {
-                    self.set_timeout(delay.clone());
+                    if delay == &Duration::ZERO {
+                        repoll = true;
+                    } else {
+                        self.set_timeout(delay.clone());
+                    }
                 }
-                break;
+                if !repoll {
+                    break;
+                }
             }
         }
     }
@@ -144,16 +143,11 @@ impl sel4cp::Handler for HandlerImpl {
     type Error = !;
 
     fn notified(&mut self, channel: sel4cp::Channel) -> Result<(), Self::Error> {
-        if channel == self.timer_driver_channel {
-            self.handle_timer_notification();
-        } else if channel == self.net_driver_channel {
-            self.handle_net_notification();
-        } else if channel == self.virtio_blk_irq_channel {
-            self.handle_virtio_blk_interrupt();
-        }
-
-        self.react();
-
+        self.react(
+            channel == self.timer_driver_channel,
+            channel == self.net_driver_channel,
+            channel == self.block_driver_channel,
+        );
         Ok(())
     }
 }
