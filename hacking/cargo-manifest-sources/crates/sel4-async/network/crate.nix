@@ -12,6 +12,8 @@ mk {
       ];
     };
     smoltcp = smoltcpWith [
+      "async"
+      "alloc"
       # "verbose"
     ];
   };

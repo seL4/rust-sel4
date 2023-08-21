@@ -139,18 +139,36 @@ let
       smoltcpWith = features: {
         version = versions.smoltcp;
         default-features = false;
-        features = smoltcpCommonFeatures ++ features;
+        features = smoltcpBaseProtosFeatures ++ features;
       };
 
-      smoltcpCommonFeatures = [
-        "alloc"
-        "async"
+      smoltcpWithAdjustedDefaultsAnd = features:
+        smoltcpWith (smoltcpAdjustedDefaultFeatures ++ features);
+
+      smoltcpBaseProtosFeatures = [
+        "proto-ipv4"
+        "proto-dhcpv4"
+        "proto-dns"
+        "socket-dhcpv4"
+        "socket-dns"
+        "socket-tcp"
+      ];
+
+      # default features with:
+      #   - "std"
+      #   + "alloc"
+      #   + "phy-raw_socket"
+      #   + "phy-tuntap_interface"
+      smoltcpAdjustedDefaultFeatures = [
+        "alloc" "log"
         "medium-ethernet" "medium-ip" "medium-ieee802154"
+        
         "proto-ipv4" "proto-igmp" "proto-dhcpv4" "proto-ipv6" "proto-dns"
         "proto-ipv4-fragmentation" "proto-sixlowpan-fragmentation"
         "socket-raw" "socket-icmp" "socket-udp" "socket-tcp" "socket-dhcpv4" "socket-dns" "socket-mdns"
-        "log"
+        "packetmeta-id" "async"
       ];
+
     };
 
   workspaceTOML = helpers.renderManifest {

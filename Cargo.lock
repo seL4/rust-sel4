@@ -3107,7 +3107,6 @@ dependencies = [
  "sel4-async-timers",
  "sel4-panicking-env",
  "sel4cp-http-server-example-server-cpiofs",
- "smoltcp",
 ]
 
 [[package]]
@@ -3345,7 +3344,6 @@ dependencies = [
  "cfg-if",
  "defmt",
  "heapless",
- "log",
  "managed",
 ]
 

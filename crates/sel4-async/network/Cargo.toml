@@ -13,24 +13,12 @@ log = "0.4.17"
 version = "0.10.0"
 default-features = false
 features = [
-    "alloc",
-    "async",
-    "medium-ethernet",
-    "medium-ip",
-    "medium-ieee802154",
     "proto-ipv4",
-    "proto-igmp",
     "proto-dhcpv4",
-    "proto-ipv6",
     "proto-dns",
-    "proto-ipv4-fragmentation",
-    "proto-sixlowpan-fragmentation",
-    "socket-raw",
-    "socket-icmp",
-    "socket-udp",
-    "socket-tcp",
     "socket-dhcpv4",
     "socket-dns",
-    "socket-mdns",
-    "log"
+    "socket-tcp",
+    "async",
+    "alloc"
 ]
