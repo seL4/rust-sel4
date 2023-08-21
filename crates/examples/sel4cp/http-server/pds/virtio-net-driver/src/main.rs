@@ -4,17 +4,12 @@
 #![feature(slice_ptr_get)]
 #![feature(never_type)]
 #![feature(strict_provenance)]
-#![allow(unused_imports)]
-#![allow(dead_code)]
-#![allow(unreachable_code)]
-#![allow(unused_variables)]
 
 extern crate alloc;
 
 use core::ptr::NonNull;
 
 use sel4_externally_shared::ExternallySharedRef;
-use sel4_logging::{LevelFilter, Logger, LoggerBuilder};
 use sel4_shared_ring_buffer::{RingBuffer, RingBuffers};
 use sel4cp::message::{MessageInfo, NoMessageValue, StatusMessageLabel};
 use sel4cp::{memory_region_symbol, protection_domain, var, Channel, Handler};
