@@ -8,9 +8,9 @@ use crate::phdrs::{
     locate_phdrs,
 };
 
-struct ThisEhFrameFinder;
+struct EhFrameFinderImpl;
 
-unsafe impl EhFrameFinder for ThisEhFrameFinder {
+unsafe impl EhFrameFinder for EhFrameFinderImpl {
     fn find(&self, pc: usize) -> Option<FrameInfo> {
         let phdrs = locate_phdrs();
 
@@ -40,6 +40,6 @@ unsafe impl EhFrameFinder for ThisEhFrameFinder {
 }
 
 pub fn set_eh_frame_finder() -> Result<(), SetCustomEhFrameFinderError> {
-    static EH_FRAME_FINDER: &(dyn EhFrameFinder + Sync) = &ThisEhFrameFinder;
+    static EH_FRAME_FINDER: &(dyn EhFrameFinder + Sync) = &EhFrameFinderImpl;
     set_custom_eh_frame_finder(EH_FRAME_FINDER)
 }
