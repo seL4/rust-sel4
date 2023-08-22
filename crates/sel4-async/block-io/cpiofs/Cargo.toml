@@ -1,5 +1,5 @@
 [package]
-name = "sel4cp-http-server-example-server-cpiofs"
+name = "sel4-async-block-io-cpiofs"
 version = "0.1.0"
 authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
 edition = "2021"

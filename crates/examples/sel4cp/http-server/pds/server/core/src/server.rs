@@ -6,8 +6,8 @@ use core::str::pattern::Pattern;
 
 use mbedtls::ssl::async_io::{AsyncIo, AsyncIoExt, ClosedError};
 
+use sel4_async_block_io_cpiofs as cpiofs;
 use sel4_async_network_mbedtls::mbedtls;
-use sel4cp_http_server_example_server_cpiofs as cpiofs;
 
 pub(crate) struct Server<T> {
     index: cpiofs::Index<T>,

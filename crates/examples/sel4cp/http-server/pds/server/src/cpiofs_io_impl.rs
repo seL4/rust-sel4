@@ -1,5 +1,5 @@
+use sel4_async_block_io_cpiofs::BlockIO as CpiofsBlockIO;
 use sel4_shared_ring_buffer_block_io::BlockIO as SharedRingBufferBlockIO;
-use sel4cp_http_server_example_server_cpiofs::BlockIO as CpiofsBlockIO;
 
 pub use sel4_shared_ring_buffer_block_io::BLOCK_SIZE;
 

@@ -12,11 +12,11 @@ debug = ["mbedtls/debug"]
 futures = { version = "0.3.28", default-features = false, features = ["async-await", "alloc"] }
 httparse = { version = "1.8.0", default-features = false }
 log = "0.4.17"
+sel4-async-block-io-cpiofs = { path = "../../../../../../sel4-async/block-io/cpiofs" }
 sel4-async-network = { path = "../../../../../../sel4-async/network" }
 sel4-async-network-mbedtls = { path = "../../../../../../sel4-async/network/mbedtls" }
 sel4-async-timers = { path = "../../../../../../sel4-async/timers" }
 sel4-panicking-env = { path = "../../../../../../sel4-panicking/env" }
-sel4cp-http-server-example-server-cpiofs = { path = "../../../helpers/cpiofs" }
 
 [dependencies.mbedtls]
 git = "https://github.com/nspin/rust-mbedtls"

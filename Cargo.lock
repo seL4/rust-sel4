@@ -2400,6 +2400,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "sel4-async-block-io-cpiofs"
+version = "0.1.0"
+dependencies = [
+ "futures",
+ "hex",
+ "log",
+ "lru",
+ "zerocopy",
+]
+
+[[package]]
 name = "sel4-async-network"
 version = "0.1.0"
 dependencies = [
@@ -3093,6 +3104,7 @@ dependencies = [
  "log",
  "rcgen",
  "sel4",
+ "sel4-async-block-io-cpiofs",
  "sel4-async-network",
  "sel4-async-request-statuses",
  "sel4-async-single-threaded-executor",
@@ -3109,7 +3121,6 @@ dependencies = [
  "sel4-sync",
  "sel4cp",
  "sel4cp-http-server-example-server-core",
- "sel4cp-http-server-example-server-cpiofs",
  "sel4cp-http-server-example-sp804-driver-interface-types",
  "sel4cp-http-server-example-virtio-net-driver-interface-types",
  "smoltcp",
@@ -3123,23 +3134,12 @@ dependencies = [
  "httparse",
  "log",
  "mbedtls",
+ "sel4-async-block-io-cpiofs",
  "sel4-async-network",
  "sel4-async-network-mbedtls",
  "sel4-async-single-threaded-executor",
  "sel4-async-timers",
  "sel4-panicking-env",
- "sel4cp-http-server-example-server-cpiofs",
-]
-
-[[package]]
-name = "sel4cp-http-server-example-server-cpiofs"
-version = "0.1.0"
-dependencies = [
- "futures",
- "hex",
- "log",
- "lru",
- "zerocopy",
 ]
 
 [[package]]

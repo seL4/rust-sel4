@@ -12,13 +12,13 @@ use futures::task::LocalSpawnExt;
 
 use mbedtls::ssl::async_io::ClosedError;
 
+use sel4_async_block_io_cpiofs as cpiofs;
 use sel4_async_network::{SharedNetwork, TcpSocketError};
 use sel4_async_network_mbedtls::{
     insecure_dummy_rng, mbedtls, seed_insecure_dummy_rng, DbgCallbackBuilder, TcpSocketWrapper,
 };
 use sel4_async_single_threaded_executor::LocalSpawner;
 use sel4_async_timers::SharedTimers;
-use sel4cp_http_server_example_server_cpiofs as cpiofs;
 
 mod server;
 

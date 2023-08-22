@@ -24,7 +24,7 @@ mk {
     sel4-async-network-mbedtls
     sel4-async-timers
     sel4-panicking-env
-    sel4cp-http-server-example-server-cpiofs
+    sel4-async-block-io-cpiofs
     # mbedtls
   ];
   features = {
