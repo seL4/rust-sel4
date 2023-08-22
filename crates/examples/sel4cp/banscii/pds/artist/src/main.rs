@@ -26,7 +26,7 @@ const ASSISTANT: Channel = Channel::new(0);
 const REGION_SIZE: usize = 0x4_000;
 
 #[protection_domain(heap_size = 0x10000)]
-fn init() -> ThisHandler {
+fn init() -> HandlerImpl {
     let region_in = unsafe {
         ExternallySharedRef::<'static, [u8]>::new_read_only(
             memory_region_symbol!(region_in_start: *mut [u8], n = REGION_SIZE),
@@ -39,18 +39,18 @@ fn init() -> ThisHandler {
         )
     };
 
-    ThisHandler {
+    HandlerImpl {
         region_in,
         region_out,
     }
 }
 
-struct ThisHandler {
+struct HandlerImpl {
     region_in: ExternallySharedRef<'static, [u8], ReadOnly>,
     region_out: ExternallySharedRef<'static, [u8], ReadWrite>,
 }
 
-impl Handler for ThisHandler {
+impl Handler for HandlerImpl {
     type Error = !;
 
     fn protected(

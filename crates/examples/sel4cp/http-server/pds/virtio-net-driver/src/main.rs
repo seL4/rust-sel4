@@ -32,7 +32,7 @@ const NET_QUEUE_SIZE: usize = 16;
 #[protection_domain(
     heap_size = 512 * 1024,
 )]
-fn init() -> ThisHandler {
+fn init() -> HandlerImpl {
     HalImpl::init(
         *var!(virtio_net_dma_real_size: usize = 0),
         *var!(virtio_net_dma_real_vaddr: usize = 0),
@@ -79,7 +79,7 @@ fn init() -> ThisHandler {
     dev.ack_interrupt();
     DEVICE.irq_ack().unwrap();
 
-    ThisHandler {
+    HandlerImpl {
         dev,
         client_region,
         client_dma_region_paddr,
@@ -93,7 +93,7 @@ fn notify_client() -> Result<(), !> {
     Ok::<_, !>(())
 }
 
-struct ThisHandler {
+struct HandlerImpl {
     dev: VirtIONet<HalImpl, MmioTransport, NET_QUEUE_SIZE>,
     client_region: ExternallySharedRef<'static, [u8]>,
     client_dma_region_paddr: usize,
@@ -101,7 +101,7 @@ struct ThisHandler {
     tx_ring_buffers: RingBuffers<'static, fn() -> Result<(), !>>,
 }
 
-impl Handler for ThisHandler {
+impl Handler for HandlerImpl {
     type Error = !;
 
     fn notified(&mut self, channel: Channel) -> Result<(), Self::Error> {

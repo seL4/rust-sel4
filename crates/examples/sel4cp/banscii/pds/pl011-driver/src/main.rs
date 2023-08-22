@@ -14,23 +14,23 @@ const DEVICE: Channel = Channel::new(0);
 const ASSISTANT: Channel = Channel::new(1);
 
 #[protection_domain]
-fn init() -> ThisHandler {
+fn init() -> HandlerImpl {
     let driver =
         unsafe { Driver::new(memory_region_symbol!(pl011_register_block: *mut ()).as_ptr()) };
-    ThisHandler {
+    HandlerImpl {
         driver,
         buffer: Deque::new(),
         notify: true,
     }
 }
 
-struct ThisHandler {
+struct HandlerImpl {
     driver: Driver,
     buffer: Deque<u8, 256>,
     notify: bool,
 }
 
-impl Handler for ThisHandler {
+impl Handler for HandlerImpl {
     type Error = !;
 
     fn notified(&mut self, channel: Channel) -> Result<(), Self::Error> {

@@ -46,20 +46,20 @@ fn init() -> impl Handler {
 
     prompt();
 
-    ThisHandler {
+    HandlerImpl {
         region_in,
         region_out,
         buffer: Vec::new(),
     }
 }
 
-struct ThisHandler {
+struct HandlerImpl {
     region_in: ExternallySharedRef<'static, [u8], ReadOnly>,
     region_out: ExternallySharedRef<'static, [u8], ReadWrite>,
     buffer: Vec<u8>,
 }
 
-impl Handler for ThisHandler {
+impl Handler for HandlerImpl {
     type Error = !;
 
     fn notified(&mut self, channel: Channel) -> Result<(), Self::Error> {
@@ -94,7 +94,7 @@ impl Handler for ThisHandler {
     }
 }
 
-impl ThisHandler {
+impl HandlerImpl {
     fn try_create(&mut self) {
         let mut buffer = Vec::new();
         mem::swap(&mut buffer, &mut self.buffer);

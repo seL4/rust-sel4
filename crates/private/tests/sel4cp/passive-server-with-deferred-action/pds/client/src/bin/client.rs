@@ -9,12 +9,12 @@ const SERVER: Channel = Channel::new(0);
 #[protection_domain]
 fn init() -> impl Handler {
     SERVER.notify();
-    ThisHandler {}
+    HandlerImpl {}
 }
 
-struct ThisHandler {}
+struct HandlerImpl {}
 
-impl Handler for ThisHandler {
+impl Handler for HandlerImpl {
     type Error = !;
 
     fn notified(&mut self, _channel: Channel) -> Result<(), Self::Error> {

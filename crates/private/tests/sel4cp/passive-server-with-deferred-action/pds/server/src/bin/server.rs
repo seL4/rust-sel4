@@ -8,16 +8,16 @@ const CLIENT: Channel = Channel::new(0);
 
 #[protection_domain]
 fn init() -> impl Handler {
-    ThisHandler {
+    HandlerImpl {
         deferred_action: DeferredActionSlot::new(),
     }
 }
 
-struct ThisHandler {
+struct HandlerImpl {
     deferred_action: DeferredActionSlot,
 }
 
-impl Handler for ThisHandler {
+impl Handler for HandlerImpl {
     type Error = !;
 
     fn notified(&mut self, _channel: Channel) -> Result<(), Self::Error> {
