@@ -7,22 +7,31 @@ mk {
     sel4-config
     sel4-sys
 
-    sel4-sync
-    sel4-logging
-    sel4-externally-shared
-    sel4-shared-ring-buffer
-    sel4-bounce-buffer-allocator
-    sel4-async-network
-    sel4-async-request-statuses
-    sel4-async-single-threaded-executor
-
     sel4-root-task
 
     sel4cp
     sel4cp-postcard
+
+    sel4-async-block-io-cpiofs
+    sel4-async-network
+    sel4-async-request-statuses
+    sel4-async-single-threaded-executor
+    sel4-async-timers
+    sel4-bounce-buffer-allocator
+    sel4-externally-shared
+    sel4-immediate-sync-once-cell
+    sel4-immutable-cell
+    sel4-logging
+    sel4-shared-ring-buffer
+    sel4-shared-ring-buffer-block-io
+    sel4-shared-ring-buffer-block-io-types
+    sel4-shared-ring-buffer-smoltcp
+    sel4-sync
+
   ];
   dependencies = {
     inherit (versions) cfg-if log;
+    sel4-externally-shared = { features = [ "alloc" "unstable" "very_unstable" ]; };
     sel4-root-task = { features = [ "full" ]; optional = true; };
     sel4cp = { features = [ "full" ]; optional = true; };
     sel4cp-postcard = { optional = true; };

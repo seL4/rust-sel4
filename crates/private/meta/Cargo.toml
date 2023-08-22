@@ -13,19 +13,29 @@ sel4cp = ["dep:sel4cp", "sel4cp-postcard"]
 cfg-if = "1.0.0"
 log = "0.4.17"
 sel4 = { path = "../../sel4" }
+sel4-async-block-io-cpiofs = { path = "../../sel4-async/block-io/cpiofs" }
 sel4-async-network = { path = "../../sel4-async/network" }
 sel4-async-request-statuses = { path = "../../sel4-async/request-statuses" }
 sel4-async-single-threaded-executor = { path = "../../sel4-async/single-threaded-executor" }
+sel4-async-timers = { path = "../../sel4-async/timers" }
 sel4-bounce-buffer-allocator = { path = "../../sel4-bounce-buffer-allocator" }
 sel4-config = { path = "../../sel4/config" }
-sel4-externally-shared = { path = "../../sel4-externally-shared" }
+sel4-immediate-sync-once-cell = { path = "../../sel4-immediate-sync-once-cell" }
+sel4-immutable-cell = { path = "../../sel4-immutable-cell" }
 sel4-logging = { path = "../../sel4-logging" }
 sel4-root-task = { path = "../../sel4-root-task", features = ["full"], optional = true }
 sel4-shared-ring-buffer = { path = "../../sel4-shared-ring-buffer" }
+sel4-shared-ring-buffer-block-io = { path = "../../sel4-shared-ring-buffer/block-io" }
+sel4-shared-ring-buffer-block-io-types = { path = "../../sel4-shared-ring-buffer/block-io/types" }
+sel4-shared-ring-buffer-smoltcp = { path = "../../sel4-shared-ring-buffer/smoltcp" }
 sel4-sync = { path = "../../sel4-sync" }
 sel4-sys = { path = "../../sel4/sys" }
 sel4cp = { path = "../../sel4cp", features = ["full"], optional = true }
 sel4cp-postcard = { path = "../../sel4cp/postcard", optional = true }
+
+[dependencies.sel4-externally-shared]
+path = "../../sel4-externally-shared"
+features = ["alloc", "unstable", "very_unstable"]
 
 [target."cfg(not(target_arch = \"x86_64\"))".dependencies]
 sel4-platform-info = { path = "../../sel4-platform-info", optional = true }
