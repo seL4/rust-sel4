@@ -6,7 +6,7 @@ mk {
     inherit (versions) log;
 
     virtio-drivers = {
-      version = "0.6.0";
+      version = "0.5.0";
       default-features = false;
     };
 
