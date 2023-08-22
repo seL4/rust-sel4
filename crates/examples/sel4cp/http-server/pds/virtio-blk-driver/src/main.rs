@@ -122,7 +122,7 @@ impl Handler for ThisHandler {
                     let mut unsafe_buf = self.client_region.as_mut_ptr().index(range).as_raw_ptr();
                     unsafe {
                         self.dev
-                            .complete_read_block(
+                            .complete_read_blocks(
                                 token,
                                 &pending_entry.virtio_req,
                                 unsafe_buf.as_mut(),
@@ -156,7 +156,7 @@ impl Handler for ThisHandler {
                     });
                     let token = unsafe {
                         self.dev
-                            .read_block_nb(
+                            .read_blocks_nb(
                                 block_id,
                                 &mut pending_entry.virtio_req,
                                 unsafe_buf.as_mut(),

@@ -57,8 +57,6 @@ mk {
     sel4-async-block-io-cpiofs
     sel4cp-http-server-example-sp804-driver-interface-types
     sel4cp-http-server-example-virtio-net-driver-interface-types
-
-    # virtio-drivers
   ];
   nix.meta.labels = [ "leaf" ];
   nix.meta.requirements = [ "sel4" ];
