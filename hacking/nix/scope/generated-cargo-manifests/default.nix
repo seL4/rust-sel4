@@ -95,6 +95,7 @@ let
         synstructure = "0.12.6";
         tock-registers = "0.8.1";
         unwinding = "0.1.6";
+        virtio-drivers = "0.5.0";
         zerocopy = "0.6.1";
       };
 
@@ -169,6 +170,11 @@ let
         "packetmeta-id" "async"
       ];
 
+      virtioDriversWith = features: {
+        version = versions.virtio-drivers;
+        default-features = false;
+        inherit features;
+      };
     };
 
   workspaceTOML = helpers.renderManifest {

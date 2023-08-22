@@ -1,15 +1,11 @@
-{ mk, localCrates, versions }:
+{ mk, localCrates, versions, virtioDriversWith }:
 
 mk {
   package.name = "sel4cp-http-server-example-virtio-net-driver";
   dependencies = rec {
     inherit (versions) log;
 
-    virtio-drivers = {
-      version = "0.5.0";
-      default-features = false;
-      features = [ "alloc" ];
-    };
+    virtio-drivers = virtioDriversWith [ "alloc" ];
 
     sel4-externally-shared.features = [ "unstable" ];
     sel4cp = { default-features = false; };

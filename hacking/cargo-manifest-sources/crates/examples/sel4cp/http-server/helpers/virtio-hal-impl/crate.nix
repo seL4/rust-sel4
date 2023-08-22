@@ -1,14 +1,11 @@
-{ mk, localCrates, versions }:
+{ mk, localCrates, versions, virtioDriversWith }:
 
 mk {
   package.name = "sel4cp-http-server-example-virtio-hal-impl";
   dependencies = rec {
     inherit (versions) log;
 
-    virtio-drivers = {
-      version = "0.5.0";
-      default-features = false;
-    };
+    virtio-drivers = virtioDriversWith [];
   };
   nix.local.dependencies = with localCrates; [
     sel4-sync
