@@ -9,11 +9,6 @@ extern crate alloc;
 
 use core::ptr::NonNull;
 
-use sel4_externally_shared::ExternallySharedRef;
-use sel4_shared_ring_buffer::{RingBuffer, RingBuffers};
-use sel4cp::message::{MessageInfo, NoMessageValue, StatusMessageLabel};
-use sel4cp::{memory_region_symbol, protection_domain, var, Channel, Handler};
-
 use virtio_drivers::{
     device::net::*,
     transport::{
@@ -22,6 +17,12 @@ use virtio_drivers::{
     },
 };
 
+use sel4_externally_shared::ExternallySharedRef;
+use sel4_shared_ring_buffer::{RingBuffer, RingBuffers};
+use sel4cp::message::{MessageInfo, NoMessageValue, StatusMessageLabel};
+use sel4cp::{memory_region_symbol, protection_domain, var, Channel, Handler};
+
+use sel4cp_http_server_example_virtio_hal_impl::HalImpl;
 use sel4cp_http_server_example_virtio_net_driver_interface_types::*;
 
 const DEVICE: Channel = Channel::new(0);
@@ -29,10 +30,6 @@ const CLIENT: Channel = Channel::new(1);
 
 const NET_BUFFER_LEN: usize = 2048;
 const NET_QUEUE_SIZE: usize = 16;
-
-mod hal_impl;
-
-use hal_impl::HalImpl;
 
 #[protection_domain(
     heap_size = 16 * 1024 * 1024,

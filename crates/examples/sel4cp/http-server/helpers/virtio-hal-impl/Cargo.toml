@@ -1,5 +1,5 @@
 [package]
-name = "sel4cp-http-server-example-virtio-blk-driver"
+name = "sel4cp-http-server-example-virtio-hal-impl"
 version = "0.1.0"
 authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
 edition = "2021"
@@ -7,19 +7,11 @@ license = "BSD-2-Clause"
 
 [dependencies]
 log = "0.4.17"
-sel4 = { path = "../../../../../sel4" }
 sel4-bounce-buffer-allocator = { path = "../../../../../sel4-bounce-buffer-allocator" }
 sel4-immediate-sync-once-cell = { path = "../../../../../sel4-immediate-sync-once-cell" }
-sel4-logging = { path = "../../../../../sel4-logging" }
-sel4-shared-ring-buffer = { path = "../../../../../sel4-shared-ring-buffer" }
 sel4-sync = { path = "../../../../../sel4-sync" }
-sel4cp = { path = "../../../../../sel4cp", default-features = false }
-sel4cp-http-server-example-virtio-hal-impl = { path = "../../helpers/virtio-hal-impl" }
 virtio-drivers = { version = "0.5.0", default-features = false, features = ["alloc"] }
 
 [dependencies.sel4-externally-shared]
 path = "../../../../../sel4-externally-shared"
 features = ["unstable", "alloc"]
-
-[dependencies.sel4-shared-ring-buffer-block-io-types]
-path = "../../../../../sel4-shared-ring-buffer/block-io/types"

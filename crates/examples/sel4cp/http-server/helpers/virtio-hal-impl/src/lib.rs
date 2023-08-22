@@ -1,3 +1,8 @@
+#![no_std]
+#![feature(ptr_metadata)]
+#![feature(slice_ptr_get)]
+#![feature(strict_provenance)]
+
 use core::alloc::Layout;
 use core::ops::Range;
 use core::ptr::{self, NonNull};
@@ -20,10 +25,10 @@ static BOUNCE_BUFFER_ALLOCATOR: GenericMutex<
     Option<BounceBufferAllocator<Basic>>,
 > = GenericMutex::new(PanickingMutexSyncOps::new(), None);
 
-pub(crate) struct HalImpl;
+pub struct HalImpl;
 
 impl HalImpl {
-    pub(crate) fn init(dma_region_size: usize, dma_region_vaddr: usize, dma_region_paddr: usize) {
+    pub fn init(dma_region_size: usize, dma_region_vaddr: usize, dma_region_paddr: usize) {
         DMA_REGION_VADDR_RANGE
             .set(dma_region_vaddr..(dma_region_vaddr + dma_region_size))
             .unwrap();

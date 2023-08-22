@@ -1,7 +1,7 @@
 { mk, localCrates, versions }:
 
 mk {
-  package.name = "sel4cp-http-server-example-virtio-blk-driver";
+  package.name = "sel4cp-http-server-example-virtio-hal-impl";
   dependencies = rec {
     inherit (versions) log;
 
@@ -11,19 +11,12 @@ mk {
       features = [ "alloc" ];
     };
 
-    sel4cp = { default-features = false; };
     sel4-externally-shared.features = [ "unstable" "alloc" ];
   };
   nix.local.dependencies = with localCrates; [
-    sel4
-    sel4-logging
-    sel4cp
     sel4-externally-shared
     sel4-sync
     sel4-immediate-sync-once-cell
-    sel4-shared-ring-buffer
-    sel4-shared-ring-buffer-block-io-types
     sel4-bounce-buffer-allocator
-    sel4cp-http-server-example-virtio-hal-impl
   ];
 }

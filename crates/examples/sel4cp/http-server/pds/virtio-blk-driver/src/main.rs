@@ -11,13 +11,6 @@ use alloc::boxed::Box;
 use alloc::collections::BTreeMap;
 use core::ptr::NonNull;
 
-use sel4_externally_shared::ExternallySharedRef;
-use sel4_shared_ring_buffer::{RingBuffer, RingBuffers};
-use sel4_shared_ring_buffer_block_io_types::{
-    BlockIORequest, BlockIORequestStatus, BlockIORequestType,
-};
-use sel4cp::{memory_region_symbol, protection_domain, var, Channel, Handler};
-
 use virtio_drivers::{
     device::blk::*,
     transport::{
@@ -26,9 +19,14 @@ use virtio_drivers::{
     },
 };
 
-mod hal_impl;
+use sel4_externally_shared::ExternallySharedRef;
+use sel4_shared_ring_buffer::{RingBuffer, RingBuffers};
+use sel4_shared_ring_buffer_block_io_types::{
+    BlockIORequest, BlockIORequestStatus, BlockIORequestType,
+};
+use sel4cp::{memory_region_symbol, protection_domain, var, Channel, Handler};
 
-use hal_impl::HalImpl;
+use sel4cp_http_server_example_virtio_hal_impl::HalImpl;
 
 const DEVICE: Channel = Channel::new(0);
 const CLIENT: Channel = Channel::new(1);
