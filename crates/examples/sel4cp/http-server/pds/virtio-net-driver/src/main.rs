@@ -5,8 +5,6 @@
 #![feature(never_type)]
 #![feature(strict_provenance)]
 
-extern crate alloc;
-
 use core::ptr::NonNull;
 
 use virtio_drivers::{
@@ -32,7 +30,7 @@ const NET_BUFFER_LEN: usize = 2048;
 const NET_QUEUE_SIZE: usize = 16;
 
 #[protection_domain(
-    heap_size = 16 * 1024 * 1024,
+    heap_size = 512 * 1024,
 )]
 fn init() -> ThisHandler {
     HalImpl::init(
@@ -135,9 +133,11 @@ impl Handler for ThisHandler {
                     let start = desc.encoded_addr() - self.client_dma_region_paddr;
                     let end = start + usize::try_from(desc.len()).unwrap();
                     let range = start..end;
-                    let v = self.client_region.as_ptr().index(range).copy_to_vec();
-                    let mut tx_buf = self.dev.new_tx_buffer(v.len());
-                    tx_buf.packet_mut().copy_from_slice(&v);
+                    let mut tx_buf = self.dev.new_tx_buffer(range.len());
+                    self.client_region
+                        .as_ptr()
+                        .index(range)
+                        .copy_into_slice(tx_buf.packet_mut());
                     self.dev.send(tx_buf).unwrap();
                     self.tx_ring_buffers.used_mut().enqueue(desc).unwrap();
                     notify_tx = true;

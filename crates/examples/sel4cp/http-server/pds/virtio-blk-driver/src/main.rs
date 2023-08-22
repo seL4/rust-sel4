@@ -35,7 +35,7 @@ const CLIENT: Channel = Channel::new(1);
 const QUEUE_SIZE: usize = 4;
 
 #[protection_domain(
-    heap_size = 16 * 1024 * 1024,
+    heap_size = 64 * 1024,
 )]
 fn init() -> ThisHandler {
     HalImpl::init(
