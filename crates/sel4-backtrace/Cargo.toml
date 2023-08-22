@@ -13,9 +13,9 @@ unwinding = ["dep:unwinding"]
 
 [dependencies]
 cfg-if = "1.0.0"
-postcard = { version = "1.0.2", default-features = false, features = [], optional = true }
+postcard = { version = "1.0.2", default-features = false, optional = true }
 sel4-backtrace-types = { path = "./types" }
-serde = { version = "1.0.147", default-features = false, features = [], optional = true }
+serde = { version = "1.0.147", default-features = false, optional = true }
 
 [dependencies.unwinding]
 version = "0.1.6"

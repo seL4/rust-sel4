@@ -6,7 +6,7 @@ edition = "2021"
 license = "BSD-2-Clause"
 
 [dependencies]
-postcard = { version = "1.0.2", default-features = false, features = [] }
+postcard = { version = "1.0.2", default-features = false }
 sel4 = { path = "../../sel4" }
 sel4cp = { path = ".." }
-serde = { version = "1.0.147", default-features = false, features = [] }
+serde = { version = "1.0.147", default-features = false }

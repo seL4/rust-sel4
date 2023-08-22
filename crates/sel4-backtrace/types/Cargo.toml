@@ -15,7 +15,7 @@ symbolize = ["addr2line", "fallible-iterator", "alloc"]
 [dependencies]
 cfg-if = "1.0.0"
 fallible-iterator = { version = "0.2.0", default-features = false, optional = true }
-postcard = { version = "1.0.2", default-features = false, features = [], optional = true }
+postcard = { version = "1.0.2", default-features = false, optional = true }
 serde = { version = "1.0.147", default-features = false, features = ["derive"], optional = true }
 
 [dependencies.addr2line]

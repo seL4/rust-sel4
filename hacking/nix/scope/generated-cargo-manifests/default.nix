@@ -53,6 +53,9 @@ let
 
   cratePaths = lib.mapAttrs (name: path: { inherit name path; }) cratePathAttrs;
 
+  filterOutEmptyFeatureList = attrs:
+    builtins.removeAttrs attrs (lib.optional (attrs ? features && attrs.features == []) "features");
+
   callCrate = { relativePath }:
 
     newScope rec {
@@ -104,40 +107,40 @@ let
         tag = "keep/6eef662dbf636d1ccf86078143b6854f";
       };
 
-      mbedtlsWith = features: (mbedtlsSource // {
+      mbedtlsWith = features: filterOutEmptyFeatureList (mbedtlsSource // {
         default-features = false;
         features = [ "no_std_deps" ] ++ features;
       });
 
-      mbedtlsSysAutoWith = features: (mbedtlsSource // {
+      mbedtlsSysAutoWith = features: filterOutEmptyFeatureList (mbedtlsSource // {
         default-features = false;
         inherit features;
       });
 
-      mbedtlsPlatformSupportWith = features: (mbedtlsSource // {
+      mbedtlsPlatformSupportWith = features: filterOutEmptyFeatureList (mbedtlsSource // {
         default-features = false;
         inherit features;
       });
 
-      serdeWith = features: {
+      serdeWith = features: filterOutEmptyFeatureList {
         version = versions.serde;
         default-features = false;
         inherit features;
       };
 
-      postcardWith = features: {
+      postcardWith = features: filterOutEmptyFeatureList {
         version = versions.postcard;
         default-features = false;
         inherit features;
       };
 
-      unwindingWith = features: {
+      unwindingWith = features: filterOutEmptyFeatureList {
         version = versions.unwinding;
         default-features = false;
         features = [ "unwinder" "fde-custom" "hide-trace" ] ++ features;
       };
 
-      smoltcpWith = features: {
+      smoltcpWith = features: filterOutEmptyFeatureList {
         version = versions.smoltcp;
         default-features = false;
         features = smoltcpBaseProtosFeatures ++ features;
@@ -170,7 +173,7 @@ let
         "packetmeta-id" "async"
       ];
 
-      virtioDriversWith = features: {
+      virtioDriversWith = features: filterOutEmptyFeatureList {
         version = versions.virtio-drivers;
         default-features = false;
         inherit features;

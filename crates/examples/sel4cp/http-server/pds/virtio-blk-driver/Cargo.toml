@@ -16,7 +16,7 @@ sel4-shared-ring-buffer = { path = "../../../../../sel4-shared-ring-buffer" }
 sel4-sync = { path = "../../../../../sel4-sync" }
 sel4cp = { path = "../../../../../sel4cp", default-features = false }
 sel4cp-http-server-example-virtio-hal-impl = { path = "../../helpers/virtio-hal-impl" }
-virtio-drivers = { version = "0.5.0", default-features = false, features = [] }
+virtio-drivers = { version = "0.5.0", default-features = false }
 
 [dependencies.sel4-shared-ring-buffer-block-io-types]
 path = "../../../../../sel4-shared-ring-buffer/block-io/types"
