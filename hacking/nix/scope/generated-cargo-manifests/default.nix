@@ -175,6 +175,11 @@ let
 
       virtioDriversWith = features: filterOutEmptyFeatureList {
         version = versions.virtio-drivers;
+        # git = "https://github.com/rcore-os/virtio-drivers.git";
+        # rev = "7385d61153aff3236d7083d143bbeef9c2eb7326"; # first bad
+        # rev = "cfb8a80cb64c2382586dd9919a82ad40bdbd4892"; # bad
+        # rev = "a2d79f1a0a0e98a33257ced9d151828feecfd23c"; # good
+        # rev = "bc78b54f32b39bc3aeda4f43dbd17f51d665f3d9"; # good
         default-features = false;
         inherit features;
       };
