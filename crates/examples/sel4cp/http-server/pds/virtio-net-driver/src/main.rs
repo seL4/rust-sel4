@@ -1,9 +1,6 @@
 #![no_std]
 #![no_main]
-#![feature(ptr_metadata)]
-#![feature(slice_ptr_get)]
 #![feature(never_type)]
-#![feature(strict_provenance)]
 
 use core::ptr::NonNull;
 
