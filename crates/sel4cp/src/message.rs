@@ -52,7 +52,7 @@ impl MessageInfo {
     pub fn recv<T: FromBytes + Copy>(&self) -> Result<T, MessageInfoRecvError> {
         with_msg_bytes(|bytes| -> Result<T, MessageInfoRecvError> {
             let num_bytes = self.count() * mem::size_of::<MessageRegisterValue>();
-            Unalign::read_from_prefix(&bytes[..num_bytes])
+            Unalign::<T>::read_from_prefix(&bytes[..num_bytes])
                 .ok_or(MessageInfoRecvError::MessageTooShort)
                 .map(|unalign| unalign.get())
         })
