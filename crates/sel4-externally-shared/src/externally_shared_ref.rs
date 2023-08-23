@@ -229,8 +229,8 @@ where
 {
 }
 
-unsafe impl<T, A> Send for ExternallySharedRef<'_, T, A> where T: Sync {}
-unsafe impl<T, A> Sync for ExternallySharedRef<'_, T, A> where T: Sync {}
+unsafe impl<T, A> Send for ExternallySharedRef<'_, T, A> where T: Sync + ?Sized {}
+unsafe impl<T, A> Sync for ExternallySharedRef<'_, T, A> where T: Sync + ?Sized {}
 
 impl<T, A> fmt::Debug for ExternallySharedRef<'_, T, A>
 where
