@@ -19,7 +19,7 @@ pub struct SharedTimers {
     inner: Rc<RefCell<SharedTimersInner>>,
 }
 
-pub struct SharedTimersInner {
+struct SharedTimersInner {
     pending: BTreeMap<Instant, Vec<Waker>>,
     now: Instant,
 }
@@ -31,11 +31,23 @@ impl SharedTimers {
         }
     }
 
-    pub fn inner(&self) -> &Rc<RefCell<SharedTimersInner>> {
+    fn inner(&self) -> &Rc<RefCell<SharedTimersInner>> {
         &self.inner
     }
 
-    async fn sleep_absolute(&self, until: Instant) {
+    pub fn poll(&self, timestamp: Instant) -> bool {
+        self.inner().borrow_mut().poll(timestamp)
+    }
+
+    pub fn poll_at(&mut self, timestamp: Instant) -> Option<Instant> {
+        self.inner().borrow_mut().poll_at(timestamp)
+    }
+
+    pub fn poll_delay(&mut self, timestamp: Instant) -> Option<Duration> {
+        self.inner().borrow_mut().poll_delay(timestamp)
+    }
+
+    pub async fn sleep_until(&self, until: Instant) {
         future::poll_fn(|cx| {
             let mut inner = self.inner().borrow_mut();
             if inner.now() < &until {
@@ -50,7 +62,7 @@ impl SharedTimers {
 
     pub async fn sleep(&self, d: Duration) {
         let now = self.inner().borrow().now().clone();
-        self.sleep_absolute(now + d).await;
+        self.sleep_until(now + d).await;
     }
 }
 
@@ -66,7 +78,7 @@ impl SharedTimersInner {
         &self.now
     }
 
-    pub fn poll(&mut self, timestamp: Instant) -> bool {
+    fn poll(&mut self, timestamp: Instant) -> bool {
         self.now = timestamp;
         let mut cursor = self.pending.upper_bound_mut(Bound::Included(&timestamp));
         let mut activity = false;
@@ -76,12 +88,12 @@ impl SharedTimersInner {
         activity
     }
 
-    pub fn poll_at(&mut self, timestamp: Instant) -> Option<Instant> {
+    fn poll_at(&mut self, timestamp: Instant) -> Option<Instant> {
         self.now = timestamp;
         self.pending.first_entry().map(|entry| entry.key().clone())
     }
 
-    pub fn poll_delay(&mut self, timestamp: Instant) -> Option<Duration> {
+    fn poll_delay(&mut self, timestamp: Instant) -> Option<Duration> {
         self.poll_at(timestamp)
             .map(|deadline| deadline.max(timestamp) - timestamp)
     }

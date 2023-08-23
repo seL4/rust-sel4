@@ -110,7 +110,7 @@ impl HandlerImpl {
             let _ = self.local_pool.run_until_stalled(Pin::new(&mut self.fut));
             let now = self.now();
             let mut activity = false;
-            activity |= self.shared_timers.inner().borrow_mut().poll(now);
+            activity |= self.shared_timers.poll(now);
             activity |= self.net_device.poll();
             activity |= self
                 .shared_network
@@ -120,7 +120,7 @@ impl HandlerImpl {
             activity |= self.fs_block_io.poll();
             if !activity {
                 let delays = &[
-                    self.shared_timers.inner().borrow_mut().poll_delay(now),
+                    self.shared_timers.poll_delay(now),
                     self.shared_network.inner().borrow_mut().poll_delay(now),
                 ];
                 let mut repoll = false;
