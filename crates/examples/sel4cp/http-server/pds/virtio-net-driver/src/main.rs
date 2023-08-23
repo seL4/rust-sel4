@@ -23,8 +23,8 @@ use sel4cp_http_server_example_virtio_net_driver_interface_types::*;
 const DEVICE: Channel = Channel::new(0);
 const CLIENT: Channel = Channel::new(1);
 
-const NET_BUFFER_LEN: usize = 2048;
 const NET_QUEUE_SIZE: usize = 16;
+const NET_BUFFER_LEN: usize = 2048;
 
 #[protection_domain(
     heap_size = 512 * 1024,
@@ -105,43 +105,51 @@ impl Handler for HandlerImpl {
         match channel {
             DEVICE | CLIENT => {
                 let mut notify_rx = false;
+
                 while self.dev.can_recv() && !self.rx_ring_buffers.free().is_empty() {
                     let rx_buf = self.dev.receive().unwrap();
                     let desc = self.rx_ring_buffers.free_mut().dequeue().unwrap();
                     let desc_len = usize::try_from(desc.len()).unwrap();
                     assert!(desc_len >= rx_buf.packet_len());
-                    let start = desc.encoded_addr() - self.client_client_dma_region_paddr;
-                    let end = start + rx_buf.packet_len();
-                    let range = start..end;
+                    let buf_range = {
+                        let start = desc.encoded_addr() - self.client_client_dma_region_paddr;
+                        start..start + rx_buf.packet_len()
+                    };
                     self.client_region
                         .as_mut_ptr()
-                        .index(range)
+                        .index(buf_range)
                         .copy_from_slice(rx_buf.packet());
                     self.dev.recycle_rx_buffer(rx_buf).unwrap();
                     self.rx_ring_buffers.used_mut().enqueue(desc).unwrap();
                     notify_rx = true;
                 }
+
                 if notify_rx {
                     self.rx_ring_buffers.notify().unwrap();
                 }
+
                 let mut notify_tx = false;
+
                 while !self.tx_ring_buffers.free().is_empty() && self.dev.can_send() {
                     let desc = self.tx_ring_buffers.free_mut().dequeue().unwrap();
-                    let start = desc.encoded_addr() - self.client_client_dma_region_paddr;
-                    let end = start + usize::try_from(desc.len()).unwrap();
-                    let range = start..end;
-                    let mut tx_buf = self.dev.new_tx_buffer(range.len());
+                    let buf_range = {
+                        let start = desc.encoded_addr() - self.client_client_dma_region_paddr;
+                        start..start + usize::try_from(desc.len()).unwrap()
+                    };
+                    let mut tx_buf = self.dev.new_tx_buffer(buf_range.len());
                     self.client_region
                         .as_ptr()
-                        .index(range)
+                        .index(buf_range)
                         .copy_into_slice(tx_buf.packet_mut());
                     self.dev.send(tx_buf).unwrap();
                     self.tx_ring_buffers.used_mut().enqueue(desc).unwrap();
                     notify_tx = true;
                 }
+
                 if notify_tx {
                     self.tx_ring_buffers.notify().unwrap();
                 }
+
                 self.dev.ack_interrupt();
                 DEVICE.irq_ack().unwrap();
             }

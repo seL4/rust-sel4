@@ -6,6 +6,7 @@ extern crate alloc;
 
 use alloc::boxed::Box;
 use alloc::collections::BTreeMap;
+use core::pin::Pin;
 use core::ptr::NonNull;
 
 use virtio_drivers::{
@@ -91,7 +92,7 @@ struct HandlerImpl {
     client_region: ExternallySharedRef<'static, [u8]>,
     client_client_dma_region_paddr: usize,
     ring_buffers: RingBuffers<'static, fn() -> Result<(), !>, BlockIORequest>,
-    pending: BTreeMap<u16, Box<PendingEntry>>,
+    pending: BTreeMap<u16, Pin<Box<PendingEntry>>>,
 }
 
 struct PendingEntry {
@@ -111,18 +112,24 @@ impl Handler for HandlerImpl {
                 while self.dev.peek_used().is_some() {
                     let token = self.dev.peek_used().unwrap();
                     let mut pending_entry = self.pending.remove(&token).unwrap();
-                    let range_start = pending_entry.client_req.buf().encoded_addr()
-                        - self.client_client_dma_region_paddr;
-                    let range_end = range_start
-                        + usize::try_from(pending_entry.client_req.buf().len()).unwrap();
-                    let range = range_start..range_end;
-                    let mut unsafe_buf = self.client_region.as_mut_ptr().index(range).as_raw_ptr();
+                    let buf_range = {
+                        let start = pending_entry.client_req.buf().encoded_addr()
+                            - self.client_client_dma_region_paddr;
+                        let len = usize::try_from(pending_entry.client_req.buf().len()).unwrap();
+                        start..start + len
+                    };
+                    let mut buf_ptr = self
+                        .client_region
+                        .as_mut_ptr()
+                        .index(buf_range)
+                        .as_raw_ptr();
                     unsafe {
+                        let pending_entry = &mut *pending_entry;
                         self.dev
                             .complete_read_block(
                                 token,
                                 &pending_entry.virtio_req,
-                                unsafe_buf.as_mut(),
+                                buf_ptr.as_mut(),
                                 &mut pending_entry.virtio_resp,
                             )
                             .unwrap();
@@ -140,23 +147,29 @@ impl Handler for HandlerImpl {
                 while self.pending.len() < QUEUE_SIZE && !self.ring_buffers.free().is_empty() {
                     let client_req = self.ring_buffers.free_mut().dequeue().unwrap();
                     assert_eq!(client_req.ty().unwrap(), BlockIORequestType::Read);
-                    let block_id = client_req.block_id();
-                    let range_start =
-                        client_req.buf().encoded_addr() - self.client_client_dma_region_paddr;
-                    let range_end = range_start + usize::try_from(client_req.buf().len()).unwrap();
-                    let range = range_start..range_end;
-                    let mut unsafe_buf = self.client_region.as_mut_ptr().index(range).as_raw_ptr();
-                    let mut pending_entry = Box::new(PendingEntry {
+                    let mut pending_entry = Box::pin(PendingEntry {
                         client_req,
                         virtio_req: BlkReq::default(),
                         virtio_resp: BlkResp::default(),
                     });
+                    let buf_range = {
+                        let start =
+                            client_req.buf().encoded_addr() - self.client_client_dma_region_paddr;
+                        let len = usize::try_from(client_req.buf().len()).unwrap();
+                        start..start + len
+                    };
+                    let mut buf_ptr = self
+                        .client_region
+                        .as_mut_ptr()
+                        .index(buf_range)
+                        .as_raw_ptr();
                     let token = unsafe {
+                        let pending_entry = &mut *pending_entry;
                         self.dev
                             .read_block_nb(
-                                block_id,
+                                pending_entry.client_req.block_id(),
                                 &mut pending_entry.virtio_req,
-                                unsafe_buf.as_mut(),
+                                buf_ptr.as_mut(),
                                 &mut pending_entry.virtio_resp,
                             )
                             .unwrap()
