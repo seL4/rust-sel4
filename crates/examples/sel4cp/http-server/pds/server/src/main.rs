@@ -78,10 +78,10 @@ fn init() -> impl Handler {
     let net_device = DeviceImpl::new(
         unsafe {
             ExternallySharedRef::<'static, _>::new(
-                memory_region_symbol!(virtio_net_dma_vaddr: *mut [u8], n = *var!(virtio_net_dma_size: usize = 0)),
+                memory_region_symbol!(virtio_net_client_dma_vaddr: *mut [u8], n = *var!(virtio_net_client_dma_size: usize = 0)),
             )
         },
-        *var!(virtio_net_dma_paddr: usize = 0),
+        *var!(virtio_net_client_dma_paddr: usize = 0),
         unsafe {
             RingBuffers::new(
                 RingBuffer::from_ptr(memory_region_symbol!(virtio_net_rx_free: *mut _)),
@@ -115,10 +115,10 @@ fn init() -> impl Handler {
     let fs_block_io = CpiofsBlockIOImpl::new(SharedRingBufferBlockIO::new(
         unsafe {
             ExternallySharedRef::<'static, _>::new(
-                memory_region_symbol!(virtio_blk_dma_vaddr: *mut [u8], n = *var!(virtio_blk_dma_size: usize = 0)),
+                memory_region_symbol!(virtio_blk_client_dma_vaddr: *mut [u8], n = *var!(virtio_blk_client_dma_size: usize = 0)),
             )
         },
-        *var!(virtio_blk_dma_paddr: usize = 0),
+        *var!(virtio_blk_client_dma_paddr: usize = 0),
         unsafe {
             RingBuffers::new(
                 RingBuffer::from_ptr(memory_region_symbol!(virtio_blk_free: *mut _)),

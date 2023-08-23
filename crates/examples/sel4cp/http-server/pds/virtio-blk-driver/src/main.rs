@@ -39,9 +39,9 @@ const QUEUE_SIZE: usize = 4;
 )]
 fn init() -> HandlerImpl {
     HalImpl::init(
-        *var!(virtio_blk_dma_real_size: usize = 0),
-        *var!(virtio_blk_dma_real_vaddr: usize = 0),
-        *var!(virtio_blk_dma_real_paddr: usize = 0),
+        *var!(virtio_blk_driver_dma_size: usize = 0),
+        *var!(virtio_blk_driver_dma_vaddr: usize = 0),
+        *var!(virtio_blk_driver_dma_paddr: usize = 0),
     );
 
     let mut dev = {
@@ -57,11 +57,11 @@ fn init() -> HandlerImpl {
 
     let client_region = unsafe {
         ExternallySharedRef::<'static, _>::new(
-            memory_region_symbol!(virtio_blk_dma_fake_vaddr: *mut [u8], n = *var!(virtio_blk_dma_fake_size: usize = 0)),
+            memory_region_symbol!(virtio_blk_client_dma_vaddr: *mut [u8], n = *var!(virtio_blk_client_dma_size: usize = 0)),
         )
     };
 
-    let client_dma_region_paddr = *var!(virtio_blk_dma_fake_paddr: usize = 0);
+    let client_client_dma_region_paddr = *var!(virtio_blk_client_dma_paddr: usize = 0);
 
     let ring_buffers = unsafe {
         RingBuffers::<'_, fn() -> Result<(), !>, BlockIORequest>::new(
@@ -78,7 +78,7 @@ fn init() -> HandlerImpl {
     HandlerImpl {
         dev,
         client_region,
-        client_dma_region_paddr,
+        client_client_dma_region_paddr,
         ring_buffers,
         pending: BTreeMap::new(),
     }
@@ -92,7 +92,7 @@ fn notify_client() -> Result<(), !> {
 struct HandlerImpl {
     dev: VirtIOBlk<HalImpl, MmioTransport>,
     client_region: ExternallySharedRef<'static, [u8]>,
-    client_dma_region_paddr: usize,
+    client_client_dma_region_paddr: usize,
     ring_buffers: RingBuffers<'static, fn() -> Result<(), !>, BlockIORequest>,
     pending: BTreeMap<u16, Box<PendingEntry>>,
 }
@@ -115,7 +115,7 @@ impl Handler for HandlerImpl {
                     let token = self.dev.peek_used().unwrap();
                     let mut pending_entry = self.pending.remove(&token).unwrap();
                     let range_start = pending_entry.client_req.buf().encoded_addr()
-                        - self.client_dma_region_paddr;
+                        - self.client_client_dma_region_paddr;
                     let range_end = range_start
                         + usize::try_from(pending_entry.client_req.buf().len()).unwrap();
                     let range = range_start..range_end;
@@ -145,7 +145,7 @@ impl Handler for HandlerImpl {
                     assert_eq!(client_req.ty().unwrap(), BlockIORequestType::Read);
                     let block_id = client_req.block_id();
                     let range_start =
-                        client_req.buf().encoded_addr() - self.client_dma_region_paddr;
+                        client_req.buf().encoded_addr() - self.client_client_dma_region_paddr;
                     let range_end = range_start + usize::try_from(client_req.buf().len()).unwrap();
                     let range = range_start..range_end;
                     let mut unsafe_buf = self.client_region.as_mut_ptr().index(range).as_raw_ptr();

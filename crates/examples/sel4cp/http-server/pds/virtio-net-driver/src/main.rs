@@ -34,9 +34,9 @@ const NET_QUEUE_SIZE: usize = 16;
 )]
 fn init() -> HandlerImpl {
     HalImpl::init(
-        *var!(virtio_net_dma_real_size: usize = 0),
-        *var!(virtio_net_dma_real_vaddr: usize = 0),
-        *var!(virtio_net_dma_real_paddr: usize = 0),
+        *var!(virtio_net_driver_dma_size: usize = 0),
+        *var!(virtio_net_driver_dma_vaddr: usize = 0),
+        *var!(virtio_net_driver_dma_paddr: usize = 0),
     );
 
     let mut dev = {
@@ -52,11 +52,11 @@ fn init() -> HandlerImpl {
 
     let client_region = unsafe {
         ExternallySharedRef::<'static, _>::new(
-            memory_region_symbol!(virtio_net_dma_fake_vaddr: *mut [u8], n = *var!(virtio_net_dma_fake_size: usize = 0)),
+            memory_region_symbol!(virtio_net_client_dma_vaddr: *mut [u8], n = *var!(virtio_net_client_dma_size: usize = 0)),
         )
     };
 
-    let client_dma_region_paddr = *var!(virtio_net_dma_fake_paddr: usize = 0);
+    let client_client_dma_region_paddr = *var!(virtio_net_client_dma_paddr: usize = 0);
 
     let rx_ring_buffers = unsafe {
         RingBuffers::<'_, fn() -> Result<(), !>>::new(
@@ -82,7 +82,7 @@ fn init() -> HandlerImpl {
     HandlerImpl {
         dev,
         client_region,
-        client_dma_region_paddr,
+        client_client_dma_region_paddr,
         rx_ring_buffers,
         tx_ring_buffers,
     }
@@ -96,7 +96,7 @@ fn notify_client() -> Result<(), !> {
 struct HandlerImpl {
     dev: VirtIONet<HalImpl, MmioTransport, NET_QUEUE_SIZE>,
     client_region: ExternallySharedRef<'static, [u8]>,
-    client_dma_region_paddr: usize,
+    client_client_dma_region_paddr: usize,
     rx_ring_buffers: RingBuffers<'static, fn() -> Result<(), !>>,
     tx_ring_buffers: RingBuffers<'static, fn() -> Result<(), !>>,
 }
@@ -113,7 +113,7 @@ impl Handler for HandlerImpl {
                     let desc = self.rx_ring_buffers.free_mut().dequeue().unwrap();
                     let desc_len = usize::try_from(desc.len()).unwrap();
                     assert!(desc_len >= rx_buf.packet_len());
-                    let start = desc.encoded_addr() - self.client_dma_region_paddr;
+                    let start = desc.encoded_addr() - self.client_client_dma_region_paddr;
                     let end = start + rx_buf.packet_len();
                     let range = start..end;
                     self.client_region
@@ -130,7 +130,7 @@ impl Handler for HandlerImpl {
                 let mut notify_tx = false;
                 while !self.tx_ring_buffers.free().is_empty() && self.dev.can_send() {
                     let desc = self.tx_ring_buffers.free_mut().dequeue().unwrap();
-                    let start = desc.encoded_addr() - self.client_dma_region_paddr;
+                    let start = desc.encoded_addr() - self.client_client_dma_region_paddr;
                     let end = start + usize::try_from(desc.len()).unwrap();
                     let range = start..end;
                     let mut tx_buf = self.dev.new_tx_buffer(range.len());
