@@ -112,16 +112,12 @@ impl HandlerImpl {
             let mut activity = false;
             activity |= self.shared_timers.poll(now);
             activity |= self.net_device.poll();
-            activity |= self
-                .shared_network
-                .inner()
-                .borrow_mut()
-                .poll(now, &mut self.net_device);
+            activity |= self.shared_network.poll(now, &mut self.net_device);
             activity |= self.fs_block_io.poll();
             if !activity {
                 let delays = &[
                     self.shared_timers.poll_delay(now),
-                    self.shared_network.inner().borrow_mut().poll_delay(now),
+                    self.shared_network.poll_delay(now),
                 ];
                 let mut repoll = false;
                 if let Some(delay) = delays.iter().filter_map(Option::as_ref).min() {

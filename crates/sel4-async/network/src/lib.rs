@@ -27,7 +27,7 @@ pub struct SharedNetwork {
     inner: Rc<RefCell<SharedNetworkInner>>,
 }
 
-pub struct SharedNetworkInner {
+struct SharedNetworkInner {
     iface: Interface,
     socket_set: SocketSet<'static>,
     dns_socket_handle: SocketHandle,
@@ -93,7 +93,7 @@ impl SharedNetwork {
         }
     }
 
-    pub fn inner(&self) -> &Rc<RefCell<SharedNetworkInner>> {
+    fn inner(&self) -> &Rc<RefCell<SharedNetworkInner>> {
         &self.inner
     }
 
@@ -115,12 +115,20 @@ impl SharedNetwork {
     }
 
     pub fn new_socket<T: AnySocket<'static>>(&self, socket: T) -> Socket<T> {
-        let handle = self.inner.borrow_mut().socket_set.add(socket);
+        let handle = self.inner().borrow_mut().socket_set.add(socket);
         Socket {
             handle,
             shared: self.clone(),
             _phantom: PhantomData,
         }
+    }
+
+    pub fn poll_delay(&self, timestamp: Instant) -> Option<Duration> {
+        self.inner().borrow_mut().poll_delay(timestamp)
+    }
+
+    pub fn poll<D: Device + ?Sized>(&self, timestamp: Instant, device: &mut D) -> bool {
+        self.inner().borrow_mut().poll(timestamp, device)
     }
 
     pub async fn dns_query(
@@ -129,7 +137,7 @@ impl SharedNetwork {
         query_type: DnsQueryType,
     ) -> Result<Vec<IpAddress>, DnsError> {
         let query_handle = {
-            let inner = &mut *self.inner.borrow_mut();
+            let inner = &mut *self.inner().borrow_mut();
             inner
                 .socket_set
                 .get_mut::<dns::Socket>(inner.dns_socket_handle)
@@ -137,7 +145,7 @@ impl SharedNetwork {
                 .map_err(DnsError::StartQueryError)?
         };
         future::poll_fn(|cx| {
-            let inner = &mut *self.inner.borrow_mut();
+            let inner = &mut *self.inner().borrow_mut();
             let socket = inner
                 .socket_set
                 .get_mut::<dns::Socket>(inner.dns_socket_handle);
@@ -158,19 +166,19 @@ impl SharedNetwork {
 
 impl<T: AnySocket<'static>> Socket<T> {
     pub fn with<R>(&self, f: impl FnOnce(&T) -> R) -> R {
-        let network = self.shared.inner.borrow();
+        let network = self.shared.inner().borrow();
         let socket = network.socket_set.get(self.handle);
         f(socket)
     }
 
     pub fn with_mut<R>(&mut self, f: impl FnOnce(&mut T) -> R) -> R {
-        let mut network = self.shared.inner.borrow_mut();
+        let mut network = self.shared.inner().borrow_mut();
         let socket = network.socket_set.get_mut(self.handle);
         f(socket)
     }
 
     pub fn with_and_context_mut<R>(&mut self, f: impl FnOnce(&mut Context, &mut T) -> R) -> R {
-        let network = &mut *self.shared.inner.borrow_mut();
+        let network = &mut *self.shared.inner().borrow_mut();
         let context = network.iface.context();
         let socket = network.socket_set.get_mut(self.handle);
         f(context, socket)
@@ -401,19 +409,19 @@ impl<T> Drop for Socket<T> {
 }
 
 impl SharedNetworkInner {
-    pub fn dhcp_socket_mut(&mut self) -> &mut dhcpv4::Socket<'static> {
+    fn dhcp_socket_mut(&mut self) -> &mut dhcpv4::Socket<'static> {
         self.socket_set.get_mut(self.dhcp_socket_handle)
     }
 
-    pub fn dns_socket_mut(&mut self) -> &mut dns::Socket<'static> {
+    fn dns_socket_mut(&mut self) -> &mut dns::Socket<'static> {
         self.socket_set.get_mut(self.dns_socket_handle)
     }
 
-    pub fn poll_delay(&mut self, timestamp: Instant) -> Option<Duration> {
+    fn poll_delay(&mut self, timestamp: Instant) -> Option<Duration> {
         self.iface.poll_delay(timestamp, &mut self.socket_set)
     }
 
-    pub fn poll<D: Device + ?Sized>(&mut self, timestamp: Instant, device: &mut D) -> bool {
+    fn poll<D: Device + ?Sized>(&mut self, timestamp: Instant, device: &mut D) -> bool {
         let activity = self.iface.poll(timestamp, device, &mut self.socket_set);
         if activity {
             self.poll_dhcp();
