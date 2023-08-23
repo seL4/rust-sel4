@@ -6,6 +6,7 @@ use core::str::pattern::Pattern;
 
 use mbedtls::ssl::async_io::{AsyncIo, AsyncIoExt, ClosedError};
 
+use sel4_async_block_io::BytesIO;
 use sel4_async_block_io_cpiofs as cpiofs;
 use sel4_async_network_mbedtls::mbedtls;
 
@@ -13,7 +14,7 @@ pub(crate) struct Server<T> {
     index: cpiofs::Index<T>,
 }
 
-impl<T: cpiofs::IO> Server<T> {
+impl<T: BytesIO> Server<T> {
     pub(crate) fn new(index: cpiofs::Index<T>) -> Self {
         Self { index }
     }

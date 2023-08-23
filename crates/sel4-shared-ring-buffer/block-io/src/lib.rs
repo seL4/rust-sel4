@@ -1,4 +1,5 @@
 #![no_std]
+#![feature(async_fn_in_trait)]
 #![feature(never_type)]
 #![feature(strict_provenance)]
 
@@ -12,6 +13,7 @@ use core::task::{ready, Poll};
 use async_unsync::semaphore::Semaphore;
 use futures::prelude::*;
 
+use sel4_async_block_io::BlockIO as BlockIOTrait;
 use sel4_async_request_statuses::RequestStatuses;
 use sel4_bounce_buffer_allocator::{Basic, BounceBufferAllocator};
 use sel4_externally_shared::ExternallySharedRef;
@@ -97,8 +99,10 @@ impl BlockIO {
 
         notify
     }
+}
 
-    pub async fn read_block(&self, block_id: usize, buf: &mut [u8; BLOCK_SIZE]) {
+impl BlockIOTrait<BLOCK_SIZE> for BlockIO {
+    async fn read_block(&self, block_id: usize, buf: &mut [u8; BLOCK_SIZE]) {
         let sem = self.shared_inner.borrow().queue_guard.clone();
         let permit = sem.acquire().await;
 

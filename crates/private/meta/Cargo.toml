@@ -13,6 +13,7 @@ sel4cp = ["dep:sel4cp", "sel4cp-postcard"]
 cfg-if = "1.0.0"
 log = "0.4.17"
 sel4 = { path = "../../sel4" }
+sel4-async-block-io = { path = "../../sel4-async/block-io" }
 sel4-async-block-io-cpiofs = { path = "../../sel4-async/block-io/cpiofs" }
 sel4-async-network = { path = "../../sel4-async/network" }
 sel4-async-request-statuses = { path = "../../sel4-async/request-statuses" }

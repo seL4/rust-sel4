@@ -12,6 +12,7 @@ use futures::task::LocalSpawnExt;
 
 use mbedtls::ssl::async_io::ClosedError;
 
+use sel4_async_block_io::BytesIO;
 use sel4_async_block_io_cpiofs as cpiofs;
 use sel4_async_network::{SharedNetwork, TcpSocketError};
 use sel4_async_network_mbedtls::{
@@ -31,7 +32,7 @@ const NUM_SIMULTANEOUS_CONNECTIONS: usize = 32;
 
 type SocketUser = Box<dyn Fn(TcpSocketWrapper) -> LocalBoxFuture<'static, ()>>;
 
-pub async fn run_server<T: cpiofs::IO + 'static>(
+pub async fn run_server<T: BytesIO + 'static>(
     _timers_ctx: SharedTimers,
     network_ctx: SharedNetwork,
     fs_io: T,
@@ -100,7 +101,7 @@ pub async fn run_server<T: cpiofs::IO + 'static>(
     future::pending().await
 }
 
-async fn use_socket_for_http<'a, T: cpiofs::IO>(
+async fn use_socket_for_http<'a, T: BytesIO>(
     server: &'a Server<T>,
     mut socket: TcpSocketWrapper,
 ) -> Result<(), ClosedError<TcpSocketError>> {
@@ -110,7 +111,7 @@ async fn use_socket_for_http<'a, T: cpiofs::IO>(
     Ok(())
 }
 
-async fn use_socket_for_https<'a, T: cpiofs::IO>(
+async fn use_socket_for_https<'a, T: BytesIO>(
     server: &'a Server<T>,
     config: Arc<mbedtls::ssl::Config>,
     mut socket: TcpSocketWrapper,

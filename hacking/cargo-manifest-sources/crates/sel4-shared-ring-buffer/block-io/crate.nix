@@ -24,5 +24,6 @@ mk {
     sel4-shared-ring-buffer-block-io-types
     sel4-bounce-buffer-allocator
     sel4-async-request-statuses
+    sel4-async-block-io
   ];
 }

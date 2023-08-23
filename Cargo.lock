@@ -1640,6 +1640,7 @@ dependencies = [
  "cfg-if",
  "log",
  "sel4",
+ "sel4-async-block-io",
  "sel4-async-block-io-cpiofs",
  "sel4-async-network",
  "sel4-async-request-statuses",
@@ -2407,6 +2408,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "sel4-async-block-io"
+version = "0.1.0"
+dependencies = [
+ "futures",
+ "log",
+ "lru",
+]
+
+[[package]]
 name = "sel4-async-block-io-cpiofs"
 version = "0.1.0"
 dependencies = [
@@ -2414,6 +2424,7 @@ dependencies = [
  "hex",
  "log",
  "lru",
+ "sel4-async-block-io",
  "zerocopy",
 ]
 
@@ -2942,6 +2953,7 @@ dependencies = [
  "async-unsync",
  "futures",
  "log",
+ "sel4-async-block-io",
  "sel4-async-request-statuses",
  "sel4-bounce-buffer-allocator",
  "sel4-externally-shared",
@@ -3111,7 +3123,7 @@ dependencies = [
  "log",
  "rcgen",
  "sel4",
- "sel4-async-block-io-cpiofs",
+ "sel4-async-block-io",
  "sel4-async-network",
  "sel4-async-request-statuses",
  "sel4-async-single-threaded-executor",
@@ -3141,6 +3153,7 @@ dependencies = [
  "httparse",
  "log",
  "mbedtls",
+ "sel4-async-block-io",
  "sel4-async-block-io-cpiofs",
  "sel4-async-network",
  "sel4-async-network-mbedtls",

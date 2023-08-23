@@ -1,4 +1,4 @@
-{ mk, versions }:
+{ mk, localCrates, versions }:
 
 mk {
   package.name = "sel4-async-block-io-cpiofs";
@@ -14,4 +14,7 @@ mk {
       ];
     };
   };
+  nix.local.dependencies = with localCrates; [
+    sel4-async-block-io
+  ];
 }

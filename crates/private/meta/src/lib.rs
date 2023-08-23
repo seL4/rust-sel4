@@ -100,6 +100,7 @@ maybe! {
 }
 
 definitely! {
+    sel4_async_block_io
     sel4_async_block_io_cpiofs
     sel4_async_network
     sel4_async_request_statuses

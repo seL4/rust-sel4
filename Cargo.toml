@@ -48,6 +48,7 @@ members = [
     "crates/private/tests/sel4cp/passive-server-with-deferred-action/pds/client",
     "crates/private/tests/sel4cp/passive-server-with-deferred-action/pds/server",
     "crates/sel4",
+    "crates/sel4-async/block-io",
     "crates/sel4-async/block-io/cpiofs",
     "crates/sel4-async/network",
     "crates/sel4-async/network/mbedtls",

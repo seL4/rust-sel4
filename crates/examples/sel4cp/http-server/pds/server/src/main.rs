@@ -18,18 +18,16 @@ use smoltcp::wire::{EthernetAddress, HardwareAddress};
 use sel4_externally_shared::ExternallySharedRef;
 use sel4_logging::{LevelFilter, Logger, LoggerBuilder};
 use sel4_shared_ring_buffer::{RingBuffer, RingBuffers};
-use sel4_shared_ring_buffer_block_io::BlockIO as SharedRingBufferBlockIO;
+use sel4_shared_ring_buffer_block_io::{BlockIO, BLOCK_SIZE};
 use sel4_shared_ring_buffer_smoltcp::DeviceImpl;
 use sel4cp::{memory_region_symbol, protection_domain, var, Channel, Handler};
 
 use sel4cp_http_server_example_server_core::run_server;
 
-mod cpiofs_io_impl;
 mod handler;
 mod net_client;
 mod timer_client;
 
-use cpiofs_io_impl::{CpiofsBlockIOImpl, BLOCK_SIZE};
 use handler::HandlerImpl;
 use net_client::NetClient;
 use timer_client::TimerClient;
@@ -112,7 +110,7 @@ fn init() -> impl Handler {
         this
     };
 
-    let fs_block_io = CpiofsBlockIOImpl::new(SharedRingBufferBlockIO::new(
+    let fs_block_io = BlockIO::new(
         unsafe {
             ExternallySharedRef::<'static, _>::new(
                 memory_region_symbol!(virtio_blk_client_dma_vaddr: *mut [u8], n = *var!(virtio_blk_client_dma_size: usize = 0)),
@@ -127,7 +125,7 @@ fn init() -> impl Handler {
                 true,
             )
         },
-    ));
+    );
 
     HandlerImpl::new(
         TIMER_DRIVER,

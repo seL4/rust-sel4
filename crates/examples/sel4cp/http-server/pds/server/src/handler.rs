@@ -7,15 +7,15 @@ use futures::future::LocalBoxFuture;
 use smoltcp::iface::Config;
 use smoltcp::time::{Duration, Instant};
 
-use sel4_async_block_io_cpiofs as cpiofs;
+use sel4_async_block_io::{BytesIOAdapter, CachedBlockIO};
 use sel4_async_network::{DhcpOverrides, SharedNetwork};
 use sel4_async_single_threaded_executor::{LocalPool, LocalSpawner};
 use sel4_async_timers::SharedTimers;
+use sel4_shared_ring_buffer_block_io::BlockIO;
 
-use crate::{CpiofsBlockIOImpl, DeviceImpl, TimerClient, BLOCK_SIZE};
+use crate::{DeviceImpl, TimerClient, BLOCK_SIZE};
 
-type CpiofsIOImpl =
-    cpiofs::BlockIOAdapter<cpiofs::CachedBlockIO<CpiofsBlockIOImpl, BLOCK_SIZE>, BLOCK_SIZE>;
+type BytesIOImpl = BytesIOAdapter<CachedBlockIO<BlockIO, BLOCK_SIZE>, BLOCK_SIZE>;
 
 const BLOCK_CACHE_SIZE_IN_BLOCKS: usize = 128;
 
@@ -25,7 +25,7 @@ pub(crate) struct HandlerImpl {
     block_driver_channel: sel4cp::Channel,
     timer: TimerClient,
     net_device: DeviceImpl,
-    fs_block_io: CpiofsBlockIOImpl,
+    fs_block_io: BlockIO,
     shared_timers: SharedTimers,
     shared_network: SharedNetwork,
     local_pool: LocalPool,
@@ -40,8 +40,8 @@ impl HandlerImpl {
         mut timer: TimerClient,
         mut net_device: DeviceImpl,
         net_config: Config,
-        fs_block_io: CpiofsBlockIOImpl,
-        f: impl FnOnce(SharedTimers, SharedNetwork, CpiofsIOImpl, LocalSpawner) -> T,
+        fs_block_io: BlockIO,
+        f: impl FnOnce(SharedTimers, SharedNetwork, BytesIOImpl, LocalSpawner) -> T,
     ) -> Self {
         let now = Self::now_with_timer_client(&mut timer);
 
@@ -57,7 +57,7 @@ impl HandlerImpl {
         let local_pool = LocalPool::new();
         let spawner = local_pool.spawner();
 
-        let fs_io = cpiofs::BlockIOAdapter::new(cpiofs::CachedBlockIO::new(
+        let fs_io = BytesIOAdapter::new(CachedBlockIO::new(
             fs_block_io.clone(),
             BLOCK_CACHE_SIZE_IN_BLOCKS,
         ));

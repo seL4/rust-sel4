@@ -12,6 +12,7 @@ mk {
     sel4cp
     sel4cp-postcard
 
+    sel4-async-block-io
     sel4-async-block-io-cpiofs
     sel4-async-network
     sel4-async-request-statuses
