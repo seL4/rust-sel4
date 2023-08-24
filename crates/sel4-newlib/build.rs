@@ -30,5 +30,7 @@ fn detect_libc() {
         .parent()
         .unwrap();
 
+    assert!(lib_path.has_root());
+
     println!("cargo:rustc-link-search=native={}", lib_path.display());
 }
