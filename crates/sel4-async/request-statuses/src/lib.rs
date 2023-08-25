@@ -33,6 +33,7 @@ pub enum Error {
 }
 
 impl<K: Ord, V, T> RequestStatuses<K, V, T> {
+    #[allow(clippy::new_without_default)]
     pub fn new() -> Self {
         Self(BTreeMap::new())
     }
@@ -90,7 +91,9 @@ impl<T> RequestStatus<T> {
         match mem::replace(self, Self::Complete(complete)) {
             Self::Complete(_) => Err(Error::AlreadyComplete),
             Self::Incomplete(maybe_waker) => {
-                maybe_waker.map(Waker::wake);
+                if let Some(waker) = maybe_waker {
+                    waker.wake();
+                }
                 Ok(())
             }
         }

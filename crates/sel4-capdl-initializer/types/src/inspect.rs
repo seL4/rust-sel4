@@ -42,7 +42,7 @@ impl<'a, N, D, M> Spec<'a, N, D, M> {
         &'b self,
         f: impl 'a + Fn(&O) -> bool,
     ) -> impl Iterator<Item = (ObjectId, O)> + 'b {
-        self.filter_objects().filter(move |(_, obj)| (&f)(obj))
+        self.filter_objects().filter(move |(_, obj)| (f)(obj))
     }
 
     pub fn lookup_object<'b: 'a, O: TryFrom<&'b Object<'a, D, M>>>(

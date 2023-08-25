@@ -20,7 +20,7 @@ impl Payload {
     }
 
     pub fn type_id(&self) -> TypeId {
-        self.0.type_id()
+        (*self.0).type_id()
     }
 
     pub fn downcast<T: Sized + 'static>(self) -> Result<T, Self> {

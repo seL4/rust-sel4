@@ -99,14 +99,13 @@ impl ZerocopyOptionWord {
     ) -> Result<Option<T>, InvalidZerocopyOptionTagOr<T::Error>> {
         <Option<ZerocopyWord>>::try_from(self)
             .map_err(InvalidZerocopyOptionTagOr::InvalidZerocopyOptionTag)
-            .map(|option_zerocopy_word| {
+            .and_then(|option_zerocopy_word| {
                 option_zerocopy_word
                     .map(U64::get)
                     .map(TryInto::try_into)
                     .transpose()
                     .map_err(InvalidZerocopyOptionTagOr::Or)
             })
-            .flatten()
     }
 
     #[cfg_attr(not(feature = "alloc"), allow(dead_code))]
@@ -163,13 +162,12 @@ impl ZerocopyOptionWordRange {
     ) -> Result<Option<Range<T>>, InvalidZerocopyOptionTagOr<T::Error>> {
         <Option<ZerocopyWordRange>>::try_from(self)
             .map_err(InvalidZerocopyOptionTagOr::InvalidZerocopyOptionTag)
-            .map(|option_zerocopy_word_range| {
+            .and_then(|option_zerocopy_word_range| {
                 option_zerocopy_word_range
                     .map(|zerocopy_word_range| <Range<T>>::try_from(&zerocopy_word_range))
                     .transpose()
                     .map_err(InvalidZerocopyOptionTagOr::Or)
             })
-            .flatten()
     }
 
     #[cfg_attr(not(feature = "alloc"), allow(dead_code))]
@@ -179,7 +177,7 @@ impl ZerocopyOptionWordRange {
         native
             .as_ref()
             .map(|range_try_into_native_word| {
-                ZerocopyWordRange::try_from_native(&range_try_into_native_word)
+                ZerocopyWordRange::try_from_native(range_try_into_native_word)
             })
             .transpose()
             .map(|x| x.as_ref().into())

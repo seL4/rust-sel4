@@ -44,6 +44,7 @@ static CONFIG: ImmediateSyncOnceCell<RuntimeConfig<'static>> = ImmediateSyncOnce
 static THREAD_INDEX: ImmediateSyncOnceCell<usize> = ImmediateSyncOnceCell::new();
 
 #[no_mangle]
+#[allow(clippy::missing_safety_doc)]
 pub unsafe extern "C" fn _start(config: *const u8, config_size: usize, thread_index: usize) -> ! {
     let config = RuntimeConfig::new(slice::from_raw_parts(config, config_size));
     let cont_arg = ContinueArg {
@@ -65,6 +66,7 @@ pub struct ContinueArg {
     thread_index: usize,
 }
 
+#[allow(clippy::missing_safety_doc)]
 pub unsafe extern "C" fn cont_fn(cont_arg: *mut c_void) -> ! {
     let cont_arg: &ContinueArg = &*(cont_arg.cast::<ContinueArg>().cast_const());
 
@@ -101,7 +103,7 @@ pub unsafe extern "C" fn cont_fn(cont_arg: *mut c_void) -> ! {
     idle()
 }
 
-pub fn try_idle() -> () {
+pub fn try_idle() {
     CONFIG
         .get()
         .and_then(RuntimeConfig::idle_notification)

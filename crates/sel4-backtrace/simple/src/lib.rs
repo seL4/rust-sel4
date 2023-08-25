@@ -64,7 +64,7 @@ impl BacktraceSendWithoutToken for SimpleBacktraceSend {
     type TxError = !;
 
     fn image(&self) -> Self::Image {
-        self.image.clone()
+        self.image
     }
 
     fn send_byte(&self, byte: u8) -> Result<(), Self::TxError> {

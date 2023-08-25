@@ -1,4 +1,5 @@
 use std::collections::BTreeMap;
+use std::fmt::Write;
 use std::ops::Range;
 use std::path::Path;
 
@@ -20,8 +21,8 @@ pub fn generate_rust(
     let mut interfaces = vec![];
     for f in interface_xml_paths {
         let api = Api::parse(&parse_xml(f));
-        structs.extend(api.structs.into_iter());
-        interfaces.extend(api.interfaces.into_iter());
+        structs.extend(api.structs);
+        interfaces.extend(api.interfaces);
     }
 
     let invocation_labels = {
@@ -178,10 +179,10 @@ impl<'a> InvocationGenerator<'a> {
                 "{}_{}(_service={{:?}}{})",
                 interface_name,
                 method_name,
-                in_params
-                    .iter()
-                    .map(|param| format!(", {}={{:?}}", param.name))
-                    .collect::<String>()
+                in_params.iter().fold(String::new(), |mut f, param| {
+                    write!(f, ", {}={{:?}}", param.name).unwrap();
+                    f
+                })
             );
             let fmt_args = in_params.iter().map(|param| raw_ident(&param.name));
             quote! {

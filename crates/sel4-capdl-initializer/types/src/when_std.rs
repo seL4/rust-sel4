@@ -87,7 +87,7 @@ impl FillMapBuilder {
             self.file_handles
                 .insert(key.file.to_owned(), File::open(path)?);
         }
-        if !self.fill_data.contains_key(&key) {
+        if !self.fill_data.contains_key(key) {
             let mut buf = vec![0; key.file_length];
             self.file_handles
                 .get(&key.file)

@@ -76,12 +76,11 @@ impl BlockIO {
 
         let mut notify = false;
 
-        while let Some(mut completed_req) = inner
+        while let Ok(mut completed_req) = inner
             .ring_buffers
             .used_mut()
             .dequeue()
             .map_err(|err| assert_eq!(err, SharedRingBuffersError::RingIsEmpty))
-            .ok()
         {
             let status = completed_req.status().unwrap();
             let key = completed_req.buf().encoded_addr() - inner.dma_region_paddr;
@@ -123,7 +122,7 @@ impl BlockIOTrait<BLOCK_SIZE> for BlockIO {
                     0,
                 ),
             );
-            inner.request_statuses.add(key, req.clone()).unwrap();
+            inner.request_statuses.add(key, req).unwrap();
             inner.ring_buffers.free_mut().enqueue(req).unwrap();
             inner.ring_buffers.notify().unwrap();
             key

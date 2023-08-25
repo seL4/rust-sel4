@@ -106,7 +106,7 @@ pub struct RuntimeThreadConfig {
 
 impl RuntimeThreadConfig {
     pub fn ipc_buffer_addr(&self) -> Address {
-        self.inner.ipc_buffer_addr.get().try_into().unwrap()
+        self.inner.ipc_buffer_addr.get()
     }
 
     pub fn endpoint(&self) -> Option<CPtrBits> {

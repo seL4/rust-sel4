@@ -61,7 +61,7 @@ cfg_if::cfg_if! {
             let mut builder = Backtrace::builder(image);
             let error = collect_with(|entry| {
                 builder.append(entry);
-                Result::<(), !>::Ok(())
+                Ok::<_, !>(())
             });
             builder.finalize(error)
         }

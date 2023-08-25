@@ -138,7 +138,7 @@ impl Handler for HandlerImpl {
                         RespStatus::OK => BlockIORequestStatus::Ok,
                         _ => panic!(),
                     };
-                    let mut completed_req = pending_entry.client_req.clone();
+                    let mut completed_req = pending_entry.client_req;
                     completed_req.set_status(status);
                     self.ring_buffers.used_mut().enqueue(completed_req).unwrap();
                     notify = true;

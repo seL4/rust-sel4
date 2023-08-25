@@ -61,7 +61,7 @@ impl SharedTimers {
     }
 
     pub async fn sleep(&self, d: Duration) {
-        let now = self.inner().borrow().now().clone();
+        let now = *self.inner().borrow().now();
         self.sleep_until(now + d).await;
     }
 }
@@ -90,7 +90,7 @@ impl SharedTimersInner {
 
     fn poll_at(&mut self, timestamp: Instant) -> Option<Instant> {
         self.now = timestamp;
-        self.pending.first_entry().map(|entry| entry.key().clone())
+        self.pending.first_entry().map(|entry| *entry.key())
     }
 
     fn poll_delay(&mut self, timestamp: Instant) -> Option<Duration> {

@@ -101,7 +101,7 @@ impl<'a> RuntimeConfigForPacking<&'a [u8]> {
             threads: config
                 .threads()
                 .iter()
-                .map(|thread| RuntimeThreadConfigForPacking::unpack(&thread))
+                .map(RuntimeThreadConfigForPacking::unpack)
                 .collect::<Vec<_>>(),
             image_identifier: config.image_identifier().map(ToOwned::to_owned),
             arg: config.arg(),

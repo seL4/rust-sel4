@@ -4,6 +4,7 @@ use sel4_sync::AbstractMutexSyncOps;
 use crate::{get_static_heap_bounds, get_static_heap_mutex_notification};
 
 #[global_allocator]
+#[allow(clippy::type_complexity)]
 static GLOBAL_ALLOCATOR: StaticDlmallocGlobalAlloc<
     AbstractMutexSyncOps<fn(), fn()>,
     fn() -> *mut [u8],

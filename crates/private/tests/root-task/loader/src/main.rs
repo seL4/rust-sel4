@@ -3,6 +3,7 @@
 #![feature(is_sorted)]
 #![feature(iter_intersperse)]
 #![feature(thread_local)]
+#![allow(clippy::single_match)]
 
 use sel4_platform_info::PLATFORM_INFO;
 use sel4_root_task::{debug_print, debug_println, root_task};

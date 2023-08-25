@@ -110,12 +110,11 @@ impl Inner {
     pub(crate) fn poll(&mut self) -> bool {
         let mut notify_rx = false;
 
-        while let Some(desc) = self
+        while let Ok(desc) = self
             .rx_ring_buffers
             .used_mut()
             .dequeue()
             .map_err(|err| assert_eq!(err, SharedRingBuffersError::RingIsEmpty))
-            .ok()
         {
             let ix = self
                 .lookup_rx_buffer_by_encoded_addr(desc.encoded_addr())
@@ -134,12 +133,11 @@ impl Inner {
 
         let mut notify_tx = false;
 
-        while let Some(desc) = self
+        while let Ok(desc) = self
             .tx_ring_buffers
             .used_mut()
             .dequeue()
             .map_err(|err| assert_eq!(err, SharedRingBuffersError::RingIsEmpty))
-            .ok()
         {
             let ix = self.lookup_tx_buffer_by_descriptor(&desc).unwrap();
             let entry = self.tx_buffer_entry_mut(ix);

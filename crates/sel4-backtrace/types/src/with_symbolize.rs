@@ -1,3 +1,5 @@
+#![allow(clippy::write_with_newline)]
+
 use alloc::format;
 use alloc::string::String;
 use alloc::string::ToString;

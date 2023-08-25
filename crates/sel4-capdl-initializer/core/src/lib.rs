@@ -202,7 +202,7 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
                                         self.take_cap_for_embedded_frame(
                                             *obj_id,
                                             &embedded.get_embedded_frame(
-                                                &self.spec_with_sources.embedded_frame_source,
+                                                self.spec_with_sources.embedded_frame_source,
                                             ),
                                         )?;
                                         *obj_id += 1;

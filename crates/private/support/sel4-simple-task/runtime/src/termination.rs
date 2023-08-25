@@ -3,17 +3,17 @@ use core::fmt;
 use sel4_panicking_env::debug_println;
 
 pub trait InfallibleTermination {
-    fn report(self) -> ();
+    fn report(self);
 }
 
 impl InfallibleTermination for () {
-    fn report(self) -> () {
+    fn report(self) {
         self
     }
 }
 
 impl InfallibleTermination for ! {
-    fn report(self) -> () {
+    fn report(self) {
         self
     }
 }
@@ -23,7 +23,7 @@ pub trait Termination {
 
     fn report(self) -> Result<(), Self::Error>;
 
-    fn show(self) -> ()
+    fn show(self)
     where
         Self: Sized,
         Self::Error: fmt::Debug,
@@ -37,7 +37,8 @@ impl<T: InfallibleTermination> Termination for T {
     type Error = !;
 
     fn report(self) -> Result<(), Self::Error> {
-        Ok(self.report())
+        self.report();
+        Ok(())
     }
 }
 

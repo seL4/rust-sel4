@@ -90,7 +90,7 @@ impl Handler for HandlerImpl {
                     self.region_out
                         .as_mut_ptr()
                         .index(signature_start..signature_end)
-                        .copy_from_slice(&signature);
+                        .copy_from_slice(signature);
 
                     MessageInfo::send(
                         StatusMessageLabel::Ok,

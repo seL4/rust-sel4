@@ -1,4 +1,3 @@
-use core::borrow::Borrow;
 use core::ops::Range;
 
 use sel4_kernel_loader_payload_types::Region;
@@ -8,7 +7,6 @@ pub(crate) fn sanity_check<T>(own_footprint: &Range<u64>, regions: &[Region<T>])
     let memory = &PLATFORM_INFO.memory;
     assert!(any_range_contains(memory.iter(), own_footprint));
     for region in regions.iter() {
-        let region = region.borrow();
         assert!(any_range_contains(memory.iter(), &region.phys_addr_range));
         assert!(ranges_are_disjoint(own_footprint, &region.phys_addr_range));
     }

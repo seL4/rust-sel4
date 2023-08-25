@@ -149,8 +149,9 @@ fn setup_newlib() {
         &HEAP
     });
 
-    let mut impls = Implementations::default();
-    impls._sbrk = Some(sbrk_with_static_heap);
-    impls._write = Some(write_with_debug_put_char);
-    set_implementations(impls)
+    set_implementations(Implementations {
+        _sbrk: Some(sbrk_with_static_heap),
+        _write: Some(write_with_debug_put_char),
+        ..Default::default()
+    })
 }

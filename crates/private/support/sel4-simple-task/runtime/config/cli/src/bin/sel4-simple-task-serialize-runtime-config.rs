@@ -9,7 +9,7 @@ use sel4_simple_task_runtime_config_types::{RuntimeConfig, RuntimeConfigForPacki
 
 fn main() -> Result<(), std::io::Error> {
     let config = serde_json::from_reader::<_, RuntimeConfigForPacking<PathBuf>>(io::stdin())?;
-    let config = config.traverse(|path| fs::read(path))?;
+    let config = config.traverse(fs::read)?;
     let packed = config.pack();
     let unpacked_for_sanity_check = RuntimeConfigForPacking::unpack(&RuntimeConfig::new(&packed))
         .traverse(|bytes| Ok::<_, !>(bytes.to_vec()))

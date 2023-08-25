@@ -21,7 +21,10 @@ pub struct Backtrace<T> {
 impl<T: Serialize> Backtrace<T> {
     pub fn send_to_vec(&self) -> postcard::Result<Vec<u8>> {
         let mut acc = vec![];
-        let mut send_byte = |b| Result::<(), !>::Ok(acc.push(b));
+        let mut send_byte = |b| {
+            acc.push(b);
+            Ok::<_, !>(())
+        };
         self.preamble.send(&mut send_byte)?;
         for entry in &self.entries {
             entry.send(&mut send_byte)?;
@@ -81,7 +84,7 @@ impl<T> Backtrace<T> {
 
 #[cfg(feature = "postcard")]
 fn take_from_bytes<T: for<'a> Deserialize<'a>>(buf: &mut &[u8]) -> postcard::Result<T> {
-    let (v, rem) = postcard::take_from_bytes(*buf)?;
+    let (v, rem) = postcard::take_from_bytes(buf)?;
     *buf = rem;
     Ok(v)
 }

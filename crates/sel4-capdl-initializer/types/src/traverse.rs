@@ -25,7 +25,7 @@ impl<'a, N, D, M> Spec<'a, N, D, M> {
                             Object::Frame(obj) => Object::Frame(object::Frame {
                                 size_bits: obj.size_bits,
                                 paddr: obj.paddr,
-                                init: g(&obj, self.root_objects.contains(&obj_id))?,
+                                init: g(obj, self.root_objects.contains(&obj_id))?,
                             }),
                             Object::PageTable(obj) => Object::PageTable(obj.clone()),
                             Object::ASIDPool(obj) => Object::ASIDPool(obj.clone()),

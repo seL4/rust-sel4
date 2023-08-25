@@ -46,6 +46,7 @@ impl<'a, D, E> FrameInit<'a, D, E> {
 }
 
 impl<'a, D> FrameInit<'a, D, !> {
+    #[allow(clippy::explicit_auto_deref)]
     pub const fn as_fill_infallible(&self) -> &Fill<'a, D> {
         match self {
             Self::Fill(fill) => fill,

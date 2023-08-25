@@ -64,5 +64,5 @@ fn main() -> Result<(), io::Error> {
         input.render_with_data(&image_elf).unwrap()
     };
 
-    fs::write(out_elf_path, &out_elf)
+    fs::write(out_elf_path, out_elf)
 }

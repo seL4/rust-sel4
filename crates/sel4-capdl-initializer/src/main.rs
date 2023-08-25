@@ -103,7 +103,7 @@ fn static_heap_bounds() -> *mut [u8] {
     unsafe {
         ptr::slice_from_raw_parts_mut(
             sel4_capdl_initializer_heap_start,
-            sel4_capdl_initializer_heap_size.try_into().unwrap(),
+            sel4_capdl_initializer_heap_size,
         )
     }
 }

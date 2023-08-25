@@ -276,10 +276,12 @@ impl Socket<tcp::Socket<'static>> {
         .await
     }
 
+    #[allow(clippy::needless_pass_by_ref_mut)]
     pub async fn recv(&mut self, buffer: &mut [u8]) -> Result<usize, TcpSocketError> {
         future::poll_fn(|cx| self.poll_recv(cx, buffer)).await
     }
 
+    #[allow(clippy::needless_pass_by_ref_mut)]
     pub fn poll_recv(
         &mut self,
         cx: &mut task::Context<'_>,
@@ -329,6 +331,7 @@ impl Socket<tcp::Socket<'static>> {
         future::poll_fn(|cx| self.poll_send(cx, buffer)).await
     }
 
+    #[allow(clippy::needless_pass_by_ref_mut)]
     pub fn poll_send(
         &mut self,
         cx: &mut task::Context<'_>,
@@ -418,7 +421,7 @@ impl SharedNetworkInner {
     }
 
     fn poll_delay(&mut self, timestamp: Instant) -> Option<Duration> {
-        self.iface.poll_delay(timestamp, &mut self.socket_set)
+        self.iface.poll_delay(timestamp, &self.socket_set)
     }
 
     fn poll<D: Device + ?Sized>(&mut self, timestamp: Instant, device: &mut D) -> bool {
@@ -431,10 +434,9 @@ impl SharedNetworkInner {
 
     // TODO should dhcp events instead just be monitored in a task?
     fn poll_dhcp(&mut self) {
-        self.dhcp_socket_mut()
-            .poll()
-            .map(free_dhcp_event)
-            .map(|event| match event {
+        if let Some(event) = self.dhcp_socket_mut().poll() {
+            let event = free_dhcp_event(event);
+            match event {
                 dhcpv4::Event::Configured(config) => {
                     info!("DHCP config acquired");
                     if self.dhcp_overrides.address.is_none() {
@@ -459,7 +461,8 @@ impl SharedNetworkInner {
                         self.clear_dns_servers();
                     }
                 }
-            });
+            }
+        }
     }
 
     fn set_address(&mut self, address: Ipv4Cidr) {
@@ -530,14 +533,14 @@ impl SharedNetworkInner {
     }
 }
 
-fn free_dhcp_event<'a>(event: dhcpv4::Event<'a>) -> dhcpv4::Event<'static> {
+fn free_dhcp_event(event: dhcpv4::Event) -> dhcpv4::Event<'static> {
     match event {
         dhcpv4::Event::Deconfigured => dhcpv4::Event::Deconfigured,
         dhcpv4::Event::Configured(config) => dhcpv4::Event::Configured(free_dhcp_config(config)),
     }
 }
 
-fn free_dhcp_config<'a>(config: dhcpv4::Config<'a>) -> dhcpv4::Config<'static> {
+fn free_dhcp_config(config: dhcpv4::Config) -> dhcpv4::Config<'static> {
     dhcpv4::Config {
         server: config.server,
         address: config.address,

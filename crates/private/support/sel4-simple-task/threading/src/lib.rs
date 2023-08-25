@@ -17,6 +17,7 @@ impl StaticThread {
         Self(endpoint)
     }
 
+    #[allow(clippy::missing_safety_doc)]
     pub unsafe fn recv_and_run(endpoint: Endpoint, reply_authority: ReplyAuthority) {
         let RecvWithMRs {
             msg: [entry_vaddr, entry_arg0, entry_arg1, ..],
@@ -48,13 +49,13 @@ mod when_alloc {
             let f_arg = Box::into_raw(b);
             self.0.send_with_mrs(
                 sel4::MessageInfoBuilder::default().length(3).build(),
-                [entry as Word, f_arg as Word, 0],
+                [entry as usize as Word, f_arg as Word, 0],
             );
         }
     }
 
     extern "C" fn entry(f_arg: u64) {
         let f = unsafe { Box::from_raw(f_arg as *mut Box<dyn FnOnce()>) };
-        let _ = catch_unwind(|| f());
+        let _ = catch_unwind(f);
     }
 }

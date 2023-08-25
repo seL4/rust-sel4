@@ -16,6 +16,7 @@ pub struct Driver {
 }
 
 impl Driver {
+    #[allow(clippy::missing_safety_doc)]
     pub unsafe fn new(ptr: *mut (), freq: u64) -> Self {
         let mut this = Self {
             device: Device::new(ptr),

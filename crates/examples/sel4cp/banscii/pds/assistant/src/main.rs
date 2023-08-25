@@ -100,7 +100,7 @@ impl HandlerImpl {
         mem::swap(&mut buffer, &mut self.buffer);
         match str::from_utf8(&buffer) {
             Ok(subject) => {
-                self.create(&subject);
+                self.create(subject);
             }
             Err(_) => {
                 writeln!(PutCharWrite, "error: input is not valid utf-8").unwrap();
@@ -177,7 +177,7 @@ fn prompt() {
 }
 
 fn newline() {
-    writeln!(PutCharWrite, "").unwrap();
+    writeln!(PutCharWrite).unwrap();
 }
 
 fn get_char() -> Option<u8> {

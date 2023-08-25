@@ -101,8 +101,8 @@ pub async fn run_server<T: BytesIO + 'static>(
     future::pending().await
 }
 
-async fn use_socket_for_http<'a, T: BytesIO>(
-    server: &'a Server<T>,
+async fn use_socket_for_http<T: BytesIO>(
+    server: &Server<T>,
     mut socket: TcpSocketWrapper,
 ) -> Result<(), ClosedError<TcpSocketError>> {
     socket.inner_mut().accept(HTTP_PORT).await?;
@@ -111,8 +111,8 @@ async fn use_socket_for_http<'a, T: BytesIO>(
     Ok(())
 }
 
-async fn use_socket_for_https<'a, T: BytesIO>(
-    server: &'a Server<T>,
+async fn use_socket_for_https<T: BytesIO>(
+    server: &Server<T>,
     config: Arc<mbedtls::ssl::Config>,
     mut socket: TcpSocketWrapper,
 ) -> Result<(), ClosedError<mbedtls::Error>> {

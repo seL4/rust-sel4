@@ -93,7 +93,7 @@ pub fn get_embedding<'a>() -> (Embedding<'a>, Footprint) {
         let fill_dir = env::var(CAPDL_FILL_DIR_ENV)
             .unwrap_or_else(|_| panic!("{} must be set", CAPDL_FILL_DIR_ENV));
         footprint.paths.push(PathBuf::from_str(&fill_dir).unwrap());
-        spec.collect_fill(&[fill_dir])
+        spec.collect_fill([fill_dir])
     };
 
     let spec = spec.split_embedded_frames(embed_frames, granule_size_bits);

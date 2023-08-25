@@ -88,7 +88,7 @@ pub enum ObjectNamesLevel {
 }
 
 impl ObjectNamesLevel {
-    pub fn apply<'a, 'b, N, D, M>(&self, named_obj: &'b NamedObject<'a, N, D, M>) -> Option<&'b N> {
+    pub fn apply<'a, N, D, M>(&self, named_obj: &'a NamedObject<N, D, M>) -> Option<&'a N> {
         match self {
             Self::All => Some(&named_obj.name),
             Self::JustTCBs => match &named_obj.object {

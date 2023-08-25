@@ -9,6 +9,7 @@ pub struct Driver {
 }
 
 impl Driver {
+    #[allow(clippy::missing_safety_doc)]
     pub unsafe fn new(ptr: *mut ()) -> Self {
         let mut this = Self {
             device: Device::new(ptr.cast()),

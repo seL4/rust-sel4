@@ -33,26 +33,23 @@ pub(crate) struct HandlerImpl {
 }
 
 impl HandlerImpl {
+    #[allow(clippy::too_many_arguments)]
     pub(crate) fn new<T: Future<Output = !> + 'static>(
         timer_driver_channel: sel4cp::Channel,
         net_driver_channel: sel4cp::Channel,
         block_driver_channel: sel4cp::Channel,
-        mut timer: TimerClient,
+        timer: TimerClient,
         mut net_device: DeviceImpl,
         net_config: Config,
         fs_block_io: BlockIO,
         f: impl FnOnce(SharedTimers, SharedNetwork, BytesIOImpl, LocalSpawner) -> T,
     ) -> Self {
-        let now = Self::now_with_timer_client(&mut timer);
+        let now = Self::now_with_timer_client(&timer);
 
-        let shared_timers = SharedTimers::new(now.clone());
+        let shared_timers = SharedTimers::new(now);
 
-        let shared_network = SharedNetwork::new(
-            net_config,
-            DhcpOverrides::default(),
-            &mut net_device,
-            now.clone(),
-        );
+        let shared_network =
+            SharedNetwork::new(net_config, DhcpOverrides::default(), &mut net_device, now);
 
         let local_pool = LocalPool::new();
         let spawner = local_pool.spawner();
@@ -87,15 +84,15 @@ impl HandlerImpl {
         this
     }
 
-    fn now(&mut self) -> Instant {
-        Self::now_with_timer_client(&mut self.timer)
+    fn now(&self) -> Instant {
+        Self::now_with_timer_client(&self.timer)
     }
 
-    fn now_with_timer_client(timer: &mut TimerClient) -> Instant {
+    fn now_with_timer_client(timer: &TimerClient) -> Instant {
         Instant::from_micros(i64::try_from(timer.now()).unwrap())
     }
 
-    fn set_timeout(&mut self, d: Duration) {
+    fn set_timeout(&self, d: Duration) {
         self.timer.set_timeout(d.micros())
     }
 
@@ -124,7 +121,7 @@ impl HandlerImpl {
                     if delay == &Duration::ZERO {
                         repoll = true;
                     } else {
-                        self.set_timeout(delay.clone());
+                        self.set_timeout(*delay);
                     }
                 }
                 if !repoll {

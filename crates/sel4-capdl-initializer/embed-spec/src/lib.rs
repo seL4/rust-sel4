@@ -124,11 +124,11 @@ impl<'a> Embedding<'a> {
     }
 
     fn embed_object_with_cap_table(&self, obj: &(impl fmt::Debug + HasCapTable)) -> TokenStream {
-        let mut expr_struct = syn::parse2::<syn::ExprStruct>(to_tokens_via_debug(&obj)).unwrap();
+        let mut expr_struct = syn::parse2::<syn::ExprStruct>(to_tokens_via_debug(obj)).unwrap();
         self.patch_field(
             &mut expr_struct,
             "slots",
-            syn::parse2::<syn::Expr>(self.embed_cap_table(&obj.slots())).unwrap(),
+            syn::parse2::<syn::Expr>(self.embed_cap_table(obj.slots())).unwrap(),
         );
         expr_struct.to_token_stream()
     }
@@ -141,11 +141,11 @@ impl<'a> Embedding<'a> {
             }
             Object::TCB(obj) => {
                 let mut expr_struct =
-                    syn::parse2::<syn::ExprStruct>(to_tokens_via_debug(&obj)).unwrap();
+                    syn::parse2::<syn::ExprStruct>(to_tokens_via_debug(obj)).unwrap();
                 self.patch_field(
                     &mut expr_struct,
                     "slots",
-                    syn::parse2::<syn::Expr>(self.embed_cap_table(&obj.slots())).unwrap(),
+                    syn::parse2::<syn::Expr>(self.embed_cap_table(obj.slots())).unwrap(),
                 );
                 self.patch_field(
                     &mut expr_struct,
@@ -186,7 +186,7 @@ impl<'a> Embedding<'a> {
             }
             Object::Frame(obj) => {
                 let mut expr_struct =
-                    syn::parse2::<syn::ExprStruct>(to_tokens_via_debug(&obj)).unwrap();
+                    syn::parse2::<syn::ExprStruct>(to_tokens_via_debug(obj)).unwrap();
                 self.patch_field(
                     &mut expr_struct,
                     "init",
@@ -201,11 +201,11 @@ impl<'a> Embedding<'a> {
             }
             Object::ArmIRQ(obj) => {
                 let mut expr_struct =
-                    syn::parse2::<syn::ExprStruct>(to_tokens_via_debug(&obj)).unwrap();
+                    syn::parse2::<syn::ExprStruct>(to_tokens_via_debug(obj)).unwrap();
                 self.patch_field(
                     &mut expr_struct,
                     "slots",
-                    syn::parse2::<syn::Expr>(self.embed_cap_table(&obj.slots())).unwrap(),
+                    syn::parse2::<syn::Expr>(self.embed_cap_table(obj.slots())).unwrap(),
                 );
                 self.patch_field(
                     &mut expr_struct,
@@ -324,12 +324,12 @@ impl<'a> Embedding<'a> {
                 ));
                 let ident = format_ident!("CHUNK_{}", id);
                 let fname = format!("chunk.{}.bin", id);
-                if !files_for_inclusion.contains_key(&fname) {
+                files_for_inclusion.entry(fname.clone()).or_insert_with(|| {
                     file_inclusion_toks.extend(quote! {
                         const #ident: &[u8] = include_bytes!(concat!(env!("OUT_DIR"), "/", #fname));
                     });
-                    files_for_inclusion.insert(fname, self.pack_fill(self.fill_map.get(data)));
-                }
+                    self.pack_fill(self.fill_map.get(data))
+                });
                 Ok(ident)
             })
             .into_ok()

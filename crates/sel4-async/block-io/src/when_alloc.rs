@@ -62,7 +62,7 @@ impl<const BLOCK_SIZE: usize, T: BlockIO<BLOCK_SIZE>> BytesIO for BytesIOAdapter
                     self.inner().read_block(block_id, chunk)
                 })),
                 async {
-                    if left_partial_chunk.len() > 0 {
+                    if !left_partial_chunk.is_empty() {
                         let block_id = block_id_of_first_full_chunk - 1;
                         let offset_into_block = BLOCK_SIZE - left_partial_chunk.len();
                         self.read_partial_block(block_id, offset_into_block, left_partial_chunk)
@@ -70,7 +70,7 @@ impl<const BLOCK_SIZE: usize, T: BlockIO<BLOCK_SIZE>> BytesIO for BytesIOAdapter
                     }
                 },
                 async {
-                    if right_partial_chunk.len() > 0 {
+                    if !right_partial_chunk.is_empty() {
                         let block_id = block_id_of_first_full_chunk + num_mid_chunks;
                         let offset_into_block = 0;
                         self.read_partial_block(block_id, offset_into_block, right_partial_chunk)
@@ -118,10 +118,10 @@ impl<T: BlockIO<BLOCK_SIZE>, const BLOCK_SIZE: usize> BlockIO<BLOCK_SIZE>
     async fn read_block(&self, block_id: usize, buf: &mut [u8; BLOCK_SIZE]) {
         // NOTE: odd control flow to avoid holding core::cell::RefMut across await
         if let Some(block) = self.lru.borrow_mut().get(&block_id) {
-            *buf = block.clone();
+            *buf = *block;
             return;
         }
         self.inner().read_block(block_id, buf).await;
-        let _ = self.lru.borrow_mut().put(block_id, buf.clone());
+        let _ = self.lru.borrow_mut().put(block_id, *buf);
     }
 }

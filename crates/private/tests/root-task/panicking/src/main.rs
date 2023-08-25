@@ -24,7 +24,7 @@ fn f1() {
     [()].iter().for_each(f1_helper);
 }
 
-fn f1_helper(_: &()) -> () {
+fn f1_helper(_: &()) {
     let _ = F1Drop;
     panic!("test");
 }

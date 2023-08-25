@@ -196,16 +196,14 @@ fn elf_phys_addr_range<'a, T: ReadRef<'a>>(
         .filter(|phdr| phdr.p_type(endian) == PT_LOAD)
         .map(|phdr| phdr.p_paddr(endian))
         .min()
-        .unwrap()
-        .into();
+        .unwrap();
     let virt_max = elf
         .raw_segments()
         .iter()
         .filter(|phdr| phdr.p_type(endian) == PT_LOAD)
         .map(|phdr| phdr.p_paddr(endian) + phdr.p_memsz(endian))
         .max()
-        .unwrap()
-        .into();
+        .unwrap();
     virt_min..virt_max
 }
 
@@ -231,6 +229,6 @@ fn virt_to_phys(vaddr: u64, phys_to_virt_offset: i64) -> u64 {
 
 fn unified<T: Eq>(mut it: impl Iterator<Item = T>) -> T {
     let first = it.next().unwrap();
-    assert!(it.all(|subsequent| &subsequent == &first));
+    assert!(it.all(|subsequent| subsequent == first));
     first
 }

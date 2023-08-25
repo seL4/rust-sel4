@@ -54,6 +54,6 @@ fn main() -> Result<()> {
     let rendered_initializer_elf =
         render_elf::render_elf(&initializer_elf, &serialized_spec, heap_size);
 
-    fs::write(out_file_path, &rendered_initializer_elf)?;
+    fs::write(out_file_path, rendered_initializer_elf)?;
     Ok(())
 }

@@ -109,8 +109,7 @@ unsafe impl Hal for HalImpl {
             .as_mut_ptr()
             .index(bounce_buffer_range.clone())
             .copy_from_slice(buffer.as_ref());
-        let paddr = state.offset_to_paddr(bounce_buffer_range.start);
-        paddr
+        state.offset_to_paddr(bounce_buffer_range.start)
     }
 
     unsafe fn unshare(paddr: PhysAddr, mut buffer: NonNull<[u8]>, direction: BufferDirection) {

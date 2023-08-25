@@ -214,11 +214,7 @@ where
     A: Access + Copyable,
 {
     fn clone(&self) -> Self {
-        Self {
-            pointer: self.pointer,
-            reference: self.reference,
-            access: self.access,
-        }
+        *self
     }
 }
 

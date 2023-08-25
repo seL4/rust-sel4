@@ -133,7 +133,7 @@ impl<T: BytesIO> Server<T> {
         reason_phrase: &str,
     ) -> Result<(), ClosedError<U::Error>> {
         conn.send_all(b"HTTP/1.1 ").await?;
-        conn.send_all(&status_code.to_string().as_bytes()).await?;
+        conn.send_all(status_code.to_string().as_bytes()).await?;
         conn.send_all(b" ").await?;
         conn.send_all(reason_phrase.as_bytes()).await?;
         conn.send_all(b"\r\n").await?;
@@ -167,48 +167,43 @@ impl<T: BytesIO> Server<T> {
         }
         let has_trailing_slash = "/".is_suffix_of(request_path);
         let normalized = request_path.trim_matches('/');
-        if normalized.len() == 0 {
+        if normalized.is_empty() {
             let file_path = "index.html";
             if let Some(location) = self.index.lookup(file_path) {
                 let entry = self.index.read_entry(location).await;
-                match entry.ty() {
-                    cpiofs::EntryType::RegularFile => {
-                        return RequestPathStatus::Ok {
-                            file_path: file_path.to_owned(),
-                            entry,
-                        };
-                    }
-                    _ => {}
+                if entry.ty() == cpiofs::EntryType::RegularFile {
+                    return RequestPathStatus::Ok {
+                        file_path: file_path.to_owned(),
+                        entry,
+                    };
                 }
             }
-        } else {
-            if let Some(location) = self.index.lookup(normalized) {
-                let entry = self.index.read_entry(location).await;
-                match entry.ty() {
-                    cpiofs::EntryType::RegularFile => {
+        } else if let Some(location) = self.index.lookup(normalized) {
+            let entry = self.index.read_entry(location).await;
+            match entry.ty() {
+                cpiofs::EntryType::RegularFile => {
+                    return RequestPathStatus::Ok {
+                        file_path: normalized.to_owned(),
+                        entry,
+                    };
+                }
+                cpiofs::EntryType::Directory => {
+                    if !has_trailing_slash {
+                        return RequestPathStatus::MovedPermanently {
+                            location: format!("{}/", request_path),
+                        };
+                    }
+                    let normalized_with_index_html = format!("{}/index.html", normalized);
+                    if let Some(location) = self.index.lookup(&normalized_with_index_html) {
+                        let entry = self.index.read_entry(location).await;
                         return RequestPathStatus::Ok {
-                            file_path: normalized.to_owned(),
+                            file_path: normalized_with_index_html,
                             entry,
                         };
                     }
-                    cpiofs::EntryType::Directory => {
-                        if !has_trailing_slash {
-                            return RequestPathStatus::MovedPermanently {
-                                location: format!("{}/", request_path),
-                            };
-                        }
-                        let normalized_with_index_html = format!("{}/index.html", normalized);
-                        if let Some(location) = self.index.lookup(&normalized_with_index_html) {
-                            let entry = self.index.read_entry(location).await;
-                            return RequestPathStatus::Ok {
-                                file_path: normalized_with_index_html,
-                                entry,
-                            };
-                        }
-                    }
-                    // TODO handle symlinks
-                    _ => {}
                 }
+                // TODO handle symlinks
+                _ => {}
             }
         }
         RequestPathStatus::NotFound

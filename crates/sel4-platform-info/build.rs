@@ -15,7 +15,7 @@ fn main() {
     let platform_info_path =
         get_with_sel4_prefix_relative_fallback(SEL4_PLATFORM_INFO_ENV, "support/platform_gen.yaml");
     let platform_info: PlatformInfoForBuildSystem =
-        serde_yaml::from_reader(fs::File::open(&platform_info_path).unwrap()).unwrap();
+        serde_yaml::from_reader(fs::File::open(platform_info_path).unwrap()).unwrap();
     let fragment = platform_info.embed();
     let out_dir = env::var("OUT_DIR").unwrap();
     let out_path = PathBuf::from(&out_dir).join("gen.rs");

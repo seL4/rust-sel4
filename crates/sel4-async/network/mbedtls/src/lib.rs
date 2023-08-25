@@ -125,6 +125,7 @@ impl DbgCallbackBuilder {
         self
     }
 
+    #[allow(clippy::useless_format)]
     pub const fn build(self) -> impl DbgCallback + Clone {
         move |level: i32, file: Cow<'_, str>, line: i32, message: Cow<'_, str>| {
             if level <= self.local_debug_threshold {
@@ -132,7 +133,7 @@ impl DbgCallbackBuilder {
                 let target = "mbedtls";
                 // TODO remove allocations
                 let location = if self.include_locations {
-                    format!(" {file}:{line}")
+                    format!("{file}:{line} ")
                 } else {
                     format!("")
                 };

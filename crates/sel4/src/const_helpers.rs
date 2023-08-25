@@ -1,3 +1,5 @@
+#![allow(clippy::assertions_on_constants)]
+
 use sel4_config::sel4_cfg_attr;
 
 pub(crate) const fn u32_into_usize(x: u32) -> usize {

@@ -66,12 +66,12 @@ impl Channel {
 
     /// Prepare a [`DeferredAction`] for syscall coalescing using [`Handler::take_deferred_action`].
     pub fn defer_notify(&self) -> DeferredAction {
-        DeferredAction::new(self.clone(), DeferredActionInterface::Notify)
+        DeferredAction::new(*self, DeferredActionInterface::Notify)
     }
 
     /// Prepare a [`DeferredAction`] for syscall coalescing using [`Handler::take_deferred_action`].
     pub fn defer_irq_ack(&self) -> DeferredAction {
-        DeferredAction::new(self.clone(), DeferredActionInterface::IrqAck)
+        DeferredAction::new(*self, DeferredActionInterface::IrqAck)
     }
 }
 
@@ -104,7 +104,10 @@ impl DeferredAction {
 
     pub fn execute_now(self) -> Result<(), IrqAckError> {
         match self.interface() {
-            DeferredActionInterface::Notify => Ok(self.channel().notify()),
+            DeferredActionInterface::Notify => {
+                self.channel().notify();
+                Ok(())
+            }
             DeferredActionInterface::IrqAck => self.channel().irq_ack(),
         }
     }

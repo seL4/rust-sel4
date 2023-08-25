@@ -22,6 +22,7 @@ static mut BUFFERS: InitializerBuffers<[PerObjectBuffer; SPEC.objects.const_inne
     InitializerBuffers::new([PerObjectBuffer::const_default(); SPEC.objects.const_inner().len()]);
 
 #[sel4_root_task::root_task]
+#[allow(clippy::let_unit_value)]
 fn main(bootinfo: &BootInfo) -> ! {
     LOGGER.set().unwrap();
     let trivial_source = ();
@@ -31,7 +32,7 @@ fn main(bootinfo: &BootInfo) -> ! {
         content_source: &trivial_source,
         embedded_frame_source: &trivial_source,
     };
-    Initializer::initialize(&bootinfo, user_image_bounds(), &spec_with_sources, unsafe {
+    Initializer::initialize(bootinfo, user_image_bounds(), &spec_with_sources, unsafe {
         &mut BUFFERS
     })
     .unwrap_or_else(|err| panic!("Error: {}", err))

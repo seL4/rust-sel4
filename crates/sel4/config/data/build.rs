@@ -7,8 +7,8 @@ use sel4_config_generic_types::Configuration;
 
 fn main() {
     let config = {
-        let kernel_config = from_path(&find_in_libsel4_include_dirs("kernel/gen_config.json"));
-        let libsel4_config = from_path(&find_in_libsel4_include_dirs("sel4/gen_config.json"));
+        let kernel_config = from_path(find_in_libsel4_include_dirs("kernel/gen_config.json"));
+        let libsel4_config = from_path(find_in_libsel4_include_dirs("sel4/gen_config.json"));
         let mut this = Configuration::empty();
         this.append(kernel_config);
         this.append(libsel4_config);

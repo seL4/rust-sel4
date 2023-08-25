@@ -92,7 +92,7 @@ pub fn panic_any<M: UpcastIntoPayload>(msg: M) -> ! {
     })
 }
 
-fn do_panic<'a>(info: ExternalPanicInfo<'a>) -> ! {
+fn do_panic(info: ExternalPanicInfo) -> ! {
     count_panic();
     (get_hook())(&info);
     if info.can_unwind() {

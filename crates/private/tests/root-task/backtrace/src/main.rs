@@ -27,7 +27,7 @@ pub fn f() {
     [()].iter().for_each(g);
 }
 
-fn g(_: &()) -> () {
+fn g(_: &()) {
     let simple = SimpleBacktracing::new(None);
     let bt = simple.collect();
     simple.send(&bt);

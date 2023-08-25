@@ -29,19 +29,19 @@ impl WrappedCPtr for StaticThread {
 
 impl ConfigBadge {
     pub fn get(&self) -> Badge {
-        self.0.try_into().unwrap()
+        self.0
     }
 }
 
 impl From<Badge> for ConfigBadge {
     fn from(badge: Badge) -> Self {
-        Self::new(badge.into())
+        Self::new(badge)
     }
 }
 
 impl ConfigCPtrBits {
     pub fn get(&self) -> CPtrBits {
-        self.0.try_into().unwrap()
+        self.0
     }
 }
 

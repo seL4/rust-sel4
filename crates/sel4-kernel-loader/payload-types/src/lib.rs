@@ -60,6 +60,7 @@ impl<T> Region<T> {
     }
 }
 
+#[allow(clippy::len_without_is_empty)]
 pub trait RegionContent {
     type Source: ?Sized;
 

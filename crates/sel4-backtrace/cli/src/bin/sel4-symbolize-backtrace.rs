@@ -15,7 +15,7 @@ fn main() {
     let bt = Backtrace::<Option<String>>::recv(&hex::decode(bt_hex).unwrap()).unwrap();
     let elf_file_path = matches
         .value_of("file")
-        .or(bt.preamble.image.as_ref().map(String::as_str))
+        .or(bt.preamble.image.as_deref())
         .expect("ELF file neither embedded nor provided");
     let elf_file = File::open(elf_file_path).unwrap();
     let map = unsafe { Mmap::map(&elf_file).unwrap() };

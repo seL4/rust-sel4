@@ -28,10 +28,10 @@ fn main() -> Result<()> {
         &args.platform_info_path,
     );
 
-    if args.verbose {}
+    // if args.verbose {}
 
     let loader_with_payload_bytes = render_elf::render_elf(&loader_bytes, &serialized_payload);
 
-    fs::write(out_file_path, &loader_with_payload_bytes)?;
+    fs::write(out_file_path, loader_with_payload_bytes)?;
     Ok(())
 }

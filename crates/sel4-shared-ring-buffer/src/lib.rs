@@ -92,6 +92,7 @@ impl Descriptor {
         self.encoded_addr
     }
 
+    #[allow(clippy::len_without_is_empty)]
     pub fn len(&self) -> u32 {
         self.len
     }
@@ -113,6 +114,7 @@ impl<'a, T: Copy> RingBuffer<'a, T> {
         Self { inner }
     }
 
+    #[allow(clippy::missing_safety_doc)]
     pub unsafe fn from_ptr(ptr: NonNull<RawRingBuffer<T>>) -> Self {
         Self::new(ExternallySharedRef::new(ptr))
     }

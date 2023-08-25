@@ -35,7 +35,7 @@ struct PlatformInfoForBuildSystem {
     devices: Ranges,
 }
 
-pub fn serialize_payload<'a>(
+pub fn serialize_payload(
     kernel_path: impl AsRef<Path>,
     app_path: impl AsRef<Path>,
     dtb_path: impl AsRef<Path>,
@@ -111,10 +111,7 @@ impl Builder {
             let paddr = virt_to_phys(vaddr, phys_to_virt_offset);
             let filesz = phdr.p_filesz(endian);
             let memsz = phdr.p_memsz(endian);
-            let content = elf
-                .data()
-                .read_bytes_at(offset.into(), filesz.into())
-                .unwrap();
+            let content = elf.data().read_bytes_at(offset, filesz).unwrap();
             self.add_region(paddr, content.to_vec());
             if memsz > filesz {
                 self.regions
@@ -154,7 +151,7 @@ impl Builder {
         let phys_start = virt_to_phys(virt_addr_range.start, phys_to_virt_offset);
         let phys_end = virt_to_phys(virt_addr_range.end, phys_to_virt_offset);
         let phys_addr_range = coarsen_footprint(phys_start..phys_end, PAGE_SIZE);
-        let virt_entry = elf.entry().try_into().unwrap();
+        let virt_entry = elf.entry();
         self.add_segments(elf, phys_to_virt_offset);
         ImageInfo {
             phys_addr_range,
@@ -186,16 +183,14 @@ fn elf_virt_addr_range<'a, T: ReadRef<'a>>(
         .filter(|phdr| phdr.p_type(endian) == PT_LOAD)
         .map(|phdr| phdr.p_vaddr(endian))
         .min()
-        .unwrap()
-        .into();
+        .unwrap();
     let virt_max = elf
         .raw_segments()
         .iter()
         .filter(|phdr| phdr.p_type(endian) == PT_LOAD)
         .map(|phdr| phdr.p_vaddr(endian) + phdr.p_memsz(endian))
         .max()
-        .unwrap()
-        .into();
+        .unwrap();
     virt_min..virt_max
 }
 
@@ -227,6 +222,6 @@ fn phys_to_virt_offset_for(paddr: u64, vaddr: u64) -> i64 {
 
 fn unified<T: Eq>(mut it: impl Iterator<Item = T>) -> T {
     let first = it.next().unwrap();
-    assert!(it.all(|subsequent| &subsequent == &first));
+    assert!(it.all(|subsequent| subsequent == first));
     first
 }

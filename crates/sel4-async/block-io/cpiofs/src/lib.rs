@@ -27,7 +27,7 @@ struct HexEncodedU32 {
 
 impl HexEncodedU32 {
     fn get(&self) -> u32 {
-        u32::from_be_bytes(FromHex::from_hex(&self.encoded).unwrap())
+        u32::from_be_bytes(FromHex::from_hex(self.encoded).unwrap())
     }
 }
 
@@ -85,7 +85,7 @@ impl EntryLocation {
         header.check_magic();
         Entry {
             header,
-            location: self.clone(),
+            location: *self,
         }
     }
 }
@@ -163,7 +163,7 @@ impl<T: BytesIO> Index<T> {
                 break;
             }
             location = entry.next_entry_location();
-            entries.insert(path, entry.location.clone());
+            entries.insert(path, entry.location);
         }
         Self { entries, io }
     }
