@@ -12,6 +12,11 @@ let
 
   superVendoredLockfile = vendorLockfile { lockfile = superLockfile; };
 
+  runClippyDefault =
+    # true
+    false
+  ;
+
 in
 
 { rootCrate
@@ -28,6 +33,8 @@ in
 , rustTargetInfo ? defaultRustTargetInfo
 
 , stdenv ? outerArgs.stdenv
+
+, runClippy ? runClippyDefault
 }:
 
 let
@@ -92,6 +99,9 @@ let
       inherit rustToolchain;
       rustTargetName = rustTargetInfo.name;
     })
+    {
+      unstable.unstable-options = true;
+    }
     (vendorLockfile { inherit lockfileContents; }).configFragment
   ];
 
@@ -107,7 +117,18 @@ let
     "--release"
   ] ++ [
     "--target" rustTargetInfo.name
+    "-j" "$NIX_BUILD_CORES"
   ];
+
+  mkCargoInvocation = args:
+    let
+      joinedArgs = lib.concatStringsSep " " args;
+    in ''
+      ${lib.optionalString runClippy ''
+        cargo clippy ${joinedArgs} -- -D warnings
+      ''}
+      cargo build ${joinedArgs}
+    '';
 
   f = accumulatedLayers:
     if lib.length accumulatedLayers == 0
@@ -124,7 +145,7 @@ let
 
         manifest = crateUtils.toTOMLFile "Cargo.toml" (modifications.modifyManifest baseManifest);
         config = crateUtils.toTOMLFile "config" (modifications.modifyConfig baseConfig);
-        flags = lib.concatStringsSep " " (baseFlags ++ modifications.extraCargoFlags);
+        flags = baseFlags ++ modifications.extraCargoFlags;
 
         workspace = linkFarm "workspace-with-dummies" [
           { name = "Cargo.toml"; path = manifest; }
@@ -143,13 +164,11 @@ let
             cp -r --preserve=timestamps ${prev} $out
             chmod -R +w $out
 
-            cargo build \
-              -Z unstable-options \
-              --config ${config} \
-              --manifest-path ${workspace}/Cargo.toml \
-              --target-dir $out \
-              -j $NIX_BUILD_CORES \
-              ${flags}
+            ${mkCargoInvocation (flags ++ [
+              "--config" "${config}"
+              "--manifest-path" "${workspace}/Cargo.toml"
+              "--target-dir" "$out"
+            ])}
 
             runHook postBuild
           '';
@@ -166,7 +185,7 @@ in let
 
   manifest = crateUtils.toTOMLFile "Cargo.toml" (modifications.modifyManifest baseManifest);
   config = crateUtils.toTOMLFile "config" (modifications.modifyConfig baseConfig);
-  flags = lib.concatStringsSep " " (baseFlags ++ modifications.extraCargoFlags);
+  flags = baseFlags ++ modifications.extraCargoFlags;
 
   workspace = linkFarm "workspace" [
     { name = "Cargo.toml"; path = manifest; }
@@ -186,14 +205,12 @@ in let
       cp -r --preserve=timestamps ${lastIntermediateLayer} $target_dir
       chmod -R +w $target_dir
 
-      cargo build \
-        -Z unstable-options \
-        --config ${config} \
-        --manifest-path ${workspace}/Cargo.toml \
-        --target-dir=$target_dir \
-        --out-dir $out/bin \
-        -j $NIX_BUILD_CORES \
-        ${flags}
+      ${mkCargoInvocation (flags ++ [
+        "--config" "${config}"
+        "--manifest-path" "${workspace}/Cargo.toml"
+        "--target-dir" "$target_dir"
+        "--out-dir" "$out/bin"
+      ])}
 
       runHook postBuild
     '';
