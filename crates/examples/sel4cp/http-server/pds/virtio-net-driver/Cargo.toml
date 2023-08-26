@@ -17,4 +17,5 @@ sel4-sync = { path = "../../../../../sel4-sync" }
 sel4cp = { path = "../../../../../sel4cp", default-features = false }
 sel4cp-http-server-example-virtio-hal-impl = { path = "../../helpers/virtio-hal-impl" }
 sel4cp-http-server-example-virtio-net-driver-interface-types = { path = "./interface-types" }
+sel4cp-message = { path = "../../../../../sel4cp/message" }
 virtio-drivers = { version = "0.5.0", default-features = false, features = ["alloc"] }

@@ -1,4 +1,5 @@
-use sel4cp::message::{MessageInfo, NoMessageValue, StatusMessageLabel};
+use sel4cp::message::MessageInfo;
+use sel4cp_message::{MessageInfoExt as _, NoMessageValue, StatusMessageLabel};
 
 use sel4cp_http_server_example_virtio_net_driver_interface_types::*;
 

@@ -4,6 +4,7 @@ mk {
   package.name = "banscii-assistant";
   nix.local.dependencies = with localCrates; [
     sel4cp
+    sel4cp-message
     sel4-externally-shared
     banscii-assistant-core
     banscii-pl011-driver-interface-types

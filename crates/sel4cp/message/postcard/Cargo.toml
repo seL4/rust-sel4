@@ -1,5 +1,5 @@
 [package]
-name = "sel4cp-postcard"
+name = "sel4cp-message-postcard"
 version = "0.1.0"
 authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
 edition = "2021"
@@ -7,6 +7,5 @@ license = "BSD-2-Clause"
 
 [dependencies]
 postcard = { version = "1.0.2", default-features = false }
-sel4 = { path = "../../sel4" }
-sel4cp = { path = ".." }
+sel4cp = { path = "../.." }
 serde = { version = "1.0.147", default-features = false }

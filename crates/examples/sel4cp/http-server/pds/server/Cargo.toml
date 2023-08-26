@@ -23,6 +23,7 @@ sel4-shared-ring-buffer-smoltcp = { path = "../../../../../sel4-shared-ring-buff
 sel4-sync = { path = "../../../../../sel4-sync" }
 sel4cp = { path = "../../../../../sel4cp", default-features = false, features = ["alloc"] }
 sel4cp-http-server-example-server-core = { path = "./core", features = [] }
+sel4cp-message = { path = "../../../../../sel4cp/message" }
 
 [dependencies.sel4-async-single-threaded-executor]
 path = "../../../../../sel4-async/single-threaded-executor"

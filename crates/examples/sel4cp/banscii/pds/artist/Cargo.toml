@@ -9,6 +9,7 @@ license = "BSD-2-Clause"
 banscii-artist-interface-types = { path = "./interface-types" }
 rsa = { version = "0.8.1", default-features = false, features = ["pem", "sha2"] }
 sel4cp = { path = "../../../../../sel4cp", default-features = false, features = ["alloc"] }
+sel4cp-message = { path = "../../../../../sel4cp/message" }
 
 [dependencies.sel4-externally-shared]
 path = "../../../../../sel4-externally-shared"

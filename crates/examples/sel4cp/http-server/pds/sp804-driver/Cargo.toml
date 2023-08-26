@@ -9,3 +9,4 @@ license = "BSD-2-Clause"
 sel4cp = { path = "../../../../../sel4cp", default-features = false }
 sel4cp-http-server-example-sp804-driver-core = { path = "./core" }
 sel4cp-http-server-example-sp804-driver-interface-types = { path = "./interface-types" }
+sel4cp-message = { path = "../../../../../sel4cp/message" }

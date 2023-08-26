@@ -10,7 +10,8 @@ mk {
     sel4-root-task
 
     sel4cp
-    sel4cp-postcard
+    sel4cp-message
+    sel4cp-message-postcard
 
     sel4-async-block-io
     sel4-async-block-io-cpiofs
@@ -28,14 +29,14 @@ mk {
     sel4-shared-ring-buffer-block-io-types
     sel4-shared-ring-buffer-smoltcp
     sel4-sync
-
   ];
   dependencies = {
     inherit (versions) cfg-if log;
     sel4-externally-shared = { features = [ "alloc" "unstable" "very_unstable" ]; };
     sel4-root-task = { features = [ "full" ]; optional = true; };
     sel4cp = { features = [ "full" ]; optional = true; };
-    sel4cp-postcard = { optional = true; };
+    sel4cp-message = { optional = true; };
+    sel4cp-message-postcard = { optional = true; };
   };
   nix.local.target."cfg(not(target_thread_local))".dependencies = with localCrates; [
     sel4
@@ -55,7 +56,8 @@ mk {
     ];
     sel4cp = [
       "dep:sel4cp"
-      "sel4cp-postcard"
+      "sel4cp-message"
+      "sel4cp-message-postcard"
     ];
   };
   nix.meta.requirements = [ "sel4" ];

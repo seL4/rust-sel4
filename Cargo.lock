@@ -198,6 +198,7 @@ dependencies = [
  "rsa",
  "sel4-externally-shared",
  "sel4cp",
+ "sel4cp-message",
 ]
 
 [[package]]
@@ -218,6 +219,7 @@ dependencies = [
  "hex",
  "sel4-externally-shared",
  "sel4cp",
+ "sel4cp-message",
 ]
 
 [[package]]
@@ -246,6 +248,7 @@ dependencies = [
  "banscii-pl011-driver-interface-types",
  "heapless",
  "sel4cp",
+ "sel4cp-message",
 ]
 
 [[package]]
@@ -1661,7 +1664,8 @@ dependencies = [
  "sel4-sync",
  "sel4-sys",
  "sel4cp",
- "sel4cp-postcard",
+ "sel4cp-message",
+ "sel4cp-message-postcard",
 ]
 
 [[package]]
@@ -3086,7 +3090,6 @@ name = "sel4cp"
 version = "0.1.0"
 dependencies = [
  "cfg-if",
- "num_enum",
  "sel4",
  "sel4-externally-shared",
  "sel4-immediate-sync-once-cell",
@@ -3095,7 +3098,6 @@ dependencies = [
  "sel4-panicking-env",
  "sel4-runtime-common",
  "sel4cp-macros",
- "zerocopy",
 ]
 
 [[package]]
@@ -3133,6 +3135,7 @@ dependencies = [
  "sel4cp-http-server-example-server-core",
  "sel4cp-http-server-example-sp804-driver-interface-types",
  "sel4cp-http-server-example-virtio-net-driver-interface-types",
+ "sel4cp-message",
  "smoltcp",
 ]
 
@@ -3160,6 +3163,7 @@ dependencies = [
  "sel4cp",
  "sel4cp-http-server-example-sp804-driver-core",
  "sel4cp-http-server-example-sp804-driver-interface-types",
+ "sel4cp-message",
 ]
 
 [[package]]
@@ -3223,6 +3227,7 @@ dependencies = [
  "sel4cp",
  "sel4cp-http-server-example-virtio-hal-impl",
  "sel4cp-http-server-example-virtio-net-driver-interface-types",
+ "sel4cp-message",
  "virtio-drivers",
 ]
 
@@ -3244,11 +3249,20 @@ dependencies = [
 ]
 
 [[package]]
-name = "sel4cp-postcard"
+name = "sel4cp-message"
+version = "0.1.0"
+dependencies = [
+ "cfg-if",
+ "num_enum",
+ "sel4cp",
+ "zerocopy",
+]
+
+[[package]]
+name = "sel4cp-message-postcard"
 version = "0.1.0"
 dependencies = [
  "postcard",
- "sel4",
  "sel4cp",
  "serde",
 ]

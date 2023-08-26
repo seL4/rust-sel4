@@ -42,6 +42,7 @@ mk {
     sel4-logging
     sel4-immediate-sync-once-cell
     sel4cp
+    sel4cp-message
     sel4-externally-shared
     sel4-async-single-threaded-executor
     sel4-async-network

@@ -7,6 +7,7 @@ mk {
   };
   nix.local.dependencies = with localCrates; [
     sel4cp
+    sel4cp-message
     sel4cp-http-server-example-sp804-driver-core
     sel4cp-http-server-example-sp804-driver-interface-types
   ];

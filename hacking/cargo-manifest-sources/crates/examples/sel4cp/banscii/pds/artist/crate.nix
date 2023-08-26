@@ -12,6 +12,7 @@ mk {
   };
   nix.local.dependencies = with localCrates; [
     sel4cp
+    sel4cp-message
     sel4-externally-shared
     banscii-artist-interface-types
   ];

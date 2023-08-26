@@ -14,8 +14,9 @@ use virtio_drivers::{
 
 use sel4_externally_shared::ExternallySharedRef;
 use sel4_shared_ring_buffer::{RingBuffer, RingBuffers};
-use sel4cp::message::{MessageInfo, NoMessageValue, StatusMessageLabel};
+use sel4cp::message::MessageInfo;
 use sel4cp::{memory_region_symbol, protection_domain, var, Channel, Handler};
+use sel4cp_message::{MessageInfoExt as _, NoMessageValue, StatusMessageLabel};
 
 use sel4cp_http_server_example_virtio_hal_impl::HalImpl;
 use sel4cp_http_server_example_virtio_net_driver_interface_types::*;

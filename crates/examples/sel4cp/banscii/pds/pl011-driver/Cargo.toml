@@ -10,3 +10,4 @@ banscii-pl011-driver-core = { path = "./core" }
 banscii-pl011-driver-interface-types = { path = "./interface-types" }
 heapless = "0.7.16"
 sel4cp = { path = "../../../../../sel4cp", default-features = false }
+sel4cp-message = { path = "../../../../../sel4cp/message" }

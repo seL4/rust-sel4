@@ -8,6 +8,7 @@ mk {
   };
   nix.local.dependencies = with localCrates; [
     sel4cp
+    sel4cp-message
     banscii-pl011-driver-core
     banscii-pl011-driver-interface-types
   ];

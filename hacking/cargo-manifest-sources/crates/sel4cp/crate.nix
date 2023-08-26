@@ -3,10 +3,9 @@
 mk {
   package.name = "sel4cp";
   dependencies = {
-    num_enum = { version = versions.num_enum; default-features = false; };
+    inherit (versions) cfg-if;
     sel4-runtime-common.features = [ "tls" "unwinding" "start" "static-heap" ];
     sel4.features = [ "single-threaded" ];
-    inherit (versions) cfg-if zerocopy;
   };
   features = {
     default = [

@@ -1,10 +1,7 @@
 //! Utilities for handling IPC messages for protected procedure calls.
 
-use core::fmt;
-use core::mem;
-
-use num_enum::{IntoPrimitive, TryFromPrimitive};
-use zerocopy::{AsBytes, FromBytes, Unalign};
+pub type MessageLabel = sel4::Word;
+pub type MessageRegisterValue = sel4::Word;
 
 #[derive(Debug)]
 pub struct MessageInfo {
@@ -31,112 +28,7 @@ impl MessageInfo {
     pub fn count(&self) -> usize {
         self.inner.length()
     }
-
-    pub fn send<T: AsBytes>(label: impl Into<MessageLabel>, val: T) -> Self {
-        Self::try_send(label, val).unwrap()
-    }
-
-    pub fn try_send<T: AsBytes>(
-        label: impl Into<MessageLabel>,
-        val: T,
-    ) -> Result<Self, MessageInfoSendError> {
-        with_msg_bytes_mut(|bytes| {
-            val.write_to_prefix(bytes)
-                .ok_or(MessageInfoSendError::ValueTooLarge)
-        })?;
-        Ok(Self::new(
-            label.into(),
-            bytes_to_mrs(mem::size_of_val(&val)),
-        ))
-    }
-
-    pub fn recv<T: FromBytes + Copy>(&self) -> Result<T, MessageInfoRecvError> {
-        with_msg_bytes(|bytes| -> Result<T, MessageInfoRecvError> {
-            Unalign::<T>::read_from_prefix(&bytes[..mrs_to_bytes(self.count())])
-                .ok_or(MessageInfoRecvError::MessageTooShort)
-                .map(|unalign| unalign.get())
-        })
-    }
 }
-
-fn mrs_to_bytes(num_mrs: usize) -> usize {
-    num_mrs * mem::size_of::<MessageRegisterValue>()
-}
-
-fn bytes_to_mrs(num_bytes: usize) -> usize {
-    let d = mem::size_of::<MessageRegisterValue>();
-    num_bytes.next_multiple_of(d) / d
-}
-
-#[derive(Debug, Clone)]
-pub enum MessageInfoSendError {
-    ValueTooLarge,
-}
-
-#[derive(Debug, Clone)]
-pub enum MessageInfoRecvError {
-    MessageTooShort,
-}
-
-// // //
-
-pub type MessageLabel = sel4::Word;
-
-#[derive(Debug, Copy, Clone, Default, PartialEq, Eq)]
-pub struct NoMessageLabel;
-
-impl From<NoMessageLabel> for MessageLabel {
-    fn from(_: NoMessageLabel) -> Self {
-        Self::default()
-    }
-}
-
-impl TryFrom<MessageLabel> for NoMessageLabel {
-    type Error = TryFromNoMessageLabelError;
-
-    fn try_from(val: MessageLabel) -> Result<Self, Self::Error> {
-        match val {
-            0 => Ok(Self),
-            _ => Err(TryFromNoMessageLabelError(())),
-        }
-    }
-}
-
-pub struct TryFromNoMessageLabelError(());
-
-impl fmt::Display for TryFromNoMessageLabelError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "unexpected label value for NoMessageLabel")
-    }
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, IntoPrimitive, TryFromPrimitive)]
-#[cfg_attr(target_pointer_width = "32", repr(u32))]
-#[cfg_attr(target_pointer_width = "64", repr(u64))]
-pub enum StatusMessageLabel {
-    Ok,
-    Error,
-}
-
-impl StatusMessageLabel {
-    pub fn is_ok(&self) -> bool {
-        *self == StatusMessageLabel::Ok
-    }
-
-    pub fn is_error(&self) -> bool {
-        *self == StatusMessageLabel::Error
-    }
-}
-
-// // //
-
-pub type MessageRegisterValue = sel4::Word;
-
-#[derive(Clone, Copy, PartialEq, Eq, AsBytes, FromBytes)]
-#[repr(C)]
-pub struct NoMessageValue;
-
-// // //
 
 pub fn with_msg_regs<T>(f: impl FnOnce(&[MessageRegisterValue]) -> T) -> T {
     sel4::with_borrow_ipc_buffer(|ipc_buffer| f(ipc_buffer.msg_regs()))

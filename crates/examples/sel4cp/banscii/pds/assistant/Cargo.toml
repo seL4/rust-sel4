@@ -11,6 +11,7 @@ banscii-assistant-core = { path = "./core" }
 banscii-pl011-driver-interface-types = { path = "../pl011-driver/interface-types" }
 hex = { version = "0.4.3", default-features = false, features = ["alloc"] }
 sel4cp = { path = "../../../../../sel4cp", default-features = false, features = ["alloc"] }
+sel4cp-message = { path = "../../../../../sel4cp/message" }
 
 [dependencies.sel4-externally-shared]
 path = "../../../../../sel4-externally-shared"
