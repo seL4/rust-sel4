@@ -16,14 +16,14 @@ use sel4_externally_shared::{
     ExternallySharedRef,
 };
 use sel4cp::{memory_region_symbol, protection_domain, Channel, Handler, MessageInfo};
-use sel4cp_message::{MessageInfoExt as _, NoMessageLabel, NoMessageValue, StatusMessageLabel};
+use sel4cp_message::MessageInfoExt as _;
 
 use banscii_artist_interface_types as artist;
 use banscii_assistant_core::Draft;
-use banscii_pl011_driver_interface_types as driver;
+use banscii_pl011_driver_interface_types as pl011_driver;
 
 const PL011_DRIVER: Channel = Channel::new(0);
-const TALENT: Channel = Channel::new(1);
+const ARTIST: Channel = Channel::new(1);
 
 const REGION_SIZE: usize = 0x4_000;
 
@@ -120,33 +120,31 @@ impl HandlerImpl {
             .index(draft_start..draft_end)
             .copy_from_slice(&draft.pixel_data);
 
-        let msg_info = TALENT.pp_call(MessageInfo::send(
-            NoMessageLabel,
-            artist::Request {
-                height: draft.height,
-                width: draft.width,
-                draft_start,
-                draft_size,
-            },
-        ));
+        let req = artist::Request {
+            height: draft.height,
+            width: draft.width,
+            draft_start,
+            draft_size,
+        };
 
-        assert_eq!(msg_info.label().try_into(), Ok(StatusMessageLabel::Ok));
+        let resp: artist::Response = ARTIST
+            .pp_call(MessageInfo::send_using_postcard(req).unwrap())
+            .recv_using_postcard()
+            .unwrap();
 
-        let msg = msg_info.recv::<artist::Response>().unwrap();
-
-        let height = msg.height;
-        let width = msg.width;
+        let height = resp.height;
+        let width = resp.width;
 
         let pixel_data = self
             .region_in
             .as_ptr()
-            .index(msg.masterpiece_start..msg.masterpiece_start + msg.masterpiece_size)
+            .index(resp.masterpiece_start..resp.masterpiece_start + resp.masterpiece_size)
             .copy_to_vec();
 
         let signature = self
             .region_in
             .as_ptr()
-            .index(msg.signature_start..msg.signature_start + msg.signature_size)
+            .index(resp.signature_start..resp.signature_start + resp.signature_size)
             .copy_to_vec();
 
         newline();
@@ -180,30 +178,20 @@ fn newline() {
 }
 
 fn get_char() -> Option<u8> {
-    let msg_info = PL011_DRIVER.pp_call(MessageInfo::send(
-        driver::RequestTag::GetChar,
-        NoMessageValue,
-    ));
-    match msg_info.label().try_into().ok() {
-        Some(driver::GetCharResponseTag::Some) => match msg_info.recv() {
-            Ok(driver::GetCharSomeResponse { val }) => Some(val),
-            Err(_) => {
-                panic!()
-            }
-        },
-        Some(driver::GetCharResponseTag::None) => None,
-        _ => {
-            panic!()
-        }
-    }
+    let req = pl011_driver::Request::GetChar;
+    let resp: pl011_driver::GetCharSomeResponse = PL011_DRIVER
+        .pp_call(MessageInfo::send_using_postcard(req).unwrap())
+        .recv_using_postcard()
+        .unwrap();
+    resp.val
 }
 
 fn put_char(val: u8) {
-    let msg_info = PL011_DRIVER.pp_call(MessageInfo::send(
-        driver::RequestTag::PutChar,
-        driver::PutCharRequest { val },
-    ));
-    assert_eq!(msg_info.label().try_into(), Ok(StatusMessageLabel::Ok));
+    let req = pl011_driver::Request::PutChar { val };
+    PL011_DRIVER
+        .pp_call(MessageInfo::send_using_postcard(req).unwrap())
+        .recv_empty()
+        .unwrap();
 }
 
 fn put_str(s: &str) {

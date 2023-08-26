@@ -3,7 +3,7 @@
 pub type MessageLabel = sel4::Word;
 pub type MessageRegisterValue = sel4::Word;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct MessageInfo {
     inner: sel4::MessageInfo,
 }
@@ -31,6 +31,12 @@ impl MessageInfo {
 
     pub fn count(&self) -> usize {
         self.inner.length()
+    }
+}
+
+impl Default for MessageInfo {
+    fn default() -> Self {
+        Self::new(0, 0)
     }
 }
 

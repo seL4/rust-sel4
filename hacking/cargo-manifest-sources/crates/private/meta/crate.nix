@@ -11,7 +11,7 @@ mk {
 
     sel4cp
     sel4cp-message
-    sel4cp-message-postcard
+    sel4cp-message-types
 
     sel4-async-block-io
     sel4-async-block-io-cpiofs
@@ -36,7 +36,7 @@ mk {
     sel4-root-task = { features = [ "full" ]; optional = true; };
     sel4cp = { features = [ "full" ]; optional = true; };
     sel4cp-message = { optional = true; };
-    sel4cp-message-postcard = { optional = true; };
+    sel4cp-message-types = { optional = true; };
   };
   nix.local.target."cfg(not(target_thread_local))".dependencies = with localCrates; [
     sel4
@@ -57,7 +57,7 @@ mk {
     sel4cp = [
       "dep:sel4cp"
       "sel4cp-message"
-      "sel4cp-message-postcard"
+      "sel4cp-message-types"
     ];
   };
   nix.meta.requirements = [ "sel4" ];

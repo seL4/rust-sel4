@@ -120,5 +120,5 @@ maybe! {
 
 maybe! {
     #[cfg(feature = "sel4cp")]
-    sel4cp_message_postcard
+    sel4cp_message_types
 }

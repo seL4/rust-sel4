@@ -5,7 +5,7 @@
 use heapless::Deque;
 
 use sel4cp::{memory_region_symbol, protection_domain, Channel, Handler, MessageInfo};
-use sel4cp_message::{MessageInfoExt as _, NoMessageValue, StatusMessageLabel};
+use sel4cp_message::MessageInfoExt as _;
 
 use banscii_pl011_driver_core::Driver;
 use banscii_pl011_driver_interface_types::*;
@@ -61,24 +61,21 @@ impl Handler for HandlerImpl {
         msg_info: MessageInfo,
     ) -> Result<MessageInfo, Self::Error> {
         Ok(match channel {
-            ASSISTANT => match msg_info.label().try_into().ok() {
-                Some(RequestTag::PutChar) => match msg_info.recv() {
-                    Ok(PutCharRequest { val }) => {
+            ASSISTANT => match msg_info.recv_using_postcard::<Request>() {
+                Ok(req) => match req {
+                    Request::PutChar { val } => {
                         self.driver.put_char(val);
-                        MessageInfo::send(StatusMessageLabel::Ok, NoMessageValue)
+                        MessageInfo::send_empty()
                     }
-                    Err(_) => MessageInfo::send(StatusMessageLabel::Error, NoMessageValue),
-                },
-                Some(RequestTag::GetChar) => match self.buffer.pop_front() {
-                    Some(val) => {
-                        MessageInfo::send(GetCharResponseTag::Some, GetCharSomeResponse { val })
-                    }
-                    None => {
-                        self.notify = true;
-                        MessageInfo::send(GetCharResponseTag::None, NoMessageValue)
+                    Request::GetChar => {
+                        let val = self.buffer.pop_front();
+                        if val.is_some() {
+                            self.notify = true;
+                        }
+                        MessageInfo::send_using_postcard(GetCharSomeResponse { val }).unwrap()
                     }
                 },
-                None => MessageInfo::send(StatusMessageLabel::Error, NoMessageValue),
+                Err(_) => MessageInfo::send_unspecified_error(),
             },
             _ => {
                 unreachable!()

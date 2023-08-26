@@ -205,8 +205,7 @@ dependencies = [
 name = "banscii-artist-interface-types"
 version = "0.1.0"
 dependencies = [
- "num_enum",
- "zerocopy",
+ "serde",
 ]
 
 [[package]]
@@ -262,8 +261,7 @@ dependencies = [
 name = "banscii-pl011-driver-interface-types"
 version = "0.1.0"
 dependencies = [
- "num_enum",
- "zerocopy",
+ "serde",
 ]
 
 [[package]]
@@ -1665,7 +1663,7 @@ dependencies = [
  "sel4-sys",
  "sel4cp",
  "sel4cp-message",
- "sel4cp-message-postcard",
+ "sel4cp-message-types",
 ]
 
 [[package]]
@@ -3178,8 +3176,7 @@ dependencies = [
 name = "sel4cp-http-server-example-sp804-driver-interface-types"
 version = "0.1.0"
 dependencies = [
- "num_enum",
- "zerocopy",
+ "serde",
 ]
 
 [[package]]
@@ -3235,8 +3232,7 @@ dependencies = [
 name = "sel4cp-http-server-example-virtio-net-driver-interface-types"
 version = "0.1.0"
 dependencies = [
- "num_enum",
- "zerocopy",
+ "serde",
 ]
 
 [[package]]
@@ -3252,19 +3248,19 @@ dependencies = [
 name = "sel4cp-message"
 version = "0.1.0"
 dependencies = [
- "cfg-if",
- "num_enum",
  "sel4cp",
- "zerocopy",
+ "sel4cp-message-types",
+ "serde",
 ]
 
 [[package]]
-name = "sel4cp-message-postcard"
+name = "sel4cp-message-types"
 version = "0.1.0"
 dependencies = [
+ "num_enum",
  "postcard",
- "sel4cp",
  "serde",
+ "zerocopy",
 ]
 
 [[package]]

@@ -1,5 +1,5 @@
 use sel4cp::MessageInfo;
-use sel4cp_message::{MessageInfoExt as _, NoMessageValue, StatusMessageLabel};
+use sel4cp_message::{types::EmptyMessage, MessageInfoExt as _};
 
 use sel4cp_http_server_example_sp804_driver_interface_types::*;
 
@@ -13,29 +13,29 @@ impl TimerClient {
     }
 
     pub fn now(&self) -> Microseconds {
-        let msg_info = self
+        let req = Request::Now;
+        let resp: NowResponse = self
             .channel
-            .pp_call(MessageInfo::send(RequestTag::Now, NoMessageValue));
-        assert_eq!(msg_info.label().try_into(), Ok(StatusMessageLabel::Ok));
-        let NowResponse { micros } = msg_info.recv().unwrap();
-        micros
+            .pp_call(MessageInfo::send_using_postcard(req).unwrap())
+            .recv_using_postcard()
+            .unwrap();
+        resp.micros
     }
 
     pub fn set_timeout(&self, relative_micros: Microseconds) {
-        let msg_info = self.channel.pp_call(MessageInfo::send(
-            RequestTag::SetTimeout,
-            SetTimeoutRequest { relative_micros },
-        ));
-        assert_eq!(msg_info.label().try_into(), Ok(StatusMessageLabel::Ok));
-        let _ = msg_info.recv::<NoMessageValue>().unwrap();
+        let req = Request::SetTimeout { relative_micros };
+        self.channel
+            .pp_call(MessageInfo::send_using_postcard(req).unwrap())
+            .recv_empty()
+            .unwrap();
     }
 
     #[allow(dead_code)]
     pub fn clear_timeout(&self) {
-        let msg_info = self
-            .channel
-            .pp_call(MessageInfo::send(RequestTag::ClearTimeout, NoMessageValue));
-        assert_eq!(msg_info.label().try_into(), Ok(StatusMessageLabel::Ok));
-        let _ = msg_info.recv::<NoMessageValue>().unwrap();
+        let req = Request::ClearTimeout;
+        self.channel
+            .pp_call(MessageInfo::send_using_postcard(req).unwrap())
+            .recv_empty()
+            .unwrap();
     }
 }

@@ -1,12 +1,18 @@
-{ mk, localCrates, versions }:
+{ mk, localCrates, serdeWith }:
 
 mk {
   package.name = "sel4cp-message";
-  dependencies = {
-    inherit (versions) cfg-if zerocopy;
-    num_enum = { version = versions.num_enum; default-features = false; };
-  };
   nix.local.dependencies = with localCrates; [
     sel4cp
+    sel4cp-message-types
   ];
+  dependencies = {
+    serde = serdeWith [] // {
+      optional = true;
+    };
+  };
+  features = {
+    default = [ "postcard" ];
+    postcard = [ "dep:serde" "sel4cp-message-types/postcard" ];
+  };
 }

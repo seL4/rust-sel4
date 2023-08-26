@@ -7,7 +7,7 @@ license = "BSD-2-Clause"
 
 [features]
 sel4-root-task = ["dep:sel4-root-task"]
-sel4cp = ["dep:sel4cp", "sel4cp-message", "sel4cp-message-postcard"]
+sel4cp = ["dep:sel4cp", "sel4cp-message", "sel4cp-message-types"]
 
 [dependencies]
 cfg-if = "1.0.0"
@@ -33,7 +33,7 @@ sel4-sync = { path = "../../sel4-sync" }
 sel4-sys = { path = "../../sel4/sys" }
 sel4cp = { path = "../../sel4cp", features = ["full"], optional = true }
 sel4cp-message = { path = "../../sel4cp/message", optional = true }
-sel4cp-message-postcard = { path = "../../sel4cp/message/postcard", optional = true }
+sel4cp-message-types = { path = "../../sel4cp/message/types", optional = true }
 
 [dependencies.sel4-externally-shared]
 path = "../../sel4-externally-shared"

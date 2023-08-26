@@ -1,5 +1,5 @@
 use sel4cp::MessageInfo;
-use sel4cp_message::{MessageInfoExt as _, NoMessageValue, StatusMessageLabel};
+use sel4cp_message::MessageInfoExt as _;
 
 use sel4cp_http_server_example_virtio_net_driver_interface_types::*;
 
@@ -13,11 +13,12 @@ impl NetClient {
     }
 
     pub fn get_mac_address(&self) -> MacAddress {
-        let msg_info = self
+        let req = Request::GetMacAddress;
+        let resp: GetMacAddressResponse = self
             .channel
-            .pp_call(MessageInfo::send(RequestTag::GetMacAddress, NoMessageValue));
-        assert_eq!(msg_info.label().try_into(), Ok(StatusMessageLabel::Ok));
-        let GetMacAddressResponse { mac_address } = msg_info.recv().unwrap();
-        mac_address
+            .pp_call(MessageInfo::send_using_postcard(req).unwrap())
+            .recv_using_postcard()
+            .unwrap();
+        resp.mac_address
     }
 }

@@ -5,7 +5,7 @@
 use core::time::Duration;
 
 use sel4cp::{memory_region_symbol, protection_domain, var, Channel, Handler, MessageInfo};
-use sel4cp_message::{MessageInfoExt as _, NoMessageValue, StatusMessageLabel};
+use sel4cp_message::MessageInfoExt as _;
 
 use sel4cp_http_server_example_sp804_driver_core::Driver;
 use sel4cp_http_server_example_sp804_driver_interface_types::*;
@@ -51,35 +51,26 @@ impl Handler for HandlerImpl {
         msg_info: MessageInfo,
     ) -> Result<MessageInfo, Self::Error> {
         Ok(match channel {
-            CLIENT => match msg_info.label().try_into().ok() {
-                Some(RequestTag::Now) => match msg_info.recv() {
-                    Ok(NoMessageValue) => {
+            CLIENT => match msg_info.recv_using_postcard::<Request>() {
+                Ok(req) => match req {
+                    Request::Now => {
                         let now = self.driver.now();
-                        MessageInfo::send(
-                            StatusMessageLabel::Ok,
-                            NowResponse {
-                                micros: now.as_micros().try_into().unwrap(),
-                            },
-                        )
+                        MessageInfo::send_using_postcard(NowResponse {
+                            micros: now.as_micros().try_into().unwrap(),
+                        })
+                        .unwrap()
                     }
-                    Err(_) => MessageInfo::send(StatusMessageLabel::Error, NoMessageValue),
-                },
-                Some(RequestTag::SetTimeout) => match msg_info.recv() {
-                    Ok(SetTimeoutRequest { relative_micros }) => {
+                    Request::SetTimeout { relative_micros } => {
                         self.driver
                             .set_timeout(Duration::from_micros(relative_micros));
-                        MessageInfo::send(StatusMessageLabel::Ok, NoMessageValue)
+                        MessageInfo::send_empty()
                     }
-                    Err(_) => MessageInfo::send(StatusMessageLabel::Error, NoMessageValue),
-                },
-                Some(RequestTag::ClearTimeout) => match msg_info.recv() {
-                    Ok(NoMessageValue) => {
+                    Request::ClearTimeout => {
                         self.driver.clear_timeout();
-                        MessageInfo::send(StatusMessageLabel::Ok, NoMessageValue)
+                        MessageInfo::send_empty()
                     }
-                    Err(_) => MessageInfo::send(StatusMessageLabel::Error, NoMessageValue),
                 },
-                None => MessageInfo::send(StatusMessageLabel::Error, NoMessageValue),
+                Err(_) => MessageInfo::send_unspecified_error(),
             },
             _ => {
                 unreachable!()

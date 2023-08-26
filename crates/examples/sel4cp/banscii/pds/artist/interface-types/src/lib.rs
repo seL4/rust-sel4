@@ -1,9 +1,8 @@
 #![no_std]
 
-use zerocopy::{AsBytes, FromBytes};
+use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Copy, PartialEq, Eq, AsBytes, FromBytes)]
-#[repr(C)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Request {
     pub height: usize,
     pub width: usize,
@@ -11,8 +10,7 @@ pub struct Request {
     pub draft_size: usize,
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, AsBytes, FromBytes)]
-#[repr(C)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Response {
     pub height: usize,
     pub width: usize,

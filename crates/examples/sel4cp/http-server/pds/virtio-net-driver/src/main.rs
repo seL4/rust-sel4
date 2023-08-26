@@ -15,7 +15,7 @@ use virtio_drivers::{
 use sel4_externally_shared::ExternallySharedRef;
 use sel4_shared_ring_buffer::{RingBuffer, RingBuffers};
 use sel4cp::{memory_region_symbol, protection_domain, var, Channel, Handler, MessageInfo};
-use sel4cp_message::{MessageInfoExt as _, NoMessageValue, StatusMessageLabel};
+use sel4cp_message::MessageInfoExt as _;
 
 use sel4cp_http_server_example_virtio_hal_impl::HalImpl;
 use sel4cp_http_server_example_virtio_net_driver_interface_types::*;
@@ -166,18 +166,17 @@ impl Handler for HandlerImpl {
         msg_info: MessageInfo,
     ) -> Result<MessageInfo, Self::Error> {
         Ok(match channel {
-            CLIENT => match msg_info.label().try_into().ok() {
-                Some(RequestTag::GetMacAddress) => match msg_info.recv() {
-                    Ok(NoMessageValue) => {
-                        let mac_address = MacAddress(self.dev.mac_address());
-                        MessageInfo::send(
-                            StatusMessageLabel::Ok,
-                            GetMacAddressResponse { mac_address },
-                        )
+            CLIENT => match msg_info.recv_using_postcard::<Request>() {
+                Ok(req) => match req {
+                    Request::GetMacAddress => {
+                        let mac_address = self.dev.mac_address();
+                        MessageInfo::send_using_postcard(GetMacAddressResponse {
+                            mac_address: MacAddress(mac_address),
+                        })
+                        .unwrap()
                     }
-                    Err(_) => MessageInfo::send(StatusMessageLabel::Error, NoMessageValue),
                 },
-                None => MessageInfo::send(StatusMessageLabel::Error, NoMessageValue),
+                Err(_) => MessageInfo::send_unspecified_error(),
             },
             _ => {
                 unreachable!()
