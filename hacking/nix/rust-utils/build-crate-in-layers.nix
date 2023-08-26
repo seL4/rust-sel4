@@ -120,14 +120,15 @@ let
     "-j" "$NIX_BUILD_CORES"
   ];
 
-  mkCargoInvocation = args:
+  mkCargoInvocation = commonArgs: buildArgs:
     let
-      joinedArgs = lib.concatStringsSep " " args;
+      joinedCommonArgs = lib.concatStringsSep " " commonArgs;
+      joinedBuildArgs = lib.concatStringsSep " " buildArgs;
     in ''
       ${lib.optionalString runClippy ''
-        cargo clippy ${joinedArgs} -- -D warnings
+        cargo clippy ${joinedCommonArgs} -- -D warnings
       ''}
-      cargo build ${joinedArgs}
+      cargo build ${joinedCommonArgs} ${joinedBuildArgs}
     '';
 
   f = accumulatedLayers:
@@ -168,7 +169,7 @@ let
               "--config" "${config}"
               "--manifest-path" "${workspace}/Cargo.toml"
               "--target-dir" "$out"
-            ])}
+            ]) []}
 
             runHook postBuild
           '';
@@ -209,8 +210,9 @@ in let
         "--config" "${config}"
         "--manifest-path" "${workspace}/Cargo.toml"
         "--target-dir" "$target_dir"
+      ]) [
         "--out-dir" "$out/bin"
-      ])}
+      ]}
 
       runHook postBuild
     '';
