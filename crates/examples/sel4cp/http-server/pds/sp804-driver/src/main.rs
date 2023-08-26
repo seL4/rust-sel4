@@ -4,8 +4,7 @@
 
 use core::time::Duration;
 
-use sel4cp::message::MessageInfo;
-use sel4cp::{memory_region_symbol, protection_domain, var, Channel, Handler};
+use sel4cp::{memory_region_symbol, protection_domain, var, Channel, Handler, MessageInfo};
 use sel4cp_message::{MessageInfoExt as _, NoMessageValue, StatusMessageLabel};
 
 use sel4cp_http_server_example_sp804_driver_core::Driver;

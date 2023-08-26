@@ -67,8 +67,6 @@ macro_rules! memory_region_symbol {
     }};
 }
 
-pub use memory_region_symbol;
-
 pub fn cast_memory_region_checked<T: Sized>(bytes_ptr: NonNull<[u8]>) -> NonNull<T> {
     let ptr = bytes_ptr.cast::<T>();
     assert!(ptr.as_ptr().is_aligned());

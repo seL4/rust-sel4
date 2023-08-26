@@ -5,9 +5,7 @@ use core::mem;
 
 use serde::{Deserialize, Serialize};
 
-use sel4cp::message::{
-    with_msg_bytes, with_msg_bytes_mut, MessageInfo, MessageLabel, MessageRegisterValue,
-};
+use sel4cp::{with_msg_bytes, with_msg_bytes_mut, MessageInfo, MessageLabel, MessageRegisterValue};
 
 pub fn send<T: Serialize>(label: impl Into<MessageLabel>, val: T) -> MessageInfo {
     try_send(label, val).unwrap()

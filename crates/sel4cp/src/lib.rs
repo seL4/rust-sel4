@@ -51,9 +51,9 @@ mod cspace;
 mod entry;
 mod env;
 mod handler;
+mod memory_region;
+mod message;
 
-pub mod memory_region;
-pub mod message;
 pub mod panicking;
 
 pub use cspace::{
@@ -61,6 +61,11 @@ pub use cspace::{
 };
 pub use env::{pd_is_passive, pd_name};
 pub use handler::{Handler, NullHandler};
+pub use memory_region::{cast_memory_region_checked, cast_memory_region_to_slice_checked};
+pub use message::{
+    get_mr, set_mr, with_msg_bytes, with_msg_bytes_mut, with_msg_regs, with_msg_regs_mut,
+    MessageInfo, MessageLabel, MessageRegisterValue,
+};
 
 /// Declares the initialization function, stack size, and, optionally, heap and heap size.
 ///

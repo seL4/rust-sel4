@@ -4,8 +4,7 @@
 
 use heapless::Deque;
 
-use sel4cp::message::MessageInfo;
-use sel4cp::{memory_region_symbol, protection_domain, Channel, Handler};
+use sel4cp::{memory_region_symbol, protection_domain, Channel, Handler, MessageInfo};
 use sel4cp_message::{MessageInfoExt as _, NoMessageValue, StatusMessageLabel};
 
 use banscii_pl011_driver_core::Driver;

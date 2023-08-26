@@ -7,7 +7,7 @@ use core::mem;
 use num_enum::{IntoPrimitive, TryFromPrimitive};
 use zerocopy::{AsBytes, FromBytes, Unalign};
 
-use sel4cp::message::*;
+use sel4cp::{with_msg_bytes, with_msg_bytes_mut, MessageInfo, MessageLabel, MessageRegisterValue};
 
 pub trait MessageInfoExt {
     fn _msg_info(&self) -> &MessageInfo;
