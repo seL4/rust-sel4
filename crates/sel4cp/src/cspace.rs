@@ -190,30 +190,3 @@ impl fmt::Display for IrqAckError {
         write!(f, "irq ack error: {:?}", self.as_sel4_error())
     }
 }
-
-// // //
-
-// pub const DOES_HAVE_NOTIFICATION_IN: bool = true;
-// pub const DOES_HAVE_NOTIFICATION_OUT: bool = true;
-// pub const DOES_HAVE_PP_IN: bool = true;
-// pub const DOES_HAVE_PP_OUT: bool = true;
-// pub const DOES_HAVE_IRQ: bool = true;
-
-// pub struct Channel<
-//     const HAS_NOTIFICATION_IN: bool = false,
-//     const HAS_NOTIFICATION_OUT: bool = false,
-//     const HAS_PP_IN: bool = false,
-//     const HAS_PP_OUT: bool = false,
-//     const HAS_IRQ: bool = false,
-// >(usize);
-
-// impl<
-//         const HAS_NOTIFICATION_IN: bool,
-//         const HAS_PP_IN: bool,
-//         const HAS_PP_OUT: bool,
-//         const HAS_IRQ: bool,
-//     > Channel<HAS_NOTIFICATION_IN, DOES_HAVE_NOTIFICATION_OUT, HAS_PP_IN, HAS_PP_OUT, HAS_IRQ>
-// {
-//     pub fn notify(&self) {
-//     }
-// }
