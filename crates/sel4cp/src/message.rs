@@ -40,23 +40,32 @@ impl MessageInfo {
         label: impl Into<MessageLabel>,
         val: T,
     ) -> Result<Self, MessageInfoSendError> {
-        let count = mem::size_of_val(&val).next_multiple_of(mem::size_of::<MessageRegisterValue>())
-            / mem::size_of::<MessageRegisterValue>();
         with_msg_bytes_mut(|bytes| {
             val.write_to_prefix(bytes)
                 .ok_or(MessageInfoSendError::ValueTooLarge)
         })?;
-        Ok(Self::new(label.into(), count))
+        Ok(Self::new(
+            label.into(),
+            bytes_to_mrs(mem::size_of_val(&val)),
+        ))
     }
 
     pub fn recv<T: FromBytes + Copy>(&self) -> Result<T, MessageInfoRecvError> {
         with_msg_bytes(|bytes| -> Result<T, MessageInfoRecvError> {
-            let num_bytes = self.count() * mem::size_of::<MessageRegisterValue>();
-            Unalign::<T>::read_from_prefix(&bytes[..num_bytes])
+            Unalign::<T>::read_from_prefix(&bytes[..mrs_to_bytes(self.count())])
                 .ok_or(MessageInfoRecvError::MessageTooShort)
                 .map(|unalign| unalign.get())
         })
     }
+}
+
+fn mrs_to_bytes(num_mrs: usize) -> usize {
+    num_mrs * mem::size_of::<MessageRegisterValue>()
+}
+
+fn bytes_to_mrs(num_bytes: usize) -> usize {
+    let d = mem::size_of::<MessageRegisterValue>();
+    num_bytes.next_multiple_of(d) / d
 }
 
 #[derive(Debug, Clone)]
