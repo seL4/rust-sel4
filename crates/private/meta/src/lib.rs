@@ -39,7 +39,6 @@ macro_rules! maybe {
     } => {
         #[cfg(not($condition))]
         use absent as $i;
-        // #[doc(hidden)]
         #[cfg($condition)]
         pub use $i;
     };
@@ -48,7 +47,6 @@ macro_rules! maybe {
 macro_rules! definitely {
     ($($i:ident)*) => {
         $(
-            // #[doc(hidden)]
             pub use $i;
         )*
     }
@@ -77,7 +75,23 @@ pub mod absent {}
 
 definitely! {
     sel4
+    sel4_async_block_io
+    sel4_async_block_io_cpiofs
+    sel4_async_network
+    sel4_async_request_statuses
+    sel4_async_single_threaded_executor
+    sel4_async_timers
+    sel4_bounce_buffer_allocator
     sel4_config
+    sel4_externally_shared
+    sel4_immediate_sync_once_cell
+    sel4_immutable_cell
+    sel4_logging
+    sel4_shared_ring_buffer
+    sel4_shared_ring_buffer_block_io
+    sel4_shared_ring_buffer_block_io_types
+    sel4_shared_ring_buffer_smoltcp
+    sel4_sync
     sel4_sys
 }
 
@@ -99,21 +113,12 @@ maybe! {
     sel4cp
 }
 
-definitely! {
-    sel4_async_block_io
-    sel4_async_block_io_cpiofs
-    sel4_async_network
-    sel4_async_request_statuses
-    sel4_async_single_threaded_executor
-    sel4_async_timers
-    sel4_bounce_buffer_allocator
-    sel4_externally_shared
-    sel4_immediate_sync_once_cell
-    sel4_immutable_cell
-    sel4_logging
-    sel4_shared_ring_buffer
-    sel4_shared_ring_buffer_block_io
-    sel4_shared_ring_buffer_block_io_types
-    sel4_shared_ring_buffer_smoltcp
-    sel4_sync
+maybe! {
+    #[cfg(feature = "sel4cp")]
+    sel4cp_message
+}
+
+maybe! {
+    #[cfg(feature = "sel4cp")]
+    sel4cp_message_postcard
 }
