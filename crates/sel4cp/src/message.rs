@@ -25,6 +25,10 @@ impl MessageInfo {
         self.inner.label()
     }
 
+    pub const fn label_width() -> usize {
+        sel4::MessageInfo::label_width()
+    }
+
     pub fn count(&self) -> usize {
         self.inner.length()
     }

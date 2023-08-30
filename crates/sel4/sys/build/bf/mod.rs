@@ -73,6 +73,7 @@ impl<'a> BitfieldGenerator<'a> {
             let field_name_ident = format_ident!("{}", field.name);
             let get_method_ident = format_ident!("get_{}", field.name);
             let set_method_ident = format_ident!("set_{}", field.name);
+            let width_method_ident = format_ident!("width_of_{}", field.name);
             let field_range_start = field.offset;
             let field_range_end = field.offset + field.width;
 
@@ -115,6 +116,10 @@ impl<'a> BitfieldGenerator<'a> {
                 }
                 #visibility fn #set_method_ident(&mut self, #field_name_ident: #primitive_type) {
                     self.0.set_bits(#field_range_start..#field_range_end, #field_name_ident)
+                }
+                #[allow(dead_code)]
+                #visibility const fn #width_method_ident() -> usize {
+                    #field_range_end - #field_range_start
                 }
             });
 

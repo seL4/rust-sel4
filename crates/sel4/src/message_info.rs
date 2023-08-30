@@ -20,6 +20,10 @@ impl MessageInfo {
         self.inner().get_label()
     }
 
+    pub const fn label_width() -> usize {
+        sys::seL4_MessageInfo::width_of_label()
+    }
+
     pub fn caps_unwrapped(&self) -> usize {
         self.inner().get_capsUnwrapped().try_into().unwrap()
     }
