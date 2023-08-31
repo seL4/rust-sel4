@@ -399,6 +399,10 @@ impl Socket<tcp::Socket<'static>> {
 
         Ok(())
     }
+
+    pub fn abort(&mut self) {
+        self.with_mut(|socket| socket.abort())
+    }
 }
 
 impl<T> Drop for Socket<T> {
