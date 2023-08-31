@@ -1,8 +1,12 @@
+#![feature(associated_type_defaults)]
+
 mod embed;
 mod glue;
 mod regions;
+mod scheme;
 mod table;
 
-pub use glue::{construct_and_embed_table, BlockDescriptor, Region, Regions};
-pub use regions::{AbstractRegion, AbstractRegions};
-pub use table::{AbstractEntry, MkLeafFnParams, RegionContent, PHYS_BOUNDS};
+pub use glue::{Region, Regions, RegionsBuilder};
+pub use regions::{AbstractRegion, AbstractRegions, AbstractRegionsBuilder};
+pub use scheme::{Scheme, SchemeHelpers, *};
+pub use table::{LeafLocation, MkLeafFn, RegionContent, Table};

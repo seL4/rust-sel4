@@ -1,22 +1,42 @@
 use std::collections::BTreeMap;
 
 use proc_macro2::{Ident, TokenStream};
-use quote::quote;
+use quote::{quote, ToTokens};
 
-use crate::table::{AbstractEntry, Table, NUM_ENTRIES};
+use crate::scheme::{Scheme, SchemeHelpers, SchemeLeafDescriptor};
+use crate::table::{AbstractEntry, Table};
 
-impl<T> Table<T>
-where
-    for<'a> &'a AbstractEntry<T>: Into<EntryForEmbedding<'a, T>>,
-{
-    pub fn embed(&self, ident: Ident) -> TokenStream {
+impl<T: Scheme> Table<T> {
+    pub fn embed(&self, ident: Ident) -> TokenStream
+    where
+        T::WordPrimitive: ToTokens,
+    {
         Embedding::new(ident).embed(self)
     }
 }
 
-pub struct EntryForEmbedding<'a, T> {
-    pub offset: u64,
-    pub ptr: Option<&'a Table<T>>,
+struct EntryForEmbedding<'a, T: Scheme> {
+    offset: T::WordPrimitive,
+    ptr: Option<&'a Table<T>>,
+}
+
+impl<'a, T: Scheme> EntryForEmbedding<'a, T> {
+    fn from_abstract_entry(entry: &'a AbstractEntry<T>) -> Self {
+        match entry {
+            AbstractEntry::Empty => Self {
+                offset: T::EMPTY_DESCRIPTOR,
+                ptr: None,
+            },
+            AbstractEntry::Leaf(descriptor) => Self {
+                offset: descriptor.to_raw(),
+                ptr: None,
+            },
+            AbstractEntry::Branch(branch) => Self {
+                offset: T::SYMBOLIC_BRANCH_DESCRIPTOR_OFFSET,
+                ptr: Some(branch),
+            },
+        }
+    }
 }
 
 struct Embedding {
@@ -34,18 +54,16 @@ impl Embedding {
         }
     }
 
-    fn embed<'a, T>(mut self, table: &'a Table<T>) -> TokenStream
-    where
-        &'a AbstractEntry<T>: Into<EntryForEmbedding<'a, T>>,
-    {
+    fn embed<'a, T: Scheme>(mut self, table: &'a Table<T>) -> TokenStream {
         let _ = self.embed_inner(table);
         self.check_tables_order();
         let ident = self.ident;
         let num_tables = self.next_index;
+        let num_entries = SchemeHelpers::<T>::num_entries_in_table();
         let tables = self.tables.values();
         quote! {
             #[repr(C, align(4096))]
-            pub struct Table(pub [*const (); #NUM_ENTRIES]);
+            pub struct Table(pub [*const (); #num_entries]);
 
             #[no_mangle]
             #[allow(unused_unsafe)]
@@ -61,13 +79,10 @@ impl Embedding {
         });
     }
 
-    fn embed_inner<'a, T>(&mut self, table: &'a Table<T>) -> usize
-    where
-        &'a AbstractEntry<T>: Into<EntryForEmbedding<'a, T>>,
-    {
+    fn embed_inner<'a, T: Scheme>(&mut self, table: &'a Table<T>) -> usize {
         let index = self.allocate_index();
         let entries = table.entries.iter().map(|entry| {
-            let entry: EntryForEmbedding<T> = entry.into();
+            let entry = EntryForEmbedding::<T>::from_abstract_entry(entry);
             let offset = entry.offset;
             match &entry.ptr {
                 None => {

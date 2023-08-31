@@ -14,7 +14,7 @@ use object::{
 use quote::format_ident;
 
 use sel4_build_env::{get_libsel4_include_dirs, get_with_sel4_prefix_relative_fallback};
-use sel4_kernel_loader_embed_page_tables::{MkLeafFnParams, Region, Regions};
+use sel4_kernel_loader_embed_page_tables::{AArch64, LeafLocation, Region, RegionsBuilder};
 use sel4_platform_info::PLATFORM_INFO;
 use sel4_rustfmt_helper::Rustfmt;
 
@@ -100,22 +100,22 @@ fn mk_loader_translation_tables() -> String {
         0b00
     };
 
-    let mk_normal_entry = move |params: MkLeafFnParams| {
+    let mk_normal_entry = move |params: LeafLocation| {
         params
-            .mk_identity()
+            .map_identity::<AArch64>()
             .set_access_flag(true)
             .set_attribute_index(4) // select MT_NORMAL
             .set_shareability(normal_shareability)
     };
 
-    let mk_device_entry = |params: MkLeafFnParams| {
+    let mk_device_entry = |params: LeafLocation| {
         params
-            .mk_identity()
+            .map_identity::<AArch64>()
             .set_access_flag(true)
             .set_attribute_index(0) // select MT_DEVICE_nGnRnE
     };
 
-    let mut regions = Regions::new();
+    let mut regions = RegionsBuilder::<AArch64>::new();
     for range in PLATFORM_INFO.memory.iter() {
         let range = range.start..range.end;
         regions = regions.insert(Region::valid(range, mk_normal_entry));
@@ -124,7 +124,10 @@ fn mk_loader_translation_tables() -> String {
         regions = regions.insert(Region::valid(range, mk_device_entry));
     }
 
-    let toks = regions.construct_and_embed_table(format_ident!("loader_level_0_table"));
+    let toks = regions
+        .build()
+        .construct_table()
+        .embed(format_ident!("loader_level_0_table"));
     format!("{toks}")
 }
 
@@ -161,26 +164,29 @@ fn mk_kernel_translation_tables(kernel_phys_start: u64, kernel_phys_to_virt_offs
         0
     };
 
-    let identity_map = |params: MkLeafFnParams| {
+    let identity_map = |params: LeafLocation| {
         params
-            .mk_identity()
+            .map_identity::<AArch64>()
             .set_access_flag(true)
             .set_attribute_index(0) // select MT_DEVICE_nGnRnE
     };
 
-    let kernel_map = move |params: MkLeafFnParams| {
+    let kernel_map = move |params: LeafLocation| {
         params
-            .mk(|vaddr| virt_to_phys(vaddr, phys_to_virt_offset))
+            .map::<AArch64>(|vaddr| virt_to_phys(vaddr, phys_to_virt_offset))
             .set_access_flag(true)
             .set_attribute_index(4) // select MT_NORMAL
             .set_shareability(normal_shareability)
     };
 
-    let regions = Regions::new()
+    let regions = RegionsBuilder::<AArch64>::new()
         .insert(Region::valid(0..virt_start, identity_map))
         .insert(Region::valid(virt_start..virt_end, kernel_map));
 
-    let toks = regions.construct_and_embed_table(format_ident!("kernel_boot_level_0_table"));
+    let toks = regions
+        .build()
+        .construct_table()
+        .embed(format_ident!("kernel_boot_level_0_table"));
     format!("{}", toks)
 }
 
