@@ -1,5 +1,5 @@
 use sel4cp::MessageInfo;
-use sel4cp_message::{types::EmptyMessage, MessageInfoExt as _};
+use sel4cp_message::MessageInfoExt as _;
 
 use sel4cp_http_server_example_sp804_driver_interface_types::*;
 
