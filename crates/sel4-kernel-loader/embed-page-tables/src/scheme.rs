@@ -43,7 +43,11 @@ impl<T: Scheme> SchemeHelpers<T> {
         T::LEVEL_BITS * T::NUM_LEVELS + T::PAGE_BITS
     }
 
-    pub const fn phys_bounds() -> Range<u64> {
+    pub const fn vaddr_mask() -> u64 {
+        (1 << Self::vaddr_bits()) - 1
+    }
+
+    pub const fn virt_bounds() -> Range<u64> {
         0..(1 << Self::vaddr_bits())
     }
 

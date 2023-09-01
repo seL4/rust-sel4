@@ -11,7 +11,7 @@ pub type RegionsBuilder<T> = AbstractRegionsBuilder<Option<RegionContent<T>>>;
 impl<T: Scheme> RegionsBuilder<T> {
     #[allow(clippy::new_without_default)]
     pub fn new() -> Self {
-        Self::new_with_background(Region::invalid(SchemeHelpers::<T>::phys_bounds()))
+        Self::new_with_background(Region::invalid(SchemeHelpers::<T>::virt_bounds()))
     }
 }
 

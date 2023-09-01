@@ -14,8 +14,10 @@ use object::{
 use quote::format_ident;
 
 use sel4_build_env::{get_libsel4_include_dirs, get_with_sel4_prefix_relative_fallback};
-use sel4_config::{sel4_cfg_bool, sel4_cfg_if, sel4_cfg_str, sel4_cfg_usize};
-use sel4_kernel_loader_embed_page_tables::{schemes, LeafLocation, Region, RegionsBuilder, Scheme};
+use sel4_config::{sel4_cfg_if, sel4_cfg_str, sel4_cfg_usize};
+use sel4_kernel_loader_embed_page_tables::{
+    schemes, LeafLocation, Region, RegionsBuilder, Scheme, SchemeHelpers,
+};
 use sel4_platform_info::PLATFORM_INFO;
 use sel4_rustfmt_helper::Rustfmt;
 
@@ -134,20 +136,18 @@ fn mk_loader_map() -> String {
 // HACK
 fn get_device_regions() -> Vec<Range<u64>> {
     let page = |start| start..start + GRANULE_SIZE;
-    if sel4_cfg_bool!(PLAT_QEMU_ARM_VIRT) {
-        vec![page(0x0900_0000)]
-    } else if sel4_cfg_bool!(PLAT_BCM2711) {
-        vec![page(0x0000_0000), page(0xfe21_5000)]
-    } else {
-        panic!("unsupported platform");
+    match sel4_cfg_str!(PLAT) {
+        "qemu-arm-virt" => vec![page(0x0900_0000)],
+        "bcm2711" => vec![page(0x0000_0000), page(0xfe21_5000)],
+        "spike" => vec![],
+        _ => panic!("unsupported platform"),
     }
 }
 
-fn mk_kernel_map(kernel_phys_start: u64, kernel_phys_to_virt_offset: i64) -> String {
+fn mk_kernel_map(kernel_phys_start: u64, kernel_phys_to_virt_offset: i128) -> String {
     let phys_to_virt_offset = kernel_phys_to_virt_offset;
-    let virt_start =
-        u64::try_from(i64::try_from(kernel_phys_start).unwrap() + phys_to_virt_offset).unwrap();
-    let virt_end = virt_start.next_multiple_of(1 << 39);
+    let virt_start = u64::try_from(i128::from(kernel_phys_start) + phys_to_virt_offset).unwrap();
+    let virt_end = virt_start.next_multiple_of(1 << 30);
 
     let regions = RegionsBuilder::<SchemeImpl>::new()
         .insert(Region::valid(
@@ -174,7 +174,7 @@ trait SchemeExt: Scheme {
     fn mk_identity_leaf_for_kernel_map(loc: LeafLocation) -> Self::LeafDescriptor;
 
     fn mk_kernel_leaf_for_kernel_map(
-        phys_to_virt_offset: i64,
+        phys_to_virt_offset: i128,
         loc: LeafLocation,
     ) -> Self::LeafDescriptor;
 }
@@ -200,13 +200,34 @@ impl SchemeExt for schemes::AArch64 {
     }
 
     fn mk_kernel_leaf_for_kernel_map(
-        phys_to_virt_offset: i64,
+        phys_to_virt_offset: i128,
         loc: LeafLocation,
     ) -> Self::LeafDescriptor {
         loc.map::<schemes::AArch64>(|vaddr| virt_to_phys(vaddr, phys_to_virt_offset))
             .set_access_flag(true)
             .set_attribute_index(4) // select MT_NORMAL
             .set_shareability(AARCH64_NORMAL_SHAREABILITY)
+    }
+}
+
+impl SchemeExt for schemes::Riscv64Sv39 {
+    fn mk_normal_leaf_for_loader_map(loc: LeafLocation) -> Self::LeafDescriptor {
+        loc.map_identity::<Self>()
+    }
+
+    fn mk_device_leaf_for_loader_map(loc: LeafLocation) -> Self::LeafDescriptor {
+        loc.map_identity::<Self>()
+    }
+
+    fn mk_identity_leaf_for_kernel_map(loc: LeafLocation) -> Self::LeafDescriptor {
+        loc.map_identity::<Self>()
+    }
+
+    fn mk_kernel_leaf_for_kernel_map(
+        phys_to_virt_offset: i128,
+        loc: LeafLocation,
+    ) -> Self::LeafDescriptor {
+        loc.map::<Self>(|vaddr| virt_to_phys(vaddr, phys_to_virt_offset))
     }
 }
 
@@ -241,22 +262,27 @@ fn elf_phys_addr_range<'a, T: ReadRef<'a>>(
 
 fn elf_phys_to_vaddr_offset<'a, T: ReadRef<'a>>(
     elf: &ElfFile<'a, FileHeader<Endianness>, T>,
-) -> i64 {
+) -> i128 {
     let endian = elf.endian();
     unified(
         elf.raw_segments()
             .iter()
             .filter(|phdr| phdr.p_type(endian) == PT_LOAD)
-            .map(|phdr| phys_to_virt_offset_for(phdr.p_paddr(endian), phdr.p_vaddr(endian))),
+            .map(|phdr| {
+                phys_to_virt_offset_for(
+                    phdr.p_paddr(endian),
+                    phdr.p_vaddr(endian) & SchemeHelpers::<SchemeImpl>::vaddr_mask(),
+                )
+            }),
     )
 }
 
-fn phys_to_virt_offset_for(paddr: u64, vaddr: u64) -> i64 {
-    i64::try_from(vaddr).unwrap() - i64::try_from(paddr).unwrap()
+fn phys_to_virt_offset_for(paddr: u64, vaddr: u64) -> i128 {
+    i128::from(vaddr) - i128::from(paddr)
 }
 
-fn virt_to_phys(vaddr: u64, phys_to_virt_offset: i64) -> u64 {
-    u64::try_from(i64::try_from(vaddr).unwrap() - phys_to_virt_offset).unwrap()
+fn virt_to_phys(vaddr: u64, phys_to_virt_offset: i128) -> u64 {
+    u64::try_from(i128::from(vaddr) - phys_to_virt_offset).unwrap()
 }
 
 fn unified<T: Eq>(mut it: impl Iterator<Item = T>) -> T {

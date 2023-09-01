@@ -4,8 +4,9 @@ use sel4_kernel_loader_payload_types::{Payload, PayloadInfo, RegionContent};
 use sel4_platform_info::PLATFORM_INFO;
 
 use crate::{
-    barrier::Barrier, copy_payload_data, debug, enter_kernel, fmt, idle, init_platform_state,
-    logging, sanity_check, smp, MAX_NUM_NODES,
+    arch::{idle, init_platform_state},
+    barrier::Barrier,
+    copy_payload_data, debug, enter_kernel, fmt, logging, sanity_check, smp, MAX_NUM_NODES,
 };
 
 static KERNEL_ENTRY_BARRIER: Barrier = Barrier::new(MAX_NUM_NODES);

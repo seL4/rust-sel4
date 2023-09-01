@@ -1,8 +1,8 @@
 use core::arch::asm;
 use core::fmt;
 
+use crate::arch::idle;
 use crate::fmt::debug_println_without_synchronization;
-use crate::idle;
 
 #[used]
 #[no_mangle]

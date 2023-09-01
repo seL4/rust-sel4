@@ -53,7 +53,7 @@ impl<T: Scheme> RegionContent<T> {
 
 impl<T: Scheme> Table<T> {
     pub fn construct(regions: &AbstractRegions<Option<RegionContent<T>>>) -> Self {
-        assert_eq!(regions.bounds(), SchemeHelpers::<T>::phys_bounds());
+        assert_eq!(regions.bounds(), SchemeHelpers::<T>::virt_bounds());
         Construction::new(regions.as_slice().iter()).construct()
     }
 }

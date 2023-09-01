@@ -1,4 +1,4 @@
-use crate::init_platform_state::reset_cntvoff;
+use crate::arch::init_platform_state::reset_cntvoff;
 
 pub(crate) mod debug;
 pub(crate) mod smp;

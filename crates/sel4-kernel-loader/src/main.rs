@@ -5,23 +5,22 @@
 #![feature(const_trait_impl)]
 #![feature(exclusive_wrapper)]
 #![feature(pointer_byte_offsets)]
+#![feature(proc_macro_hygiene)]
 #![feature(strict_provenance)]
 #![allow(dead_code)]
 #![allow(unreachable_code)]
 
-use core::arch::asm;
 use core::panic::PanicInfo;
 
 use sel4_logging::LevelFilter;
 
+mod arch;
 mod barrier;
 mod copy_payload_data;
 mod debug;
 mod drivers;
 mod enter_kernel;
-mod exception_handler;
 mod fmt;
-mod init_platform_state;
 mod logging;
 mod plat;
 mod run;
@@ -46,15 +45,7 @@ extern "C" fn main() -> ! {
 #[panic_handler]
 extern "C" fn panic_handler(info: &PanicInfo) -> ! {
     log::error!("{}", info);
-    idle()
-}
-
-fn idle() -> ! {
-    loop {
-        unsafe {
-            asm!("wfe");
-        }
-    }
+    crate::arch::idle()
 }
 
 mod translation_tables {
