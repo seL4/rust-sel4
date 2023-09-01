@@ -46,6 +46,16 @@ impl<T: Scheme> SchemeHelpers<T> {
     pub const fn phys_bounds() -> Range<u64> {
         0..(1 << Self::vaddr_bits())
     }
+
+    pub(crate) fn leaf_descriptor_from_vaddr_with_check(
+        vaddr: u64,
+        level: usize,
+    ) -> T::LeafDescriptor {
+        let num_zero_bits = (T::NUM_LEVELS - level - 1) * T::LEVEL_BITS + T::PAGE_BITS;
+        let mask = (1 << num_zero_bits) - 1;
+        assert_eq!(vaddr & mask, 0);
+        T::LeafDescriptor::from_vaddr(vaddr, level)
+    }
 }
 
 #[derive(Debug)]
@@ -62,7 +72,7 @@ impl Scheme for AArch64 {
 
     type LeafDescriptor = AArch64LeafDescriptor;
 
-    const EMPTY_DESCRIPTOR: Self::WordPrimitive = 0;
+    const EMPTY_DESCRIPTOR: Self::WordPrimitive = 0b0;
     const SYMBOLIC_BRANCH_DESCRIPTOR_OFFSET: Self::WordPrimitive = 0b11;
 }
 
@@ -71,7 +81,8 @@ pub struct AArch64LeafDescriptor(u64);
 
 impl SchemeLeafDescriptor<u64> for AArch64LeafDescriptor {
     fn from_vaddr(vaddr: u64, level: usize) -> Self {
-        Self::new(vaddr, level)
+        let mask = if level == 3 { 0b11 } else { 0b01 };
+        Self(vaddr | mask)
     }
 
     fn to_raw(&self) -> u64 {
@@ -80,12 +91,6 @@ impl SchemeLeafDescriptor<u64> for AArch64LeafDescriptor {
 }
 
 impl AArch64LeafDescriptor {
-    pub fn new(vaddr: u64, level: usize) -> Self {
-        assert_eq!(vaddr & ((1 << 12) - 1), 0);
-        let mask = if level == 3 { 0b11 } else { 0b01 };
-        Self(vaddr | mask)
-    }
-
     pub fn set_access_flag(self, value: bool) -> Self {
         Self(self.0 | (u64::from(value) << 10))
     }
@@ -101,12 +106,64 @@ impl AArch64LeafDescriptor {
     }
 }
 
-// pub enum Riscv64Sv48 {}
+const RISCV_ENCODE_FOR_LINKING_LEFT_ROTATION: u32 = 2;
 
-// impl Scheme for Riscv64Sv48 {
-//     type PointerWidthPrimitive = u64;
+#[allow(dead_code)]
+const fn riscv32_encode_for_linking(word: u32) -> u32 {
+    word.rotate_left(RISCV_ENCODE_FOR_LINKING_LEFT_ROTATION)
+}
 
-//     const PAGE_BITS: usize = 12;
-//     const LEVEL_BITS: usize = 9;
-//     const NUM_LEVELS: usize = 4;
-// }
+const fn riscv64_encode_for_linking(word: u64) -> u64 {
+    word.rotate_left(RISCV_ENCODE_FOR_LINKING_LEFT_ROTATION)
+}
+
+#[derive(Debug)]
+pub enum Riscv64Sv39 {}
+
+impl Scheme for Riscv64Sv39 {
+    type WordPrimitive = u64;
+
+    const PAGE_BITS: usize = 12;
+    const LEVEL_BITS: usize = 9;
+    const NUM_LEVELS: usize = 3;
+
+    const MIN_LEVEL_FOR_LEAF: usize = 0;
+
+    type LeafDescriptor = Riscv64Sv39LeafDescriptor;
+
+    const EMPTY_DESCRIPTOR: Self::WordPrimitive = 0b0;
+    const SYMBOLIC_BRANCH_DESCRIPTOR_OFFSET: Self::WordPrimitive = 0b1;
+}
+
+#[derive(Debug)]
+pub struct Riscv64Sv39LeafDescriptor(u64);
+
+impl SchemeLeafDescriptor<u64> for Riscv64Sv39LeafDescriptor {
+    fn from_vaddr(vaddr: u64, _level: usize) -> Self {
+        Self(vaddr | 0b1)
+            .set_read(true)
+            .set_write(true)
+            .set_execute(true)
+    }
+
+    fn to_raw(&self) -> u64 {
+        riscv64_encode_for_linking(self.0)
+    }
+}
+
+impl Riscv64Sv39LeafDescriptor {
+    pub fn set_read(self, value: bool) -> Self {
+        let ix = 1;
+        Self((self.0 & !(1 << ix)) | (u64::from(value) << ix))
+    }
+
+    pub fn set_write(self, value: bool) -> Self {
+        let ix = 2;
+        Self((self.0 & !(1 << ix)) | (u64::from(value) << ix))
+    }
+
+    pub fn set_execute(self, value: bool) -> Self {
+        let ix = 3;
+        Self((self.0 & !(1 << ix)) | (u64::from(value) << ix))
+    }
+}

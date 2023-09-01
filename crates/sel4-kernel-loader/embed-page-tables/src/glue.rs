@@ -1,7 +1,7 @@
 use std::ops::Range;
 
 use crate::regions::{AbstractRegion, AbstractRegions, AbstractRegionsBuilder};
-use crate::scheme::{Scheme, SchemeHelpers, SchemeLeafDescriptor};
+use crate::scheme::{Scheme, SchemeHelpers};
 use crate::table::{LeafLocation, MkLeafFn, RegionContent, Table};
 
 pub type Region<T> = AbstractRegion<Option<RegionContent<T>>>;
@@ -39,7 +39,10 @@ impl<T: Scheme> Region<T> {
 
 impl LeafLocation {
     pub fn map<T: Scheme>(&self, vaddr_to_paddr: impl FnOnce(u64) -> u64) -> T::LeafDescriptor {
-        T::LeafDescriptor::from_vaddr((vaddr_to_paddr)(self.vaddr()), self.level())
+        SchemeHelpers::<T>::leaf_descriptor_from_vaddr_with_check(
+            (vaddr_to_paddr)(self.vaddr()),
+            self.level(),
+        )
     }
 
     pub fn map_identity<T: Scheme>(&self) -> T::LeafDescriptor {

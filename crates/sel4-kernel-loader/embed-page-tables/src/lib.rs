@@ -8,5 +8,9 @@ mod table;
 
 pub use glue::{Region, Regions, RegionsBuilder};
 pub use regions::{AbstractRegion, AbstractRegions, AbstractRegionsBuilder};
-pub use scheme::{Scheme, SchemeHelpers, *};
+pub use scheme::{Scheme, SchemeHelpers};
 pub use table::{LeafLocation, MkLeafFn, RegionContent, Table};
+
+pub mod schemes {
+    pub use crate::scheme::{AArch64, Riscv64Sv39};
+}
