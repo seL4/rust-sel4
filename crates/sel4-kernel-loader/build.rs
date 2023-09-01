@@ -134,19 +134,12 @@ fn mk_loader_translation_tables() -> String {
 // HACK
 fn get_device_regions() -> Vec<Range<u64>> {
     let page = |start| start..start + 4096;
-    sel4_config::sel4_cfg_if! {
-        if #[cfg(PLAT_QEMU_ARM_VIRT)] {
-            vec![
-                page(0x0900_0000),
-            ]
-        } else if #[cfg(PLAT_BCM2711)] {
-            vec![
-                page(0x0000_0000),
-                page(0xfe21_5000),
-            ]
-        } else {
-            compile_error!("Unsupported platform");
-        }
+    if sel4_config::sel4_cfg_bool!(PLAT_QEMU_ARM_VIRT) {
+        vec![page(0x0900_0000)]
+    } else if sel4_config::sel4_cfg_bool!(PLAT_BCM2711) {
+        vec![page(0x0000_0000), page(0xfe21_5000)]
+    } else {
+        panic!("unsupported platform");
     }
 }
 
