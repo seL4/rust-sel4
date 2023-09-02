@@ -243,8 +243,12 @@ superCallPackage ../rust-utils {} self //
   }).overrideDerivation (attrs: {
     patches = attrs.patches ++ [
       (fetchurl {
-        url = "https://github.com/coliasgroup/qemu/commit/cd3b78de4b5a8d7c79ae99dab2b5e0ab1ba0ffac.patch";
-        sha256 = "sha256-bDmMyelaMCJWhr88XIKEBNMZP3VcBD3mOXhOWal3IBw=";
+        url = "https://github.com/coliasgroup/qemu/commit/79310d4cd22230a0dfca55697729670fe7e952fa.patch";
+        sha256 = "sha256-6CMhLFo7B6tGrOfvIqfT+ZtJz7A7WBfHazeAYECDWbE=";
+      })
+      (fetchurl {
+        url = "https://github.com/coliasgroup/qemu/commit/4b0e8e5be4cdcdd9aeb387f949bbc8a1dbfe9299.patch";
+        sha256 = "sha256-CoEnu5Ijy+khO7Jqq8NaKzJ1E4lLdaKDFF1ZC/I1C6k=";
       })
     ];
   });

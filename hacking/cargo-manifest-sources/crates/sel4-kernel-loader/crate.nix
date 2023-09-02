@@ -11,6 +11,10 @@ mk {
     psci = { version = "0.1.1"; default-features = false; };
     inherit (versions) tock-registers cfg-if log;
   };
+  target."cfg(any(target_arch = \"riscv32\", target_arch = \"riscv64\"))".dependencies = {
+    sbi = "0.2.0";
+    riscv = "0.10.0";
+  };
   build-dependencies = {
     postcard = postcardWith [ "alloc" ];
     cc = "1.0.76";

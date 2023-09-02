@@ -46,6 +46,7 @@ let
         instanceForPlatform.links
         (lib.optionals worldConfig.platformRequiresLoader [
           { name = "loader.elf"; path = loader.elf; }
+          { name = "loader.debug.elf"; path = loader.split.full; }
         ])
         [
           symbolizeBacktraceLinksEntry

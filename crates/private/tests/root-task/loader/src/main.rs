@@ -20,13 +20,16 @@ fn main(bootinfo: &sel4::BootInfo) -> ! {
     debug_println!("{}", X.0);
     assert_eq!(X.0, 1337);
 
-    assert!(bootinfo
-        .device_untyped_list()
-        .is_sorted_by_key(|ut| ut.paddr()));
-    assert!(bootinfo
-        .kernel_untyped_list()
-        .is_sorted_by_key(|ut| ut.paddr()));
+    debug_println!("Gaps in device untypeds:");
+    let mut last_end = 0;
+    for ut in bootinfo.device_untyped_list() {
+        if ut.paddr() > last_end {
+            debug_println!("{:x?}", last_end..ut.paddr());
+        }
+        last_end = ut.paddr() + (1 << ut.size_bits());
+    }
 
+    debug_println!("Gaps in kernel untypeds:");
     let mut last_end = PLATFORM_INFO.memory[0].start.try_into().unwrap();
     for ut in bootinfo.kernel_untyped_list() {
         if ut.paddr() > last_end {

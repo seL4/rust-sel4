@@ -7,6 +7,7 @@
 #![feature(pointer_byte_offsets)]
 #![feature(proc_macro_hygiene)]
 #![feature(strict_provenance)]
+#![feature(stdsimd)]
 #![allow(dead_code)]
 #![allow(unreachable_code)]
 

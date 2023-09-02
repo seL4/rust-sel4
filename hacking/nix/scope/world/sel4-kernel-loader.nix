@@ -14,6 +14,7 @@ let
   rootCrate = crates.sel4-kernel-loader;
 
   release = true;
+  # release = false;
 
   profile = if release then "release" else "dev";
 
@@ -27,6 +28,7 @@ let
       profile.${profile} = {
         codegen-units = 1;
         incremental = false;
+        # debug = 2;
       };
     }
   ];

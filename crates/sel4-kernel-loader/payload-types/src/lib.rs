@@ -30,7 +30,7 @@ pub struct PayloadInfo {
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct ImageInfo {
     pub phys_addr_range: Range<u64>,
-    pub phys_to_virt_offset: i64,
+    pub phys_to_virt_offset: i128,
     pub virt_entry: u64,
 }
 
@@ -40,7 +40,7 @@ impl ImageInfo {
     }
 
     pub fn phys_to_virt(&self, paddr: u64) -> u64 {
-        u64::try_from(i64::try_from(paddr).unwrap() + self.phys_to_virt_offset).unwrap()
+        u64::try_from(i128::from(paddr) + self.phys_to_virt_offset).unwrap()
     }
 }
 

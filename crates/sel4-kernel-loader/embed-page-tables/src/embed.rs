@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 
 use proc_macro2::{Ident, TokenStream};
-use quote::{quote, ToTokens};
+use quote::{format_ident, quote, ToTokens};
 
 use crate::scheme::{Scheme, SchemeHelpers, SchemeLeafDescriptor};
 use crate::table::{AbstractEntry, Table};
@@ -58,6 +58,7 @@ impl Embedding {
         let _ = self.embed_inner(table);
         self.check_tables_order();
         let ident = self.ident;
+        let num_total_entries_ident = format_ident!("{}_num_total_entries", ident);
         let num_tables = self.next_index;
         let num_entries = SchemeHelpers::<T>::num_entries_in_table();
         let tables = self.tables.values();
@@ -70,6 +71,10 @@ impl Embedding {
             pub static mut #ident: [Table; #num_tables] = unsafe {
                 [#(#tables,)*]
             };
+
+            #[no_mangle]
+            #[allow(unused_unsafe)]
+            pub static mut #num_total_entries_ident: usize = #num_tables * #num_entries;
         }
     }
 

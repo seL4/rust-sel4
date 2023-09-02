@@ -51,10 +51,12 @@ impl TlsImage {
         cfg_if::cfg_if! {
             if #[cfg(target_arch = "aarch64")] {
                 (tpidr + RESERVED_ABOVE_TPIDR).next_multiple_of(self.align)
+            } else if #[cfg(target_arch = "riscv64")] {
+                tpidr.next_multiple_of(self.align)
             } else if #[cfg(target_arch = "x86_64")] {
                 (tpidr - self.memsz) & !(self.align - 1)
             } else {
-                compile_error!("unsupported architecture")
+                compile_error!("unsupported architecture");
             }
         }
     }
@@ -115,27 +117,47 @@ cfg_if::cfg_if! {
                     br x5
             "#
         }
+    } else if #[cfg(target_arch = "riscv64")] {
+        global_asm! {
+            r#"
+                .global __sel4_runtime_reserve_tls_and_continue
+
+                .section .text
+
+                __sel4_runtime_reserve_tls_and_continue:
+                    mv s9, sp
+                    sub s9, s9, a1 // a1: segment_size
+                    and s9, s9, a2 // a2: segment_align_down_mask
+                    sub s9, s9, a3 // a3: reserved_above_tpidr
+                    and s9, s9, a2 // a2: segment_align_down_mask
+                    mv s10, s9     // save tpidr for later
+                    and s9, s9, a4 // a4: stack_align_down_mask
+                    mv sp, s9
+                    mv a1, s10     // pass tpidr to continuation
+                    jr a5
+            "#
+        }
     } else if #[cfg(target_arch = "x86_64")] {
         global_asm! {
             r#"
-            .global __sel4_runtime_reserve_tls_and_continue
+                .global __sel4_runtime_reserve_tls_and_continue
 
-            .section .text
+                .section .text
 
-            __sel4_runtime_reserve_tls_and_continue:
-                mov r10, rsp
-                sub r10, 0x8 // space for thread structure
-                and r10, rdx // rdx: segment_align_down_mask
-                mov r11, r10 // save tpidr for later
-                sub r10, rsi // rsi: segment_size
-                and r10, rdx // rdx: segment_align_down_mask
-                and r10, r8  // r8: stack_align_down_mask
-                mov rsp, r10
-                mov rsi, r11 // pass tpidr to continuation
-                mov rbp, rsp
-                sub rsp, 0x8 // stack must be 16-byte aligned before call
-                push rbp
-                call r9
+                __sel4_runtime_reserve_tls_and_continue:
+                    mov r10, rsp
+                    sub r10, 0x8 // space for thread structure
+                    and r10, rdx // rdx: segment_align_down_mask
+                    mov r11, r10 // save tpidr for later
+                    sub r10, rsi // rsi: segment_size
+                    and r10, rdx // rdx: segment_align_down_mask
+                    and r10, r8  // r8: stack_align_down_mask
+                    mov rsp, r10
+                    mov rsi, r11 // pass tpidr to continuation
+                    mov rbp, rsp
+                    sub rsp, 0x8 // stack must be 16-byte aligned before call
+                    push rbp
+                    call r9
             "#
         }
     } else {
@@ -181,7 +203,23 @@ cfg_if::cfg_if! {
             tpidr
         }
 
+    } else if #[cfg(target_arch = "riscv64")] {
+
+        #[inline(never)] // issues with optimizer
+        unsafe fn set_tls_base(tpidr: usize) {
+            asm!("mv tp, {tpidr}", tpidr = in(reg) tpidr);
+        }
+
+        #[allow(dead_code)]
+        #[inline(never)] // issues with optimizer
+        unsafe fn get_tls_base() -> usize {
+            let mut tpidr;
+            asm!("mv {tpidr}, tp", tpidr = out(reg) tpidr);
+            tpidr
+        }
+
     } else if #[cfg(target_arch = "x86_64")] {
+
         sel4::sel4_cfg_if! {
             if #[cfg(FSGSBASE_INST)] {
 
@@ -217,8 +255,6 @@ cfg_if::cfg_if! {
             }
         }
     } else {
-
         compile_error!("unsupported architecture");
-
     }
 }

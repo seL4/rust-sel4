@@ -120,8 +120,7 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
 
         debug!("Creating objects");
 
-        // Sort untypeds by paddr, not taking isDevice into account.
-        // The kernel provides them sorted first by isDevice.
+        // Sort untypeds by paddr
         let mut _uts_by_paddr_backing: [usize;
             sel4::sel4_cfg_usize!(MAX_NUM_BOOTINFO_UNTYPED_CAPS)] = array::from_fn(|i| i); // TODO (not a big deal) allocate in image rather than on stack
         let uts = self.bootinfo.untyped_list();

@@ -14,6 +14,7 @@ in {
     pkgs.host.x86_64.none.this.worlds.default
     pkgs.host.aarch64.none.this.worlds.default
     pkgs.host.aarch64.none.this.worlds.qemu-arm-virt.sel4cp
+    pkgs.host.riscv64.none.this.worlds.spike
   ];
 
   sel4testInstances = (map (x: x.this.sel4test) [

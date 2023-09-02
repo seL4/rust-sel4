@@ -98,6 +98,8 @@ in rec {
 
   riscv64 =
     let
+      numCores = "1";
+      mkSeL4KernelWithPayloadArgs = loader: [ "-kernel" loader ];
     in rec {
       default = spike;
 
@@ -109,6 +111,15 @@ in rec {
           KernelPlatform = mkString "spike";
         };
         canSimulate = true;
+        mkInstanceForPlatform = platUtils.qemu.mkMkInstanceForPlatform {
+          mkQemuCmd = loader: [
+            "${pkgsBuildBuild.this.qemuForSeL4}/bin/qemu-system-riscv64"
+              "-machine" "spike"
+              "-cpu" "rv64" "-smp" numCores "-m" "size=4096M"
+              "-nographic"
+              "-serial" "mon:stdio"
+          ] ++ mkSeL4KernelWithPayloadArgs loader;
+        };
       };
     };
 

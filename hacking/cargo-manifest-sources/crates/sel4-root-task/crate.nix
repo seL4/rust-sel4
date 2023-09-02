@@ -3,7 +3,7 @@
 mk {
   package.name = "sel4-root-task";
   dependencies = {
-    sel4-runtime-common.features = [ "tls" "unwinding" "start" "static-heap" ];
+    sel4-runtime-common.features = [ "tls" "start" "static-heap" ];
   };
   features = {
     default = [
@@ -15,6 +15,7 @@ mk {
     ];
     unwinding = [
       "sel4-panicking/unwinding"
+      "sel4-runtime-common/unwinding"
     ];
     alloc = [
       "sel4-panicking/alloc"

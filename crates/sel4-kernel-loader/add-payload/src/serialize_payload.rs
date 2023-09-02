@@ -98,7 +98,7 @@ impl Builder {
     fn add_segments<'a, T: ReadRef<'a>>(
         &mut self,
         elf: &ElfFile<'a, FileHeader<Endianness>, T>,
-        phys_to_virt_offset: i64,
+        phys_to_virt_offset: i128,
     ) {
         let endian = elf.endian();
         for phdr in elf
@@ -145,7 +145,7 @@ impl Builder {
     fn add_image<'a, T: ReadRef<'a>>(
         &mut self,
         elf: &ElfFile<'a, FileHeader<Endianness>, T>,
-        phys_to_virt_offset: i64,
+        phys_to_virt_offset: i128,
     ) -> ImageInfo {
         let virt_addr_range = elf_virt_addr_range(elf);
         let phys_start = virt_to_phys(virt_addr_range.start, phys_to_virt_offset);
@@ -196,7 +196,7 @@ fn elf_virt_addr_range<'a, T: ReadRef<'a>>(
 
 fn elf_phys_to_vaddr_offset<'a, T: ReadRef<'a>>(
     elf: &ElfFile<'a, FileHeader<Endianness>, T>,
-) -> i64 {
+) -> i128 {
     let endian = elf.endian();
     unified(
         elf.raw_segments()
@@ -212,12 +212,12 @@ fn coarsen_footprint(footprint: Range<u64>, granularity: u64) -> Range<u64> {
     (footprint.start & !(granularity - 1))..footprint.end.next_multiple_of(granularity)
 }
 
-fn virt_to_phys(vaddr: u64, phys_to_virt_offset: i64) -> u64 {
-    u64::try_from(i64::try_from(vaddr).unwrap() - phys_to_virt_offset).unwrap()
+fn virt_to_phys(vaddr: u64, phys_to_virt_offset: i128) -> u64 {
+    u64::try_from(i128::from(vaddr) - phys_to_virt_offset).unwrap()
 }
 
-fn phys_to_virt_offset_for(paddr: u64, vaddr: u64) -> i64 {
-    i64::try_from(vaddr).unwrap() - i64::try_from(paddr).unwrap()
+fn phys_to_virt_offset_for(paddr: u64, vaddr: u64) -> i128 {
+    i128::from(vaddr) - i128::from(paddr)
 }
 
 fn unified<T: Eq>(mut it: impl Iterator<Item = T>) -> T {

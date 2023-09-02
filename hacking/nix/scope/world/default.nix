@@ -6,6 +6,7 @@
 , crateUtils
 , mkSeL4
 , mkSeL4CorePlatform
+, sources
 }:
 
 let

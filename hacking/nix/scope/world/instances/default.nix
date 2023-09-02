@@ -29,9 +29,10 @@
 let
   inherit (worldConfig) isCorePlatform canSimulate;
 
-  haveFullRuntime = !isCorePlatform && (hostPlatform.isAarch64 || hostPlatform.isx86_64);
+  haveFullRuntime = !isCorePlatform && (hostPlatform.isAarch64 || hostPlatform.isRiscV64 || hostPlatform.isx86_64);
   haveMinimalRuntime = haveFullRuntime;
-  haveKernelLoader = hostPlatform.isAarch64;
+  haveKernelLoader = hostPlatform.isAarch64 || hostPlatform.isRiscV64;
+  haveCapDLInitializer = hostPlatform.isAarch64 || hostPlatform.isx86_64;
 
   maybe = condition: v: if condition then v else null;
 
@@ -182,7 +183,7 @@ in rec {
     };
 
     capdl = {
-      threads = maybe haveFullRuntime (mkInstance {
+      threads = maybe (haveFullRuntime && haveCapDLInitializer) (mkInstance {
         rootTask = mkCapDLRootTask rec {
           small = true;
           script = sources.srcRoot + "/crates/private/tests/capdl/threads/cdl.py";
@@ -202,7 +203,7 @@ in rec {
         };
       });
 
-      utcover = maybe haveFullRuntime (mkInstance {
+      utcover = maybe (haveFullRuntime && haveCapDLInitializer) (mkInstance {
         rootTask = mkCapDLRootTask rec {
           # small = true;
           script = sources.srcRoot + "/crates/private/tests/capdl/utcover/cdl.py";

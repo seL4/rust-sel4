@@ -135,8 +135,8 @@ impl Scheme for Riscv64Sv39 {
 
     type LeafDescriptor = Riscv64Sv39LeafDescriptor;
 
-    const EMPTY_DESCRIPTOR: Self::WordPrimitive = 0b0;
-    const SYMBOLIC_BRANCH_DESCRIPTOR_OFFSET: Self::WordPrimitive = 0b1;
+    const EMPTY_DESCRIPTOR: Self::WordPrimitive = riscv64_encode_for_linking(0b0);
+    const SYMBOLIC_BRANCH_DESCRIPTOR_OFFSET: Self::WordPrimitive = riscv64_encode_for_linking(0b1);
 }
 
 #[derive(Debug)]
@@ -144,7 +144,7 @@ pub struct Riscv64Sv39LeafDescriptor(u64);
 
 impl SchemeLeafDescriptor<u64> for Riscv64Sv39LeafDescriptor {
     fn from_vaddr(vaddr: u64, _level: usize) -> Self {
-        Self(vaddr | 0b1)
+        Self((vaddr >> 2) | 0b1)
             .set_read(true)
             .set_write(true)
             .set_execute(true)

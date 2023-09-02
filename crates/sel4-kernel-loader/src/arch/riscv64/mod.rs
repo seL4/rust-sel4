@@ -1,5 +1,6 @@
 use core::arch::asm;
 
+pub(crate) mod drivers;
 pub(crate) mod init_platform_state;
 
 pub(crate) fn idle() -> ! {
@@ -9,3 +10,6 @@ pub(crate) fn idle() -> ! {
         }
     }
 }
+
+#[no_mangle]
+static mut hsm_exists: i32 = 0;
