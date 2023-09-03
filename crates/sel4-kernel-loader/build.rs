@@ -85,7 +85,7 @@ fn main() {
         let out_path = PathBuf::from(&out_dir).join("kernel_translation_tables.rs");
         fs::write(
             &out_path,
-            mk_kernel_map(kernel_phys_addr_range.start, kernel_phys_to_virt_offset),
+            mk_kernel_map(kernel_phys_addr_range, kernel_phys_to_virt_offset),
         )
         .unwrap();
         Rustfmt::detect().format(&out_path);
@@ -144,19 +144,22 @@ fn get_device_regions() -> Vec<Range<u64>> {
     }
 }
 
-fn mk_kernel_map(kernel_phys_start: u64, kernel_phys_to_virt_offset: i128) -> String {
-    let phys_to_virt_offset = kernel_phys_to_virt_offset;
-    let virt_start = u64::try_from(i128::from(kernel_phys_start) + phys_to_virt_offset).unwrap();
-    // let virt_end = virt_start.next_multiple_of(1 << 30);
-    let virt_end = SchemeHelpers::<SchemeImpl>::virt_bounds().end; // HACKTMP
+fn mk_kernel_map(kernel_phys_addr_range: Range<u64>, kernel_phys_to_virt_offset: i128) -> String {
+    let virt_start =
+        u64::try_from(i128::from(kernel_phys_addr_range.start) + kernel_phys_to_virt_offset)
+            .unwrap();
+    let virt_end =
+        u64::try_from(i128::from(kernel_phys_addr_range.end) + kernel_phys_to_virt_offset).unwrap();
+    let virt_map_end =
+        virt_end.next_multiple_of(1 << SchemeHelpers::<SchemeImpl>::largest_leaf_size_bits());
 
     let regions = RegionsBuilder::<SchemeImpl>::new()
         .insert(Region::valid(
             0..virt_start,
             SchemeImpl::mk_identity_leaf_for_kernel_map,
         ))
-        .insert(Region::valid(virt_start..virt_end, move |loc| {
-            SchemeImpl::mk_kernel_leaf_for_kernel_map(phys_to_virt_offset, loc)
+        .insert(Region::valid(virt_start..virt_map_end, move |loc| {
+            SchemeImpl::mk_kernel_leaf_for_kernel_map(kernel_phys_to_virt_offset, loc)
         }));
 
     let toks = regions

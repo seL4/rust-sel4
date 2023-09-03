@@ -51,6 +51,10 @@ impl<T: Scheme> SchemeHelpers<T> {
         0..(1 << Self::vaddr_bits())
     }
 
+    pub fn largest_leaf_size_bits() -> usize {
+        T::LEVEL_BITS * (T::NUM_LEVELS - T::MIN_LEVEL_FOR_LEAF - 1) + T::PAGE_BITS
+    }
+
     pub(crate) fn leaf_descriptor_from_vaddr_with_check(
         vaddr: u64,
         level: usize,

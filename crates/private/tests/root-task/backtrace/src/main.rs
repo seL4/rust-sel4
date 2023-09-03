@@ -32,7 +32,9 @@ fn g(_: &()) {
     let bt = simple.collect();
     simple.send(&bt);
     assert!(bt.postamble.error.is_none());
-    // assert!(bt.entries.len().abs_diff(10) <= 3); // HACKTMP
+
+    // TODO: find a check that works for all platforms
+    // assert!(bt.entries.len().abs_diff(10) <= 3);
 
     let mut s = String::new();
     collect(())
