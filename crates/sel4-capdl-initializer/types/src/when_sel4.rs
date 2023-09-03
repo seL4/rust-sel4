@@ -51,8 +51,7 @@ impl<'a, D, M> Object<'a, D, M> {
                 }
                 #[sel4_cfg(ARCH_RISCV64)]
                 Object::PageTable(obj) => {
-                    let level = obj.level.unwrap();
-                    assert_eq!(obj.is_root, level == 0); // sanity check
+                    assert!(obj.level.is_none()); // sanity check
                     ObjectBlueprintArch::PageTable.into()
                 }
                 #[sel4_cfg(ARCH_X86_64)]

@@ -405,16 +405,10 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
 
     fn init_asids(&self) -> Result<()> {
         debug!("Initializing ASIDs");
-        for (obj_id, obj) in self.spec().filter_objects::<&object::PageTable>() {
-            if !(obj.is_root
-                || (sel4::config::sel4_cfg_bool!(ARCH_RISCV64)
-                    && self
-                        .spec()
-                        .page_table_level_for_riscv64sv39_is_root(obj)
-                        .unwrap_or(false)))
-            {
-                continue;
-            }
+        for (obj_id, _obj) in self
+            .spec()
+            .filter_objects_with::<&object::PageTable>(|obj| obj.is_root)
+        {
             let pgd = self.orig_local_cptr::<cap_type::VSpace>(obj_id);
             BootInfo::init_thread_asid_pool().asid_pool_assign(pgd)?;
         }
@@ -568,16 +562,10 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
         #[sel4::sel4_cfg(not(PT_LEVELS = "3"))]
         compile_error!("unsupported configuration");
 
-        for (obj_id, obj) in self.spec().filter_objects::<&object::PageTable>() {
-            if !(obj.is_root
-                || (sel4::config::sel4_cfg_bool!(ARCH_RISCV64)
-                    && self
-                        .spec()
-                        .page_table_level_for_riscv64sv39_is_root(obj)
-                        .unwrap_or(false)))
-            {
-                continue;
-            }
+        for (obj_id, obj) in self
+            .spec()
+            .filter_objects_with::<&object::PageTable>(|obj| obj.is_root)
+        {
             let vspace = self.orig_local_cptr::<cap_type::PageTable>(obj_id);
             for (i, cap) in obj.page_tables() {
                 let pud = self.orig_local_cptr::<cap_type::PageTable>(cap.object);

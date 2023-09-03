@@ -51,47 +51,4 @@ impl<'a, N, D, M> Spec<'a, N, D, M> {
     ) -> Result<O, O::Error> {
         self.object(obj_id).try_into()
     }
-
-    // HACKTMP
-    pub fn page_table_level_for_riscv64sv39<'b: 'a>(
-        &'b self,
-        pt: &'a crate::object::PageTable<'a>,
-    ) -> Option<usize> {
-        let mut next_level = None;
-        for (_, entry) in pt.entries() {
-            let this_next_level = match entry {
-                crate::PageTableEntry::Frame(cap) => {
-                    let frame = self
-                        .lookup_object::<&crate::object::Frame<'a, D, M>>(cap.object)
-                        .unwrap();
-                    Some(match frame.size_bits {
-                        12 => 3,
-                        21 => 2,
-                        _ => panic!(),
-                    })
-                }
-                crate::PageTableEntry::PageTable(cap) => {
-                    let pt = self
-                        .lookup_object::<&crate::object::PageTable>(cap.object)
-                        .unwrap();
-                    self.page_table_level_for_riscv64sv39(pt)
-                }
-            };
-            if let Some(this_next_level) = this_next_level {
-                if let Some(old_next_level) = next_level.replace(this_next_level) {
-                    assert_eq!(old_next_level, this_next_level);
-                }
-            }
-        }
-        next_level.map(|next_level| next_level - 1)
-    }
-
-    // HACKTMP
-    pub fn page_table_level_for_riscv64sv39_is_root<'b: 'a>(
-        &'b self,
-        pt: &'a crate::object::PageTable<'a>,
-    ) -> Option<bool> {
-        self.page_table_level_for_riscv64sv39(pt)
-            .map(|level| level == 0)
-    }
 }
