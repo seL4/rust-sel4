@@ -6,12 +6,10 @@ edition = "2021"
 license = "BSD-2-Clause"
 
 [dependencies]
-aarch64-cpu = "9.0.0"
 cfg-if = "1.0.0"
 heapless = { version = "0.7.16", features = ["serde"] }
 log = "0.4.17"
 postcard = { version = "1.0.2", default-features = false }
-psci = { version = "0.1.1", default-features = false }
 sel4-config = { path = "../sel4/config" }
 sel4-kernel-loader-payload-types = { path = "./payload-types", features = ["serde"] }
 sel4-logging = { path = "../sel4-logging" }
@@ -38,3 +36,7 @@ serde_yaml = "0.9.14"
 [target."cfg(any(target_arch = \"riscv32\", target_arch = \"riscv64\"))".dependencies]
 riscv = "0.10.0"
 sbi = "0.2.0"
+
+[target."cfg(target_arch = \"aarch64\")".dependencies]
+aarch64-cpu = "9.0.0"
+smccc = "0.1.1"

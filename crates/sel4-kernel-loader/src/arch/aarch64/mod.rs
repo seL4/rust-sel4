@@ -11,3 +11,7 @@ pub(crate) fn idle() -> ! {
         }
     }
 }
+
+fn x() {
+    unsafe { core::arch::asm!("smc #0",) }
+}

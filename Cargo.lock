@@ -2145,12 +2145,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "psci"
-version = "0.1.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3b6fb7be1022539b1ea394ff4bcbad807a55c93841bb12c733f0be1048ea3e53"
-
-[[package]]
 name = "quote"
 version = "1.0.33"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2818,7 +2812,6 @@ dependencies = [
  "log",
  "object",
  "postcard",
- "psci",
  "quote",
  "riscv",
  "sbi",
@@ -2832,6 +2825,7 @@ dependencies = [
  "sel4-rustfmt-helper",
  "serde",
  "serde_yaml",
+ "smccc",
  "spin 0.9.8",
  "tock-registers",
 ]
@@ -3453,6 +3447,12 @@ name = "smallvec"
 version = "1.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "62bb4feee49fdd9f707ef802e22365a35de4b7b299de4763d44bfea899442ff9"
+
+[[package]]
+name = "smccc"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "617d17f088ec733e5a6b86da6ce4cce1414e6e856d6061c16dda51cceae6f68c"
 
 [[package]]
 name = "smoltcp"

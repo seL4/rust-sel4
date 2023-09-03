@@ -6,14 +6,16 @@ mk {
     sel4-kernel-loader-payload-types.features = [ "serde" ];
     postcard = postcardWith [];
     heapless = { version = versions.heapless; features = [ "serde" ]; };
-    aarch64-cpu = "9.0.0";
     spin = "0.9.4";
-    psci = { version = "0.1.1"; default-features = false; };
     inherit (versions) tock-registers cfg-if log;
   };
   target."cfg(any(target_arch = \"riscv32\", target_arch = \"riscv64\"))".dependencies = {
     sbi = "0.2.0";
     riscv = "0.10.0";
+  };
+  target."cfg(target_arch = \"aarch64\")".dependencies = {
+    smccc = "0.1.1";
+    aarch64-cpu = "9.0.0";
   };
   build-dependencies = {
     postcard = postcardWith [ "alloc" ];
