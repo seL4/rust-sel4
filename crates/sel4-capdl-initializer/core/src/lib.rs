@@ -405,10 +405,16 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
 
     fn init_asids(&self) -> Result<()> {
         debug!("Initializing ASIDs");
-        for (obj_id, _obj) in self
-            .spec()
-            .filter_objects_with::<&object::PageTable>(|obj| obj.is_root)
-        {
+        for (obj_id, obj) in self.spec().filter_objects::<&object::PageTable>() {
+            if !(obj.is_root
+                || (sel4::config::sel4_cfg_bool!(ARCH_RISCV64)
+                    && self
+                        .spec()
+                        .page_table_level_for_riscv64sv39_is_root(obj)
+                        .unwrap_or(false)))
+            {
+                continue;
+            }
             let pgd = self.orig_local_cptr::<cap_type::VSpace>(obj_id);
             BootInfo::init_thread_asid_pool().asid_pool_assign(pgd)?;
         }
@@ -548,6 +554,69 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
                                         cap.vm_attributes(),
                                     )?;
                                 }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        Ok(())
+    }
+
+    #[sel4::sel4_cfg(ARCH_RISCV64)]
+    fn init_vspaces_arch(&mut self) -> Result<()> {
+        #[sel4::sel4_cfg(not(PT_LEVELS = "3"))]
+        compile_error!("unsupported configuration");
+
+        for (obj_id, obj) in self.spec().filter_objects::<&object::PageTable>() {
+            if !(obj.is_root
+                || (sel4::config::sel4_cfg_bool!(ARCH_RISCV64)
+                    && self
+                        .spec()
+                        .page_table_level_for_riscv64sv39_is_root(obj)
+                        .unwrap_or(false)))
+            {
+                continue;
+            }
+            let vspace = self.orig_local_cptr::<cap_type::PageTable>(obj_id);
+            for (i, cap) in obj.page_tables() {
+                let pud = self.orig_local_cptr::<cap_type::PageTable>(cap.object);
+                let vaddr = i << 30;
+                pud.page_table_map(vspace, vaddr, cap.vm_attributes())?;
+                for (i, cap) in self
+                    .spec()
+                    .lookup_object::<&object::PageTable>(cap.object)?
+                    .entries()
+                {
+                    let vaddr = vaddr + (i << 21);
+                    match cap {
+                        PageTableEntry::Frame(cap) => {
+                            let frame = self.orig_local_cptr::<cap_type::MegaPage>(cap.object);
+                            let rights = (&cap.rights).into();
+                            self.copy(frame)?.frame_map(
+                                vspace,
+                                vaddr,
+                                rights,
+                                cap.vm_attributes(),
+                            )?;
+                        }
+                        PageTableEntry::PageTable(cap) => {
+                            let pt = self.orig_local_cptr::<cap_type::PageTable>(cap.object);
+                            pt.page_table_map(vspace, vaddr, cap.vm_attributes())?;
+                            for (i, cap) in self
+                                .spec()
+                                .lookup_object::<&object::PageTable>(cap.object)?
+                                .frames()
+                            {
+                                let frame = self.orig_local_cptr::<cap_type::_4KPage>(cap.object);
+                                let vaddr = vaddr + (i << FrameSize::_4K.bits());
+                                let rights = (&cap.rights).into();
+                                self.copy(frame)?.frame_map(
+                                    vspace,
+                                    vaddr,
+                                    rights,
+                                    cap.vm_attributes(),
+                                )?;
                             }
                         }
                     }

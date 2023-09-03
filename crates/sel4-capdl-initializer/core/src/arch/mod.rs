@@ -1,4 +1,4 @@
-use sel4::sel4_cfg;
+use sel4::{sel4_cfg, VMAttributes};
 
 #[sel4_cfg(any(ARCH_AARCH32, ARCH_AARCH64))]
 mod imp {
@@ -19,7 +19,6 @@ mod imp {
 }
 
 #[sel4_cfg(any(ARCH_IA32, ARCH_X86_64))]
-#[path = "x86/mod.rs"]
 mod imp {
     pub(crate) type FrameType1 = sel4::cap_type::LargePage;
     pub(crate) type FrameType2 = sel4::cap_type::HugePage;
@@ -37,8 +36,21 @@ mod imp {
 }
 
 #[sel4_cfg(any(ARCH_RISCV32, ARCH_RISCV64))]
-#[path = "riscv/mod.rs"]
-mod imp {}
+mod imp {
+    pub(crate) type FrameType1 = sel4::cap_type::MegaPage;
+    pub(crate) type FrameType2 = sel4::cap_type::GigaPage;
+
+    pub(crate) fn init_user_context(
+        regs: &mut sel4::UserContext,
+        extra: &sel4_capdl_initializer_types::object::TCBExtraInfo,
+    ) {
+        *regs.pc_mut() = extra.ip;
+        *regs.sp_mut() = extra.sp;
+        for (i, value) in extra.gprs.iter().enumerate() {
+            *regs.gpr_a_mut(i.try_into().unwrap()) = *value;
+        }
+    }
+}
 
 pub(crate) use imp::*;
 
@@ -55,15 +67,18 @@ pub(crate) mod frame_types {
 
 sel4::sel4_cfg_if! {
     if #[cfg(ARCH_AARCH64)] {
-        const CACHED: sel4::VMAttributes = sel4::VMAttributes::PAGE_CACHEABLE;
-        const UNCACHED: sel4::VMAttributes = sel4::VMAttributes::DEFAULT;
+        const CACHED: VMAttributes = VMAttributes::PAGE_CACHEABLE;
+        const UNCACHED: VMAttributes = VMAttributes::DEFAULT;
+    } else if #[cfg(ARCH_RISCV64)] {
+        const CACHED: VMAttributes = VMAttributes::DEFAULT;
+        const UNCACHED: VMAttributes = VMAttributes::NONE;
     } else if #[cfg(ARCH_X86_64)] {
-        const CACHED: sel4::VMAttributes = sel4::VMAttributes::DEFAULT;
-        const UNCACHED: sel4::VMAttributes = sel4::VMAttributes::CACHE_DISABLED;
+        const CACHED: VMAttributes = VMAttributes::DEFAULT;
+        const UNCACHED: VMAttributes = VMAttributes::CACHE_DISABLED;
     }
 }
 
-pub(crate) fn vm_attributes_from_whether_cached(cached: bool) -> sel4::VMAttributes {
+pub(crate) fn vm_attributes_from_whether_cached(cached: bool) -> VMAttributes {
     if cached {
         CACHED
     } else {

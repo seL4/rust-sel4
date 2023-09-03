@@ -10,7 +10,7 @@ class BaseComponent:
         self.name = name
 
         cspace = self.alloc(ObjectType.seL4_CapTableObject, 'cspace')
-        vspace = self.alloc(self.composition.arch.vspace().object, 'vspace')
+        vspace = self.alloc(self.composition.capdl_arch.vspace().object, 'vspace')
         self.render_state().cspaces[self.key] = CSpaceAllocator(cspace)
         self.render_state().addr_spaces[self.key] = AddressSpaceAllocator('{}_addr_space'.format(self.key), vspace)
         self.render_state().pds[self.key] = vspace
@@ -47,7 +47,7 @@ class BaseComponent:
         pass
 
     def finalize(self):
-        self.cspace().cnode.finalise_size(arch=self.composition.arch)
+        self.cspace().cnode.finalise_size(arch=self.composition.capdl_arch)
 
     def fmt(self, s, *args):
         return s.format(self.name, *args)

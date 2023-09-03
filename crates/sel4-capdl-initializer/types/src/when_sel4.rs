@@ -24,6 +24,13 @@ impl<'a, D, M> Object<'a, D, M> {
                     sel4::FrameSize::LARGE_BITS => ObjectBlueprintArch::LargePage.into(),
                     _ => panic!(),
                 },
+                #[sel4_cfg(ARCH_RISCV64)]
+                Object::Frame(obj) => match obj.size_bits {
+                    sel4::FrameSize::_4K_BITS => ObjectBlueprintArch::_4KPage.into(),
+                    sel4::FrameSize::MEGA_BITS => ObjectBlueprintArch::MegaPage.into(),
+                    sel4::FrameSize::GIGA_BITS => ObjectBlueprintSeL4Arch::GigaPage.into(),
+                    _ => panic!(),
+                },
                 #[sel4_cfg(ARCH_X86_64)]
                 Object::Frame(obj) => match obj.size_bits {
                     sel4::FrameSize::_4K_BITS => ObjectBlueprintArch::_4K.into(),
@@ -41,6 +48,12 @@ impl<'a, D, M> Object<'a, D, M> {
                         3 => ObjectBlueprintArch::PT.into(),
                         _ => panic!(),
                     }
+                }
+                #[sel4_cfg(ARCH_RISCV64)]
+                Object::PageTable(obj) => {
+                    let level = obj.level.unwrap();
+                    assert_eq!(obj.is_root, level == 0); // sanity check
+                    ObjectBlueprintArch::PageTable.into()
                 }
                 #[sel4_cfg(ARCH_X86_64)]
                 Object::PageTable(obj) => {
@@ -123,6 +136,9 @@ sel4::sel4_cfg_if! {
     if #[cfg(ARCH_AARCH64)] {
         const CACHED: VMAttributes = VMAttributes::PAGE_CACHEABLE;
         const UNCACHED: VMAttributes = VMAttributes::DEFAULT;
+    } else if #[cfg(ARCH_RISCV64)] {
+        const CACHED: VMAttributes = VMAttributes::DEFAULT;
+        const UNCACHED: VMAttributes = VMAttributes::NONE;
     } else if #[cfg(ARCH_X86_64)] {
         const CACHED: VMAttributes = VMAttributes::DEFAULT;
         const UNCACHED: VMAttributes = VMAttributes::CACHE_DISABLED;

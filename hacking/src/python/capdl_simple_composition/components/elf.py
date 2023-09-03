@@ -32,7 +32,7 @@ class ElfComponent(BaseComponent):
         elf_fname = '{}.elf'.format(self.name)
         elf_path = Path(self.config()['image'])
         self.elf_path = elf_path
-        self.elf = ELF(str(elf_path), elf_fname, self.composition.arch.capdl_name())
+        self.elf = ELF(str(elf_path), elf_fname, self.composition.arch)
 
         self.composition.register_file(elf_fname, elf_path)
 

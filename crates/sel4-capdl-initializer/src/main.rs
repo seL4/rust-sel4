@@ -21,8 +21,10 @@ use sel4_capdl_initializer_types::{
 use sel4_logging::{LevelFilter, Logger, LoggerBuilder};
 use sel4_root_task::root_task;
 
-// const LOG_LEVEL: LevelFilter = LevelFilter::Debug;
-const LOG_LEVEL: LevelFilter = LevelFilter::Info;
+const LOG_LEVEL: LevelFilter =
+    // LevelFilter::Trace
+    // LevelFilter::Debug
+    LevelFilter::Info;
 
 static LOGGER: Logger = LoggerBuilder::const_default()
     .level_filter(LOG_LEVEL)

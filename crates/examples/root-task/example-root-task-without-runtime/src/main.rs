@@ -114,7 +114,7 @@ cfg_if::cfg_if! {
                     b __rust_entry
 
                 1:
-                    b 1
+                    b 1b
             "#
         }
     } else if #[cfg(target_arch = "riscv64")] {
@@ -161,7 +161,7 @@ cfg_if::cfg_if! {
                     call __rust_entry
 
                 1:
-                    jmp 1
+                    jmp 1b
             "#
         }
     } else {

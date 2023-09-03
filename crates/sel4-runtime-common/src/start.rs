@@ -51,7 +51,7 @@ cfg_if::cfg_if! {
                     b sel4_runtime_rust_entry
 
                 1:
-                    b 1
+                    b 1b
             "#
         }
     } else if #[cfg(target_arch = "riscv64")] {
@@ -98,7 +98,7 @@ cfg_if::cfg_if! {
                     call sel4_runtime_rust_entry
 
                 1:
-                    jmp 1
+                    jmp 1b
             "#
         }
     } else {

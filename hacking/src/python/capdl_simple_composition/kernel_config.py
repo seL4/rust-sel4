@@ -29,8 +29,11 @@ class KernelConfig:
     def is_mcs(self):
         return self['KERNEL_MCS']
 
+    # TODO
     def page_sizes_in_bits(self):
         if self.arch() == 'arm':
+            return [12, 21]
+        elif self.sel4_arch() == 'riscv64':
             return [12, 21]
         elif self.arch() == 'x86':
             return [12, 21]
@@ -41,7 +44,8 @@ class KernelConfig:
         return self.page_sizes_in_bits()[0]
 
     def larger_page_size_in_bits(self):
-        assert self.arch() == 'arm' or self.arch() == 'x86'
+        # TODO
+        # assert self.arch() == 'arm' or self.arch() == 'x86'
         return self.page_sizes_in_bits()[1]
 
     def page_sizes(self):

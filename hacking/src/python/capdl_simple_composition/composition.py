@@ -41,10 +41,11 @@ class BaseComposition:
             object_sizes = yaml.load(f, Loader=yaml.FullLoader)
         register_object_sizes(object_sizes)
 
-        self.arch = self.kernel_config.capdl_arch()
+        self.arch = self.kernel_config.sel4_arch()
+        self.capdl_arch = self.kernel_config.capdl_arch()
 
         obj_space = ObjectAllocator()
-        obj_space.spec.arch = self.arch.capdl_name()
+        obj_space.spec.arch = self.arch
         self.render_state = RenderState(obj_space=obj_space)
 
         # TODO
