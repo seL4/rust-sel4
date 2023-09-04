@@ -140,6 +140,7 @@ fn get_device_regions() -> Vec<Range<u64>> {
         "qemu-arm-virt" => vec![page(0x0900_0000)],
         "bcm2711" => vec![page(0x0000_0000), page(0xfe21_5000)],
         "spike" => vec![],
+        "qemu-riscv-virt" => vec![],
         _ => panic!("unsupported platform"),
     }
 }

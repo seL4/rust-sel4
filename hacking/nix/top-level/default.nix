@@ -11,10 +11,10 @@ in {
   };
 
   worldsForEverythingInstances = [
-    pkgs.host.x86_64.none.this.worlds.default
     pkgs.host.aarch64.none.this.worlds.default
     pkgs.host.aarch64.none.this.worlds.qemu-arm-virt.sel4cp
-    pkgs.host.riscv64.none.this.worlds.spike
+    pkgs.host.riscv64.none.this.worlds.default
+    pkgs.host.x86_64.none.this.worlds.default
   ];
 
   sel4testInstances = (map (x: x.this.sel4test) [
@@ -50,7 +50,6 @@ in {
     sel4testInstances
 
     pkgs.host.aarch32.none.this.worlds.default.seL4
-    pkgs.host.riscv64.none.this.worlds.default.seL4
     pkgs.host.riscv32.none.this.worlds.default.seL4
     pkgs.host.ia32.none.this.worlds.default.seL4
 

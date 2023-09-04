@@ -98,10 +98,52 @@ in rec {
 
   riscv64 =
     let
-      numCores = "1";
-      mkSeL4KernelWithPayloadArgs = loader: [ "-kernel" loader ];
     in rec {
-      default = spike;
+      default = qemu-riscv-virt.default;
+
+      qemu-riscv-virt =
+        let
+          mk =
+            { mcs ? false
+            , smp ? false
+            }:
+            let
+              numCores = if smp then "2" else "1";
+              qemuMemory = "3072";
+            in
+              mkWorld {
+                inherit kernelLoaderConfig corePlatformConfig;
+                kernelConfig = kernelConfigCommon // {
+                  QEMU_MEMORY = mkString qemuMemory;
+                  KernelArch = mkString "riscv";
+                  KernelSel4Arch = mkString "riscv64";
+                  KernelPlatform = mkString "qemu-riscv-virt";
+                  KernelMaxNumNodes = mkString numCores;
+                  KernelIsMCS = fromBool mcs;
+                };
+                canSimulate = true;
+                mkInstanceForPlatform = platUtils.qemu.mkMkInstanceForPlatform {
+                  mkQemuCmd = loader: [
+                    "${pkgsBuildBuild.this.qemuForSeL4}/bin/qemu-system-riscv64"
+                      "-machine" "virt"
+                      "-cpu" "rv64" "-smp" numCores "-m" qemuMemory
+                      "-nographic"
+                      "-serial" "mon:stdio"
+                      "-kernel" loader
+                  ];
+                };
+              };
+        in rec {
+          default = legacy.nosmp;
+          mcs = {
+            smp = mk { mcs = true; smp = true; };
+            nosmp = mk { mcs = true; smp = false; };
+          };
+          legacy = {
+            smp = mk { mcs = false; smp = true; };
+            nosmp = mk { mcs = false; smp = false; };
+          };
+        };
 
       spike = mkWorld {
         inherit kernelLoaderConfig;
@@ -115,7 +157,7 @@ in rec {
           mkQemuCmd = loader: [
             "${pkgsBuildBuild.this.qemuForSeL4}/bin/qemu-system-riscv64"
               "-machine" "spike"
-              "-cpu" "rv64" "-smp" numCores "-m" "size=4096M"
+              "-cpu" "rv64" "-m" "size=4096M"
               "-nographic"
               "-serial" "mon:stdio"
           ] ++ mkSeL4KernelWithPayloadArgs loader;
