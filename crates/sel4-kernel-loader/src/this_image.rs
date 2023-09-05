@@ -4,7 +4,7 @@ use core::slice;
 use sel4_immutable_cell::ImmutableCell;
 use sel4_kernel_loader_payload_types::*;
 
-pub(crate) fn get_payload() -> (PayloadForX, &'static [u8]) {
+pub(crate) fn get_payload() -> (ConcretePayload, &'static [u8]) {
     let blob = unsafe {
         slice::from_raw_parts(
             *loader_payload_start.get() as *const u8,

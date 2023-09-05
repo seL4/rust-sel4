@@ -66,7 +66,7 @@ pub fn serialize_payload(
             .next_multiple_of(PAGE_SIZE);
     let fdt_phys_addr_range = builder.add_region(fdt_paddr, fdt_content);
 
-    let payload = PayloadForX {
+    let payload = ConcretePayload {
         info: PayloadInfo {
             kernel_image,
             user_image,

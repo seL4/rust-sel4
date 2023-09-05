@@ -9,7 +9,7 @@ use serde::{Deserialize, Serialize};
 
 pub const MAX_NUM_REGIONS: usize = 16;
 
-pub type PayloadForX = Payload<IndirectRegionContent, MAX_NUM_REGIONS>;
+pub type ConcretePayload = Payload<IndirectRegionContent, MAX_NUM_REGIONS>;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
