@@ -13,7 +13,7 @@ const MU_LSR_DATAREADY: u32 = 1 << 0;
 
 register_structs! {
     #[allow(non_snake_case)]
-    pub Bcm2835AuxUartRegisterBlock {
+    pub(crate)Bcm2835AuxUartRegisterBlock {
         (0x000 => _reserved0),
         (0x040 => IO: ReadWrite<u8>),
         (0x041 => _reserved1),
@@ -24,12 +24,12 @@ register_structs! {
     }
 }
 
-pub struct Bcm2835AuxUartDevice {
+pub(crate) struct Bcm2835AuxUartDevice {
     base_addr: usize,
 }
 
 impl Bcm2835AuxUartDevice {
-    pub const unsafe fn new(base_addr: usize) -> Self {
+    pub(crate) const unsafe fn new(base_addr: usize) -> Self {
         Self { base_addr }
     }
 
@@ -37,7 +37,7 @@ impl Bcm2835AuxUartDevice {
         self.base_addr as *const _
     }
 
-    pub fn init(&self) {}
+    pub(crate) fn init(&self) {}
 }
 
 impl Deref for Bcm2835AuxUartDevice {
@@ -49,7 +49,7 @@ impl Deref for Bcm2835AuxUartDevice {
 }
 
 impl Bcm2835AuxUartDevice {
-    pub fn put_char(&self, c: u8) {
+    pub(crate) fn put_char(&self, c: u8) {
         loop {
             if self.LSR.get() & MU_LSR_TXIDLE != 0 {
                 break;

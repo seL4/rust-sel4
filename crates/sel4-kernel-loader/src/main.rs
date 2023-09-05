@@ -18,7 +18,6 @@ use sel4_logging::LevelFilter;
 mod arch;
 mod barrier;
 mod copy_payload_data;
-mod debug;
 mod drivers;
 mod enter_kernel;
 mod fmt;
@@ -33,6 +32,7 @@ mod this_image;
 const LOG_LEVEL: LevelFilter = LevelFilter::Debug;
 
 const MAX_NUM_NODES: usize = sel4_config::sel4_cfg_usize!(MAX_NUM_NODES);
+
 const NUM_SECONDARY_CORES: usize = MAX_NUM_NODES - 1;
 
 #[no_mangle]
@@ -46,10 +46,11 @@ extern "C" fn main() -> ! {
 #[panic_handler]
 extern "C" fn panic_handler(info: &PanicInfo) -> ! {
     log::error!("{}", info);
-    crate::arch::idle()
+    arch::idle()
 }
 
 mod translation_tables {
+    #[sel4_config::sel4_cfg(ARCH_AARCH64)]
     mod loader {
         include!(concat!(env!("OUT_DIR"), "/loader_translation_tables.rs"));
     }

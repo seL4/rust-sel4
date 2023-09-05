@@ -3,7 +3,7 @@
 
 use core::fmt;
 
-use crate::debug;
+use crate::plat::debug;
 
 struct DebugWrite;
 

@@ -6,7 +6,7 @@ use sel4_platform_info::PLATFORM_INFO;
 use crate::{
     arch::{idle, init_platform_state},
     barrier::Barrier,
-    copy_payload_data, debug, enter_kernel, fmt, logging, sanity_check, smp, MAX_NUM_NODES,
+    copy_payload_data, enter_kernel, fmt, logging, plat, sanity_check, smp, MAX_NUM_NODES,
 };
 
 static KERNEL_ENTRY_BARRIER: Barrier = Barrier::new(MAX_NUM_NODES);
@@ -18,7 +18,7 @@ pub(crate) fn run<T: RegionContent, const N: usize>(
 where
     <T as RegionContent>::Source: 'static,
 {
-    debug::init();
+    plat::debug::init();
 
     logging::set_logger();
 

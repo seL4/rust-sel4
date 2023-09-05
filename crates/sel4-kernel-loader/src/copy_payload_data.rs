@@ -3,7 +3,7 @@ use core::slice;
 
 use sel4_kernel_loader_payload_types::{Region, RegionContent};
 
-pub fn copy_payload_data<T: RegionContent>(
+pub(crate) fn copy_payload_data<T: RegionContent>(
     regions: &[Region<T>],
     region_content_source: &T::Source,
 ) {
@@ -22,7 +22,6 @@ pub fn copy_payload_data<T: RegionContent>(
             }
             None => {
                 // NOTE slice::fill is too slow
-                // dst.fill(0);
                 unsafe {
                     ptr::write_bytes(dst.as_mut_ptr(), 0, dst.len());
                 }

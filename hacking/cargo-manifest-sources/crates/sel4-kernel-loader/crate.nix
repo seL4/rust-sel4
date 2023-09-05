@@ -33,6 +33,7 @@ mk {
     sel4-logging
     sel4-config
     sel4-kernel-loader-payload-types
+    sel4-immutable-cell
   ];
   nix.local.build-dependencies = with localCrates; [
     sel4-rustfmt-helper

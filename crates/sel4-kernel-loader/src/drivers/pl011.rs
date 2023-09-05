@@ -13,7 +13,7 @@ const PL011_UARTFR_RXFE: u32 = 1 << 4;
 
 register_structs! {
     #[allow(non_snake_case)]
-    pub Pl011RegisterBlock {
+    pub(crate)Pl011RegisterBlock {
         (0x000 => DR: ReadWrite<u8>),
         (0x001 => _reserved0),
         (0x018 => FR: ReadWrite<u32>),
@@ -25,12 +25,12 @@ register_structs! {
     }
 }
 
-pub struct Pl011Device {
+pub(crate) struct Pl011Device {
     base_addr: usize,
 }
 
 impl Pl011Device {
-    pub const unsafe fn new(base_addr: usize) -> Self {
+    pub(crate) const unsafe fn new(base_addr: usize) -> Self {
         Self { base_addr }
     }
 
@@ -38,7 +38,7 @@ impl Pl011Device {
         self.base_addr as *const _
     }
 
-    pub fn init(&self) {
+    pub(crate) fn init(&self) {
         self.IMSC.set(0x50);
     }
 }
@@ -52,7 +52,7 @@ impl Deref for Pl011Device {
 }
 
 impl Pl011Device {
-    pub fn put_char(&self, c: u8) {
+    pub(crate) fn put_char(&self, c: u8) {
         loop {
             if self.FR.get() & PL011_UARTFR_TXFF == 0 {
                 break;

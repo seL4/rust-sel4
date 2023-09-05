@@ -37,13 +37,8 @@ pub(crate) fn start_secondary_cores(payload_info: &PayloadInfo) {
     }
 }
 
-extern "C" {
-    fn secondary_entry() -> !;
-}
-
 #[no_mangle]
 extern "C" fn secondary_entry_rust() -> ! {
-    // crate::fmt::debug_println_without_synchronization!("secondary_core_entry()");
     let core_id;
     let payload_info;
     {

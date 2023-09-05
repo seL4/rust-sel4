@@ -1,5 +1,3 @@
-use crate::arch::drivers::sbi;
-
 pub(crate) fn init() {}
 
 pub(crate) fn put_char(c: u8) {

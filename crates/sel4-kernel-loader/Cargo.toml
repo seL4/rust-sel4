@@ -11,6 +11,7 @@ heapless = { version = "0.7.16", features = ["serde"] }
 log = "0.4.17"
 postcard = { version = "1.0.2", default-features = false }
 sel4-config = { path = "../sel4/config" }
+sel4-immutable-cell = { path = "../sel4-immutable-cell" }
 sel4-kernel-loader-payload-types = { path = "./payload-types", features = ["serde"] }
 sel4-logging = { path = "../sel4-logging" }
 sel4-platform-info = { path = "../sel4-platform-info" }

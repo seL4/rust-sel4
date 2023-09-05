@@ -1,6 +1,5 @@
 use core::arch::asm;
 
-pub(crate) mod drivers;
 pub(crate) mod init_platform_state;
 
 pub(crate) fn idle() -> ! {

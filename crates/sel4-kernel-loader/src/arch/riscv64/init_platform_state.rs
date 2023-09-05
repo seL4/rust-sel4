@@ -6,9 +6,9 @@ extern "C" {
     static kernel_boot_level_0_table_num_total_entries: usize;
 }
 
-pub fn init_platform_state_per_core(_core_id: usize) {}
+pub(crate) fn init_platform_state_per_core(_core_id: usize) {}
 
-pub fn init_platform_state_per_core_after_which_no_syncronization(_core_id: usize) {
+pub(crate) fn init_platform_state_per_core_after_which_no_syncronization(_core_id: usize) {
     unsafe {
         let ptr = &kernel_boot_level_0_table as *const u64 as *mut u64;
         let vaddr = ptr as usize;
