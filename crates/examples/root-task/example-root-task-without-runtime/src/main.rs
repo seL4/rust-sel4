@@ -113,8 +113,7 @@ cfg_if::cfg_if! {
                     mov sp, x9
                     b __rust_entry
 
-                1:
-                    b 1b
+                1:  b 1b
             "#
         }
     } else if #[cfg(target_arch = "riscv64")] {
@@ -131,8 +130,7 @@ cfg_if::cfg_if! {
                     # See https://www.sifive.com/blog/all-aboard-part-3-linker-relaxation-in-riscv-toolchain
                 .option push
                 .option norelax
-                1:
-                    auipc gp, %pcrel_hi(__global_pointer$)
+                1:  auipc gp, %pcrel_hi(__global_pointer$)
                     addi gp, gp, %pcrel_lo(1b)
                 .option pop
 
@@ -140,8 +138,7 @@ cfg_if::cfg_if! {
                     ld sp, (sp)
                     jal __rust_entry
 
-                1:
-                    j 1b
+                1:  j 1b
             "#
         }
     } else if #[cfg(target_arch = "x86_64")] {
@@ -160,8 +157,7 @@ cfg_if::cfg_if! {
                     push rbp
                     call __rust_entry
 
-                1:
-                    jmp 1b
+                1:  jmp 1b
             "#
         }
     } else {
