@@ -1,3 +1,4 @@
+use std::env;
 use std::path::Path;
 
 #[rustfmt::skip]
@@ -47,9 +48,12 @@ pub fn generate_rust(
         builder = builder.blocklist_item(item);
     }
 
-    // HACK for risc64imac (already handled in upstream bindgen for riscv64gc)
-    if sel4_config::sel4_cfg_bool!(ARCH_RISCV64) {
-        builder = builder.clang_arg("--target=riscv64-unknown-linux-gnu");
+    {
+        // HACK for risc64imac (already handled in upstream bindgen for riscv64gc)
+        let target = env::var("TARGET").unwrap();
+        if let Some(rest) = target.strip_prefix("riscv64imac-") {
+            builder = builder.clang_arg(format!("--target=riscv64-{}", rest));
+        }
     }
 
     builder
