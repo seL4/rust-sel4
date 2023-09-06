@@ -22,6 +22,12 @@ This work is funded by the [seL4 Foundation](https://sel4.systems/Foundation/hom
 
 [https://coliasgroup.com/rust-seL4/](https://coliasgroup.com/rust-seL4/)
 
+### Demos
+
+- Simple root task: https://github.com/coliasgroup/rust-seL4-root-task-demo
+- Simple system using the seL4 Core Platform: https://github.com/coliasgroup/rust-sel4cp-demo
+- HTTP server using the seL4 Core Platform: https://github.com/coliasgroup/rust-sel4cp-http-server-demo
+
 ### Overview of crates
 
 ##### General crates
@@ -64,6 +70,9 @@ This work is funded by the [seL4 Foundation](https://sel4.systems/Foundation/hom
 
 ### Integrating these crates into your project
 
+The best way to learn how to integrate these crates into your project is to check out these concrete
+examples of their use [listed above](#demos).
+
 These crates are not yet hosted on [crates.io](https://crates.io). Use them either as Git or path
 Cargo dependencies.
 
@@ -84,12 +93,6 @@ the crates which use them:
   Furthermore, if `$SEL4_KERNEL_LOADER_CONFIG` is set, then `sel4-kernel-loader` overrides the
   default configuration with one in the provided JSON file. Note that no configuration options are
   actually implemented yet.
-
-The best way to learn how to integrate these crates into your project is to check out these concrete
-examples of their use:
-
-- Simple root task: https://github.com/coliasgroup/rust-seL4-root-task-demo
-- Using the seL4 Core Platform: https://github.com/coliasgroup/rust-seL4-sel4cp-demo
 
 ### Quick start for running the tests in this repository
 
