@@ -3,6 +3,7 @@ use std::marker::PhantomData;
 use std::mem;
 use std::ops::Range;
 
+use bitfield::{BitMut, BitRange, BitRangeMut};
 use quote::ToTokens;
 
 pub trait Scheme {
@@ -25,7 +26,7 @@ pub trait Scheme {
 }
 
 pub trait SchemeLeafDescriptor<WordPrimitive> {
-    fn from_vaddr(vaddr: u64, level: usize) -> Self;
+    fn from_paddr(paddr: u64, level: usize) -> Self;
 
     fn to_raw(&self) -> WordPrimitive;
 }
@@ -57,14 +58,14 @@ impl<T: Scheme> SchemeHelpers<T> {
         T::LEVEL_BITS * (T::NUM_LEVELS - T::MIN_LEVEL_FOR_LEAF - 1) + T::PAGE_BITS
     }
 
-    pub(crate) fn leaf_descriptor_from_vaddr_with_check(
-        vaddr: u64,
+    pub(crate) fn leaf_descriptor_from_paddr_with_check(
+        paddr: u64,
         level: usize,
     ) -> T::LeafDescriptor {
         let num_zero_bits = (T::NUM_LEVELS - level - 1) * T::LEVEL_BITS + T::PAGE_BITS;
         let mask = (1 << num_zero_bits) - 1;
-        assert_eq!(vaddr & mask, 0);
-        T::LeafDescriptor::from_vaddr(vaddr, level)
+        assert_eq!(paddr & mask, 0);
+        T::LeafDescriptor::from_paddr(paddr, level)
     }
 }
 
@@ -92,9 +93,10 @@ impl Scheme for AArch64 {
 pub struct AArch64LeafDescriptor(u64);
 
 impl SchemeLeafDescriptor<u64> for AArch64LeafDescriptor {
-    fn from_vaddr(vaddr: u64, level: usize) -> Self {
-        let mask = if level == 3 { 0b11 } else { 0b01 };
-        Self(vaddr | mask)
+    fn from_paddr(paddr: u64, level: usize) -> Self {
+        let mut desc = paddr;
+        desc.set_bit_range(1, 0, if level == 3 { 0b11 } else { 0b01 });
+        Self(desc)
     }
 
     fn to_raw(&self) -> u64 {
@@ -103,18 +105,21 @@ impl SchemeLeafDescriptor<u64> for AArch64LeafDescriptor {
 }
 
 impl AArch64LeafDescriptor {
-    pub fn set_access_flag(self, value: bool) -> Self {
-        Self(self.0 | (u64::from(value) << 10))
+    pub fn set_access_flag(mut self, value: bool) -> Self {
+        self.0.set_bit(10, value);
+        self
     }
 
-    pub fn set_attribute_index(self, index: u64) -> Self {
-        assert_eq!(index & !0b111, 0);
-        Self(self.0 | (index << 2))
+    pub fn set_attribute_index(mut self, index: u64) -> Self {
+        assert_eq!(index >> 3, 0);
+        self.0.set_bit_range(4, 2, index);
+        self
     }
 
-    pub fn set_shareability(self, shareability: u64) -> Self {
-        assert_eq!(shareability & !0b11, 0);
-        Self(self.0 | (shareability << 8))
+    pub fn set_shareability(mut self, shareability: u64) -> Self {
+        assert_eq!(shareability >> 2, 0);
+        self.0.set_bit_range(9, 8, shareability);
+        self
     }
 }
 
@@ -153,11 +158,11 @@ impl Scheme for Riscv64Sv39 {
 pub struct Riscv64Sv39LeafDescriptor(u64);
 
 impl SchemeLeafDescriptor<u64> for Riscv64Sv39LeafDescriptor {
-    fn from_vaddr(vaddr: u64, _level: usize) -> Self {
-        Self((vaddr >> 2) | 0b1)
-            .set_read(true)
-            .set_write(true)
-            .set_execute(true)
+    fn from_paddr(paddr: u64, _level: usize) -> Self {
+        let mut desc = 0u64;
+        desc.set_bit_range(53, 10, BitRange::<u64>::bit_range(&paddr, 55, 12));
+        desc.set_bit(0, true);
+        Self(desc).set_read(true).set_write(true).set_execute(true)
     }
 
     fn to_raw(&self) -> u64 {
@@ -166,18 +171,18 @@ impl SchemeLeafDescriptor<u64> for Riscv64Sv39LeafDescriptor {
 }
 
 impl Riscv64Sv39LeafDescriptor {
-    pub fn set_read(self, value: bool) -> Self {
-        let ix = 1;
-        Self((self.0 & !(1 << ix)) | (u64::from(value) << ix))
+    pub fn set_read(mut self, value: bool) -> Self {
+        self.0.set_bit(1, value);
+        self
     }
 
-    pub fn set_write(self, value: bool) -> Self {
-        let ix = 2;
-        Self((self.0 & !(1 << ix)) | (u64::from(value) << ix))
+    pub fn set_write(mut self, value: bool) -> Self {
+        self.0.set_bit(2, value);
+        self
     }
 
-    pub fn set_execute(self, value: bool) -> Self {
-        let ix = 3;
-        Self((self.0 & !(1 << ix)) | (u64::from(value) << ix))
+    pub fn set_execute(mut self, value: bool) -> Self {
+        self.0.set_bit(3, value);
+        self
     }
 }

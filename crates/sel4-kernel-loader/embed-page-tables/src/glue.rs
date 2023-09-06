@@ -39,7 +39,7 @@ impl<T: Scheme> Region<T> {
 
 impl LeafLocation {
     pub fn map<T: Scheme>(&self, vaddr_to_paddr: impl FnOnce(u64) -> u64) -> T::LeafDescriptor {
-        SchemeHelpers::<T>::leaf_descriptor_from_vaddr_with_check(
+        SchemeHelpers::<T>::leaf_descriptor_from_paddr_with_check(
             (vaddr_to_paddr)(self.vaddr()),
             self.level(),
         )
