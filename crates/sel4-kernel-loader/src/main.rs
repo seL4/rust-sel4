@@ -49,12 +49,12 @@ extern "C" fn panic_handler(info: &PanicInfo) -> ! {
     arch::idle()
 }
 
-mod translation_tables {
+pub(crate) mod translation_tables {
     #[sel4_config::sel4_cfg(ARCH_AARCH64)]
     mod loader {
         include!(concat!(env!("OUT_DIR"), "/loader_translation_tables.rs"));
     }
-    mod kernel {
+    pub(crate) mod kernel {
         include!(concat!(env!("OUT_DIR"), "/kernel_translation_tables.rs"));
     }
 }

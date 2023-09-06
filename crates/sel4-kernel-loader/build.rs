@@ -125,10 +125,10 @@ fn mk_loader_map() -> String {
         ));
     }
 
-    let toks = regions
-        .build()
-        .construct_table()
-        .embed(format_ident!("loader_level_0_table"));
+    let toks = regions.build().construct_table().embed(
+        format_ident!("loader_level_0_table"),
+        format_ident!("sel4_kernel_loader_embed_page_tables_runtime"),
+    );
 
     format!("{toks}")
 }
@@ -163,10 +163,10 @@ fn mk_kernel_map(kernel_phys_addr_range: Range<u64>, kernel_phys_to_virt_offset:
             SchemeImpl::mk_kernel_leaf_for_kernel_map(kernel_phys_to_virt_offset, loc)
         }));
 
-    let toks = regions
-        .build()
-        .construct_table()
-        .embed(format_ident!("kernel_boot_level_0_table"));
+    let toks = regions.build().construct_table().embed(
+        format_ident!("kernel_boot_level_0_table"),
+        format_ident!("sel4_kernel_loader_embed_page_tables_runtime"),
+    );
 
     format!("{}", toks)
 }

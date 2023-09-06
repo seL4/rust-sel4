@@ -2820,6 +2820,7 @@ dependencies = [
  "sel4-immutable-cell",
  "sel4-kernel-loader-config-types",
  "sel4-kernel-loader-embed-page-tables",
+ "sel4-kernel-loader-embed-page-tables-runtime",
  "sel4-kernel-loader-payload-types",
  "sel4-logging",
  "sel4-platform-info",
@@ -2863,6 +2864,10 @@ dependencies = [
  "proc-macro2",
  "quote",
 ]
+
+[[package]]
+name = "sel4-kernel-loader-embed-page-tables-runtime"
+version = "0.1.0"
 
 [[package]]
 name = "sel4-kernel-loader-payload-types"

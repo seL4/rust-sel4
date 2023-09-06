@@ -7,11 +7,11 @@ use crate::scheme::{Scheme, SchemeHelpers, SchemeLeafDescriptor};
 use crate::table::{AbstractEntry, Table};
 
 impl<T: Scheme> Table<T> {
-    pub fn embed(&self, ident: Ident) -> TokenStream
+    pub fn embed(&self, symbol_ident: Ident, runtime_mod_ident: Ident) -> TokenStream
     where
         T::WordPrimitive: ToTokens,
     {
-        Embedding::new(ident).embed(self)
+        Embedding::new(symbol_ident, runtime_mod_ident).embed(self)
     }
 }
 
@@ -40,15 +40,17 @@ impl<'a, T: Scheme> EntryForEmbedding<'a, T> {
 }
 
 struct Embedding {
-    ident: Ident,
+    symbol_ident: Ident,
+    runtime_mod_ident: Ident,
     next_index: usize,
     tables: BTreeMap<usize, TokenStream>,
 }
 
 impl Embedding {
-    fn new(ident: Ident) -> Self {
+    fn new(symbol_ident: Ident, runtime_mod_ident: Ident) -> Self {
         Self {
-            ident,
+            symbol_ident,
+            runtime_mod_ident,
             next_index: 0,
             tables: BTreeMap::new(),
         }
@@ -57,24 +59,20 @@ impl Embedding {
     fn embed<'a, T: Scheme>(mut self, table: &'a Table<T>) -> TokenStream {
         let _ = self.embed_inner(table);
         self.check_tables_order();
-        let ident = self.ident;
-        let num_total_entries_ident = format_ident!("{}_num_total_entries", ident);
+        let runtime_mod_ident = self.runtime_mod_ident;
+        let symbol_ident = self.symbol_ident;
+        let runtime_scheme_ident = format_ident!("{}", T::RUNTIME_SCHEME_IDENT);
         let num_tables = self.next_index;
         let num_entries = SchemeHelpers::<T>::num_entries_in_table();
         let tables = self.tables.values();
         quote! {
-            #[repr(C, align(4096))]
-            pub struct Table(pub [*const (); #num_entries]);
+            use #runtime_mod_ident::*;
 
             #[no_mangle]
             #[allow(unused_unsafe)]
-            pub static mut #ident: [Table; #num_tables] = unsafe {
+            pub static mut #symbol_ident: Tables<#runtime_scheme_ident, #num_entries, #num_tables> = Tables::new(unsafe {
                 [#(#tables,)*]
-            };
-
-            #[no_mangle]
-            #[allow(unused_unsafe)]
-            pub static mut #num_total_entries_ident: usize = #num_tables * #num_entries;
+            });
         }
     }
 
@@ -88,24 +86,27 @@ impl Embedding {
         let index = self.allocate_index();
         let entries = table.entries.iter().map(|entry| {
             let entry = EntryForEmbedding::<T>::from_abstract_entry(entry);
-            let offset = entry.offset;
-            match &entry.ptr {
+            let ptr = match &entry.ptr {
                 None => {
                     quote! {
-                        (#offset as *const ())
+                        None
                     }
                 }
                 Some(ptr) => {
                     let child_index = self.embed_inner(ptr);
-                    let ident = &self.ident;
+                    let symbol_ident = &self.symbol_ident;
                     quote! {
-                        (&#ident[#child_index] as *const Table as *const ()).byte_add(#offset as usize)
+                        Some(#symbol_ident.table(#child_index))
                     }
                 }
+            };
+            let offset = entry.offset;
+            quote! {
+                Entry::new(#ptr, #offset as usize)
             }
         });
         let toks = quote! {
-            Table([#(#entries,)*])
+            Table::new([#(#entries,)*])
         };
         self.tables.insert(index, toks);
         index

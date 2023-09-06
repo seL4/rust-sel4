@@ -19,6 +19,8 @@ pub trait Scheme {
     const EMPTY_DESCRIPTOR: Self::WordPrimitive;
     const SYMBOLIC_BRANCH_DESCRIPTOR_OFFSET: Self::WordPrimitive;
 
+    const RUNTIME_SCHEME_IDENT: &'static str;
+
     type Hepers = SchemeHelpers<Self>;
 }
 
@@ -82,6 +84,8 @@ impl Scheme for AArch64 {
 
     const EMPTY_DESCRIPTOR: Self::WordPrimitive = 0b0;
     const SYMBOLIC_BRANCH_DESCRIPTOR_OFFSET: Self::WordPrimitive = 0b11;
+
+    const RUNTIME_SCHEME_IDENT: &'static str = "AArch64";
 }
 
 #[derive(Debug)]
@@ -141,6 +145,8 @@ impl Scheme for Riscv64Sv39 {
 
     const EMPTY_DESCRIPTOR: Self::WordPrimitive = riscv64_encode_for_linking(0b0);
     const SYMBOLIC_BRANCH_DESCRIPTOR_OFFSET: Self::WordPrimitive = riscv64_encode_for_linking(0b1);
+
+    const RUNTIME_SCHEME_IDENT: &'static str = "RiscV64";
 }
 
 #[derive(Debug)]

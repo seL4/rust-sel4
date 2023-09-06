@@ -33,6 +33,7 @@ mk {
     sel4-logging
     sel4-config
     sel4-kernel-loader-payload-types
+    sel4-kernel-loader-embed-page-tables-runtime
     sel4-immutable-cell
   ];
   nix.local.build-dependencies = with localCrates; [
