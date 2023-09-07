@@ -13,6 +13,12 @@ use parse::*;
 
 const WORD_SIZE: usize = sel4_config::sel4_cfg_usize!(WORD_SIZE);
 
+#[sel4_config::sel4_cfg(WORD_SIZE = "32")]
+type Word = u32;
+
+#[sel4_config::sel4_cfg(WORD_SIZE = "64")]
+type Word = u64;
+
 pub fn generate_rust(
     blocklist_for_bindgen: &mut Vec<String>,
     interface_xml_paths: &[impl AsRef<Path>],
@@ -149,8 +155,8 @@ impl<'a> InvocationGenerator<'a> {
         }
 
         let (marshalling_toks, num_msg_regs, num_caps) = self.generate_marshalling(in_params);
-        let num_msg_regs = u64::try_from(num_msg_regs).unwrap();
-        let num_caps = u64::try_from(num_caps).unwrap();
+        let num_msg_regs = Word::try_from(num_msg_regs).unwrap();
+        let num_caps = Word::try_from(num_caps).unwrap();
 
         let invocation_label_path = {
             let ident = format_ident!("{}", invocation_id);
@@ -477,7 +483,10 @@ impl ParameterType {
     }
 
     fn pass_by_reference(&self) -> bool {
-        self.width() > WORD_SIZE
+        match self {
+            Self::Struct { members } => members.len() > 1,
+            _ => false,
+        }
     }
 }
 
@@ -563,7 +572,7 @@ impl ParameterTypes {
             this.insert_capability("seL4_ARM_IOPageTable");
         }
 
-        if sel4_config::sel4_cfg_bool!(ARCH_RISCV64) {
+        if sel4_config::sel4_cfg_bool!(ARCH_RISCV64) || sel4_config::sel4_cfg_bool!(ARCH_RISCV32) {
             this.insert_enum("seL4_RISCV_VMAttributes", WORD_SIZE);
             this.insert_capability("seL4_RISCV_Page");
             this.insert_capability("seL4_RISCV_PageTable");

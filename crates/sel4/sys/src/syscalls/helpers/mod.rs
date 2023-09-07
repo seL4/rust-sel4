@@ -15,7 +15,7 @@ impl seL4_MessageInfo {
         self.0.into_arr()[0]
     }
 
-    pub(crate) fn msg_helper(&self, msg: Option<seL4_Word>, i: u64) -> seL4_Word {
+    pub(crate) fn msg_helper(&self, msg: Option<seL4_Word>, i: seL4_Word) -> seL4_Word {
         if let Some(msg) = msg && i < self.get_length() {
             msg
         } else {

@@ -186,7 +186,7 @@ superCallPackage ../rust-utils {} self //
 
   # TODO name more configurations
   sel4test = makeOverridable' mkSeL4Test {
-    rust = hostPlatform.is64bit;
+    rust = hostPlatform.is64bit || hostPlatform.isRiscV;
   };
 
   ### helpers
