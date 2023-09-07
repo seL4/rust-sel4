@@ -6,6 +6,9 @@ use sel4_config::sel4_cfg;
 use crate::{seL4_Word, seL4_MessageInfo};
 use super::sys_id_to_word;
 
+#[sel4_cfg(not(SYSCALL))]
+compile_error!("unsupported configuration");
+
 pub fn sys_send(
     sys: c_int,
     dest: seL4_Word,
