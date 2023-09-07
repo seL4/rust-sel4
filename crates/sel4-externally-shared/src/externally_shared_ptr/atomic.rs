@@ -23,18 +23,30 @@ macro_rules! atomic_primitive_impl {
     };
 }
 
+#[cfg(target_has_atomic = "8")]
 atomic_primitive_impl!(bool, atomic::AtomicBool);
-atomic_primitive_impl!(i8, atomic::AtomicI8);
-atomic_primitive_impl!(i16, atomic::AtomicI16);
-atomic_primitive_impl!(i32, atomic::AtomicI32);
-atomic_primitive_impl!(i64, atomic::AtomicI64);
-atomic_primitive_impl!(isize, atomic::AtomicIsize);
+#[cfg(target_has_atomic = "8")]
 atomic_primitive_impl!(u8, atomic::AtomicU8);
+#[cfg(target_has_atomic = "8")]
+atomic_primitive_impl!(i8, atomic::AtomicI8);
+#[cfg(target_has_atomic = "16")]
 atomic_primitive_impl!(u16, atomic::AtomicU16);
+#[cfg(target_has_atomic = "16")]
+atomic_primitive_impl!(i16, atomic::AtomicI16);
+#[cfg(target_has_atomic = "32")]
 atomic_primitive_impl!(u32, atomic::AtomicU32);
+#[cfg(target_has_atomic = "32")]
+atomic_primitive_impl!(i32, atomic::AtomicI32);
+#[cfg(target_has_atomic = "64")]
 atomic_primitive_impl!(u64, atomic::AtomicU64);
+#[cfg(target_has_atomic = "64")]
+atomic_primitive_impl!(i64, atomic::AtomicI64);
+#[cfg(target_has_atomic = "usize")]
 atomic_primitive_impl!(usize, atomic::AtomicUsize);
+#[cfg(target_has_atomic = "isize")]
+atomic_primitive_impl!(isize, atomic::AtomicIsize);
 
+#[cfg(target_has_atomic = "ptr")]
 impl<T> AtomicPrimitive for *mut T {
     type Atomic = atomic::AtomicPtr<T>;
 

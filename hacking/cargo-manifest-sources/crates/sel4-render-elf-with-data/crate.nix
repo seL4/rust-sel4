@@ -5,7 +5,7 @@ mk {
   dependencies = {
     object = { version = versions.object; features = [ "all" ]; };
     clap = "3.2.23";
-    inherit (versions) anyhow fallible-iterator;
+    inherit (versions) anyhow fallible-iterator num;
   };
   nix.meta.labels = [ "leaf" ];
   nix.meta.requirements = [ "unix" ];

@@ -12,5 +12,6 @@ sel4-platform-info-types = { path = "./types" }
 proc-macro2 = "1.0.50"
 quote = "1.0.23"
 sel4-build-env = { path = "../sel4/build-env" }
+sel4-config = { path = "../sel4/config" }
 serde = { version = "1.0.147", features = ["derive"] }
 serde_yaml = "0.9.14"

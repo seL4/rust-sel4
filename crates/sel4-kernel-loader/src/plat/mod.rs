@@ -8,7 +8,7 @@ mod imp;
 #[path = "bcm2711/mod.rs"]
 mod imp;
 
-#[sel4_cfg(all(ARCH_RISCV64, any(PLAT_SPIKE, PLAT_QEMU_RISCV_VIRT)))]
+#[sel4_cfg(all(any(ARCH_RISCV64, ARCH_RISCV32), any(PLAT_SPIKE, PLAT_QEMU_RISCV_VIRT)))]
 #[path = "riscv_generic/mod.rs"]
 mod imp;
 

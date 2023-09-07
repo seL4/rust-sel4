@@ -11,13 +11,10 @@ use crate::{
 
 static KERNEL_ENTRY_BARRIER: Barrier = Barrier::new(MAX_NUM_NODES);
 
-pub(crate) fn run<T: RegionContent, const N: usize>(
-    get_payload: impl FnOnce() -> (Payload<T, N>, &'static T::Source),
+pub(crate) fn run<U: RegionContent<Source: 'static>, const N: usize>(
+    get_payload: impl FnOnce() -> (Payload<usize, U, N>, &'static U::Source),
     own_footprint: &Range<usize>,
-) -> !
-where
-    <T as RegionContent>::Source: 'static,
-{
+) -> ! {
     plat::debug::init();
 
     logging::set_logger();
@@ -52,11 +49,11 @@ where
     common_epilogue(0, &payload.info)
 }
 
-pub(crate) fn secondary_main(core_id: usize, payload_info: &PayloadInfo) -> ! {
+pub(crate) fn secondary_main(core_id: usize, payload_info: &PayloadInfo<usize>) -> ! {
     common_epilogue(core_id, payload_info)
 }
 
-pub(crate) fn common_epilogue(core_id: usize, payload_info: &PayloadInfo) -> ! {
+pub(crate) fn common_epilogue(core_id: usize, payload_info: &PayloadInfo<usize>) -> ! {
     if core_id == 0 {
         log::info!("Entering kernel");
     }

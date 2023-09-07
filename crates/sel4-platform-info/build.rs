@@ -11,6 +11,12 @@ use sel4_build_env::get_with_sel4_prefix_relative_fallback;
 
 const SEL4_PLATFORM_INFO_ENV: &str = "SEL4_PLATFORM_INFO";
 
+#[sel4_config::sel4_cfg(WORD_SIZE = "32")]
+type Word = u32;
+
+#[sel4_config::sel4_cfg(WORD_SIZE = "64")]
+type Word = u64;
+
 fn main() {
     let platform_info_path =
         get_with_sel4_prefix_relative_fallback(SEL4_PLATFORM_INFO_ENV, "support/platform_gen.yaml");
@@ -22,7 +28,7 @@ fn main() {
     fs::write(out_path, format!("{fragment}")).unwrap();
 }
 
-type Ranges = Vec<Range<u64>>;
+type Ranges = Vec<Range<Word>>;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 struct PlatformInfoForBuildSystem {
@@ -32,13 +38,18 @@ struct PlatformInfoForBuildSystem {
 
 impl PlatformInfoForBuildSystem {
     fn embed(&self) -> TokenStream {
+        let ty = match sel4_config::sel4_cfg_usize!(WORD_SIZE) {
+            32 => quote!(u32),
+            64 => quote!(u64),
+            _ => unreachable!(),
+        };
         let memory = embed_ranges(&self.memory);
         let devices = embed_ranges(&self.devices);
         quote! {
-            PlatformInfo {
+            pub const PLATFORM_INFO: PlatformInfo<#ty> = PlatformInfo {
                 memory: #memory,
                 devices: #devices,
-            }
+            };
         }
     }
 }

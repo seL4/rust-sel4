@@ -26,6 +26,7 @@ let
     }
     {
       profile.${profile} = {
+        # overflow-checks = true; # TODO
         codegen-units = 1;
         incremental = false;
         # debug = 2;

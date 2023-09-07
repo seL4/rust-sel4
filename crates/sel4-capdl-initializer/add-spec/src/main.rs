@@ -1,3 +1,4 @@
+#![feature(associated_type_bounds)]
 #![feature(int_roundings)]
 #![feature(never_type)]
 #![feature(unwrap_infallible)]
@@ -7,6 +8,7 @@ use std::fs;
 use anyhow::Result;
 
 use sel4_capdl_initializer_types::{Footprint, InputSpec};
+use sel4_render_elf_with_data::{ConcreteFileHeader32, ConcreteFileHeader64, ElfBitWidth};
 
 mod args;
 mod render_elf;
@@ -19,6 +21,7 @@ const GRANULE_SIZE_BITS: usize = 12;
 
 fn main() -> Result<()> {
     let args = Args::parse()?;
+
     if args.verbose {
         eprintln!("{:#?}", args);
     }
@@ -51,8 +54,17 @@ fn main() -> Result<()> {
         eprintln!("heap size: {}", heap_size / 4096);
     }
 
-    let rendered_initializer_elf =
-        render_elf::render_elf(&initializer_elf, &serialized_spec, heap_size);
+    let render_elf_args = render_elf::RenderElfArgs {
+        orig_elf: &initializer_elf,
+        data: &serialized_spec,
+        granule_size_bits: GRANULE_SIZE_BITS,
+        heap_size,
+    };
+
+    let rendered_initializer_elf = match ElfBitWidth::detect(&initializer_elf).unwrap() {
+        ElfBitWidth::Elf32 => render_elf_args.call_with::<ConcreteFileHeader32>(),
+        ElfBitWidth::Elf64 => render_elf_args.call_with::<ConcreteFileHeader64>(),
+    };
 
     fs::write(out_file_path, rendered_initializer_elf)?;
     Ok(())

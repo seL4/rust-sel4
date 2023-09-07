@@ -3,4 +3,6 @@
 
 use sel4_platform_info_types::PlatformInfo;
 
-pub const PLATFORM_INFO: PlatformInfo = include!(concat!(env!("OUT_DIR"), "/gen.rs"));
+include! {
+    concat!(env!("OUT_DIR"), "/gen.rs")
+}

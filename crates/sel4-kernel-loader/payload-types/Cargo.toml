@@ -7,4 +7,5 @@ license = "BSD-2-Clause"
 
 [dependencies]
 heapless = { version = "0.7.16", features = ["serde"] }
+num-traits = { version = "0.2.16", default-features = false }
 serde = { version = "1.0.147", default-features = false, features = ["derive"], optional = true }

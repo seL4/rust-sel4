@@ -1,10 +1,21 @@
+#![feature(associated_type_bounds)]
 #![feature(int_roundings)]
 #![feature(never_type)]
 #![feature(unwrap_infallible)]
 
-use std::fs;
+use std::fs::{self, File};
 
 use anyhow::Result;
+use num::{traits::WrappingSub, Integer, PrimInt};
+use object::{
+    elf::{FileHeader32, FileHeader64},
+    read::elf::FileHeader,
+    Endianness,
+};
+use serde::Serialize;
+
+use sel4_config_generic_types::Configuration;
+use sel4_render_elf_with_data::FileHeaderExt;
 
 mod args;
 mod render_elf;
@@ -14,23 +25,45 @@ use args::Args;
 
 fn main() -> Result<()> {
     let args = Args::parse()?;
+
     if args.verbose {
         eprintln!("{:#?}", args);
     }
 
-    let loader_bytes = fs::read(&args.loader_path)?;
-    let out_file_path = &args.out_file_path;
+    let sel4_config: Configuration =
+        serde_json::from_reader(File::open(&args.sel4_config_path).unwrap()).unwrap();
+    let word_size = sel4_config.get("WORD_SIZE").unwrap().as_string().unwrap();
 
-    let serialized_payload = serialize_payload::serialize_payload(
+    match word_size {
+        "32" => continue_with_word_size::<FileHeader32<Endianness>>(&args),
+        "64" => continue_with_word_size::<FileHeader64<Endianness>>(&args),
+        _ => {
+            panic!()
+        }
+    }
+}
+
+fn continue_with_word_size<T>(args: &Args) -> Result<()>
+where
+    T: FileHeaderExt
+        + FileHeader<
+            Word: PrimInt + WrappingSub + Integer + Serialize,
+            Sword: PrimInt,
+            Endian = Endianness,
+        >,
+{
+    let loader_bytes = fs::read(&args.loader_path)?;
+
+    let serialized_payload = serialize_payload::serialize_payload::<T>(
         &args.kernel_path,
         &args.app_path,
         &args.dtb_path,
         &args.platform_info_path,
     );
 
-    // if args.verbose {}
+    let loader_with_payload_bytes = render_elf::render_elf::<T>(&loader_bytes, &serialized_payload);
 
-    let loader_with_payload_bytes = render_elf::render_elf(&loader_bytes, &serialized_payload);
+    let out_file_path = &args.out_file_path;
 
     fs::write(out_file_path, loader_with_payload_bytes)?;
     Ok(())

@@ -1,4 +1,4 @@
-use sel4::{ObjectBlueprint, ObjectBlueprintArch, ObjectBlueprintSeL4Arch, VMAttributes};
+use sel4::{ObjectBlueprint, VMAttributes};
 
 use crate::{cap, Badge, Cap, FillEntryContentBootInfoId, Object, Rights};
 
@@ -17,24 +17,24 @@ impl<'a, D, M> Object<'a, D, M> {
                 },
                 Object::TCB(_) => ObjectBlueprint::TCB,
                 #[sel4_cfg(all(ARCH_AARCH64, ARM_HYPERVISOR_SUPPORT))]
-                Object::VCPU => ObjectBlueprintArch::VCPU.into(),
+                Object::VCPU => sel4::ObjectBlueprintArch::VCPU.into(),
                 #[sel4_cfg(ARCH_AARCH64)]
                 Object::Frame(obj) => match obj.size_bits {
-                    sel4::FrameSize::SMALL_BITS => ObjectBlueprintArch::SmallPage.into(),
-                    sel4::FrameSize::LARGE_BITS => ObjectBlueprintArch::LargePage.into(),
+                    sel4::FrameSize::SMALL_BITS => sel4::ObjectBlueprintArch::SmallPage.into(),
+                    sel4::FrameSize::LARGE_BITS => sel4::ObjectBlueprintArch::LargePage.into(),
                     _ => panic!(),
                 },
                 #[sel4_cfg(ARCH_RISCV64)]
                 Object::Frame(obj) => match obj.size_bits {
-                    sel4::FrameSize::_4K_BITS => ObjectBlueprintArch::_4KPage.into(),
-                    sel4::FrameSize::MEGA_BITS => ObjectBlueprintArch::MegaPage.into(),
-                    sel4::FrameSize::GIGA_BITS => ObjectBlueprintSeL4Arch::GigaPage.into(),
+                    sel4::FrameSize::_4K_BITS => sel4::ObjectBlueprintArch::_4KPage.into(),
+                    sel4::FrameSize::MEGA_BITS => sel4::ObjectBlueprintArch::MegaPage.into(),
+                    sel4::FrameSize::GIGA_BITS => sel4::ObjectBlueprintArch::GigaPage.into(),
                     _ => panic!(),
                 },
                 #[sel4_cfg(ARCH_X86_64)]
                 Object::Frame(obj) => match obj.size_bits {
-                    sel4::FrameSize::_4K_BITS => ObjectBlueprintArch::_4K.into(),
-                    sel4::FrameSize::LARGE_BITS => ObjectBlueprintArch::LargePage.into(),
+                    sel4::FrameSize::_4K_BITS => sel4::ObjectBlueprintArch::_4K.into(),
+                    sel4::FrameSize::LARGE_BITS => sel4::ObjectBlueprintArch::LargePage.into(),
                     _ => panic!(),
                 },
                 #[sel4_cfg(ARCH_AARCH64)]
@@ -42,27 +42,27 @@ impl<'a, D, M> Object<'a, D, M> {
                     let level = obj.level.unwrap();
                     assert_eq!(obj.is_root, level == 0); // sanity check
                     match level {
-                        0 => ObjectBlueprintSeL4Arch::PGD.into(),
-                        1 => ObjectBlueprintSeL4Arch::PUD.into(),
-                        2 => ObjectBlueprintArch::PD.into(),
-                        3 => ObjectBlueprintArch::PT.into(),
+                        0 => sel4::ObjectBlueprintSeL4Arch::PGD.into(),
+                        1 => sel4::ObjectBlueprintSeL4Arch::PUD.into(),
+                        2 => sel4::ObjectBlueprintArch::PD.into(),
+                        3 => sel4::ObjectBlueprintArch::PT.into(),
                         _ => panic!(),
                     }
                 }
                 #[sel4_cfg(ARCH_RISCV64)]
                 Object::PageTable(obj) => {
                     assert!(obj.level.is_none()); // sanity check
-                    ObjectBlueprintArch::PageTable.into()
+                    sel4::ObjectBlueprintArch::PageTable.into()
                 }
                 #[sel4_cfg(ARCH_X86_64)]
                 Object::PageTable(obj) => {
                     let level = obj.level.unwrap();
                     assert_eq!(obj.is_root, level == 0); // sanity check
                     match level {
-                        0 => ObjectBlueprintSeL4Arch::PML4.into(),
-                        1 => ObjectBlueprintSeL4Arch::PDPT.into(),
-                        2 => ObjectBlueprintArch::PageDirectory.into(),
-                        3 => ObjectBlueprintArch::PageTable.into(),
+                        0 => sel4::ObjectBlueprintSeL4Arch::PML4.into(),
+                        1 => sel4::ObjectBlueprintSeL4Arch::PDPT.into(),
+                        2 => sel4::ObjectBlueprintArch::PageDirectory.into(),
+                        3 => sel4::ObjectBlueprintArch::PageTable.into(),
                         _ => panic!(),
                     }
                 }

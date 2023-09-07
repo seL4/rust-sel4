@@ -10,11 +10,11 @@ static SECONDARY_CORE_INIT_INFO: RwLock<Option<SecondaryCoreInitInfo>> = RwLock:
 
 struct SecondaryCoreInitInfo {
     core_id: usize,
-    payload_info: PayloadInfo,
+    payload_info: PayloadInfo<usize>,
     barrier: Barrier,
 }
 
-pub(crate) fn start_secondary_cores(payload_info: &PayloadInfo) {
+pub(crate) fn start_secondary_cores(payload_info: &PayloadInfo<usize>) {
     for i in 0..NUM_SECONDARY_CORES {
         let core_id = i + 1;
         let sp = get_secondary_stack_bottom(i);

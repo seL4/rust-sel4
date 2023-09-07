@@ -1,5 +1,4 @@
 use core::mem;
-use core::ops::Neg;
 
 use sel4_kernel_loader_payload_types::PayloadInfo;
 
@@ -12,12 +11,9 @@ type KernelEntry = extern "C" fn(
     dtb_size: usize,
 ) -> !;
 
-pub(crate) fn enter_kernel(payload_info: &PayloadInfo) -> ! {
-    let kernel_entry = unsafe {
-        mem::transmute::<usize, KernelEntry>(
-            payload_info.kernel_image.virt_entry.try_into().unwrap(),
-        )
-    };
+pub(crate) fn enter_kernel(payload_info: &PayloadInfo<usize>) -> ! {
+    let kernel_entry =
+        unsafe { mem::transmute::<usize, KernelEntry>(payload_info.kernel_image.virt_entry) };
 
     let (dtb_addr_p, dtb_size) = match &payload_info.fdt_phys_addr_range {
         Some(region) => (
@@ -28,25 +24,10 @@ pub(crate) fn enter_kernel(payload_info: &PayloadInfo) -> ! {
     };
 
     (kernel_entry)(
-        payload_info
-            .user_image
-            .phys_addr_range
-            .start
-            .try_into()
-            .unwrap(),
-        payload_info
-            .user_image
-            .phys_addr_range
-            .end
-            .try_into()
-            .unwrap(),
-        payload_info
-            .user_image
-            .phys_to_virt_offset
-            .neg()
-            .try_into()
-            .unwrap(),
-        payload_info.user_image.virt_entry.try_into().unwrap(),
+        payload_info.user_image.phys_addr_range.start,
+        payload_info.user_image.phys_addr_range.end,
+        0_usize.wrapping_sub(payload_info.user_image.phys_to_virt_offset) as isize,
+        payload_info.user_image.virt_entry,
         dtb_addr_p,
         dtb_size,
     )

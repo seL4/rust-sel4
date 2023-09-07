@@ -1,9 +1,15 @@
+#![feature(associated_type_bounds)]
+
 use std::fs;
 use std::io;
 
 use clap::{App, Arg};
+use num::{NumCast, One, PrimInt, Zero};
 
-use sel4_render_elf_with_data::{Input, SymbolicInjection, SymbolicValue};
+use sel4_render_elf_with_data::{
+    ConcreteFileHeader32, ConcreteFileHeader64, ElfBitWidth, FileHeaderExt, Input,
+    SymbolicInjection, SymbolicValue,
+};
 
 fn main() -> Result<(), io::Error> {
     let matches = App::new("")
@@ -43,26 +49,34 @@ fn main() -> Result<(), io::Error> {
     let image_elf = fs::read(image_elf_path)?;
     let debug_info_elf = fs::read(debug_info_elf_path)?;
 
-    let content = &debug_info_elf;
-
-    let out_elf = {
-        let mut input = Input::default();
-        input.symbolic_injections.push(SymbolicInjection {
-            align_modulus: 1,
-            align_residue: 0,
-            content,
-            memsz: content.len(),
-            patches: vec![(
-                "embedded_debug_info_start".to_owned(),
-                SymbolicValue { addend: 0 },
-            )],
-        });
-        input.concrete_patches.push((
-            "embedded_debug_info_size".to_owned(),
-            content.len().try_into().unwrap(),
-        ));
-        input.render_with_data(&image_elf).unwrap()
+    let out_elf = match ElfBitWidth::detect(&image_elf).unwrap() {
+        ElfBitWidth::Elf32 => with_bit_width::<ConcreteFileHeader32>(&image_elf, &debug_info_elf),
+        ElfBitWidth::Elf64 => with_bit_width::<ConcreteFileHeader64>(&image_elf, &debug_info_elf),
     };
 
     fs::write(out_elf_path, out_elf)
+}
+
+fn with_bit_width<T: FileHeaderExt<Word: PrimInt, Sword: PrimInt>>(
+    image_elf: &[u8],
+    content: &[u8],
+) -> Vec<u8> {
+    let content_len = NumCast::from(content.len()).unwrap();
+    let mut input = Input::<T>::default();
+    input.symbolic_injections.push(SymbolicInjection {
+        align_modulus: T::Word::one(),
+        align_residue: T::Word::zero(),
+        content,
+        memsz: content_len,
+        patches: vec![(
+            "embedded_debug_info_start".to_owned(),
+            SymbolicValue {
+                addend: T::Sword::zero(),
+            },
+        )],
+    });
+    input
+        .concrete_patches
+        .push(("embedded_debug_info_size".to_owned(), content_len));
+    input.render_with_data(&image_elf).unwrap()
 }

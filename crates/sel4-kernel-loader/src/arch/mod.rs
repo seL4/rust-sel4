@@ -4,8 +4,8 @@ use sel4_config::sel4_cfg;
 #[path = "aarch64/mod.rs"]
 mod imp;
 
-#[sel4_cfg(ARCH_RISCV64)]
-#[path = "riscv64/mod.rs"]
+#[sel4_cfg(any(ARCH_RISCV64, ARCH_RISCV32))]
+#[path = "riscv/mod.rs"]
 mod imp;
 
 pub(crate) use imp::*;

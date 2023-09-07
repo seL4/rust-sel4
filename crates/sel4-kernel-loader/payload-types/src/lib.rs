@@ -3,56 +3,55 @@
 use core::ops::Range;
 
 use heapless::Vec;
+use num_traits::{PrimInt, WrappingAdd};
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-pub const MAX_NUM_REGIONS: usize = 16;
-
-pub type ConcretePayload = Payload<IndirectRegionContent, MAX_NUM_REGIONS>;
+pub const DEFAULT_MAX_NUM_REGIONS: usize = 16;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub struct Payload<T, const N: usize> {
-    pub info: PayloadInfo,
-    pub data: Vec<Region<T>, N>,
+pub struct Payload<T, U = IndirectRegionContent<T>, const N: usize = DEFAULT_MAX_NUM_REGIONS> {
+    pub info: PayloadInfo<T>,
+    pub data: Vec<Region<T, U>, N>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub struct PayloadInfo {
-    pub kernel_image: ImageInfo,
-    pub user_image: ImageInfo,
-    pub fdt_phys_addr_range: Option<Range<u64>>,
+pub struct PayloadInfo<T> {
+    pub kernel_image: ImageInfo<T>,
+    pub user_image: ImageInfo<T>,
+    pub fdt_phys_addr_range: Option<Range<T>>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub struct ImageInfo {
-    pub phys_addr_range: Range<u64>,
-    pub phys_to_virt_offset: i128,
-    pub virt_entry: u64,
+pub struct ImageInfo<T> {
+    pub phys_addr_range: Range<T>,
+    pub phys_to_virt_offset: T,
+    pub virt_entry: T,
 }
 
-impl ImageInfo {
-    pub fn virt_addr_range(&self) -> Range<u64> {
+impl<T: PrimInt + WrappingAdd> ImageInfo<T> {
+    pub fn virt_addr_range(&self) -> Range<T> {
         self.phys_to_virt(self.phys_addr_range.start)..self.phys_to_virt(self.phys_addr_range.end)
     }
 
-    pub fn phys_to_virt(&self, paddr: u64) -> u64 {
-        u64::try_from(i128::from(paddr) + self.phys_to_virt_offset).unwrap()
+    pub fn phys_to_virt(&self, paddr: T) -> T {
+        paddr.wrapping_add(&self.phys_to_virt_offset)
     }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub struct Region<T> {
-    pub phys_addr_range: Range<u64>,
-    pub content: Option<T>,
+pub struct Region<T, U> {
+    pub phys_addr_range: Range<T>,
+    pub content: Option<U>,
 }
 
-impl<T> Region<T> {
-    pub fn traverse<U, E>(&self, mut f: impl FnMut(&T) -> Result<U, E>) -> Result<Region<U>, E> {
+impl<T: Clone, U> Region<T, U> {
+    pub fn traverse<V, E>(&self, mut f: impl FnMut(&U) -> Result<V, E>) -> Result<Region<T, V>, E> {
         Ok(Region {
             phys_addr_range: self.phys_addr_range.clone(),
             content: self.content.as_ref().map(&mut f).transpose()?,
@@ -71,19 +70,25 @@ pub trait RegionContent {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub struct IndirectRegionContent {
-    pub content_range: Range<usize>,
+pub struct IndirectRegionContent<T> {
+    pub content_range: Range<T>,
 }
 
-impl RegionContent for IndirectRegionContent {
+impl<T: PrimInt> IndirectRegionContent<T> {
+    fn to_usize_range(&self) -> Range<usize> {
+        self.content_range.start.to_usize().unwrap()..self.content_range.end.to_usize().unwrap()
+    }
+}
+
+impl<T: PrimInt> RegionContent for IndirectRegionContent<T> {
     type Source = [u8];
 
     fn len(&self) -> usize {
-        self.content_range.end - self.content_range.start
+        self.to_usize_range().len()
     }
 
     fn copy_out(&self, source: &Self::Source, dst: &mut [u8]) {
-        dst.copy_from_slice(&source[self.content_range.clone()])
+        dst.copy_from_slice(&source[self.to_usize_range()])
     }
 }
 

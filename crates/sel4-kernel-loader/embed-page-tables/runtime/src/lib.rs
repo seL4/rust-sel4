@@ -14,9 +14,15 @@ pub enum RiscV64 {}
 
 impl Scheme<512> for RiscV64 {}
 
+pub enum RiscV32 {}
+
+impl Scheme<1024> for RiscV32 {}
+
 pub trait RiscVScheme {}
 
 impl RiscVScheme for RiscV64 {}
+
+impl RiscVScheme for RiscV32 {}
 
 const RISCV_SCHEME_ROTATE_RIGHT_FOR_FINISH: u32 = 2;
 

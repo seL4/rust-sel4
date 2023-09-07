@@ -11,6 +11,7 @@ mk {
       anyhow
       fallible-iterator
       serde_json
+      num
     ;
   };
   nix.local.dependencies = with localCrates; [

@@ -9,4 +9,5 @@ license = "BSD-2-Clause"
 anyhow = "1.0.66"
 clap = "3.2.23"
 fallible-iterator = "0.2.0"
-object = { version = "0.31.0", features = ["all"] }
+num = "0.4.1"
+object = { version = "0.32.1", features = ["all"] }

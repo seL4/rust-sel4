@@ -4,7 +4,7 @@ use core::slice;
 use sel4_kernel_loader_payload_types::{Region, RegionContent};
 
 pub(crate) fn copy_payload_data<T: RegionContent>(
-    regions: &[Region<T>],
+    regions: &[Region<usize, T>],
     region_content_source: &T::Source,
 ) {
     for region in regions.iter() {

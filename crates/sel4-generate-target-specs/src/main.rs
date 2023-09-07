@@ -23,6 +23,7 @@ struct Config {
 enum Arch {
     AArch64,
     Riscv64,
+    Riscv32,
     X86_64,
 }
 
@@ -50,6 +51,7 @@ impl Config {
                 target
             }
             Arch::Riscv64 => builtin("riscv64imac-unknown-none-elf"),
+            Arch::Riscv32 => builtin("riscv32imac-unknown-none-elf"),
             Arch::X86_64 => {
                 let mut target = builtin("x86_64-unknown-none");
                 let options = &mut target.options;
@@ -121,6 +123,7 @@ impl Arch {
         match self {
             Self::AArch64 => "aarch64".to_owned(),
             Self::Riscv64 => "riscv64imac".to_owned(),
+            Self::Riscv32 => "riscv32imac".to_owned(),
             Self::X86_64 => "x86_64".to_owned(),
         }
     }
@@ -133,7 +136,7 @@ impl Arch {
     }
 
     fn all() -> Vec<Self> {
-        vec![Self::AArch64, Self::Riscv64, Self::X86_64]
+        vec![Self::AArch64, Self::Riscv64, Self::Riscv32, Self::X86_64]
     }
 }
 

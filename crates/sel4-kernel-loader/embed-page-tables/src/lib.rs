@@ -12,5 +12,5 @@ pub use scheme::{Scheme, SchemeHelpers};
 pub use table::{LeafLocation, MkLeafFn, RegionContent, Table};
 
 pub mod schemes {
-    pub use crate::scheme::{AArch64, Riscv64Sv39};
+    pub use crate::scheme::{AArch64, Riscv32Sv32, Riscv64Sv39};
 }

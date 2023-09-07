@@ -161,8 +161,11 @@ impl SchemeLeafDescriptor<u64> for Riscv64Sv39LeafDescriptor {
     fn from_paddr(paddr: u64, _level: usize) -> Self {
         let mut desc = 0u64;
         desc.set_bit_range(53, 10, BitRange::<u64>::bit_range(&paddr, 55, 12));
-        desc.set_bit(0, true);
-        Self(desc).set_read(true).set_write(true).set_execute(true)
+        Self(desc)
+            .set_valid(true)
+            .set_read(true)
+            .set_write(true)
+            .set_execute(true)
     }
 
     fn to_raw(&self) -> u64 {
@@ -171,6 +174,72 @@ impl SchemeLeafDescriptor<u64> for Riscv64Sv39LeafDescriptor {
 }
 
 impl Riscv64Sv39LeafDescriptor {
+    pub fn set_valid(mut self, value: bool) -> Self {
+        self.0.set_bit(0, value);
+        self
+    }
+
+    pub fn set_read(mut self, value: bool) -> Self {
+        self.0.set_bit(1, value);
+        self
+    }
+
+    pub fn set_write(mut self, value: bool) -> Self {
+        self.0.set_bit(2, value);
+        self
+    }
+
+    pub fn set_execute(mut self, value: bool) -> Self {
+        self.0.set_bit(3, value);
+        self
+    }
+}
+
+#[derive(Debug)]
+pub enum Riscv32Sv32 {}
+
+impl Scheme for Riscv32Sv32 {
+    type WordPrimitive = u32;
+
+    const PAGE_BITS: usize = 12;
+    const LEVEL_BITS: usize = 10;
+    const NUM_LEVELS: usize = 2;
+
+    const MIN_LEVEL_FOR_LEAF: usize = 0;
+
+    type LeafDescriptor = Riscv32Sv32LeafDescriptor;
+
+    const EMPTY_DESCRIPTOR: Self::WordPrimitive = riscv32_encode_for_linking(0b0);
+    const SYMBOLIC_BRANCH_DESCRIPTOR_OFFSET: Self::WordPrimitive = riscv32_encode_for_linking(0b1);
+
+    const RUNTIME_SCHEME_IDENT: &'static str = "RiscV32";
+}
+
+#[derive(Debug)]
+pub struct Riscv32Sv32LeafDescriptor(u32);
+
+impl SchemeLeafDescriptor<u32> for Riscv32Sv32LeafDescriptor {
+    fn from_paddr(paddr: u64, _level: usize) -> Self {
+        let mut desc = 0u32;
+        desc.set_bit_range(29, 10, BitRange::<u32>::bit_range(&paddr, 31, 12));
+        Self(desc)
+            .set_valid(true)
+            .set_read(true)
+            .set_write(true)
+            .set_execute(true)
+    }
+
+    fn to_raw(&self) -> u32 {
+        riscv32_encode_for_linking(self.0)
+    }
+}
+
+impl Riscv32Sv32LeafDescriptor {
+    pub fn set_valid(mut self, value: bool) -> Self {
+        self.0.set_bit(0, value);
+        self
+    }
+
     pub fn set_read(mut self, value: bool) -> Self {
         self.0.set_bit(1, value);
         self

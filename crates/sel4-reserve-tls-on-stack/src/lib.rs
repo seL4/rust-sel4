@@ -51,7 +51,7 @@ impl TlsImage {
         cfg_if::cfg_if! {
             if #[cfg(target_arch = "aarch64")] {
                 (tpidr + RESERVED_ABOVE_TPIDR).next_multiple_of(self.align)
-            } else if #[cfg(target_arch = "riscv64")] {
+            } else if #[cfg(any(target_arch = "riscv64", target_arch = "riscv32"))] {
                 tpidr.next_multiple_of(self.align)
             } else if #[cfg(target_arch = "x86_64")] {
                 (tpidr - self.memsz) & !(self.align - 1)
@@ -117,7 +117,7 @@ cfg_if::cfg_if! {
                     br x5
             "#
         }
-    } else if #[cfg(target_arch = "riscv64")] {
+    } else if #[cfg(any(target_arch = "riscv64", target_arch = "riscv32"))] {
         global_asm! {
             r#"
                 .global __sel4_runtime_reserve_tls_and_continue
@@ -203,7 +203,7 @@ cfg_if::cfg_if! {
             tpidr
         }
 
-    } else if #[cfg(target_arch = "riscv64")] {
+    } else if #[cfg(any(target_arch = "riscv64", target_arch = "riscv32"))] {
 
         #[inline(never)] // issues with optimizer
         unsafe fn set_tls_base(tpidr: usize) {

@@ -1,5 +1,6 @@
 #![no_std]
 #![no_main]
+#![feature(associated_type_bounds)]
 #![feature(atomic_from_mut)]
 #![feature(const_pointer_byte_offsets)]
 #![feature(const_trait_impl)]

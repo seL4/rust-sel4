@@ -10,8 +10,10 @@ anyhow = "1.0.66"
 clap = "3.2.23"
 fallible-iterator = "0.2.0"
 heapless = "0.7.16"
-object = { version = "0.31.0", features = ["all"] }
+num = "0.4.1"
+object = { version = "0.32.1", features = ["all"] }
 postcard = { version = "1.0.2", default-features = false, features = ["alloc"] }
+sel4-config-generic-types = { path = "../../sel4/config/generic/types", features = ["serde"] }
 sel4-kernel-loader-config-types = { path = "../config-types" }
 sel4-kernel-loader-payload-types = { path = "../payload-types", features = ["serde"] }
 sel4-render-elf-with-data = { path = "../../sel4-render-elf-with-data" }

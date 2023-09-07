@@ -2,12 +2,12 @@
 
 use core::mem;
 
-use sel4::{Endpoint, RecvWithMRs, ReplyAuthority};
+use sel4::{Endpoint, RecvWithMRs, ReplyAuthority, Word};
 
 #[cfg(feature = "alloc")]
 extern crate alloc;
 
-pub type StaticThreadEntryFn = extern "C" fn(arg0: u64, arg1: u64);
+pub type StaticThreadEntryFn = extern "C" fn(arg0: Word, arg1: Word);
 
 #[derive(Copy, Clone, Debug)]
 pub struct StaticThread(Endpoint);
@@ -54,7 +54,7 @@ mod when_alloc {
         }
     }
 
-    extern "C" fn entry(f_arg: u64) {
+    extern "C" fn entry(f_arg: Word) {
         let f = unsafe { Box::from_raw(f_arg as *mut Box<dyn FnOnce()>) };
         let _ = catch_unwind(f);
     }

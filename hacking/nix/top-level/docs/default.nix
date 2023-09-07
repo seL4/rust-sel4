@@ -37,6 +37,11 @@ let
         runtime = "sel4-root-task";
         minimal = false;
       }
+      { id = "riscv32-root-task";
+        world = pkgs.host.riscv32.none.this.worlds.default;
+        runtime = "sel4-root-task";
+        minimal = false;
+      }
       { id = "x86_64-root-task";
         world = pkgs.host.x86_64.none.this.worlds.default;
         runtime = "sel4-root-task";

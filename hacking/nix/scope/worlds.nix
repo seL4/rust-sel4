@@ -2,6 +2,7 @@
 , cmakeConfigHelpers
 , mkWorld
 , platUtils
+, opensbi
 }:
 
 with cmakeConfigHelpers;
@@ -233,6 +234,7 @@ in rec {
                       "-cpu" "rv32" "-m" "size=2000M"
                       "-nographic"
                       "-serial" "mon:stdio"
+                      "-bios" "${opensbi}/share/opensbi/ilp32/generic/firmware/fw_dynamic.bin"
                       "-kernel" loader
                   ];
                 };

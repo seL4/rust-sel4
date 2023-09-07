@@ -215,6 +215,8 @@ superCallPackage ../rust-utils {} self //
 
   ### QEMU
 
+  opensbi = callPackage ./opensbi.nix {};
+
   qemuForSeL4 = (qemu.override {
     hostCpuTargets = [
       "arm-softmmu"

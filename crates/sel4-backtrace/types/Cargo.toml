@@ -10,16 +10,15 @@ alloc = ["serde?/alloc"]
 full = ["alloc", "serde", "postcard", "symbolize"]
 postcard = ["serde", "dep:postcard"]
 serde = ["dep:serde"]
-symbolize = ["addr2line", "fallible-iterator", "alloc"]
+symbolize = ["addr2line", "alloc"]
 
 [dependencies]
 cfg-if = "1.0.0"
-fallible-iterator = { version = "0.2.0", default-features = false, optional = true }
 postcard = { version = "1.0.2", default-features = false, optional = true }
 serde = { version = "1.0.147", default-features = false, features = ["derive"], optional = true }
 
 [dependencies.addr2line]
-version = "0.20.0"
+version = "0.21.0"
 default-features = false
 features = ["rustc-demangle", "cpp_demangle", "object", "fallible-iterator", "smallvec"]
 optional = true

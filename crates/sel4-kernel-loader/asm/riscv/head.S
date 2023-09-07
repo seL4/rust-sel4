@@ -20,6 +20,12 @@
 #define SBI_EXT_BASE 0x10
 #define SBI_EXT_BASE_PROBE_EXT 3
 
+#if __riscv_xlen == 32
+    #define lx lw
+#else
+    #define lx ld
+#endif
+
 .section ".text.start"
 
 /* OpenSBI starts us these parameters:
@@ -56,7 +62,7 @@ _start:
 
   /* Attach the stack to sp before calling any C functions */
   la sp, __primary_stack_bottom
-  ld sp, (sp)
+  lx sp, (sp)
 
   /* Check if the Heart State Management (HSM) extension exists, so it can be
    * used to switch harts if we are not running on hart CONFIG_FIRST_HART_ID.
@@ -113,7 +119,7 @@ _start1: /* a0 must hold current hard ID passed by bootloader */
    * If we've switched HARTs then the other HART will get a different stack
    * region in secondary_harts. */
   la sp, __primary_stack_bottom
-  ld sp, (sp)
+  lx sp, (sp)
   /* The C code expects the registers to be set up as:
    *   a0 = hart id
    *   a1 = dtb

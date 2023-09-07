@@ -5,10 +5,10 @@ use alloc::string::String;
 use alloc::string::ToString;
 use core::fmt;
 
+use addr2line::fallible_iterator::FallibleIterator;
 use addr2line::gimli::read::Reader;
 use addr2line::gimli::Error;
 use addr2line::Context;
-use fallible_iterator::FallibleIterator;
 
 pub use addr2line::object::File;
 

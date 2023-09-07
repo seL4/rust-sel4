@@ -79,14 +79,18 @@ let
       defaultAuthor = "Nick Spinale <nick.spinale@coliasgroup.com>";
 
       versions = {
+        addr2line = "0.21.0";
         anyhow = "1.0.66";
         cfg-if = "1.0.0";
         fallible-iterator = "0.2.0";
         futures = "0.3.28";
+        gimli = "0.28.0";
         heapless = "0.7.16";
         log = "0.4.17";
+        num = "0.4.1";
+        num-traits = "0.2.16";
         num_enum = "0.5.9";
-        object = "0.31.0";
+        object = "0.32.1";
         postcard = "1.0.2";
         proc-macro2 = "1.0.50";
         quote = "1.0.23";
