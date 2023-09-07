@@ -138,7 +138,7 @@ in {
     default = self.aarch64.default;
   } // lib.listToAttrs
     (lib.forEach
-      [ "aarch64" "riscv64" "x86_64" ]
+      [ "aarch64" "aarch32" "riscv64" "riscv32" "x86_64" "i386" ]
       (arch: lib.nameValuePair arch (pkgs.host.${arch}.none.this.worlds)))
   );
 

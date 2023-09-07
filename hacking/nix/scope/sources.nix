@@ -48,11 +48,15 @@ in rec {
     rust-sel4cp = fetchGit {
       url = "https://github.com/coliasgroup/seL4.git";
       rev = "fc80c9ad05d33e77a6b850dae8eb4b8317ec32a1"; # branch "rust-sel4cp"
+      local = localRoot + "/seL4";
+      # useLocal = true;
     };
 
     rust-sel4test = fetchGit {
       url = "https://github.com/coliasgroup/seL4.git";
       rev = "e98505aaf5373d1ffc0ee363fbc8182c5795ef2c"; # rust-sel4test
+      local = localRoot + "/seL4";
+      # useLocal = true;
     };
   };
 

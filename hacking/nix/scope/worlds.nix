@@ -20,7 +20,7 @@ in rec {
   aarch64 =
     let
     in rec {
-      default = qemu-arm-virt.el2;
+      default = qemu-arm-virt.default;
       qemu-arm-virt =
         let
           mk =
@@ -96,6 +96,45 @@ in rec {
       };
     };
 
+  aarch32 =
+    let
+    in rec {
+      default = qemu-arm-virt.default;
+      qemu-arm-virt =
+        let
+          mk = { smp ? false, mcs ? false, cpu ? "cortex-a15" }:
+            let
+              numCores = if smp then "2" else "1";
+            in
+              mkWorld {
+                inherit kernelLoaderConfig;
+                isCorePlatform = false;
+                kernelConfig = kernelConfigCommon // {
+                  ARM_CPU = mkString cpu;
+                  KernelArch = mkString "arm";
+                  KernelSel4Arch = mkString "aarch32";
+                  KernelPlatform = mkString "qemu-arm-virt";
+                  KernelMaxNumNodes = mkString numCores;
+                  KernelIsMCS = fromBool mcs;
+                };
+                mkInstanceForPlatform = platUtils.qemu.mkMkInstanceForPlatform {
+                  mkQemuCmd = loader: [
+                    "${pkgsBuildBuild.this.qemuForSeL4}/bin/qemu-system-aarch32"
+                      "-machine" "virt"
+                      "-cpu" cpu "-smp" numCores "-m" "1024"
+                      "-nographic"
+                      "-serial" "mon:stdio"
+                      "-kernel" loader
+                  ];
+                };
+              };
+        in rec {
+          default = legacy;
+          legacy = mk {};
+          mcs = mk { mcs = true; };
+        };
+    };
+
   riscv64 =
     let
     in rec {
@@ -160,7 +199,8 @@ in rec {
               "-cpu" "rv64" "-m" "size=4096M"
               "-nographic"
               "-serial" "mon:stdio"
-          ] ++ mkSeL4KernelWithPayloadArgs loader;
+              "-kernel" loader
+          ];
         };
       };
     };
@@ -168,17 +208,40 @@ in rec {
   riscv32 =
     let
     in rec {
-      default = spike;
+      default = spike.default;
 
-      spike = mkWorld {
-        inherit kernelLoaderConfig;
-        kernelConfig = kernelConfigCommon // {
-          KernelArch = mkString "riscv";
-          KernelSel4Arch = mkString "riscv32";
-          KernelPlatform = mkString "spike";
+      spike =
+        let
+          mk =
+            { mcs ? false
+            }:
+            let
+            in
+              mkWorld {
+                inherit kernelLoaderConfig;
+                kernelConfig = kernelConfigCommon // {
+                  KernelArch = mkString "riscv";
+                  KernelSel4Arch = mkString "riscv32";
+                  KernelPlatform = mkString "spike";
+                  KernelIsMCS = fromBool mcs;
+                };
+                canSimulate = true;
+                mkInstanceForPlatform = platUtils.qemu.mkMkInstanceForPlatform {
+                  mkQemuCmd = loader: [
+                    "${pkgsBuildBuild.this.qemuForSeL4}/bin/qemu-system-riscv32"
+                      "-machine" "spike"
+                      "-cpu" "rv32" "-m" "size=2000M"
+                      "-nographic"
+                      "-serial" "mon:stdio"
+                      "-kernel" loader
+                  ];
+                };
+              };
+        in rec {
+          default = legacy;
+          legacy = mk {};
+          mcs = mk { mcs = true; };
         };
-        canSimulate = true;
-      };
     };
 
   x86 = is64bit:
@@ -235,44 +298,5 @@ in rec {
 
   x86_64 = x86 true;
   ia32 = x86 false;
-
-  aarch32 =
-    let
-    in rec {
-      default = qemu-arm-virt.default;
-      qemu-arm-virt =
-        let
-          mk = { smp ? false, mcs ? off, cpu ? "cortex-a15" }:
-            let
-              numCores = if smp then "2" else "1";
-            in
-              mkWorld {
-                inherit kernelLoaderConfig;
-                isCorePlatform = false;
-                kernelConfig = kernelConfigCommon // {
-                  ARM_CPU = mkString cpu;
-                  KernelArch = mkString "arm";
-                  KernelSel4Arch = mkString "aarch32";
-                  KernelPlatform = mkString "qemu-arm-virt";
-                  KernelMaxNumNodes = mkString numCores;
-                  KernelIsMCS = mcs;
-                };
-                mkInstanceForPlatform = platUtils.qemu.mkMkInstanceForPlatform {
-                  mkQemuCmd = loader: [
-                    # NOTE
-                    # virtualization=on even when hypervisor to test loader dropping exception level
-                    "${pkgsBuildBuild.this.qemuForSeL4}/bin/qemu-system-aarch32"
-                      "-machine" "virt"
-                      "-cpu" cpu "-smp" numCores "-m" "1024"
-                      "-nographic"
-                      "-serial" "mon:stdio"
-                      "-kernel" loader
-                  ];
-                };
-              };
-        in rec {
-          default = mk {};
-        };
-    };
 
 }
