@@ -255,7 +255,7 @@ impl<'a> InvocationGenerator<'a> {
                     match non_cap {
                         ParameterType::Primitive { .. } => {
                             toks.extend(quote! {
-                                self.set_mr_bits(#start..#end, #name as seL4_Word);
+                                self.set_mr_bits(#start..#end, #name);
                             });
                         }
                         ParameterType::Bitfield => toks.extend(quote! {
@@ -302,9 +302,8 @@ impl<'a> InvocationGenerator<'a> {
                     module_enum: false, ..
                 } => {
                     let name = format_ident!("{}", param.name);
-                    let ty = format_ident!("{}", param.ty);
                     toks.extend(quote! {
-                        ret.#name = self.get_mr_bits(#start..#end) as #ty;
+                        ret.#name = self.get_mr_bits(#start..#end);
                     })
                 }
                 ParameterType::Struct { members } => {

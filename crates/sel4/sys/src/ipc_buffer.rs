@@ -2,7 +2,9 @@ use core::mem;
 use core::ops::Range;
 use core::slice;
 
-use sel4_bitfield_types::{get_bits, set_bits};
+use sel4_bitfield_types::{
+    get_bits_maybe_signed, set_bits_maybe_signed, BitfieldPrimitiveMaybeSigned,
+};
 
 use crate::{seL4_CPtr, seL4_IPCBuffer, seL4_Word};
 
@@ -15,12 +17,20 @@ impl seL4_IPCBuffer {
         self.msg[i] = value;
     }
 
-    pub(crate) fn get_mr_bits(&self, range: Range<usize>) -> seL4_Word {
-        get_bits(&self.msg, range)
+    pub(crate) fn get_mr_bits<T>(&self, range: Range<usize>) -> T
+    where
+        T: BitfieldPrimitiveMaybeSigned,
+        T::Unsigned: TryFrom<seL4_Word>,
+    {
+        get_bits_maybe_signed(&self.msg, range)
     }
 
-    pub(crate) fn set_mr_bits(&mut self, range: Range<usize>, value: seL4_Word) {
-        set_bits(&mut self.msg, range, value)
+    pub(crate) fn set_mr_bits<T>(&mut self, range: Range<usize>, value: T)
+    where
+        T: BitfieldPrimitiveMaybeSigned,
+        T::Unsigned: TryInto<seL4_Word>,
+    {
+        set_bits_maybe_signed(&mut self.msg, range, value)
     }
 
     pub(crate) fn msg_bytes_mut(&mut self) -> &'static mut [u8] {
