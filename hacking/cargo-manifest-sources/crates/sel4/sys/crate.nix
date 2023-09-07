@@ -7,7 +7,7 @@ mk {
     inherit (versions) log;
   };
   build-dependencies = {
-    bindgen = "0.64.0";
+    bindgen = "0.68.1";
     xmltree = "0.10.3";
     glob = "0.3.0";
     regex = "1.7.0";

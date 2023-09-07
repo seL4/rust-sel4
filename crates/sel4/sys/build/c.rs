@@ -64,7 +64,6 @@ pub fn generate_rust(
         .generate_comments(false)
         .use_core()
         .ctypes_prefix("::core::ffi")
-        .rustfmt_bindings(true)
         .generate()
         .unwrap()
 }

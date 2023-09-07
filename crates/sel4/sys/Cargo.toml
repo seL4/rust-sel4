@@ -15,7 +15,7 @@ sel4-bitfield-types = { path = "../bitfield-types" }
 sel4-config = { path = "../config" }
 
 [build-dependencies]
-bindgen = "0.64.0"
+bindgen = "0.68.1"
 glob = "0.3.0"
 proc-macro2 = "1.0.50"
 quote = "1.0.23"
