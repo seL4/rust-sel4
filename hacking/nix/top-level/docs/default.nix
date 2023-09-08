@@ -32,15 +32,15 @@ let
         runtime = "sel4cp";
         minimal = true;
       }
+      { id = "riscv64-root-task";
+        world = pkgs.host.riscv64.none.this.worlds.default;
+        runtime = "sel4-root-task";
+        minimal = false;
+      }
       { id = "x86_64-root-task";
         world = pkgs.host.x86_64.none.this.worlds.default;
         runtime = "sel4-root-task";
         minimal = false;
-      }
-      { id = "riscv64-minimal";
-        world = pkgs.host.riscv64.none.this.worlds.default;
-        runtime = null;
-        minimal = true;
       }
     ];
 
