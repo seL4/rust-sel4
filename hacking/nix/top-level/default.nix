@@ -20,7 +20,7 @@ in {
 
   sel4testInstances = (map (x: x.this.sel4test) [
     pkgs.host.aarch64.none
-    pkgs.host.aarch32.linux # TODO figure out why none doesn't pass
+    pkgs.host.aarch32.none
     pkgs.host.riscv64.none
     pkgs.host.riscv32.none
     # TODO figure out why none doesn't build

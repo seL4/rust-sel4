@@ -18,6 +18,7 @@ in
 , extraManifest ? {}
 , extraConfig ? {}
 , rustTargetInfo ? defaultRustTargetInfo
+, compilerBuiltinsWeakIntrinsics ? false
 }:
 
 let
@@ -62,6 +63,12 @@ let
     extraConfig
   ]);
 
+  features = lib.concatStringsSep "," ([
+    "compiler-builtins-mem"
+  ] ++ lib.optionals compilerBuiltinsWeakIntrinsics [
+    "compiler-builtins-weak-intrinsics"
+  ]);
+
 in
 runCommand "sysroot" {
   depsBuildBuild = [ buildPackages.stdenv.cc ];
@@ -77,7 +84,7 @@ runCommand "sysroot" {
     ${lib.optionalString release "--release"} \
     --target ${rustTargetInfo.name} \
     -Z build-std=core,alloc,compiler_builtins \
-    -Z build-std-features=compiler-builtins-mem \
+    -Z build-std-features=${features} \
     --manifest-path ${workspace}/Cargo.toml \
     --target-dir $(pwd)/target
 

@@ -8,6 +8,9 @@ sel4_cfg_if! {
     if #[cfg(ARCH_AARCH64)] {
         #[path = "aarch64.rs"]
         mod imp;
+    } else if #[cfg(ARCH_AARCH32)] {
+        #[path = "aarch32.rs"]
+        mod imp;
     } else if #[cfg(any(ARCH_RISCV64, ARCH_RISCV32))] {
         #[path = "riscv.rs"]
         mod imp;

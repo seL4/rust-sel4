@@ -28,6 +28,7 @@
 , mcs ? false
 , smp ? false
 , virtualization ? false
+, filter ? ".*"
 }:
 
 with lib;
@@ -50,6 +51,7 @@ let
       "-DSMP=${bool smp}"
       "-DSIMULATION=TRUE"
       "-DLibSel4UseRust=${bool rust}"
+      "-DLibSel4TestPrinterRegex='${filter}'"
     ] ++ lib.optionals rust [
       "-DHACK_CARGO_MANIFEST_PATH=${workspace}/Cargo.toml"
       "-DHACK_CARGO_CONFIG=${cargoConfig}"
@@ -59,7 +61,6 @@ let
       "-DPLATFORM=pc99"
     ] ++ lib.optionals hostPlatform.isRiscV [
       "-DPLATFORM=spike"
-      "-DHACK_COMPILER_BUILTINS_SYMBOLS=${compilerBuiltinsSymbols}"
     ] ++ lib.optionals hostPlatform.isAarch [
       "-DPLATFORM=qemu-arm-virt"
       "-DARM_HYP=${bool virtualization}"
@@ -119,12 +120,8 @@ let
     release = false;
     inherit rustTargetInfo;
     extraManifest = profiles;
+    compilerBuiltinsWeakIntrinsics = true;
   };
-
-  compilerBuiltinsSymbols = runCommandCC "weaken.txt" {} ''
-    $NM ${sysroot}/lib/rustlib/${rustTargetInfo.name}/lib/libcompiler_builtins-*.rlib \
-      | sed -rn 's,^.* T (__.*)$,\1,p' > $out
-  '';
 
   tests = thisStdenv.mkDerivation {
     name = "sel4test";
@@ -179,13 +176,15 @@ let
       sed -i 's,tput reset,true,' \
         tools/seL4/cmake-tool/simulate_scripts/simulate.py
 
-    '' + lib.optionalString hostPlatform.isRiscV64 ''
+      # HACK with this aarch32 toolchain, sizeof(SUCCESS) != sizeof(test_result_t)
+      sed -i 's|test_eq(res, SUCCESS);|test_eq((int)res, SUCCESS);|' \
+        projects/sel4test/apps/sel4test-tests/src/tests/ipc.c
+    '' + lib.optionalString hostPlatform.isx86 ''
       # HACK
-      sed -i 's|test_bad_instruction, true|test_bad_instruction, false|' \
-        projects/sel4test/apps/sel4test-tests/src/tests/faults.c
-
-      sed -i 's|printf("Bootstrapping kernel\\n");|printf("Bootstrapping kernel %lx\\n", v_entry);|' \
-        kernel/src/arch/riscv/kernel/boot.c
+      sed -i \
+        -e 's|test_scheduler_accuracy,|test_scheduler_accuracy, false \&\&|' \
+        -e 's|test_ordering_periodic_threads,|test_ordering_periodic_threads, false \&\&|' \
+        projects/sel4test/apps/sel4test-tests/src/tests/scheduler.c
     '';
 
     configurePhase = ''

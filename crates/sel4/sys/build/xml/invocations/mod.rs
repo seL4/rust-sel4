@@ -6,6 +6,8 @@ use std::path::Path;
 use proc_macro2::{Ident, TokenStream};
 use quote::{format_ident, quote};
 
+use sel4_config::sel4_cfg_bool;
+
 use super::{parse_xml, Condition};
 
 mod parse;
@@ -557,14 +559,16 @@ impl ParameterTypes {
         this.insert_capability("seL4_SchedContext");
         this.insert_capability("seL4_SchedControl");
 
-        if sel4_config::sel4_cfg_bool!(ARCH_AARCH64) {
+        if sel4_cfg_bool!(ARCH_AARCH64) | sel4_cfg_bool!(ARCH_AARCH32) {
             this.insert_enum("seL4_ARM_VMAttributes", WORD_SIZE);
             this.insert_capability("seL4_ARM_Page");
             this.insert_capability("seL4_ARM_PageTable");
             this.insert_capability("seL4_ARM_PageDirectory");
-            this.insert_capability("seL4_ARM_PageUpperDirectory");
-            this.insert_capability("seL4_ARM_PageGlobalDirectory");
-            this.insert_capability("seL4_ARM_VSpace");
+            if sel4_cfg_bool!(ARCH_AARCH64) {
+                this.insert_capability("seL4_ARM_PageUpperDirectory");
+                this.insert_capability("seL4_ARM_PageGlobalDirectory");
+                this.insert_capability("seL4_ARM_VSpace");
+            }
             this.insert_capability("seL4_ARM_ASIDControl");
             this.insert_capability("seL4_ARM_ASIDPool");
             this.insert_capability("seL4_ARM_VCPU");
@@ -572,7 +576,7 @@ impl ParameterTypes {
             this.insert_capability("seL4_ARM_IOPageTable");
         }
 
-        if sel4_config::sel4_cfg_bool!(ARCH_RISCV64) || sel4_config::sel4_cfg_bool!(ARCH_RISCV32) {
+        if sel4_cfg_bool!(ARCH_RISCV64) || sel4_cfg_bool!(ARCH_RISCV32) {
             this.insert_enum("seL4_RISCV_VMAttributes", WORD_SIZE);
             this.insert_capability("seL4_RISCV_Page");
             this.insert_capability("seL4_RISCV_PageTable");
@@ -580,7 +584,7 @@ impl ParameterTypes {
             this.insert_capability("seL4_RISCV_ASIDPool");
         }
 
-        if sel4_config::sel4_cfg_bool!(ARCH_X86_64) {
+        if sel4_cfg_bool!(ARCH_X86_64) {
             this.insert_enum("seL4_X86_VMAttributes", WORD_SIZE);
             this.insert_capability("seL4_X86_IOPort");
             this.insert_capability("seL4_X86_IOPortControl");
