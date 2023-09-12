@@ -35,34 +35,34 @@ impl TlsImage {
         };
         let segment_size = self.memsz;
         let segment_align_down_mask = !(self.align - 1);
-        let reserved_above_tpidr = RESERVED_ABOVE_TPIDR;
+        let reserved_above_tp = RESERVED_ABOVE_TPIDR;
         let stack_align_down_mask = !(STACK_ALIGNMENT - 1);
         __sel4_runtime_reserve_tls_and_continue(
             &args as *const InternalContArgs,
             segment_size,
             segment_align_down_mask,
-            reserved_above_tpidr,
+            reserved_above_tp,
             stack_align_down_mask,
             continue_with,
         )
     }
 
-    fn base_addr(&self, tpidr: usize) -> usize {
+    fn tls_base_addr(&self, tp: usize) -> usize {
         cfg_if::cfg_if! {
             if #[cfg(target_arch = "aarch64")] {
-                (tpidr + RESERVED_ABOVE_TPIDR).next_multiple_of(self.align)
+                (tp + RESERVED_ABOVE_TPIDR).next_multiple_of(self.align)
             } else if #[cfg(any(target_arch = "riscv64", target_arch = "riscv32"))] {
-                tpidr.next_multiple_of(self.align)
+                tp.next_multiple_of(self.align)
             } else if #[cfg(target_arch = "x86_64")] {
-                (tpidr - self.memsz) & !(self.align - 1)
+                (tp - self.memsz) & !(self.align - 1)
             } else {
                 compile_error!("unsupported architecture");
             }
         }
     }
 
-    unsafe fn init(&self, tpidr: usize) {
-        let addr = self.base_addr(tpidr);
+    unsafe fn init(&self, tp: usize) {
+        let addr = self.tls_base_addr(tp);
         let window = slice::from_raw_parts_mut(ptr::from_exposed_addr_mut(addr), self.memsz);
         let (tdata, tbss) = window.split_at_mut(self.filesz);
         tdata.copy_from_slice(self.data());
@@ -90,9 +90,9 @@ extern "C" {
         args: *const InternalContArgs,
         segment_size: usize,
         segment_align_down_mask: usize,
-        reserved_above_tpidr: usize,
+        reserved_above_tp: usize,
         stack_align_down_mask: usize,
-        continue_with: unsafe extern "C" fn(args: *const InternalContArgs, tpidr: usize) -> !,
+        continue_with: unsafe extern "C" fn(args: *const InternalContArgs, tp: usize) -> !,
     ) -> !;
 }
 
@@ -108,12 +108,12 @@ cfg_if::cfg_if! {
                     mov x9, sp
                     sub x9, x9, x1 // x1: segment_size
                     and x9, x9, x2 // x2: segment_align_down_mask
-                    sub x9, x9, x3 // x3: reserved_above_tpidr
+                    sub x9, x9, x3 // x3: reserved_above_tp
                     and x9, x9, x2 // x2: segment_align_down_mask
-                    mov x10, x9    // save tpidr for later
+                    mov x10, x9    // save tp for later
                     and x9, x9, x4 // x4: stack_align_down_mask
                     mov sp, x9
-                    mov x1, x10    // pass tpidr to continuation
+                    mov x1, x10    // pass tp to continuation
                     br x5
             "#
         }
@@ -128,12 +128,12 @@ cfg_if::cfg_if! {
                     mv s9, sp
                     sub s9, s9, a1 // a1: segment_size
                     and s9, s9, a2 // a2: segment_align_down_mask
-                    sub s9, s9, a3 // a3: reserved_above_tpidr
+                    sub s9, s9, a3 // a3: reserved_above_tp
                     and s9, s9, a2 // a2: segment_align_down_mask
-                    mv s10, s9     // save tpidr for later
+                    mv s10, s9     // save tp for later
                     and s9, s9, a4 // a4: stack_align_down_mask
                     mv sp, s9
-                    mv a1, s10     // pass tpidr to continuation
+                    mv a1, s10     // pass tp to continuation
                     jr a5
             "#
         }
@@ -148,12 +148,12 @@ cfg_if::cfg_if! {
                     mov r10, rsp
                     sub r10, 0x8 // space for thread structure
                     and r10, rdx // rdx: segment_align_down_mask
-                    mov r11, r10 // save tpidr for later
+                    mov r11, r10 // save tp for later
                     sub r10, rsi // rsi: segment_size
                     and r10, rdx // rdx: segment_align_down_mask
                     and r10, r8  // r8: stack_align_down_mask
                     mov rsp, r10
-                    mov rsi, r11 // pass tpidr to continuation
+                    mov rsi, r11 // pass tp to continuation
                     mov rbp, rsp
                     sub rsp, 0x8 // stack must be 16-byte aligned before call
                     push rbp
@@ -165,15 +165,15 @@ cfg_if::cfg_if! {
     }
 }
 
-unsafe extern "C" fn continue_with(args: *const InternalContArgs, tpidr: usize) -> ! {
+unsafe extern "C" fn continue_with(args: *const InternalContArgs, tp: usize) -> ! {
     let args = unsafe { &*args };
     let tls_image = unsafe { &*args.tls_image };
-    tls_image.init(tpidr);
+    tls_image.init(tp);
 
-    set_tls_base(tpidr);
+    set_thread_pointer(tp);
 
     if cfg!(target_arch = "x86_64") {
-        ptr::from_exposed_addr_mut::<usize>(tpidr).write(tpidr);
+        ptr::from_exposed_addr_mut::<usize>(tp).write(tp);
     }
 
     (args.cont_fn)(args.cont_arg)
@@ -182,40 +182,39 @@ unsafe extern "C" fn continue_with(args: *const InternalContArgs, tpidr: usize) 
 // helpers
 
 // NOTE
-// The Rust optimizer has caused issues here. For example, thread local accesses
-// below being emitted before this call. Fences in core::sync::atomic didn't work,
-// but a get_tls_base() call did. For now, making this function #[inline(never)] seems
-// to be sufficient.
+// The Rust optimizer has caused issues here. For example, thread local accesses below being emitted
+// before this call. Fences in core::sync::atomic didn't work, but a get_thread_pointer() call did.
+// For now, making this function #[inline(never)] seems to be sufficient.
 
 cfg_if::cfg_if! {
     if #[cfg(target_arch = "aarch64")] {
 
         #[inline(never)] // issues with optimizer
-        unsafe fn set_tls_base(tpidr: usize) {
-            asm!("msr tpidr_el0, {tpidr}", tpidr = in(reg) tpidr);
+        unsafe fn set_thread_pointer(tp: usize) {
+            asm!("msr tpidr_el0, {tp}", tp = in(reg) tp);
         }
 
         #[allow(dead_code)]
         #[inline(never)] // issues with optimizer
-        unsafe fn get_tls_base() -> usize {
-            let mut tpidr;
-            asm!("mrs {tpidr}, tpidr_el0", tpidr = out(reg) tpidr);
-            tpidr
+        unsafe fn get_thread_pointer() -> usize {
+            let mut tp;
+            asm!("mrs {tp}, tpidr_el0", tp = out(reg) tp);
+            tp
         }
 
     } else if #[cfg(any(target_arch = "riscv64", target_arch = "riscv32"))] {
 
         #[inline(never)] // issues with optimizer
-        unsafe fn set_tls_base(tpidr: usize) {
-            asm!("mv tp, {tpidr}", tpidr = in(reg) tpidr);
+        unsafe fn set_thread_pointer(tp: usize) {
+            asm!("mv tp, {tp}", tp = in(reg) tp);
         }
 
         #[allow(dead_code)]
         #[inline(never)] // issues with optimizer
-        unsafe fn get_tls_base() -> usize {
-            let mut tpidr;
-            asm!("mv {tpidr}, tp", tpidr = out(reg) tpidr);
-            tpidr
+        unsafe fn get_thread_pointer() -> usize {
+            let mut tp;
+            asm!("mv {tp}, tp", tp = out(reg) tp);
+            tp
         }
 
     } else if #[cfg(target_arch = "x86_64")] {
@@ -224,13 +223,13 @@ cfg_if::cfg_if! {
             if #[cfg(FSGSBASE_INST)] {
 
                 #[inline(never)] // issues with optimizer
-                unsafe fn set_tls_base(val: usize) {
+                unsafe fn set_thread_pointer(val: usize) {
                     asm!("wrfsbase {val}", val = in(reg) val);
                 }
 
                 #[allow(dead_code)]
                 #[inline(never)] // issues with optimizer
-                unsafe fn get_tls_base() -> usize {
+                unsafe fn get_thread_pointer() -> usize {
                     let mut val;
                     asm!("rdfsbase {val}", val = out(reg) val);
                     val
@@ -238,13 +237,13 @@ cfg_if::cfg_if! {
 
             } else if #[cfg(SET_TLS_BASE_SELF)] {
 
-                unsafe fn set_tls_base(val: usize) {
+                unsafe fn set_thread_pointer(val: usize) {
                     sel4::sys::seL4_SetTLSBase(val.try_into().unwrap());
                 }
 
                 #[allow(dead_code)]
                 #[inline(never)] // issues with optimizer
-                unsafe fn get_tls_base() -> usize {
+                unsafe fn get_thread_pointer() -> usize {
                     let mut val;
                     asm!("mov {val}, fs:0", val = out(reg) val);
                     val
