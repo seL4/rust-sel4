@@ -6,7 +6,7 @@ use sel4_platform_info::PLATFORM_INFO;
 use crate::{
     arch::{idle, init_platform_state},
     barrier::Barrier,
-    copy_payload_data, enter_kernel, fmt, logging, plat, sanity_check, smp, MAX_NUM_NODES,
+    enter_kernel, fmt, logging, plat, smp, MAX_NUM_NODES,
 };
 
 static KERNEL_ENTRY_BARRIER: Barrier = Barrier::new(MAX_NUM_NODES);
@@ -35,14 +35,12 @@ pub(crate) fn run<U: RegionContent<Source: 'static>, const N: usize>(
         );
     }
 
-    {
-        let own_footprint =
-            own_footprint.start.try_into().unwrap()..own_footprint.end.try_into().unwrap();
-        sanity_check::sanity_check(&own_footprint, &payload.data);
-    }
+    payload.sanity_check(&PLATFORM_INFO, own_footprint.clone());
 
     log::debug!("Copying payload data");
-    copy_payload_data::copy_payload_data(&payload.data, region_content_source);
+    unsafe {
+        payload.copy_data_out(region_content_source);
+    }
 
     smp::start_secondary_cores(&payload.info);
 

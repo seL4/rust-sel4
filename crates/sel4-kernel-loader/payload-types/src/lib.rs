@@ -1,12 +1,18 @@
 #![no_std]
+#![feature(strict_provenance)]
+#![deny(unsafe_op_in_unsafe_fn)]
 
 use core::ops::Range;
+use core::ptr;
+use core::slice;
 
 use heapless::Vec;
 use num_traits::{PrimInt, WrappingAdd};
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
+
+use sel4_platform_info_types::PlatformInfo;
 
 pub const DEFAULT_MAX_NUM_REGIONS: usize = 16;
 
@@ -108,4 +114,60 @@ impl<'a> RegionContent for DirectRegionContent<'a> {
     fn copy_out(&self, _source: &Self::Source, dst: &mut [u8]) {
         dst.copy_from_slice(self.content)
     }
+}
+
+impl<U: RegionContent, const N: usize> Payload<usize, U, N> {
+    pub unsafe fn copy_data_out(&self, region_content_source: &U::Source) {
+        for region in self.data.iter() {
+            let dst = unsafe {
+                slice::from_raw_parts_mut(
+                    ptr::from_exposed_addr_mut(region.phys_addr_range.start.try_into().unwrap()),
+                    (region.phys_addr_range.end - region.phys_addr_range.start)
+                        .try_into()
+                        .unwrap(),
+                )
+            };
+            match &region.content {
+                Some(src) => {
+                    src.copy_out(region_content_source, dst);
+                }
+                None => {
+                    // NOTE slice::fill is too slow
+                    unsafe {
+                        ptr::write_bytes(dst.as_mut_ptr(), 0, dst.len());
+                    }
+                }
+            }
+        }
+    }
+}
+
+impl<U, const N: usize> Payload<usize, U, N> {
+    pub fn sanity_check<T: PrimInt>(
+        &self,
+        platform_info: &PlatformInfo<T>,
+        own_footprint: Range<usize>,
+    ) {
+        let memory = &platform_info.memory;
+        assert!(any_range_contains(memory.iter(), &own_footprint));
+        for region in self.data.iter() {
+            assert!(any_range_contains(memory.iter(), &region.phys_addr_range));
+            assert!(ranges_are_disjoint(&own_footprint, &region.phys_addr_range));
+        }
+    }
+}
+
+fn ranges_are_disjoint(this: &Range<usize>, that: &Range<usize>) -> bool {
+    this.end.min(that.end) <= this.start.max(that.start)
+}
+
+fn range_contains<T: PrimInt>(this: &Range<T>, that: &Range<usize>) -> bool {
+    this.start.to_usize().unwrap() <= that.start && that.end <= this.end.to_usize().unwrap()
+}
+
+fn any_range_contains<'a, T: PrimInt + 'a>(
+    mut these: impl Iterator<Item = &'a Range<T>>,
+    that: &Range<usize>,
+) -> bool {
+    these.any(|this| range_contains(this, that))
 }

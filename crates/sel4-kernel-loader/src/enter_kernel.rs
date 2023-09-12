@@ -16,10 +16,7 @@ pub(crate) fn enter_kernel(payload_info: &PayloadInfo<usize>) -> ! {
         unsafe { mem::transmute::<usize, KernelEntry>(payload_info.kernel_image.virt_entry) };
 
     let (dtb_addr_p, dtb_size) = match &payload_info.fdt_phys_addr_range {
-        Some(region) => (
-            region.start,
-            region.len(),
-        ),
+        Some(region) => (region.start, region.len()),
         None => (0, 0),
     };
 

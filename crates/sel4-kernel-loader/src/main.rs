@@ -18,14 +18,12 @@ use sel4_logging::LevelFilter;
 
 mod arch;
 mod barrier;
-mod copy_payload_data;
 mod drivers;
 mod enter_kernel;
 mod fmt;
 mod logging;
 mod plat;
 mod run;
-mod sanity_check;
 mod smp;
 mod stacks;
 mod this_image;
@@ -52,7 +50,7 @@ extern "C" fn panic_handler(info: &PanicInfo) -> ! {
 
 pub(crate) mod translation_tables {
     #[sel4_config::sel4_cfg(ARCH_AARCH64)]
-    mod loader {
+    pub(crate) mod loader {
         include!(concat!(env!("OUT_DIR"), "/loader_translation_tables.rs"));
     }
     pub(crate) mod kernel {
