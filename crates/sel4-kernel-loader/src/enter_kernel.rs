@@ -17,8 +17,8 @@ pub(crate) fn enter_kernel(payload_info: &PayloadInfo<usize>) -> ! {
 
     let (dtb_addr_p, dtb_size) = match &payload_info.fdt_phys_addr_range {
         Some(region) => (
-            usize::try_from(region.start).unwrap(),
-            usize::try_from(region.end).unwrap() - usize::try_from(region.start).unwrap(),
+            region.start,
+            region.len(),
         ),
         None => (0, 0),
     };
