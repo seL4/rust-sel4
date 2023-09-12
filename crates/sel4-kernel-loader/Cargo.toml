@@ -3,7 +3,7 @@ name = "sel4-kernel-loader"
 version = "0.1.0"
 authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
 edition = "2021"
-license = "BSD-2-Clause"
+license = "GPL-2.0-only"
 
 [dependencies]
 cfg-if = "1.0.0"

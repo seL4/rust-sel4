@@ -174,7 +174,7 @@ in rec {
                 };
               };
         in rec {
-          default = legacy.nosmp;
+          default = legacy.smp;
           mcs = {
             smp = mk { mcs = true; smp = true; };
             nosmp = mk { mcs = true; smp = false; };

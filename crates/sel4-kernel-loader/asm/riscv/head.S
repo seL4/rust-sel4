@@ -1,5 +1,6 @@
 /*
  * Copyright 2020, Data61, CSIRO (ABN 41 687 119 230)
+ * Copyright 2023, Nick Spinale <nick.spinale@coliasgroup.com>
  *
  * SPDX-License-Identifier: GPL-2.0-only
  */
@@ -9,7 +10,11 @@
 .extern __global_pointer$
 .extern __primary_stack_bottom
 .extern hsm_exists
+.extern next_logical_core_id
+.extern start_core_by_logical_id
+.extern secondary_core_sp
 .extern arch_main
+.extern arch_secondary_main
 
 #define BIT(n) (1 << (n))
 
@@ -127,14 +132,6 @@ _start1: /* a0 must hold current hard ID passed by bootloader */
   la s0, arch_main
   jr s0
 
-#if CONFIG_MAX_NUM_NODES > 1
-.extern next_logical_core_id
-.data
-bootstack_secondary_cores:
-.align 12
-.space 4096 * (CONFIG_MAX_NUM_NODES - 1)
-#endif
-
 .text
 
 .global secondary_harts
@@ -146,27 +143,28 @@ secondary_harts:
   addi  gp, gp, %pcrel_lo(1b)
 .option pop
 
-#if CONFIG_MAX_NUM_NODES > 1
   la a1, next_logical_core_id
   li t2, 1
   amoadd.w t0, t2, (a1)
-  /* now a1 has the logical core id */
+  /* now t0 has the logical core id */
   li t2, CONFIG_MAX_NUM_NODES
-  bge t0, t2, hsm_suspend_hart
+  bge t0, t2, hsm_stop_hart
 
-  mv a1, t0
-  slli t0, t0, 12
-  la sp, bootstack_secondary_cores
-  add sp, sp, t0
-  la s0, secondary_entry
+  la a1, start_core_by_logical_id
+1:lw t2, (a1)
+  bne t0, t2, 1b
+
+  la sp, secondary_core_sp
+  lx sp, (sp)
+  la s0, arch_secondary_main
   jr s0
-#endif
+
 /* If we get here then the HSM extension exists and the current
- * HART is not going to be used and needs to be suspended. */
-hsm_suspend_hart:
+ * HART is not going to be used and needs to be stopped. */
+hsm_stop_hart:
   li a7, SBI_HSM_BASE
   li a6, SBI_HSM_BASE_HART_STOP
-  ecall /* call SBI to suspend current HART */
+  ecall /* call SBI to stop current HART */
 
 spin_hart:
   wfi

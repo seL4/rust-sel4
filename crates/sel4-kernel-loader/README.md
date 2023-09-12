@@ -49,8 +49,8 @@ Later, prepare the loader by adding the kernel+application payload:
 
 ```bash
 $my_project_local_cargo_root/bin/sel4-kernel-loader-add-payload \
-    --loader $my_project_local_cargo_root/bin/sel4-kernel-loader \
     --sel4-prefix $my_sel4_prefix \
+    --loader $my_project_local_cargo_root/bin/sel4-kernel-loader \
     --app $my_app \
     -o image.elf
 ```
