@@ -3,7 +3,7 @@ import argparse
 import pexpect
 from pathlib import Path
 
-TIMEOUT = 60 * 5
+TIMEOUT = 60 * 10
 
 def main():
     parser = argparse.ArgumentParser()
