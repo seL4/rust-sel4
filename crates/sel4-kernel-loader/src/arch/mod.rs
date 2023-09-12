@@ -12,9 +12,15 @@ mod imp;
 pub(crate) use imp::*;
 
 pub(crate) trait Arch {
+    type PerCore;
+
     fn init() {}
 
     fn idle() -> !;
 
-    fn enter_kernel(core_id: usize, payload_info: &PayloadInfo<usize>) -> !;
+    fn enter_kernel(
+        core_id: usize,
+        payload_info: &PayloadInfo<usize>,
+        per_core: Self::PerCore,
+    ) -> !;
 }

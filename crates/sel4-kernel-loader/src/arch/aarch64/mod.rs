@@ -6,7 +6,7 @@ use tock_registers::interfaces::Readable;
 
 use sel4_kernel_loader_payload_types::PayloadInfo;
 
-use crate::arch::Arch;
+use crate::{arch::Arch, main, secondary_main};
 
 pub(crate) mod drivers;
 pub(crate) mod exception_handler;
@@ -15,9 +15,21 @@ extern "C" {
     fn switch_translation_tables_el2();
 }
 
+#[no_mangle]
+extern "C" fn arch_main() -> ! {
+    main(())
+}
+
+#[no_mangle]
+extern "C" fn arch_secondary_main() -> ! {
+    secondary_main(())
+}
+
 pub(crate) enum ArchImpl {}
 
 impl Arch for ArchImpl {
+    type PerCore = ();
+
     fn idle() -> ! {
         loop {
             unsafe {
@@ -26,7 +38,11 @@ impl Arch for ArchImpl {
         }
     }
 
-    fn enter_kernel(core_id: usize, payload_info: &PayloadInfo<usize>) -> ! {
+    fn enter_kernel(
+        core_id: usize,
+        payload_info: &PayloadInfo<usize>,
+        _per_core: Self::PerCore,
+    ) -> ! {
         let kernel_entry =
             unsafe { mem::transmute::<usize, KernelEntry>(payload_info.kernel_image.virt_entry) };
 

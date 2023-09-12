@@ -5,14 +5,28 @@ use riscv::register::satp;
 
 use sel4_kernel_loader_payload_types::PayloadInfo;
 
-use crate::{arch::Arch, this_image::page_tables::kernel::kernel_boot_level_0_table};
+use crate::{
+    arch::Arch, main, secondary_main, this_image::page_tables::kernel::kernel_boot_level_0_table,
+};
 
 #[no_mangle]
 static mut hsm_exists: i32 = 0;
 
+#[no_mangle]
+extern "C" fn arch_main() -> ! {
+    main(())
+}
+
+#[no_mangle]
+extern "C" fn arch_secondary_main() -> ! {
+    secondary_main(())
+}
+
 pub(crate) enum ArchImpl {}
 
 impl Arch for ArchImpl {
+    type PerCore = ();
+
     fn init() {
         unsafe {
             kernel_boot_level_0_table.finish();
@@ -27,7 +41,11 @@ impl Arch for ArchImpl {
         }
     }
 
-    fn enter_kernel(_core_id: usize, payload_info: &PayloadInfo<usize>) -> ! {
+    fn enter_kernel(
+        _core_id: usize,
+        payload_info: &PayloadInfo<usize>,
+        _per_core: Self::PerCore,
+    ) -> ! {
         let kernel_entry =
             unsafe { mem::transmute::<usize, KernelEntry>(payload_info.kernel_image.virt_entry) };
 

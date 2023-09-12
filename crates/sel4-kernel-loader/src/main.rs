@@ -42,8 +42,7 @@ struct SecondaryCoreInitInfo {
     barrier: Barrier,
 }
 
-#[no_mangle]
-extern "C" fn main() -> ! {
+fn main(per_core: <ArchImpl as Arch>::PerCore) -> ! {
     ArchImpl::init();
     PlatImpl::init();
 
@@ -94,11 +93,10 @@ extern "C" fn main() -> ! {
         log::debug!("Primary core: core {} up", core_id);
     }
 
-    common_epilogue(0, &payload.info)
+    common_epilogue(0, &payload.info, per_core)
 }
 
-#[no_mangle]
-extern "C" fn secondary_main() -> ! {
+fn secondary_main(per_core: <ArchImpl as Arch>::PerCore) -> ! {
     let core_id;
     let payload_info;
     {
@@ -109,18 +107,22 @@ extern "C" fn secondary_main() -> ! {
         payload_info = init_info.payload_info.clone();
     }
     log::debug!("Core {}: up", core_id);
-    common_epilogue(core_id, &payload_info)
+    common_epilogue(core_id, &payload_info, per_core)
 }
 
 static KERNEL_ENTRY_BARRIER: Barrier = Barrier::new(MAX_NUM_NODES);
 
-fn common_epilogue(core_id: usize, payload_info: &PayloadInfo<usize>) -> ! {
+fn common_epilogue(
+    core_id: usize,
+    payload_info: &PayloadInfo<usize>,
+    per_core: <ArchImpl as Arch>::PerCore,
+) -> ! {
     PlatImpl::init_per_core();
     if core_id == 0 {
         log::info!("Entering kernel");
     }
     KERNEL_ENTRY_BARRIER.wait();
-    ArchImpl::enter_kernel(core_id, payload_info);
+    ArchImpl::enter_kernel(core_id, payload_info, per_core);
     fmt::debug_println_without_synchronization!("Core {}: failed to enter kernel", core_id);
     ArchImpl::idle()
 }

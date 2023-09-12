@@ -6,10 +6,10 @@
 
 #include <kernel/gen_config.h>
 
-.extern main
 .extern __global_pointer$
 .extern __primary_stack_bottom
 .extern hsm_exists
+.extern arch_main
 
 #define BIT(n) (1 << (n))
 
@@ -124,7 +124,7 @@ _start1: /* a0 must hold current hard ID passed by bootloader */
    *   a0 = hart id
    *   a1 = dtb
    */
-  la s0, main
+  la s0, arch_main
   jr s0
 
 #if CONFIG_MAX_NUM_NODES > 1

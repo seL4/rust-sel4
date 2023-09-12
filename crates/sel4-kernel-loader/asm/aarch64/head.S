@@ -5,10 +5,10 @@
 .global _start;
 .global secondary_entry;
 
-.extern main
 .extern __primary_stack
 .extern __primary_stack_size
-.extern secondary_main
+.extern arch_main
+.extern arch_secondary_main
 
 .extern clean_and_invalideate_dcache
 .extern invalidate_dcache
@@ -33,11 +33,11 @@ clear_bss_loop:
     ldr     x9, [x9]
     mov     sp, x9
     bl      init_core_state
-    b       main
+    b       arch_main
 
 secondary_entry:
     bl      init_core_state
-    b       secondary_main
+    b       arch_secondary_main
 
 hang:
     wfe
