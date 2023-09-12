@@ -1,10 +1,11 @@
 use log::{Log, Metadata, Record};
 use spin::Mutex;
 
-use sel4_logging::{Logger, LoggerBuilder};
+use sel4_logging::{LevelFilter, Logger, LoggerBuilder};
 
 use crate::fmt::debug_print;
-use crate::LOG_LEVEL;
+
+const LOG_LEVEL: LevelFilter = LevelFilter::Debug;
 
 static LOGGER: SynchronizedLogger<Logger> = SynchronizedLogger::new(
     LoggerBuilder::const_default()

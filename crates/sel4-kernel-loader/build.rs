@@ -75,7 +75,7 @@ fn main() {
     }
 
     if let "aarch64" | "aarch32" = sel4_cfg_str!(SEL4_ARCH) {
-        let out_path = PathBuf::from(&out_dir).join("loader_translation_tables.rs");
+        let out_path = PathBuf::from(&out_dir).join("loader_page_tables.rs");
         fs::write(&out_path, mk_loader_map()).unwrap();
         Rustfmt::detect().format(&out_path);
     }
@@ -90,7 +90,7 @@ fn main() {
         (kernel_phys_addr_range.end + KERNEL_HEADROOM).next_multiple_of(GRANULE_SIZE);
 
     {
-        let out_path = PathBuf::from(&out_dir).join("kernel_translation_tables.rs");
+        let out_path = PathBuf::from(&out_dir).join("kernel_page_tables.rs");
         fs::write(
             &out_path,
             mk_kernel_map(kernel_phys_addr_range, kernel_phys_to_virt_offset),
