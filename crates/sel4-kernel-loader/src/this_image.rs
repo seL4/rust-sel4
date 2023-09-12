@@ -48,7 +48,7 @@ pub(crate) mod page_tables {
 pub(crate) mod stacks {
     use core::sync::Exclusive;
 
-    use crate::NUM_SECONDARY_CORES;
+    use sel4_config::sel4_cfg_usize;
 
     #[repr(C, align(16))]
     struct Stack<const N: usize>([u8; N]);
@@ -61,17 +61,19 @@ pub(crate) mod stacks {
     static __primary_stack_bottom: Exclusive<*const u8> =
         Exclusive::new(unsafe { PRIMARY_STACK.0.as_ptr_range().end });
 
+    const NUM_SECONDARY_CORES: usize = sel4_cfg_usize!(MAX_NUM_NODES) - 1;
+
     const SECONDARY_STACK_SIZE: usize = 4096 * 2;
     const SECONDARY_STACKS_SIZE: usize = SECONDARY_STACK_SIZE * NUM_SECONDARY_CORES;
 
     static SECONDARY_STACKS: Stack<SECONDARY_STACKS_SIZE> = Stack([0; SECONDARY_STACKS_SIZE]);
 
-    pub(crate) fn get_secondary_stack_bottom(i: usize) -> usize {
+    pub(crate) fn get_secondary_stack_bottom(core_id: usize) -> usize {
         unsafe {
             SECONDARY_STACKS
                 .0
                 .as_ptr()
-                .offset(((i + 1) * SECONDARY_STACK_SIZE).try_into().unwrap())
+                .offset((core_id * SECONDARY_STACK_SIZE).try_into().unwrap())
                 .expose_addr()
         }
     }

@@ -1,4 +1,5 @@
 use sel4_config::sel4_cfg;
+use sel4_kernel_loader_payload_types::PayloadInfo;
 
 #[sel4_cfg(ARCH_AARCH64)]
 #[path = "aarch64/mod.rs"]
@@ -9,3 +10,11 @@ mod imp;
 mod imp;
 
 pub(crate) use imp::*;
+
+pub(crate) trait Arch {
+    fn init() {}
+
+    fn idle() -> !;
+
+    fn enter_kernel(core_id: usize, payload_info: &PayloadInfo<usize>) -> !;
+}

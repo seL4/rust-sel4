@@ -1,35 +1,41 @@
-use crate::arch::reset_cntvoff;
+use spin::Mutex;
 
-pub(crate) use crate::arch::drivers::psci::start_secondary_core;
+use crate::{
+    arch::{drivers::psci, reset_cntvoff},
+    drivers::pl011::Pl011Device,
+    plat::Plat,
+};
 
-pub(crate) fn init_platform_state_per_core(_core_id: usize) {
-    unsafe {
-        reset_cntvoff();
-    }
+const SERIAL_DEVICE_BASE_ADDR: usize = 0x0900_0000;
+
+static SERIAL_DEVICE: Mutex<Pl011Device> = Mutex::new(get_serial_device());
+
+const fn get_serial_device() -> Pl011Device {
+    unsafe { Pl011Device::new(SERIAL_DEVICE_BASE_ADDR) }
 }
 
-pub(crate) mod debug {
-    use spin::Mutex;
+pub(crate) enum PlatImpl {}
 
-    use crate::drivers::pl011::Pl011Device;
-
-    const BASE_ADDR: usize = 0x0900_0000;
-
-    static DEVICE: Mutex<Pl011Device> = Mutex::new(get_device());
-
-    const fn get_device() -> Pl011Device {
-        unsafe { Pl011Device::new(BASE_ADDR) }
+impl Plat for PlatImpl {
+    fn init() {
+        SERIAL_DEVICE.lock().init();
     }
 
-    pub(crate) fn init() {
-        DEVICE.lock().init();
+    fn init_per_core() {
+        unsafe {
+            reset_cntvoff();
+        }
     }
 
-    pub(crate) fn put_char(c: u8) {
-        DEVICE.lock().put_char(c);
+    fn put_char(c: u8) {
+        SERIAL_DEVICE.lock().put_char(c);
     }
 
-    pub(crate) fn put_char_without_synchronization(c: u8) {
-        get_device().put_char(c);
+    fn put_char_without_synchronization(c: u8) {
+        get_serial_device().put_char(c);
+    }
+
+    fn start_secondary_core(core_id: usize, sp: usize) {
+        psci::start_secondary_core(core_id, sp)
     }
 }

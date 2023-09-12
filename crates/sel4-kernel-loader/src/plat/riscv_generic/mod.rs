@@ -1,17 +1,17 @@
-pub(crate) fn init_platform_state_per_core(_core_id: usize) {}
+use crate::plat::Plat;
 
-pub(crate) fn start_secondary_core(_core_id: usize, _sp: usize) {
-    unimplemented!()
-}
+pub(crate) enum PlatImpl {}
 
-pub(crate) mod debug {
-    pub(crate) fn init() {}
-
-    pub(crate) fn put_char(c: u8) {
+impl Plat for PlatImpl {
+    fn put_char(c: u8) {
         sbi::legacy::console_putchar(c)
     }
 
-    pub(crate) fn put_char_without_synchronization(c: u8) {
+    fn put_char_without_synchronization(c: u8) {
         sbi::legacy::console_putchar(c)
+    }
+
+    fn start_secondary_core(_core_id: usize, _sp: usize) {
+        unimplemented!()
     }
 }

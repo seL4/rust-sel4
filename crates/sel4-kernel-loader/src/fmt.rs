@@ -3,14 +3,14 @@
 
 use core::fmt;
 
-use crate::plat::debug::{put_char, put_char_without_synchronization};
+use crate::plat::{Plat, PlatImpl};
 
 struct DebugWrite;
 
 impl fmt::Write for DebugWrite {
     fn write_str(&mut self, s: &str) -> fmt::Result {
         for &c in s.as_bytes() {
-            put_char(c);
+            PlatImpl::put_char(c);
         }
         Ok(())
     }
@@ -42,7 +42,7 @@ struct DebugWriteWithoutSynchronization;
 impl fmt::Write for DebugWriteWithoutSynchronization {
     fn write_str(&mut self, s: &str) -> fmt::Result {
         for &c in s.as_bytes() {
-            put_char_without_synchronization(c);
+            PlatImpl::put_char_without_synchronization(c);
         }
         Ok(())
     }

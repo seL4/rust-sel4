@@ -37,7 +37,7 @@ clear_bss_loop:
 
 secondary_entry:
     bl      init_core_state
-    b       secondary_entry_rust
+    b       secondary_main
 
 hang:
     wfe

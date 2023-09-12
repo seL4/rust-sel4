@@ -1,7 +1,7 @@
 use core::arch::asm;
 use core::fmt;
 
-use crate::arch::idle;
+use crate::arch::{Arch, ArchImpl};
 use crate::fmt::debug_println_without_synchronization;
 
 #[used]
@@ -26,7 +26,7 @@ unsafe extern "C" fn exception_handler(vector_table_index: usize) {
         registers: unsafe { exception_register_state },
     };
     debug_println_without_synchronization!("!!! Exception:\n{}", exception);
-    idle()
+    ArchImpl::idle()
 }
 
 //

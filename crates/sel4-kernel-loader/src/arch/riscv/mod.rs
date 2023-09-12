@@ -1,23 +1,64 @@
 use core::arch::asm;
+use core::mem;
 
 use riscv::register::satp;
 
-use crate::this_image::page_tables::kernel::kernel_boot_level_0_table;
+use sel4_kernel_loader_payload_types::PayloadInfo;
+
+use crate::{arch::Arch, this_image::page_tables::kernel::kernel_boot_level_0_table};
 
 #[no_mangle]
 static mut hsm_exists: i32 = 0;
 
-pub(crate) fn idle() -> ! {
-    loop {
+pub(crate) enum ArchImpl {}
+
+impl Arch for ArchImpl {
+    fn init() {
         unsafe {
-            asm!("wfi");
+            kernel_boot_level_0_table.finish();
         }
+    }
+
+    fn idle() -> ! {
+        loop {
+            unsafe {
+                asm!("wfi");
+            }
+        }
+    }
+
+    fn enter_kernel(_core_id: usize, payload_info: &PayloadInfo<usize>) -> ! {
+        let kernel_entry =
+            unsafe { mem::transmute::<usize, KernelEntry>(payload_info.kernel_image.virt_entry) };
+
+        let (dtb_addr_p, dtb_size) = match &payload_info.fdt_phys_addr_range {
+            Some(region) => (region.start, region.len()),
+            None => (0, 0),
+        };
+
+        switch_page_tables();
+
+        (kernel_entry)(
+            payload_info.user_image.phys_addr_range.start,
+            payload_info.user_image.phys_addr_range.end,
+            0_usize.wrapping_sub(payload_info.user_image.phys_to_virt_offset) as isize,
+            payload_info.user_image.virt_entry,
+            dtb_addr_p,
+            dtb_size,
+        )
     }
 }
 
-pub(crate) fn init_platform_state_per_core(_core_id: usize) {}
+type KernelEntry = extern "C" fn(
+    ui_p_reg_start: usize,
+    ui_p_reg_end: usize,
+    pv_offset: isize,
+    v_entry: usize,
+    dtb_addr_p: usize,
+    dtb_size: usize,
+) -> !;
 
-pub(crate) fn init_platform_state_per_core_after_which_no_syncronization(_core_id: usize) {
+fn switch_page_tables() {
     #[cfg(target_pointer_width = "32")]
     unsafe fn by_ptr_width(ppn: usize) {
         use core::arch::riscv32::{fence_i, sfence_vma_all};
@@ -37,7 +78,6 @@ pub(crate) fn init_platform_state_per_core_after_which_no_syncronization(_core_i
     }
 
     unsafe {
-        kernel_boot_level_0_table.finish();
         let ppn = kernel_boot_level_0_table.root() as usize >> 12;
         by_ptr_width(ppn);
     }

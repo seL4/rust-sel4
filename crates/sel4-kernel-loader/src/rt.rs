@@ -1,9 +1,9 @@
 use core::panic::PanicInfo;
 
-use crate::arch::idle;
+use crate::arch::{Arch, ArchImpl};
 
 #[panic_handler]
 extern "C" fn panic_handler(info: &PanicInfo) -> ! {
     log::error!("{}", info);
-    idle()
+    ArchImpl::idle()
 }

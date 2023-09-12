@@ -14,3 +14,15 @@ mod imp;
 
 #[allow(unused_imports)]
 pub(crate) use imp::*;
+
+pub(crate) trait Plat {
+    fn init() {}
+
+    fn init_per_core() {}
+
+    fn put_char(c: u8);
+
+    fn put_char_without_synchronization(c: u8);
+
+    fn start_secondary_core(core_id: usize, sp: usize);
+}
