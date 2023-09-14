@@ -28,7 +28,7 @@
 //!   - [`sel4_root_task`]: A runtime for root tasks that supports thread-local storage and
 //!     unwinding, and provides a global allocator.
 //! - **seL4 Microkit**:
-//!   - [`sel4-microkit`]: A runtime for [seL4 Microkit](https://github.com/seL4/microkit)
+//!   - [`sel4_microkit`]: A runtime for [seL4 Microkit](https://github.com/seL4/microkit)
 //!     protection domains, including an implementation of libmicrokit and abstractions for IPC.
 
 macro_rules! maybe {
