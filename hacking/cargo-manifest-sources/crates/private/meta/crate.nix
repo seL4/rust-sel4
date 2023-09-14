@@ -9,9 +9,9 @@ mk {
 
     sel4-root-task
 
-    sel4cp
-    sel4cp-message
-    sel4cp-message-types
+    sel4-microkit
+    sel4-microkit-message
+    sel4-microkit-message-types
 
     sel4-async-block-io
     sel4-async-block-io-cpiofs
@@ -34,9 +34,9 @@ mk {
     inherit (versions) cfg-if log;
     sel4-externally-shared = { features = [ "alloc" "unstable" "very_unstable" ]; };
     sel4-root-task = { features = [ "full" ]; optional = true; };
-    sel4cp = { features = [ "full" ]; optional = true; };
-    sel4cp-message = { optional = true; };
-    sel4cp-message-types = { optional = true; };
+    sel4-microkit = { features = [ "full" ]; optional = true; };
+    sel4-microkit-message = { optional = true; };
+    sel4-microkit-message-types = { optional = true; };
   };
   nix.local.target."cfg(not(target_thread_local))".dependencies = with localCrates; [
     sel4
@@ -54,10 +54,10 @@ mk {
     sel4-root-task = [
       "dep:sel4-root-task"
     ];
-    sel4cp = [
-      "dep:sel4cp"
-      "sel4cp-message"
-      "sel4cp-message-types"
+    sel4-microkit = [
+      "dep:sel4-microkit"
+      "sel4-microkit-message"
+      "sel4-microkit-message-types"
     ];
   };
   nix.meta.requirements = [ "sel4" ];

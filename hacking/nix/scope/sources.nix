@@ -45,9 +45,9 @@ in rec {
       # useLocal = true;
     };
 
-    rust-sel4cp = fetchGit {
+    rust-microkit = fetchGit {
       url = "https://github.com/coliasgroup/seL4.git";
-      rev = "fc80c9ad05d33e77a6b850dae8eb4b8317ec32a1"; # branch "rust-sel4cp"
+      rev = "fc80c9ad05d33e77a6b850dae8eb4b8317ec32a1"; # branch "rust-microkit"
       local = localRoot + "/seL4";
       # useLocal = true;
     };
@@ -60,10 +60,10 @@ in rec {
     };
   };
 
-  sel4cp = fetchGit {
-    url = "https://github.com/coliasgroup/sel4cp.git";
-    rev = "8c361140e483137d0d95d0aaef1fcdc2d77d07ba"; # branch "rust-seL4-nix"
-    local = localRoot + "/sel4cp";
+  microkit = fetchGit {
+    url = "https://github.com/coliasgroup/microkit.git";
+    rev = "b0a82657af8f340f418295bae158f5132294ce4b"; # branch "rust-nix"
+    local = localRoot + "/microkit";
     # useLocal = true;
   };
 

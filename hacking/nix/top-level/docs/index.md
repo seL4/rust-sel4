@@ -7,4 +7,4 @@ The rustdoc for each view is generated all at once with one `cargo doc` invocati
 [`meta`](https://github.com/coliasgroup/rust-seL4/tree/main/crates/private/meta) crate, whose only
 purpose is to depend on and select features for the other crates. Due to a current limitation of
 rustdoc, each view can only include at most one language runtime crate (e.g. `sel4-root-task` or
-`sel4cp`).
+`sel4-microkit`).

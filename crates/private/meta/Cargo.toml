@@ -6,8 +6,8 @@ edition = "2021"
 license = "BSD-2-Clause"
 
 [features]
+sel4-microkit = ["dep:sel4-microkit", "sel4-microkit-message", "sel4-microkit-message-types"]
 sel4-root-task = ["dep:sel4-root-task"]
-sel4cp = ["dep:sel4cp", "sel4cp-message", "sel4cp-message-types"]
 
 [dependencies]
 cfg-if = "1.0.0"
@@ -24,6 +24,9 @@ sel4-config = { path = "../../sel4/config" }
 sel4-immediate-sync-once-cell = { path = "../../sel4-immediate-sync-once-cell" }
 sel4-immutable-cell = { path = "../../sel4-immutable-cell" }
 sel4-logging = { path = "../../sel4-logging" }
+sel4-microkit = { path = "../../sel4-microkit", features = ["full"], optional = true }
+sel4-microkit-message = { path = "../../sel4-microkit/message", optional = true }
+sel4-microkit-message-types = { path = "../../sel4-microkit/message/types", optional = true }
 sel4-root-task = { path = "../../sel4-root-task", features = ["full"], optional = true }
 sel4-shared-ring-buffer = { path = "../../sel4-shared-ring-buffer" }
 sel4-shared-ring-buffer-block-io = { path = "../../sel4-shared-ring-buffer/block-io" }
@@ -31,9 +34,6 @@ sel4-shared-ring-buffer-block-io-types = { path = "../../sel4-shared-ring-buffer
 sel4-shared-ring-buffer-smoltcp = { path = "../../sel4-shared-ring-buffer/smoltcp" }
 sel4-sync = { path = "../../sel4-sync" }
 sel4-sys = { path = "../../sel4/sys" }
-sel4cp = { path = "../../sel4cp", features = ["full"], optional = true }
-sel4cp-message = { path = "../../sel4cp/message", optional = true }
-sel4cp-message-types = { path = "../../sel4cp/message/types", optional = true }
 
 [dependencies.sel4-externally-shared]
 path = "../../sel4-externally-shared"

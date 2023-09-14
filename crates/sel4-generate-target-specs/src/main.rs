@@ -15,7 +15,7 @@ use clap::{Arg, ArgAction, Command};
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 struct Config {
     arch: Arch,
-    cp: bool,
+    microkit: bool,
     minimal: bool,
 }
 
@@ -70,7 +70,7 @@ impl Config {
             options.eh_frame_header = !self.minimal;
         }
 
-        if self.cp {
+        if self.microkit {
             let options = &mut target.options;
             options.link_script =
                 Some("__sel4_ipc_buffer_obj = (_end + 4096 - 1) & ~(4096 - 1);".into());
@@ -86,14 +86,14 @@ impl Config {
     }
 
     fn filter(&self) -> bool {
-        !self.cp || self.arch.cp_support()
+        !self.microkit || self.arch.microkit_support()
     }
 
     fn name(&self) -> String {
         let mut name = self.arch.name();
         name.push_str("-sel4");
-        if self.cp {
-            name.push_str("cp");
+        if self.microkit {
+            name.push_str("-microkit");
         }
         if self.minimal {
             name.push_str("-minimal");
@@ -105,9 +105,13 @@ impl Config {
         let mut all = vec![];
         let all_bools = &[true, false];
         for arch in Arch::all() {
-            for cp in all_bools.iter().copied() {
+            for microkit in all_bools.iter().copied() {
                 for minimal in all_bools.iter().copied() {
-                    let config = Self { arch, cp, minimal };
+                    let config = Self {
+                        arch,
+                        microkit,
+                        minimal,
+                    };
                     if config.filter() {
                         all.push(config);
                     }
@@ -128,7 +132,7 @@ impl Arch {
         }
     }
 
-    fn cp_support(&self) -> bool {
+    fn microkit_support(&self) -> bool {
         match self {
             Self::AArch64 => true,
             _ => false,

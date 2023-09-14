@@ -197,8 +197,8 @@ dependencies = [
  "banscii-artist-interface-types",
  "rsa",
  "sel4-externally-shared",
- "sel4cp",
- "sel4cp-message",
+ "sel4-microkit",
+ "sel4-microkit-message",
 ]
 
 [[package]]
@@ -217,8 +217,8 @@ dependencies = [
  "banscii-pl011-driver-interface-types",
  "hex",
  "sel4-externally-shared",
- "sel4cp",
- "sel4cp-message",
+ "sel4-microkit",
+ "sel4-microkit-message",
 ]
 
 [[package]]
@@ -246,8 +246,8 @@ dependencies = [
  "banscii-pl011-driver-core",
  "banscii-pl011-driver-interface-types",
  "heapless",
- "sel4cp",
- "sel4cp-message",
+ "sel4-microkit",
+ "sel4-microkit-message",
 ]
 
 [[package]]
@@ -1685,6 +1685,9 @@ dependencies = [
  "sel4-immediate-sync-once-cell",
  "sel4-immutable-cell",
  "sel4-logging",
+ "sel4-microkit",
+ "sel4-microkit-message",
+ "sel4-microkit-message-types",
  "sel4-platform-info",
  "sel4-root-task",
  "sel4-shared-ring-buffer",
@@ -1693,9 +1696,143 @@ dependencies = [
  "sel4-shared-ring-buffer-smoltcp",
  "sel4-sync",
  "sel4-sys",
- "sel4cp",
- "sel4cp-message",
- "sel4cp-message-types",
+]
+
+[[package]]
+name = "microkit-hello"
+version = "0.1.0"
+dependencies = [
+ "sel4-microkit",
+]
+
+[[package]]
+name = "microkit-http-server-example-server"
+version = "0.1.0"
+dependencies = [
+ "async-unsync",
+ "futures",
+ "log",
+ "microkit-http-server-example-server-core",
+ "microkit-http-server-example-sp804-driver-interface-types",
+ "microkit-http-server-example-virtio-net-driver-interface-types",
+ "rcgen",
+ "sel4",
+ "sel4-async-block-io",
+ "sel4-async-network",
+ "sel4-async-request-statuses",
+ "sel4-async-single-threaded-executor",
+ "sel4-async-timers",
+ "sel4-bounce-buffer-allocator",
+ "sel4-externally-shared",
+ "sel4-immediate-sync-once-cell",
+ "sel4-logging",
+ "sel4-microkit",
+ "sel4-microkit-message",
+ "sel4-newlib",
+ "sel4-shared-ring-buffer",
+ "sel4-shared-ring-buffer-block-io",
+ "sel4-shared-ring-buffer-block-io-types",
+ "sel4-shared-ring-buffer-smoltcp",
+ "sel4-sync",
+ "smoltcp",
+]
+
+[[package]]
+name = "microkit-http-server-example-server-core"
+version = "0.1.0"
+dependencies = [
+ "futures",
+ "httparse",
+ "log",
+ "mbedtls",
+ "sel4-async-block-io",
+ "sel4-async-block-io-cpiofs",
+ "sel4-async-network",
+ "sel4-async-network-mbedtls",
+ "sel4-async-single-threaded-executor",
+ "sel4-async-timers",
+ "sel4-panicking-env",
+]
+
+[[package]]
+name = "microkit-http-server-example-sp804-driver"
+version = "0.1.0"
+dependencies = [
+ "microkit-http-server-example-sp804-driver-core",
+ "microkit-http-server-example-sp804-driver-interface-types",
+ "sel4-microkit",
+ "sel4-microkit-message",
+]
+
+[[package]]
+name = "microkit-http-server-example-sp804-driver-core"
+version = "0.1.0"
+dependencies = [
+ "log",
+ "tock-registers",
+]
+
+[[package]]
+name = "microkit-http-server-example-sp804-driver-interface-types"
+version = "0.1.0"
+dependencies = [
+ "serde",
+]
+
+[[package]]
+name = "microkit-http-server-example-virtio-blk-driver"
+version = "0.1.0"
+dependencies = [
+ "log",
+ "microkit-http-server-example-virtio-hal-impl",
+ "sel4",
+ "sel4-bounce-buffer-allocator",
+ "sel4-externally-shared",
+ "sel4-immediate-sync-once-cell",
+ "sel4-logging",
+ "sel4-microkit",
+ "sel4-shared-ring-buffer",
+ "sel4-shared-ring-buffer-block-io-types",
+ "sel4-sync",
+ "virtio-drivers",
+]
+
+[[package]]
+name = "microkit-http-server-example-virtio-hal-impl"
+version = "0.1.0"
+dependencies = [
+ "log",
+ "sel4-bounce-buffer-allocator",
+ "sel4-externally-shared",
+ "sel4-immediate-sync-once-cell",
+ "sel4-sync",
+ "virtio-drivers",
+]
+
+[[package]]
+name = "microkit-http-server-example-virtio-net-driver"
+version = "0.1.0"
+dependencies = [
+ "log",
+ "microkit-http-server-example-virtio-hal-impl",
+ "microkit-http-server-example-virtio-net-driver-interface-types",
+ "sel4",
+ "sel4-bounce-buffer-allocator",
+ "sel4-externally-shared",
+ "sel4-immediate-sync-once-cell",
+ "sel4-logging",
+ "sel4-microkit",
+ "sel4-microkit-message",
+ "sel4-shared-ring-buffer",
+ "sel4-sync",
+ "virtio-drivers",
+]
+
+[[package]]
+name = "microkit-http-server-example-virtio-net-driver-interface-types"
+version = "0.1.0"
+dependencies = [
+ "serde",
 ]
 
 [[package]]
@@ -2953,6 +3090,49 @@ dependencies = [
 ]
 
 [[package]]
+name = "sel4-microkit"
+version = "0.1.0"
+dependencies = [
+ "cfg-if",
+ "sel4",
+ "sel4-externally-shared",
+ "sel4-immediate-sync-once-cell",
+ "sel4-immutable-cell",
+ "sel4-microkit-macros",
+ "sel4-panicking",
+ "sel4-panicking-env",
+ "sel4-runtime-common",
+]
+
+[[package]]
+name = "sel4-microkit-macros"
+version = "0.1.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 1.0.109",
+]
+
+[[package]]
+name = "sel4-microkit-message"
+version = "0.1.0"
+dependencies = [
+ "sel4-microkit",
+ "sel4-microkit-message-types",
+ "serde",
+]
+
+[[package]]
+name = "sel4-microkit-message-types"
+version = "0.1.0"
+dependencies = [
+ "num_enum",
+ "postcard",
+ "serde",
+ "zerocopy",
+]
+
+[[package]]
 name = "sel4-newlib"
 version = "0.1.0"
 dependencies = [
@@ -3201,186 +3381,6 @@ name = "sel4-sys-wrappers"
 version = "0.1.0"
 dependencies = [
  "sel4-sys",
-]
-
-[[package]]
-name = "sel4cp"
-version = "0.1.0"
-dependencies = [
- "cfg-if",
- "sel4",
- "sel4-externally-shared",
- "sel4-immediate-sync-once-cell",
- "sel4-immutable-cell",
- "sel4-panicking",
- "sel4-panicking-env",
- "sel4-runtime-common",
- "sel4cp-macros",
-]
-
-[[package]]
-name = "sel4cp-hello"
-version = "0.1.0"
-dependencies = [
- "sel4cp",
-]
-
-[[package]]
-name = "sel4cp-http-server-example-server"
-version = "0.1.0"
-dependencies = [
- "async-unsync",
- "futures",
- "log",
- "rcgen",
- "sel4",
- "sel4-async-block-io",
- "sel4-async-network",
- "sel4-async-request-statuses",
- "sel4-async-single-threaded-executor",
- "sel4-async-timers",
- "sel4-bounce-buffer-allocator",
- "sel4-externally-shared",
- "sel4-immediate-sync-once-cell",
- "sel4-logging",
- "sel4-newlib",
- "sel4-shared-ring-buffer",
- "sel4-shared-ring-buffer-block-io",
- "sel4-shared-ring-buffer-block-io-types",
- "sel4-shared-ring-buffer-smoltcp",
- "sel4-sync",
- "sel4cp",
- "sel4cp-http-server-example-server-core",
- "sel4cp-http-server-example-sp804-driver-interface-types",
- "sel4cp-http-server-example-virtio-net-driver-interface-types",
- "sel4cp-message",
- "smoltcp",
-]
-
-[[package]]
-name = "sel4cp-http-server-example-server-core"
-version = "0.1.0"
-dependencies = [
- "futures",
- "httparse",
- "log",
- "mbedtls",
- "sel4-async-block-io",
- "sel4-async-block-io-cpiofs",
- "sel4-async-network",
- "sel4-async-network-mbedtls",
- "sel4-async-single-threaded-executor",
- "sel4-async-timers",
- "sel4-panicking-env",
-]
-
-[[package]]
-name = "sel4cp-http-server-example-sp804-driver"
-version = "0.1.0"
-dependencies = [
- "sel4cp",
- "sel4cp-http-server-example-sp804-driver-core",
- "sel4cp-http-server-example-sp804-driver-interface-types",
- "sel4cp-message",
-]
-
-[[package]]
-name = "sel4cp-http-server-example-sp804-driver-core"
-version = "0.1.0"
-dependencies = [
- "log",
- "tock-registers",
-]
-
-[[package]]
-name = "sel4cp-http-server-example-sp804-driver-interface-types"
-version = "0.1.0"
-dependencies = [
- "serde",
-]
-
-[[package]]
-name = "sel4cp-http-server-example-virtio-blk-driver"
-version = "0.1.0"
-dependencies = [
- "log",
- "sel4",
- "sel4-bounce-buffer-allocator",
- "sel4-externally-shared",
- "sel4-immediate-sync-once-cell",
- "sel4-logging",
- "sel4-shared-ring-buffer",
- "sel4-shared-ring-buffer-block-io-types",
- "sel4-sync",
- "sel4cp",
- "sel4cp-http-server-example-virtio-hal-impl",
- "virtio-drivers",
-]
-
-[[package]]
-name = "sel4cp-http-server-example-virtio-hal-impl"
-version = "0.1.0"
-dependencies = [
- "log",
- "sel4-bounce-buffer-allocator",
- "sel4-externally-shared",
- "sel4-immediate-sync-once-cell",
- "sel4-sync",
- "virtio-drivers",
-]
-
-[[package]]
-name = "sel4cp-http-server-example-virtio-net-driver"
-version = "0.1.0"
-dependencies = [
- "log",
- "sel4",
- "sel4-bounce-buffer-allocator",
- "sel4-externally-shared",
- "sel4-immediate-sync-once-cell",
- "sel4-logging",
- "sel4-shared-ring-buffer",
- "sel4-sync",
- "sel4cp",
- "sel4cp-http-server-example-virtio-hal-impl",
- "sel4cp-http-server-example-virtio-net-driver-interface-types",
- "sel4cp-message",
- "virtio-drivers",
-]
-
-[[package]]
-name = "sel4cp-http-server-example-virtio-net-driver-interface-types"
-version = "0.1.0"
-dependencies = [
- "serde",
-]
-
-[[package]]
-name = "sel4cp-macros"
-version = "0.1.0"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 1.0.109",
-]
-
-[[package]]
-name = "sel4cp-message"
-version = "0.1.0"
-dependencies = [
- "sel4cp",
- "sel4cp-message-types",
- "serde",
-]
-
-[[package]]
-name = "sel4cp-message-types"
-version = "0.1.0"
-dependencies = [
- "num_enum",
- "postcard",
- "serde",
- "zerocopy",
 ]
 
 [[package]]
@@ -3711,6 +3711,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "tests-microkit-passive-server-with-deferred-action-pds-client"
+version = "0.1.0"
+dependencies = [
+ "sel4-microkit",
+]
+
+[[package]]
+name = "tests-microkit-passive-server-with-deferred-action-pds-server"
+version = "0.1.0"
+dependencies = [
+ "sel4-microkit",
+]
+
+[[package]]
 name = "tests-root-task-backtrace"
 version = "0.1.0"
 dependencies = [
@@ -3791,20 +3805,6 @@ version = "0.1.0"
 dependencies = [
  "sel4",
  "sel4-root-task",
-]
-
-[[package]]
-name = "tests-sel4cp-passive-server-with-deferred-action-pds-client"
-version = "0.1.0"
-dependencies = [
- "sel4cp",
-]
-
-[[package]]
-name = "tests-sel4cp-passive-server-with-deferred-action-pds-server"
-version = "0.1.0"
-dependencies = [
- "sel4cp",
 ]
 
 [[package]]

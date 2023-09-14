@@ -1,0 +1,12 @@
+[package]
+name = "microkit-http-server-example-sp804-driver"
+version = "0.1.0"
+authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
+edition = "2021"
+license = "BSD-2-Clause"
+
+[dependencies]
+microkit-http-server-example-sp804-driver-core = { path = "./core" }
+microkit-http-server-example-sp804-driver-interface-types = { path = "./interface-types" }
+sel4-microkit = { path = "../../../../../sel4-microkit", default-features = false }
+sel4-microkit-message = { path = "../../../../../sel4-microkit/message" }

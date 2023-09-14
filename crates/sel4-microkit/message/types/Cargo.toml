@@ -1,0 +1,16 @@
+[package]
+name = "sel4-microkit-message-types"
+version = "0.1.0"
+authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
+edition = "2021"
+license = "BSD-2-Clause"
+
+[features]
+default = ["postcard"]
+postcard = ["dep:postcard", "dep:serde"]
+
+[dependencies]
+num_enum = { version = "0.5.9", default-features = false }
+postcard = { version = "1.0.2", default-features = false, optional = true }
+serde = { version = "1.0.147", default-features = false, optional = true }
+zerocopy = "0.6.1"

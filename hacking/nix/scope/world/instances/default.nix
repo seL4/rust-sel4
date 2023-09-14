@@ -27,9 +27,9 @@
 }:
 
 let
-  inherit (worldConfig) isCorePlatform canSimulate;
+  inherit (worldConfig) isMicrokit canSimulate;
 
-  haveFullRuntime = !isCorePlatform && (hostPlatform.isAarch64 || hostPlatform.isRiscV || hostPlatform.isx86_64);
+  haveFullRuntime = !isMicrokit && (hostPlatform.isAarch64 || hostPlatform.isRiscV || hostPlatform.isx86_64);
   haveMinimalRuntime = haveFullRuntime;
   haveKernelLoader = hostPlatform.isAarch64 || hostPlatform.isRiscV;
   haveCapDLInitializer = hostPlatform.isAarch64 || hostPlatform.isRiscV64 || hostPlatform.isx86_64;
@@ -51,10 +51,10 @@ in rec {
     tests.root-task.c
     tests.capdl.threads
     tests.capdl.utcover
-    sel4cp.examples.hello
-    sel4cp.examples.banscii
-    sel4cp.examples.http-server
-    sel4cp.tests.passive-server-with-deferred-action
+    microkit.examples.hello
+    microkit.examples.banscii
+    microkit.examples.http-server
+    microkit.tests.passive-server-with-deferred-action
     examples.root-task.hello
     examples.root-task.example-root-task
     examples.root-task.example-root-task-without-runtime
@@ -226,7 +226,7 @@ in rec {
     };
   };
 
-  sel4cp = callPackage ./sel4cp {
+  microkit = callPackage ./microkit {
     inherit maybe;
     inherit canSimulate;
   };

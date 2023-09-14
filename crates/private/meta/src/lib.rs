@@ -27,10 +27,9 @@
 //! - **Root task**:
 //!   - [`sel4_root_task`]: A runtime for root tasks that supports thread-local storage and
 //!     unwinding, and provides a global allocator.
-//! - **seL4 Core Platform**:
-//!   - [`sel4cp`]: A runtime for [seL4 Core
-//!     Platform](https://github.com/BreakawayConsulting/sel4cp) protection domains, including an
-//!     implementation of libsel4cp and abstractions for IPC.
+//! - **seL4 Microkit**:
+//!   - [`sel4-microkit`]: A runtime for [seL4 Microkit](https://github.com/seL4/microkit)
+//!     protection domains, including an implementation of libmicrokit and abstractions for IPC.
 
 macro_rules! maybe {
     {
@@ -66,7 +65,7 @@ macro_rules! mutually_exclusive {
 mutually_exclusive! {
     runtime_feature_check [
         "sel4-root-task"
-        "sel4cp"
+        "sel4-microkit"
     ]
 }
 
@@ -109,16 +108,16 @@ maybe! {
 }
 
 maybe! {
-    #[cfg(feature = "sel4cp")]
-    sel4cp
+    #[cfg(feature = "sel4-microkit")]
+    sel4_microkit
 }
 
 maybe! {
-    #[cfg(feature = "sel4cp")]
-    sel4cp_message
+    #[cfg(feature = "sel4-microkit")]
+    sel4_microkit_message
 }
 
 maybe! {
-    #[cfg(feature = "sel4cp")]
-    sel4cp_message_types
+    #[cfg(feature = "sel4-microkit")]
+    sel4_microkit_message_types
 }

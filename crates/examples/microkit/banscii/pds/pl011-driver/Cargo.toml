@@ -1,0 +1,13 @@
+[package]
+name = "banscii-pl011-driver"
+version = "0.1.0"
+authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
+edition = "2021"
+license = "BSD-2-Clause"
+
+[dependencies]
+banscii-pl011-driver-core = { path = "./core" }
+banscii-pl011-driver-interface-types = { path = "./interface-types" }
+heapless = "0.7.16"
+sel4-microkit = { path = "../../../../../sel4-microkit", default-features = false }
+sel4-microkit-message = { path = "../../../../../sel4-microkit/message" }

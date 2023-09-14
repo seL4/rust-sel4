@@ -5,8 +5,8 @@ includes:
 
 - Rust bindings for the seL4 API ([source](./crates/sel4))
 - A runtime for root tasks ([source](./crates/sel4-root-task))
-- A runtime for [seL4 Core Platform](https://github.com/BreakawayConsulting/sel4cp)
-  protection domains ([source](./crates/sel4cp))
+- A runtime for [seL4 Microkit](https://github.com/seL4/microkit) protection domains
+  ([source](./crates/sel4-microkit))
 - A [CapDL](https://docs.sel4.systems/projects/capdl/)-based system initializer ([source and
   docs](./crates/sel4-capdl-initializer))
 - A loader for the seL4 kernel ([source and docs](./crates/sel4-kernel-loader))
@@ -25,8 +25,8 @@ This work is funded by the [seL4 Foundation](https://sel4.systems/Foundation/hom
 ### Demos
 
 - Simple root task: https://github.com/coliasgroup/rust-seL4-root-task-demo
-- Simple system using the seL4 Core Platform: https://github.com/coliasgroup/rust-sel4cp-demo
-- HTTP server using the seL4 Core Platform: https://github.com/coliasgroup/rust-sel4cp-http-server-demo
+- Simple system using the seL4 Microkit: https://github.com/coliasgroup/rust-sel4cp-demo
+- HTTP server using the seL4 Microkit: https://github.com/coliasgroup/rust-sel4cp-http-server-demo
 
 ### Overview of crates
 
@@ -56,10 +56,10 @@ This work is funded by the [seL4 Foundation](https://sel4.systems/Foundation/hom
 - **Root task**:
   - [`sel4-root-task`](./crates/sel4-root-task): A runtime for root tasks that supports thread-local
     storage and unwinding, and provides a global allocator.
-- **seL4 Core Platform**:
-  - [`sel4cp`](./crates/sel4cp): A runtime for [seL4 Core
-    Platform](https://github.com/BreakawayConsulting/sel4cp) protection domains, including an
-    implementation of libsel4cp and abstractions for IPC.
+- **seL4 Microkit**:
+  - [`sel4-microkit`](./crates/sel4-microkit): A runtime for [seL4
+    Microkit](https://github.com/seL4/microkit) protection domains, including an implementation of
+    libmicrokit and abstractions for IPC.
 
 ##### Programs
 
@@ -81,8 +81,8 @@ information for locating these dependencies is passed to the dependant crates vi
 variables which are interpreted by `build.rs` scripts. Here is a list of environment variables that
 the crates which use them:
 
-- `sel4-config` and `sel4-sys`, whose dependants include `sel4`, `sel4-root-task`, `sel4cp`, and
-  many more, use `$SEL4_INCLUDE_DIRS` (defaulting to `$SEL4_PREFIX/libsel4/include` if
+- `sel4-config` and `sel4-sys`, whose dependants include `sel4`, `sel4-root-task`, `sel4-microkit`,
+  and many more, use `$SEL4_INCLUDE_DIRS` (defaulting to `$SEL4_PREFIX/libsel4/include` if
   `$SEL4_PREFIX` is set) which must contain a colon-separated list of include paths for the libsel4
   headers. See the the `sel4` crate's rustdoc for more information.
 - `sel4-platform-info`, whose dependants include `sel4-kernel-loader`, uses `$SEL4_PLATFORM_INFO`

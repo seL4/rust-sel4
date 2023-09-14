@@ -5,13 +5,13 @@
 , symlinkToRegularFile
 , crateUtils
 , mkSeL4
-, mkSeL4CorePlatform
+, mkMicrokit
 , sources
 }:
 
 let
   elaborateWorldConfig =
-    { isCorePlatform ? false
+    { isMicrokit ? false
     , kernelConfig ? null
     , kernelLoaderConfig ? null
     , corePlatformConfig ? null
@@ -20,7 +20,7 @@ let
     , mkInstanceForPlatform ? _: { attrs = {}; links = []; }
     }:
     { inherit
-        isCorePlatform
+        isMicrokit
         kernelConfig
         kernelLoaderConfig
         corePlatformConfig
@@ -42,12 +42,12 @@ self: with self;
 {
   inherit worldConfig;
 
-  sel4cp = assert worldConfig.isCorePlatform; mkSeL4CorePlatform worldConfig.corePlatformConfig;
+  microkit = assert worldConfig.isMicrokit; mkMicrokit worldConfig.corePlatformConfig;
 
-  sel4cpForUserspace = sel4cp;
-  sel4cpForBoot = sel4cp;
+  microkitForUserspace = microkit;
+  microkitForBoot = microkit;
 
-  seL4 = assert !worldConfig.isCorePlatform; mkSeL4 worldConfig.kernelConfig;
+  seL4 = assert !worldConfig.isMicrokit; mkSeL4 worldConfig.kernelConfig;
 
   seL4ForUserspace = seL4;
 
@@ -56,20 +56,20 @@ self: with self;
   });
 
   seL4IncludeDir =
-    if worldConfig.isCorePlatform
+    if worldConfig.isMicrokit
     then
       let
-        d = "${sel4cpForUserspace.sdk}/board/qemu_arm_virt/debug";
+        d = "${microkitForUserspace.sdk}/board/qemu_arm_virt/debug";
       in
         "${d}/include"
     else
       "${seL4ForUserspace}/libsel4/include";
 
   seL4RustEnvVars =
-    if worldConfig.isCorePlatform
+    if worldConfig.isMicrokit
     then
       let
-        d = "${sel4cpForUserspace.sdk}/board/qemu_arm_virt/debug";
+        d = "${microkitForUserspace.sdk}/board/qemu_arm_virt/debug";
       in {
           SEL4_INCLUDE_DIRS = "${d}/include";
       }
@@ -81,7 +81,7 @@ self: with self;
     modifyDerivation = drv: drv.overrideAttrs (self: super: seL4RustEnvVars);
   };
 
-  kernelBinary = assert !worldConfig.isCorePlatform; "${seL4ForBoot}/bin/kernel.elf";
+  kernelBinary = assert !worldConfig.isMicrokit; "${seL4ForBoot}/bin/kernel.elf";
 
   kernelBinary32Bit =
     assert hostPlatform.isx86_64;
@@ -89,7 +89,7 @@ self: with self;
       $OBJCOPY -O elf32-i386 ${kernelBinary} $out
     '';
 
-  libsel4 = assert !worldConfig.isCorePlatform; "${seL4ForUserspace}/libsel4";
+  libsel4 = assert !worldConfig.isMicrokit; "${seL4ForUserspace}/libsel4";
 
   seL4Config =
     let
@@ -129,7 +129,7 @@ self: with self;
   };
 
   inherit (callPackage ./mk-instance.nix {})
-    mkInstance mkCorePlatformInstance mkCapDLRootTask
+    mkInstance mkMicrokitInstance mkCapDLRootTask
   ;
 
   instances = callPackage ./instances {};

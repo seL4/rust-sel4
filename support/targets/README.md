@@ -9,8 +9,8 @@ your Rust toolchain.
 The difference between the `*-minimal` targets and the non-minimal ones are that the minimal ones
 have `"panic": "abort"` and `"has-thread-local": false`.
 
-The difference between the `*-sel4cp` targets and the `*-sel4` ones is that the `*-sel4cp` targets
-include a linker script fragment to add the `__sel4_ipc_buffer_obj` symbol required by the `sel4cp`
-tool.
+The difference between the `*-sel4-microkit` targets and the `*-sel4` ones is that the
+`*-sel4-microkit` targets include a linker script fragment to add the `__sel4_ipc_buffer_obj` symbol
+required by the `microkit` tool.
 
 Note that options whose values do not deviate from the default are absent in these JSON files.

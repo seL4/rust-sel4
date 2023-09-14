@@ -1,0 +1,22 @@
+[package]
+name = "banscii-assistant"
+version = "0.1.0"
+authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
+edition = "2021"
+license = "BSD-2-Clause"
+
+[dependencies]
+banscii-artist-interface-types = { path = "../artist/interface-types" }
+banscii-assistant-core = { path = "./core" }
+banscii-pl011-driver-interface-types = { path = "../pl011-driver/interface-types" }
+hex = { version = "0.4.3", default-features = false, features = ["alloc"] }
+sel4-microkit-message = { path = "../../../../../sel4-microkit/message" }
+
+[dependencies.sel4-externally-shared]
+path = "../../../../../sel4-externally-shared"
+features = ["unstable", "alloc"]
+
+[dependencies.sel4-microkit]
+path = "../../../../../sel4-microkit"
+default-features = false
+features = ["alloc"]

@@ -20,11 +20,11 @@
 }:
 
 let
-  kernelLoaderConfigEnvVars = lib.optionalAttrs (!worldConfig.isCorePlatform && worldConfig.kernelLoaderConfig != null) {
+  kernelLoaderConfigEnvVars = lib.optionalAttrs (!worldConfig.isMicrokit && worldConfig.kernelLoaderConfig != null) {
     SEL4_KERNEL_LOADER_CONFIG = writeText "loader-config.json" (builtins.toJSON worldConfig.kernelLoaderConfig);
   };
 
-  capdlEnvVars = lib.optionalAttrs (!worldConfig.isCorePlatform) {
+  capdlEnvVars = lib.optionalAttrs (!worldConfig.isMicrokit) {
     CAPDL_SPEC_FILE = serializeCapDLSpec { inherit (dummyCapDLSpec.passthru) spec; };
     CAPDL_FILL_DIR = dummyCapDLSpec.passthru.fill;
   };

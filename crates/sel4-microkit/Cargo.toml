@@ -1,0 +1,26 @@
+[package]
+name = "sel4-microkit"
+version = "0.1.0"
+authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
+edition = "2021"
+license = "BSD-2-Clause"
+
+[features]
+alloc = ["sel4-panicking/alloc"]
+default = ["unwinding"]
+full = ["default", "alloc"]
+unwinding = ["sel4-panicking/unwinding"]
+
+[dependencies]
+cfg-if = "1.0.0"
+sel4 = { path = "../sel4", features = ["single-threaded"] }
+sel4-externally-shared = { path = "../sel4-externally-shared" }
+sel4-immediate-sync-once-cell = { path = "../sel4-immediate-sync-once-cell" }
+sel4-immutable-cell = { path = "../sel4-immutable-cell" }
+sel4-microkit-macros = { path = "./macros" }
+sel4-panicking = { path = "../sel4-panicking" }
+sel4-panicking-env = { path = "../sel4-panicking/env" }
+
+[dependencies.sel4-runtime-common]
+path = "../sel4-runtime-common"
+features = ["tls", "unwinding", "start", "static-heap"]

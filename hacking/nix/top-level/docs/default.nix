@@ -22,14 +22,14 @@ let
         runtime = "sel4-root-task";
         minimal = true;
       }
-      { id = "aarch64-sel4cp";
-        world = pkgs.host.aarch64.none.this.worlds.qemu-arm-virt.sel4cp;
-        runtime = "sel4cp";
+      { id = "aarch64-microkit";
+        world = pkgs.host.aarch64.none.this.worlds.qemu-arm-virt.microkit;
+        runtime = "sel4-microkit";
         minimal = false;
       }
-      { id = "aarch64-sel4cp-minimal";
-        world = pkgs.host.aarch64.none.this.worlds.qemu-arm-virt.sel4cp;
-        runtime = "sel4cp";
+      { id = "aarch64-microkit-minimal";
+        world = pkgs.host.aarch64.none.this.worlds.qemu-arm-virt.microkit;
+        runtime = "sel4-microkit";
         minimal = true;
       }
       { id = "riscv64-root-task";
@@ -91,7 +91,7 @@ let
         <head>
           <meta charset="utf-8">
           <meta name="viewport" content="width=device-width, initial-scale=1">
-          <title>Rustdoc for rust-seL4</title>
+          <title>Rustdoc for seL4 crates</title>
           <link
             rel="stylesheet"
             href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.0.0/github-markdown-light.min.css"
@@ -122,7 +122,7 @@ let
             <h1>
               Rustdoc for
               <a href="https://github.com/coliasgroup/rust-seL4">
-                rust-seL4
+                seL4 crates
               </a>
             </h1>
             @content@

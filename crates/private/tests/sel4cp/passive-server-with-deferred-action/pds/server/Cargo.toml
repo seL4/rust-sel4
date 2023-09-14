@@ -1,9 +1,0 @@
-[package]
-name = "tests-sel4cp-passive-server-with-deferred-action-pds-server"
-version = "0.1.0"
-authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
-edition = "2021"
-license = "BSD-2-Clause"
-
-[dependencies]
-sel4cp = { path = "../../../../../../sel4cp" }

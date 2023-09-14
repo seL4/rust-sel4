@@ -1,0 +1,9 @@
+[package]
+name = "tests-microkit-passive-server-with-deferred-action-pds-server"
+version = "0.1.0"
+authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
+edition = "2021"
+license = "BSD-2-Clause"
+
+[dependencies]
+sel4-microkit = { path = "../../../../../../sel4-microkit" }

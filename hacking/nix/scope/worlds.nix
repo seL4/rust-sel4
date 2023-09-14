@@ -30,7 +30,7 @@ in rec {
             , el2 ? true
             , hypervisor ? false
             , cpu ? "cortex-a57"
-            , isCorePlatform ? false
+            , isMicrokit ? false
             , mkSeL4KernelWithPayloadArgs ? loader: [ "-kernel" loader ]
             }:
             let
@@ -38,7 +38,7 @@ in rec {
             in
               mkWorld {
                 inherit kernelLoaderConfig corePlatformConfig;
-                inherit isCorePlatform;
+                inherit isMicrokit;
                 kernelConfig = kernelConfigCommon // {
                   ARM_CPU = mkString cpu;
                   KernelArch = mkString "arm";
@@ -74,10 +74,10 @@ in rec {
           el1 = mk { smp = true; };
           el2 = mk { smp = true; hypervisor = true; };
           el2MCS = mk { smp = true; hypervisor = true; mcs = true; };
-          sel4cp = mk {
+          microkit = mk {
             el2 = false;
             mcs = true;
-            isCorePlatform = true;
+            isMicrokit = true;
             cpu = "cortex-a53";
             mkSeL4KernelWithPayloadArgs = loader: [ "-device" "loader,file=${loader},addr=0x70000000,cpu-num=0" ];
           };
@@ -109,7 +109,7 @@ in rec {
             in
               mkWorld {
                 inherit kernelLoaderConfig;
-                isCorePlatform = false;
+                isMicrokit = false;
                 kernelConfig = kernelConfigCommon // {
                   ARM_CPU = mkString cpu;
                   KernelArch = mkString "arm";

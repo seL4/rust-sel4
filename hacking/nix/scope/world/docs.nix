@@ -27,7 +27,7 @@ let
 
   runtimes =
     let
-      common = lib.optionals (!worldConfig.isCorePlatform) [ "sel4-platform-info" ];
+      common = lib.optionals (!worldConfig.isMicrokit) [ "sel4-platform-info" ];
     in [
       { name = "none";
         features = common ++ [];
@@ -38,10 +38,10 @@ let
         features = common ++ [ "sel4-root-task" ];
         rustTargetInfo = seL4RustTargetInfoWithConfig { minimal = false; };
       }
-    ] ++ lib.optionals (worldConfig.isCorePlatform or false) [
-      { name = "sel4cp";
-        features = common ++ [ "sel4cp" ];
-        rustTargetInfo = seL4RustTargetInfoWithConfig { minimal = true; cp = true; };
+    ] ++ lib.optionals (worldConfig.isMicrokit or false) [
+      { name = "sel4-microkit";
+        features = common ++ [ "sel4-microkit" ];
+        rustTargetInfo = seL4RustTargetInfoWithConfig { microkit = true; minimal = true; };
       }
     ];
 
@@ -49,8 +49,8 @@ let
 
   mkView = { runtime ? null, minimal ? true }:
     let
-      commonFeatures = lib.optionals (!worldConfig.isCorePlatform) [ "sel4-platform-info" ];
-      rustTargetInfo = seL4RustTargetInfoWithConfig { cp = runtime == "sel4cp"; inherit minimal; };
+      commonFeatures = lib.optionals (!worldConfig.isMicrokit) [ "sel4-platform-info" ];
+      rustTargetInfo = seL4RustTargetInfoWithConfig { microkit = runtime == "sel4-microkit"; inherit minimal; };
     in {
       inherit seL4ConfigJSON;
       inherit (seL4Config) PLAT SEL4_ARCH KERNEL_MCS;

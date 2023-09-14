@@ -12,7 +12,7 @@ in {
 
   worldsForEverythingInstances = [
     pkgs.host.aarch64.none.this.worlds.default
-    pkgs.host.aarch64.none.this.worlds.qemu-arm-virt.sel4cp
+    pkgs.host.aarch64.none.this.worlds.qemu-arm-virt.microkit
     pkgs.host.riscv64.none.this.worlds.default
     pkgs.host.riscv32.none.this.worlds.default
     pkgs.host.x86_64.none.this.worlds.default

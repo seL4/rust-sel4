@@ -87,7 +87,7 @@ superCallPackage ../rust-utils {} self //
     then mkBuiltinRustTargetInfo hostPlatform.config
     else seL4RustTargetInfoWithConfig {};
 
-  seL4RustTargetInfoWithConfig = { cp ? false, minimal ? false }: mkCustomRustTargetInfo "${rustTargetArchName}-sel4${lib.optionalString cp "cp"}${lib.optionalString minimal "-minimal"}";
+  seL4RustTargetInfoWithConfig = { microkit ? false, minimal ? false }: mkCustomRustTargetInfo "${rustTargetArchName}-sel4${lib.optionalString microkit "-microkit"}${lib.optionalString minimal "-minimal"}";
 
   bareMetalRustTargetInfo = mkBuiltinRustTargetInfo {
     aarch64 = "aarch64-unknown-none";
@@ -168,7 +168,7 @@ superCallPackage ../rust-utils {} self //
 
   mkSeL4 = callPackage ./sel4 {};
 
-  mkSeL4CorePlatform = callPackage ./sel4cp {};
+  mkMicrokit = callPackage ./microkit {};
 
   cmakeConfigHelpers = callPackage ./cmake-config-helpers.nix {};
 
@@ -244,11 +244,14 @@ superCallPackage ../rust-utils {} self //
     tpmSupport = false;
     uringSupport = false;
   }).overrideDerivation (attrs: {
+    # patches from https://github.com/coliasgroup/qemu
     patches = attrs.patches ++ [
+      # nspin/arm-virt-sp804
       (fetchurl {
         url = "https://github.com/coliasgroup/qemu/commit/79310d4cd22230a0dfca55697729670fe7e952fa.patch";
         sha256 = "sha256-6CMhLFo7B6tGrOfvIqfT+ZtJz7A7WBfHazeAYECDWbE=";
       })
+      # nspin/opensbi-fw-payload-use-elf-entry-point
       (fetchurl {
         url = "https://github.com/coliasgroup/qemu/commit/4b0e8e5be4cdcdd9aeb387f949bbc8a1dbfe9299.patch";
         sha256 = "sha256-CoEnu5Ijy+khO7Jqq8NaKzJ1E4lLdaKDFF1ZC/I1C6k=";

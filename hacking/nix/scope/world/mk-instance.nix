@@ -60,7 +60,7 @@ let
 
     } // instanceForPlatform.attrs;
 
-  mkCorePlatformInstance =
+  mkMicrokitInstance =
     { system
     , extraLinks ? []
     , extraPlatformArgs ? {}
@@ -114,5 +114,5 @@ let
       // passthru
     );
 in {
-  inherit mkInstance mkCorePlatformInstance mkCapDLRootTask;
+  inherit mkInstance mkMicrokitInstance mkCapDLRootTask;
 }

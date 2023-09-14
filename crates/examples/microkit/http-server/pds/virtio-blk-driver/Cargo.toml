@@ -1,0 +1,22 @@
+[package]
+name = "microkit-http-server-example-virtio-blk-driver"
+version = "0.1.0"
+authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
+edition = "2021"
+license = "BSD-2-Clause"
+
+[dependencies]
+log = "0.4.17"
+microkit-http-server-example-virtio-hal-impl = { path = "../../helpers/virtio-hal-impl" }
+sel4 = { path = "../../../../../sel4" }
+sel4-bounce-buffer-allocator = { path = "../../../../../sel4-bounce-buffer-allocator" }
+sel4-externally-shared = { path = "../../../../../sel4-externally-shared", features = ["unstable"] }
+sel4-immediate-sync-once-cell = { path = "../../../../../sel4-immediate-sync-once-cell" }
+sel4-logging = { path = "../../../../../sel4-logging" }
+sel4-microkit = { path = "../../../../../sel4-microkit", default-features = false }
+sel4-shared-ring-buffer = { path = "../../../../../sel4-shared-ring-buffer" }
+sel4-sync = { path = "../../../../../sel4-sync" }
+virtio-drivers = { version = "0.5.0", default-features = false }
+
+[dependencies.sel4-shared-ring-buffer-block-io-types]
+path = "../../../../../sel4-shared-ring-buffer/block-io/types"
