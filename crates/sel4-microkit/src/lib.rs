@@ -29,9 +29,9 @@
 //! domains must contain the symbol `__sel4_ipc_buffer_obj`. Furthermore, for protection domains
 //! with memory regions, the `microkit` tool injects the addresses of these memory regions at build
 //! time by patching designated symbols. The
-//! [`*-sel4-microkit{,-minimal}.json`](https://github.com/coliasgroup/rust-seL4/tree/main/support/targets)
-//! `rustc` target specs distributed as part of the [rust-seL4
-//! project](https://github.com/coliasgroup/rust-seL4) provide `__sel4_ipc_buffer_obj`, and the
+//! [`*-sel4-microkit{,-minimal}.json`](https://github.com/coliasgroup/rust-sel4/tree/main/support/targets)
+//! `rustc` target specs distributed as part of the [rust-sel4
+//! project](https://github.com/coliasgroup/rust-sel4) provide `__sel4_ipc_buffer_obj`, and the
 //! [`memory_region_symbol`] macro provides a conveneint way to declare memory region address
 //! symbols.
 //!

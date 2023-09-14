@@ -22,7 +22,7 @@ Here is an example of how to build and use this crate. First, independantly of t
 build the initializer and accompanying CLI tool:
 
 ```bash
-url="https://github.com/coliasgroup/rust-seL4"
+url="https://github.com/coliasgroup/rust-sel4"
 
 RUST_TARGET_PATH=$my_rust_target_path \
 SEL4_PREFIX=$my_sel4_prefix \
@@ -64,7 +64,7 @@ independantly of the spec and then adding the spec later, the spec is provided t
 script at compile time via environment variables.
 
 ```bash
-url="https://github.com/coliasgroup/rust-seL4"
+url="https://github.com/coliasgroup/rust-sel4"
 
 RUST_TARGET_PATH=$my_rust_target_path \
 SEL4_PREFIX=$my_sel4_prefix \
