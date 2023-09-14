@@ -18,8 +18,8 @@
 //! See the [seL4 Microkit manual](https://github.com/seL4/microkit/blob/main/docs/manual.md) for
 //! non-Rust-specific documentation about the seL4 Microkit.
 //!
-//! See [the demo](https://github.com/coliasgroup/rust-seL4-root-task-demo) for a concrete example
-//! of this crate in action.
+//! See [the demo](https://github.com/coliasgroup/rust-root-task-demo) for a concrete example of
+//! this crate in action.
 //!
 //! This crate depends, at build time, on the libsel4 headers. It requires that either
 //! `$SEL4_INCLUDE_DIRS` contains a colon-separated list of include paths for the libsel4 headers,

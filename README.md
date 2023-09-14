@@ -24,9 +24,9 @@ This work is funded by the [seL4 Foundation](https://sel4.systems/Foundation/hom
 
 ### Demos
 
-- Simple root task: https://github.com/coliasgroup/rust-seL4-root-task-demo
-- Simple system using the seL4 Microkit: https://github.com/coliasgroup/rust-sel4cp-demo
-- HTTP server using the seL4 Microkit: https://github.com/coliasgroup/rust-sel4cp-http-server-demo
+- Simple root task: https://github.com/coliasgroup/rust-root-task-demo
+- Simple system using the seL4 Microkit: https://github.com/coliasgroup/rust-microkit-demo
+- HTTP server using the seL4 Microkit: https://github.com/coliasgroup/rust-microkit-http-server-demo
 
 ### Overview of crates
 
