@@ -5,8 +5,8 @@ includes:
 
 - Rust bindings for the seL4 API ([source](./crates/sel4))
 - A runtime for root tasks ([source](./crates/sel4-root-task))
-- A runtime for [seL4 Core Platform protection](https://github.com/BreakawayConsulting/sel4cp)
-  domains ([source](./crates/sel4cp))
+- A runtime for [seL4 Core Platform](https://github.com/BreakawayConsulting/sel4cp)
+  protection domains ([source](./crates/sel4cp))
 - A [CapDL](https://docs.sel4.systems/projects/capdl/)-based system initializer ([source and
   docs](./crates/sel4-capdl-initializer))
 - A loader for the seL4 kernel ([source and docs](./crates/sel4-kernel-loader))
