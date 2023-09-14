@@ -20,7 +20,7 @@ This work is funded by the [seL4 Foundation](https://sel4.systems/Foundation/hom
 
 ### Rendered rustdoc
 
-[https://coliasgroup.com/rust-sel4/](https://coliasgroup.com/rust-sel4/)
+[https://sel4.github.io/rust-sel4/](https://sel4.github.io/rust-sel4/)
 
 ### Demos
 
@@ -101,7 +101,7 @@ The only requirements for running the tests in this repository are Git, Make, an
 First, clone this repository:
 
 ```
-git clone https://github.com/coliasgroup/rust-sel4
+git clone https://github.com/seL4/rust-sel4
 cd rust-sel4
 ```
 

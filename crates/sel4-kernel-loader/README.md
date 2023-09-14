@@ -26,7 +26,7 @@ Here is an example of how to build and use this crate. First, independantly of t
 build the loader and accompanying CLI tool:
 
 ```bash
-url="https://github.com/coliasgroup/rust-sel4"
+url="https://github.com/seL4/rust-sel4"
 
 CC=aarch64-linux-gnu-gcc \
 SEL4_PREFIX=$my_sel4_prefix \

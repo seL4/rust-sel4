@@ -4,7 +4,7 @@ representative combinations. Each entry below provides a consistent view of all 
 one such combination.
 
 The rustdoc for each view is generated all at once with one `cargo doc` invocation on the
-[`meta`](https://github.com/coliasgroup/rust-sel4/tree/main/crates/private/meta) crate, whose only
+[`meta`](https://github.com/seL4/rust-sel4/tree/main/crates/private/meta) crate, whose only
 purpose is to depend on and select features for the other crates. Due to a current limitation of
 rustdoc, each view can only include at most one language runtime crate (e.g. `sel4-root-task` or
 `sel4-microkit`).
