@@ -18,7 +18,7 @@
 //! See the [seL4 Microkit manual](https://github.com/seL4/microkit/blob/main/docs/manual.md) for
 //! non-Rust-specific documentation about the seL4 Microkit.
 //!
-//! See [the demo](https://github.com/coliasgroup/rust-microkit-demo) for a concrete example of
+//! See [the demo](https://github.com/seL4/rust-microkit-demo) for a concrete example of
 //! this crate in action.
 //!
 //! This crate depends, at build time, on the libsel4 headers. It requires that either
