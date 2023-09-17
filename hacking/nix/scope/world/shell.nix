@@ -34,9 +34,9 @@ let
   bindgenEnvVars =
     let
       targets = lib.flatten (
-        lib.forEach [ true false ] (cp:
+        lib.forEach [ true false ] (microkit:
           lib.forEach [ true false ] (minimal:
-            seL4RustTargetInfoWithConfig { inherit cp minimal; })));
+            seL4RustTargetInfoWithConfig { inherit microkit minimal; })));
     in lib.listToAttrs (lib.forEach targets (target: {
       name = "BINDGEN_EXTRA_CLANG_ARGS_${target.name}";
       value = [ "-I${libcDir}/include" ];

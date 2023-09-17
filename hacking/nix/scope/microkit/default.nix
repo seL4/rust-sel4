@@ -36,15 +36,6 @@ let
     '';
   };
 
-  libc =
-    let
-      root = "${newlib}/${stdenv.hostPlatform.config}";
-    in
-      linkFarm "libc" [
-        { name = "include"; path = "${root}/include"; }
-        { name = "lib"; path = "${root}/lib"; }
-      ];
-
   sdk = stdenv.mkDerivation {
     name = "microkit-sdk";
 
@@ -56,10 +47,6 @@ let
         let baseName = baseNameOf (toString name);
         in !(type == "directory" && baseName == "tool");
     };
-
-    buildInputs = [
-      libc
-    ];
 
     nativeBuildInputs = [
       cmake ninja
@@ -101,10 +88,6 @@ let
 
     dontConfigure = true;
     dontFixup = true;
-
-    buildInputs = [
-      libc
-    ];
 
     nativeBuildInputs = [
       python3Packages.sel4-deps

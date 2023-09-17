@@ -106,7 +106,7 @@ in rec {
         };
       });
 
-      backtrace = maybe haveFullRuntime (mkInstance {
+      backtrace = maybe haveFullRuntime (mkInstance rec {
         rootTask =
           let
             orig = mkTask {
@@ -123,6 +123,9 @@ in rec {
         extraPlatformArgs = lib.optionalAttrs canSimulate  {
           canAutomateSimply = true;
         };
+        extraLinks = [
+          { name = "root-task.orig.elf"; path = rootTask.orig.elf; }
+        ];
       });
 
       panicking =
