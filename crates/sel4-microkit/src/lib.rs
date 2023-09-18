@@ -1,4 +1,5 @@
 #![no_std]
+#![feature(associated_type_defaults)]
 #![feature(cfg_target_thread_local)]
 #![feature(const_pointer_is_aligned)]
 #![feature(const_ptr_is_null)]
