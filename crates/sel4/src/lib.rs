@@ -88,7 +88,7 @@ pub use reply_authority::{ConveysReplyAuthority, ReplyAuthority};
 pub use syscalls::{
     r#yield, Badge, CallWithMRs, FastMessages, IPCCapType, RecvWithMRs, NUM_MESSAGE_REGISTERS,
 };
-pub use vspace::{FrameType, GRANULE_SIZE};
+pub use vspace::{FrameType, SizedFrameType, GRANULE_SIZE};
 
 sel4_cfg_if! {
     if #[cfg(KERNEL_MCS)] {

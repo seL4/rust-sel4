@@ -13,6 +13,10 @@ impl FrameSize {
     }
 }
 
-pub trait FrameType: CapType {
+pub trait FrameType: CapType {}
+
+impl FrameType for cap_type::UnspecifiedFrame {}
+
+pub trait SizedFrameType: FrameType {
     const FRAME_SIZE: FrameSize;
 }

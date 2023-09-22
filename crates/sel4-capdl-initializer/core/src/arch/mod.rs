@@ -5,6 +5,25 @@ mod imp {
     pub(crate) type FrameType1 = sel4::cap_type::LargePage;
     pub(crate) type FrameType2 = sel4::cap_type::HugePage;
 
+    pub(crate) type PageTableType = sel4::cap_type::PT;
+
+    pub(crate) const VSPACE_LEVELS: usize = if sel4::sel4_cfg_bool!(ARCH_AARCH64) {
+        4
+    } else {
+        2
+    };
+
+    pub(crate) fn map_page_table(
+        vspace: sel4::VSpace,
+        _level: usize,
+        vaddr: usize,
+        cap: sel4::Unspecified,
+        vm_attributes: sel4::VMAttributes,
+    ) -> sel4::Result<()> {
+        cap.downcast::<PageTableType>()
+            .pt_map(vspace, vaddr, vm_attributes)
+    }
+
     pub(crate) fn init_user_context(
         regs: &mut sel4::UserContext,
         extra: &sel4_capdl_initializer_types::object::TCBExtraInfo,
@@ -23,6 +42,35 @@ mod imp {
     pub(crate) type FrameType1 = sel4::cap_type::LargePage;
     pub(crate) type FrameType2 = sel4::cap_type::HugePage;
 
+    pub(crate) const VSPACE_LEVELS: usize = if sel4::sel4_cfg_bool!(ARCH_X86_64) {
+        4
+    } else {
+        2
+    };
+
+    pub(crate) fn map_page_table(
+        vspace: sel4::VSpace,
+        level: usize,
+        vaddr: usize,
+        cap: sel4::Unspecified,
+        vm_attributes: sel4::VMAttributes,
+    ) -> sel4::Result<()> {
+        match level {
+            1 => cap
+                .downcast::<sel4::cap_type::PDPT>()
+                .pdpt_map(vspace, vaddr, vm_attributes),
+            2 => cap
+                .downcast::<sel4::cap_type::PageDirectory>()
+                .page_directory_map(vspace, vaddr, vm_attributes),
+            3 => cap.downcast::<sel4::cap_type::PageTable>().page_table_map(
+                vspace,
+                vaddr,
+                vm_attributes,
+            ),
+            _ => panic!(),
+        }
+    }
+
     pub(crate) fn init_user_context(
         regs: &mut sel4::UserContext,
         extra: &sel4_capdl_initializer_types::object::TCBExtraInfo,
@@ -40,6 +88,21 @@ mod imp {
     pub(crate) type FrameType1 = sel4::cap_type::MegaPage;
     pub(crate) type FrameType2 = sel4::cap_type::GigaPage;
 
+    pub(crate) type PageTableType = sel4::cap_type::PageTable;
+
+    pub(crate) const VSPACE_LEVELS: usize = sel4::sel4_cfg_usize!(PT_LEVELS);
+
+    pub(crate) fn map_page_table(
+        vspace: sel4::VSpace,
+        _level: usize,
+        vaddr: usize,
+        cap: sel4::Unspecified,
+        vm_attributes: sel4::VMAttributes,
+    ) -> sel4::Result<()> {
+        cap.downcast::<PageTableType>()
+            .page_table_map(vspace, vaddr, vm_attributes)
+    }
+
     pub(crate) fn init_user_context(
         regs: &mut sel4::UserContext,
         extra: &sel4_capdl_initializer_types::object::TCBExtraInfo,
@@ -55,7 +118,7 @@ mod imp {
 pub(crate) use imp::*;
 
 pub(crate) mod frame_types {
-    use sel4::FrameType;
+    use sel4::SizedFrameType;
 
     pub(crate) use super::{FrameType1, FrameType2};
 
