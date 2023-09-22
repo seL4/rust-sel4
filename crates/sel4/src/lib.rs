@@ -152,10 +152,7 @@ sel4_cfg_if! {
 mod state;
 
 #[cfg(feature = "state")]
-pub use state::{
-    set_ipc_buffer, with_borrow_ipc_buffer, with_borrow_ipc_buffer_mut, with_ipc_buffer,
-    ImplicitInvocationContext,
-};
+pub use state::{set_ipc_buffer, with_ipc_buffer, with_ipc_buffer_mut, ImplicitInvocationContext};
 
 /// Corresponds to `seL4_Word`.
 pub type Word = sys::seL4_Word;

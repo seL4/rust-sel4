@@ -43,7 +43,7 @@ pub mod server {
         F: FnOnce(Reception) -> T,
     {
         let (info, badge) = endpoint.recv(());
-        sel4::with_borrow_ipc_buffer(|ipc_buffer| {
+        sel4::with_ipc_buffer(|ipc_buffer| {
             let reception = Reception::new(info, badge, ipc_buffer);
             f(reception)
         })
@@ -57,7 +57,7 @@ pub mod server {
 
     pub fn reply<T: Serialize>(data: &T) -> Result<(), Error> {
         let info = prepare_data_for_send(data)?;
-        sel4::with_borrow_ipc_buffer_mut(|ipc_buffer| sel4::reply(ipc_buffer, info));
+        sel4::with_ipc_buffer_mut(|ipc_buffer| sel4::reply(ipc_buffer, info));
         Ok(())
     }
 }
@@ -90,14 +90,14 @@ impl<'a> Reception<'a> {
     }
 
     pub fn read<T: for<'b> Deserialize<'b>>(&self) -> Result<T, Error> {
-        recv_data_with_borrow_ipc_buffer(&self.info, self.ipc_buffer())
+        recv_data_with_ipc_buffer(&self.info, self.ipc_buffer())
     }
 }
 
 // // //
 
 pub fn prepare_data_for_send<T: Serialize>(data: &T) -> Result<MessageInfo, Error> {
-    let used = sel4::with_borrow_ipc_buffer_mut(|ipc_buffer| {
+    let used = sel4::with_ipc_buffer_mut(|ipc_buffer| {
         postcard::to_slice(data, ipc_buffer.msg_bytes_mut()).map(|used| used.len())
     })?;
     Ok(MessageInfoBuilder::default()
@@ -106,7 +106,7 @@ pub fn prepare_data_for_send<T: Serialize>(data: &T) -> Result<MessageInfo, Erro
 }
 
 pub fn prepare_bytes_for_send(bytes: &[u8]) -> Result<MessageInfo, Error> {
-    sel4::with_borrow_ipc_buffer_mut(|ipc_buffer| {
+    sel4::with_ipc_buffer_mut(|ipc_buffer| {
         ipc_buffer.msg_bytes_mut()[..bytes.len()].copy_from_slice(bytes);
     });
     Ok(MessageInfoBuilder::default()
@@ -115,20 +115,17 @@ pub fn prepare_bytes_for_send(bytes: &[u8]) -> Result<MessageInfo, Error> {
 }
 
 fn recv_data<T: for<'a> Deserialize<'a>>(info: &MessageInfo) -> Result<T, Error> {
-    sel4::with_borrow_ipc_buffer(|ipc_buffer| recv_data_with_borrow_ipc_buffer(info, ipc_buffer))
+    sel4::with_ipc_buffer(|ipc_buffer| recv_data_with_ipc_buffer(info, ipc_buffer))
 }
 
-fn recv_data_with_borrow_ipc_buffer<T: for<'a> Deserialize<'a>>(
+fn recv_data_with_ipc_buffer<T: for<'a> Deserialize<'a>>(
     info: &MessageInfo,
     ipc_buffer: &IPCBuffer,
 ) -> Result<T, Error> {
-    postcard::from_bytes(recv_bytes_with_borrow_ipc_buffer(ipc_buffer, info)).map_err(Into::into)
+    postcard::from_bytes(recv_bytes_with_ipc_buffer(ipc_buffer, info)).map_err(Into::into)
 }
 
-fn recv_bytes_with_borrow_ipc_buffer<'a>(
-    ipc_buffer: &'a IPCBuffer,
-    info: &MessageInfo,
-) -> &'a [u8] {
+fn recv_bytes_with_ipc_buffer<'a>(ipc_buffer: &'a IPCBuffer, info: &MessageInfo) -> &'a [u8] {
     &ipc_buffer.msg_bytes()[..BYTES_PER_WORD * usize::try_from(info.length()).unwrap()]
 }
 

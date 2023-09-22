@@ -9,6 +9,9 @@ pub struct IPCBuffer {
     ptr: *mut sys::seL4_IPCBuffer,
 }
 
+unsafe impl Send for IPCBuffer {}
+unsafe impl Sync for IPCBuffer {}
+
 impl IPCBuffer {
     #[allow(clippy::missing_safety_doc)]
     pub unsafe fn from_ptr(ptr: *mut sys::seL4_IPCBuffer) -> Self {

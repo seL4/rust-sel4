@@ -34,9 +34,7 @@ impl InvocationContext for &RefCell<IPCBuffer> {
 
 cfg_if::cfg_if! {
     if #[cfg(feature = "state")] {
-        use crate::ImplicitInvocationContext;
-
-        type NoExplicitInvocationContextInternal = ImplicitInvocationContext;
+        type NoExplicitInvocationContextInternal = crate::ImplicitInvocationContext;
     } else {
         type NoExplicitInvocationContextInternal = NoInvocationContext;
     }
