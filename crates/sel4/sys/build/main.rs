@@ -7,7 +7,9 @@ use std::path::{Path, PathBuf};
 use glob::glob;
 use proc_macro2::TokenStream;
 
-use sel4_build_env::{find_in_libsel4_include_dirs, get_libsel4_include_dirs};
+use sel4_build_env::{
+    find_in_libsel4_include_dirs, get_libsel4_include_dirs, get_or_find_in_libsel4_include_dirs,
+};
 use sel4_rustfmt_helper::Rustfmt;
 
 mod bf;
@@ -43,15 +45,15 @@ fn main() {
     }
 
     {
-        let interface_definition_files = [
+        let interface_definition_files = vec![
             // order must be consistent with C libsel4
-            "interfaces/sel4.xml",
-            "interfaces/sel4-sel4arch.xml",
-            "interfaces/sel4-arch.xml",
-        ]
-        .into_iter()
-        .map(find_in_libsel4_include_dirs)
-        .collect::<Vec<PathBuf>>();
+            get_or_find_in_libsel4_include_dirs("SEL4_OBJECT_API", "interfaces/sel4.xml"),
+            get_or_find_in_libsel4_include_dirs(
+                "SEL4_OBJECT_API_SEL4_ARCH",
+                "interfaces/sel4-sel4arch.xml",
+            ),
+            get_or_find_in_libsel4_include_dirs("SEL4_OBJECT_API_ARCH", "interfaces/sel4-arch.xml"),
+        ];
 
         let (invocation_labels_fragment, native_fragment, wrappers_fragment) =
             xml::invocations::generate_rust(

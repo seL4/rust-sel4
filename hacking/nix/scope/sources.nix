@@ -54,7 +54,7 @@ in rec {
 
     rust-sel4test = fetchGit {
       url = "https://github.com/coliasgroup/seL4.git";
-      rev = "07266a57e1073e4dfb4a4f9dddc31b197abdb2a0"; # rust-sel4test
+      rev = "8e0d0f7f599720a134b5e710ac0433a175b2399b"; # rust-sel4test
       local = localRoot + "/seL4";
       # useLocal = true;
     };
