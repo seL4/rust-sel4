@@ -1,4 +1,4 @@
-use sel4_reserve_tls_on_stack::TlsImage;
+use sel4_initialize_tls_on_stack::TlsImage;
 
 use crate::phdrs::{elf::PT_TLS, locate_phdrs};
 

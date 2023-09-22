@@ -8,12 +8,12 @@ license = "BSD-2-Clause"
 [features]
 start = []
 static-heap = ["sel4-sync", "sel4-dlmalloc"]
-tls = ["dep:sel4-reserve-tls-on-stack"]
+tls = ["dep:sel4-initialize-tls-on-stack"]
 
 [dependencies]
 cfg-if = "1.0.0"
 sel4-dlmalloc = { path = "../sel4-dlmalloc", optional = true }
-sel4-reserve-tls-on-stack = { path = "../sel4-reserve-tls-on-stack", optional = true }
+sel4-initialize-tls-on-stack = { path = "../sel4-initialize-tls-on-stack", optional = true }
 sel4-sync = { path = "../sel4-sync", optional = true }
 
 [dependencies.unwinding]
