@@ -9,5 +9,4 @@ mk {
   features = {
     alloc = [];
   };
-  nix.meta.requirements = [ "sel4" ];
 }

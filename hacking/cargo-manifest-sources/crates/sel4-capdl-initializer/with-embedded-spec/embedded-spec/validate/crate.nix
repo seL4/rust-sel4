@@ -10,5 +10,4 @@ mk {
     sel4-capdl-initializer-with-embedded-spec-build-env
     sel4-capdl-initializer-with-embedded-spec-embedded-spec
   ];
-  nix.meta.requirements = [ "linux" "capdl-spec" ];
 }

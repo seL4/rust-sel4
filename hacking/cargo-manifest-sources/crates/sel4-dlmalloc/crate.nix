@@ -8,5 +8,4 @@ mk {
   nix.local.dependencies = with localCrates; [
     sel4-sync
   ];
-  nix.meta.requirements = [ "sel4" ];
 }

@@ -20,5 +20,4 @@ mk {
     sel4-dlmalloc
   ];
 
-  nix.meta.requirements = [ "sel4" ];
 }

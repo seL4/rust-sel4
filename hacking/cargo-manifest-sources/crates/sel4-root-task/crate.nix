@@ -31,5 +31,4 @@ mk {
     sel4-runtime-common
     sel4-root-task-macros
   ];
-  nix.meta.requirements = [ "sel4" ];
 }

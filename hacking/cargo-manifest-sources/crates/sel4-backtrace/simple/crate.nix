@@ -14,5 +14,4 @@ mk {
     sel4-backtrace
     sel4-panicking-env
   ];
-  nix.meta.requirements = [ "sel4" ];
 }

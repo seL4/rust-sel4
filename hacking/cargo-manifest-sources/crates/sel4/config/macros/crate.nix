@@ -7,5 +7,4 @@ mk {
     sel4-config-generic-macro-impls
     sel4-config-data
   ];
-  nix.meta.requirements = [ "sel4-config" ];
 }

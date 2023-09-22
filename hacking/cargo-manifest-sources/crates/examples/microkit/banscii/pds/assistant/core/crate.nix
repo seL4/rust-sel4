@@ -7,5 +7,4 @@ mk {
     libm = { version = "0.2.1"; default-features = false; };
     inherit (versions) log;
   };
-  nix.meta.skip = true;
 }

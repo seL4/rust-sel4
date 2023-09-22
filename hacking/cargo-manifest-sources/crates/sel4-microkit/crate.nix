@@ -32,6 +32,4 @@ mk {
     sel4-microkit-macros
     sel4-externally-shared
   ];
-  nix.meta.requirements = [ "sel4" ];
-  nix.meta.skip = true;
 }

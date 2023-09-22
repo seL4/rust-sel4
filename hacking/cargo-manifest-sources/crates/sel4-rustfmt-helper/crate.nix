@@ -5,5 +5,4 @@ mk {
   dependencies = {
     which = "4.3.0";
   };
-  nix.meta.requirements = [ "linux" ];
 }

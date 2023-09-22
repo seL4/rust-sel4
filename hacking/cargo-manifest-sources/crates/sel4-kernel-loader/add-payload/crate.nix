@@ -24,6 +24,4 @@ mk {
     sel4-render-elf-with-data
     sel4-config-generic-types
   ];
-  nix.meta.labels = [ "leaf" ];
-  nix.meta.requirements = [ "unix" ];
 }

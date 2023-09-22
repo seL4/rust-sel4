@@ -15,7 +15,4 @@ mk {
     hex = { version = "0.4.3"; default-features = false; features = [ "alloc" ]; };
     sel4-externally-shared.features = [ "unstable" "alloc" ];
   };
-  nix.meta.labels = [ "leaf" ];
-  nix.meta.requirements = [ "sel4" ];
-  nix.meta.skip = true;
 }

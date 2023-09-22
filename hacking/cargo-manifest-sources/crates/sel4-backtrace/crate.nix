@@ -29,5 +29,4 @@ mk {
   nix.local.dependencies = with localCrates; [
     sel4-backtrace-types
   ];
-  nix.meta.requirements = [ "sel4" ];
 }

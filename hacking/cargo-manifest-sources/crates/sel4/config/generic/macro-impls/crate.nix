@@ -13,5 +13,4 @@ mk {
   nix.local.dependencies = with localCrates; [
     sel4-config-generic-types
   ];
-  nix.meta.requirements = [ "linux" ];
 }

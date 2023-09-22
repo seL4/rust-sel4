@@ -6,5 +6,4 @@ mk {
     inherit (versions) proc-macro2 quote;
     bitfield = "0.14";
   };
-  nix.meta.requirements = [ "linux" ];
 }

@@ -11,6 +11,4 @@ mk {
   dependencies = {
     serde = serdeWith [ "alloc" "derive" ];
   };
-  nix.meta.labels = [ "leaf" ];
-  nix.meta.requirements = [ "sel4" ];
 }

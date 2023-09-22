@@ -16,5 +16,4 @@ mk {
   nix.local.dependencies = with localCrates; [
     sel4-capdl-initializer-types
   ];
-  nix.meta.requirements = [ "linux" ];
 }

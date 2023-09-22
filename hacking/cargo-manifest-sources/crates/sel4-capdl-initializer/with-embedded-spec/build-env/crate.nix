@@ -10,5 +10,4 @@ mk {
     sel4-capdl-initializer-types.features = [ "std" "serde" ];
     inherit (versions) serde serde_json;
   };
-  nix.meta.requirements = [ "linux" ];
 }

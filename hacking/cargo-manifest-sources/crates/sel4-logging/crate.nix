@@ -5,5 +5,4 @@ mk {
   dependencies = {
     inherit (versions) log;
   };
-  nix.meta.requirements = [ "sel4" ];
 }

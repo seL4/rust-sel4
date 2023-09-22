@@ -60,5 +60,4 @@ mk {
       "sel4-microkit-message-types"
     ];
   };
-  nix.meta.requirements = [ "sel4" ];
 }

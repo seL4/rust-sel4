@@ -11,6 +11,4 @@ mk {
     sel4-simple-task-runtime
     sel4-simple-task-config-types
   ];
-  nix.meta.labels = [ "leaf" ];
-  nix.meta.requirements = [ "sel4" ];
 }

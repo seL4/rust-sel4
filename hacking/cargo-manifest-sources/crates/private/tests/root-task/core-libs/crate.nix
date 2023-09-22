@@ -8,6 +8,4 @@ mk {
     sel4-config
     sel4
   ];
-  nix.meta.labels = [ "leaf" ];
-  nix.meta.requirements = [ "sel4" ];
 }

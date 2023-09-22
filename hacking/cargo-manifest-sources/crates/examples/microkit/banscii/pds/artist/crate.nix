@@ -16,7 +16,4 @@ mk {
     sel4-externally-shared
     banscii-artist-interface-types
   ];
-  nix.meta.labels = [ "leaf" ];
-  nix.meta.requirements = [ "sel4" ];
-  nix.meta.skip = true;
 }

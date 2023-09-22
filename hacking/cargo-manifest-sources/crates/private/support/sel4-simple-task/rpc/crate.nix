@@ -15,5 +15,4 @@ mk {
   nix.local.dependencies = with localCrates; [
     sel4
   ];
-  nix.meta.requirements = [ "sel4" ];
 }

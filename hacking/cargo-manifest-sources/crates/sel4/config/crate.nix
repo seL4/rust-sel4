@@ -5,5 +5,4 @@ mk {
   nix.local.dependencies = with localCrates; [
     sel4-config-macros
   ];
-  nix.meta.requirements = [ "sel4" ];
 }

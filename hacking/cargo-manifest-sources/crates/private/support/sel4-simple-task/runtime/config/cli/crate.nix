@@ -9,6 +9,4 @@ mk {
   nix.local.dependencies = with localCrates; [
     sel4-simple-task-runtime-config-types
   ];
-  nix.meta.labels = [ "leaf" ];
-  nix.meta.requirements = [ "unix" ];
 }

@@ -13,5 +13,4 @@ mk {
     sel4-build-env
     sel4-config
   ];
-  nix.meta.requirements = [ "sel4" ];
 }

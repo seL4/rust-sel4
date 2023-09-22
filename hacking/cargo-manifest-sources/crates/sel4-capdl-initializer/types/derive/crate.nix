@@ -11,5 +11,4 @@ mk {
       synstructure
     ;
   };
-  nix.meta.requirements = [ "linux" ];
 }

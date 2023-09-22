@@ -11,5 +11,4 @@ mk {
   dev-dependencies = {
     rand = "0.8.3";
   };
-  nix.meta.requirements = [ "sel4" ];
 }
