@@ -70,17 +70,11 @@ rec {
           meta = elaborateMeta meta;
         };
 
+      # TODO
       elaborateMeta =
-        { labels ? {}
-        , requirements ? {}
-        , skip ? false
+        {
         }:
         {
-          inherit
-            labels
-            requirements
-            skip
-          ;
         };
 
     in
