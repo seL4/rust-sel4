@@ -1,86 +1,118 @@
-use core::cell::RefCell;
+use core::fmt;
 
 use crate::{IPCBuffer, InvocationContext};
 
-const fn ipc_buffer_init() -> RefCell<Option<IPCBuffer>> {
-    RefCell::new(None)
-}
+// For the sake of consistent behavior between configurations, re-entrancy is not supported even in
+// the immutable case
 
 cfg_if::cfg_if! {
     if #[cfg(target_thread_local)] {
-        #[thread_local]
-        static IPC_BUFFER: RefCell<Option<IPCBuffer>> = ipc_buffer_init();
+        use core::cell::RefCell;
 
-        fn with_ipc_buffer_internal<F, T>(f: F) -> T
+        #[thread_local]
+        static IPC_BUFFER: RefCell<Option<IPCBuffer>> = RefCell::new(None);
+
+        fn try_with_ipc_buffer_internal<F, T>(f: F) -> T
         where
-            F: FnOnce(&RefCell<Option<IPCBuffer>>) -> T,
+            F: FnOnce(Result<&mut Option<IPCBuffer>, BorrowError>) -> T,
         {
-            f(&IPC_BUFFER)
+            match IPC_BUFFER.try_borrow_mut() {
+                Ok(mut buf) => f(Ok(&mut *buf)),
+                Err(_) => f(Err(BorrowError::new())),
+            }
         }
     } else if #[cfg(feature = "single-threaded")] {
-        static IPC_BUFFER: SingleThreaded<RefCell<Option<IPCBuffer>>> = SingleThreaded(ipc_buffer_init());
+        use core::sync::atomic::{AtomicBool, Ordering};
 
-        struct SingleThreaded<T>(T);
+        static mut IPC_BUFFER: Option<IPCBuffer> = None;
 
-        unsafe impl<T> Sync for SingleThreaded<T> {}
+        static IPC_BUFFER_BORROWED: AtomicBool = AtomicBool::new(false);
 
-        fn with_ipc_buffer_internal<F, T>(f: F) -> T
+        fn try_with_ipc_buffer_internal<F, T>(f: F) -> T
         where
-            F: FnOnce(&RefCell<Option<IPCBuffer>>) -> T,
+            F: FnOnce(Result<&mut Option<IPCBuffer>, BorrowError>) -> T,
         {
-            f(&IPC_BUFFER.0)
+            // release on panic
+            struct Guard;
+
+            impl Drop for Guard {
+                fn drop(&mut self) {
+                    IPC_BUFFER_BORROWED.store(false, Ordering::Release);
+                }
+            }
+
+            if IPC_BUFFER_BORROWED.swap(true, Ordering::Acquire) {
+                f(Err(BorrowError::new()))
+            } else {
+                let _ = Guard;
+                unsafe {
+                    f(Ok(&mut IPC_BUFFER))
+                }
+            }
         }
     } else {
         compile_error!(r#"when #[cfg(feature = "state")], at least one of #[cfg(target_thread_local)] or #[cfg(feature = "single-threaded")] is required"#);
     }
 }
 
-/// Provides access to this thread's IPC buffer.
-///
-/// This function is a convenience wrapper around [`with_ipc_buffer`].
-///
-/// Requires the `"state"` feature to be enabled.
-pub fn with_ipc_buffer<F, T>(f: F) -> T
+fn try_with_ipc_buffer_raw<F, T>(f: F) -> T
 where
-    F: FnOnce(&RefCell<Option<IPCBuffer>>) -> T,
+    F: FnOnce(Result<&mut Option<IPCBuffer>, BorrowError>) -> T,
 {
-    with_ipc_buffer_internal(f)
+    try_with_ipc_buffer_internal(f)
+}
+
+#[derive(Debug, Clone)]
+pub struct BorrowError(());
+
+impl BorrowError {
+    fn new() -> Self {
+        Self(())
+    }
+}
+
+impl fmt::Display for BorrowError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "IPC buffer already borrowed")
+    }
+}
+
+fn with_ipc_buffer_raw<F, T>(f: F) -> T
+where
+    F: FnOnce(&mut Option<IPCBuffer>) -> T,
+{
+    try_with_ipc_buffer_raw(|r| f(r.unwrap()))
 }
 
 /// Sets the IPC buffer that this crate will use for this thread.
 ///
-/// This function does not modify kernel state. It only this crate's thread-local state.
-///
-/// This function is a convenience wrapper around [`with_ipc_buffer`].
+/// This function does not modify kernel state. It only affects this crate's thread-local state.
 ///
 /// Requires the `"state"` feature to be enabled.
-#[allow(clippy::missing_safety_doc)]
-pub unsafe fn set_ipc_buffer(ipc_buffer: IPCBuffer) {
-    with_ipc_buffer(|buf| {
-        let _ = buf.replace(Some(ipc_buffer));
+pub fn set_ipc_buffer(ipc_buffer: IPCBuffer) {
+    with_ipc_buffer_raw(|buf| {
+        let _ = buf.replace(ipc_buffer);
     })
 }
 
-/// Provides access to a borrowed reference to this thread's IPC buffer.
-///
-/// This function is a convenience wrapper around [`with_ipc_buffer`].
+/// Provides access to this thread's IPC buffer.
 ///
 /// Requires the `"state"` feature to be enabled.
-pub fn with_borrow_ipc_buffer<F, T>(f: F) -> T
+pub fn with_ipc_buffer<F, T>(f: F) -> T
 where
     F: FnOnce(&IPCBuffer) -> T,
 {
-    with_ipc_buffer(|buf| f(buf.borrow().as_ref().unwrap()))
+    with_ipc_buffer_raw(|buf| f(buf.as_ref().unwrap()))
 }
 
-/// Provides access to a mutably borrowed reference to this thread's IPC buffer.
+/// Provides mutable access to this thread's IPC buffer.
 ///
 /// Requires the `"state"` feature to be enabled.
-pub fn with_borrow_ipc_buffer_mut<F, T>(f: F) -> T
+pub fn with_ipc_buffer_mut<F, T>(f: F) -> T
 where
     F: FnOnce(&mut IPCBuffer) -> T,
 {
-    with_ipc_buffer(|buf| f(buf.borrow_mut().as_mut().unwrap()))
+    with_ipc_buffer_raw(|buf| f(buf.as_mut().unwrap()))
 }
 
 /// The strategy for discovering the current thread's IPC buffer which uses thread-local state.
@@ -99,6 +131,6 @@ impl ImplicitInvocationContext {
 
 impl InvocationContext for ImplicitInvocationContext {
     fn invoke<T>(self, f: impl FnOnce(&mut IPCBuffer) -> T) -> T {
-        with_borrow_ipc_buffer_mut(f)
+        with_ipc_buffer_mut(f)
     }
 }
