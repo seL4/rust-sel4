@@ -41,14 +41,10 @@ impl FrameType for cap_type::HugePage {
 
 //
 
-impl cap_type::PUD {
-    pub const SPAN_BITS: usize = cap_type::PD::SPAN_BITS + (sys::seL4_PUDIndexBits as usize);
-}
-
-impl cap_type::PD {
-    pub const SPAN_BITS: usize = cap_type::PT::SPAN_BITS + (sys::seL4_PageDirIndexBits as usize);
+impl cap_type::VSpace {
+    pub const INDEX_BITS: usize = sys::seL4_VSpaceIndexBits as usize;
 }
 
 impl cap_type::PT {
-    pub const SPAN_BITS: usize = FrameSize::Small.bits() + (sys::seL4_PageTableIndexBits as usize);
+    pub const INDEX_BITS: usize = sys::seL4_PageTableIndexBits as usize;
 }

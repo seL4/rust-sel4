@@ -42,7 +42,7 @@ in rec {
       url = "https://github.com/coliasgroup/seL4.git";
       rev = "656f11fd66139e1102c8bae0b07639a2ada9af78"; # branch "rust"
       local = localRoot + "/seL4";
-      # useLocal = true;
+      useLocal = true;
     };
 
     rust-microkit = fetchGit {
