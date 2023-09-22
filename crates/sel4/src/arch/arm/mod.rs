@@ -1,8 +1,10 @@
 use crate::sys;
 
 mod arch;
+mod invocations;
 mod object;
 mod vm_attributes;
+mod vspace;
 
 pub(crate) mod fault;
 
@@ -11,6 +13,7 @@ pub(crate) mod top_level {
         arch::top_level::*,
         object::{ObjectBlueprintArch, ObjectBlueprintArm, ObjectTypeArch, ObjectTypeArm},
         vm_attributes::VMAttributes,
+        vspace::FrameSize,
         NUM_FAST_MESSAGE_REGISTERS,
     };
 }
@@ -37,14 +40,22 @@ pub(crate) mod cap_type_arch {
         LargePage
     }
 
+    #[sel4_cfg(ARCH_AARCH64)]
     declare_cap_type! {
         /// Corresponds to `seL4_ARM_Page` with `size_bits = 30`.
         HugePage
     }
 
+    #[sel4_cfg(ARCH_AARCH64)]
     declare_cap_type! {
         /// Corresponds to `seL4_ARM_VSpace`.
         VSpace
+    }
+
+    #[sel4_cfg(ARCH_AARCH32)]
+    declare_cap_type! {
+        /// Corresponds to `seL4_ARM_PD`.
+        PD
     }
 
     declare_cap_type! {
@@ -54,6 +65,10 @@ pub(crate) mod cap_type_arch {
 
     /// Alias for [`cap_type::SmallPage`](SmallPage).
     pub type Granule = SmallPage;
+
+    #[sel4_cfg(ARCH_AARCH32)]
+    /// Alias for [`cap_type::PD`](PD).
+    pub type VSpace = PD;
 }
 
 pub(crate) mod local_cptr_arch {
@@ -64,6 +79,12 @@ pub(crate) mod local_cptr_arch {
 
     declare_local_cptr_alias!(SmallPage);
     declare_local_cptr_alias!(LargePage);
+
+    #[sel4_cfg(ARCH_AARCH64)]
     declare_local_cptr_alias!(HugePage);
+
+    #[sel4_cfg(ARCH_AARCH32)]
+    declare_local_cptr_alias!(PD);
+
     declare_local_cptr_alias!(PT);
 }
