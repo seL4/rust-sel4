@@ -9,6 +9,4 @@ mk {
   nix.local.dependencies = with localCrates; [
     sel4
   ];
-  nix.meta.labels = [ "leaf" ];
-  nix.meta.requirements = [ "sel4" ];
 }

@@ -59,6 +59,4 @@ mk {
     microkit-http-server-example-sp804-driver-interface-types
     microkit-http-server-example-virtio-net-driver-interface-types
   ];
-  nix.meta.labels = [ "leaf" ];
-  nix.meta.requirements = [ "sel4" ];
 }

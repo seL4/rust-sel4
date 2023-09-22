@@ -22,6 +22,4 @@ mk {
     sel4-root-task
     sel4-sync
   ];
-  nix.meta.labels = [ "leaf" ];
-  nix.meta.requirements = [ "sel4" "capdl-spec" ];
 }

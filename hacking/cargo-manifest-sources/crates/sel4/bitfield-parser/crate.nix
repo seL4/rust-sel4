@@ -7,5 +7,4 @@ mk {
     pest = "2.4.1";
     pest_derive = pest;
   };
-  nix.meta.requirements = [ "linux" ];
 }

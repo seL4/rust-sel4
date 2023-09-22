@@ -18,5 +18,4 @@ mk {
     sel4-config-generic-types
     sel4-build-env
   ];
-  nix.meta.requirements = [ "linux" "sel4-config" ];
 }

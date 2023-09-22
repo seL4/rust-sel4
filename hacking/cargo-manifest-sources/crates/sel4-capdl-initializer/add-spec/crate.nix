@@ -18,6 +18,4 @@ mk {
     sel4-capdl-initializer-types
     sel4-render-elf-with-data
   ];
-  nix.meta.labels = [ "leaf" ];
-  nix.meta.requirements = [ "unix" ];
 }

@@ -25,6 +25,4 @@ mk {
     sel4-async-network-mbedtls-mozilla-ca-list
     # mbedtls
   ];
-  nix.meta.requirements = [ "sel4" ];
-  nix.meta.skip = true;
 }

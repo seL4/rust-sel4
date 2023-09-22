@@ -46,6 +46,4 @@ mk {
     sel4-kernel-loader-payload-types
     sel4-kernel-loader-embed-page-tables
   ];
-  nix.meta.labels = [ "leaf" ];
-  nix.meta.requirements = [ "sel4" ];
 }

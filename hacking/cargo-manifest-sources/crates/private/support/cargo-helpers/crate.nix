@@ -7,6 +7,4 @@ mk {
     cargo = "0.70.1";
     clap = "3.2.23";
   };
-  nix.meta.labels = [ "leaf" ];
-  nix.meta.requirements = [ "unix" ];
 }

@@ -11,6 +11,4 @@ mk {
     microkit-http-server-example-sp804-driver-core
     microkit-http-server-example-sp804-driver-interface-types
   ];
-  nix.meta.labels = [ "leaf" ];
-  nix.meta.requirements = [ "sel4" ];
 }

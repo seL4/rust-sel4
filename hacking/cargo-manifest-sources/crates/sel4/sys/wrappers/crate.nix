@@ -9,6 +9,4 @@ mk {
   nix.local.dependencies = with localCrates; [
     sel4-sys
   ];
-  nix.meta.requirements = [ "sel4" ];
-  nix.meta.skip = true; # HACK
 }

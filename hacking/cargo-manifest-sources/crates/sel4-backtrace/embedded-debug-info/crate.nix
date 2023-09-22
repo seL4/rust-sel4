@@ -9,5 +9,4 @@ mk {
   nix.local.dependencies = with localCrates; [
     sel4-backtrace-addr2line-context-helper
   ];
-  nix.meta.requirements = [ "sel4" ];
 }

@@ -9,7 +9,4 @@ mk {
   nix.local.dependencies = with localCrates; [
     banscii-assistant-core
   ];
-  nix.meta.labels = [ "leaf" ];
-  nix.meta.requirements = [ "unix" ];
-  nix.meta.skip = true;
 }

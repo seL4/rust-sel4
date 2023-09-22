@@ -22,5 +22,4 @@ mk {
     sel4-capdl-initializer-types
     sel4-rustfmt-helper
   ];
-  nix.meta.requirements = [ "capdl-spec" ];
 }

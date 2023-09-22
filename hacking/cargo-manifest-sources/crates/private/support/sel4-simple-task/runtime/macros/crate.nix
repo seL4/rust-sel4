@@ -7,5 +7,4 @@ mk {
     inherit (versions) proc-macro2 quote;
     syn = { version = versions.syn; features = [ "full" ]; };
   };
-  nix.meta.requirements = [ "linux" ];
 }

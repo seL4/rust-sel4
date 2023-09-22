@@ -10,6 +10,4 @@ mk {
     sel4-root-task
     sel4-platform-info
   ];
-  nix.meta.labels = [ "leaf" ];
-  nix.meta.requirements = [ "sel4" ];
 }

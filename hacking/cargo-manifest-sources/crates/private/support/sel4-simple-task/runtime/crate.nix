@@ -39,5 +39,4 @@ mk {
     sel4-simple-task-threading
     sel4-sync
   ];
-  nix.meta.requirements = [ "sel4" ];
 }

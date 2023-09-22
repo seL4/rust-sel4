@@ -22,6 +22,4 @@ mk {
   nix.local.build-dependencies = with localCrates; [
     sel4-capdl-initializer-with-embedded-spec-embedded-spec-validate
   ];
-  nix.meta.labels = [ "leaf" ];
-  nix.meta.requirements = [ "sel4" "capdl-spec" ];
 }

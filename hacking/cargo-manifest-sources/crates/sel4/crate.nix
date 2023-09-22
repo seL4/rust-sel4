@@ -15,5 +15,4 @@ mk {
     sel4-config
     sel4-sys
   ];
-  nix.meta.requirements = [ "sel4" ];
 }

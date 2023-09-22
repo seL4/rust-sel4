@@ -9,6 +9,4 @@ mk {
   nix.local.dependencies = with localCrates; [
     sel4-render-elf-with-data
   ];
-  nix.meta.labels = [ "leaf" ];
-  nix.meta.requirements = [ "unix" ];
 }

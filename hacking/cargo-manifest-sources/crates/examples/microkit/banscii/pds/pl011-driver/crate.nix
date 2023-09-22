@@ -12,7 +12,4 @@ mk {
     banscii-pl011-driver-core
     banscii-pl011-driver-interface-types
   ];
-  nix.meta.labels = [ "leaf" ];
-  nix.meta.requirements = [ "sel4" ];
-  nix.meta.skip = true;
 }

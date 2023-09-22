@@ -10,5 +10,4 @@ mk {
     sel4-capdl-initializer-types.features = [ "sel4" ];
     inherit (versions) log;
   };
-  nix.meta.requirements = [ "sel4" ];
 }

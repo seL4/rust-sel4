@@ -16,6 +16,4 @@ mk {
     sel4-backtrace-embedded-debug-info
     sel4-root-task
   ];
-  nix.meta.labels = [ "leaf" ];
-  nix.meta.requirements = [ "sel4" ];
 }
