@@ -27,7 +27,7 @@ pub struct TlsImage {
 
 impl TlsImage {
     #[allow(clippy::missing_safety_doc)]
-    pub unsafe fn reserve_on_stack_and_continue(&self, cont_fn: ContFn, cont_arg: ContArg) -> ! {
+    pub unsafe fn initialize_on_stack_and_continue(&self, cont_fn: ContFn, cont_arg: ContArg) -> ! {
         let args = InternalContArgs {
             tls_image: self as *const TlsImage,
             cont_fn,
@@ -37,7 +37,7 @@ impl TlsImage {
         let segment_align_down_mask = !(self.align - 1);
         let reserved_above_tp = RESERVED_ABOVE_TPIDR;
         let stack_align_down_mask = !(STACK_ALIGNMENT - 1);
-        __sel4_runtime_reserve_tls_and_continue(
+        __sel4_runtime_initialize_tls_and_continue(
             &args as *const InternalContArgs,
             segment_size,
             segment_align_down_mask,
@@ -86,7 +86,7 @@ struct InternalContArgs {
 }
 
 extern "C" {
-    fn __sel4_runtime_reserve_tls_and_continue(
+    fn __sel4_runtime_initialize_tls_and_continue(
         args: *const InternalContArgs,
         segment_size: usize,
         segment_align_down_mask: usize,
@@ -100,11 +100,11 @@ cfg_if::cfg_if! {
     if #[cfg(target_arch = "aarch64")] {
         global_asm! {
             r#"
-                .global __sel4_runtime_reserve_tls_and_continue
+                .global __sel4_runtime_initialize_tls_and_continue
 
                 .section .text
 
-                __sel4_runtime_reserve_tls_and_continue:
+                __sel4_runtime_initialize_tls_and_continue:
                     mov x9, sp
                     sub x9, x9, x1 // x1: segment_size
                     and x9, x9, x2 // x2: segment_align_down_mask
@@ -120,11 +120,11 @@ cfg_if::cfg_if! {
     } else if #[cfg(any(target_arch = "riscv64", target_arch = "riscv32"))] {
         global_asm! {
             r#"
-                .global __sel4_runtime_reserve_tls_and_continue
+                .global __sel4_runtime_initialize_tls_and_continue
 
                 .section .text
 
-                __sel4_runtime_reserve_tls_and_continue:
+                __sel4_runtime_initialize_tls_and_continue:
                     mv s9, sp
                     sub s9, s9, a1 // a1: segment_size
                     and s9, s9, a2 // a2: segment_align_down_mask
@@ -140,11 +140,11 @@ cfg_if::cfg_if! {
     } else if #[cfg(target_arch = "x86_64")] {
         global_asm! {
             r#"
-                .global __sel4_runtime_reserve_tls_and_continue
+                .global __sel4_runtime_initialize_tls_and_continue
 
                 .section .text
 
-                __sel4_runtime_reserve_tls_and_continue:
+                __sel4_runtime_initialize_tls_and_continue:
                     mov r10, rsp
                     sub r10, 0x8 // space for thread structure
                     and r10, rdx // rdx: segment_align_down_mask

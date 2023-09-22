@@ -31,7 +31,7 @@ unsafe extern "C" fn sel4_runtime_rust_entry(bootinfo: *const sel4::sys::seL4_Bo
 
     sel4_runtime_common::locate_tls_image()
         .unwrap()
-        .reserve_on_stack_and_continue(cont_fn, cont_arg)
+        .initialize_on_stack_and_continue(cont_fn, cont_arg)
 }
 
 #[cfg(not(target_thread_local))]

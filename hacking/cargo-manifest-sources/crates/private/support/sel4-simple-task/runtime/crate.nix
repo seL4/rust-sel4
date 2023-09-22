@@ -32,7 +32,7 @@ mk {
     sel4-immediate-sync-once-cell
     sel4-panicking
     sel4-panicking-env
-    sel4-reserve-tls-on-stack
+    sel4-initialize-tls-on-stack
     sel4-runtime-common
     sel4-simple-task-runtime-config-types
     sel4-simple-task-runtime-macros

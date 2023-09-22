@@ -53,7 +53,7 @@ pub unsafe extern "C" fn _start(config: *const u8, config_size: usize, thread_in
     };
     sel4_runtime_common::locate_tls_image()
         .unwrap()
-        .reserve_on_stack_and_continue(
+        .initialize_on_stack_and_continue(
             cont_fn,
             (&cont_arg as *const ContinueArg)
                 .cast::<c_void>()

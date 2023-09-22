@@ -1,5 +1,5 @@
 [package]
-name = "sel4-reserve-tls-on-stack"
+name = "sel4-initialize-tls-on-stack"
 version = "0.1.0"
 authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
 edition = "2021"
