@@ -1,6 +1,6 @@
 use sel4_config::{sel4_cfg, sel4_cfg_enum, sel4_cfg_if, sel4_cfg_match};
 
-use crate::{declare_fault_newtype, sys};
+use crate::{declare_fault_newtype, sys, Word};
 
 declare_fault_newtype!(NullFault, sys::seL4_Fault_NullFault);
 declare_fault_newtype!(CapFault, sys::seL4_Fault_CapFault);
@@ -67,5 +67,73 @@ impl Fault {
                 Self::VPPIEvent(VPPIEvent::from_inner(inner))
             }
         }
+    }
+}
+
+impl CapFault {
+    // TODO
+}
+
+impl UnknownSyscall {
+    pub fn fault_ip(&self) -> Word {
+        self.inner().get_FaultIP()
+    }
+
+    pub fn sp(&self) -> Word {
+        self.inner().get_SP()
+    }
+
+    pub fn lr(&self) -> Word {
+        self.inner().get_LR()
+    }
+
+    pub fn syscall(&self) -> Word {
+        self.inner().get_Syscall()
+    }
+}
+
+impl UserException {
+    // TODO
+}
+
+impl VMFault {
+    pub fn ip(&self) -> Word {
+        self.inner().get_IP()
+    }
+
+    pub fn addr(&self) -> Word {
+        self.inner().get_Addr()
+    }
+
+    pub fn is_prefetch(&self) -> bool {
+        self.inner().get_PrefetchFault() != 0
+    }
+
+    pub fn fsr(&self) -> Word {
+        self.inner().get_FSR()
+    }
+}
+
+#[sel4_cfg(ARM_HYPERVISOR_SUPPORT)]
+impl VGICMaintenance {
+    pub fn idx(&self) -> Option<Word> {
+        match self.inner().get_IDX() {
+            Word::MAX => None,
+            idx => Some(idx),
+        }
+    }
+}
+
+#[sel4_cfg(ARM_HYPERVISOR_SUPPORT)]
+impl VCPUFault {
+    pub fn hsr(&self) -> Word {
+        self.inner().get_HSR()
+    }
+}
+
+#[sel4_cfg(ARM_HYPERVISOR_SUPPORT)]
+impl VPPIEvent {
+    pub fn irq(&self) -> Word {
+        self.inner().get_irq()
     }
 }
