@@ -75,3 +75,23 @@ pub fn find_in_libsel4_include_dirs(relative_path: impl AsRef<Path>) -> PathBuf 
         )
     })
 }
+
+pub fn try_get_or_find_in_libsel4_include_dirs(
+    var: &str,
+    relative_path: impl AsRef<Path>,
+) -> Option<PathBuf> {
+    get_asserting_valid_unicode(var)
+        .map(PathBuf::from)
+        .or_else(|| try_find_in_libsel4_include_dirs(relative_path))
+}
+
+pub fn get_or_find_in_libsel4_include_dirs(var: &str, relative_path: impl AsRef<Path>) -> PathBuf {
+    let relative_path = relative_path.as_ref();
+    try_get_or_find_in_libsel4_include_dirs(var, relative_path).unwrap_or_else(|| {
+        panic!(
+            "{} not in env and {} not found in libsel4 include path",
+            var,
+            relative_path.display(),
+        )
+    })
+}
