@@ -39,14 +39,11 @@ impl<'a, D, M> Object<'a, D, M> {
                 },
                 #[sel4_cfg(ARCH_AARCH64)]
                 Object::PageTable(obj) => {
-                    let level = obj.level.unwrap();
-                    assert_eq!(obj.is_root, level == 0); // sanity check
-                    match level {
-                        0 => sel4::ObjectBlueprintSeL4Arch::PGD.into(),
-                        1 => sel4::ObjectBlueprintSeL4Arch::PUD.into(),
-                        2 => sel4::ObjectBlueprintArch::PD.into(),
-                        3 => sel4::ObjectBlueprintArch::PT.into(),
-                        _ => panic!(),
+                    // assert!(obj.level.is_none()); // sanity check // TODO
+                    if obj.is_root {
+                        sel4::ObjectBlueprintSeL4Arch::VSpace.into()
+                    } else {
+                        sel4::ObjectBlueprintArch::PT.into()
                     }
                 }
                 #[sel4_cfg(ARCH_RISCV64)]
@@ -135,7 +132,7 @@ sel4::sel4_cfg_if! {
     if #[cfg(ARCH_AARCH64)] {
         const CACHED: VMAttributes = VMAttributes::PAGE_CACHEABLE;
         const UNCACHED: VMAttributes = VMAttributes::DEFAULT;
-    } else if #[cfg(ARCH_RISCV64)] {
+    } else if #[cfg(any(ARCH_RISCV64, ARCH_RISCV32))] {
         const CACHED: VMAttributes = VMAttributes::DEFAULT;
         const UNCACHED: VMAttributes = VMAttributes::NONE;
     } else if #[cfg(ARCH_X86_64)] {

@@ -1,5 +1,5 @@
 #[allow(unused_imports)]
-use crate::{cap_type, sys, FrameType, ObjectBlueprint, ObjectBlueprintRISCV};
+use crate::{cap_type, sys, FrameType, ObjectBlueprint, ObjectBlueprintRISCV, SizedFrameType};
 
 #[sel4_config::sel4_cfg_enum]
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
@@ -30,16 +30,23 @@ impl FrameSize {
     pub const GIGA_BITS: usize = Self::Giga.bits();
 }
 
-impl FrameType for cap_type::_4KPage {
+impl FrameType for cap_type::_4KPage {}
+
+impl SizedFrameType for cap_type::_4KPage {
     const FRAME_SIZE: FrameSize = FrameSize::_4K;
 }
 
-impl FrameType for cap_type::MegaPage {
+impl FrameType for cap_type::MegaPage {}
+
+impl SizedFrameType for cap_type::MegaPage {
     const FRAME_SIZE: FrameSize = FrameSize::Mega;
 }
 
 #[sel4_config::sel4_cfg(any(PT_LEVELS = "3", PT_LEVELS = "4"))]
-impl FrameType for cap_type::GigaPage {
+impl FrameType for cap_type::GigaPage {}
+
+#[sel4_config::sel4_cfg(any(PT_LEVELS = "3", PT_LEVELS = "4"))]
+impl SizedFrameType for cap_type::GigaPage {
     const FRAME_SIZE: FrameSize = FrameSize::Giga;
 }
 

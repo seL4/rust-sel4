@@ -11,7 +11,10 @@ use sel4_capdl_initializer_types::SpecWithSources;
 use sel4_capdl_initializer_with_embedded_spec_embedded_spec::SPEC;
 use sel4_logging::{LevelFilter, Logger, LoggerBuilder};
 
-const LOG_LEVEL: LevelFilter = LevelFilter::Info;
+const LOG_LEVEL: LevelFilter =
+    // LevelFilter::Trace
+    // LevelFilter::Debug
+    LevelFilter::Info;
 
 static LOGGER: Logger = LoggerBuilder::const_default()
     .level_filter(LOG_LEVEL)

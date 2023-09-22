@@ -1,6 +1,6 @@
 use core::ops::Range;
 
-use sel4::FrameType;
+use sel4::SizedFrameType;
 
 use super::frame_types;
 

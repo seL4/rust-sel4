@@ -213,6 +213,11 @@ pub mod cap_type {
         Unspecified
     }
 
+    declare_cap_type! {
+        /// Any frame capability.
+        UnspecifiedFrame
+    }
+
     sel4_cfg_if! {
         if #[cfg(KERNEL_MCS)] {
             declare_cap_type! {

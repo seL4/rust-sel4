@@ -1,6 +1,6 @@
 use sel4_config::{sel4_cfg, sel4_cfg_enum, sel4_cfg_match};
 
-use crate::{cap_type, sys, FrameType, ObjectBlueprint, ObjectBlueprintArm};
+use crate::{cap_type, sys, FrameType, ObjectBlueprint, ObjectBlueprintArm, SizedFrameType};
 
 #[sel4_cfg(ARCH_AARCH64)]
 use crate::ObjectBlueprintAArch64;
@@ -36,16 +36,23 @@ impl FrameSize {
     pub const HUGE_BITS: usize = Self::Huge.bits();
 }
 
-impl FrameType for cap_type::SmallPage {
+impl FrameType for cap_type::SmallPage {}
+
+impl SizedFrameType for cap_type::SmallPage {
     const FRAME_SIZE: FrameSize = FrameSize::Small;
 }
 
-impl FrameType for cap_type::LargePage {
+impl FrameType for cap_type::LargePage {}
+
+impl SizedFrameType for cap_type::LargePage {
     const FRAME_SIZE: FrameSize = FrameSize::Large;
 }
 
 #[sel4_cfg(ARCH_AARCH64)]
-impl FrameType for cap_type::HugePage {
+impl FrameType for cap_type::HugePage {}
+
+#[sel4_cfg(ARCH_AARCH64)]
+impl SizedFrameType for cap_type::HugePage {
     const FRAME_SIZE: FrameSize = FrameSize::Huge;
 }
 

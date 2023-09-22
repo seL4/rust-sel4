@@ -129,8 +129,8 @@ let
     src = fetchRepoProject {
       name = "sel4test";
       manifest = "https://github.com/seL4/sel4test-manifest.git";
-      rev = "cfc1195ba8fd0de1a0e179aef1314b8f402ff74c";
-      sha256 = "sha256-JspN1A/w5XIV+XCj5/oj7NABsKXVdr+UZOTJWvfJPUY=";
+      rev = "8bf6fd506a0546866ba5fbd7396f497d5a056f5c";
+      sha256 = "sha256-1Gmbksgh2VTUggM6qcawRC9b+g/bwB8tWGfUzCg1A0U=";
     };
 
     LIBCLANG_PATH = libclangPath;

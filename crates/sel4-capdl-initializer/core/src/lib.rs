@@ -21,10 +21,13 @@ use core::sync::atomic::{self, Ordering};
 use log::{debug, info, trace};
 
 use sel4::{
-    cap_type, AbsoluteCPtr, BootInfo, CNodeCapData, CPtr, CapRights, CapType, FrameSize, FrameType,
-    InitCSpaceSlot, LocalCPtr, ObjectBlueprint, Untyped, UserContext,
+    cap_type, AbsoluteCPtr, BootInfo, CNodeCapData, CPtr, CapRights, CapType, InitCSpaceSlot,
+    LocalCPtr, ObjectBlueprint, SizedFrameType, Untyped, UserContext,
 };
 use sel4_capdl_initializer_types::*;
+
+#[allow(unused_imports)]
+use sel4::{FrameSize, FrameType, VSpace};
 
 mod arch;
 mod buffers;
@@ -39,6 +42,9 @@ use cslot_allocator::{CSlotAllocator, CSlotAllocatorError};
 pub use error::CapDLInitializerError;
 use hold_slots::HoldSlots;
 use memory::{get_user_image_frame_slot, init_copy_addrs};
+
+#[sel4::sel4_cfg(all(ARCH_RISCV64, not(PT_LEVELS = "3")))]
+compile_error!("unsupported configuration");
 
 type Result<T> = result::Result<T, CapDLInitializerError>;
 
@@ -441,7 +447,11 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
         Ok(())
     }
 
-    fn fill_frame<U: FrameType>(&self, frame: LocalCPtr<U>, fill: &[FillEntry<D>]) -> Result<()> {
+    fn fill_frame<U: SizedFrameType>(
+        &self,
+        frame: LocalCPtr<U>,
+        fill: &[FillEntry<D>],
+    ) -> Result<()> {
         frame.frame_map(
             BootInfo::init_thread_vspace(),
             self.copy_addr::<U>(),
@@ -486,193 +496,45 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
 
     fn init_vspaces(&mut self) -> Result<()> {
         debug!("Initializing VSpaces");
-        self.init_vspaces_arch()
-    }
-
-    #[sel4::sel4_cfg(ARCH_AARCH64)]
-    fn init_vspaces_arch(&mut self) -> Result<()> {
-        // TODO
-        // Add support for uncached non-device mappings.
-        // See note about seL4_ARM_Page_CleanInvalidate_Data/seL4_ARM_Page_Unify_Instruction in upstream.
-
         for (obj_id, obj) in self
             .spec()
             .filter_objects_with::<&object::PageTable>(|obj| obj.is_root)
         {
             let vspace = self.orig_local_cptr::<cap_type::VSpace>(obj_id);
-            for (i, cap) in obj.page_tables() {
-                let pud = self.orig_local_cptr::<cap_type::PUD>(cap.object);
-                let vaddr = i << cap_type::PUD::SPAN_BITS;
-                pud.pud_map(vspace, vaddr, cap.vm_attributes())?;
-                for (i, cap) in self
-                    .spec()
-                    .lookup_object::<&object::PageTable>(cap.object)?
-                    .page_tables()
-                {
-                    let pd = self.orig_local_cptr::<cap_type::PD>(cap.object);
-                    let vaddr = vaddr + (i << cap_type::PD::SPAN_BITS);
-                    pd.pd_map(vspace, vaddr, cap.vm_attributes())?;
-                    for (i, cap) in self
-                        .spec()
-                        .lookup_object::<&object::PageTable>(cap.object)?
-                        .entries()
-                    {
-                        let vaddr = vaddr + (i << cap_type::PT::SPAN_BITS);
-                        match cap {
-                            PageTableEntry::Frame(cap) => {
-                                let frame = self.orig_local_cptr::<cap_type::LargePage>(cap.object);
-                                let rights = (&cap.rights).into();
-                                self.copy(frame)?.frame_map(
-                                    vspace,
-                                    vaddr,
-                                    rights,
-                                    cap.vm_attributes(),
-                                )?;
-                            }
-                            PageTableEntry::PageTable(cap) => {
-                                let pt = self.orig_local_cptr::<cap_type::PT>(cap.object);
-                                pt.pt_map(vspace, vaddr, cap.vm_attributes())?;
-                                for (i, cap) in self
-                                    .spec()
-                                    .lookup_object::<&object::PageTable>(cap.object)?
-                                    .frames()
-                                {
-                                    let frame =
-                                        self.orig_local_cptr::<cap_type::SmallPage>(cap.object);
-                                    let vaddr = vaddr + (i << FrameSize::Small.bits());
-                                    let rights = (&cap.rights).into();
-                                    self.copy(frame)?.frame_map(
-                                        vspace,
-                                        vaddr,
-                                        rights,
-                                        cap.vm_attributes(),
-                                    )?;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+            self.init_vspace(vspace, 0, 0, obj)?;
         }
         Ok(())
     }
 
-    #[sel4::sel4_cfg(ARCH_RISCV64)]
-    fn init_vspaces_arch(&mut self) -> Result<()> {
-        #[sel4::sel4_cfg(not(PT_LEVELS = "3"))]
-        compile_error!("unsupported configuration");
-
-        for (obj_id, obj) in self
-            .spec()
-            .filter_objects_with::<&object::PageTable>(|obj| obj.is_root)
-        {
-            let vspace = self.orig_local_cptr::<cap_type::PageTable>(obj_id);
-            for (i, cap) in obj.page_tables() {
-                let pud = self.orig_local_cptr::<cap_type::PageTable>(cap.object);
-                let vaddr = i << 30;
-                pud.page_table_map(vspace, vaddr, cap.vm_attributes())?;
-                for (i, cap) in self
-                    .spec()
-                    .lookup_object::<&object::PageTable>(cap.object)?
-                    .entries()
-                {
-                    let vaddr = vaddr + (i << 21);
-                    match cap {
-                        PageTableEntry::Frame(cap) => {
-                            let frame = self.orig_local_cptr::<cap_type::MegaPage>(cap.object);
-                            let rights = (&cap.rights).into();
-                            self.copy(frame)?.frame_map(
-                                vspace,
-                                vaddr,
-                                rights,
-                                cap.vm_attributes(),
-                            )?;
-                        }
-                        PageTableEntry::PageTable(cap) => {
-                            let pt = self.orig_local_cptr::<cap_type::PageTable>(cap.object);
-                            pt.page_table_map(vspace, vaddr, cap.vm_attributes())?;
-                            for (i, cap) in self
-                                .spec()
-                                .lookup_object::<&object::PageTable>(cap.object)?
-                                .frames()
-                            {
-                                let frame = self.orig_local_cptr::<cap_type::_4KPage>(cap.object);
-                                let vaddr = vaddr + (i << FrameSize::_4K.bits());
-                                let rights = (&cap.rights).into();
-                                self.copy(frame)?.frame_map(
-                                    vspace,
-                                    vaddr,
-                                    rights,
-                                    cap.vm_attributes(),
-                                )?;
-                            }
-                        }
-                    }
+    fn init_vspace(
+        &mut self,
+        vspace: VSpace,
+        level: usize,
+        vaddr: usize,
+        obj: &object::PageTable,
+    ) -> Result<()> {
+        for (i, entry) in obj.entries() {
+            let vaddr = vaddr + (i << ((arch::VSPACE_LEVELS - level - 1) * 9 + 12));
+            match entry {
+                PageTableEntry::Frame(cap) => {
+                    let frame = self.orig_local_cptr::<cap_type::UnspecifiedFrame>(cap.object);
+                    let rights = (&cap.rights).into();
+                    self.copy(frame)?
+                        .frame_map(vspace, vaddr, rights, cap.vm_attributes())?;
                 }
-            }
-        }
-        Ok(())
-    }
-
-    #[sel4::sel4_cfg(ARCH_X86_64)]
-    fn init_vspaces_arch(&mut self) -> Result<()> {
-        for (obj_id, obj) in self
-            .spec()
-            .filter_objects_with::<&object::PageTable>(|obj| obj.is_root)
-        {
-            let vspace = self.orig_local_cptr::<cap_type::VSpace>(obj_id);
-            for (i, cap) in obj.page_tables() {
-                let pdpt = self.orig_local_cptr::<cap_type::PDPT>(cap.object);
-                let vaddr = i << cap_type::PDPT::SPAN_BITS;
-                pdpt.pdpt_map(vspace, vaddr, cap.vm_attributes())?;
-                for (i, cap) in self
-                    .spec()
-                    .lookup_object::<&object::PageTable>(cap.object)?
-                    .page_tables()
-                {
-                    let page_directory =
-                        self.orig_local_cptr::<cap_type::PageDirectory>(cap.object);
-                    let vaddr = vaddr + (i << cap_type::PageDirectory::SPAN_BITS);
-                    page_directory.page_directory_map(vspace, vaddr, cap.vm_attributes())?;
-                    for (i, cap) in self
+                PageTableEntry::PageTable(cap) => {
+                    let page_table = self.orig_local_cptr::<cap_type::Unspecified>(cap.object);
+                    arch::map_page_table(
+                        vspace,
+                        level + 1,
+                        vaddr,
+                        page_table,
+                        cap.vm_attributes(),
+                    )?;
+                    let obj = self
                         .spec()
-                        .lookup_object::<&object::PageTable>(cap.object)?
-                        .entries()
-                    {
-                        let vaddr = vaddr + (i << cap_type::PageTable::SPAN_BITS);
-                        match cap {
-                            PageTableEntry::Frame(cap) => {
-                                let frame = self.orig_local_cptr::<cap_type::LargePage>(cap.object);
-                                let rights = (&cap.rights).into();
-                                self.copy(frame)?.frame_map(
-                                    vspace,
-                                    vaddr,
-                                    rights,
-                                    cap.vm_attributes(),
-                                )?;
-                            }
-                            PageTableEntry::PageTable(cap) => {
-                                let page_table =
-                                    self.orig_local_cptr::<cap_type::PageTable>(cap.object);
-                                page_table.page_table_map(vspace, vaddr, cap.vm_attributes())?;
-                                for (i, cap) in self
-                                    .spec()
-                                    .lookup_object::<&object::PageTable>(cap.object)?
-                                    .frames()
-                                {
-                                    let frame = self.orig_local_cptr::<cap_type::_4K>(cap.object);
-                                    let vaddr = vaddr + (i << FrameSize::_4K.bits());
-                                    let rights = (&cap.rights).into();
-                                    self.copy(frame)?.frame_map(
-                                        vspace,
-                                        vaddr,
-                                        rights,
-                                        cap.vm_attributes(),
-                                    )?;
-                                }
-                            }
-                        }
-                    }
+                        .lookup_object::<&object::PageTable>(cap.object)?;
+                    self.init_vspace(vspace, level + 1, vaddr, obj)?;
                 }
             }
         }
@@ -868,7 +730,7 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
 
     //
 
-    fn copy_addr<U: FrameType>(&self) -> usize {
+    fn copy_addr<U: SizedFrameType>(&self) -> usize {
         match U::FRAME_SIZE {
             frame_types::FrameType0::FRAME_SIZE => self.small_frame_copy_addr,
             frame_types::FrameType1::FRAME_SIZE => self.large_frame_copy_addr,

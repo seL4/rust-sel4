@@ -1,4 +1,7 @@
-use crate::{cap_type, sys, FrameType, ObjectBlueprint, ObjectBlueprintX64, ObjectBlueprintX86};
+use crate::{
+    cap_type, sys, FrameType, ObjectBlueprint, ObjectBlueprintX64, ObjectBlueprintX86,
+    SizedFrameType,
+};
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum FrameSize {
@@ -24,22 +27,28 @@ impl FrameSize {
     pub const HUGE_BITS: usize = Self::Huge.bits();
 }
 
-impl FrameType for cap_type::_4K {
+impl FrameType for cap_type::_4K {}
+
+impl SizedFrameType for cap_type::_4K {
     const FRAME_SIZE: FrameSize = FrameSize::_4K;
 }
 
-impl FrameType for cap_type::LargePage {
+impl FrameType for cap_type::LargePage {}
+
+impl SizedFrameType for cap_type::LargePage {
     const FRAME_SIZE: FrameSize = FrameSize::Large;
 }
 
-impl FrameType for cap_type::HugePage {
+impl FrameType for cap_type::HugePage {}
+
+impl SizedFrameType for cap_type::HugePage {
     const FRAME_SIZE: FrameSize = FrameSize::Huge;
 }
 
 //
 
 impl cap_type::PDPT {
-    pub const INDEX_BITS: usize = sys::seL4_PDPTIndexBits;
+    pub const INDEX_BITS: usize = sys::seL4_PDPTIndexBits as usize;
 }
 
 impl cap_type::PageDirectory {

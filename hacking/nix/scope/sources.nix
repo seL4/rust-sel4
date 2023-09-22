@@ -22,7 +22,7 @@ let
 
   capdlCommon = {
     url = "https://github.com/coliasgroup/capdl.git";
-    rev = "dcad98b8a6665c8ea2b822e97cf9bffbd3c349fe";
+    rev = "6e1c2fe0637e01b303506cfbad8ed5f863c2446a"; # branch coliasgroup
     local = localRoot + "/capdl";
   };
 
@@ -40,21 +40,21 @@ in rec {
   seL4 = {
     rust = fetchGit {
       url = "https://github.com/coliasgroup/seL4.git";
-      rev = "656f11fd66139e1102c8bae0b07639a2ada9af78"; # branch "rust"
+      rev = "b170676396064a45e88a8394ae5f463ab792b63a"; # branch "rust"
       local = localRoot + "/seL4";
-      useLocal = true;
+      # useLocal = true;
     };
 
     rust-microkit = fetchGit {
       url = "https://github.com/coliasgroup/seL4.git";
-      rev = "fc80c9ad05d33e77a6b850dae8eb4b8317ec32a1"; # branch "rust-microkit"
+      rev = "d5196f79d696f74ce40ad13c393a525d1b83ae1f"; # branch "rust-microkit"
       local = localRoot + "/seL4";
       # useLocal = true;
     };
 
     rust-sel4test = fetchGit {
       url = "https://github.com/coliasgroup/seL4.git";
-      rev = "8e0d0f7f599720a134b5e710ac0433a175b2399b"; # rust-sel4test
+      rev = "06fc7f562f7a78d753687d9dcfda852b834169c5"; # rust-sel4test
       local = localRoot + "/seL4";
       # useLocal = true;
     };
@@ -62,20 +62,23 @@ in rec {
 
   microkit = fetchGit {
     url = "https://github.com/coliasgroup/microkit.git";
-    rev = "b0a82657af8f340f418295bae158f5132294ce4b"; # branch "rust-nix"
+    rev = "80069432ef126411128f2e2c3c95a6d171cb83fe"; # branch "rust-nix"
     local = localRoot + "/microkit";
     # useLocal = true;
   };
 
   capdlTool = fetchGit (capdlCommon // {
     andThen = "/capDL-tool";
+    # useLocal = true;
   });
 
   pythonCapDLTool = fetchGit (capdlCommon // {
     andThen = "/python-capdl-tool";
+    # useLocal = true;
   });
 
   objectSizes = fetchGit (capdlCommon // {
     andThen = "/object_sizes";
+    # useLocal = true;
   });
 }
