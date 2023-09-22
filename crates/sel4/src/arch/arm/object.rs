@@ -20,7 +20,6 @@ pub enum ObjectTypeArm {
     SmallPage,
     LargePage,
     PT,
-    PD,
     #[sel4_cfg(ARM_HYPERVISOR_SUPPORT)]
     VCPU,
     SeL4Arch(ObjectTypeSeL4Arch),
@@ -33,7 +32,6 @@ impl ObjectTypeArm {
             Self::SmallPage => sys::_object::seL4_ARM_SmallPageObject,
             Self::LargePage => sys::_object::seL4_ARM_LargePageObject,
             Self::PT => sys::_object::seL4_ARM_PageTableObject,
-            Self::PD => sys::_object::seL4_ARM_PageDirectoryObject,
             #[sel4_cfg(ARM_HYPERVISOR_SUPPORT)]
             Self::VCPU => sys::_object::seL4_ARM_VCPUObject,
             Self::SeL4Arch(sel4_arch) => sel4_arch.into_sys(),
@@ -60,7 +58,6 @@ pub enum ObjectBlueprintArm {
     SmallPage,
     LargePage,
     PT,
-    PD,
     #[sel4_cfg(ARM_HYPERVISOR_SUPPORT)]
     VCPU,
     SeL4Arch(ObjectBlueprintSeL4Arch),
@@ -73,7 +70,6 @@ impl ObjectBlueprintArm {
             Self::SmallPage => ObjectTypeArm::SmallPage,
             Self::LargePage => ObjectTypeArm::LargePage,
             Self::PT => ObjectTypeArm::PT,
-            Self::PD => ObjectTypeArm::PD,
             #[sel4_cfg(ARM_HYPERVISOR_SUPPORT)]
             Self::VCPU => ObjectTypeArm::VCPU,
             Self::SeL4Arch(sel4_arch) => ObjectTypeArch::SeL4Arch(sel4_arch.ty()),
@@ -86,7 +82,6 @@ impl ObjectBlueprintArm {
             Self::SmallPage => u32_into_usize(sys::seL4_PageBits),
             Self::LargePage => u32_into_usize(sys::seL4_LargePageBits),
             Self::PT => u32_into_usize(sys::seL4_PageTableBits),
-            Self::PD => u32_into_usize(sys::seL4_PageDirBits),
             #[sel4_cfg(ARM_HYPERVISOR_SUPPORT)]
             Self::VCPU => u32_into_usize(sys::seL4_VCPUBits),
             Self::SeL4Arch(sel4_arch) => sel4_arch.physical_size_bits(),

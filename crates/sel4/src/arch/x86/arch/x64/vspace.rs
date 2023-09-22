@@ -39,15 +39,13 @@ impl FrameType for cap_type::HugePage {
 //
 
 impl cap_type::PDPT {
-    pub const SPAN_BITS: usize =
-        cap_type::PageDirectory::SPAN_BITS + (sys::seL4_PDPTIndexBits as usize);
+    pub const INDEX_BITS: usize = sys::seL4_PDPTIndexBits;
 }
 
 impl cap_type::PageDirectory {
-    pub const SPAN_BITS: usize =
-        cap_type::PageTable::SPAN_BITS + (sys::seL4_PageDirIndexBits as usize);
+    pub const INDEX_BITS: usize = sys::seL4_PageDirIndexBits as usize;
 }
 
 impl cap_type::PageTable {
-    pub const SPAN_BITS: usize = FrameSize::_4K.bits() + (sys::seL4_PageTableIndexBits as usize);
+    pub const INDEX_BITS: usize = sys::seL4_PageTableIndexBits as usize;
 }

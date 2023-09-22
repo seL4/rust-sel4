@@ -67,7 +67,7 @@ impl<T: FrameType, C: InvocationContext> LocalCPtr<T, C> {
     /// Corresponds to `seL4_ARM_Page_Map`.
     pub fn frame_map(
         self,
-        pgd: PGD,
+        vspace: VSpace,
         vaddr: usize,
         rights: CapRights,
         attrs: VMAttributes,
@@ -75,7 +75,7 @@ impl<T: FrameType, C: InvocationContext> LocalCPtr<T, C> {
         Error::wrap(self.invoke(|cptr, ipc_buffer| {
             ipc_buffer.inner_mut().seL4_ARM_Page_Map(
                 cptr.bits(),
-                pgd.bits(),
+                vspace.bits(),
                 vaddr.try_into().unwrap(),
                 rights.into_inner(),
                 attrs.into_inner(),
@@ -102,34 +102,8 @@ impl<T: FrameType, C: InvocationContext> LocalCPtr<T, C> {
     }
 }
 
-impl<C: InvocationContext> PUD<C> {
-    pub fn pud_map(self, vspace: PGD, vaddr: usize, attr: VMAttributes) -> Result<()> {
-        Error::wrap(self.invoke(|cptr, ipc_buffer| {
-            ipc_buffer.inner_mut().seL4_ARM_PageUpperDirectory_Map(
-                cptr.bits(),
-                vspace.bits(),
-                vaddr.try_into().unwrap(),
-                attr.into_inner(),
-            )
-        }))
-    }
-}
-
-impl<C: InvocationContext> PD<C> {
-    pub fn pd_map(self, vspace: PGD, vaddr: usize, attr: VMAttributes) -> Result<()> {
-        Error::wrap(self.invoke(|cptr, ipc_buffer| {
-            ipc_buffer.inner_mut().seL4_ARM_PageDirectory_Map(
-                cptr.bits(),
-                vspace.bits(),
-                vaddr.try_into().unwrap(),
-                attr.into_inner(),
-            )
-        }))
-    }
-}
-
 impl<C: InvocationContext> PT<C> {
-    pub fn pt_map(self, vspace: PGD, vaddr: usize, attr: VMAttributes) -> Result<()> {
+    pub fn pt_map(self, vspace: VSpace, vaddr: usize, attr: VMAttributes) -> Result<()> {
         Error::wrap(self.invoke(|cptr, ipc_buffer| {
             ipc_buffer.inner_mut().seL4_ARM_PageTable_Map(
                 cptr.bits(),
@@ -202,11 +176,11 @@ impl<C: InvocationContext> ASIDControl<C> {
 
 impl<C: InvocationContext> ASIDPool<C> {
     /// Corresponds to `seL4_ARM_ASIDPool_Assign`.
-    pub fn asid_pool_assign(self, pd: PGD) -> Result<()> {
+    pub fn asid_pool_assign(self, vspace: VSpace) -> Result<()> {
         Error::wrap(self.invoke(|cptr, ipc_buffer| {
             ipc_buffer
                 .inner_mut()
-                .seL4_ARM_ASIDPool_Assign(cptr.bits(), pd.bits())
+                .seL4_ARM_ASIDPool_Assign(cptr.bits(), vspace.bits())
         }))
     }
 }

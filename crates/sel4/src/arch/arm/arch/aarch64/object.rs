@@ -12,16 +12,14 @@ pub type ObjectBlueprintSeL4Arch = ObjectBlueprintAArch64;
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub enum ObjectTypeAArch64 {
     HugePage,
-    PUD,
-    PGD,
+    VSpace,
 }
 
 impl ObjectTypeAArch64 {
     pub(crate) const fn into_sys(self) -> c_uint {
         match self {
             Self::HugePage => sys::_mode_object::seL4_ARM_HugePageObject,
-            Self::PUD => sys::_mode_object::seL4_ARM_PageUpperDirectoryObject,
-            Self::PGD => sys::_mode_object::seL4_ARM_PageGlobalDirectoryObject,
+            Self::VSpace => sys::_mode_object::seL4_ARM_VSpaceObject,
         }
     }
 }
@@ -30,24 +28,21 @@ impl ObjectTypeAArch64 {
 #[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub enum ObjectBlueprintAArch64 {
     HugePage,
-    PUD,
-    PGD,
+    VSpace,
 }
 
 impl ObjectBlueprintAArch64 {
     pub(crate) const fn ty(self) -> ObjectTypeAArch64 {
         match self {
             Self::HugePage => ObjectTypeAArch64::HugePage,
-            Self::PUD => ObjectTypeAArch64::PUD,
-            Self::PGD => ObjectTypeAArch64::PGD,
+            Self::VSpace => ObjectTypeAArch64::VSpace,
         }
     }
 
     pub(crate) const fn physical_size_bits(self) -> usize {
         match self {
             Self::HugePage => u32_into_usize(sys::seL4_HugePageBits),
-            Self::PUD => u32_into_usize(sys::seL4_PUDBits),
-            Self::PGD => u32_into_usize(sys::seL4_PGDBits),
+            Self::VSpace => u32_into_usize(sys::seL4_VSpaceBits),
         }
     }
 }

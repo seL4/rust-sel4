@@ -44,26 +44,13 @@ pub(crate) mod cap_type_arch {
 
     declare_cap_type! {
         /// Corresponds to `seL4_ARM_VSpace`.
-        PGD
-    }
-
-    declare_cap_type! {
-        /// Corresponds to `seL4_ARM_PageUpperDirectory`.
-        PUD
-    }
-
-    declare_cap_type! {
-        /// Corresponds to `seL4_ARM_PageDirectory`.
-        PD
+        VSpace
     }
 
     declare_cap_type! {
         /// Corresponds to `seL4_ARM_PageTable`.
         PT
     }
-
-    /// Alias for [`cap_type::PGD`](PGD).
-    pub type VSpace = PGD;
 
     /// Alias for [`cap_type::SmallPage`](SmallPage).
     pub type Granule = SmallPage;
@@ -78,8 +65,5 @@ pub(crate) mod local_cptr_arch {
     declare_local_cptr_alias!(SmallPage);
     declare_local_cptr_alias!(LargePage);
     declare_local_cptr_alias!(HugePage);
-    declare_local_cptr_alias!(PGD);
-    declare_local_cptr_alias!(PUD);
-    declare_local_cptr_alias!(PD);
     declare_local_cptr_alias!(PT);
 }
