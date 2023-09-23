@@ -20,7 +20,7 @@ sel4-async-timers = { path = "../../../../../../sel4-async/timers" }
 sel4-panicking-env = { path = "../../../../../../sel4-panicking/env" }
 
 [dependencies.mbedtls]
-git = "https://github.com/nspin/rust-mbedtls"
+git = "https://github.com/coliasgroup/rust-mbedtls"
 tag = "keep/6eef662dbf636d1ccf86078143b6854f"
 default-features = false
 features = ["no_std_deps"]
