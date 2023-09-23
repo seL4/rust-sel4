@@ -16,12 +16,12 @@ use crate::{object, Indirect, SelfContained};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub enum FrameInit<'a, D, T> {
+pub enum FrameInit<'a, D, M> {
     Fill(Fill<'a, D>),
-    Embedded(T),
+    Embedded(M),
 }
 
-impl<'a, D, E> FrameInit<'a, D, E> {
+impl<'a, D, M> FrameInit<'a, D, M> {
     pub const fn as_fill(&self) -> Option<&Fill<'a, D>> {
         match self {
             Self::Fill(fill) => Some(fill),
@@ -29,7 +29,7 @@ impl<'a, D, E> FrameInit<'a, D, E> {
         }
     }
 
-    pub const fn as_embedded(&self) -> Option<&E> {
+    pub const fn as_embedded(&self) -> Option<&M> {
         match self {
             Self::Embedded(embedded) => Some(embedded),
             _ => None,
