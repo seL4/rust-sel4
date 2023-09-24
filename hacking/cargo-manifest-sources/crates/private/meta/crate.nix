@@ -15,6 +15,7 @@ mk {
 
     sel4-async-block-io
     sel4-async-block-io-cpiofs
+    sel4-async-block-io-fat
     sel4-async-network
     sel4-async-request-statuses
     sel4-async-single-threaded-executor

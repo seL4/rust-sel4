@@ -12,6 +12,7 @@ mk {
   };
   nix.local.dependencies = with localCrates; [
     sel4-microkit
+    sel4-microkit-message
     sel4
     sel4-sync
     sel4-logging
@@ -22,5 +23,6 @@ mk {
     sel4-bounce-buffer-allocator
 
     microkit-http-server-example-virtio-hal-impl
+    microkit-http-server-example-virtio-blk-driver-interface-types
   ];
 }

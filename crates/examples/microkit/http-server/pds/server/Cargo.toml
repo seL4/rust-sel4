@@ -12,6 +12,7 @@ log = "0.4.17"
 microkit-http-server-example-server-core = { path = "./core", features = [] }
 sel4 = { path = "../../../../../sel4" }
 sel4-async-block-io = { path = "../../../../../sel4-async/block-io" }
+sel4-async-block-io-fat = { path = "../../../../../sel4-async/block-io/fat" }
 sel4-async-network = { path = "../../../../../sel4-async/network" }
 sel4-async-request-statuses = { path = "../../../../../sel4-async/request-statuses" }
 sel4-async-timers = { path = "../../../../../sel4-async/timers" }
@@ -26,6 +27,9 @@ sel4-sync = { path = "../../../../../sel4-sync" }
 
 [dependencies.microkit-http-server-example-sp804-driver-interface-types]
 path = "../sp804-driver/interface-types"
+
+[dependencies.microkit-http-server-example-virtio-blk-driver-interface-types]
+path = "../virtio-blk-driver/interface-types"
 
 [dependencies.microkit-http-server-example-virtio-net-driver-interface-types]
 path = "../virtio-net-driver/interface-types"

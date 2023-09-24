@@ -13,7 +13,7 @@ use core::mem;
 use hex::FromHex;
 use zerocopy::{AsBytes, FromBytes};
 
-use sel4_async_block_io::BytesIO;
+use sel4_async_block_io::ByteIO;
 
 const CPIO_ALIGN: usize = 4;
 
@@ -79,14 +79,15 @@ impl EntryLocation {
         self.offset
     }
 
-    async fn read_entry<T: BytesIO>(&self, io: &T) -> Entry {
+    async fn read_entry<T: ByteIO>(&self, io: &T) -> Result<Entry, T::Error> {
         let mut header = Header::new_zeroed();
-        io.read(self.offset(), header.as_bytes_mut()).await;
+        io.read(self.offset().try_into().unwrap(), header.as_bytes_mut())
+            .await?;
         header.check_magic();
-        Entry {
+        Ok(Entry {
             header,
             location: *self,
-        }
+        })
     }
 }
 
@@ -132,11 +133,12 @@ impl Entry {
         }
     }
 
-    async fn read_name<T: BytesIO>(&self, io: &T) -> String {
+    async fn read_name<T: ByteIO>(&self, io: &T) -> Result<String, T::Error> {
         let mut buf = vec![0; self.header().name_size()];
-        io.read(self.name_offset(), &mut buf).await;
+        io.read(self.name_offset().try_into().unwrap(), &mut buf)
+            .await?;
         assert_eq!(buf.pop().unwrap(), 0);
-        String::from_utf8(buf).unwrap()
+        Ok(String::from_utf8(buf).unwrap())
     }
 }
 
@@ -152,20 +154,20 @@ pub struct Index<T> {
     io: T,
 }
 
-impl<T: BytesIO> Index<T> {
-    pub async fn create(io: T) -> Self {
+impl<T: ByteIO> Index<T> {
+    pub async fn create(io: T) -> Result<Self, T::Error> {
         let mut entries = BTreeMap::new();
         let mut location = EntryLocation::first();
         loop {
-            let entry = location.read_entry(&io).await;
-            let path = entry.read_name(&io).await;
+            let entry = location.read_entry(&io).await?;
+            let path = entry.read_name(&io).await?;
             if path == END_OF_ARCHIVE {
                 break;
             }
             location = entry.next_entry_location();
             entries.insert(path, entry.location);
         }
-        Self { entries, io }
+        Ok(Self { entries, io })
     }
 
     pub fn lookup(&self, path: &str) -> Option<&EntryLocation> {
@@ -176,12 +178,17 @@ impl<T: BytesIO> Index<T> {
         &self.entries
     }
 
-    pub async fn read_entry(&self, location: &EntryLocation) -> Entry {
+    pub async fn read_entry(&self, location: &EntryLocation) -> Result<Entry, T::Error> {
         location.read_entry(&self.io).await
     }
 
-    pub async fn read_data(&self, entry: &Entry, offset_into_data: usize, buf: &mut [u8]) {
+    pub async fn read_data(
+        &self,
+        entry: &Entry,
+        offset_into_data: usize,
+        buf: &mut [u8],
+    ) -> Result<(), T::Error> {
         let offset = entry.data_offset() + offset_into_data;
-        self.io.read(offset, buf).await;
+        self.io.read(offset.try_into().unwrap(), buf).await
     }
 }

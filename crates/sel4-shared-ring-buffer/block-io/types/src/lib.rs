@@ -10,7 +10,7 @@ use sel4_shared_ring_buffer::Descriptor;
 pub struct BlockIORequest {
     status: i32,
     ty: u32,
-    block_id: usize,
+    start_block_idx: u64,
     buf: Descriptor,
 }
 
@@ -33,13 +33,13 @@ impl BlockIORequest {
     pub fn new(
         status: BlockIORequestStatus,
         ty: BlockIORequestType,
-        block_id: usize,
+        start_block_idx: u64,
         buf: Descriptor,
     ) -> Self {
         Self {
             status: status.into(),
             ty: ty.into(),
-            block_id,
+            start_block_idx,
             buf,
         }
     }
@@ -58,8 +58,8 @@ impl BlockIORequest {
         self.ty.try_into()
     }
 
-    pub fn block_id(&self) -> usize {
-        self.block_id
+    pub fn start_block_idx(&self) -> u64 {
+        self.start_block_idx
     }
 
     pub fn buf(&self) -> &Descriptor {

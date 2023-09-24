@@ -1,24 +1,29 @@
 use alloc::borrow::ToOwned;
 use alloc::format;
+use alloc::rc::Rc;
 use alloc::string::{String, ToString};
 use alloc::vec;
 use core::str::pattern::Pattern;
 
 use mbedtls::ssl::async_io::{AsyncIo, AsyncIoExt, ClosedError};
 
-use sel4_async_block_io::BytesIO;
-use sel4_async_block_io_cpiofs as cpiofs;
+use sel4_async_block_io_fat as fat;
 use sel4_async_network_mbedtls::mbedtls;
+use sel4_async_unsync::Mutex;
 
 use crate::mime::content_type_from_name;
 
-pub(crate) struct Server<T> {
-    index: cpiofs::Index<T>,
+pub(crate) struct Server<D: fat::BlockDevice + 'static, T: fat::TimeSource + 'static> {
+    volume_manager: Rc<Mutex<fat::Volume<D, T, 4, 4>>>,
+    dir: fat::Directory,
 }
 
-impl<T: BytesIO> Server<T> {
-    pub(crate) fn new(index: cpiofs::Index<T>) -> Self {
-        Self { index }
+impl<D: fat::BlockDevice + 'static, T: fat::TimeSource + 'static> Server<D, T> {
+    pub(crate) fn new(volume_manager: fat::Volume<D, T, 4, 4>, dir: fat::Directory) -> Self {
+        Self {
+            volume_manager: Rc::new(Mutex::new(volume_manager)),
+            dir,
+        }
     }
 
     pub(crate) async fn handle_connection<U: AsyncIo>(
@@ -64,9 +69,9 @@ impl<T: BytesIO> Server<T> {
         request_path: &str,
     ) -> Result<(), ClosedError<U::Error>> {
         match self.lookup_request_path(request_path).await {
-            RequestPathStatus::Ok { file_path, entry } => {
-                let content_type = content_type_from_name(&file_path);
-                self.serve_file(conn, content_type, &entry).await?;
+            RequestPathStatus::Ok { file_name, file } => {
+                let content_type = content_type_from_name(&file_name);
+                self.serve_file(conn, content_type, file).await?;
             }
             RequestPathStatus::MovedPermanently { location } => {
                 self.serve_moved_permanently(conn, &location).await?;
@@ -82,28 +87,44 @@ impl<T: BytesIO> Server<T> {
         &self,
         conn: &mut U,
         content_type: &str,
-        entry: &cpiofs::Entry,
+        file: fat::File,
     ) -> Result<(), ClosedError<U::Error>> {
+        let file_len: usize = self
+            .volume_manager
+            .lock()
+            .await
+            .file_length(file)
+            .unwrap()
+            .try_into()
+            .unwrap();
         self.start_response_headers(conn, 200, "OK").await?;
         self.send_response_header(conn, "Content-Type", content_type.as_bytes())
             .await?;
-        self.send_response_header(
-            conn,
-            "Content-Length",
-            entry.data_size().to_string().as_bytes(),
-        )
-        .await?;
+        self.send_response_header(conn, "Content-Length", file_len.to_string().as_bytes())
+            .await?;
         self.finish_response_headers(conn).await?;
         {
             let mut buf = vec![0; 2048];
             let mut pos = 0;
-            while pos < entry.data_size() {
-                let n = buf.len().min(entry.data_size() - pos);
-                self.index.read_data(entry, pos, &mut buf[..n]).await;
+            while pos < file_len {
+                let n = buf.len().min(file_len - pos);
+                self.volume_manager
+                    .lock()
+                    .await
+                    .read(file, &mut buf[..n])
+                    .await
+                    .unwrap();
                 conn.send_all(&buf[..n]).await?;
                 pos += n;
             }
         }
+        assert!(self.volume_manager.lock().await.file_eof(file).unwrap());
+        self.volume_manager
+            .lock()
+            .await
+            .close_file(file)
+            .await
+            .unwrap();
         Ok(())
     }
 
@@ -173,63 +194,78 @@ impl<T: BytesIO> Server<T> {
     }
 
     async fn lookup_request_path(&self, request_path: &str) -> RequestPathStatus {
+        let mut volume_manager = self.volume_manager.lock().await;
         if !"/".is_prefix_of(request_path) {
             return RequestPathStatus::NotFound;
         }
         let has_trailing_slash = "/".is_suffix_of(request_path);
-        let normalized = request_path.trim_matches('/');
-        if normalized.is_empty() {
-            let file_path = "index.html";
-            if let Some(location) = self.index.lookup(file_path) {
-                let entry = self.index.read_entry(location).await;
-                if entry.ty() == cpiofs::EntryType::RegularFile {
-                    return RequestPathStatus::Ok {
-                        file_path: file_path.to_owned(),
-                        entry,
-                    };
-                }
+        let mut cur = self.dir;
+        for seg in request_path.split('/') {
+            if seg.is_empty() {
+                continue;
             }
-        } else if let Some(location) = self.index.lookup(normalized) {
-            let entry = self.index.read_entry(location).await;
-            match entry.ty() {
-                cpiofs::EntryType::RegularFile => {
-                    return RequestPathStatus::Ok {
-                        file_path: normalized.to_owned(),
-                        entry,
-                    };
-                }
-                cpiofs::EntryType::Directory => {
-                    if !has_trailing_slash {
-                        return RequestPathStatus::MovedPermanently {
-                            location: format!("{}/", request_path),
-                        };
-                    }
-                    let normalized_with_index_html = format!("{}/index.html", normalized);
-                    if let Some(location) = self.index.lookup(&normalized_with_index_html) {
-                        let entry = self.index.read_entry(location).await;
+            let entry = volume_manager.find_lfn_directory_entry(cur, seg).await;
+            match entry {
+                Ok(entry) => {
+                    if entry.attributes.is_directory() {
+                        let new = volume_manager.open_dir(cur, entry.name).await.unwrap();
+                        if cur != self.dir {
+                            volume_manager.close_dir(cur).unwrap();
+                        }
+                        cur = new;
+                    } else {
+                        let file = volume_manager
+                            .open_file_in_dir(cur, entry.name, fat::Mode::ReadOnly)
+                            .await
+                            .unwrap();
+                        if cur != self.dir {
+                            volume_manager.close_dir(cur).unwrap();
+                        }
                         return RequestPathStatus::Ok {
-                            file_path: normalized_with_index_html,
-                            entry,
+                            file_name: seg.to_owned(),
+                            file,
                         };
                     }
                 }
-                // TODO handle symlinks
-                _ => {}
+                Err(err) => {
+                    log::warn!("{:?}: {:?}", err, request_path);
+                    if cur != self.dir {
+                        volume_manager.close_dir(cur).unwrap();
+                    }
+                    return RequestPathStatus::NotFound; // TODO
+                }
             }
         }
-        RequestPathStatus::NotFound
+        if !has_trailing_slash {
+            RequestPathStatus::MovedPermanently {
+                location: format!("{}/", request_path),
+            }
+        } else {
+            let file_name = "index.html";
+            let seg = file_name;
+            let entry = volume_manager
+                .find_lfn_directory_entry(cur, seg)
+                .await
+                .unwrap();
+            let file = volume_manager
+                .open_file_in_dir(cur, entry.name, fat::Mode::ReadOnly)
+                .await
+                .unwrap();
+            if cur != self.dir {
+                volume_manager.close_dir(cur).unwrap();
+            }
+            RequestPathStatus::Ok {
+                file_name: file_name.to_owned(),
+                file,
+            }
+        }
     }
 }
 
 #[derive(Debug)]
 enum RequestPathStatus {
-    Ok {
-        file_path: String,
-        entry: cpiofs::Entry,
-    },
-    MovedPermanently {
-        location: String,
-    },
+    Ok { file_name: String, file: fat::File },
+    MovedPermanently { location: String },
     NotFound,
 }
 

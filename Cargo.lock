@@ -395,6 +395,26 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a3e2c3daef883ecc1b5d58c15adae93470a91d425f3532ba1695849656af3fc1"
 
 [[package]]
+name = "bytemuck"
+version = "1.14.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "374d28ec25809ee0e23827c2ab573d729e293f281dfe393500e7ad618baa61c6"
+dependencies = [
+ "bytemuck_derive",
+]
+
+[[package]]
+name = "bytemuck_derive"
+version = "1.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "965ab7eb5f8f97d2a083c799f3a1b994fc397b2fe2da5d1da1626ce15a39f2b1"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.29",
+]
+
+[[package]]
 name = "byteorder"
 version = "1.4.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -690,6 +710,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "crc"
+version = "3.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "86ec7a15cbe22e59248fc7eadb1907dab5ba09372595da4d73dd805ed4417dfe"
+dependencies = [
+ "crc-catalog",
+]
+
+[[package]]
+name = "crc-catalog"
+version = "2.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9cace84e55f07e7301bae1c519df89cdad8cc3cd868413d3fdbdeca9ff3db484"
+
+[[package]]
 name = "crc32fast"
 version = "1.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -892,6 +927,16 @@ dependencies = [
  "sec1",
  "subtle",
  "zeroize",
+]
+
+[[package]]
+name = "embedded-fat"
+version = "0.5.0"
+source = "git+https://github.com/coliasgroup/rust-embedded-fat.git?tag=keep/e1465a43c9f550ef58701a275b313310#e1465a43c9f550ef58701a275b3133105deb9183"
+dependencies = [
+ "byteorder",
+ "heapless",
+ "log",
 ]
 
 [[package]]
@@ -1205,6 +1250,18 @@ dependencies = [
  "fnv",
  "log",
  "regex",
+]
+
+[[package]]
+name = "gpt_disk_types"
+version = "0.15.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1c9cec52cc9bb7305e0178834c310519a4d602952fb65a31bdf60aed797fbf47"
+dependencies = [
+ "bytemuck",
+ "crc",
+ "ucs2",
+ "uguid",
 ]
 
 [[package]]
@@ -1675,6 +1732,7 @@ dependencies = [
  "sel4",
  "sel4-async-block-io",
  "sel4-async-block-io-cpiofs",
+ "sel4-async-block-io-fat",
  "sel4-async-network",
  "sel4-async-request-statuses",
  "sel4-async-single-threaded-executor",
@@ -1714,10 +1772,12 @@ dependencies = [
  "log",
  "microkit-http-server-example-server-core",
  "microkit-http-server-example-sp804-driver-interface-types",
+ "microkit-http-server-example-virtio-blk-driver-interface-types",
  "microkit-http-server-example-virtio-net-driver-interface-types",
  "rcgen",
  "sel4",
  "sel4-async-block-io",
+ "sel4-async-block-io-fat",
  "sel4-async-network",
  "sel4-async-request-statuses",
  "sel4-async-single-threaded-executor",
@@ -1746,11 +1806,12 @@ dependencies = [
  "log",
  "mbedtls",
  "sel4-async-block-io",
- "sel4-async-block-io-cpiofs",
+ "sel4-async-block-io-fat",
  "sel4-async-network",
  "sel4-async-network-mbedtls",
  "sel4-async-single-threaded-executor",
  "sel4-async-timers",
+ "sel4-async-unsync",
  "sel4-panicking-env",
 ]
 
@@ -1784,6 +1845,7 @@ name = "microkit-http-server-example-virtio-blk-driver"
 version = "0.1.0"
 dependencies = [
  "log",
+ "microkit-http-server-example-virtio-blk-driver-interface-types",
  "microkit-http-server-example-virtio-hal-impl",
  "sel4",
  "sel4-bounce-buffer-allocator",
@@ -1791,10 +1853,18 @@ dependencies = [
  "sel4-immediate-sync-once-cell",
  "sel4-logging",
  "sel4-microkit",
+ "sel4-microkit-message",
  "sel4-shared-ring-buffer",
  "sel4-shared-ring-buffer-block-io-types",
  "sel4-sync",
  "virtio-drivers",
+]
+
+[[package]]
+name = "microkit-http-server-example-virtio-blk-driver-interface-types"
+version = "0.1.0"
+dependencies = [
+ "serde",
 ]
 
 [[package]]
@@ -1942,6 +2012,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1ba157ca0885411de85d6ca030ba7e2a83a28636056c7c699b07c8b6f7383214"
 dependencies = [
  "num-traits",
+]
+
+[[package]]
+name = "num-derive"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9e6a0fd4f737c707bd9086cc16c925f294943eb62eb71499e9fd4cf71f8b9f4e"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.29",
 ]
 
 [[package]]
@@ -2645,9 +2726,13 @@ dependencies = [
 name = "sel4-async-block-io"
 version = "0.1.0"
 dependencies = [
+ "bytemuck",
  "futures",
+ "gpt_disk_types",
  "log",
  "lru",
+ "num-derive",
+ "num-traits",
 ]
 
 [[package]]
@@ -2655,6 +2740,20 @@ name = "sel4-async-block-io-cpiofs"
 version = "0.1.0"
 dependencies = [
  "futures",
+ "hex",
+ "log",
+ "lru",
+ "sel4-async-block-io",
+ "zerocopy",
+]
+
+[[package]]
+name = "sel4-async-block-io-fat"
+version = "0.1.0"
+dependencies = [
+ "embedded-fat",
+ "futures",
+ "heapless",
  "hex",
  "log",
  "lru",
@@ -2705,6 +2804,13 @@ dependencies = [
  "futures",
  "log",
  "smoltcp",
+]
+
+[[package]]
+name = "sel4-async-unsync"
+version = "0.1.0"
+dependencies = [
+ "async-unsync",
 ]
 
 [[package]]
@@ -3984,6 +4090,24 @@ name = "ucd-trie"
 version = "0.1.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ed646292ffc8188ef8ea4d1e0e0150fb15a5c2e12ad9b8fc191ae7a8a7f3c4b9"
+
+[[package]]
+name = "ucs2"
+version = "0.3.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bad643914094137d475641b6bab89462505316ec2ce70907ad20102d28a79ab8"
+dependencies = [
+ "bit_field",
+]
+
+[[package]]
+name = "uguid"
+version = "2.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "16dfbd255defbd727b3a30e8950695d2e6d045841ee250ff0f1f7ced17917f8d"
+dependencies = [
+ "bytemuck",
+]
 
 [[package]]
 name = "unicode-bidi"

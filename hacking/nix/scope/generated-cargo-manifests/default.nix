@@ -47,6 +47,7 @@ let
     # "mbedtls" = "tmp/rust-mbedtls/mbedtls";
     # "mbedtls-sys-auto" = "tmp/rust-mbedtls/mbedtls-sys";
     # "mbedtls-platform-support" = "tmp/rust-mbedtls/mbedtls-platform-support";
+    # "embedded-fat" = "tmp/rust-embedded-fat";
   };
 
   cratePathAttrs = localCratePathAttrs // externalCratePathAttrs;
@@ -88,6 +89,7 @@ let
         heapless = "0.7.16";
         log = "0.4.17";
         num = "0.4.1";
+        num-derive = "0.4.0";
         num-traits = "0.2.16";
         num_enum = "0.5.9";
         object = "0.32.1";
@@ -176,6 +178,11 @@ let
         "socket-raw" "socket-icmp" "socket-udp" "socket-tcp" "socket-dhcpv4" "socket-dns" "socket-mdns"
         "packetmeta-id" "async"
       ];
+
+      fatSource = {
+        git = "https://github.com/coliasgroup/rust-embedded-fat.git";
+        tag = "keep/e1465a43c9f550ef58701a275b313310"; # branch sel4
+      };
 
       virtioDriversWith = features: filterOutEmptyFeatureList {
         version = versions.virtio-drivers;
