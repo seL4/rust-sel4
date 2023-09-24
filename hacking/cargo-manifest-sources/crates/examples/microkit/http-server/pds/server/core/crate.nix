@@ -20,12 +20,13 @@ mk {
   };
   nix.local.dependencies = with localCrates; [
     sel4-async-single-threaded-executor
+    sel4-async-unsync
     sel4-async-network
     sel4-async-network-mbedtls
     sel4-async-timers
     sel4-panicking-env
     sel4-async-block-io
-    sel4-async-block-io-cpiofs
+    sel4-async-block-io-fat
     # mbedtls
   ];
   features = {

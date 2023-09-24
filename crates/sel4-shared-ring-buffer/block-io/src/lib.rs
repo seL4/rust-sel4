@@ -13,7 +13,7 @@ use core::task::{ready, Poll};
 use async_unsync::semaphore::Semaphore;
 use futures::prelude::*;
 
-use sel4_async_block_io::BlockIO as BlockIOTrait;
+use sel4_async_block_io::{block_sizes, BlockIO};
 use sel4_async_request_statuses::RequestStatuses;
 use sel4_bounce_buffer_allocator::{Basic, BounceBufferAllocator};
 use sel4_externally_shared::ExternallySharedRef;
@@ -24,10 +24,12 @@ use sel4_shared_ring_buffer_block_io_types::{
     BlockIORequest, BlockIORequestStatus, BlockIORequestType,
 };
 
+// TODO clean up dropped requests
+
 pub const BLOCK_SIZE: usize = 512;
 
 #[derive(Clone)]
-pub struct BlockIO {
+pub struct SharedRingBufferBlockIO {
     shared_inner: Rc<RefCell<Inner>>,
 }
 
@@ -40,13 +42,15 @@ struct Inner {
     ring_buffers: RingBuffers<'static, fn() -> Result<(), !>, BlockIORequest>,
     request_statuses: RequestStatuses<EncodedAddr, BlockIORequest, BlockIORequestStatus>,
     queue_guard: Rc<Semaphore>,
+    num_blocks: u64,
 }
 
-impl BlockIO {
+impl SharedRingBufferBlockIO {
     pub fn new(
         dma_region: ExternallySharedRef<'static, [u8]>,
         dma_region_paddr: usize,
         ring_buffers: RingBuffers<'static, fn() -> Result<(), !>, BlockIORequest>,
+        num_blocks: u64,
     ) -> Self {
         let max_alignment = 1
             << dma_region
@@ -67,6 +71,7 @@ impl BlockIO {
                 ring_buffers,
                 request_statuses: RequestStatuses::new(),
                 queue_guard: Rc::new(Semaphore::new(RING_BUFFER_SIZE)),
+                num_blocks,
             })),
         }
     }
@@ -100,8 +105,16 @@ impl BlockIO {
     }
 }
 
-impl BlockIOTrait<BLOCK_SIZE> for BlockIO {
-    async fn read_block(&self, block_id: usize, buf: &mut [u8; BLOCK_SIZE]) {
+impl BlockIO for SharedRingBufferBlockIO {
+    type Error = !;
+
+    type BlockSize = block_sizes::BlockSize512;
+
+    fn num_blocks(&self) -> u64 {
+        self.shared_inner.borrow().num_blocks
+    }
+
+    async fn read_blocks(&self, start_block_idx: u64, buf: &mut [u8]) -> Result<(), Self::Error> {
         let sem = self.shared_inner.borrow().queue_guard.clone();
         let permit = sem.acquire().await;
 
@@ -115,7 +128,7 @@ impl BlockIOTrait<BLOCK_SIZE> for BlockIO {
             let req = BlockIORequest::new(
                 BlockIORequestStatus::Pending,
                 BlockIORequestType::Read,
-                block_id,
+                start_block_idx.try_into().unwrap(),
                 Descriptor::new(
                     inner.dma_region_paddr + range.start,
                     range.len().try_into().unwrap(),
@@ -147,5 +160,7 @@ impl BlockIOTrait<BLOCK_SIZE> for BlockIO {
         .await;
 
         drop(permit); // explicit extent of scope
+
+        Ok(())
     }
 }

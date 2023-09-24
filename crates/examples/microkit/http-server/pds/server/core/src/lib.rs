@@ -12,8 +12,8 @@ use futures::task::LocalSpawnExt;
 
 use mbedtls::ssl::async_io::ClosedError;
 
-use sel4_async_block_io::BytesIO;
-use sel4_async_block_io_cpiofs as cpiofs;
+use sel4_async_block_io::{block_sizes, BlockIO};
+use sel4_async_block_io_fat as fat;
 use sel4_async_network::{SharedNetwork, TcpSocketError};
 use sel4_async_network_mbedtls::{
     insecure_dummy_rng, mbedtls, seed_insecure_dummy_rng, DbgCallbackBuilder, TcpSocketWrapper,
@@ -29,17 +29,21 @@ use server::Server;
 const HTTP_PORT: u16 = 80;
 const HTTPS_PORT: u16 = 443;
 
-const NUM_SIMULTANEOUS_CONNECTIONS: usize = 32;
+type SocketUser<T> = Box<
+    dyn Fn(
+        Server<fat::BlockIOWrapper<T>, fat::DummyTimeSource>,
+        TcpSocketWrapper,
+    ) -> LocalBoxFuture<'static, ()>,
+>;
 
-type SocketUser = Box<dyn Fn(TcpSocketWrapper) -> LocalBoxFuture<'static, ()>>;
-
-pub async fn run_server<T: BytesIO + 'static>(
+pub async fn run_server<T: BlockIO<BlockSize = block_sizes::BlockSize512> + Clone>(
     _timers_ctx: SharedTimers,
     network_ctx: SharedNetwork,
-    fs_io: T,
+    fs_block_io: T,
     spawner: LocalSpawner,
     cert_pem: &str,
     priv_pem: &str,
+    max_num_simultaneous_connections: usize,
 ) -> ! {
     #[cfg(feature = "debug")]
     unsafe {
@@ -48,16 +52,10 @@ pub async fn run_server<T: BytesIO + 'static>(
 
     seed_insecure_dummy_rng(0);
 
-    let index = cpiofs::Index::create(fs_io).await;
-
-    let server = Rc::new(Server::new(index));
-
-    let use_socket_for_http_closure: SocketUser = Box::new({
-        let server = server.clone();
-        move |socket: TcpSocketWrapper| {
-            let server = server.clone();
+    let use_socket_for_http_closure: SocketUser<T> = Box::new({
+        move |server, socket| {
             Box::pin(async move {
-                use_socket_for_http(&server, socket)
+                use_socket_for_http(server, socket)
                     .await
                     .unwrap_or_else(|err| {
                         log::warn!("error: {err:?}");
@@ -66,14 +64,12 @@ pub async fn run_server<T: BytesIO + 'static>(
         }
     });
 
-    let use_socket_for_https_closure: SocketUser = Box::new({
-        let server = server.clone();
+    let use_socket_for_https_closure: SocketUser<T> = Box::new({
         let config = Arc::new(mk_config(cert_pem, priv_pem).unwrap());
-        move |socket: TcpSocketWrapper| {
-            let server = server.clone();
+        move |server, socket| {
             let config = config.clone();
             Box::pin(async move {
-                use_socket_for_https(&server, config, socket)
+                use_socket_for_https(server, config, socket)
                     .await
                     .unwrap_or_else(|err| {
                         log::warn!("error: {err:?}");
@@ -83,15 +79,23 @@ pub async fn run_server<T: BytesIO + 'static>(
     });
 
     for f in [use_socket_for_http_closure, use_socket_for_https_closure].map(Rc::new) {
-        for _ in 0..NUM_SIMULTANEOUS_CONNECTIONS {
+        for _ in 0..max_num_simultaneous_connections {
             spawner
                 .spawn_local({
                     let network_ctx = network_ctx.clone();
                     let f = f.clone();
+                    let fs_block_io = fs_block_io.clone();
                     async move {
                         loop {
+                            let fs_block_io = fat::BlockIOWrapper::new(fs_block_io.clone());
+                            let mut volume_manager =
+                                fat::Volume::new(fs_block_io, fat::DummyTimeSource::new())
+                                    .await
+                                    .unwrap();
+                            let dir = volume_manager.open_root_dir().unwrap();
+                            let server = Server::new(volume_manager, dir);
                             let socket = network_ctx.new_tcp_socket_with_buffer_sizes(8192, 65535);
-                            f(TcpSocketWrapper::new(socket)).await;
+                            f(server, TcpSocketWrapper::new(socket)).await;
                         }
                     }
                 })
@@ -102,8 +106,8 @@ pub async fn run_server<T: BytesIO + 'static>(
     future::pending().await
 }
 
-async fn use_socket_for_http<T: BytesIO>(
-    server: &Server<T>,
+async fn use_socket_for_http<D: fat::BlockDevice + 'static, T: fat::TimeSource + 'static>(
+    server: Server<D, T>,
     mut socket: TcpSocketWrapper,
 ) -> Result<(), ClosedError<TcpSocketError>> {
     socket.inner_mut().accept(HTTP_PORT).await?;
@@ -112,8 +116,8 @@ async fn use_socket_for_http<T: BytesIO>(
     Ok(())
 }
 
-async fn use_socket_for_https<T: BytesIO>(
-    server: &Server<T>,
+async fn use_socket_for_https<D: fat::BlockDevice + 'static, T: fat::TimeSource + 'static>(
+    server: Server<D, T>,
     config: Arc<mbedtls::ssl::Config>,
     mut socket: TcpSocketWrapper,
 ) -> Result<(), ClosedError<mbedtls::Error>> {

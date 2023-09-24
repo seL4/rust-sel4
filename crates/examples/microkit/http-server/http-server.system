@@ -38,14 +38,14 @@
         <map mr="virtio_blk_used" vaddr="0x4_001_000_000" perms="rw" cached="true" setvar_vaddr="virtio_blk_used" />
     </protection_domain>
 
-    <protection_domain name="sp804_driver" priority="254" pp="true">
+    <protection_domain name="sp804_driver" pp="true" priority="254">
         <program_image path="microkit-http-server-example-sp804-driver.elf" />
         <map mr="sp804_mmio"  vaddr="0x5_000_000_000" perms="rw" cached="false" setvar_vaddr="sp804_mmio_vaddr" />
         <irq irq="43" id="0" />
         <setvar symbol="freq" vaddr="1_000_000" />
     </protection_domain>
 
-    <protection_domain name="virtio_net_driver" priority="253" pp="true">
+    <protection_domain name="virtio_net_driver" pp="true" priority="253">
         <program_image path="microkit-http-server-example-virtio-net-driver.elf" />
 
         <map mr="virtio_mmio" vaddr="0x6_000_000_000" perms="rw" cached="false" setvar_vaddr="virtio_net_mmio_vaddr" />
@@ -67,7 +67,7 @@
         <irq irq="79" id="0" />
     </protection_domain>
 
-    <protection_domain name="virtio_blk_driver" priority="252">
+    <protection_domain name="virtio_blk_driver" pp="true" priority="252">
         <program_image path="microkit-http-server-example-virtio-blk-driver.elf" />
 
         <map mr="virtio_mmio" vaddr="0x6_000_000_000" perms="rw" cached="false" setvar_vaddr="virtio_blk_mmio_vaddr" />

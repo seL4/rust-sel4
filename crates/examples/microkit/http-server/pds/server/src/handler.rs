@@ -7,17 +7,12 @@ use futures::future::LocalBoxFuture;
 use smoltcp::iface::Config;
 use smoltcp::time::{Duration, Instant};
 
-use sel4_async_block_io::{BytesIOAdapter, CachedBlockIO};
 use sel4_async_network::{DhcpOverrides, SharedNetwork};
 use sel4_async_single_threaded_executor::{LocalPool, LocalSpawner};
 use sel4_async_timers::SharedTimers;
-use sel4_shared_ring_buffer_block_io::BlockIO;
+use sel4_shared_ring_buffer_block_io::SharedRingBufferBlockIO;
 
-use crate::{DeviceImpl, TimerClient, BLOCK_SIZE};
-
-type BytesIOImpl = BytesIOAdapter<CachedBlockIO<BlockIO, BLOCK_SIZE>, BLOCK_SIZE>;
-
-const BLOCK_CACHE_SIZE_IN_BLOCKS: usize = 128;
+use crate::{DeviceImpl, TimerClient};
 
 pub(crate) struct HandlerImpl {
     timer_driver_channel: sel4_microkit::Channel,
@@ -25,7 +20,7 @@ pub(crate) struct HandlerImpl {
     block_driver_channel: sel4_microkit::Channel,
     timer: TimerClient,
     net_device: DeviceImpl,
-    fs_block_io: BlockIO,
+    shared_block_io: SharedRingBufferBlockIO,
     shared_timers: SharedTimers,
     shared_network: SharedNetwork,
     local_pool: LocalPool,
@@ -41,8 +36,8 @@ impl HandlerImpl {
         timer: TimerClient,
         mut net_device: DeviceImpl,
         net_config: Config,
-        fs_block_io: BlockIO,
-        f: impl FnOnce(SharedTimers, SharedNetwork, BytesIOImpl, LocalSpawner) -> T,
+        shared_block_io: SharedRingBufferBlockIO,
+        f: impl FnOnce(SharedTimers, SharedNetwork, LocalSpawner) -> T,
     ) -> Self {
         let now = Self::now_with_timer_client(&timer);
 
@@ -54,17 +49,7 @@ impl HandlerImpl {
         let local_pool = LocalPool::new();
         let spawner = local_pool.spawner();
 
-        let fs_io = BytesIOAdapter::new(CachedBlockIO::new(
-            fs_block_io.clone(),
-            BLOCK_CACHE_SIZE_IN_BLOCKS,
-        ));
-
-        let fut = Box::pin(f(
-            shared_timers.clone(),
-            shared_network.clone(),
-            fs_io,
-            spawner,
-        ));
+        let fut = Box::pin(f(shared_timers.clone(), shared_network.clone(), spawner));
 
         let mut this = Self {
             timer_driver_channel,
@@ -72,7 +57,7 @@ impl HandlerImpl {
             block_driver_channel,
             timer,
             net_device,
-            fs_block_io,
+            shared_block_io,
             shared_timers,
             shared_network,
             local_pool,
@@ -110,7 +95,7 @@ impl HandlerImpl {
             activity |= self.shared_timers.poll(now);
             activity |= self.net_device.poll();
             activity |= self.shared_network.poll(now, &mut self.net_device);
-            activity |= self.fs_block_io.poll();
+            activity |= self.shared_block_io.poll();
             if !activity {
                 let delays = &[
                     self.shared_timers.poll_delay(now),

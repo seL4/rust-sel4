@@ -15,6 +15,7 @@ log = "0.4.17"
 sel4 = { path = "../../sel4" }
 sel4-async-block-io = { path = "../../sel4-async/block-io" }
 sel4-async-block-io-cpiofs = { path = "../../sel4-async/block-io/cpiofs" }
+sel4-async-block-io-fat = { path = "../../sel4-async/block-io/fat" }
 sel4-async-network = { path = "../../sel4-async/network" }
 sel4-async-request-statuses = { path = "../../sel4-async/request-statuses" }
 sel4-async-single-threaded-executor = { path = "../../sel4-async/single-threaded-executor" }

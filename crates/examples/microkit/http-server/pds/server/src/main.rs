@@ -11,26 +11,35 @@
 
 extern crate alloc;
 
+use alloc::rc::Rc;
+
 use smoltcp::iface::Config;
 use smoltcp::phy::{Device, Medium};
 use smoltcp::wire::{EthernetAddress, HardwareAddress};
 
+use sel4_async_block_io::{disk::Disk, CachedBlockIO};
 use sel4_externally_shared::ExternallySharedRef;
 use sel4_logging::{LevelFilter, Logger, LoggerBuilder};
 use sel4_microkit::{memory_region_symbol, protection_domain, var, Channel, Handler};
 use sel4_shared_ring_buffer::{RingBuffer, RingBuffers};
-use sel4_shared_ring_buffer_block_io::{BlockIO, BLOCK_SIZE};
+use sel4_shared_ring_buffer_block_io::SharedRingBufferBlockIO;
 use sel4_shared_ring_buffer_smoltcp::DeviceImpl;
 
 use microkit_http_server_example_server_core::run_server;
 
+mod block_client;
 mod handler;
 mod net_client;
 mod timer_client;
 
+use block_client::BlockClient;
 use handler::HandlerImpl;
 use net_client::NetClient;
 use timer_client::TimerClient;
+
+const BLOCK_CACHE_SIZE_IN_BLOCKS: usize = 128;
+
+const MAX_NUM_SIMULTANEOUS_CONNECTIONS: usize = 32;
 
 const CERT_PEM: &str = concat!(include_str!(concat!(env!("OUT_DIR"), "/cert.pem")), "\0");
 const PRIV_PEM: &str = concat!(include_str!(concat!(env!("OUT_DIR"), "/priv.pem")), "\0");
@@ -62,6 +71,7 @@ fn init() -> impl Handler {
 
     let timer_client = TimerClient::new(TIMER_DRIVER);
     let net_client = NetClient::new(NET_DRIVER);
+    let block_client = BlockClient::new(BLOCK_DRIVER);
 
     let notify_net = || {
         NET_DRIVER.notify();
@@ -110,7 +120,9 @@ fn init() -> impl Handler {
         this
     };
 
-    let fs_block_io = BlockIO::new(
+    let num_blocks = block_client.get_num_blocks();
+
+    let shared_block_io = SharedRingBufferBlockIO::new(
         unsafe {
             ExternallySharedRef::<'static, _>::new(
                 memory_region_symbol!(virtio_blk_client_dma_vaddr: *mut [u8], n = *var!(virtio_blk_client_dma_size: usize = 0)),
@@ -125,7 +137,11 @@ fn init() -> impl Handler {
                 true,
             )
         },
+        num_blocks,
     );
+
+    let fs_block_io = shared_block_io.clone();
+    let fs_block_io = CachedBlockIO::new(fs_block_io.clone(), BLOCK_CACHE_SIZE_IN_BLOCKS);
 
     HandlerImpl::new(
         TIMER_DRIVER,
@@ -134,9 +150,22 @@ fn init() -> impl Handler {
         timer_client,
         net_device,
         net_config,
-        fs_block_io,
-        |timers_ctx, network_ctx, fs_io, spawner| {
-            run_server(timers_ctx, network_ctx, fs_io, spawner, CERT_PEM, PRIV_PEM)
+        shared_block_io,
+        |timers_ctx, network_ctx, spawner| async move {
+            let disk = Disk::new(fs_block_io);
+            let entry = disk.read_mbr().await.unwrap().partition(0).unwrap();
+            let fs_block_io = disk.partition_using_mbr(&entry);
+            let fs_block_io = Rc::new(fs_block_io);
+            run_server(
+                timers_ctx,
+                network_ctx,
+                fs_block_io,
+                spawner,
+                CERT_PEM,
+                PRIV_PEM,
+                MAX_NUM_SIMULTANEOUS_CONNECTIONS,
+            )
+            .await
         },
     )
 }

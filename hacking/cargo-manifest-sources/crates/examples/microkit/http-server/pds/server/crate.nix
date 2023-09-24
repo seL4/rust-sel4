@@ -48,6 +48,7 @@ mk {
     sel4-async-network
     sel4-async-timers
     sel4-async-request-statuses
+    sel4-async-block-io-fat
     sel4-newlib
     sel4-bounce-buffer-allocator
     sel4-shared-ring-buffer
@@ -56,7 +57,9 @@ mk {
     sel4-shared-ring-buffer-block-io-types
     microkit-http-server-example-server-core
     sel4-async-block-io
+    sel4-async-block-io-fat
     microkit-http-server-example-sp804-driver-interface-types
+    microkit-http-server-example-virtio-blk-driver-interface-types
     microkit-http-server-example-virtio-net-driver-interface-types
   ];
 }

@@ -1,7 +1,7 @@
 { lib, stdenv, hostPlatform, buildPackages
 , linkFarm, symlinkJoin, writeText, writeScript, runCommand
 , fetchgit
-, cpio
+, parted, mtools, fatresize, dosfstools
 , cmake, perl, python3Packages
 , microkit
 
@@ -30,12 +30,36 @@ let
     rev = "0a579415c4837c96c4d4629e4b4d4691aaff07ca";
   };
 
-  contentCPIO = runCommand "x.cpio" {
-    nativeBuildInputs = [ cpio ];
+  diskImage = runCommand "x.cpio" {
+    nativeBuildInputs = [ parted mtools fatresize dosfstools ];
   } ''
-    cd ${content}/localhost \
-      && find . -print -depth \
-      | cpio -o -H newc > $out
+    part_size=1000M
+
+    p=partition.img
+    touch $p
+    truncate -s $part_size $p
+    mkfs.vfat -F 32 $p
+
+    dir=${content}/localhost
+    for rel in $(find $dir -mindepth 1 -type d -printf "%P\n"); do
+      mmd -i $p ::$rel
+    done
+    for rel in $(find $dir -not -type d -printf "%P\n"); do
+      mcopy -i $p $dir/$rel ::$rel
+    done
+
+    l=label.img
+    touch $l
+    truncate -s 512 $l
+    truncate -s +$part_size $l
+    parted -s $l mklabel msdos
+    parted -s $l mkpart primary fat32 512B 100%
+    truncate -s -$part_size $l
+
+    d=disk.img
+    cat $l $p > $d
+
+    mv $d $out
   '';
 
   libcDir = "${stdenv.cc.libc}/${hostPlatform.config}";
@@ -101,12 +125,12 @@ lib.fix (self: mkMicrokitInstance {
       "-netdev" "user,id=netdev0,hostfwd=tcp::8080-:80,hostfwd=tcp::8443-:443"
 
       "-device" "virtio-blk-device,drive=blkdev0"
-      "-blockdev" "node-name=blkdev0,read-only=on,driver=file,filename=${contentCPIO}"
+      "-blockdev" "node-name=blkdev0,read-only=on,driver=file,filename=${diskImage}"
     ];
   };
 } // {
   inherit pds;
-  inherit contentCPIO;
+  inherit diskImage;
 } // lib.optionalAttrs canSimulate rec {
   automate =
     let

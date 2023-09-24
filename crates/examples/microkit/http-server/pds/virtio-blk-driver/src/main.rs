@@ -18,12 +18,14 @@ use virtio_drivers::{
 };
 
 use sel4_externally_shared::ExternallySharedRef;
-use sel4_microkit::{memory_region_symbol, protection_domain, var, Channel, Handler};
+use sel4_microkit::{memory_region_symbol, protection_domain, var, Channel, Handler, MessageInfo};
+use sel4_microkit_message::MessageInfoExt as _;
 use sel4_shared_ring_buffer::{RingBuffer, RingBuffers};
 use sel4_shared_ring_buffer_block_io_types::{
     BlockIORequest, BlockIORequestStatus, BlockIORequestType,
 };
 
+use microkit_http_server_example_virtio_blk_driver_interface_types::*;
 use microkit_http_server_example_virtio_hal_impl::HalImpl;
 
 const DEVICE: Channel = Channel::new(0);
@@ -163,11 +165,16 @@ impl Handler for HandlerImpl {
                         .as_mut_ptr()
                         .index(buf_range)
                         .as_raw_ptr();
+                    assert_eq!(buf_ptr.len(), 512);
                     let token = unsafe {
                         let pending_entry = &mut *pending_entry;
                         self.dev
                             .read_block_nb(
-                                pending_entry.client_req.block_id(),
+                                pending_entry
+                                    .client_req
+                                    .start_block_idx()
+                                    .try_into()
+                                    .unwrap(),
                                 &mut pending_entry.virtio_req,
                                 buf_ptr.as_mut(),
                                 &mut pending_entry.virtio_resp,
@@ -190,5 +197,27 @@ impl Handler for HandlerImpl {
             }
         }
         Ok(())
+    }
+
+    fn protected(
+        &mut self,
+        channel: Channel,
+        msg_info: MessageInfo,
+    ) -> Result<MessageInfo, Self::Error> {
+        Ok(match channel {
+            CLIENT => match msg_info.recv_using_postcard::<Request>() {
+                Ok(req) => match req {
+                    Request::GetNumBlocks => {
+                        let num_blocks = self.dev.capacity().try_into().unwrap();
+                        MessageInfo::send_using_postcard(GetNumBlocksResponse { num_blocks })
+                            .unwrap()
+                    }
+                },
+                Err(_) => MessageInfo::send_unspecified_error(),
+            },
+            _ => {
+                unreachable!()
+            }
+        })
     }
 }
