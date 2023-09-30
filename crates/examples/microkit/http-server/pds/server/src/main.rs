@@ -17,7 +17,9 @@ use smoltcp::iface::Config;
 use smoltcp::phy::{Device, Medium};
 use smoltcp::wire::{EthernetAddress, HardwareAddress};
 
-use sel4_async_block_io::{disk::Disk, CachedBlockIO};
+use sel4_async_block_io::{
+    constant_block_sizes::BlockSize512, disk::Disk, CachedBlockIO, ConstantBlockSize,
+};
 use sel4_externally_shared::ExternallySharedRef;
 use sel4_logging::{LevelFilter, Logger, LoggerBuilder};
 use sel4_microkit::{memory_region_symbol, protection_domain, var, Channel, Handler};
@@ -123,6 +125,8 @@ fn init() -> impl Handler {
     let num_blocks = block_client.get_num_blocks();
 
     let shared_block_io = SharedRingBufferBlockIO::new(
+        BlockSize512::SINGLETON,
+        num_blocks,
         unsafe {
             ExternallySharedRef::<'static, _>::new(
                 memory_region_symbol!(virtio_blk_client_dma_vaddr: *mut [u8], n = *var!(virtio_blk_client_dma_size: usize = 0)),
@@ -137,7 +141,6 @@ fn init() -> impl Handler {
                 true,
             )
         },
-        num_blocks,
     );
 
     let fs_block_io = shared_block_io.clone();
