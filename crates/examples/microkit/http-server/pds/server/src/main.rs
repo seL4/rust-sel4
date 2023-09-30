@@ -143,9 +143,6 @@ fn init() -> impl Handler {
         },
     );
 
-    let fs_block_io = shared_block_io.clone();
-    let fs_block_io = CachedBlockIO::new(fs_block_io.clone(), BLOCK_CACHE_SIZE_IN_BLOCKS);
-
     HandlerImpl::new(
         TIMER_DRIVER,
         NET_DRIVER,
@@ -153,8 +150,10 @@ fn init() -> impl Handler {
         timer_client,
         net_device,
         net_config,
-        shared_block_io,
+        shared_block_io.clone(),
         |timers_ctx, network_ctx, spawner| async move {
+            let fs_block_io = shared_block_io.clone();
+            let fs_block_io = CachedBlockIO::new(fs_block_io.clone(), BLOCK_CACHE_SIZE_IN_BLOCKS);
             let disk = Disk::new(fs_block_io);
             let entry = disk.read_mbr().await.unwrap().partition(0).unwrap();
             let fs_block_io = disk.partition_using_mbr(&entry);
