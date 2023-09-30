@@ -9,14 +9,14 @@ pub struct ImmutableCell<T: ?Sized> {
 }
 
 impl<T: Default> Default for ImmutableCell<T> {
-    fn default() -> ImmutableCell<T> {
-        ImmutableCell::new(Default::default())
+    fn default() -> Self {
+        Self::new(Default::default())
     }
 }
 
 impl<T> From<T> for ImmutableCell<T> {
-    fn from(t: T) -> ImmutableCell<T> {
-        ImmutableCell::new(t)
+    fn from(t: T) -> Self {
+        Self::new(t)
     }
 }
 

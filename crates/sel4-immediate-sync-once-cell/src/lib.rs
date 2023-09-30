@@ -10,6 +10,12 @@ pub struct ImmediateSyncOnceCell<T> {
     inner: SyncUnsafeCell<Option<T>>,
 }
 
+impl<T> Default for ImmediateSyncOnceCell<T> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl<T> ImmediateSyncOnceCell<T> {
     pub const fn new() -> Self {
         Self {
