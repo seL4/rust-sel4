@@ -76,6 +76,7 @@ definitely! {
     sel4
     sel4_async_block_io
     sel4_async_block_io_cpiofs
+    sel4_async_block_io_fat
     sel4_async_network
     sel4_async_request_statuses
     sel4_async_single_threaded_executor
@@ -86,6 +87,7 @@ definitely! {
     sel4_immediate_sync_once_cell
     sel4_immutable_cell
     sel4_logging
+    sel4_one_ref_cell
     sel4_shared_ring_buffer
     sel4_shared_ring_buffer_block_io
     sel4_shared_ring_buffer_block_io_types
