@@ -12,7 +12,7 @@ use futures::task::LocalSpawnExt;
 
 use mbedtls::ssl::async_io::ClosedError;
 
-use sel4_async_block_io::{block_sizes, BlockIO};
+use sel4_async_block_io::{constant_block_sizes, BlockIO};
 use sel4_async_block_io_fat as fat;
 use sel4_async_network::{SharedNetwork, TcpSocketError};
 use sel4_async_network_mbedtls::{
@@ -36,7 +36,7 @@ type SocketUser<T> = Box<
     ) -> LocalBoxFuture<'static, ()>,
 >;
 
-pub async fn run_server<T: BlockIO<BlockSize = block_sizes::BlockSize512> + Clone>(
+pub async fn run_server<T: BlockIO<BlockSize = constant_block_sizes::BlockSize512> + Clone>(
     _timers_ctx: SharedTimers,
     network_ctx: SharedNetwork,
     fs_block_io: T,

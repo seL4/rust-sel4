@@ -1,6 +1,6 @@
 use futures::future;
 
-use sel4_async_block_io::{block_sizes, BlockIO};
+use sel4_async_block_io::{constant_block_sizes, BlockIO};
 
 pub use embedded_fat as fat;
 
@@ -14,7 +14,9 @@ impl<T> BlockIOWrapper<T> {
     }
 }
 
-impl<T: BlockIO<BlockSize = block_sizes::BlockSize512>> fat::BlockDevice for BlockIOWrapper<T> {
+impl<T: BlockIO<BlockSize = constant_block_sizes::BlockSize512>> fat::BlockDevice
+    for BlockIOWrapper<T>
+{
     type Error = !;
 
     async fn read(

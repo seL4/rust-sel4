@@ -13,7 +13,7 @@ use core::task::{ready, Poll};
 use async_unsync::semaphore::Semaphore;
 use futures::prelude::*;
 
-use sel4_async_block_io::{block_sizes, BlockIO};
+use sel4_async_block_io::{BlockIO, BlockSize};
 use sel4_async_request_statuses::RequestStatuses;
 use sel4_bounce_buffer_allocator::{Basic, BounceBufferAllocator};
 use sel4_externally_shared::ExternallySharedRef;
@@ -29,28 +29,30 @@ use sel4_shared_ring_buffer_block_io_types::{
 pub const BLOCK_SIZE: usize = 512;
 
 #[derive(Clone)]
-pub struct SharedRingBufferBlockIO {
-    shared_inner: Rc<RefCell<Inner>>,
+pub struct SharedRingBufferBlockIO<N> {
+    shared_inner: Rc<RefCell<Inner<N>>>,
 }
 
 type EncodedAddr = usize;
 
-struct Inner {
+struct Inner<N> {
+    block_size: N,
+    num_blocks: u64,
     dma_region: ExternallySharedRef<'static, [u8]>,
     dma_region_paddr: usize,
     bounce_buffer_allocator: BounceBufferAllocator<Basic>,
     ring_buffers: RingBuffers<'static, fn() -> Result<(), !>, BlockIORequest>,
     request_statuses: RequestStatuses<EncodedAddr, BlockIORequest, BlockIORequestStatus>,
     queue_guard: Rc<Semaphore>,
-    num_blocks: u64,
 }
 
-impl SharedRingBufferBlockIO {
+impl<N> SharedRingBufferBlockIO<N> {
     pub fn new(
+        block_size: N,
+        num_blocks: u64,
         dma_region: ExternallySharedRef<'static, [u8]>,
         dma_region_paddr: usize,
         ring_buffers: RingBuffers<'static, fn() -> Result<(), !>, BlockIORequest>,
-        num_blocks: u64,
     ) -> Self {
         let max_alignment = 1
             << dma_region
@@ -65,17 +67,20 @@ impl SharedRingBufferBlockIO {
 
         Self {
             shared_inner: Rc::new(RefCell::new(Inner {
+                block_size,
+                num_blocks,
                 dma_region,
                 dma_region_paddr,
                 bounce_buffer_allocator,
                 ring_buffers,
                 request_statuses: RequestStatuses::new(),
                 queue_guard: Rc::new(Semaphore::new(RING_BUFFER_SIZE)),
-                num_blocks,
             })),
         }
     }
+}
 
+impl<N: BlockSize> SharedRingBufferBlockIO<N> {
     pub fn poll(&self) -> bool {
         let mut inner = self.shared_inner.borrow_mut();
 
@@ -105,10 +110,14 @@ impl SharedRingBufferBlockIO {
     }
 }
 
-impl BlockIO for SharedRingBufferBlockIO {
+impl<N: BlockSize + Copy> BlockIO for SharedRingBufferBlockIO<N> {
     type Error = !;
 
-    type BlockSize = block_sizes::BlockSize512;
+    type BlockSize = N;
+
+    fn block_size(&self) -> Self::BlockSize {
+        self.shared_inner.borrow().block_size
+    }
 
     fn num_blocks(&self) -> u64 {
         self.shared_inner.borrow().num_blocks
