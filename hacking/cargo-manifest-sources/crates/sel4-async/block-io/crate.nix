@@ -14,7 +14,7 @@ mk {
     lru = { version = "0.10.0"; optional = true; };
   };
   features = {
-    alloc = [ "lru" ];
+    alloc = [ "futures/alloc" "lru" ];
     default = [ "alloc" ];
   };
 }
