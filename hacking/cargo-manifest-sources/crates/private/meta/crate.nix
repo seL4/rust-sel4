@@ -25,6 +25,7 @@ mk {
     sel4-immediate-sync-once-cell
     sel4-immutable-cell
     sel4-logging
+    sel4-one-ref-cell
     sel4-shared-ring-buffer
     sel4-shared-ring-buffer-block-io
     sel4-shared-ring-buffer-block-io-types

@@ -28,6 +28,7 @@ sel4-logging = { path = "../../sel4-logging" }
 sel4-microkit = { path = "../../sel4-microkit", features = ["full"], optional = true }
 sel4-microkit-message = { path = "../../sel4-microkit/message", optional = true }
 sel4-microkit-message-types = { path = "../../sel4-microkit/message/types", optional = true }
+sel4-one-ref-cell = { path = "../../sel4-one-ref-cell" }
 sel4-root-task = { path = "../../sel4-root-task", features = ["full"], optional = true }
 sel4-shared-ring-buffer = { path = "../../sel4-shared-ring-buffer" }
 sel4-shared-ring-buffer-block-io = { path = "../../sel4-shared-ring-buffer/block-io" }

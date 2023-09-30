@@ -1746,6 +1746,7 @@ dependencies = [
  "sel4-microkit",
  "sel4-microkit-message",
  "sel4-microkit-message-types",
+ "sel4-one-ref-cell",
  "sel4-platform-info",
  "sel4-root-task",
  "sel4-shared-ring-buffer",
@@ -3255,6 +3256,10 @@ dependencies = [
  "sel4-immediate-sync-once-cell",
  "sel4-panicking-env",
 ]
+
+[[package]]
+name = "sel4-one-ref-cell"
+version = "0.1.0"
 
 [[package]]
 name = "sel4-panicking"
