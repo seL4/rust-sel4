@@ -6,7 +6,7 @@ edition = "2021"
 license = "BSD-2-Clause"
 
 [features]
-alloc = ["lru"]
+alloc = ["futures/alloc", "lru"]
 default = ["alloc"]
 
 [dependencies]
