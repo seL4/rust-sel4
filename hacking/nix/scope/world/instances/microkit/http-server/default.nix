@@ -1,8 +1,8 @@
 { lib, stdenv, hostPlatform, buildPackages
 , linkFarm, symlinkJoin, writeText, writeScript, runCommand
 , fetchgit
-, parted, mtools, fatresize, dosfstools
-, cmake, perl, python3Packages
+, parted, fatresize, dosfstools, kmod
+, cmake, perl, python3, python3Packages
 , microkit
 
 , crates
@@ -30,37 +30,67 @@ let
     rev = "0a579415c4837c96c4d4629e4b4d4691aaff07ca";
   };
 
-  diskImage = runCommand "x.cpio" {
-    nativeBuildInputs = [ parted mtools fatresize dosfstools ];
+  diskImage = buildPackages.vmTools.runInLinuxVM (runCommand "disk-image" {
+    nativeBuildInputs = [ python3 kmod parted fatresize dosfstools ];
+    preVM = ''
+      mkdir scratch
+      scratch=$(realpath scratch)
+      QEMU_OPTS+=" -virtfs local,path=$scratch,security_model=none,mount_tag=scratch"
+    '';
   } ''
-    part_size=1000M
+    mkdir /tmp/scratch
+    mount -t 9p scratch /tmp/scratch -o trans=virtio,version=9p2000.L,msize=131072
+    cd scratch
 
-    p=partition.img
-    touch $p
-    truncate -s $part_size $p
-    mkfs.vfat -F 32 $p
+    modprobe loop
 
-    dir=${content}/localhost
-    for rel in $(find $dir -mindepth 1 -type d -printf "%P\n"); do
-      mmd -i $p ::$rel
-    done
-    for rel in $(find $dir -not -type d -printf "%P\n"); do
-      mcopy -i $p $dir/$rel ::$rel
-    done
+    mkdir /mnt
 
-    l=label.img
-    touch $l
-    truncate -s 512 $l
-    truncate -s +$part_size $l
-    parted -s $l mklabel msdos
-    parted -s $l mkpart primary fat32 512B 100%
-    truncate -s -$part_size $l
+    # HACK: fatresize segfaults when run on a filesystem that's not on a partition (?)
 
-    d=disk.img
-    cat $l $p > $d
+    img_size=500M
+    img=disk.img
+    touch $img
+    truncate -s $img_size $img
 
-    mv $d $out
-  '';
+    dev=$(losetup --find --show $img)
+
+    parted -s $dev mklabel msdos
+    parted -s $dev mkpart primary fat16 512B 100%
+  
+    partprobe $dev
+    partition=''${dev}p1 
+
+    mkfs.vfat -F 16 $partition
+  
+    mount $partition /mnt
+
+    # HACK:
+    #  - some filesystem layer doesn't seem to like '?' in filename
+    #  - rsync doesn't play nicely with some filesystem layer
+    cp -r --no-preserve=owner,mode ${content}/localhost x/
+    find x/ -name '*\?' -delete
+    cp -r x/* /mnt/
+
+    umount /mnt
+
+    min=$(fatresize --info $partition | sed -rn 's/Min size: (.*)$/\1/p')
+    min_rounded_up=$(python3 -c "print(512 * ($min // 512 + 1))")
+    total_disk_size=$(expr $min_rounded_up + 512)
+
+    fatresize -v -s $min_rounded_up $partition
+
+    real_img=real-disk.img
+    touch $real_img
+    truncate -s $total_disk_size $real_img
+    parted -s $real_img mklabel msdos
+    parted -s $real_img mkpart primary fat16 512B 100%
+    dd if=$partition of=$real_img oflag=seek_bytes seek=512 count=$min_rounded_up
+
+    losetup -d $dev
+
+    mv $real_img $out/disk.img
+  '');
 
   libcDir = "${stdenv.cc.libc}/${hostPlatform.config}";
 
@@ -125,7 +155,7 @@ lib.fix (self: mkMicrokitInstance {
       "-netdev" "user,id=netdev0,hostfwd=tcp::8080-:80,hostfwd=tcp::8443-:443"
 
       "-device" "virtio-blk-device,drive=blkdev0"
-      "-blockdev" "node-name=blkdev0,read-only=on,driver=file,filename=${diskImage}"
+      "-blockdev" "node-name=blkdev0,read-only=on,driver=file,filename=${diskImage}/disk.img"
     ];
   };
 } // {
