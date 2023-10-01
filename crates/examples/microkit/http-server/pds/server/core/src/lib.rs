@@ -29,13 +29,6 @@ use server::Server;
 const HTTP_PORT: u16 = 80;
 const HTTPS_PORT: u16 = 443;
 
-type SocketUser<T> = Box<
-    dyn Fn(
-        Server<fat::BlockIOWrapper<T>, fat::DummyTimeSource>,
-        TcpSocketWrapper,
-    ) -> LocalBoxFuture<'static, ()>,
->;
-
 pub async fn run_server<T: BlockIO<BlockSize = constant_block_sizes::BlockSize512> + Clone>(
     _timers_ctx: SharedTimers,
     network_ctx: SharedNetwork,
@@ -105,6 +98,13 @@ pub async fn run_server<T: BlockIO<BlockSize = constant_block_sizes::BlockSize51
 
     future::pending().await
 }
+
+type SocketUser<T> = Box<
+    dyn Fn(
+        Server<fat::BlockIOWrapper<T>, fat::DummyTimeSource>,
+        TcpSocketWrapper,
+    ) -> LocalBoxFuture<'static, ()>,
+>;
 
 async fn use_socket_for_http<D: fat::BlockDevice + 'static, T: fat::TimeSource + 'static>(
     server: Server<D, T>,
