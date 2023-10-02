@@ -83,6 +83,7 @@ let
         addr2line = "0.21.0";
         anyhow = "1.0.66";
         cfg-if = "1.0.0";
+        clap = "4.4.6";
         fallible-iterator = "0.2.0";
         futures = "0.3.28";
         gimli = "0.28.0";

@@ -1,9 +1,9 @@
-{ mk, localCrates }:
+{ mk, localCrates, versions }:
 
 mk {
   package.name = "sel4-bitfield-parser-test";
   dependencies = {
-    clap = "3.2.23";
+    inherit (versions) clap;
     glob = "0.3.0";
   };
   nix.local.dependencies = with localCrates; [

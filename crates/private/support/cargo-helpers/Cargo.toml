@@ -8,4 +8,4 @@ license = "BSD-2-Clause"
 [dependencies]
 cargo = "0.73.1"
 cargo-util = "0.2.3"
-clap = "3.2.23"
+clap = "4.4.6"

@@ -6,7 +6,6 @@ mk {
     sel4-kernel-loader-payload-types.features = [ "serde" ];
     sel4-config-generic-types.features = [ "serde" ];
     object = { version = versions.object; features = [ "all" ]; };
-    clap = "3.2.23";
     postcard = postcardWith [ "alloc" ];
     serde = serdeWith [ "alloc" "derive" ];
     inherit (versions)
@@ -16,6 +15,7 @@ mk {
       serde_yaml
       heapless
       num
+      clap
     ;
   };
   nix.local.dependencies = with localCrates; [

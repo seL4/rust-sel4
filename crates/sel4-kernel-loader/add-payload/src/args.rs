@@ -1,5 +1,5 @@
 use anyhow::Result;
-use clap::{App, Arg, ArgAction};
+use clap::{Arg, ArgAction, Command};
 
 #[derive(Debug)]
 pub struct Args {
@@ -15,7 +15,7 @@ pub struct Args {
 
 impl Args {
     pub fn parse() -> Result<Self> {
-        let matches = App::new("")
+        let matches = Command::new("")
             .arg(
                 Arg::new("sel4-prefix")
                     .long("sel4-prefix")

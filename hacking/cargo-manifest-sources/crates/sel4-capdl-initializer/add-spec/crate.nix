@@ -4,7 +4,6 @@ mk {
   package.name = "sel4-capdl-initializer-add-spec";
   dependencies = {
     sel4-capdl-initializer-types.features = [ "std" "serde" "deflate" ];
-    clap = "3.2.23";
     object = { version = versions.object; features = [ "all" ]; };
     postcard = postcardWith [ "alloc" ];
     inherit (versions)
@@ -12,6 +11,7 @@ mk {
       fallible-iterator
       serde_json
       num
+      clap
     ;
   };
   nix.local.dependencies = with localCrates; [

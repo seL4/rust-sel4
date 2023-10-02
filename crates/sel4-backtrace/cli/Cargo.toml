@@ -7,7 +7,7 @@ license = "BSD-2-Clause"
 
 [dependencies]
 addr2line = "0.21.0"
-clap = "3.2.23"
+clap = "4.4.6"
 hex = "0.4.3"
 memmap = "0.7.0"
 object = "0.32.1"
