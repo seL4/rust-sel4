@@ -499,7 +499,7 @@ dependencies = [
  "tar",
  "tempfile",
  "termcolor",
- "time 0.3.27",
+ "time",
  "toml",
  "toml_edit",
  "unicode-width",
@@ -576,17 +576,16 @@ checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
 
 [[package]]
 name = "chrono"
-version = "0.4.26"
+version = "0.4.31"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ec837a71355b28f6556dbd569b37b3f363091c0bd4b2e735674521b4c5fd9bc5"
+checksum = "7f2c685bad3eb3d45a01354cedb7d5faa66194d1d58ba6e267a8de788f79db38"
 dependencies = [
  "android-tzdata",
  "iana-time-zone",
  "js-sys",
  "num-traits",
- "time 0.1.45",
  "wasm-bindgen",
- "winapi",
+ "windows-targets",
 ]
 
 [[package]]
@@ -1220,7 +1219,7 @@ dependencies = [
  "cfg-if",
  "js-sys",
  "libc",
- "wasi 0.11.0+wasi-snapshot-preview1",
+ "wasi",
  "wasm-bindgen",
 ]
 
@@ -1449,7 +1448,7 @@ dependencies = [
  "bstr",
  "itoa",
  "thiserror",
- "time 0.3.27",
+ "time",
 ]
 
 [[package]]
@@ -2369,7 +2368,7 @@ dependencies = [
 [[package]]
 name = "mbedtls"
 version = "0.11.0"
-source = "git+https://github.com/coliasgroup/rust-mbedtls?tag=keep/6eef662dbf636d1ccf86078143b6854f#6eef662dbf636d1ccf86078143b6854f97469dd6"
+source = "git+https://github.com/coliasgroup/rust-mbedtls?tag=keep/30d001b63baea36135b2590c4fd05e95#30d001b63baea36135b2590c4fd05e95e464234c"
 dependencies = [
  "async-trait",
  "bitflags 1.3.2",
@@ -2387,7 +2386,7 @@ dependencies = [
 [[package]]
 name = "mbedtls-platform-support"
 version = "0.3.0"
-source = "git+https://github.com/coliasgroup/rust-mbedtls?tag=keep/6eef662dbf636d1ccf86078143b6854f#6eef662dbf636d1ccf86078143b6854f97469dd6"
+source = "git+https://github.com/coliasgroup/rust-mbedtls?tag=keep/30d001b63baea36135b2590c4fd05e95#30d001b63baea36135b2590c4fd05e95e464234c"
 dependencies = [
  "cc",
  "cfg-if",
@@ -2401,7 +2400,7 @@ dependencies = [
 [[package]]
 name = "mbedtls-sys-auto"
 version = "3.5.0-alpha.3+0b3de6f"
-source = "git+https://github.com/coliasgroup/rust-mbedtls?tag=keep/6eef662dbf636d1ccf86078143b6854f#6eef662dbf636d1ccf86078143b6854f97469dd6"
+source = "git+https://github.com/coliasgroup/rust-mbedtls?tag=keep/30d001b63baea36135b2590c4fd05e95#30d001b63baea36135b2590c4fd05e95e464234c"
 dependencies = [
  "bindgen 0.65.1",
  "cc",
@@ -2944,7 +2943,7 @@ dependencies = [
  "serde_json",
  "sha2",
  "subtle",
- "time 0.3.27",
+ "time",
  "zeroize",
 ]
 
@@ -3232,7 +3231,7 @@ checksum = "4954fbc00dcd4d8282c987710e50ba513d351400dbdd00e803a05172a90d8976"
 dependencies = [
  "pem",
  "ring",
- "time 0.3.27",
+ "time",
  "yasna",
 ]
 
@@ -4737,17 +4736,6 @@ dependencies = [
 
 [[package]]
 name = "time"
-version = "0.1.45"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1b797afad3f312d1c66a56d11d0316f916356d11bd158fbc6ca6389ff6bf805a"
-dependencies = [
- "libc",
- "wasi 0.10.0+wasi-snapshot-preview1",
- "winapi",
-]
-
-[[package]]
-name = "time"
 version = "0.3.27"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0bb39ee79a6d8de55f48f2293a830e040392f1c5f16e336bdd1788cd0aadce07"
@@ -5022,12 +5010,6 @@ dependencies = [
  "same-file",
  "winapi-util",
 ]
-
-[[package]]
-name = "wasi"
-version = "0.10.0+wasi-snapshot-preview1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1a143597ca7c7793eff794def352d41792a93c481eb1042423ff7ff72ba2c31f"
 
 [[package]]
 name = "wasi"
@@ -5322,7 +5304,7 @@ version = "0.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e17bb3549cc1321ae1296b9cdc2698e2b6cb1992adfa19a8c72e5b7a738f44cd"
 dependencies = [
- "time 0.3.27",
+ "time",
 ]
 
 [[package]]

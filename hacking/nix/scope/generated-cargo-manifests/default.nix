@@ -111,7 +111,7 @@ let
 
       mbedtlsSource = {
         git = "https://github.com/coliasgroup/rust-mbedtls";
-        tag = "keep/6eef662dbf636d1ccf86078143b6854f"; # branch sel4
+        tag = "keep/30d001b63baea36135b2590c4fd05e95"; # branch sel4
       };
 
       mbedtlsWith = features: filterOutEmptyFeatureList (mbedtlsSource // {

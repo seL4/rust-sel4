@@ -22,7 +22,7 @@ sel4-panicking-env = { path = "../../../../../../sel4-panicking/env" }
 
 [dependencies.mbedtls]
 git = "https://github.com/coliasgroup/rust-mbedtls"
-tag = "keep/6eef662dbf636d1ccf86078143b6854f"
+tag = "keep/30d001b63baea36135b2590c4fd05e95"
 default-features = false
 features = ["no_std_deps"]
 
