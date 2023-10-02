@@ -119,7 +119,7 @@ superCallPackage ../rust-utils {} self //
     then "${rustToolchain}/lib/rustlib/${buildPlatform.config}/bin/rust-lld"
     else null;
 
-  inherit (callPackage ./crates.nix {}) crates;
+  inherit (callPackage ./crates.nix {}) crates publicCrates publicCratesTxt;
 
   distribution = callPackage ./distribution.nix {};
 
@@ -133,6 +133,12 @@ superCallPackage ../rust-utils {} self //
   topLevelLockfile = sources.srcRoot + "/Cargo.lock";
 
   vendoredTopLevelLockfile = vendorLockfile { lockfile = topLevelLockfile; };
+
+  publicCratesCargoLock = pruneLockfile {
+    superLockfile = topLevelLockfile;
+    superLockfileVendoringConfig = vendoredTopLevelLockfile.configFragment;
+    rootCrates = lib.attrValues publicCrates;
+  };
 
   # HACK: reduce closure size, llvm now depends on targetPackage
   libclangPath = "${lib.getLib pkgsBuildBuild.llvmPackages.libclang}/lib";
