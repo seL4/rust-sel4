@@ -1,11 +1,11 @@
 use std::fs;
 use std::path::Path;
 
-use clap::{App, Arg, ArgAction};
+use clap::{Arg, ArgAction, Command};
 use glob::glob;
 
 fn main() {
-    let matches = App::new("")
+    let matches = Command::new("")
         .arg(
             Arg::new("dir")
                 .short('d')

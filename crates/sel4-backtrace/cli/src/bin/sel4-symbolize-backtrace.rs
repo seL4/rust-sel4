@@ -1,21 +1,21 @@
 use std::fs::File;
 
 use addr2line::Context;
-use clap::{App, Arg};
+use clap::{arg, Command};
 use memmap::Mmap;
 
 use sel4_backtrace_types::Backtrace;
 
 fn main() {
-    let matches = App::new("")
-        .arg(Arg::from_usage("-f --file=[ELF]"))
-        .arg(Arg::from_usage("<raw_backtrace>"))
+    let matches = Command::new("")
+        .arg(arg!(-f --file <ELF>))
+        .arg(arg!(<raw_backtrace>))
         .get_matches();
-    let bt_hex = matches.value_of("raw_backtrace").unwrap();
+    let bt_hex = matches.get_one::<String>("raw_backtrace").unwrap();
     let bt = Backtrace::<Option<String>>::recv(&hex::decode(bt_hex).unwrap()).unwrap();
     let elf_file_path = matches
-        .value_of("file")
-        .or(bt.preamble.image.as_deref())
+        .get_one("file")
+        .or(bt.preamble.image.as_ref())
         .expect("ELF file neither embedded nor provided");
     let elf_file = File::open(elf_file_path).unwrap();
     let map = unsafe { Mmap::map(&elf_file).unwrap() };

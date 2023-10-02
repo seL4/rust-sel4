@@ -214,7 +214,7 @@ fn main() -> std::io::Result<()> {
             do_list();
         }
         Some(("write", sub_matches)) => {
-            let target_dir = sub_matches.value_of("target_dir").unwrap();
+            let target_dir = sub_matches.get_one::<String>("target_dir").unwrap();
             let targets = sub_matches
                 .get_many::<String>("targets")
                 .map(|many| many.cloned().collect::<Vec<_>>())

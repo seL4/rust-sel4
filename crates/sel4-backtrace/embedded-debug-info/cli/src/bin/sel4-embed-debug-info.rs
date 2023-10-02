@@ -3,7 +3,7 @@
 use std::fs;
 use std::io;
 
-use clap::{App, Arg};
+use clap::{Arg, Command};
 use num::{NumCast, One, PrimInt, Zero};
 
 use sel4_render_elf_with_data::{
@@ -12,7 +12,7 @@ use sel4_render_elf_with_data::{
 };
 
 fn main() -> Result<(), io::Error> {
-    let matches = App::new("")
+    let matches = Command::new("")
         .arg(
             Arg::new("image_elf")
                 .short('i')
