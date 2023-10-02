@@ -1,4 +1,5 @@
 { lib
+, writeText
 , crateUtils
 , sources
 }:
@@ -52,13 +53,22 @@ let
     # };
   };
 
-  crates = lib.listToAttrs (lib.forEach workspaceMemberPaths (cratePath: rec {
+  unAugmentedCrates = lib.listToAttrs (lib.forEach workspaceMemberPaths (cratePath: rec {
     name = (crateUtils.crateManifest cratePath).package.name; # TODO redundant
     value = crateUtils.mkCrate cratePath (overrides.${name} or {});
   }));
 
-  augmentedCrates = crateUtils.augmentCrates crates;
+  augmentedCrates = crateUtils.augmentCrates unAugmentedCrates;
+
+  crates = augmentedCrates;
+
+  isPrivate = crateName: builtins.match "^sel4-.*" crateName == null;
+
+  publicCrates = lib.flip lib.filterAttrs crates (k: v: !isPrivate k);
+
+  publicCratesTxt = writeText "public-crates.txt"
+    (lib.concatMapStrings (crateName: "${crateName}\n") (lib.attrNames publicCrates));
 
 in {
-  crates = augmentedCrates;
+  inherit crates publicCrates publicCratesTxt;
 }

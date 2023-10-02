@@ -13,3 +13,7 @@ check:
 .PHONY: docs
 docs:
 	$(MAKE) -C $(root_dir) html
+
+.PHONY: check-dependencies
+check-dependencies:
+	$(MAKE) -C $(root_dir) check-dependencies
