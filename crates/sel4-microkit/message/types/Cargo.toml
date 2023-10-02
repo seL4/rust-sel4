@@ -13,4 +13,4 @@ postcard = ["dep:postcard", "dep:serde"]
 num_enum = { version = "0.5.9", default-features = false }
 postcard = { version = "1.0.2", default-features = false, optional = true }
 serde = { version = "1.0.147", default-features = false, optional = true }
-zerocopy = "0.6.1"
+zerocopy = "0.6.4"

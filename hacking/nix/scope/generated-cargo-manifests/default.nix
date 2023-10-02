@@ -105,7 +105,7 @@ let
         tock-registers = "0.8.1";
         unwinding = "0.1.6";
         virtio-drivers = "0.5.0";
-        zerocopy = "0.6.1";
+        zerocopy = "0.6.4";
       };
 
       mbedtlsSource = {

@@ -8,4 +8,4 @@ license = "BSD-2-Clause"
 [dependencies]
 log = "0.4.17"
 sel4-externally-shared = { path = "../sel4-externally-shared", features = ["unstable"] }
-zerocopy = "0.6.1"
+zerocopy = "0.6.4"
