@@ -1,8 +1,7 @@
-use std::fs::File;
+use std::fs;
 
 use addr2line::Context;
 use clap::{arg, Command};
-use memmap::Mmap;
 
 use sel4_backtrace_types::Backtrace;
 
@@ -17,9 +16,8 @@ fn main() {
         .get_one("file")
         .or(bt.preamble.image.as_ref())
         .expect("ELF file neither embedded nor provided");
-    let elf_file = File::open(elf_file_path).unwrap();
-    let map = unsafe { Mmap::map(&elf_file).unwrap() };
-    let elf_obj = &object::File::parse(&*map).unwrap();
+    let elf_file_contents = fs::read(elf_file_path).unwrap();
+    let elf_obj = &object::File::parse(&*elf_file_contents).unwrap();
     let ctx = Context::new(elf_obj).unwrap();
     println!("backtrace: {}", elf_file_path);
     let mut s = String::new();
