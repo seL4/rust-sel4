@@ -11,4 +11,4 @@ serde = ["dep:serde"]
 
 [dependencies]
 serde = { version = "1.0.147", default-features = false, features = ["derive"], optional = true }
-zerocopy = "0.6.1"
+zerocopy = "0.6.4"
