@@ -5,7 +5,7 @@ extern crate alloc;
 use alloc::vec;
 use alloc::vec::Vec;
 
-use rusttype::{point, Font, Scale};
+use ab_glyph::{point, Font, FontRef, Glyph, Point, PxScale, ScaleFont};
 
 mod nostd_float;
 
@@ -19,61 +19,77 @@ pub struct Draft {
 
 impl Draft {
     // Derived from:
-    // https://github.com/redox-os/rusttype/blob/master/dev/examples/ascii.rs
+    // https://github.com/alexheretic/ab-glyph/blob/main/dev/examples/ascii.rs
     pub fn new(subject: &str) -> Self {
         let font_data = include_bytes!("../assets/fonts/rock-salt/RockSalt-Regular.ttf");
-        let font = Font::try_from_bytes(font_data as &[u8]).unwrap();
+        let font = FontRef::try_from_slice(font_data).unwrap();
 
         // Desired font pixel height
         let height: f32 = 12.4; // to get 80 chars across (fits most terminals); adjust as desired
-        let pixel_height = height.ceil() as usize;
+        let px_height = height.ceil() as usize;
 
         // 2x scale in x direction to counter the aspect ratio of monospace characters.
-        let scale = Scale {
+        let scale = PxScale {
             x: height * 2.0,
             y: height,
         };
 
-        // The origin of a line of text is at the baseline (roughly where
-        // non-descending letters sit). We don't want to clip the text, so we shift
-        // it down with an offset when laying it out. v_metrics.ascent is the
-        // distance between the baseline and the highest edge of any glyph in
-        // the font. That's enough to guarantee that there's no clipping.
-        let v_metrics = font.v_metrics(scale);
-        let offset = point(0.0, v_metrics.ascent);
+        let scaled_font = font.into_scaled(scale);
 
-        let glyphs = font.layout(subject, scale, offset).collect::<Vec<_>>();
+        let mut glyphs = Vec::new();
+        layout(&scaled_font, point(0.0, 0.0), subject, &mut glyphs);
 
         // Find the most visually pleasing width to display
-        let width = glyphs
+        let px_width = glyphs
             .iter()
             .rev()
-            .map(|g| g.position().x + g.unpositioned().h_metrics().advance_width)
+            .map(|g| g.position.x + scaled_font.h_advance(g.id))
             .next()
             .unwrap_or(0.0)
             .ceil() as usize;
 
-        // Rasterise to greyscale
-        let mut pixel_data = vec![0; width * pixel_height];
+        // Rasterize to greyscale
+        let mut pixel_data = vec![0; px_width * px_height];
         for g in glyphs {
-            if let Some(bb) = g.pixel_bounding_box() {
-                g.draw(|x, y, v| {
-                    let x = x as i32 + bb.min.x;
-                    let y = y as i32 + bb.min.y;
+            if let Some(og) = scaled_font.outline_glyph(g) {
+                let bounds = og.px_bounds();
+                og.draw(|x, y, v| {
+                    let x = x as f32 + bounds.min.x;
+                    let y = y as f32 + bounds.min.y;
                     // There's still a possibility that the glyph clips the boundaries of the bitmap
-                    if x >= 0 && x < width as i32 && y >= 0 && y < pixel_height as i32 {
-                        let x = x as usize;
-                        let y = y as usize;
-                        pixel_data[x + y * width] = (v * 255.0 + 0.5) as u8;
+                    if x >= 0.0 && (x as usize) < px_width && y >= 0.0 && (y as usize) < px_height {
+                        pixel_data[(x as usize) + (y as usize) * px_width] =
+                            (v * 255.0 + 0.5) as u8;
                     }
                 })
             }
         }
 
         Self {
-            width,
-            height: pixel_height,
+            width: px_width,
+            height: px_height,
             pixel_data,
         }
+    }
+}
+
+pub fn layout<F, SF>(font: SF, position: Point, text: &str, target: &mut Vec<Glyph>)
+where
+    F: Font,
+    SF: ScaleFont<F>,
+{
+    let mut caret = position + point(0.0, font.ascent());
+    let mut last_glyph: Option<Glyph> = None;
+    for c in text.chars() {
+        let mut glyph = font.scaled_glyph(c);
+        if let Some(previous) = last_glyph.take() {
+            caret.x += font.kern(previous.id, glyph.id);
+        }
+        glyph.position = caret;
+
+        last_glyph = Some(glyph.clone());
+        caret.x += font.h_advance(glyph.id);
+
+        target.push(glyph);
     }
 }
