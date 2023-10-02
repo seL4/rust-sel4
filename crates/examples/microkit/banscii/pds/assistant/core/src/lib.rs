@@ -6,10 +6,7 @@ use alloc::vec;
 use alloc::vec::Vec;
 
 use ab_glyph::{point, Font, FontRef, Glyph, Point, PxScale, ScaleFont};
-
-mod nostd_float;
-
-use nostd_float::FloatExt;
+use num_traits::Float;
 
 pub struct Draft {
     pub width: usize,

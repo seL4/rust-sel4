@@ -232,8 +232,8 @@ name = "banscii-assistant-core"
 version = "0.1.0"
 dependencies = [
  "ab_glyph",
- "libm",
  "log",
+ "num-traits",
 ]
 
 [[package]]
