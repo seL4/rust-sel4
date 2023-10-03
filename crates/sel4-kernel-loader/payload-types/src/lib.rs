@@ -1,6 +1,7 @@
 #![no_std]
 #![feature(strict_provenance)]
 #![deny(unsafe_op_in_unsafe_fn)]
+#![allow(clippy::useless_conversion)]
 
 use core::ops::Range;
 use core::ptr;
@@ -117,6 +118,7 @@ impl<'a> RegionContent for DirectRegionContent<'a> {
 }
 
 impl<U: RegionContent, const N: usize> Payload<usize, U, N> {
+    #[allow(clippy::missing_safety_doc)]
     pub unsafe fn copy_data_out(&self, region_content_source: &U::Source) {
         for region in self.data.iter() {
             let dst = unsafe {

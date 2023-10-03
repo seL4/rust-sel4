@@ -1,4 +1,5 @@
 #![feature(int_roundings)]
+#![allow(clippy::useless_conversion)]
 
 use std::env;
 use std::fs;

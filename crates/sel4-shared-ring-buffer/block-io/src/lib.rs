@@ -2,6 +2,7 @@
 #![feature(async_fn_in_trait)]
 #![feature(never_type)]
 #![feature(strict_provenance)]
+#![allow(clippy::useless_conversion)]
 
 extern crate alloc;
 

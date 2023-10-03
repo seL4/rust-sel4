@@ -208,7 +208,7 @@ impl Handler for HandlerImpl {
             CLIENT => match msg_info.recv_using_postcard::<Request>() {
                 Ok(req) => match req {
                     Request::GetNumBlocks => {
-                        let num_blocks = self.dev.capacity().try_into().unwrap();
+                        let num_blocks = self.dev.capacity();
                         MessageInfo::send_using_postcard(GetNumBlocksResponse { num_blocks })
                             .unwrap()
                     }

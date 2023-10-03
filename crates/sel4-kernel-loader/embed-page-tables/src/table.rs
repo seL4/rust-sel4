@@ -125,7 +125,7 @@ where
     }
 
     fn current_content(&self) -> Option<&RegionContent<T>> {
-        (&*self.current().content).as_ref()
+        (*self.current().content).as_ref()
     }
 
     fn advance(&mut self) -> bool {

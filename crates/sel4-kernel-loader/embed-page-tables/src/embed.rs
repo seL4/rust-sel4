@@ -56,7 +56,7 @@ impl Embedding {
         }
     }
 
-    fn embed<'a, T: Scheme>(mut self, table: &'a Table<T>) -> TokenStream {
+    fn embed<T: Scheme>(mut self, table: &Table<T>) -> TokenStream {
         let _ = self.embed_inner(table);
         self.check_tables_order();
         let runtime_mod_ident = self.runtime_mod_ident;
@@ -82,7 +82,7 @@ impl Embedding {
         });
     }
 
-    fn embed_inner<'a, T: Scheme>(&mut self, table: &'a Table<T>) -> usize {
+    fn embed_inner<T: Scheme>(&mut self, table: &Table<T>) -> usize {
         let index = self.allocate_index();
         let entries = table.entries.iter().map(|entry| {
             let entry = EntryForEmbedding::<T>::from_abstract_entry(entry);

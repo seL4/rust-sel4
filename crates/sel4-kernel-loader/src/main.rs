@@ -11,6 +11,7 @@
 #![feature(stdsimd)]
 #![allow(dead_code)]
 #![allow(unreachable_code)]
+#![allow(clippy::reversed_empty_ranges)]
 
 use spin::RwLock;
 

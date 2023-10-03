@@ -1,3 +1,6 @@
+#![allow(clippy::eq_op)]
+#![allow(clippy::nonminimal_bool)]
+
 use std::collections::BTreeMap;
 use std::fmt::Write;
 use std::ops::Range;
