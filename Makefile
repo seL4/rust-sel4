@@ -3,12 +3,20 @@ ifeq ($(K),1)
 endif
 
 ifneq ($(J),)
-	jobs := -j$(J)
+	jobs_arg := -j$(J)
+else
+	jobs_arg := -j$$(nproc)
+endif
+
+ifneq ($(CORES),)
+	cores_arg := --cores $(CORES)
+else
+	cores_arg :=
 endif
 
 out := out
 
-nix_build := nix-build $(keep_going) $(jobs)
+nix_build := nix-build $(keep_going) $(jobs_arg) $(cores_arg)
 
 .PHONY: none
 none:
@@ -73,6 +81,12 @@ run-tests:
 	script=$$($(nix_build) -A runTests --no-out-link) && $$script
 	$(try_restore_terminal)
 
+.PHONY: run-sel4test-for
+run-sel4test-for:
+	# use trailing period to catch empty variable
+	script=$$($(nix_build) -A sel4testInstances.$(SEL4TEST_ARCH). --no-out-link) && $$script
+	$(try_restore_terminal)
+
 .PHONY: run-fast-tests
 run-fast-tests:
 	script=$$($(nix_build) -A runFastTests --no-out-link) && $$script
@@ -120,16 +134,16 @@ example-rpi4-b-4gb:
 	$(nix_build) -A $@ -o $(out)/$@
 
 .PHONY: check-fast
-check-fast: check-source
+check-fast: check-source check-dependencies
 	$(MAKE) witness-fast-tests
-	$(MAKE) everything-fast
+	$(MAKE) everything-except-non-incremental
 
 .PHONY: check-exhaustively
-check-exhaustively: check-source
+check-exhaustively: check-source check-dependencies
 	$(MAKE) witness-tests
-	$(MAKE) everything
+	$(MAKE) everything-with-excess
 
 .PHONY: check-oneshot
-check-oneshot: check-source
+check-oneshot: check-source check-dependencies
 	$(MAKE) run-tests
-	$(MAKE) everything
+	$(MAKE) everything-with-excess

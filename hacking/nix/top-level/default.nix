@@ -18,15 +18,17 @@ in {
     pkgs.host.x86_64.none.this.worlds.default
   ];
 
-  sel4testInstances = (map (x: x.this.sel4test) [
-    pkgs.host.aarch64.none
-    pkgs.host.aarch32.none
-    pkgs.host.riscv64.none
-    pkgs.host.riscv32.none
+  sel4testInstances = (lib.mapAttrs (k: v: v.this.sel4test.automate) {
+    aarch64 = pkgs.host.aarch64.none;
+    aarch32 = pkgs.host.aarch32.none;
+    riscv64 = pkgs.host.riscv64.none;
+    riscv32 = pkgs.host.riscv32.none;
     # TODO figure out why none doesn't build
-    pkgs.host.x86_64.linux
-    pkgs.host.ia32.linux
-  ]);
+    x86_64 = pkgs.host.x86_64.linux;
+    ia32 = pkgs.host.ia32.linux; # no rust support yet
+  });
+
+  sel4testInstancesList = lib.attrValues sel4testInstances;
 
   prerequisites = aggregate "prerequisites" [
     pkgs.host.riscv64.none.gccMultiStdenvGeneric
@@ -48,10 +50,9 @@ in {
       map (instance: instance.links) world.instances.all
     ))
 
-    sel4testInstances
+    sel4testInstancesList
 
     pkgs.host.aarch32.none.this.worlds.default.seL4
-    pkgs.host.riscv32.none.this.worlds.default.seL4
     pkgs.host.ia32.none.this.worlds.default.seL4
 
     example
@@ -84,7 +85,7 @@ in {
     lib.forEach worldsForEverythingInstances
       (world: world.instances.allAutomationScripts);
 
-  slowTests = map (x: x.automate) sel4testInstances;
+  slowTests = sel4testInstancesList;
 
   runFastTests = mkRunTests (lib.flatten [
     fastTests

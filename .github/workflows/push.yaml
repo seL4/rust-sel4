@@ -6,22 +6,10 @@ on:
   pull_request:
   workflow_dispatch:
 jobs:
-  build-and-check:
-    name: Build and check
+  check-source:
+    name: Check dependencies
     runs-on: ubuntu-latest
     steps:
-      - name: Prepare to maximize build space
-        run: sudo mkdir /nix
-      - name: Maximize build space
-        uses: easimon/maximize-build-space@master
-        with:
-          build-mount-path: /nix
-          root-reserve-mb: 8192
-          remove-dotnet: 'true'
-          remove-android: 'true'
-          remove-haskell: 'true'
-          remove-codeql: 'true'
-          remove-docker-images: 'true'
       - uses: actions/checkout@v3
       - uses: cachix/install-nix-action@v22
         with:
@@ -30,30 +18,8 @@ jobs:
         with:
           name: coliasgroup
           authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
-      - name: Build and check
-        run: make -C hacking/ci/github-actions check J=$(nproc)
-      - name: Expose docs
-        run: make -C hacking/ci/github-actions docs
-      - name: Upload Pages artifact
-        if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
-        uses: actions/upload-pages-artifact@v2
-        with:
-          path: out/html
-  deploy-docs:
-    name: Deploy docs
-    if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
-    needs: build-and-check
-    permissions:
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v2
+      - name: Check dependencies
+        run: make check-source
   check-dependencies:
     name: Check dependencies
     runs-on: ubuntu-latest
@@ -67,4 +33,107 @@ jobs:
           name: coliasgroup
           authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
       - name: Check dependencies
-        run: make -C hacking/ci/github-actions check-dependencies
+        run: make check-dependencies
+  run-sel4test:
+    name: Run sel4test
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [aarch64, aarch32, riscv64, riscv32, x86_64, ia32]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: cachix/install-nix-action@v22
+        with:
+          nix_path: nixpkgs=channel:nixos-unstable
+      - uses: cachix/cachix-action@v12
+        with:
+          name: coliasgroup
+          authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+      - name: Build and check
+        run: make run-sel4test-for SEL4TEST_ARCH=${{ matrix.arch }}
+  run-other-tests:
+    name: Run other tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: cachix/install-nix-action@v22
+        with:
+          nix_path: nixpkgs=channel:nixos-unstable
+      - uses: cachix/cachix-action@v12
+        with:
+          name: coliasgroup
+          authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+      - name: Run tests
+        run: make run-fast-tests
+  build-docs:
+    name: Build docs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: cachix/install-nix-action@v22
+        with:
+          nix_path: nixpkgs=channel:nixos-unstable
+      - uses: cachix/cachix-action@v12
+        with:
+          name: coliasgroup
+          authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+      - name: Build docs
+        run: make html-links
+  build-everything:
+    name: Build everything
+    runs-on: ubuntu-latest
+    needs: [check-source, run-sel4test, run-other-tests, build-docs]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: cachix/install-nix-action@v22
+        with:
+          nix_path: nixpkgs=channel:nixos-unstable
+      - uses: cachix/cachix-action@v12
+        with:
+          name: coliasgroup
+          authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+      - name: Build everything
+        run: make everything
+      - name: Expose docs
+        run: make html
+      - name: Upload Pages artifact
+        if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+        uses: actions/upload-pages-artifact@v2
+        with:
+          path: out/html
+  deploy-docs:
+    name: Deploy docs
+    if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+    needs: [check-dependencies, build-everything]
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v2
+
+# NOTE
+#
+# May be necessary in the future:
+#
+# - name: Prepare to maximize build space
+#   run: sudo mkdir /nix
+# - name: Maximize build space
+#   uses: easimon/maximize-build-space@master
+#   with:
+#     build-mount-path: /nix
+#     root-reserve-mb: 8192
+#     remove-dotnet: 'true'
+#     remove-android: 'true'
+#     remove-haskell: 'true'
+#     remove-codeql: 'true'
+#     remove-docker-images: 'true'
+#
+# For debugging and monitoring disk usage:
+# (make foo && df -h) || (df -h && false)
