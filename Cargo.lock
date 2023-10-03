@@ -3881,7 +3881,6 @@ dependencies = [
  "sel4-platform-info",
  "sel4-rustfmt-helper",
  "serde",
- "serde_yaml",
  "smccc",
  "spin 0.9.8",
  "tock-registers",
