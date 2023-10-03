@@ -90,8 +90,8 @@ let
         heapless = "0.7.16";
         log = "0.4.17";
         num = "0.4.1";
-        num-traits = "0.2.16";
         num_enum = "0.5.9";
+        num-traits = "0.2.16";
         object = "0.32.1";
         postcard = "1.0.2";
         proc-macro2 = "1.0.50";
