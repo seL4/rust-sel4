@@ -31,7 +31,7 @@ jobs:
           name: coliasgroup
           authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
       - name: Build and check
-        run: make -C hacking/ci/github-actions check
+        run: make -C hacking/ci/github-actions check J=$(nproc)
       - name: Expose docs
         run: make -C hacking/ci/github-actions docs
       - name: Upload Pages artifact
