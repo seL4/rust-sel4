@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 jobs:
   check-source:
-    name: Check dependencies
+    name: Check source
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -18,7 +18,7 @@ jobs:
         with:
           name: coliasgroup
           authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
-      - name: Check dependencies
+      - name: Check source
         run: make check-source
   check-dependencies:
     name: Check dependencies
