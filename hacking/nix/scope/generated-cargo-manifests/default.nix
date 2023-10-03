@@ -90,7 +90,6 @@ let
         heapless = "0.7.16";
         log = "0.4.17";
         num = "0.4.1";
-        num-derive = "0.4.0";
         num-traits = "0.2.16";
         num_enum = "0.5.9";
         object = "0.32.1";
