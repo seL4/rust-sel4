@@ -12,7 +12,7 @@ impl<T> AbstractRegion<T> {
         Self { range, content }
     }
 
-    fn to_arc(self) -> AbstractRegion<Arc<T>> {
+    fn into_arc(self) -> AbstractRegion<Arc<T>> {
         AbstractRegion {
             range: self.range,
             content: Arc::new(self.content),
@@ -33,7 +33,7 @@ pub struct AbstractRegions<T> {
 impl<T> AbstractRegionsBuilder<T> {
     pub fn new_with_background(background: AbstractRegion<T>) -> Self {
         Self {
-            regions: vec![background.to_arc()],
+            regions: vec![background.into_arc()],
         }
     }
 
@@ -67,7 +67,7 @@ impl<T> AbstractRegionsBuilder<T> {
         let new_regions = regions[..i_left]
             .iter()
             .chain(
-                [left, region.to_arc(), right]
+                [left, region.into_arc(), right]
                     .iter()
                     .filter(|r| r.range.start < r.range.end),
             )

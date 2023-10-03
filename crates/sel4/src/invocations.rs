@@ -1,3 +1,5 @@
+#![allow(clippy::useless_conversion)]
+
 use core::mem;
 
 use sel4_config::{sel4_cfg, sel4_cfg_if};

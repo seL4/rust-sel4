@@ -39,12 +39,12 @@ impl<T> Deref for Guard<'_, T> {
     type Target = T;
 
     fn deref(&self) -> &Self::Target {
-        &*self.ref_mut
+        &self.ref_mut
     }
 }
 
 impl<T> DerefMut for Guard<'_, T> {
     fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut *self.ref_mut
+        &mut self.ref_mut
     }
 }

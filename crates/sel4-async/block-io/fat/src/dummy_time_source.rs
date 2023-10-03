@@ -1,5 +1,6 @@
 pub use embedded_fat as fat;
 
+#[derive(Default)]
 pub struct DummyTimeSource(());
 
 impl DummyTimeSource {

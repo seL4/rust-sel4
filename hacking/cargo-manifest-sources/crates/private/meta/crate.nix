@@ -20,6 +20,7 @@ mk {
     sel4-async-request-statuses
     sel4-async-single-threaded-executor
     sel4-async-timers
+    sel4-async-unsync
     sel4-bounce-buffer-allocator
     sel4-externally-shared
     sel4-immediate-sync-once-cell

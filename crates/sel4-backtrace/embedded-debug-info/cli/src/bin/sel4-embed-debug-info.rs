@@ -78,5 +78,5 @@ fn with_bit_width<T: FileHeaderExt<Word: PrimInt, Sword: PrimInt>>(
     input
         .concrete_patches
         .push(("embedded_debug_info_size".to_owned(), content_len));
-    input.render_with_data(&image_elf).unwrap()
+    input.render_with_data(image_elf).unwrap()
 }
