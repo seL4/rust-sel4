@@ -33,7 +33,6 @@ sel4-kernel-loader-payload-types = { path = "./payload-types" }
 sel4-platform-info = { path = "../sel4-platform-info" }
 sel4-rustfmt-helper = { path = "../sel4-rustfmt-helper" }
 serde = "1.0.147"
-serde_yaml = "0.9.14"
 
 [target."cfg(any(target_arch = \"riscv32\", target_arch = \"riscv64\"))".dependencies]
 riscv = "0.10.0"

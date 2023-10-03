@@ -26,7 +26,6 @@ mk {
       quote
       object
       serde
-      serde_yaml
     ;
   };
   nix.local.dependencies = with localCrates; [
