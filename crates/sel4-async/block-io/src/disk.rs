@@ -2,8 +2,7 @@ use core::mem;
 use core::ops::Range;
 
 use gpt_disk_types::{GptHeader, MasterBootRecord, MbrPartitionRecord};
-use num_derive::{FromPrimitive, ToPrimitive};
-use num_traits::cast::FromPrimitive;
+use num_enum::{IntoPrimitive, TryFromPrimitive};
 
 use crate::{read_bytes, BlockIO, Partition};
 
@@ -68,7 +67,7 @@ impl MbrPartitionEntry {
     }
 }
 
-#[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, FromPrimitive, ToPrimitive)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, TryFromPrimitive, IntoPrimitive)]
 #[repr(u8)]
 pub enum KnownPartitionId {
     Free = 0x00,
@@ -83,9 +82,9 @@ pub enum PartitionId {
 
 impl From<u8> for PartitionId {
     fn from(val: u8) -> Self {
-        KnownPartitionId::from_u8(val)
+        KnownPartitionId::try_from(val)
             .map(Self::Known)
-            .unwrap_or_else(|| Self::Unknown(val))
+            .unwrap_or_else(|_| Self::Unknown(val))
     }
 }
 
