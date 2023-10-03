@@ -106,28 +106,13 @@ let
         tock-registers = "0.8.1";
         unwinding = "0.1.6";
         virtio-drivers = "0.5.0";
-        zerocopy = "0.6.4";
+        zerocopy = "0.7.6";
       };
 
-      mbedtlsSource = {
-        git = "https://github.com/coliasgroup/rust-mbedtls";
-        tag = "keep/30d001b63baea36135b2590c4fd05e95"; # branch sel4
+      zerocopyWith = features: filterOutEmptyFeatureList {
+        version = versions.zerocopy;
+        inherit features;
       };
-
-      mbedtlsWith = features: filterOutEmptyFeatureList (mbedtlsSource // {
-        default-features = false;
-        features = [ "no_std_deps" ] ++ features;
-      });
-
-      mbedtlsSysAutoWith = features: filterOutEmptyFeatureList (mbedtlsSource // {
-        default-features = false;
-        inherit features;
-      });
-
-      mbedtlsPlatformSupportWith = features: filterOutEmptyFeatureList (mbedtlsSource // {
-        default-features = false;
-        inherit features;
-      });
 
       serdeWith = features: filterOutEmptyFeatureList {
         version = versions.serde;
@@ -184,6 +169,27 @@ let
         git = "https://github.com/coliasgroup/rust-embedded-fat.git";
         tag = "keep/e1465a43c9f550ef58701a275b313310"; # branch sel4
       };
+
+
+      mbedtlsSource = {
+        git = "https://github.com/coliasgroup/rust-mbedtls";
+        tag = "keep/30d001b63baea36135b2590c4fd05e95"; # branch sel4
+      };
+
+      mbedtlsWith = features: filterOutEmptyFeatureList (mbedtlsSource // {
+        default-features = false;
+        features = [ "no_std_deps" ] ++ features;
+      });
+
+      mbedtlsSysAutoWith = features: filterOutEmptyFeatureList (mbedtlsSource // {
+        default-features = false;
+        inherit features;
+      });
+
+      mbedtlsPlatformSupportWith = features: filterOutEmptyFeatureList (mbedtlsSource // {
+        default-features = false;
+        inherit features;
+      });
 
       virtioDriversWith = features: filterOutEmptyFeatureList {
         version = versions.virtio-drivers;

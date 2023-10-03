@@ -1,10 +1,10 @@
-{ mk, versions, serdeWith }:
+{ mk, versions, zerocopyWith, serdeWith }:
 
 mk {
   package.name = "sel4-simple-task-runtime-config-types";
   dependencies = {
-    inherit (versions) zerocopy;
     serde = serdeWith [ "derive" ] // { optional = true; };
+    zerocopy = zerocopyWith [ "derive" ];
   };
   features = {
     alloc = [

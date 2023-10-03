@@ -8,7 +8,7 @@ extern crate alloc;
 use core::ops::Range;
 use core::str;
 
-use zerocopy::{AsBytes, FromBytes, LayoutVerified};
+use zerocopy::{AsBytes, FromBytes, FromZeroes, Ref};
 
 mod zerocopy_helpers;
 
@@ -27,7 +27,7 @@ pub type Address = NativeWord;
 pub type CPtrBits = NativeWord;
 
 #[repr(C)]
-#[derive(Debug, Clone, PartialEq, Eq, AsBytes, FromBytes)]
+#[derive(Debug, Clone, PartialEq, Eq, AsBytes, FromBytes, FromZeroes)]
 struct Head {
     static_heap: ZerocopyOptionWordRange,
     static_heap_mutex_notification: ZerocopyOptionWord,
@@ -38,7 +38,7 @@ struct Head {
 }
 
 #[repr(C)]
-#[derive(Debug, Clone, PartialEq, Eq, AsBytes, FromBytes)]
+#[derive(Debug, Clone, PartialEq, Eq, AsBytes, FromBytes, FromZeroes)]
 struct Thread {
     ipc_buffer_addr: ZerocopyWord,
     endpoint: ZerocopyOptionWord,
@@ -71,7 +71,7 @@ impl<'a> RuntimeConfig<'a> {
     }
 
     pub fn threads(&self) -> &[RuntimeThreadConfig] {
-        LayoutVerified::new_slice(self.index(self.head().threads.try_into_native().unwrap()))
+        Ref::new_slice(self.index(self.head().threads.try_into_native().unwrap()))
             .unwrap()
             .into_slice()
     }
@@ -89,7 +89,7 @@ impl<'a> RuntimeConfig<'a> {
     }
 
     fn head(&self) -> &Head {
-        let (head, _) = LayoutVerified::<_, Head>::new_from_prefix(self.bytes).unwrap();
+        let (head, _) = Ref::<_, Head>::new_from_prefix(self.bytes).unwrap();
         head.into_ref()
     }
 
@@ -99,7 +99,7 @@ impl<'a> RuntimeConfig<'a> {
 }
 
 #[repr(transparent)]
-#[derive(Debug, Clone, PartialEq, Eq, AsBytes, FromBytes)]
+#[derive(Debug, Clone, PartialEq, Eq, AsBytes, FromBytes, FromZeroes)]
 pub struct RuntimeThreadConfig {
     inner: Thread,
 }

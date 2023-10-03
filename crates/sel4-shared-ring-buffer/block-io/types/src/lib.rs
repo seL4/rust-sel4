@@ -1,11 +1,11 @@
 #![no_std]
 
 use num_enum::{IntoPrimitive, TryFromPrimitive, TryFromPrimitiveError};
-use zerocopy::{AsBytes, FromBytes};
+use zerocopy::{AsBytes, FromBytes, FromZeroes};
 
 use sel4_shared_ring_buffer::Descriptor;
 
-#[derive(Copy, Clone, Debug, PartialOrd, Ord, PartialEq, Eq, AsBytes, FromBytes)]
+#[derive(Copy, Clone, Debug, PartialOrd, Ord, PartialEq, Eq, AsBytes, FromBytes, FromZeroes)]
 #[repr(C)]
 pub struct BlockIORequest {
     status: i32,

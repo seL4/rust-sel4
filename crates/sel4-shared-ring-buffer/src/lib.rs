@@ -4,7 +4,7 @@ use core::num::Wrapping;
 use core::ptr::NonNull;
 use core::sync::atomic::Ordering;
 
-use zerocopy::{AsBytes, FromBytes};
+use zerocopy::{AsBytes, FromBytes, FromZeroes};
 
 use sel4_externally_shared::{map_field, ExternallySharedPtr, ExternallySharedRef};
 
@@ -70,7 +70,7 @@ pub struct RawRingBuffer<T = Descriptor> {
 }
 
 #[repr(C)]
-#[derive(Copy, Clone, Debug, PartialOrd, Ord, PartialEq, Eq, AsBytes, FromBytes)]
+#[derive(Copy, Clone, Debug, PartialOrd, Ord, PartialEq, Eq, AsBytes, FromBytes, FromZeroes)]
 pub struct Descriptor {
     encoded_addr: usize,
     len: u32,
