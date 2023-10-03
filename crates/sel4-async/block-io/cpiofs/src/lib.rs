@@ -11,7 +11,7 @@ use alloc::vec;
 use core::mem;
 
 use hex::FromHex;
-use zerocopy::{AsBytes, FromBytes};
+use zerocopy::{AsBytes, FromBytes, FromZeroes};
 
 use sel4_async_block_io::ByteIO;
 
@@ -20,7 +20,7 @@ const CPIO_ALIGN: usize = 4;
 const END_OF_ARCHIVE: &str = "TRAILER!!!";
 
 #[repr(C)]
-#[derive(Debug, Copy, Clone, AsBytes, FromBytes)]
+#[derive(Debug, Copy, Clone, AsBytes, FromBytes, FromZeroes)]
 struct HexEncodedU32 {
     encoded: [u8; 8],
 }
@@ -32,7 +32,7 @@ impl HexEncodedU32 {
 }
 
 #[repr(C)]
-#[derive(Debug, Copy, Clone, AsBytes, FromBytes)]
+#[derive(Debug, Copy, Clone, AsBytes, FromBytes, FromZeroes)]
 struct Header {
     c_magic: [u8; 6],
     c_ino: HexEncodedU32,

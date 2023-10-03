@@ -3486,7 +3486,7 @@ dependencies = [
  "log",
  "lru",
  "sel4-async-block-io",
- "zerocopy",
+ "zerocopy 0.7.6",
 ]
 
 [[package]]
@@ -3500,7 +3500,6 @@ dependencies = [
  "log",
  "lru",
  "sel4-async-block-io",
- "zerocopy",
 ]
 
 [[package]]
@@ -3983,7 +3982,7 @@ dependencies = [
  "num_enum",
  "postcard",
  "serde",
- "zerocopy",
+ "zerocopy 0.7.6",
 ]
 
 [[package]]
@@ -4085,7 +4084,7 @@ version = "0.1.0"
 dependencies = [
  "log",
  "sel4-externally-shared",
- "zerocopy",
+ "zerocopy 0.7.6",
 ]
 
 [[package]]
@@ -4109,7 +4108,7 @@ version = "0.1.0"
 dependencies = [
  "num_enum",
  "sel4-shared-ring-buffer",
- "zerocopy",
+ "zerocopy 0.7.6",
 ]
 
 [[package]]
@@ -4177,7 +4176,7 @@ name = "sel4-simple-task-runtime-config-types"
 version = "0.1.0"
 dependencies = [
  "serde",
- "zerocopy",
+ "zerocopy 0.7.6",
 ]
 
 [[package]]
@@ -4978,7 +4977,7 @@ checksum = "6c1b8da1e59e77cdae29b32fb936614dc849352d7f58da199072067fe402bbcf"
 dependencies = [
  "bitflags 2.4.0",
  "log",
- "zerocopy",
+ "zerocopy 0.6.4",
 ]
 
 [[package]]
@@ -5322,7 +5321,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "20707b61725734c595e840fb3704378a0cd2b9c74cc9e6e20724838fc6a1e2f9"
 dependencies = [
  "byteorder",
- "zerocopy-derive",
+ "zerocopy-derive 0.6.4",
+]
+
+[[package]]
+name = "zerocopy"
+version = "0.7.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3acf0fc2746d3e32f07be6067e170628e3b3d558c68f5dbada298039a6726331"
+dependencies = [
+ "byteorder",
+ "zerocopy-derive 0.7.6",
 ]
 
 [[package]]
@@ -5330,6 +5339,17 @@ name = "zerocopy-derive"
 version = "0.6.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "56097d5b91d711293a42be9289403896b68654625021732067eac7a4ca388a1f"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.37",
+]
+
+[[package]]
+name = "zerocopy-derive"
+version = "0.7.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b539ef18157ab9e248758ab68041c0179e639024ca17c794c6afa7a691f4c271"
 dependencies = [
  "proc-macro2",
  "quote",
