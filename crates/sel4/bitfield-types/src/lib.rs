@@ -88,6 +88,7 @@ impl UnsignedPrimInt for u16 {}
 impl UnsignedPrimInt for u32 {}
 impl UnsignedPrimInt for u64 {}
 impl UnsignedPrimInt for u128 {}
+impl UnsignedPrimInt for usize {}
 
 use unsigned_prim_int_sealing::UnsignedPrimIntSealed;
 
@@ -99,6 +100,7 @@ mod unsigned_prim_int_sealing {
     impl UnsignedPrimIntSealed for u32 {}
     impl UnsignedPrimIntSealed for u64 {}
     impl UnsignedPrimIntSealed for u128 {}
+    impl UnsignedPrimIntSealed for usize {}
 }
 
 pub trait PrimInt: PrimIntSealed {
@@ -144,6 +146,7 @@ impl_prim_int!(i16, u16);
 impl_prim_int!(i32, u32);
 impl_prim_int!(i64, u64);
 impl_prim_int!(i128, u128);
+impl_prim_int!(isize, usize);
 
 use prim_int_sealing::PrimIntSealed;
 
@@ -159,6 +162,7 @@ mod prim_int_sealing {
     impl PrimIntSealed for i32 {}
     impl PrimIntSealed for i64 {}
     impl PrimIntSealed for i128 {}
+    impl PrimIntSealed for isize {}
 }
 
 pub fn get_bits<T: UnsignedPrimInt, U: UnsignedPrimInt + TryFrom<T>>(
