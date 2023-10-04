@@ -1,4 +1,4 @@
-use sel4_bitfield_types::Bitfield;
+use crate::bf::types::Bitfield;
 
 use crate::{seL4_MessageInfo, seL4_Word};
 
