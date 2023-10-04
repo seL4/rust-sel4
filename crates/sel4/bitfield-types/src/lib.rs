@@ -231,6 +231,33 @@ pub fn set_bits<T: UnsignedPrimInt, U: UnsignedPrimInt + TryInto<T>>(
     }
 }
 
+pub fn set_bits_from_slice<T: UnsignedPrimInt, U: UnsignedPrimInt>(
+    dst: &mut [T],
+    dst_range: Range<usize>,
+    src: &[U],
+    src_start: usize,
+) where
+    T: TryFrom<usize>,
+    usize: TryFrom<U>,
+{
+    let num_bits = dst_range.len();
+
+    assert!(dst_range.start <= dst_range.end);
+    assert!(dst_range.end <= dst.len() * T::NUM_BITS);
+    assert!(src_start + num_bits <= src.len() * U::NUM_BITS);
+
+    let mut cur_xfer_start = 0;
+    while cur_xfer_start < num_bits {
+        let cur_xfer_end = num_bits.min(cur_xfer_start + mem::size_of::<usize>());
+        let cur_xfer_src_range = (src_start + cur_xfer_start)..(src_start + cur_xfer_end);
+        let cur_xfer_dst_range =
+            (dst_range.start + cur_xfer_start)..(dst_range.start + cur_xfer_end);
+        let xfer: usize = get_bits(src, cur_xfer_src_range);
+        set_bits(dst, cur_xfer_dst_range, xfer);
+        cur_xfer_start = cur_xfer_end;
+    }
+}
+
 pub fn get_bits_maybe_signed<T: UnsignedPrimInt, U: PrimInt>(arr: &[T], range: Range<usize>) -> U
 where
     U::Unsigned: TryFrom<T>,
