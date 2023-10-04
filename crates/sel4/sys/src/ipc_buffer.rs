@@ -2,7 +2,7 @@ use core::mem;
 use core::ops::Range;
 use core::slice;
 
-use sel4_bitfield_ops::{get_bits, set_bits, PrimInt};
+use sel4_bitfield_ops::{get_bits, set_bits, set_bits_from_slice, PrimInt, UnsignedPrimInt};
 
 use crate::{seL4_CPtr, seL4_IPCBuffer, seL4_Word};
 
@@ -29,6 +29,14 @@ impl seL4_IPCBuffer {
         T::Unsigned: TryInto<seL4_Word>,
     {
         set_bits(&mut self.msg, range, T::cast_to_unsigned(value))
+    }
+
+    pub(crate) fn set_mr_bits_from_slice<T>(&mut self, range: Range<usize>, value: &[T])
+    where
+        T: UnsignedPrimInt,
+        usize: TryFrom<T>,
+    {
+        set_bits_from_slice(&mut self.msg, range, value, 0)
     }
 
     pub(crate) fn msg_bytes_mut(&mut self) -> &'static mut [u8] {

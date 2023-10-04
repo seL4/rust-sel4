@@ -270,7 +270,7 @@ impl<'a> InvocationGenerator<'a> {
                             });
                         }
                         ParameterType::Bitfield => toks.extend(quote! {
-                            self.set_mr_bits(#start..#end, #name.0.inner()[0]);
+                            self.set_mr_bits_from_slice(#start..#end, #name.0.inner());
                         }),
                         ParameterType::Struct { members } => {
                             assert!(self.parameter_types.get(&param.ty).pass_by_reference());
