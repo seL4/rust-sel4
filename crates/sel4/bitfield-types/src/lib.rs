@@ -3,45 +3,6 @@
 use core::mem;
 use core::ops::{BitAnd, BitAndAssign, BitOr, BitOrAssign, Not, Range, Shl, Shr};
 
-#[repr(C)]
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-pub struct Bitfield<T, const N: usize> {
-    arr: [T; N],
-}
-
-impl<T, const N: usize> Bitfield<T, N>
-where
-    T: UnsignedPrimInt,
-{
-    pub fn from_arr(arr: [T; N]) -> Self {
-        Self { arr }
-    }
-
-    pub fn into_arr(self) -> [T; N] {
-        self.arr
-    }
-
-    pub fn as_arr(&self) -> &[T; N] {
-        &self.arr
-    }
-
-    pub fn as_mut_arr(&mut self) -> &mut [T; N] {
-        &mut self.arr
-    }
-
-    pub fn zeroed() -> Self {
-        Self::from_arr([T::zero(); N])
-    }
-
-    pub fn get_bits(&self, range: Range<usize>) -> T {
-        get_bits(&self.arr, range)
-    }
-
-    pub fn set_bits(&mut self, range: Range<usize>, bits: T) {
-        set_bits(&mut self.arr, range, bits)
-    }
-}
-
 pub trait UnsignedPrimInt:
     UnsignedPrimIntSealed
     + Copy
@@ -55,52 +16,11 @@ pub trait UnsignedPrimInt:
     + Shr<usize, Output = Self>
     + Default // HACK for generic 0
 {
-}
-
-trait UnsignedPrimIntExt: UnsignedPrimInt {
     const NUM_BITS: usize = mem::size_of::<Self>() * 8;
 
     fn zero() -> Self {
         Default::default()
     }
-
-    fn mask(range: Range<usize>) -> Self {
-        debug_assert!(range.start <= range.end);
-        debug_assert!(range.end <= Self::NUM_BITS);
-        let num_bits = range.end - range.start;
-        // avoid overflow
-        match num_bits {
-            0 => Self::zero(),
-            _ if num_bits == Self::NUM_BITS => !Self::zero(),
-            _ => !(!Self::zero() << num_bits) << range.start,
-        }
-    }
-
-    fn take(self, num_bits: usize) -> Self {
-        self & Self::mask(0..num_bits)
-    }
-}
-
-impl<T: UnsignedPrimInt> UnsignedPrimIntExt for T {}
-
-impl UnsignedPrimInt for u8 {}
-impl UnsignedPrimInt for u16 {}
-impl UnsignedPrimInt for u32 {}
-impl UnsignedPrimInt for u64 {}
-impl UnsignedPrimInt for u128 {}
-impl UnsignedPrimInt for usize {}
-
-use unsigned_prim_int_sealing::UnsignedPrimIntSealed;
-
-mod unsigned_prim_int_sealing {
-    pub trait UnsignedPrimIntSealed {}
-
-    impl UnsignedPrimIntSealed for u8 {}
-    impl UnsignedPrimIntSealed for u16 {}
-    impl UnsignedPrimIntSealed for u32 {}
-    impl UnsignedPrimIntSealed for u64 {}
-    impl UnsignedPrimIntSealed for u128 {}
-    impl UnsignedPrimIntSealed for usize {}
 }
 
 pub trait PrimInt: PrimIntSealed {
@@ -125,9 +45,21 @@ where
     }
 }
 
+use sealing::{PrimIntSealed, UnsignedPrimIntSealed};
+
+mod sealing {
+    pub trait UnsignedPrimIntSealed {}
+
+    pub trait PrimIntSealed {}
+
+    impl<T: UnsignedPrimIntSealed> PrimIntSealed for T {}
+}
+
 macro_rules! impl_prim_int {
-    ($maybe_signed:ty, $unsigned:ty) => {
-        impl PrimInt for $maybe_signed {
+    ($unsigned:ty, $signed:ty) => {
+        impl UnsignedPrimInt for $unsigned {}
+
+        impl PrimInt for $signed {
             type Unsigned = $unsigned;
 
             fn cast_from_unsigned(val: Self::Unsigned) -> Self {
@@ -138,32 +70,43 @@ macro_rules! impl_prim_int {
                 val as Self::Unsigned
             }
         }
+
+        impl UnsignedPrimIntSealed for $unsigned {}
+
+        impl PrimIntSealed for $signed {}
     };
 }
 
-impl_prim_int!(i8, u8);
-impl_prim_int!(i16, u16);
-impl_prim_int!(i32, u32);
-impl_prim_int!(i64, u64);
-impl_prim_int!(i128, u128);
-impl_prim_int!(isize, usize);
+impl_prim_int!(u8, i8);
+impl_prim_int!(u16, i16);
+impl_prim_int!(u32, i32);
+impl_prim_int!(u64, i64);
+impl_prim_int!(u128, i128);
+impl_prim_int!(usize, isize);
 
-use prim_int_sealing::PrimIntSealed;
+// // //
 
-mod prim_int_sealing {
-    use super::UnsignedPrimIntSealed;
+trait UnsignedPrimIntExt: UnsignedPrimInt {
+    fn mask(range: Range<usize>) -> Self {
+        debug_assert!(range.start <= range.end);
+        debug_assert!(range.end <= Self::NUM_BITS);
+        let num_bits = range.end - range.start;
+        // avoid overflow
+        match num_bits {
+            0 => Self::zero(),
+            _ if num_bits == Self::NUM_BITS => !Self::zero(),
+            _ => !(!Self::zero() << num_bits) << range.start,
+        }
+    }
 
-    pub trait PrimIntSealed {}
-
-    impl<T: UnsignedPrimIntSealed> PrimIntSealed for T {}
-
-    impl PrimIntSealed for i8 {}
-    impl PrimIntSealed for i16 {}
-    impl PrimIntSealed for i32 {}
-    impl PrimIntSealed for i64 {}
-    impl PrimIntSealed for i128 {}
-    impl PrimIntSealed for isize {}
+    fn take(self, num_bits: usize) -> Self {
+        self & Self::mask(0..num_bits)
+    }
 }
+
+impl<T: UnsignedPrimInt> UnsignedPrimIntExt for T {}
+
+// // //
 
 pub fn get_bits<T: UnsignedPrimInt, U: UnsignedPrimInt + TryFrom<T>>(
     src: &[T],
@@ -231,6 +174,16 @@ pub fn set_bits<T: UnsignedPrimInt, U: UnsignedPrimInt + TryInto<T>>(
     }
 }
 
+fn check_range<T: UnsignedPrimInt, U: UnsignedPrimInt>(arr: &[T], range: &Range<usize>) {
+    assert!(range.start <= range.end);
+    assert!(range.end <= arr.len() * T::NUM_BITS);
+    assert!(range.end - range.start <= U::NUM_BITS);
+}
+
+fn checked_cast<T: TryInto<U>, U>(val: T) -> U {
+    val.try_into().map_err(|_| unreachable!()).unwrap()
+}
+
 pub fn set_bits_from_slice<T: UnsignedPrimInt, U: UnsignedPrimInt>(
     dst: &mut [T],
     dst_range: Range<usize>,
@@ -248,7 +201,7 @@ pub fn set_bits_from_slice<T: UnsignedPrimInt, U: UnsignedPrimInt>(
 
     let mut cur_xfer_start = 0;
     while cur_xfer_start < num_bits {
-        let cur_xfer_end = num_bits.min(cur_xfer_start + mem::size_of::<usize>());
+        let cur_xfer_end = num_bits.min(cur_xfer_start + usize::NUM_BITS);
         let cur_xfer_src_range = (src_start + cur_xfer_start)..(src_start + cur_xfer_end);
         let cur_xfer_dst_range =
             (dst_range.start + cur_xfer_start)..(dst_range.start + cur_xfer_end);
@@ -258,32 +211,66 @@ pub fn set_bits_from_slice<T: UnsignedPrimInt, U: UnsignedPrimInt>(
     }
 }
 
-pub fn get_bits_maybe_signed<T: UnsignedPrimInt, U: PrimInt>(arr: &[T], range: Range<usize>) -> U
+// // //
+
+pub fn get<T: UnsignedPrimInt, U: PrimInt>(src: &[T], src_start_bit: usize) -> U
 where
     U::Unsigned: TryFrom<T>,
 {
-    U::cast_from_unsigned(get_bits(arr, range))
+    let src_range = src_start_bit..(src_start_bit + U::Unsigned::NUM_BITS);
+    U::cast_from_unsigned(get_bits(src, src_range))
 }
 
-pub fn set_bits_maybe_signed<T: UnsignedPrimInt, U: PrimInt>(
-    arr: &mut [T],
-    range: Range<usize>,
-    bits: U,
-) where
+pub fn set<T: UnsignedPrimInt, U: PrimInt>(dst: &mut [T], dst_start_bit: usize, src: U)
+where
     U::Unsigned: TryInto<T>,
 {
-    set_bits(arr, range, U::cast_to_unsigned(bits))
+    let dst_range = dst_start_bit..(dst_start_bit + U::Unsigned::NUM_BITS);
+    set_bits(dst, dst_range, U::cast_to_unsigned(src))
 }
 
-fn check_range<T: UnsignedPrimInt, U: UnsignedPrimInt>(arr: &[T], range: &Range<usize>) {
-    assert!(range.start <= range.end);
-    assert!(range.end <= arr.len() * T::NUM_BITS);
-    assert!(range.end - range.start <= U::NUM_BITS);
+// // //
+
+#[repr(C)]
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+pub struct Bitfield<T, const N: usize> {
+    arr: [T; N],
 }
 
-fn checked_cast<T: TryInto<U>, U>(val: T) -> U {
-    val.try_into().map_err(|_| unreachable!()).unwrap()
+impl<T, const N: usize> Bitfield<T, N>
+where
+    T: UnsignedPrimInt,
+{
+    pub fn from_arr(arr: [T; N]) -> Self {
+        Self { arr }
+    }
+
+    pub fn into_arr(self) -> [T; N] {
+        self.arr
+    }
+
+    pub fn as_arr(&self) -> &[T; N] {
+        &self.arr
+    }
+
+    pub fn as_mut_arr(&mut self) -> &mut [T; N] {
+        &mut self.arr
+    }
+
+    pub fn zeroed() -> Self {
+        Self::from_arr([T::zero(); N])
+    }
+
+    pub fn get_bits(&self, range: Range<usize>) -> T {
+        get_bits(&self.arr, range)
+    }
+
+    pub fn set_bits(&mut self, range: Range<usize>, bits: T) {
+        set_bits(&mut self.arr, range, bits)
+    }
 }
+
+// // //
 
 #[cfg(test)]
 mod test {
