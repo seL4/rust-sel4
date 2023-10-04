@@ -161,11 +161,11 @@ mod prim_int_sealing {
     impl PrimIntSealed for i128 {}
 }
 
-pub fn get_bits<T: UnsignedPrimInt, const N: usize, U: UnsignedPrimInt + TryFrom<T>>(
-    arr: &[T; N],
+pub fn get_bits<T: UnsignedPrimInt, U: UnsignedPrimInt + TryFrom<T>>(
+    arr: &[T],
     range: Range<usize>,
 ) -> U {
-    check_range::<T, N, U>(&range);
+    check_range::<T, U>(arr, &range);
 
     let num_bits = range.end - range.start;
     let index_of_first_primitive = range.start / T::NUM_BITS;
@@ -190,12 +190,12 @@ pub fn get_bits<T: UnsignedPrimInt, const N: usize, U: UnsignedPrimInt + TryFrom
     bits
 }
 
-pub fn set_bits<T: UnsignedPrimInt, const N: usize, U: UnsignedPrimInt + TryInto<T>>(
-    arr: &mut [T; N],
+pub fn set_bits<T: UnsignedPrimInt, U: UnsignedPrimInt + TryInto<T>>(
+    arr: &mut [T],
     range: Range<usize>,
     bits: U,
 ) {
-    check_range::<T, N, U>(&range);
+    check_range::<T, U>(arr, &range);
 
     let num_bits = range.end - range.start;
 
@@ -227,18 +227,15 @@ pub fn set_bits<T: UnsignedPrimInt, const N: usize, U: UnsignedPrimInt + TryInto
     }
 }
 
-pub fn get_bits_maybe_signed<T: UnsignedPrimInt, const N: usize, U: PrimInt>(
-    arr: &[T; N],
-    range: Range<usize>,
-) -> U
+pub fn get_bits_maybe_signed<T: UnsignedPrimInt, U: PrimInt>(arr: &[T], range: Range<usize>) -> U
 where
     U::Unsigned: TryFrom<T>,
 {
     U::cast_from_unsigned(get_bits(arr, range))
 }
 
-pub fn set_bits_maybe_signed<T: UnsignedPrimInt, const N: usize, U: PrimInt>(
-    arr: &mut [T; N],
+pub fn set_bits_maybe_signed<T: UnsignedPrimInt, U: PrimInt>(
+    arr: &mut [T],
     range: Range<usize>,
     bits: U,
 ) where
@@ -247,9 +244,9 @@ pub fn set_bits_maybe_signed<T: UnsignedPrimInt, const N: usize, U: PrimInt>(
     set_bits(arr, range, U::cast_to_unsigned(bits))
 }
 
-fn check_range<T: UnsignedPrimInt, const N: usize, U: UnsignedPrimInt>(range: &Range<usize>) {
+fn check_range<T: UnsignedPrimInt, U: UnsignedPrimInt>(arr: &[T], range: &Range<usize>) {
     assert!(range.start <= range.end);
-    assert!(range.end <= N * T::NUM_BITS);
+    assert!(range.end <= arr.len() * T::NUM_BITS);
     assert!(range.end - range.start <= U::NUM_BITS);
 }
 
