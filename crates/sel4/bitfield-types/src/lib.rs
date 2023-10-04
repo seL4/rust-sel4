@@ -166,17 +166,17 @@ mod prim_int_sealing {
 }
 
 pub fn get_bits<T: UnsignedPrimInt, U: UnsignedPrimInt + TryFrom<T>>(
-    arr: &[T],
-    range: Range<usize>,
+    src: &[T],
+    src_range: Range<usize>,
 ) -> U {
-    check_range::<T, U>(arr, &range);
+    check_range::<T, U>(src, &src_range);
 
-    let num_bits = range.end - range.start;
-    let index_of_first_primitive = range.start / T::NUM_BITS;
-    let offset_into_first_primitive = range.start % T::NUM_BITS;
+    let num_bits = src_range.end - src_range.start;
+    let index_of_first_primitive = src_range.start / T::NUM_BITS;
+    let offset_into_first_primitive = src_range.start % T::NUM_BITS;
     let num_bits_from_first_primitive = (T::NUM_BITS - offset_into_first_primitive).min(num_bits);
 
-    let bits_from_first_primitive = (arr[index_of_first_primitive] >> offset_into_first_primitive)
+    let bits_from_first_primitive = (src[index_of_first_primitive] >> offset_into_first_primitive)
         .take(num_bits_from_first_primitive);
 
     let mut bits = checked_cast::<T, U>(bits_from_first_primitive);
@@ -185,7 +185,7 @@ pub fn get_bits<T: UnsignedPrimInt, U: UnsignedPrimInt + TryFrom<T>>(
 
     while num_bits_so_far < num_bits {
         let num_bits_from_cur_primitive = (num_bits - num_bits_so_far).min(T::NUM_BITS);
-        let bits_from_cur_primitive = arr[index_of_cur_primitive].take(num_bits_from_cur_primitive);
+        let bits_from_cur_primitive = src[index_of_cur_primitive].take(num_bits_from_cur_primitive);
         bits |= checked_cast::<T, U>(bits_from_cur_primitive) << num_bits_so_far;
         num_bits_so_far += num_bits_from_cur_primitive;
         index_of_cur_primitive += 1;
@@ -195,22 +195,22 @@ pub fn get_bits<T: UnsignedPrimInt, U: UnsignedPrimInt + TryFrom<T>>(
 }
 
 pub fn set_bits<T: UnsignedPrimInt, U: UnsignedPrimInt + TryInto<T>>(
-    arr: &mut [T],
-    range: Range<usize>,
-    bits: U,
+    dst: &mut [T],
+    dst_range: Range<usize>,
+    src: U,
 ) {
-    check_range::<T, U>(arr, &range);
+    check_range::<T, U>(dst, &dst_range);
 
-    let num_bits = range.end - range.start;
+    let num_bits = dst_range.end - dst_range.start;
 
-    assert!(num_bits == U::NUM_BITS || bits >> num_bits == U::zero());
+    assert!(num_bits == U::NUM_BITS || src >> num_bits == U::zero());
 
-    let index_of_first_primitive = range.start / T::NUM_BITS;
-    let offset_into_first_primitive = range.start % T::NUM_BITS;
+    let index_of_first_primitive = dst_range.start / T::NUM_BITS;
+    let offset_into_first_primitive = dst_range.start % T::NUM_BITS;
     let num_bits_for_first_primitive = (T::NUM_BITS - offset_into_first_primitive).min(num_bits);
-    let bits_for_first_primitive = bits.take(num_bits_for_first_primitive);
+    let bits_for_first_primitive = src.take(num_bits_for_first_primitive);
 
-    arr[index_of_first_primitive] = (arr[index_of_first_primitive]
+    dst[index_of_first_primitive] = (dst[index_of_first_primitive]
         & !T::mask(
             offset_into_first_primitive
                 ..(offset_into_first_primitive + num_bits_for_first_primitive),
@@ -222,8 +222,8 @@ pub fn set_bits<T: UnsignedPrimInt, U: UnsignedPrimInt + TryInto<T>>(
 
     while num_bits_so_far < num_bits {
         let num_bits_for_cur_primitive = (num_bits - num_bits_so_far).min(T::NUM_BITS);
-        let bits_for_cur_primitive = (bits >> num_bits_so_far).take(num_bits_for_cur_primitive);
-        arr[index_of_cur_primitive] = (arr[index_of_cur_primitive]
+        let bits_for_cur_primitive = (src >> num_bits_so_far).take(num_bits_for_cur_primitive);
+        dst[index_of_cur_primitive] = (dst[index_of_cur_primitive]
             & T::mask(num_bits_for_cur_primitive..T::NUM_BITS))
             | checked_cast(bits_for_cur_primitive);
         num_bits_so_far += num_bits_for_cur_primitive;
