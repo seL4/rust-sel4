@@ -23,12 +23,24 @@ def run(args):
 
     time.sleep(3)
 
-    for url_base in [HTTP_URL_BASE, HTTPS_URL_BASE]:
-        sess = Session()
-        url = url_base + '/About/'
-        r = sess.get(url, verify=False, timeout=5)
-        print(r.status_code)
-        r.raise_for_status()
+    flush_read(child)
+
+    try:
+        for url_base in [HTTP_URL_BASE, HTTPS_URL_BASE]:
+            sess = Session()
+            url = url_base + '/About/'
+            r = sess.get(url, verify=False, timeout=5)
+            print(r.status_code)
+            r.raise_for_status()
+    finally:
+        flush_read(child)
+
+def flush_read(child):
+    while True:
+        try:
+            child.read_nonblocking(timeout=0)
+        except pexpect.TIMEOUT:
+            break
 
 if __name__ == '__main__':
     main()
