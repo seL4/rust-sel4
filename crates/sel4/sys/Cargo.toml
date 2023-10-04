@@ -11,7 +11,7 @@ wrappers = []
 
 [dependencies]
 log = "0.4.17"
-sel4-bitfield-types = { path = "../bitfield-types" }
+sel4-bitfield-ops = { path = "../bitfield-ops" }
 sel4-config = { path = "../config" }
 
 [build-dependencies]

@@ -20,7 +20,7 @@ mk {
   };
   nix.local.dependencies = with localCrates; [
     sel4-config
-    sel4-bitfield-types
+    sel4-bitfield-ops
   ];
   nix.local.build-dependencies = with localCrates; [
     sel4-build-env

@@ -1,5 +1,5 @@
 [package]
-name = "sel4-bitfield-types"
+name = "sel4-bitfield-ops"
 version = "0.1.0"
 authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
 edition = "2021"
