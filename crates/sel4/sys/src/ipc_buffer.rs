@@ -2,9 +2,7 @@ use core::mem;
 use core::ops::Range;
 use core::slice;
 
-use sel4_bitfield_types::{
-    get_bits_maybe_signed, set_bits_maybe_signed, PrimInt,
-};
+use sel4_bitfield_types::{get_bits_maybe_signed, set_bits_maybe_signed, PrimInt};
 
 use crate::{seL4_CPtr, seL4_IPCBuffer, seL4_Word};
 
