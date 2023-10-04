@@ -1,6 +1,6 @@
 use core::ops::Range;
 
-use sel4_bitfield_types::{get_bits, set_bits, UnsignedPrimInt};
+use sel4_bitfield_ops::{get_bits, set_bits, UnsignedPrimInt};
 
 #[repr(C)]
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]

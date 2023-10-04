@@ -3611,6 +3611,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "sel4-bitfield-ops"
+version = "0.1.0"
+
+[[package]]
 name = "sel4-bitfield-parser"
 version = "0.1.0"
 dependencies = [
@@ -3627,10 +3631,6 @@ dependencies = [
  "glob",
  "sel4-bitfield-parser",
 ]
-
-[[package]]
-name = "sel4-bitfield-types"
-version = "0.1.0"
 
 [[package]]
 name = "sel4-bounce-buffer-allocator"
@@ -4203,8 +4203,8 @@ dependencies = [
  "proc-macro2",
  "quote",
  "regex",
+ "sel4-bitfield-ops",
  "sel4-bitfield-parser",
- "sel4-bitfield-types",
  "sel4-build-env",
  "sel4-config",
  "sel4-config-data",

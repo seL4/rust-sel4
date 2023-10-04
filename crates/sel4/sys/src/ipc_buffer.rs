@@ -2,7 +2,7 @@ use core::mem;
 use core::ops::Range;
 use core::slice;
 
-use sel4_bitfield_types::{get_bits, set_bits, PrimInt};
+use sel4_bitfield_ops::{get_bits, set_bits, PrimInt};
 
 use crate::{seL4_CPtr, seL4_IPCBuffer, seL4_Word};
 
