@@ -4,14 +4,14 @@ use core::mem;
 use core::ops::{BitAnd, BitAndAssign, BitOr, BitOrAssign, Not, Range, Shl, Shr};
 
 #[repr(C)]
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub struct Bitfield<T, const N: usize> {
     arr: [T; N],
 }
 
 impl<T, const N: usize> Bitfield<T, N>
 where
-    T: BitfieldPrimitive,
+    T: UnsignedPrimInt,
 {
     pub fn from_arr(arr: [T; N]) -> Self {
         Self { arr }
@@ -42,26 +42,26 @@ where
     }
 }
 
-pub trait BitfieldPrimitive:
-    BitfieldPrimitiveSealed
+pub trait UnsignedPrimInt:
+    UnsignedPrimIntSealed
     + Copy
     + Eq
     + Not<Output = Self>
     + BitAnd<Output = Self>
     + BitOr<Output = Self>
-    + BitOrAssign
     + BitAndAssign
+    + BitOrAssign
     + Shl<usize, Output = Self>
     + Shr<usize, Output = Self>
-    + From<bool> // HACK for generic 0
+    + Default // HACK for generic 0
 {
 }
 
-trait BitfieldPrimitiveExt: BitfieldPrimitive {
+trait UnsignedPrimIntExt: UnsignedPrimInt {
     const NUM_BITS: usize = mem::size_of::<Self>() * 8;
 
     fn zero() -> Self {
-        false.into()
+        Default::default()
     }
 
     fn mask(range: Range<usize>) -> Self {
@@ -81,36 +81,36 @@ trait BitfieldPrimitiveExt: BitfieldPrimitive {
     }
 }
 
-impl<T: BitfieldPrimitive> BitfieldPrimitiveExt for T {}
+impl<T: UnsignedPrimInt> UnsignedPrimIntExt for T {}
 
-impl BitfieldPrimitive for u128 {}
-impl BitfieldPrimitive for u64 {}
-impl BitfieldPrimitive for u32 {}
-impl BitfieldPrimitive for u16 {}
-impl BitfieldPrimitive for u8 {}
+impl UnsignedPrimInt for u8 {}
+impl UnsignedPrimInt for u16 {}
+impl UnsignedPrimInt for u32 {}
+impl UnsignedPrimInt for u64 {}
+impl UnsignedPrimInt for u128 {}
 
-use bitfield_primative_sealing::BitfieldPrimitiveSealed;
+use unsigned_prim_int_sealing::UnsignedPrimIntSealed;
 
-mod bitfield_primative_sealing {
-    pub trait BitfieldPrimitiveSealed {}
+mod unsigned_prim_int_sealing {
+    pub trait UnsignedPrimIntSealed {}
 
-    impl BitfieldPrimitiveSealed for u128 {}
-    impl BitfieldPrimitiveSealed for u64 {}
-    impl BitfieldPrimitiveSealed for u32 {}
-    impl BitfieldPrimitiveSealed for u16 {}
-    impl BitfieldPrimitiveSealed for u8 {}
+    impl UnsignedPrimIntSealed for u8 {}
+    impl UnsignedPrimIntSealed for u16 {}
+    impl UnsignedPrimIntSealed for u32 {}
+    impl UnsignedPrimIntSealed for u64 {}
+    impl UnsignedPrimIntSealed for u128 {}
 }
 
-pub trait BitfieldPrimitiveMaybeSigned: BitfieldPrimitiveMaybeSignedSealed {
-    type Unsigned: BitfieldPrimitive;
+pub trait PrimInt: PrimIntSealed {
+    type Unsigned: UnsignedPrimInt;
 
     fn cast_from_unsigned(val: Self::Unsigned) -> Self;
     fn cast_to_unsigned(val: Self) -> Self::Unsigned;
 }
 
-impl<T> BitfieldPrimitiveMaybeSigned for T
+impl<T> PrimInt for T
 where
-    T: BitfieldPrimitive + BitfieldPrimitiveMaybeSignedSealed,
+    T: UnsignedPrimInt + PrimIntSealed,
 {
     type Unsigned = Self;
 
@@ -123,9 +123,9 @@ where
     }
 }
 
-macro_rules! impl_bitfield_primitive_maybe_unsigned {
+macro_rules! impl_prim_int {
     ($maybe_signed:ty, $unsigned:ty) => {
-        impl BitfieldPrimitiveMaybeSigned for $maybe_signed {
+        impl PrimInt for $maybe_signed {
             type Unsigned = $unsigned;
 
             fn cast_from_unsigned(val: Self::Unsigned) -> Self {
@@ -139,31 +139,29 @@ macro_rules! impl_bitfield_primitive_maybe_unsigned {
     };
 }
 
-impl_bitfield_primitive_maybe_unsigned!(i128, u128);
-impl_bitfield_primitive_maybe_unsigned!(i64, u64);
-impl_bitfield_primitive_maybe_unsigned!(i32, u32);
-impl_bitfield_primitive_maybe_unsigned!(i16, u16);
-impl_bitfield_primitive_maybe_unsigned!(i8, u8);
+impl_prim_int!(i8, u8);
+impl_prim_int!(i16, u16);
+impl_prim_int!(i32, u32);
+impl_prim_int!(i64, u64);
+impl_prim_int!(i128, u128);
 
-use bitfield_primative_maybe_signed_sealing::BitfieldPrimitiveMaybeSignedSealed;
+use prim_int_sealing::PrimIntSealed;
 
-mod bitfield_primative_maybe_signed_sealing {
-    use super::BitfieldPrimitiveSealed;
+mod prim_int_sealing {
+    use super::UnsignedPrimIntSealed;
 
-    pub trait BitfieldPrimitiveMaybeSignedSealed {}
+    pub trait PrimIntSealed {}
 
-    impl<T: BitfieldPrimitiveSealed> BitfieldPrimitiveMaybeSignedSealed for T {}
+    impl<T: UnsignedPrimIntSealed> PrimIntSealed for T {}
 
-    impl BitfieldPrimitiveMaybeSignedSealed for i128 {}
-    impl BitfieldPrimitiveMaybeSignedSealed for i64 {}
-    impl BitfieldPrimitiveMaybeSignedSealed for i32 {}
-    impl BitfieldPrimitiveMaybeSignedSealed for i16 {}
-    impl BitfieldPrimitiveMaybeSignedSealed for i8 {}
+    impl PrimIntSealed for i8 {}
+    impl PrimIntSealed for i16 {}
+    impl PrimIntSealed for i32 {}
+    impl PrimIntSealed for i64 {}
+    impl PrimIntSealed for i128 {}
 }
 
-//
-
-pub fn get_bits<T: BitfieldPrimitive, const N: usize, U: BitfieldPrimitive + TryFrom<T>>(
+pub fn get_bits<T: UnsignedPrimInt, const N: usize, U: UnsignedPrimInt + TryFrom<T>>(
     arr: &[T; N],
     range: Range<usize>,
 ) -> U {
@@ -192,21 +190,7 @@ pub fn get_bits<T: BitfieldPrimitive, const N: usize, U: BitfieldPrimitive + Try
     bits
 }
 
-pub fn get_bits_maybe_signed<
-    T: BitfieldPrimitive,
-    const N: usize,
-    U: BitfieldPrimitiveMaybeSigned,
->(
-    arr: &[T; N],
-    range: Range<usize>,
-) -> U
-where
-    U::Unsigned: TryFrom<T>,
-{
-    U::cast_from_unsigned(get_bits(arr, range))
-}
-
-pub fn set_bits<T: BitfieldPrimitive, const N: usize, U: BitfieldPrimitive + TryInto<T>>(
+pub fn set_bits<T: UnsignedPrimInt, const N: usize, U: UnsignedPrimInt + TryInto<T>>(
     arr: &mut [T; N],
     range: Range<usize>,
     bits: U,
@@ -243,11 +227,17 @@ pub fn set_bits<T: BitfieldPrimitive, const N: usize, U: BitfieldPrimitive + Try
     }
 }
 
-pub fn set_bits_maybe_signed<
-    T: BitfieldPrimitive,
-    const N: usize,
-    U: BitfieldPrimitiveMaybeSigned,
->(
+pub fn get_bits_maybe_signed<T: UnsignedPrimInt, const N: usize, U: PrimInt>(
+    arr: &[T; N],
+    range: Range<usize>,
+) -> U
+where
+    U::Unsigned: TryFrom<T>,
+{
+    U::cast_from_unsigned(get_bits(arr, range))
+}
+
+pub fn set_bits_maybe_signed<T: UnsignedPrimInt, const N: usize, U: PrimInt>(
     arr: &mut [T; N],
     range: Range<usize>,
     bits: U,
@@ -257,7 +247,7 @@ pub fn set_bits_maybe_signed<
     set_bits(arr, range, U::cast_to_unsigned(bits))
 }
 
-fn check_range<T: BitfieldPrimitive, const N: usize, U: BitfieldPrimitive>(range: &Range<usize>) {
+fn check_range<T: UnsignedPrimInt, const N: usize, U: UnsignedPrimInt>(range: &Range<usize>) {
     assert!(range.start <= range.end);
     assert!(range.end <= N * T::NUM_BITS);
     assert!(range.end - range.start <= U::NUM_BITS);
@@ -284,9 +274,9 @@ mod test {
     }
 
     fn set_and_get<
-        T: BitfieldPrimitive,
+        T: UnsignedPrimInt,
         const N: usize,
-        U: BitfieldPrimitive + TryInto<T> + TryFrom<T> + fmt::Debug,
+        U: UnsignedPrimInt + TryInto<T> + TryFrom<T> + fmt::Debug,
     >(
         range: Range<usize>,
         val: U,
