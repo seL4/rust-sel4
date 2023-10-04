@@ -1,5 +1,6 @@
 #![no_std]
 
+use core::marker::PhantomData;
 use core::mem;
 use core::ops::{BitAnd, BitAndAssign, BitOr, BitOrAssign, Not, Range, Shl, Shr};
 
@@ -231,6 +232,101 @@ where
 
 // // //
 
+#[repr(transparent)]
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+pub struct Bitfield<T, U> {
+    inner: T,
+    _phantom: PhantomData<U>,
+}
+
+impl<T, U> Bitfield<T, U> {
+    pub fn new(inner: T) -> Self {
+        Self {
+            inner,
+            _phantom: PhantomData,
+        }
+    }
+
+    pub fn into_inner(self) -> T {
+        self.inner
+    }
+
+    pub fn inner(&self) -> &T {
+        &self.inner
+    }
+
+    pub fn inner_mut(&mut self) -> &mut T {
+        &mut self.inner
+    }
+}
+
+impl<T: UnsignedPrimInt, const N: usize> Bitfield<[T; N], T> {
+    pub fn zeroed() -> Self {
+        Self::new([T::zero(); N])
+    }
+}
+
+impl<T: AsRef<[U]>, U: UnsignedPrimInt> Bitfield<T, U> {
+    pub fn bits(&self) -> &[U] {
+        self.inner().as_ref()
+    }
+
+    pub fn get_bits<V: UnsignedPrimInt + TryFrom<U>>(&self, range: Range<usize>) -> V {
+        get_bits(self.bits(), range)
+    }
+
+    pub fn get_bits_into_slice<V: UnsignedPrimInt>(
+        &self,
+        range: Range<usize>,
+        dst: &mut [V],
+        dst_start: usize,
+    ) where
+        V: TryFrom<usize>,
+        usize: TryFrom<U>,
+    {
+        let dst_range = dst_start..(dst_start + range.len());
+        set_bits_from_slice(dst, dst_range, self.bits(), range.start)
+    }
+
+    pub fn get<V: PrimInt>(&self, start_bit: usize) -> V
+    where
+        V::Unsigned: TryFrom<U>,
+    {
+        get(self.bits(), start_bit)
+    }
+}
+
+impl<T: AsMut<[U]>, U: UnsignedPrimInt> Bitfield<T, U> {
+    pub fn bits_mut(&mut self) -> &mut [U] {
+        self.inner_mut().as_mut()
+    }
+
+    pub fn set_bits<V: UnsignedPrimInt + TryInto<U>>(&mut self, range: Range<usize>, src: V) {
+        set_bits(self.bits_mut(), range, src)
+    }
+
+    pub fn set_bits_from_slice<V: UnsignedPrimInt>(
+        &mut self,
+        range: Range<usize>,
+        src: &[V],
+        src_start: usize,
+    ) where
+        U: TryFrom<usize>,
+        usize: TryFrom<V>,
+    {
+        set_bits_from_slice(self.bits_mut(), range, src, src_start)
+    }
+
+    pub fn set<V: PrimInt>(&mut self, start_bit: usize, src: V)
+    where
+        V::Unsigned: TryInto<U>,
+    {
+        set(self.bits_mut(), start_bit, src)
+    }
+}
+
+// // //
+
 #[cfg(test)]
 mod test {
     #![allow(unused_imports)]
@@ -244,7 +340,7 @@ mod test {
 
     #[test]
     fn zero_gets_zero() {
-        assert_eq!(Bitfield::<u64, 2>::zeroed().get_bits(50..80), 0);
+        assert_eq!(Bitfield::<[u64; 2], _>::zeroed().get_bits::<u64>(50..80), 0);
     }
 
     fn set_and_get<
@@ -255,9 +351,9 @@ mod test {
         range: Range<usize>,
         val: U,
     ) {
-        let mut arr = Bitfield::<T, N>::zeroed();
-        set_bits(arr.as_mut_arr(), range.clone(), val);
-        let observed_val: U = get_bits(arr.as_arr(), range);
+        let mut arr = Bitfield::<[T; N], _>::zeroed();
+        set_bits(arr.inner_mut(), range.clone(), val);
+        let observed_val: U = get_bits(arr.inner(), range);
         assert_eq!(observed_val, val);
     }
 
@@ -271,13 +367,13 @@ mod test {
     #[test]
     fn this_works_too() {
         for init in [0, !0] {
-            let mut arr = Bitfield::<u64, 1>::from_arr([init]);
-            arr.set_bits(0..2, 0b11);
-            arr.set_bits(60..64, 0b1111);
-            arr.set_bits(10..11, 0b1);
-            assert_eq!(arr.get_bits(0..2), 0b11);
-            assert_eq!(arr.get_bits(60..64), 0b1111);
-            assert_eq!(arr.get_bits(10..11), 0b1);
+            let mut arr = Bitfield::<[u64; 1], u64>::new([init]);
+            arr.set_bits::<u64>(0..2, 0b11);
+            arr.set_bits::<u64>(60..64, 0b1111);
+            arr.set_bits::<u64>(10..11, 0b1);
+            assert_eq!(arr.get_bits::<u64>(0..2), 0b11);
+            assert_eq!(arr.get_bits::<u64>(60..64), 0b1111);
+            assert_eq!(arr.get_bits::<u64>(10..11), 0b1);
         }
     }
 }

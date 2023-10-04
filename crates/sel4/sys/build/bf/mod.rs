@@ -389,7 +389,7 @@ impl BackingType {
     fn bitfield(&self) -> TokenStream {
         let primitive = self.primitive();
         let multiple = self.multiple;
-        quote!(Bitfield<#primitive, #multiple>)
+        quote!(SeL4Bitfield<#primitive, #multiple>)
     }
 }
 

@@ -23,7 +23,7 @@ impl CNodeCapData {
     }
 
     pub fn into_word(self) -> Word {
-        let arr = self.inner().0.as_arr();
+        let arr = self.inner().0.inner();
         assert_eq!(arr.len(), 1); // TODO assert at compile time instead
         arr[0]
     }
