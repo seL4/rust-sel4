@@ -15,12 +15,16 @@ pub trait UnsignedPrimInt:
     + BitOrAssign
     + Shl<usize, Output = Self>
     + Shr<usize, Output = Self>
-    + Default // HACK for generic 0
+    + From<bool> // HACK for generic 0 and 1
 {
     const NUM_BITS: usize = mem::size_of::<Self>() * 8;
 
     fn zero() -> Self {
-        Default::default()
+        false.into()
+    }
+
+    fn one() -> Self {
+        true.into()
     }
 }
 
@@ -109,6 +113,11 @@ impl<T: UnsignedPrimInt> UnsignedPrimIntExt for T {}
 
 // // //
 
+pub fn get_bit<T: UnsignedPrimInt>(src: &[T], i: usize) -> bool {
+    assert!(i < src.len() * T::NUM_BITS);
+    src[i / T::NUM_BITS] & (T::one() << (i % T::NUM_BITS)) != T::zero()
+}
+
 pub fn get_bits<T: UnsignedPrimInt, U: UnsignedPrimInt + TryFrom<T>>(
     src: &[T],
     src_range: Range<usize>,
@@ -194,6 +203,18 @@ pub fn set_bits_from_slice<T: UnsignedPrimInt, U: UnsignedPrimInt>(
     T: TryFrom<usize>,
     usize: TryFrom<U>,
 {
+    set_bits_from_slice_via::<_, _, usize>(dst, dst_range, src, src_start)
+}
+
+fn set_bits_from_slice_via<T: UnsignedPrimInt, U: UnsignedPrimInt, V: UnsignedPrimInt>(
+    dst: &mut [T],
+    dst_range: Range<usize>,
+    src: &[U],
+    src_start: usize,
+) where
+    T: TryFrom<V>,
+    V: TryFrom<U>,
+{
     let num_bits = dst_range.len();
 
     assert!(dst_range.start <= dst_range.end);
@@ -202,11 +223,11 @@ pub fn set_bits_from_slice<T: UnsignedPrimInt, U: UnsignedPrimInt>(
 
     let mut cur_xfer_start = 0;
     while cur_xfer_start < num_bits {
-        let cur_xfer_end = num_bits.min(cur_xfer_start + usize::NUM_BITS);
+        let cur_xfer_end = num_bits.min(cur_xfer_start + V::NUM_BITS);
         let cur_xfer_src_range = (src_start + cur_xfer_start)..(src_start + cur_xfer_end);
         let cur_xfer_dst_range =
             (dst_range.start + cur_xfer_start)..(dst_range.start + cur_xfer_end);
-        let xfer: usize = get_bits(src, cur_xfer_src_range);
+        let xfer: V = get_bits(src, cur_xfer_src_range);
         set_bits(dst, cur_xfer_dst_range, xfer);
         cur_xfer_start = cur_xfer_end;
     }
@@ -375,5 +396,65 @@ mod test {
             assert_eq!(arr.get_bits::<u64>(60..64), 0b1111);
             assert_eq!(arr.get_bits::<u64>(10..11), 0b1);
         }
+    }
+}
+
+#[cfg(kani)]
+mod verification {
+    use super::*;
+
+    #[kani::proof]
+    #[kani::unwind(4)]
+    fn slice_ops() {
+        slice_ops_generic::<u64, 3, u8, 3, u8>(kani::any());
+        slice_ops_generic::<u8, 3, u64, 3, u8>(kani::any());
+        slice_ops_generic::<u64, 3, u8, 3, u32>(kani::any());
+        slice_ops_generic::<u8, 3, u64, 3, u32>(kani::any());
+    }
+
+    // The type of kani::any() can't depend on generic parameters, so we pass the arrays as args.
+    fn slice_ops_generic<T, const N: usize, U, const M: usize, V>((a, b): ([T; N], [U; M]))
+    where
+        T: UnsignedPrimInt + TryFrom<V>,
+        U: UnsignedPrimInt + TryFrom<V>,
+        V: UnsignedPrimInt + TryFrom<T> + TryFrom<U>,
+    {
+        let n: usize = kani::any();
+        let start_a: usize = kani::any();
+        let start_b: usize = kani::any();
+
+        kani::assume(n <= a.len());
+        kani::assume(n <= b.len());
+        kani::assume(
+            start_a
+                .checked_add(n)
+                .map(|end| end <= a.len())
+                .unwrap_or(false),
+        );
+        kani::assume(
+            start_b
+                .checked_add(n)
+                .map(|end| end <= b.len())
+                .unwrap_or(false),
+        );
+
+        let range_a = start_a..(start_a + n);
+
+        let mut a_mut = a;
+
+        set_bits_from_slice_via::<_, _, V>(&mut a_mut, range_a.clone(), &b, start_b);
+
+        let i: usize = kani::any();
+        kani::assume(i < a.len() * T::NUM_BITS);
+
+        let val = get_bit(&a_mut, i);
+
+        let val_expected = if range_a.contains(&i) {
+            get_bit(&b, i - start_a + start_b)
+        } else {
+            get_bit(&a, i)
+        };
+
+        assert_eq!(val, val_expected);
     }
 }
