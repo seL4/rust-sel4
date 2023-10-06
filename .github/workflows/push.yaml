@@ -141,6 +141,3 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v2
-
-# For debugging and monitoring disk usage:
-# (make foo && df -h) || (df -h && false)
