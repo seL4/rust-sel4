@@ -365,7 +365,7 @@ mod test {
     }
 
     #[test]
-    fn this_works_too() {
+    fn multiple_gets_return_what_was_set_with_multiple_sets() {
         for init in [0, !0] {
             let mut arr = Bitfield::<[u64; 1], u64>::new([init]);
             arr.set_bits::<u64>(0..2, 0b11);
