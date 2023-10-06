@@ -142,11 +142,5 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v2
 
-# NOTE
-#
-# May be necessary in the future:
-#
-
-#
 # For debugging and monitoring disk usage:
 # (make foo && df -h) || (df -h && false)
