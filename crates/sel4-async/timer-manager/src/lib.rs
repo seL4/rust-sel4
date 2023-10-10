@@ -16,9 +16,10 @@ mod instant;
 mod sub_key;
 mod timer_queue;
 
-use instant::Instant;
 use sub_key::SubKey;
 use timer_queue::{Key, TimerQueue};
+
+pub use instant::Instant;
 
 #[derive(Clone)]
 pub struct TimerManager {
