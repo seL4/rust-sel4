@@ -93,6 +93,7 @@ let
         num_enum = "0.5.9";
         num-traits = "0.2.16";
         object = "0.32.1";
+        pin-project = "1.1.3";
         postcard = "1.0.2";
         proc-macro2 = "1.0.50";
         quote = "1.0.23";
