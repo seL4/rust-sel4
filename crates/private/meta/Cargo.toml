@@ -19,7 +19,7 @@ sel4-async-block-io-fat = { path = "../../sel4-async/block-io/fat" }
 sel4-async-network = { path = "../../sel4-async/network" }
 sel4-async-request-statuses = { path = "../../sel4-async/request-statuses" }
 sel4-async-single-threaded-executor = { path = "../../sel4-async/single-threaded-executor" }
-sel4-async-timers = { path = "../../sel4-async/timers" }
+sel4-async-timer-manager = { path = "../../sel4-async/timer-manager" }
 sel4-async-unsync = { path = "../../sel4-async/unsync" }
 sel4-bounce-buffer-allocator = { path = "../../sel4-bounce-buffer-allocator" }
 sel4-config = { path = "../../sel4/config" }

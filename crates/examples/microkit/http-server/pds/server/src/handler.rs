@@ -10,7 +10,7 @@ use smoltcp::time::{Duration, Instant};
 use sel4_async_block_io::constant_block_sizes::BlockSize512;
 use sel4_async_network::{DhcpOverrides, SharedNetwork};
 use sel4_async_single_threaded_executor::{LocalPool, LocalSpawner};
-use sel4_async_timers::SharedTimers;
+use sel4_async_timer_manager::SharedTimers;
 use sel4_shared_ring_buffer_block_io::SharedRingBufferBlockIO;
 
 use crate::{DeviceImpl, TimerClient};

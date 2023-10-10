@@ -80,7 +80,7 @@ definitely! {
     sel4_async_network
     sel4_async_request_statuses
     sel4_async_single_threaded_executor
-    sel4_async_timers
+    sel4_async_timer_manager
     sel4_async_unsync
     sel4_bounce_buffer_allocator
     sel4_config
