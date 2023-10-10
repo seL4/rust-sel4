@@ -1,7 +1,7 @@
 { mk, versions, smoltcpWith }:
 
 mk {
-  package.name = "sel4-async-timers";
+  package.name = "sel4-async-timer-manager";
   dependencies = {
     inherit (versions) log pin-project;
     # futures = {

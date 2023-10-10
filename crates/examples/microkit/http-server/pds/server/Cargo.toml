@@ -15,7 +15,7 @@ sel4-async-block-io = { path = "../../../../../sel4-async/block-io" }
 sel4-async-block-io-fat = { path = "../../../../../sel4-async/block-io/fat" }
 sel4-async-network = { path = "../../../../../sel4-async/network" }
 sel4-async-request-statuses = { path = "../../../../../sel4-async/request-statuses" }
-sel4-async-timers = { path = "../../../../../sel4-async/timers" }
+sel4-async-timer-manager = { path = "../../../../../sel4-async/timer-manager" }
 sel4-bounce-buffer-allocator = { path = "../../../../../sel4-bounce-buffer-allocator" }
 sel4-immediate-sync-once-cell = { path = "../../../../../sel4-immediate-sync-once-cell" }
 sel4-logging = { path = "../../../../../sel4-logging" }

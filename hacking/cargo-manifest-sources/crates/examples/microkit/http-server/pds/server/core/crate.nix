@@ -23,7 +23,7 @@ mk {
     sel4-async-unsync
     sel4-async-network
     sel4-async-network-mbedtls
-    sel4-async-timers
+    sel4-async-timer-manager
     sel4-panicking-env
     sel4-async-block-io
     sel4-async-block-io-fat
