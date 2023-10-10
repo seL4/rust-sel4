@@ -19,7 +19,7 @@ use sel4_async_network_mbedtls::{
     insecure_dummy_rng, mbedtls, seed_insecure_dummy_rng, DbgCallbackBuilder, TcpSocketWrapper,
 };
 use sel4_async_single_threaded_executor::LocalSpawner;
-use sel4_async_timer_manager::SharedTimers;
+use sel4_async_timer_manager::TimerManager;
 
 mod mime;
 mod server;
@@ -30,7 +30,7 @@ const HTTP_PORT: u16 = 80;
 const HTTPS_PORT: u16 = 443;
 
 pub async fn run_server<T: BlockIO<BlockSize = constant_block_sizes::BlockSize512> + Clone>(
-    _timers_ctx: SharedTimers,
+    _timers_ctx: TimerManager,
     network_ctx: SharedNetwork,
     fs_block_io: T,
     spawner: LocalSpawner,
