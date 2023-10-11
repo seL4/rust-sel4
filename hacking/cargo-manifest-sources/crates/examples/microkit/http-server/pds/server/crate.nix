@@ -46,7 +46,7 @@ mk {
     sel4-externally-shared
     sel4-async-single-threaded-executor
     sel4-async-network
-    sel4-async-timer-manager
+    sel4-async-time
     sel4-async-request-statuses
     sel4-async-block-io-fat
     sel4-newlib

@@ -19,7 +19,7 @@ use sel4_async_network_mbedtls::{
     insecure_dummy_rng, mbedtls, seed_insecure_dummy_rng, DbgCallbackBuilder, TcpSocketWrapper,
 };
 use sel4_async_single_threaded_executor::LocalSpawner;
-use sel4_async_timer_manager::TimerManager;
+use sel4_async_time::TimerManager;
 
 mod mime;
 mod server;
