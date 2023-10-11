@@ -123,6 +123,10 @@ impl ManagedIface {
         }
     }
 
+    pub fn poll_at(&self, timestamp: Instant) -> Option<Instant> {
+        self.inner().borrow_mut().poll_at(timestamp)
+    }
+
     pub fn poll_delay(&self, timestamp: Instant) -> Option<Duration> {
         self.inner().borrow_mut().poll_delay(timestamp)
     }
@@ -422,6 +426,10 @@ impl ManagedIfaceShared {
 
     fn dns_socket_mut(&mut self) -> &mut dns::Socket<'static> {
         self.socket_set.get_mut(self.dns_socket_handle)
+    }
+
+    fn poll_at(&mut self, timestamp: Instant) -> Option<Instant> {
+        self.iface.poll_at(timestamp, &self.socket_set)
     }
 
     fn poll_delay(&mut self, timestamp: Instant) -> Option<Duration> {
