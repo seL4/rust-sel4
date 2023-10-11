@@ -23,11 +23,11 @@ pub(crate) const DEFAULT_KEEP_ALIVE_INTERVAL: u64 = 75000;
 pub(crate) const DEFAULT_TCP_SOCKET_BUFFER_SIZE: usize = 65535;
 
 #[derive(Clone)]
-pub struct ManagedIface {
-    inner: Rc<RefCell<ManagedIfaceShared>>,
+pub struct ManagedInterface {
+    inner: Rc<RefCell<ManagedInterfaceShared>>,
 }
 
-struct ManagedIfaceShared {
+struct ManagedInterfaceShared {
     iface: Interface,
     socket_set: SocketSet<'static>,
     dns_socket_handle: SocketHandle,
@@ -46,7 +46,7 @@ pub type TcpSocket = Socket<tcp::Socket<'static>>;
 
 pub struct Socket<T> {
     handle: SocketHandle,
-    shared: ManagedIface,
+    shared: ManagedInterface,
     _phantom: PhantomData<T>,
 }
 
@@ -64,7 +64,7 @@ pub enum DnsError {
     GetQueryResultError(dns::GetQueryResultError),
 }
 
-impl ManagedIface {
+impl ManagedInterface {
     pub fn new<D: Device + ?Sized>(
         config: Config,
         dhcp_overrides: DhcpOverrides,
@@ -78,7 +78,7 @@ impl ManagedIface {
         let dhcp_socket = dhcpv4::Socket::new();
         let dhcp_socket_handle = socket_set.add(dhcp_socket);
 
-        let mut this = ManagedIfaceShared {
+        let mut this = ManagedInterfaceShared {
             iface,
             socket_set,
             dns_socket_handle,
@@ -93,7 +93,7 @@ impl ManagedIface {
         }
     }
 
-    fn inner(&self) -> &Rc<RefCell<ManagedIfaceShared>> {
+    fn inner(&self) -> &Rc<RefCell<ManagedInterfaceShared>> {
         &self.inner
     }
 
@@ -419,7 +419,7 @@ impl<T> Drop for Socket<T> {
     }
 }
 
-impl ManagedIfaceShared {
+impl ManagedInterfaceShared {
     fn dhcp_socket_mut(&mut self) -> &mut dhcpv4::Socket<'static> {
         self.socket_set.get_mut(self.dhcp_socket_handle)
     }

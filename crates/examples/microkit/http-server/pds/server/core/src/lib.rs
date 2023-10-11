@@ -14,7 +14,7 @@ use mbedtls::ssl::async_io::ClosedError;
 
 use sel4_async_block_io::{constant_block_sizes, BlockIO};
 use sel4_async_block_io_fat as fat;
-use sel4_async_network::{ManagedIface, TcpSocketError};
+use sel4_async_network::{ManagedInterface, TcpSocketError};
 use sel4_async_network_mbedtls::{
     insecure_dummy_rng, mbedtls, seed_insecure_dummy_rng, DbgCallbackBuilder, TcpSocketWrapper,
 };
@@ -31,7 +31,7 @@ const HTTPS_PORT: u16 = 443;
 
 pub async fn run_server<T: BlockIO<BlockSize = constant_block_sizes::BlockSize512> + Clone>(
     _timers_ctx: TimerManager,
-    network_ctx: ManagedIface,
+    network_ctx: ManagedInterface,
     fs_block_io: T,
     spawner: LocalSpawner,
     cert_pem: &str,

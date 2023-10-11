@@ -9,7 +9,7 @@ use smoltcp::iface::Config;
 use smoltcp::time::Instant as SmoltcpInstant;
 
 use sel4_async_block_io::constant_block_sizes::BlockSize512;
-use sel4_async_network::{DhcpOverrides, ManagedIface};
+use sel4_async_network::{DhcpOverrides, ManagedInterface};
 use sel4_async_single_threaded_executor::{LocalPool, LocalSpawner};
 use sel4_async_timer_manager::{Instant, TimerManager};
 use sel4_shared_ring_buffer_block_io::SharedRingBufferBlockIO;
@@ -24,7 +24,7 @@ pub(crate) struct HandlerImpl {
     net_device: DeviceImpl,
     shared_block_io: SharedRingBufferBlockIO<BlockSize512>,
     shared_timers: TimerManager,
-    shared_network: ManagedIface,
+    shared_network: ManagedInterface,
     local_pool: LocalPool,
     fut: LocalBoxFuture<'static, !>,
 }
@@ -39,14 +39,14 @@ impl HandlerImpl {
         mut net_device: DeviceImpl,
         net_config: Config,
         shared_block_io: SharedRingBufferBlockIO<BlockSize512>,
-        f: impl FnOnce(TimerManager, ManagedIface, LocalSpawner) -> T,
+        f: impl FnOnce(TimerManager, ManagedInterface, LocalSpawner) -> T,
     ) -> Self {
         let now = Self::now_with_timer_client(&timer);
         let now_smoltcp = SmoltcpInstant::ZERO + now.since_zero().into();
 
         let shared_timers = TimerManager::new();
 
-        let shared_network = ManagedIface::new(
+        let shared_network = ManagedInterface::new(
             net_config,
             DhcpOverrides::default(),
             &mut net_device,
