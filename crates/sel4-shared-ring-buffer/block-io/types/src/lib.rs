@@ -58,11 +58,23 @@ impl BlockIORequest {
         self.ty.try_into()
     }
 
+    pub fn set_ty(&mut self, ty: BlockIORequestType) {
+        self.ty = ty.into();
+    }
+
     pub fn start_block_idx(&self) -> u64 {
         self.start_block_idx
     }
 
+    pub fn set_start_block_idx(&mut self, start_block_idx: u64) {
+        self.start_block_idx = start_block_idx;
+    }
+
     pub fn buf(&self) -> &Descriptor {
         &self.buf
+    }
+
+    pub fn buf_mut(&mut self) -> &mut Descriptor {
+        &mut self.buf
     }
 }

@@ -20,10 +20,11 @@ use smoltcp::wire::{EthernetAddress, HardwareAddress};
 use sel4_async_block_io::{
     constant_block_sizes::BlockSize512, disk::Disk, CachedBlockIO, ConstantBlockSize,
 };
+use sel4_bounce_buffer_allocator::{Basic, BounceBufferAllocator};
 use sel4_externally_shared::ExternallySharedRef;
 use sel4_logging::{LevelFilter, Logger, LoggerBuilder};
 use sel4_microkit::{memory_region_symbol, protection_domain, var, Channel, Handler};
-use sel4_shared_ring_buffer::{RingBuffer, RingBuffers};
+use sel4_shared_ring_buffer::RingBuffers;
 use sel4_shared_ring_buffer_block_io::SharedRingBufferBlockIO;
 use sel4_shared_ring_buffer_smoltcp::DeviceImpl;
 
@@ -75,15 +76,8 @@ fn init() -> impl Handler {
     let net_client = NetClient::new(NET_DRIVER);
     let block_client = BlockClient::new(BLOCK_DRIVER);
 
-    let notify_net = || {
-        NET_DRIVER.notify();
-        Ok::<_, !>(())
-    };
-
-    let notify_block = || {
-        BLOCK_DRIVER.notify();
-        Ok::<_, !>(())
-    };
+    let notify_net: fn() = || NET_DRIVER.notify();
+    let notify_block: fn() = || BLOCK_DRIVER.notify();
 
     let net_device = DeviceImpl::new(
         unsafe {
@@ -92,22 +86,16 @@ fn init() -> impl Handler {
             )
         },
         *var!(virtio_net_client_dma_paddr: usize = 0),
-        unsafe {
-            RingBuffers::new(
-                RingBuffer::from_ptr(memory_region_symbol!(virtio_net_rx_free: *mut _)),
-                RingBuffer::from_ptr(memory_region_symbol!(virtio_net_rx_used: *mut _)),
-                notify_net,
-                true,
-            )
-        },
-        unsafe {
-            RingBuffers::new(
-                RingBuffer::from_ptr(memory_region_symbol!(virtio_net_tx_free: *mut _)),
-                RingBuffer::from_ptr(memory_region_symbol!(virtio_net_tx_used: *mut _)),
-                notify_net,
-                true,
-            )
-        },
+        RingBuffers::from_ptrs_using_default_initialization_strategy_for_role(
+            unsafe { ExternallySharedRef::new(memory_region_symbol!(virtio_net_rx_free: *mut _)) },
+            unsafe { ExternallySharedRef::new(memory_region_symbol!(virtio_net_rx_used: *mut _)) },
+            notify_net,
+        ),
+        RingBuffers::from_ptrs_using_default_initialization_strategy_for_role(
+            unsafe { ExternallySharedRef::new(memory_region_symbol!(virtio_net_tx_free: *mut _)) },
+            unsafe { ExternallySharedRef::new(memory_region_symbol!(virtio_net_tx_used: *mut _)) },
+            notify_net,
+        ),
         16,
         2048,
         1500,
@@ -124,24 +112,28 @@ fn init() -> impl Handler {
 
     let num_blocks = block_client.get_num_blocks();
 
-    let shared_block_io = SharedRingBufferBlockIO::new(
-        BlockSize512::SINGLETON,
-        num_blocks,
-        unsafe {
+    let shared_block_io = {
+        let dma_region = unsafe {
             ExternallySharedRef::<'static, _>::new(
                 memory_region_symbol!(virtio_blk_client_dma_vaddr: *mut [u8], n = *var!(virtio_blk_client_dma_size: usize = 0)),
             )
-        },
-        *var!(virtio_blk_client_dma_paddr: usize = 0),
-        unsafe {
-            RingBuffers::new(
-                RingBuffer::from_ptr(memory_region_symbol!(virtio_blk_free: *mut _)),
-                RingBuffer::from_ptr(memory_region_symbol!(virtio_blk_used: *mut _)),
+        };
+
+        let bounce_buffer_allocator =
+            BounceBufferAllocator::new(Basic::new(dma_region.as_ptr().len()), 1);
+
+        SharedRingBufferBlockIO::new(
+            BlockSize512::SINGLETON,
+            num_blocks,
+            dma_region,
+            bounce_buffer_allocator,
+            RingBuffers::from_ptrs_using_default_initialization_strategy_for_role(
+                unsafe { ExternallySharedRef::new(memory_region_symbol!(virtio_blk_free: *mut _)) },
+                unsafe { ExternallySharedRef::new(memory_region_symbol!(virtio_blk_used: *mut _)) },
                 notify_block,
-                true,
-            )
-        },
-    );
+            ),
+        )
+    };
 
     HandlerImpl::new(
         TIMER_DRIVER,

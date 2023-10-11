@@ -17,7 +17,6 @@ mk {
     sel4-async-block-io-cpiofs
     sel4-async-block-io-fat
     sel4-async-network
-    sel4-async-request-statuses
     sel4-async-single-threaded-executor
     sel4-async-time
     sel4-async-unsync
@@ -30,6 +29,7 @@ mk {
     sel4-shared-ring-buffer
     sel4-shared-ring-buffer-block-io
     sel4-shared-ring-buffer-block-io-types
+    sel4-shared-ring-buffer-bookkeeping
     sel4-shared-ring-buffer-smoltcp
     sel4-sync
   ];

@@ -15,7 +15,7 @@ use virtio_drivers::{
 use sel4_externally_shared::ExternallySharedRef;
 use sel4_microkit::{memory_region_symbol, protection_domain, var, Channel, Handler, MessageInfo};
 use sel4_microkit_message::MessageInfoExt as _;
-use sel4_shared_ring_buffer::{RingBuffer, RingBuffers};
+use sel4_shared_ring_buffer::{roles::Use, RingBuffers};
 
 use microkit_http_server_example_virtio_hal_impl::HalImpl;
 use microkit_http_server_example_virtio_net_driver_interface_types::*;
@@ -53,25 +53,21 @@ fn init() -> HandlerImpl {
         )
     };
 
-    let client_client_dma_region_paddr = *var!(virtio_net_client_dma_paddr: usize = 0);
+    let notify_client: fn() = || CLIENT.notify();
 
-    let rx_ring_buffers = unsafe {
-        RingBuffers::<'_, fn() -> Result<(), !>>::new(
-            RingBuffer::from_ptr(memory_region_symbol!(virtio_net_rx_free: *mut _)),
-            RingBuffer::from_ptr(memory_region_symbol!(virtio_net_rx_used: *mut _)),
+    let rx_ring_buffers =
+        RingBuffers::<'_, Use, fn()>::from_ptrs_using_default_initialization_strategy_for_role(
+            unsafe { ExternallySharedRef::new(memory_region_symbol!(virtio_net_rx_free: *mut _)) },
+            unsafe { ExternallySharedRef::new(memory_region_symbol!(virtio_net_rx_used: *mut _)) },
             notify_client,
-            true,
-        )
-    };
+        );
 
-    let tx_ring_buffers = unsafe {
-        RingBuffers::<'_, fn() -> Result<(), !>>::new(
-            RingBuffer::from_ptr(memory_region_symbol!(virtio_net_tx_free: *mut _)),
-            RingBuffer::from_ptr(memory_region_symbol!(virtio_net_tx_used: *mut _)),
+    let tx_ring_buffers =
+        RingBuffers::<'_, Use, fn()>::from_ptrs_using_default_initialization_strategy_for_role(
+            unsafe { ExternallySharedRef::new(memory_region_symbol!(virtio_net_tx_free: *mut _)) },
+            unsafe { ExternallySharedRef::new(memory_region_symbol!(virtio_net_tx_used: *mut _)) },
             notify_client,
-            true,
-        )
-    };
+        );
 
     dev.ack_interrupt();
     DEVICE.irq_ack().unwrap();
@@ -79,23 +75,16 @@ fn init() -> HandlerImpl {
     HandlerImpl {
         dev,
         client_region,
-        client_client_dma_region_paddr,
         rx_ring_buffers,
         tx_ring_buffers,
     }
 }
 
-fn notify_client() -> Result<(), !> {
-    CLIENT.notify();
-    Ok::<_, !>(())
-}
-
 struct HandlerImpl {
     dev: VirtIONet<HalImpl, MmioTransport, NET_QUEUE_SIZE>,
     client_region: ExternallySharedRef<'static, [u8]>,
-    client_client_dma_region_paddr: usize,
-    rx_ring_buffers: RingBuffers<'static, fn() -> Result<(), !>>,
-    tx_ring_buffers: RingBuffers<'static, fn() -> Result<(), !>>,
+    rx_ring_buffers: RingBuffers<'static, Use, fn()>,
+    tx_ring_buffers: RingBuffers<'static, Use, fn()>,
 }
 
 impl Handler for HandlerImpl {
@@ -106,13 +95,13 @@ impl Handler for HandlerImpl {
             DEVICE | CLIENT => {
                 let mut notify_rx = false;
 
-                while self.dev.can_recv() && !self.rx_ring_buffers.free().is_empty() {
+                while self.dev.can_recv() && !self.rx_ring_buffers.free_mut().is_empty().unwrap() {
                     let rx_buf = self.dev.receive().unwrap();
-                    let desc = self.rx_ring_buffers.free_mut().dequeue().unwrap();
+                    let desc = self.rx_ring_buffers.free_mut().dequeue().unwrap().unwrap();
                     let desc_len = usize::try_from(desc.len()).unwrap();
                     assert!(desc_len >= rx_buf.packet_len());
                     let buf_range = {
-                        let start = desc.encoded_addr() - self.client_client_dma_region_paddr;
+                        let start = desc.encoded_addr();
                         start..start + rx_buf.packet_len()
                     };
                     self.client_region
@@ -120,20 +109,24 @@ impl Handler for HandlerImpl {
                         .index(buf_range)
                         .copy_from_slice(rx_buf.packet());
                     self.dev.recycle_rx_buffer(rx_buf).unwrap();
-                    self.rx_ring_buffers.used_mut().enqueue(desc).unwrap();
+                    self.rx_ring_buffers
+                        .used_mut()
+                        .enqueue_and_commit(desc)
+                        .unwrap()
+                        .unwrap();
                     notify_rx = true;
                 }
 
                 if notify_rx {
-                    self.rx_ring_buffers.notify().unwrap();
+                    self.rx_ring_buffers.notify();
                 }
 
                 let mut notify_tx = false;
 
-                while !self.tx_ring_buffers.free().is_empty() && self.dev.can_send() {
-                    let desc = self.tx_ring_buffers.free_mut().dequeue().unwrap();
+                while !self.tx_ring_buffers.free_mut().is_empty().unwrap() && self.dev.can_send() {
+                    let desc = self.tx_ring_buffers.free_mut().dequeue().unwrap().unwrap();
                     let buf_range = {
-                        let start = desc.encoded_addr() - self.client_client_dma_region_paddr;
+                        let start = desc.encoded_addr();
                         start..start + usize::try_from(desc.len()).unwrap()
                     };
                     let mut tx_buf = self.dev.new_tx_buffer(buf_range.len());
@@ -142,12 +135,16 @@ impl Handler for HandlerImpl {
                         .index(buf_range)
                         .copy_into_slice(tx_buf.packet_mut());
                     self.dev.send(tx_buf).unwrap();
-                    self.tx_ring_buffers.used_mut().enqueue(desc).unwrap();
+                    self.tx_ring_buffers
+                        .used_mut()
+                        .enqueue_and_commit(desc)
+                        .unwrap()
+                        .unwrap();
                     notify_tx = true;
                 }
 
                 if notify_tx {
-                    self.tx_ring_buffers.notify().unwrap();
+                    self.tx_ring_buffers.notify();
                 }
 
                 self.dev.ack_interrupt();

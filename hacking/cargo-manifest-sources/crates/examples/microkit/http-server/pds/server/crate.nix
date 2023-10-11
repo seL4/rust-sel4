@@ -16,7 +16,7 @@ mk {
 
     smoltcp = smoltcpWith [];
 
-    async-unsync = { version = "0.2.2"; default-features = false; };
+    async-unsync = { version = versions.async-unsync; default-features = false; };
 
     sel4-newlib = {
       features = [
@@ -47,7 +47,7 @@ mk {
     sel4-async-single-threaded-executor
     sel4-async-network
     sel4-async-time
-    sel4-async-request-statuses
+    sel4-shared-ring-buffer-bookkeeping
     sel4-async-block-io-fat
     sel4-newlib
     sel4-bounce-buffer-allocator
