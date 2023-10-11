@@ -11,7 +11,7 @@ use smoltcp::time::Instant as SmoltcpInstant;
 use sel4_async_block_io::constant_block_sizes::BlockSize512;
 use sel4_async_network::{DhcpOverrides, ManagedInterface};
 use sel4_async_single_threaded_executor::{LocalPool, LocalSpawner};
-use sel4_async_timer_manager::{Instant, TimerManager};
+use sel4_async_time::{Instant, TimerManager};
 use sel4_shared_ring_buffer_block_io::SharedRingBufferBlockIO;
 
 use crate::{DeviceImpl, TimerClient};

@@ -2446,7 +2446,7 @@ dependencies = [
  "sel4-async-network",
  "sel4-async-request-statuses",
  "sel4-async-single-threaded-executor",
- "sel4-async-timer-manager",
+ "sel4-async-time",
  "sel4-async-unsync",
  "sel4-bounce-buffer-allocator",
  "sel4-config",
@@ -2493,7 +2493,7 @@ dependencies = [
  "sel4-async-network",
  "sel4-async-request-statuses",
  "sel4-async-single-threaded-executor",
- "sel4-async-timer-manager",
+ "sel4-async-time",
  "sel4-bounce-buffer-allocator",
  "sel4-externally-shared",
  "sel4-immediate-sync-once-cell",
@@ -2522,7 +2522,7 @@ dependencies = [
  "sel4-async-network",
  "sel4-async-network-mbedtls",
  "sel4-async-single-threaded-executor",
- "sel4-async-timer-manager",
+ "sel4-async-time",
  "sel4-async-unsync",
  "sel4-panicking-env",
 ]
@@ -3548,7 +3548,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "sel4-async-timer-manager"
+name = "sel4-async-time"
 version = "0.1.0"
 dependencies = [
  "log",

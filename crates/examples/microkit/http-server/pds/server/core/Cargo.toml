@@ -16,7 +16,7 @@ sel4-async-block-io = { path = "../../../../../../sel4-async/block-io" }
 sel4-async-block-io-fat = { path = "../../../../../../sel4-async/block-io/fat" }
 sel4-async-network = { path = "../../../../../../sel4-async/network" }
 sel4-async-network-mbedtls = { path = "../../../../../../sel4-async/network/mbedtls" }
-sel4-async-timer-manager = { path = "../../../../../../sel4-async/timer-manager" }
+sel4-async-time = { path = "../../../../../../sel4-async/time" }
 sel4-async-unsync = { path = "../../../../../../sel4-async/unsync" }
 sel4-panicking-env = { path = "../../../../../../sel4-panicking/env" }
 
