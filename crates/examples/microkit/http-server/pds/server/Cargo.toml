@@ -14,7 +14,6 @@ sel4 = { path = "../../../../../sel4" }
 sel4-async-block-io = { path = "../../../../../sel4-async/block-io" }
 sel4-async-block-io-fat = { path = "../../../../../sel4-async/block-io/fat" }
 sel4-async-network = { path = "../../../../../sel4-async/network" }
-sel4-async-request-statuses = { path = "../../../../../sel4-async/request-statuses" }
 sel4-async-time = { path = "../../../../../sel4-async/time" }
 sel4-bounce-buffer-allocator = { path = "../../../../../sel4-bounce-buffer-allocator" }
 sel4-immediate-sync-once-cell = { path = "../../../../../sel4-immediate-sync-once-cell" }
@@ -52,6 +51,9 @@ features = ["nosys", "all-symbols", "sel4-panicking-env"]
 
 [dependencies.sel4-shared-ring-buffer-block-io-types]
 path = "../../../../../sel4-shared-ring-buffer/block-io/types"
+
+[dependencies.sel4-shared-ring-buffer-bookkeeping]
+path = "../../../../../sel4-shared-ring-buffer/bookkeeping"
 
 [dependencies.smoltcp]
 version = "0.10.0"

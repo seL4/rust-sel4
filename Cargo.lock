@@ -2444,7 +2444,6 @@ dependencies = [
  "sel4-async-block-io-cpiofs",
  "sel4-async-block-io-fat",
  "sel4-async-network",
- "sel4-async-request-statuses",
  "sel4-async-single-threaded-executor",
  "sel4-async-time",
  "sel4-async-unsync",
@@ -2463,6 +2462,7 @@ dependencies = [
  "sel4-shared-ring-buffer",
  "sel4-shared-ring-buffer-block-io",
  "sel4-shared-ring-buffer-block-io-types",
+ "sel4-shared-ring-buffer-bookkeeping",
  "sel4-shared-ring-buffer-smoltcp",
  "sel4-sync",
  "sel4-sys",
@@ -2491,7 +2491,6 @@ dependencies = [
  "sel4-async-block-io",
  "sel4-async-block-io-fat",
  "sel4-async-network",
- "sel4-async-request-statuses",
  "sel4-async-single-threaded-executor",
  "sel4-async-time",
  "sel4-bounce-buffer-allocator",
@@ -2504,6 +2503,7 @@ dependencies = [
  "sel4-shared-ring-buffer",
  "sel4-shared-ring-buffer-block-io",
  "sel4-shared-ring-buffer-block-io-types",
+ "sel4-shared-ring-buffer-bookkeeping",
  "sel4-shared-ring-buffer-smoltcp",
  "sel4-sync",
  "smoltcp",
@@ -3537,10 +3537,6 @@ name = "sel4-async-network-mbedtls-mozilla-ca-list"
 version = "0.1.0"
 
 [[package]]
-name = "sel4-async-request-statuses"
-version = "0.1.0"
-
-[[package]]
 name = "sel4-async-single-threaded-executor"
 version = "0.1.0"
 dependencies = [
@@ -4103,11 +4099,11 @@ dependencies = [
  "futures",
  "log",
  "sel4-async-block-io",
- "sel4-async-request-statuses",
  "sel4-bounce-buffer-allocator",
  "sel4-externally-shared",
  "sel4-shared-ring-buffer",
  "sel4-shared-ring-buffer-block-io-types",
+ "sel4-shared-ring-buffer-bookkeeping",
 ]
 
 [[package]]
@@ -4117,6 +4113,13 @@ dependencies = [
  "num_enum",
  "sel4-shared-ring-buffer",
  "zerocopy 0.7.6",
+]
+
+[[package]]
+name = "sel4-shared-ring-buffer-bookkeeping"
+version = "0.1.0"
+dependencies = [
+ "async-unsync",
 ]
 
 [[package]]

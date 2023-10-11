@@ -32,6 +32,11 @@ pub trait BlockIO {
     fn num_blocks(&self) -> u64;
 
     async fn read_blocks(&self, start_block_idx: u64, buf: &mut [u8]) -> Result<(), Self::Error>;
+
+    // TODO
+    async fn write_blocks(&self, _start_block_idx: u64, _buf: &[u8]) -> Result<(), Self::Error> {
+        unimplemented!()
+    }
 }
 
 pub trait BlockSize {

@@ -78,7 +78,6 @@ definitely! {
     sel4_async_block_io_cpiofs
     sel4_async_block_io_fat
     sel4_async_network
-    sel4_async_request_statuses
     sel4_async_single_threaded_executor
     sel4_async_time
     sel4_async_unsync
@@ -92,6 +91,7 @@ definitely! {
     sel4_shared_ring_buffer
     sel4_shared_ring_buffer_block_io
     sel4_shared_ring_buffer_block_io_types
+    sel4_shared_ring_buffer_bookkeeping
     sel4_shared_ring_buffer_smoltcp
     sel4_sync
     sel4_sys

@@ -11,7 +11,7 @@ use smoltcp::phy::{self, Device, DeviceCapabilities};
 use smoltcp::time::Instant;
 
 use sel4_externally_shared::ExternallySharedRef;
-use sel4_shared_ring_buffer::RingBuffers;
+use sel4_shared_ring_buffer::{roles::Provide, RingBuffers};
 
 mod inner;
 
@@ -27,8 +27,8 @@ impl DeviceImpl {
     pub fn new(
         dma_region: ExternallySharedRef<'static, [u8]>,
         dma_region_paddr: usize,
-        rx_ring_buffers: RingBuffers<'static, fn() -> Result<(), !>>,
-        tx_ring_buffers: RingBuffers<'static, fn() -> Result<(), !>>,
+        rx_ring_buffers: RingBuffers<'static, Provide, fn()>,
+        tx_ring_buffers: RingBuffers<'static, Provide, fn()>,
         num_rx_buffers: usize,
         rx_buffer_size: usize,
         mtu: usize,

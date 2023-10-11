@@ -20,7 +20,7 @@ use virtio_drivers::{
 use sel4_externally_shared::ExternallySharedRef;
 use sel4_microkit::{memory_region_symbol, protection_domain, var, Channel, Handler, MessageInfo};
 use sel4_microkit_message::MessageInfoExt as _;
-use sel4_shared_ring_buffer::{RingBuffer, RingBuffers};
+use sel4_shared_ring_buffer::{roles::Use, RingBuffers};
 use sel4_shared_ring_buffer_block_io_types::{
     BlockIORequest, BlockIORequestStatus, BlockIORequestType,
 };
@@ -61,16 +61,14 @@ fn init() -> HandlerImpl {
         )
     };
 
-    let client_client_dma_region_paddr = *var!(virtio_blk_client_dma_paddr: usize = 0);
+    let notify_client: fn() = || CLIENT.notify();
 
-    let ring_buffers = unsafe {
-        RingBuffers::<'_, fn() -> Result<(), !>, BlockIORequest>::new(
-            RingBuffer::from_ptr(memory_region_symbol!(virtio_blk_free: *mut _)),
-            RingBuffer::from_ptr(memory_region_symbol!(virtio_blk_used: *mut _)),
+    let ring_buffers =
+        RingBuffers::<'_, Use, fn(), BlockIORequest>::from_ptrs_using_default_initialization_strategy_for_role(
+            unsafe { ExternallySharedRef::new(memory_region_symbol!(virtio_blk_free: *mut _)) },
+            unsafe { ExternallySharedRef::new(memory_region_symbol!(virtio_blk_used: *mut _)) },
             notify_client,
-            true,
-        )
-    };
+        );
 
     dev.ack_interrupt();
     DEVICE.irq_ack().unwrap();
@@ -78,22 +76,15 @@ fn init() -> HandlerImpl {
     HandlerImpl {
         dev,
         client_region,
-        client_client_dma_region_paddr,
         ring_buffers,
         pending: BTreeMap::new(),
     }
 }
 
-fn notify_client() -> Result<(), !> {
-    CLIENT.notify();
-    Ok::<_, !>(())
-}
-
 struct HandlerImpl {
     dev: VirtIOBlk<HalImpl, MmioTransport>,
     client_region: ExternallySharedRef<'static, [u8]>,
-    client_client_dma_region_paddr: usize,
-    ring_buffers: RingBuffers<'static, fn() -> Result<(), !>, BlockIORequest>,
+    ring_buffers: RingBuffers<'static, Use, fn(), BlockIORequest>,
     pending: BTreeMap<u16, Pin<Box<PendingEntry>>>,
 }
 
@@ -115,8 +106,7 @@ impl Handler for HandlerImpl {
                     let token = self.dev.peek_used().unwrap();
                     let mut pending_entry = self.pending.remove(&token).unwrap();
                     let buf_range = {
-                        let start = pending_entry.client_req.buf().encoded_addr()
-                            - self.client_client_dma_region_paddr;
+                        let start = pending_entry.client_req.buf().encoded_addr();
                         let len = usize::try_from(pending_entry.client_req.buf().len()).unwrap();
                         start..start + len
                     };
@@ -142,12 +132,18 @@ impl Handler for HandlerImpl {
                     };
                     let mut completed_req = pending_entry.client_req;
                     completed_req.set_status(status);
-                    self.ring_buffers.used_mut().enqueue(completed_req).unwrap();
+                    self.ring_buffers
+                        .used_mut()
+                        .enqueue_and_commit(completed_req)
+                        .unwrap()
+                        .unwrap();
                     notify = true;
                 }
 
-                while self.pending.len() < QUEUE_SIZE && !self.ring_buffers.free().is_empty() {
-                    let client_req = self.ring_buffers.free_mut().dequeue().unwrap();
+                while self.pending.len() < QUEUE_SIZE
+                    && !self.ring_buffers.free_mut().is_empty().unwrap()
+                {
+                    let client_req = self.ring_buffers.free_mut().dequeue().unwrap().unwrap();
                     assert_eq!(client_req.ty().unwrap(), BlockIORequestType::Read);
                     let mut pending_entry = Box::pin(PendingEntry {
                         client_req,
@@ -155,8 +151,7 @@ impl Handler for HandlerImpl {
                         virtio_resp: BlkResp::default(),
                     });
                     let buf_range = {
-                        let start =
-                            client_req.buf().encoded_addr() - self.client_client_dma_region_paddr;
+                        let start = client_req.buf().encoded_addr();
                         let len = usize::try_from(client_req.buf().len()).unwrap();
                         start..start + len
                     };
@@ -186,7 +181,7 @@ impl Handler for HandlerImpl {
                 }
 
                 if notify {
-                    self.ring_buffers.notify().unwrap();
+                    self.ring_buffers.notify();
                 }
 
                 self.dev.ack_interrupt();

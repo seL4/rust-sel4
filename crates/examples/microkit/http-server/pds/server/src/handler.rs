@@ -12,6 +12,7 @@ use sel4_async_block_io::constant_block_sizes::BlockSize512;
 use sel4_async_network::{DhcpOverrides, ManagedInterface};
 use sel4_async_single_threaded_executor::{LocalPool, LocalSpawner};
 use sel4_async_time::{Instant, TimerManager};
+use sel4_bounce_buffer_allocator::Basic;
 use sel4_shared_ring_buffer_block_io::SharedRingBufferBlockIO;
 
 use crate::{DeviceImpl, TimerClient};
@@ -22,7 +23,7 @@ pub(crate) struct HandlerImpl {
     block_driver_channel: sel4_microkit::Channel,
     timer: TimerClient,
     net_device: DeviceImpl,
-    shared_block_io: SharedRingBufferBlockIO<BlockSize512>,
+    shared_block_io: SharedRingBufferBlockIO<BlockSize512, Basic, fn()>,
     shared_timers: TimerManager,
     shared_network: ManagedInterface,
     local_pool: LocalPool,
@@ -38,7 +39,7 @@ impl HandlerImpl {
         timer: TimerClient,
         mut net_device: DeviceImpl,
         net_config: Config,
-        shared_block_io: SharedRingBufferBlockIO<BlockSize512>,
+        shared_block_io: SharedRingBufferBlockIO<BlockSize512, Basic, fn()>,
         f: impl FnOnce(TimerManager, ManagedInterface, LocalSpawner) -> T,
     ) -> Self {
         let now = Self::now_with_timer_client(&timer);
@@ -103,7 +104,7 @@ impl HandlerImpl {
             activity |= self.shared_timers.poll(now);
             activity |= self.net_device.poll();
             activity |= self.shared_network.poll(now_smoltcp, &mut self.net_device);
-            activity |= self.shared_block_io.poll();
+            activity |= self.shared_block_io.poll().unwrap();
             if !activity {
                 let delays = &[
                     self.shared_timers.poll_at().map(|absolute| absolute - now),

@@ -1,199 +1,303 @@
 #![no_std]
 
+use core::marker::PhantomData;
 use core::num::Wrapping;
-use core::ptr::NonNull;
 use core::sync::atomic::Ordering;
-
-use zerocopy::{AsBytes, FromBytes, FromZeroes};
 
 use sel4_externally_shared::{map_field, ExternallySharedPtr, ExternallySharedRef};
 
+pub mod roles;
+
+use roles::{Read, RingBufferRole, RingBufferRoleValue, RingBuffersRole, Write};
+
+mod descriptor;
+
+pub use descriptor::Descriptor;
+
+// TODO
+// - zerocopy for RawRingBuffer
+// - require zerocopy for T in enqueue and dequeue?
+// - variable length descriptor array?
+
 pub const RING_BUFFER_SIZE: usize = 512;
 
-pub struct RingBuffers<'a, F, T = Descriptor> {
-    free: RingBuffer<'a, T>,
-    used: RingBuffer<'a, T>,
+#[derive(Debug, Copy, Clone, PartialOrd, Ord, PartialEq, Eq, Hash)]
+pub struct PeerMisbehaviorError(());
+
+impl PeerMisbehaviorError {
+    fn new() -> Self {
+        Self(())
+    }
+}
+
+pub struct RingBuffers<'a, R: RingBuffersRole, F, T = Descriptor> {
+    free: RingBuffer<'a, R::FreeRole, T>,
+    used: RingBuffer<'a, R::UsedRole, T>,
     notify: F,
 }
 
-impl<'a, F, T: Copy> RingBuffers<'a, F, T> {
+impl<'a, R: RingBuffersRole, F, T: Copy> RingBuffers<'a, R, F, T> {
     pub fn new(
-        free: RingBuffer<'a, T>,
-        used: RingBuffer<'a, T>,
+        free: RingBuffer<'a, R::FreeRole, T>,
+        used: RingBuffer<'a, R::UsedRole, T>,
         notify: F,
-        initialize: bool,
     ) -> Self {
-        let mut this = Self { free, used, notify };
-        if initialize {
-            this.free_mut().initialize();
-            this.used_mut().initialize();
-        }
-        this
+        Self { free, used, notify }
     }
 
-    pub fn free(&self) -> &RingBuffer<'a, T> {
+    pub fn from_ptrs_using_default_initialization_strategy_for_role(
+        free: ExternallySharedRef<'a, RawRingBuffer<T>>,
+        used: ExternallySharedRef<'a, RawRingBuffer<T>>,
+        notify: F,
+    ) -> Self {
+        let initialization_strategy = R::default_initialization_strategy();
+        Self::new(
+            RingBuffer::new(free, initialization_strategy),
+            RingBuffer::new(used, initialization_strategy),
+            notify,
+        )
+    }
+
+    pub fn free(&self) -> &RingBuffer<'a, R::FreeRole, T> {
         &self.free
     }
 
-    pub fn used(&self) -> &RingBuffer<'a, T> {
+    pub fn used(&self) -> &RingBuffer<'a, R::UsedRole, T> {
         &self.used
     }
 
-    pub fn free_mut(&mut self) -> &mut RingBuffer<'a, T> {
+    pub fn free_mut(&mut self) -> &mut RingBuffer<'a, R::FreeRole, T> {
         &mut self.free
     }
 
-    pub fn used_mut(&mut self) -> &mut RingBuffer<'a, T> {
+    pub fn used_mut(&mut self) -> &mut RingBuffer<'a, R::UsedRole, T> {
         &mut self.used
     }
 }
 
-impl<'a, T, F: Fn() -> R, R> RingBuffers<'a, F, T> {
-    pub fn notify(&self) -> R {
+impl<'a, U, R: RingBuffersRole, F: Fn() -> U, T> RingBuffers<'a, R, F, T> {
+    pub fn notify(&self) -> U {
         (self.notify)()
     }
 }
 
-impl<'a, T, F: FnMut() -> R, R> RingBuffers<'a, F, T> {
-    pub fn notify_mut(&mut self) -> R {
+impl<'a, U, R: RingBuffersRole, F: FnMut() -> U, T> RingBuffers<'a, R, F, T> {
+    pub fn notify_mut(&mut self) -> U {
         (self.notify)()
     }
 }
 
-// TODO: zerocopy AsBytes and FromBytes
 #[repr(C)]
 #[derive(Copy, Clone, Debug)]
 pub struct RawRingBuffer<T = Descriptor> {
-    write_index: u32,
-    read_index: u32,
-    descriptors: [T; RING_BUFFER_SIZE],
+    pub write_index: u32,
+    pub read_index: u32,
+    pub descriptors: [T; RING_BUFFER_SIZE],
 }
 
-#[repr(C)]
-#[derive(Copy, Clone, Debug, PartialOrd, Ord, PartialEq, Eq, AsBytes, FromBytes, FromZeroes)]
-pub struct Descriptor {
-    encoded_addr: usize,
-    len: u32,
-    _padding: [u8; 4],
-    cookie: usize,
+pub struct RingBuffer<'a, R: RingBufferRole, T = Descriptor> {
+    inner: ExternallySharedRef<'a, RawRingBuffer<T>>,
+    stored_write_index: Wrapping<u32>,
+    stored_read_index: Wrapping<u32>,
+    _phantom: PhantomData<R>,
 }
 
-impl Descriptor {
-    pub fn new(encoded_addr: usize, len: u32, cookie: usize) -> Self {
+impl<'a, R: RingBufferRole, T: Copy> RingBuffer<'a, R, T> {
+    const SIZE: usize = RING_BUFFER_SIZE;
+
+    pub fn new(
+        ptr: ExternallySharedRef<'a, RawRingBuffer<T>>,
+        initialization_strategy: InitializationStrategy,
+    ) -> Self {
+        let mut inner = ptr;
+        let initial_state = match initialization_strategy {
+            InitializationStrategy::ReadState => {
+                let ptr = inner.as_ptr();
+                InitialState {
+                    write_index: map_field!(ptr.write_index).read(),
+                    read_index: map_field!(ptr.read_index).read(),
+                }
+            }
+            InitializationStrategy::UseState(initial_state) => initial_state,
+            InitializationStrategy::UseAndWriteState(initial_state) => {
+                let ptr = inner.as_mut_ptr();
+                map_field!(ptr.write_index).write(initial_state.write_index);
+                map_field!(ptr.read_index).write(initial_state.read_index);
+                initial_state
+            }
+        };
         Self {
-            encoded_addr,
-            len,
-            _padding: [0; 4],
-            cookie,
+            inner,
+            stored_write_index: Wrapping(initial_state.write_index),
+            stored_read_index: Wrapping(initial_state.read_index),
+            _phantom: PhantomData,
         }
     }
 
-    pub fn encoded_addr(&self) -> usize {
-        self.encoded_addr
+    const fn role(&self) -> RingBufferRoleValue {
+        R::ROLE
     }
 
-    #[allow(clippy::len_without_is_empty)]
-    pub fn len(&self) -> u32 {
-        self.len
+    pub const fn capacity(&self) -> usize {
+        Self::SIZE - 1
     }
 
-    pub fn cookie(&self) -> usize {
-        self.cookie
-    }
-}
-
-pub struct RingBuffer<'a, T = Descriptor> {
-    inner: ExternallySharedRef<'a, RawRingBuffer<T>>,
-}
-
-impl<'a, T: Copy> RingBuffer<'a, T> {
-    // TODO parameterizing RingBuffer to use this const is not very ergonomic
-    // pub const SIZE: usize = RING_BUFFER_SIZE;
-
-    pub fn new(inner: ExternallySharedRef<'a, RawRingBuffer<T>>) -> Self {
-        Self { inner }
-    }
-
-    #[allow(clippy::missing_safety_doc)]
-    pub unsafe fn from_ptr(ptr: NonNull<RawRingBuffer<T>>) -> Self {
-        Self::new(ExternallySharedRef::new(ptr))
-    }
-
-    fn write_index(&self) -> Wrapping<u32> {
-        let ptr = self.inner.as_ptr();
-        Wrapping(map_field!(ptr.write_index).read())
-    }
-
-    fn read_index(&self) -> Wrapping<u32> {
-        let ptr = self.inner.as_ptr();
-        Wrapping(map_field!(ptr.read_index).read())
-    }
-
-    fn set_write_index(&mut self, index: Wrapping<u32>) {
+    fn write_index(&mut self) -> ExternallySharedPtr<'_, u32> {
         let ptr = self.inner.as_mut_ptr();
-        map_field!(ptr.write_index).write(index.0)
+        map_field!(ptr.write_index)
     }
 
-    fn set_read_index(&mut self, index: Wrapping<u32>) {
+    fn read_index(&mut self) -> ExternallySharedPtr<'_, u32> {
         let ptr = self.inner.as_mut_ptr();
-        map_field!(ptr.read_index).write(index.0)
-    }
-
-    fn initialize(&mut self) {
-        self.set_write_index(Wrapping(0));
-        self.set_read_index(Wrapping(0));
+        map_field!(ptr.read_index)
     }
 
     fn descriptor(&mut self, index: Wrapping<u32>) -> ExternallySharedPtr<'_, T> {
-        let linear_index = usize::try_from(residue(index).0).unwrap();
+        let residue = self.residue(index);
         let ptr = self.inner.as_mut_ptr();
-        map_field!(ptr.descriptors).as_slice().index(linear_index)
+        map_field!(ptr.descriptors).as_slice().index(residue)
     }
 
-    pub fn is_empty(&self) -> bool {
-        !has_nonzero_residue(self.write_index() - self.read_index())
-    }
-
-    pub fn is_full(&self) -> bool {
-        !has_nonzero_residue(self.write_index() - self.read_index() + Wrapping(1))
-    }
-
-    pub fn enqueue(&mut self, desc: T) -> Result<(), Error> {
-        if self.is_full() {
-            return Err(Error::RingIsFull);
+    fn update_stored_write_index(&mut self) -> Result<(), PeerMisbehaviorError> {
+        debug_assert!(self.role().is_read());
+        let observed_write_index = Wrapping(self.write_index().read());
+        let observed_num_filled_slots = self.residue(observed_write_index - self.stored_read_index);
+        if observed_num_filled_slots < self.stored_num_filled_slots() {
+            return Err(PeerMisbehaviorError::new());
         }
-        self.descriptor(self.write_index()).write(desc);
-        {
-            let ptr = self.inner.as_mut_ptr();
-            map_field!(ptr.write_index).with_atomic(|x| x.fetch_add(1, Ordering::Release));
-        }
+        self.stored_write_index = observed_write_index;
         Ok(())
     }
 
-    pub fn dequeue(&mut self) -> Result<T, Error> {
-        if self.is_empty() {
-            return Err(Error::RingIsEmpty);
+    fn update_stored_read_index(&mut self) -> Result<(), PeerMisbehaviorError> {
+        debug_assert!(self.role().is_write());
+        let observed_read_index = Wrapping(self.read_index().read());
+        let observed_num_filled_slots = self.residue(self.stored_write_index - observed_read_index);
+        if observed_num_filled_slots > self.stored_num_filled_slots() {
+            return Err(PeerMisbehaviorError::new());
         }
-        let desc = self.descriptor(self.read_index()).read();
-        {
-            let ptr = self.inner.as_mut_ptr();
-            map_field!(ptr.read_index).with_atomic(|x| x.fetch_add(1, Ordering::Release));
-        }
-        Ok(desc)
+        self.stored_read_index = observed_read_index;
+        Ok(())
+    }
+
+    fn stored_num_filled_slots(&mut self) -> usize {
+        self.residue(self.stored_write_index - self.stored_read_index)
+    }
+
+    pub fn num_filled_slots(&mut self) -> Result<usize, PeerMisbehaviorError> {
+        match self.role() {
+            RingBufferRoleValue::Read => self.update_stored_write_index(),
+            RingBufferRoleValue::Write => self.update_stored_read_index(),
+        }?;
+        Ok(self.stored_num_filled_slots())
+    }
+
+    pub fn num_empty_slots(&mut self) -> Result<usize, PeerMisbehaviorError> {
+        Ok(self.capacity() - self.num_filled_slots()?)
+    }
+
+    pub fn is_empty(&mut self) -> Result<bool, PeerMisbehaviorError> {
+        Ok(self.num_filled_slots()? == 0)
+    }
+
+    pub fn is_full(&mut self) -> Result<bool, PeerMisbehaviorError> {
+        Ok(self.num_empty_slots()? == 0)
+    }
+
+    fn residue(&self, index: Wrapping<u32>) -> usize {
+        usize::try_from(index.0).unwrap() % Self::SIZE
     }
 }
 
-#[derive(Debug, Copy, Clone, PartialOrd, Ord, PartialEq, Eq)]
-pub enum Error {
-    RingIsFull,
-    RingIsEmpty,
+impl<'a, T: Copy> RingBuffer<'a, Write, T> {
+    pub fn enqueue_and_commit(&mut self, desc: T) -> Result<Result<(), T>, PeerMisbehaviorError> {
+        self.enqueue(desc, true)
+    }
+
+    pub fn enqueue_without_committing(
+        &mut self,
+        desc: T,
+    ) -> Result<Result<(), T>, PeerMisbehaviorError> {
+        self.enqueue(desc, false)
+    }
+
+    pub fn enqueue(
+        &mut self,
+        desc: T,
+        commit: bool,
+    ) -> Result<Result<(), T>, PeerMisbehaviorError> {
+        if self.is_full()? {
+            return Ok(Err(desc));
+        }
+        self.force_enqueue(desc, commit);
+        Ok(Ok(()))
+    }
+
+    pub fn force_enqueue(&mut self, desc: T, commit: bool) {
+        self.descriptor(self.stored_write_index).write(desc);
+        self.stored_write_index += 1;
+        if commit {
+            self.commit();
+        }
+    }
+
+    pub fn commit(&mut self) {
+        self.expose_write_index();
+    }
+
+    fn expose_write_index(&mut self) {
+        let write_index = self.stored_write_index.0;
+        self.write_index()
+            .with_atomic(|x| x.store(write_index, Ordering::Release));
+    }
 }
 
-fn residue(n: Wrapping<u32>) -> Wrapping<u32> {
-    let size = Wrapping(u32::try_from(RING_BUFFER_SIZE).unwrap());
-    n % size
+impl<'a, T: Copy> RingBuffer<'a, Read, T> {
+    pub fn dequeue(&mut self) -> Result<Option<T>, PeerMisbehaviorError> {
+        if self.is_empty()? {
+            return Ok(None);
+        }
+        Ok(Some(self.force_dequeue()))
+    }
+
+    pub fn force_dequeue(&mut self) -> T {
+        let desc = self.descriptor(self.stored_read_index).read();
+        self.stored_read_index += 1;
+        self.expose_read_index();
+        desc
+    }
+
+    fn expose_read_index(&mut self) {
+        let read_index = self.stored_read_index.0;
+        self.read_index()
+            .with_atomic(|x| x.store(read_index, Ordering::Release));
+    }
 }
 
-fn has_nonzero_residue(n: Wrapping<u32>) -> bool {
-    residue(n) != Wrapping(0)
+#[derive(Debug, Copy, Clone, PartialOrd, Ord, PartialEq, Eq, Hash)]
+pub enum InitializationStrategy {
+    ReadState,
+    UseState(InitialState),
+    UseAndWriteState(InitialState),
+}
+
+impl Default for InitializationStrategy {
+    fn default() -> Self {
+        Self::ReadState
+    }
+}
+
+#[derive(Debug, Copy, Clone, PartialOrd, Ord, PartialEq, Eq, Hash, Default)]
+pub struct InitialState {
+    write_index: u32,
+    read_index: u32,
+}
+
+impl InitialState {
+    pub fn new(write_index: u32, read_index: u32) -> Self {
+        Self {
+            write_index,
+            read_index,
+        }
+    }
 }

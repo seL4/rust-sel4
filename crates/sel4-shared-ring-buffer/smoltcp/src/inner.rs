@@ -5,16 +5,13 @@ use core::ops::Range;
 
 use sel4_bounce_buffer_allocator::{Basic, BounceBufferAllocator};
 use sel4_externally_shared::ExternallySharedRef;
-use sel4_shared_ring_buffer::{
-    Descriptor, Error as SharedRingBuffersError, RingBuffers, RING_BUFFER_SIZE,
-};
+use sel4_shared_ring_buffer::{roles::Provide, Descriptor, RingBuffers, RING_BUFFER_SIZE};
 
 pub(crate) struct Inner {
     dma_region: ExternallySharedRef<'static, [u8]>,
-    dma_region_paddr: usize,
     bounce_buffer_allocator: BounceBufferAllocator<Basic>,
-    rx_ring_buffers: RingBuffers<'static, fn() -> Result<(), !>>,
-    tx_ring_buffers: RingBuffers<'static, fn() -> Result<(), !>>,
+    rx_ring_buffers: RingBuffers<'static, Provide, fn()>,
+    tx_ring_buffers: RingBuffers<'static, Provide, fn()>,
     rx_buffers: Vec<RxBufferEntry>,
     tx_buffers: Vec<TxBufferEntry>,
     mtu: usize,
@@ -53,8 +50,8 @@ impl Inner {
     pub(crate) fn new(
         dma_region: ExternallySharedRef<'static, [u8]>,
         dma_region_paddr: usize,
-        mut rx_ring_buffers: RingBuffers<'static, fn() -> Result<(), !>>,
-        tx_ring_buffers: RingBuffers<'static, fn() -> Result<(), !>>,
+        mut rx_ring_buffers: RingBuffers<'static, Provide, fn()>,
+        tx_ring_buffers: RingBuffers<'static, Provide, fn()>,
         num_rx_buffers: usize,
         rx_buffer_size: usize,
         mtu: usize,
@@ -82,7 +79,8 @@ impl Inner {
         for entry in rx_buffers.iter() {
             rx_ring_buffers
                 .free_mut()
-                .enqueue(descriptor_of(dma_region_paddr, entry.range.clone()))
+                .enqueue_and_commit(descriptor_of(entry.range.clone()))
+                .unwrap()
                 .unwrap();
         }
         let tx_buffers = iter::repeat_with(|| TxBufferEntry {
@@ -93,7 +91,6 @@ impl Inner {
 
         Self {
             dma_region,
-            dma_region_paddr,
             bounce_buffer_allocator,
             rx_ring_buffers,
             tx_ring_buffers,
@@ -110,12 +107,7 @@ impl Inner {
     pub(crate) fn poll(&mut self) -> bool {
         let mut notify_rx = false;
 
-        while let Ok(desc) = self
-            .rx_ring_buffers
-            .used_mut()
-            .dequeue()
-            .map_err(|err| assert_eq!(err, SharedRingBuffersError::RingIsEmpty))
-        {
+        while let Some(desc) = self.rx_ring_buffers.used_mut().dequeue().unwrap() {
             let ix = self
                 .lookup_rx_buffer_by_encoded_addr(desc.encoded_addr())
                 .unwrap();
@@ -128,17 +120,12 @@ impl Inner {
         }
 
         if notify_rx {
-            self.rx_ring_buffers.notify().unwrap();
+            self.rx_ring_buffers.notify();
         }
 
         let mut notify_tx = false;
 
-        while let Ok(desc) = self
-            .tx_ring_buffers
-            .used_mut()
-            .dequeue()
-            .map_err(|err| assert_eq!(err, SharedRingBuffersError::RingIsEmpty))
-        {
+        while let Some(desc) = self.tx_ring_buffers.used_mut().dequeue().unwrap() {
             let ix = self.lookup_tx_buffer_by_descriptor(&desc).unwrap();
             let entry = self.tx_buffer_entry_mut(ix);
             let range = match &entry.state {
@@ -153,7 +140,7 @@ impl Inner {
         }
 
         if notify_tx {
-            self.tx_ring_buffers.notify().unwrap();
+            self.tx_ring_buffers.notify();
         }
 
         notify_rx || notify_tx
@@ -163,7 +150,7 @@ impl Inner {
         self.rx_buffers
             .iter()
             .enumerate()
-            .find(|(_i, entry)| self.dma_region_paddr + entry.range.start == encoded_addr)
+            .find(|(_i, entry)| entry.range.start == encoded_addr)
             .map(|(i, _entry)| i)
     }
 
@@ -172,9 +159,7 @@ impl Inner {
             .iter()
             .enumerate()
             .find(|(_i, entry)| match &entry.state {
-                TxBufferState::Sent { range } => {
-                    &descriptor_of(self.dma_region_paddr, range.clone()) == desc
-                }
+                TxBufferState::Sent { range } => &descriptor_of(range.clone()) == desc,
                 _ => false,
             })
             .map(|(i, _entry)| i)
@@ -262,9 +247,13 @@ impl Inner {
             RxBufferState::Claimed { .. } => {
                 entry.state = RxBufferState::Free;
                 let range = entry.range.clone();
-                let desc = descriptor_of(self.dma_region_paddr, range);
-                self.rx_ring_buffers.free_mut().enqueue(desc).unwrap();
-                self.rx_ring_buffers.notify().unwrap();
+                let desc = descriptor_of(range);
+                self.rx_ring_buffers
+                    .free_mut()
+                    .enqueue_and_commit(desc)
+                    .unwrap()
+                    .unwrap();
+                self.rx_ring_buffers.notify();
             }
             _ => {
                 panic!()
@@ -292,9 +281,13 @@ impl Inner {
                 .as_raw_ptr()
                 .as_mut()
         });
-        let desc = descriptor_of(self.dma_region_paddr, range);
-        self.tx_ring_buffers.free_mut().enqueue(desc).unwrap();
-        self.tx_ring_buffers.notify().unwrap();
+        let desc = descriptor_of(range);
+        self.tx_ring_buffers
+            .free_mut()
+            .enqueue_and_commit(desc)
+            .unwrap()
+            .unwrap();
+        self.tx_ring_buffers.notify();
         r
     }
 
@@ -313,10 +306,6 @@ impl Inner {
     }
 }
 
-fn descriptor_of(dma_region_paddr: usize, range: Range<usize>) -> Descriptor {
-    Descriptor::new(
-        dma_region_paddr + range.start,
-        range.len().try_into().unwrap(),
-        0,
-    )
+fn descriptor_of(range: Range<usize>) -> Descriptor {
+    Descriptor::from_encoded_addr_range(range, 0)
 }
