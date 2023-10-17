@@ -225,7 +225,7 @@ impl<S: SlotSemaphore, A: AbstractBounceBufferAllocator, F: FnMut()>
     }
 
     pub fn cancel_request(&mut self, request_index: usize) -> Result<(), ErrorOrUserError> {
-        let mut state_value = self.requests.get_state_value_mut(request_index)?;
+        let state_value = self.requests.get_state_value_mut(request_index)?;
         let occupied = state_value.as_occupied()?;
         match &occupied.state {
             OccupiedState::Pending { .. } => {
@@ -267,7 +267,7 @@ impl<S: SlotSemaphore, A: AbstractBounceBufferAllocator, F: FnMut()>
         buf: &mut PollRequestBuf,
         waker: Option<Waker>,
     ) -> Result<Poll<Result<(), IOError>>, ErrorOrUserError> {
-        let mut state_value = self.requests.get_state_value_mut(request_index)?;
+        let state_value = self.requests.get_state_value_mut(request_index)?;
         let occupied = state_value.as_occupied()?;
 
         Ok(match &mut occupied.state {
@@ -318,7 +318,7 @@ impl<S: SlotSemaphore, A: AbstractBounceBufferAllocator, F: FnMut()>
         while let Some(completed_req) = self.ring_buffers.used_mut().dequeue()? {
             let request_index = completed_req.buf().cookie();
 
-            let mut state_value = self
+            let state_value = self
                 .requests
                 .get_state_value_mut(request_index)
                 .map_err(|_| PeerMisbehaviorError::OutOfBoundsCookie)?;
