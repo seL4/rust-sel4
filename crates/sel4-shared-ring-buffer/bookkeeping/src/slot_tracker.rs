@@ -68,6 +68,31 @@ impl<T: SlotStateTypes> SlotTracker<T> {
         Self::new(iter::repeat((common, free)).take(capacity))
     }
 
+    pub fn new_occupied(iter: impl Iterator<Item = (T::Common, T::Occupied)>) -> Self {
+        let entries = iter
+            .map(|(v_common, v_occupied)| Entry {
+                common: v_common,
+                state: StateInternal::Occupied { value: v_occupied },
+            })
+            .collect();
+        Self {
+            entries,
+            free_list_head_index: None,
+            num_free: 0,
+        }
+    }
+
+    pub fn new_occupied_with_capacity(
+        common: T::Common,
+        occupied: T::Occupied,
+        capacity: usize,
+    ) -> Self
+    where
+        T: SlotStateTypes<Common: Clone, Occupied: Clone>,
+    {
+        Self::new_occupied(iter::repeat((common, occupied)).take(capacity))
+    }
+
     pub fn capacity(&self) -> usize {
         self.entries.capacity()
     }
@@ -82,6 +107,11 @@ impl<T: SlotStateTypes> SlotTracker<T> {
 
     pub fn peek_next_free_index(&self) -> Option<usize> {
         self.free_list_head_index
+    }
+
+    pub fn peek_next_free_value(&self) -> Option<&T::Free> {
+        let index = self.peek_next_free_index()?;
+        Some(self.get_state_value(index).unwrap().as_free().unwrap())
     }
 
     fn get_entry(&self, index: usize) -> Result<&Entry<T>> {
