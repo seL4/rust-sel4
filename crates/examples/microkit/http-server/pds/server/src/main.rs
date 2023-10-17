@@ -79,27 +79,42 @@ fn init() -> impl Handler {
     let notify_net: fn() = || NET_DRIVER.notify();
     let notify_block: fn() = || BLOCK_DRIVER.notify();
 
-    let net_device = DeviceImpl::new(
-        unsafe {
+    let net_device = {
+        let dma_region = unsafe {
             ExternallySharedRef::<'static, _>::new(
                 memory_region_symbol!(virtio_net_client_dma_vaddr: *mut [u8], n = *var!(virtio_net_client_dma_size: usize = 0)),
             )
-        },
-        *var!(virtio_net_client_dma_paddr: usize = 0),
-        RingBuffers::from_ptrs_using_default_initialization_strategy_for_role(
-            unsafe { ExternallySharedRef::new(memory_region_symbol!(virtio_net_rx_free: *mut _)) },
-            unsafe { ExternallySharedRef::new(memory_region_symbol!(virtio_net_rx_used: *mut _)) },
-            notify_net,
-        ),
-        RingBuffers::from_ptrs_using_default_initialization_strategy_for_role(
-            unsafe { ExternallySharedRef::new(memory_region_symbol!(virtio_net_tx_free: *mut _)) },
-            unsafe { ExternallySharedRef::new(memory_region_symbol!(virtio_net_tx_used: *mut _)) },
-            notify_net,
-        ),
-        16,
-        2048,
-        1500,
-    );
+        };
+
+        let bounce_buffer_allocator =
+            BounceBufferAllocator::new(Basic::new(dma_region.as_ptr().len()), 1);
+
+        DeviceImpl::new(
+            dma_region,
+            bounce_buffer_allocator,
+            RingBuffers::from_ptrs_using_default_initialization_strategy_for_role(
+                unsafe {
+                    ExternallySharedRef::new(memory_region_symbol!(virtio_net_rx_free: *mut _))
+                },
+                unsafe {
+                    ExternallySharedRef::new(memory_region_symbol!(virtio_net_rx_used: *mut _))
+                },
+                notify_net,
+            ),
+            RingBuffers::from_ptrs_using_default_initialization_strategy_for_role(
+                unsafe {
+                    ExternallySharedRef::new(memory_region_symbol!(virtio_net_tx_free: *mut _))
+                },
+                unsafe {
+                    ExternallySharedRef::new(memory_region_symbol!(virtio_net_tx_used: *mut _))
+                },
+                notify_net,
+            ),
+            16,
+            2048,
+            1500,
+        )
+    };
 
     let net_config = {
         assert_eq!(net_device.capabilities().medium, Medium::Ethernet);
