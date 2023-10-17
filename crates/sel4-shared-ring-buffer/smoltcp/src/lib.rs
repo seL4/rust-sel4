@@ -111,15 +111,12 @@ impl<A: AbstractBounceBufferAllocator> phy::RxToken for RxToken<A> {
     where
         F: FnOnce(&mut [u8]) -> R,
     {
-        // let r = self.handle.inner().borrow_mut().consume_rx(self.buffer, f);
-        let ptr = self
+        let mut ptr = self
             .shared
             .inner()
             .borrow_mut()
             .consume_rx_start(self.buffer);
-        let r = f(unsafe { ptr.as_mut().unwrap() });
-        drop(self);
-        r
+        f(unsafe { ptr.as_mut() })
     }
 }
 
@@ -139,13 +136,10 @@ impl<A: AbstractBounceBufferAllocator> phy::TxToken for TxToken<A> {
     where
         F: FnOnce(&mut [u8]) -> R,
     {
-        let r = self
-            .shared
+        self.shared
             .inner()
             .borrow_mut()
-            .consume_tx(self.buffer, len, f);
-        drop(self);
-        r
+            .consume_tx(self.buffer, len, f)
     }
 }
 

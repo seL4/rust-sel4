@@ -2,6 +2,7 @@ use alloc::vec::Vec;
 use core::alloc::Layout;
 use core::iter;
 use core::ops::Range;
+use core::ptr::NonNull;
 
 use sel4_bounce_buffer_allocator::{AbstractBounceBufferAllocator, BounceBufferAllocator};
 use sel4_externally_shared::ExternallySharedRef;
@@ -212,20 +213,17 @@ impl<A: AbstractBounceBufferAllocator> Inner<A> {
         entry.state = TxBufferState::SlotClaimed;
     }
 
-    pub(crate) fn consume_rx_start(&mut self, index: RxBufferIndex) -> *mut [u8] {
+    pub(crate) fn consume_rx_start(&mut self, index: RxBufferIndex) -> NonNull<[u8]> {
         let entry = self.rx_buffer_entry_mut(index);
         let range = entry.range.clone();
         let len = match entry.state {
             RxBufferState::Claimed { len } => len,
             _ => panic!(),
         };
-        unsafe {
-            self.dma_region
-                .as_mut_ptr()
-                .index(range.start..range.start + len)
-                .as_raw_ptr()
-                .as_mut()
-        }
+        self.dma_region
+            .as_mut_ptr()
+            .index(range.start..range.start + len)
+            .as_raw_ptr()
     }
 
     pub(crate) fn drop_rx(&mut self, index: RxBufferIndex) {
@@ -263,13 +261,12 @@ impl<A: AbstractBounceBufferAllocator> Inner<A> {
         entry.state = TxBufferState::Sent {
             range: range.clone(),
         };
-        let r = f(unsafe {
-            self.dma_region
-                .as_mut_ptr()
-                .index(range.clone())
-                .as_raw_ptr()
-                .as_mut()
-        });
+        let mut ptr = self
+            .dma_region
+            .as_mut_ptr()
+            .index(range.clone())
+            .as_raw_ptr();
+        let r = f(unsafe { ptr.as_mut() });
         let desc = descriptor_of(range);
         self.tx_ring_buffers
             .free_mut()
