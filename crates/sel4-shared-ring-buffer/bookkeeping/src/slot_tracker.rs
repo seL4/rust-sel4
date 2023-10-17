@@ -193,14 +193,14 @@ pub enum SlotStateValueRef<'a, T: SlotStateTypes> {
 }
 
 impl<'a, T: SlotStateTypes> SlotStateValueRef<'a, T> {
-    pub fn as_free(&self) -> Result<&T::Free> {
+    pub fn as_free(self) -> Result<&'a T::Free> {
         match self {
             Self::Free(r) => Ok(r),
             _ => Err(SlotTrackerError::StateMismatch),
         }
     }
 
-    pub fn as_occupied(&self) -> Result<&T::Occupied> {
+    pub fn as_occupied(self) -> Result<&'a T::Occupied> {
         match self {
             Self::Occupied(r) => Ok(r),
             _ => Err(SlotTrackerError::StateMismatch),
@@ -215,14 +215,14 @@ pub enum SlotStateValueRefMut<'a, T: SlotStateTypes> {
 }
 
 impl<'a, T: SlotStateTypes> SlotStateValueRefMut<'a, T> {
-    pub fn as_free(&mut self) -> Result<&mut T::Free> {
+    pub fn as_free(self) -> Result<&'a mut T::Free> {
         match self {
             Self::Free(r) => Ok(r),
             _ => Err(SlotTrackerError::StateMismatch),
         }
     }
 
-    pub fn as_occupied(&mut self) -> Result<&mut T::Occupied> {
+    pub fn as_occupied(self) -> Result<&'a mut T::Occupied> {
         match self {
             Self::Occupied(r) => Ok(r),
             _ => Err(SlotTrackerError::StateMismatch),
