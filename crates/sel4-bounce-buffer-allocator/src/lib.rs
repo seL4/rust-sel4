@@ -8,6 +8,7 @@
 extern crate alloc;
 
 use core::alloc::Layout;
+use core::fmt;
 use core::ops::Range;
 
 type Offset = usize;
@@ -23,7 +24,7 @@ pub use bump::Bump;
 const MIN_ALLOCATION_SIZE: Size = 1;
 
 pub trait AbstractBounceBufferAllocator {
-    type Error;
+    type Error: fmt::Debug;
 
     fn allocate(&mut self, layout: Layout) -> Result<Offset, Self::Error>;
 

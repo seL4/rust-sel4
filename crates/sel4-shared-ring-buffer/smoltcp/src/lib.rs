@@ -10,6 +10,7 @@ use core::cell::RefCell;
 use smoltcp::phy::{self, Device, DeviceCapabilities};
 use smoltcp::time::Instant;
 
+use sel4_bounce_buffer_allocator::{AbstractBounceBufferAllocator, BounceBufferAllocator};
 use sel4_externally_shared::ExternallySharedRef;
 use sel4_shared_ring_buffer::{roles::Provide, RingBuffers};
 
@@ -17,16 +18,22 @@ mod inner;
 
 use inner::{Inner, RxBufferIndex, TxBufferIndex};
 
-pub struct DeviceImpl {
-    shared_inner: SharedInner,
+pub struct DeviceImpl<A> {
+    inner: Rc<RefCell<Inner<A>>>,
 }
 
-type SharedInner = Rc<RefCell<Inner>>;
+impl<A> Clone for DeviceImpl<A> {
+    fn clone(&self) -> Self {
+        Self {
+            inner: self.inner.clone(),
+        }
+    }
+}
 
-impl DeviceImpl {
+impl<A: AbstractBounceBufferAllocator> DeviceImpl<A> {
     pub fn new(
         dma_region: ExternallySharedRef<'static, [u8]>,
-        dma_region_paddr: usize,
+        bounce_buffer_allocator: BounceBufferAllocator<A>,
         rx_ring_buffers: RingBuffers<'static, Provide, fn()>,
         tx_ring_buffers: RingBuffers<'static, Provide, fn()>,
         num_rx_buffers: usize,
@@ -34,9 +41,9 @@ impl DeviceImpl {
         mtu: usize,
     ) -> Self {
         Self {
-            shared_inner: Rc::new(RefCell::new(Inner::new(
+            inner: Rc::new(RefCell::new(Inner::new(
                 dma_region,
-                dma_region_paddr,
+                bounce_buffer_allocator,
                 rx_ring_buffers,
                 tx_ring_buffers,
                 num_rx_buffers,
@@ -46,47 +53,47 @@ impl DeviceImpl {
         }
     }
 
-    fn shared_inner(&self) -> &SharedInner {
-        &self.shared_inner
+    fn inner(&self) -> &Rc<RefCell<Inner<A>>> {
+        &self.inner
     }
 
     pub fn poll(&self) -> bool {
-        self.shared_inner().borrow_mut().poll()
+        self.inner().borrow_mut().poll()
     }
 
-    fn new_rx_token(&self, rx_buffer: RxBufferIndex) -> RxToken {
+    fn new_rx_token(&self, rx_buffer: RxBufferIndex) -> RxToken<A> {
         RxToken {
             buffer: rx_buffer,
-            shared_inner: self.shared_inner().clone(),
+            shared: self.clone(),
         }
     }
 
-    fn new_tx_token(&self, tx_buffer: TxBufferIndex) -> TxToken {
+    fn new_tx_token(&self, tx_buffer: TxBufferIndex) -> TxToken<A> {
         TxToken {
             buffer: tx_buffer,
-            shared_inner: self.shared_inner().clone(),
+            shared: self.clone(),
         }
     }
 }
 
-impl Device for DeviceImpl {
-    type RxToken<'a> = RxToken;
-    type TxToken<'a> = TxToken;
+impl<A: AbstractBounceBufferAllocator> Device for DeviceImpl<A> {
+    type RxToken<'a> = RxToken<A> where A: 'a;
+    type TxToken<'a> = TxToken<A> where A: 'a;
 
     fn capabilities(&self) -> DeviceCapabilities {
         let mut cap = DeviceCapabilities::default();
-        cap.max_transmission_unit = self.shared_inner().borrow().mtu();
+        cap.max_transmission_unit = self.inner().borrow().mtu();
         cap
     }
 
     fn receive(&mut self, _timestamp: Instant) -> Option<(Self::RxToken<'_>, Self::TxToken<'_>)> {
-        let r = self.shared_inner().borrow_mut().receive();
+        let r = self.inner().borrow_mut().receive();
         r.ok()
             .map(|(rx_ix, tx_ix)| (self.new_rx_token(rx_ix), self.new_tx_token(tx_ix)))
     }
 
     fn transmit(&mut self, _timestamp: Instant) -> Option<Self::TxToken<'_>> {
-        self.shared_inner()
+        self.inner()
             .borrow_mut()
             .transmit()
             .ok()
@@ -94,42 +101,47 @@ impl Device for DeviceImpl {
     }
 }
 
-pub struct RxToken {
+pub struct RxToken<A: AbstractBounceBufferAllocator> {
     buffer: RxBufferIndex,
-    shared_inner: SharedInner,
+    shared: DeviceImpl<A>,
 }
 
-impl phy::RxToken for RxToken {
+impl<A: AbstractBounceBufferAllocator> phy::RxToken for RxToken<A> {
     fn consume<R, F>(self, f: F) -> R
     where
         F: FnOnce(&mut [u8]) -> R,
     {
-        // let r = self.shared_inner.borrow_mut().consume_rx(self.buffer, f);
-        let ptr = self.shared_inner.borrow_mut().consume_rx_start(self.buffer);
+        // let r = self.handle.inner().borrow_mut().consume_rx(self.buffer, f);
+        let ptr = self
+            .shared
+            .inner()
+            .borrow_mut()
+            .consume_rx_start(self.buffer);
         let r = f(unsafe { ptr.as_mut().unwrap() });
         drop(self);
         r
     }
 }
 
-impl Drop for RxToken {
+impl<A: AbstractBounceBufferAllocator> Drop for RxToken<A> {
     fn drop(&mut self) {
-        self.shared_inner.borrow_mut().drop_rx(self.buffer)
+        self.shared.inner().borrow_mut().drop_rx(self.buffer)
     }
 }
 
-pub struct TxToken {
+pub struct TxToken<A: AbstractBounceBufferAllocator> {
     buffer: TxBufferIndex,
-    shared_inner: SharedInner,
+    shared: DeviceImpl<A>,
 }
 
-impl phy::TxToken for TxToken {
+impl<A: AbstractBounceBufferAllocator> phy::TxToken for TxToken<A> {
     fn consume<R, F>(self, len: usize, f: F) -> R
     where
         F: FnOnce(&mut [u8]) -> R,
     {
         let r = self
-            .shared_inner
+            .shared
+            .inner()
             .borrow_mut()
             .consume_tx(self.buffer, len, f);
         drop(self);
@@ -137,8 +149,8 @@ impl phy::TxToken for TxToken {
     }
 }
 
-impl Drop for TxToken {
+impl<A: AbstractBounceBufferAllocator> Drop for TxToken<A> {
     fn drop(&mut self) {
-        self.shared_inner.borrow_mut().drop_tx(self.buffer)
+        self.shared.inner().borrow_mut().drop_tx(self.buffer)
     }
 }

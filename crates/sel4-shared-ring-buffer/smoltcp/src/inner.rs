@@ -3,13 +3,13 @@ use core::alloc::Layout;
 use core::iter;
 use core::ops::Range;
 
-use sel4_bounce_buffer_allocator::{Basic, BounceBufferAllocator};
+use sel4_bounce_buffer_allocator::{AbstractBounceBufferAllocator, BounceBufferAllocator};
 use sel4_externally_shared::ExternallySharedRef;
 use sel4_shared_ring_buffer::{roles::Provide, Descriptor, RingBuffers, RING_BUFFER_SIZE};
 
-pub(crate) struct Inner {
+pub(crate) struct Inner<A> {
     dma_region: ExternallySharedRef<'static, [u8]>,
-    bounce_buffer_allocator: BounceBufferAllocator<Basic>,
+    bounce_buffer_allocator: BounceBufferAllocator<A>,
     rx_ring_buffers: RingBuffers<'static, Provide, fn()>,
     tx_ring_buffers: RingBuffers<'static, Provide, fn()>,
     rx_buffers: Vec<RxBufferEntry>,
@@ -46,27 +46,16 @@ enum TxBufferState {
     Sent { range: Range<usize> },
 }
 
-impl Inner {
+impl<A: AbstractBounceBufferAllocator> Inner<A> {
     pub(crate) fn new(
         dma_region: ExternallySharedRef<'static, [u8]>,
-        dma_region_paddr: usize,
+        mut bounce_buffer_allocator: BounceBufferAllocator<A>,
         mut rx_ring_buffers: RingBuffers<'static, Provide, fn()>,
         tx_ring_buffers: RingBuffers<'static, Provide, fn()>,
         num_rx_buffers: usize,
         rx_buffer_size: usize,
         mtu: usize,
     ) -> Self {
-        let max_alignment = 1
-            << dma_region
-                .as_ptr()
-                .as_raw_ptr()
-                .addr()
-                .trailing_zeros()
-                .min(dma_region_paddr.trailing_zeros());
-
-        let mut bounce_buffer_allocator =
-            BounceBufferAllocator::new(Basic::new(dma_region.as_ptr().len()), max_alignment);
-
         let rx_buffers = iter::repeat_with(|| RxBufferEntry {
             state: RxBufferState::Free,
             range: bounce_buffer_allocator
