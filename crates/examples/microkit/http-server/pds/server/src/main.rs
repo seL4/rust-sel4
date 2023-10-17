@@ -114,6 +114,7 @@ fn init() -> impl Handler {
             2048,
             1500,
         )
+        .unwrap()
     };
 
     let net_config = {

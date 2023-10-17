@@ -16,6 +16,7 @@ use sel4_shared_ring_buffer::{roles::Provide, RingBuffers};
 
 mod inner;
 
+pub use inner::{Error, PeerMisbehaviorError};
 use inner::{Inner, RxBufferIndex, TxBufferIndex};
 
 pub struct DeviceImpl<A> {
@@ -39,8 +40,8 @@ impl<A: AbstractBounceBufferAllocator> DeviceImpl<A> {
         num_rx_buffers: usize,
         rx_buffer_size: usize,
         mtu: usize,
-    ) -> Self {
-        Self {
+    ) -> Result<Self, Error> {
+        Ok(Self {
             inner: Rc::new(RefCell::new(Inner::new(
                 dma_region,
                 bounce_buffer_allocator,
@@ -49,8 +50,8 @@ impl<A: AbstractBounceBufferAllocator> DeviceImpl<A> {
                 num_rx_buffers,
                 rx_buffer_size,
                 mtu,
-            ))),
-        }
+            )?)),
+        })
     }
 
     fn inner(&self) -> &Rc<RefCell<Inner<A>>> {
@@ -58,7 +59,7 @@ impl<A: AbstractBounceBufferAllocator> DeviceImpl<A> {
     }
 
     pub fn poll(&self) -> bool {
-        self.inner().borrow_mut().poll()
+        self.inner().borrow_mut().poll().unwrap()
     }
 
     fn new_rx_token(&self, rx_buffer: RxBufferIndex) -> RxToken<A> {
@@ -88,15 +89,13 @@ impl<A: AbstractBounceBufferAllocator> Device for DeviceImpl<A> {
 
     fn receive(&mut self, _timestamp: Instant) -> Option<(Self::RxToken<'_>, Self::TxToken<'_>)> {
         let r = self.inner().borrow_mut().receive();
-        r.ok()
-            .map(|(rx_ix, tx_ix)| (self.new_rx_token(rx_ix), self.new_tx_token(tx_ix)))
+        r.map(|(rx_ix, tx_ix)| (self.new_rx_token(rx_ix), self.new_tx_token(tx_ix)))
     }
 
     fn transmit(&mut self, _timestamp: Instant) -> Option<Self::TxToken<'_>> {
         self.inner()
             .borrow_mut()
             .transmit()
-            .ok()
             .map(|ix| self.new_tx_token(ix))
     }
 }
@@ -116,13 +115,22 @@ impl<A: AbstractBounceBufferAllocator> phy::RxToken for RxToken<A> {
             .inner()
             .borrow_mut()
             .consume_rx_start(self.buffer);
-        f(unsafe { ptr.as_mut() })
+        let r = f(unsafe { ptr.as_mut() });
+        self.shared
+            .inner()
+            .borrow_mut()
+            .consume_rx_finish(self.buffer);
+        r
     }
 }
 
 impl<A: AbstractBounceBufferAllocator> Drop for RxToken<A> {
     fn drop(&mut self) {
-        self.shared.inner().borrow_mut().drop_rx(self.buffer)
+        self.shared
+            .inner()
+            .borrow_mut()
+            .drop_rx(self.buffer)
+            .unwrap()
     }
 }
 
@@ -140,6 +148,7 @@ impl<A: AbstractBounceBufferAllocator> phy::TxToken for TxToken<A> {
             .inner()
             .borrow_mut()
             .consume_tx(self.buffer, len, f)
+            .unwrap()
     }
 }
 
