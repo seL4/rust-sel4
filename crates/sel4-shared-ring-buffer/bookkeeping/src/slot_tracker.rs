@@ -166,16 +166,22 @@ impl<T: SlotStateTypes> SlotTracker<T> {
                 unreachable!()
             }
         };
+        self.num_free -= 1;
         Some((index, value))
     }
 
     pub fn free(&mut self, index: usize, value: T::Free) -> Result<T::Occupied> {
         self.ensure_state(index, SlotState::Occupied)?;
-        let old_state = self.replace_state_with_free(index, value);
+        let new_state = StateInternal::Free {
+            free_list_next_index: self.free_list_head_index.replace(index),
+            value,
+        };
+        let old_state = self.replace_state(index, new_state);
         let value = match old_state {
             StateInternal::Occupied { value } => value,
             _ => unreachable!(),
         };
+        self.num_free += 1;
         Ok(value)
     }
 
@@ -189,14 +195,6 @@ impl<T: SlotStateTypes> SlotTracker<T> {
 
     fn replace_state(&mut self, index: usize, new_state: StateInternal<T>) -> StateInternal<T> {
         mem::replace(&mut self.get_entry_mut(index).unwrap().state, new_state)
-    }
-
-    fn replace_state_with_free(&mut self, index: usize, value: T::Free) -> StateInternal<T> {
-        let new_state = StateInternal::Free {
-            free_list_next_index: self.free_list_head_index.replace(index),
-            value,
-        };
-        self.replace_state(index, new_state)
     }
 }
 
