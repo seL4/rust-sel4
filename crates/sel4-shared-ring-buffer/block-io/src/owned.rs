@@ -1,6 +1,7 @@
 use core::alloc::Layout;
 use core::task::{Poll, Waker};
 
+use sel4_async_block_io::{access::Access, Operation};
 use sel4_bounce_buffer_allocator::{AbstractBounceBufferAllocator, BounceBufferAllocator};
 use sel4_externally_shared::ExternallySharedRef;
 use sel4_shared_ring_buffer::{
@@ -43,36 +44,19 @@ enum OccupiedState {
     Complete { error: Option<IOError> },
 }
 
-pub enum RequestBuf<'a> {
-    Read { buf: &'a mut [u8] },
-    Write { buf: &'a [u8] },
-}
-
-impl<'a> RequestBuf<'a> {
-    pub fn issue_request_buf<'b>(&'b mut self) -> IssueRequestBuf<'a> {
-        match self {
-            Self::Read { buf } => IssueRequestBuf::Read { len: buf.len() },
-            Self::Write { buf } => IssueRequestBuf::Write { buf },
-        }
-    }
-
-    pub fn poll_request_buf<'b>(&'b mut self) -> PollRequestBuf<'b>
-    where
-        'a: 'b,
-    {
-        match self {
-            Self::Read { buf } => PollRequestBuf::Read { buf },
-            Self::Write { .. } => PollRequestBuf::Write,
-        }
-    }
-}
-
 pub enum IssueRequestBuf<'a> {
     Read { len: usize },
     Write { buf: &'a [u8] },
 }
 
 impl<'a> IssueRequestBuf<'a> {
+    pub fn new<A: Access>(operation: &'a Operation<'a, A>) -> Self {
+        match operation {
+            Operation::Read { buf, .. } => Self::Read { len: buf.len() },
+            Operation::Write { buf, .. } => Self::Write { buf },
+        }
+    }
+
     fn len(&self) -> usize {
         match self {
             Self::Read { len } => *len,
@@ -91,6 +75,18 @@ impl<'a> IssueRequestBuf<'a> {
 pub enum PollRequestBuf<'a> {
     Read { buf: &'a mut [u8] },
     Write,
+}
+
+impl<'a> PollRequestBuf<'a> {
+    pub fn new<'b, A: Access>(operation: &'a mut Operation<'b, A>) -> Self
+    where
+        'b: 'a,
+    {
+        match operation {
+            Operation::Read { buf, .. } => Self::Read { buf },
+            Operation::Write { .. } => Self::Write,
+        }
+    }
 }
 
 impl<S: SlotSemaphore, A: AbstractBounceBufferAllocator, F: FnMut()>

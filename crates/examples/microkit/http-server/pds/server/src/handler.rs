@@ -8,7 +8,7 @@ use futures::future::LocalBoxFuture;
 use smoltcp::iface::Config;
 use smoltcp::time::Instant as SmoltcpInstant;
 
-use sel4_async_block_io::constant_block_sizes::BlockSize512;
+use sel4_async_block_io::{access::ReadOnly, constant_block_sizes::BlockSize512};
 use sel4_async_network::{DhcpOverrides, ManagedInterface};
 use sel4_async_single_threaded_executor::{LocalPool, LocalSpawner};
 use sel4_async_time::{Instant, TimerManager};
@@ -23,7 +23,7 @@ pub(crate) struct HandlerImpl {
     block_driver_channel: sel4_microkit::Channel,
     timer: TimerClient,
     net_device: DeviceImpl<Basic>,
-    shared_block_io: SharedRingBufferBlockIO<BlockSize512, Basic, fn()>,
+    shared_block_io: SharedRingBufferBlockIO<BlockSize512, ReadOnly, Basic, fn()>,
     shared_timers: TimerManager,
     shared_network: ManagedInterface,
     local_pool: LocalPool,
@@ -39,7 +39,7 @@ impl HandlerImpl {
         timer: TimerClient,
         mut net_device: DeviceImpl<Basic>,
         net_config: Config,
-        shared_block_io: SharedRingBufferBlockIO<BlockSize512, Basic, fn()>,
+        shared_block_io: SharedRingBufferBlockIO<BlockSize512, ReadOnly, Basic, fn()>,
         f: impl FnOnce(TimerManager, ManagedInterface, LocalSpawner) -> T,
     ) -> Self {
         let now = Self::now_with_timer_client(&timer);

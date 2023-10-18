@@ -139,7 +139,7 @@ fn init() -> impl Handler {
             BounceBufferAllocator::new(Basic::new(dma_region.as_ptr().len()), 1);
 
         SharedRingBufferBlockIO::new(
-            BlockSize512::SINGLETON,
+            BlockSize512::BLOCK_SIZE,
             num_blocks,
             dma_region,
             bounce_buffer_allocator,
