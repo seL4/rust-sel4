@@ -12,7 +12,7 @@ use futures::task::LocalSpawnExt;
 
 use mbedtls::ssl::async_io::ClosedError;
 
-use sel4_async_block_io::{constant_block_sizes, BlockIO};
+use sel4_async_block_io::{access::ReadOnly, constant_block_sizes, BlockIO};
 use sel4_async_block_io_fat as fat;
 use sel4_async_network::{ManagedInterface, TcpSocketError};
 use sel4_async_network_mbedtls::{
@@ -29,7 +29,9 @@ use server::Server;
 const HTTP_PORT: u16 = 80;
 const HTTPS_PORT: u16 = 443;
 
-pub async fn run_server<T: BlockIO<BlockSize = constant_block_sizes::BlockSize512> + Clone>(
+pub async fn run_server<
+    T: BlockIO<ReadOnly, BlockSize = constant_block_sizes::BlockSize512> + Clone,
+>(
     _timers_ctx: TimerManager,
     network_ctx: ManagedInterface,
     fs_block_io: T,
@@ -101,7 +103,7 @@ pub async fn run_server<T: BlockIO<BlockSize = constant_block_sizes::BlockSize51
 
 type SocketUser<T> = Box<
     dyn Fn(
-        Server<fat::BlockIOWrapper<T>, fat::DummyTimeSource>,
+        Server<fat::BlockIOWrapper<T, ReadOnly>, fat::DummyTimeSource>,
         TcpSocketWrapper,
     ) -> LocalBoxFuture<'static, ()>,
 >;

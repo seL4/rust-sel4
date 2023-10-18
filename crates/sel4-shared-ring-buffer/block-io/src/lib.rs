@@ -8,12 +8,13 @@ extern crate alloc;
 use alloc::rc::Rc;
 use core::cell::RefCell;
 use core::future::Future;
+use core::marker::PhantomData;
 use core::pin::Pin;
 use core::task::{Context, Poll};
 
 use async_unsync::semaphore::Semaphore;
 
-use sel4_async_block_io::{BlockIO, BlockSize};
+use sel4_async_block_io::{access::Access, BlockIO, BlockIOLayout, BlockSize, Operation};
 use sel4_bounce_buffer_allocator::{AbstractBounceBufferAllocator, BounceBufferAllocator};
 use sel4_externally_shared::ExternallySharedRef;
 use sel4_shared_ring_buffer::{roles::Provide, RingBuffers};
@@ -23,19 +24,22 @@ mod errors;
 mod owned;
 
 pub use errors::{Error, ErrorOrUserError, IOError, PeerMisbehaviorError, UserError};
-pub use owned::{IssueRequestBuf, OwnedSharedRingBufferBlockIO, PollRequestBuf, RequestBuf};
+pub use owned::{IssueRequestBuf, OwnedSharedRingBufferBlockIO, PollRequestBuf};
 
-pub struct SharedRingBufferBlockIO<N, A, F> {
-    shared: Rc<RefCell<Inner<N, A, F>>>,
+pub struct SharedRingBufferBlockIO<N, P, A, F> {
+    shared: Rc<RefCell<Inner<N, P, A, F>>>,
 }
 
-struct Inner<N, A, F> {
+struct Inner<N, P, A, F> {
     owned: OwnedSharedRingBufferBlockIO<Rc<Semaphore>, A, F>,
     block_size: N,
     num_blocks: u64,
+    _phantom: PhantomData<P>,
 }
 
-impl<N, A: AbstractBounceBufferAllocator, F: FnMut()> SharedRingBufferBlockIO<N, A, F> {
+impl<N, P: Access, A: AbstractBounceBufferAllocator, F: FnMut()>
+    SharedRingBufferBlockIO<N, P, A, F>
+{
     pub fn new(
         block_size: N,
         num_blocks: u64,
@@ -52,6 +56,7 @@ impl<N, A: AbstractBounceBufferAllocator, F: FnMut()> SharedRingBufferBlockIO<N,
                 ),
                 block_size,
                 num_blocks,
+                _phantom: PhantomData,
             })),
         }
     }
@@ -67,7 +72,7 @@ impl<N, A: AbstractBounceBufferAllocator, F: FnMut()> SharedRingBufferBlockIO<N,
     async fn request<'a>(
         &'a self,
         start_block_idx: u64,
-        mut request_buf: RequestBuf<'a>,
+        mut operation: Operation<'a, P>,
     ) -> Result<(), Error> {
         let request_index = {
             let sem = self.shared.borrow().owned.slot_set_semaphore().clone();
@@ -78,13 +83,13 @@ impl<N, A: AbstractBounceBufferAllocator, F: FnMut()> SharedRingBufferBlockIO<N,
                 .issue_request(
                     &mut reservation,
                     start_block_idx,
-                    &mut request_buf.issue_request_buf(),
+                    &mut IssueRequestBuf::new(&mut operation),
                 )
                 .map_err(ErrorOrUserError::unwrap_error)?
         };
         RequestFuture {
             io: self,
-            request_buf,
+            operation,
             request_index,
             poll_returned_ready: false,
         }
@@ -92,7 +97,7 @@ impl<N, A: AbstractBounceBufferAllocator, F: FnMut()> SharedRingBufferBlockIO<N,
     }
 }
 
-impl<N, A, F> Clone for SharedRingBufferBlockIO<N, A, F> {
+impl<N, P, A, F> Clone for SharedRingBufferBlockIO<N, P, A, F> {
     fn clone(&self) -> Self {
         Self {
             shared: self.shared.clone(),
@@ -100,8 +105,8 @@ impl<N, A, F> Clone for SharedRingBufferBlockIO<N, A, F> {
     }
 }
 
-impl<N: BlockSize + Copy, A: AbstractBounceBufferAllocator, F: FnMut()> BlockIO
-    for SharedRingBufferBlockIO<N, A, F>
+impl<N: BlockSize + Copy, P: Access, A: AbstractBounceBufferAllocator, F: FnMut()> BlockIOLayout
+    for SharedRingBufferBlockIO<N, P, A, F>
 {
     type Error = Error;
 
@@ -114,26 +119,28 @@ impl<N: BlockSize + Copy, A: AbstractBounceBufferAllocator, F: FnMut()> BlockIO
     fn num_blocks(&self) -> u64 {
         self.shared.borrow().num_blocks
     }
+}
 
-    async fn read_blocks(&self, start_block_idx: u64, buf: &mut [u8]) -> Result<(), Self::Error> {
-        self.request(start_block_idx, RequestBuf::Read { buf })
-            .await
-    }
-
-    async fn write_blocks(&self, start_block_idx: u64, buf: &[u8]) -> Result<(), Self::Error> {
-        self.request(start_block_idx, RequestBuf::Write { buf })
-            .await
+impl<N: BlockSize + Copy, P: Access, A: AbstractBounceBufferAllocator, F: FnMut()> BlockIO<P>
+    for SharedRingBufferBlockIO<N, P, A, F>
+{
+    async fn read_or_write_blocks(
+        &self,
+        start_block_idx: u64,
+        operation: Operation<'_, P>,
+    ) -> Result<(), Self::Error> {
+        self.request(start_block_idx, operation).await
     }
 }
 
-pub struct RequestFuture<'a, N, A: AbstractBounceBufferAllocator, F: FnMut()> {
-    io: &'a SharedRingBufferBlockIO<N, A, F>,
-    request_buf: RequestBuf<'a>,
+pub struct RequestFuture<'a, N, P: Access, A: AbstractBounceBufferAllocator, F: FnMut()> {
+    io: &'a SharedRingBufferBlockIO<N, P, A, F>,
+    operation: Operation<'a, P>,
     request_index: usize,
     poll_returned_ready: bool,
 }
 
-impl<'a, N, A: AbstractBounceBufferAllocator, F: FnMut()> RequestFuture<'a, N, A, F> {
+impl<'a, N, P: Access, A: AbstractBounceBufferAllocator, F: FnMut()> RequestFuture<'a, N, P, A, F> {
     fn poll_inner<'b>(&'b mut self, cx: &mut Context<'_>) -> Poll<Result<(), Error>>
     where
         'a: 'b,
@@ -146,7 +153,7 @@ impl<'a, N, A: AbstractBounceBufferAllocator, F: FnMut()> RequestFuture<'a, N, A
             .owned
             .poll_request(
                 self.request_index,
-                &mut self.request_buf.poll_request_buf(),
+                &mut PollRequestBuf::new(&mut self.operation),
                 Some(cx.waker().clone()),
             )
             .map_err(ErrorOrUserError::unwrap_error)
@@ -161,7 +168,9 @@ impl<'a, N, A: AbstractBounceBufferAllocator, F: FnMut()> RequestFuture<'a, N, A
     }
 }
 
-impl<'a, N, A: AbstractBounceBufferAllocator, F: FnMut()> Future for RequestFuture<'a, N, A, F> {
+impl<'a, N, P: Access, A: AbstractBounceBufferAllocator, F: FnMut()> Future
+    for RequestFuture<'a, N, P, A, F>
+{
     type Output = Result<(), Error>;
 
     fn poll(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
@@ -169,7 +178,9 @@ impl<'a, N, A: AbstractBounceBufferAllocator, F: FnMut()> Future for RequestFutu
     }
 }
 
-impl<'a, N, A: AbstractBounceBufferAllocator, F: FnMut()> Drop for RequestFuture<'a, N, A, F> {
+impl<'a, N, P: Access, A: AbstractBounceBufferAllocator, F: FnMut()> Drop
+    for RequestFuture<'a, N, P, A, F>
+{
     fn drop(&mut self) {
         if !self.poll_returned_ready {
             self.io

@@ -4,7 +4,7 @@ use core::ops::Range;
 use gpt_disk_types::{GptHeader, MasterBootRecord, MbrPartitionRecord};
 use num_enum::{IntoPrimitive, TryFromPrimitive};
 
-use crate::{read_bytes, BlockIO, Partition};
+use crate::{access::ReadOnly, read_bytes, BlockIO, Partition};
 
 pub struct Disk<T> {
     io: T,
@@ -88,7 +88,7 @@ impl From<u8> for PartitionId {
     }
 }
 
-impl<T: BlockIO> Disk<T> {
+impl<T: BlockIO<ReadOnly>> Disk<T> {
     pub fn new(io: T) -> Self {
         Self { io }
     }
@@ -110,7 +110,7 @@ impl<T: BlockIO> Disk<T> {
     }
 }
 
-impl<T: BlockIO> Disk<T> {
+impl<T: BlockIO<ReadOnly>> Disk<T> {
     pub fn partition_using_mbr(self, entry: &MbrPartitionEntry) -> Partition<T> {
         Partition::new(self.io, entry.lba_range())
     }

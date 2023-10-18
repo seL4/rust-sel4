@@ -11,7 +11,7 @@ use core::ops::Deref;
 use futures::future;
 use lru::LruCache;
 
-use crate::{wrapper_methods, BlockIO, BlockSize};
+use crate::{wrapper_methods, Access, BlockIO, BlockIOLayout, BlockSize, Operation};
 
 pub struct DynamicBlockSize {
     bits: usize,
@@ -35,7 +35,7 @@ impl BlockSize for DynamicBlockSize {
     }
 }
 
-impl<T: BlockIO> BlockIO for Rc<T> {
+impl<T: BlockIOLayout> BlockIOLayout for Rc<T> {
     type Error = T::Error;
 
     type BlockSize = T::BlockSize;
@@ -47,19 +47,27 @@ impl<T: BlockIO> BlockIO for Rc<T> {
     fn num_blocks(&self) -> u64 {
         self.deref().num_blocks()
     }
+}
 
-    async fn read_blocks(&self, start_block_idx: u64, buf: &mut [u8]) -> Result<(), Self::Error> {
-        self.deref().read_blocks(start_block_idx, buf).await
+impl<T: BlockIO<A>, A: Access> BlockIO<A> for Rc<T> {
+    async fn read_or_write_blocks(
+        &self,
+        start_block_idx: u64,
+        operation: Operation<'_, A>,
+    ) -> Result<(), Self::Error> {
+        self.deref()
+            .read_or_write_blocks(start_block_idx, operation)
+            .await
     }
 }
 
 #[derive(Debug)]
-pub struct CachedBlockIO<T: BlockIO> {
+pub struct CachedBlockIO<T: BlockIOLayout> {
     inner: T,
     lru: RefCell<LruCache<u64, <T::BlockSize as BlockSize>::Block>>,
 }
 
-impl<T: BlockIO> CachedBlockIO<T> {
+impl<T: BlockIOLayout> CachedBlockIO<T> {
     pub fn new(inner: T, cache_size_in_blocks: usize) -> Self {
         Self {
             inner,
@@ -72,33 +80,65 @@ impl<T: BlockIO> CachedBlockIO<T> {
     wrapper_methods!(T);
 }
 
-impl<T: BlockIO> BlockIO for CachedBlockIO<T> {
-    type Error = T::Error;
+impl<T: BlockIOLayout> BlockIOLayout for CachedBlockIO<T> {
+    type Error = <T as BlockIOLayout>::Error;
 
-    type BlockSize = T::BlockSize;
+    type BlockSize = <T as BlockIOLayout>::BlockSize;
 
     fn block_size(&self) -> Self::BlockSize {
-        self.inner().block_size()
+        <T as BlockIOLayout>::block_size(self.inner())
     }
 
     fn num_blocks(&self) -> u64 {
-        self.inner().num_blocks()
+        <T as BlockIOLayout>::num_blocks(self.inner())
     }
+}
 
-    async fn read_blocks(&self, start_block_idx: u64, buf: &mut [u8]) -> Result<(), Self::Error> {
-        assert_eq!(buf.len() % self.block_size().bytes(), 0);
-        future::try_join_all(buf.chunks_mut(self.block_size().bytes()).enumerate().map(
-            |(i, block_buf)| async move {
+impl<T: BlockIO<A>, A: Access> BlockIO<A> for CachedBlockIO<T> {
+    async fn read_or_write_blocks(
+        &self,
+        start_block_idx: u64,
+        mut operation: Operation<'_, A>,
+    ) -> Result<(), Self::Error> {
+        assert_eq!(operation.len() % self.block_size().bytes(), 0);
+        future::try_join_all(operation.chunks(self.block_size().bytes()).enumerate().map(
+            |(i, block_operation)| async move {
                 let block_idx = start_block_idx.checked_add(i.try_into().unwrap()).unwrap();
-                // NOTE: odd control flow to avoid holding core::cell::RefMut across await
-                if let Some(block) = self.lru.borrow_mut().get(&block_idx) {
-                    block_buf.copy_from_slice(block.as_ref());
-                    return Ok(());
+                match block_operation {
+                    Operation::Read { buf, witness } => {
+                        // NOTE: odd control flow to avoid holding core::cell::RefMut across await
+                        let cached = self
+                            .lru
+                            .borrow_mut()
+                            .get(&block_idx)
+                            .map(|block| {
+                                buf.copy_from_slice(block.as_ref());
+                            })
+                            .is_some();
+                        if !cached {
+                            let mut block = self.block_size().zeroed_block();
+                            self.inner
+                                .read_or_write_blocks(
+                                    block_idx,
+                                    Operation::Read {
+                                        buf: block.as_mut(),
+                                        witness,
+                                    },
+                                )
+                                .await?;
+                            buf.copy_from_slice(block.as_ref());
+                            let _ = self.lru.borrow_mut().put(block_idx, block);
+                        }
+                    }
+                    Operation::Write { buf, witness } => {
+                        self.inner
+                            .read_or_write_blocks(block_idx, Operation::Write { buf, witness })
+                            .await?;
+                        let mut block = self.block_size().zeroed_block();
+                        block.as_mut().copy_from_slice(buf);
+                        let _ = self.lru.borrow_mut().put(block_idx, block);
+                    }
                 }
-                let mut block = self.block_size().zeroed_block();
-                self.inner.read_blocks(block_idx, block.as_mut()).await?;
-                block_buf.copy_from_slice(block.as_ref());
-                let _ = self.lru.borrow_mut().put(block_idx, block);
                 Ok(())
             },
         ))
