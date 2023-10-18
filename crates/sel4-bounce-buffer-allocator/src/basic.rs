@@ -1,14 +1,9 @@
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
-
 use alloc::alloc::Global;
 use alloc::collections::BTreeMap;
-use alloc::vec::Vec;
 use core::alloc::{Allocator, Layout};
 use core::ops::Bound;
 
-use crate::{AbstractBounceBufferAllocator, Align, Offset, Size};
+use crate::{AbstractBounceBufferAllocator, Offset, Size};
 
 const GRANULE_SIZE: usize = 2048;
 

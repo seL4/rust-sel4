@@ -1,6 +1,3 @@
-#![allow(dead_code)]
-#![allow(unused_variables)]
-
 use alloc::rc::Rc;
 use alloc::vec;
 use alloc::vec::Vec;
