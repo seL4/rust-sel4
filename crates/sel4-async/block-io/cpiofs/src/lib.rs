@@ -13,7 +13,7 @@ use core::mem;
 use hex::FromHex;
 use zerocopy::{AsBytes, FromBytes, FromZeroes};
 
-use sel4_async_block_io::ByteIO;
+use sel4_async_block_io::{access::ReadOnly, ByteIO};
 
 const CPIO_ALIGN: usize = 4;
 
@@ -79,7 +79,7 @@ impl EntryLocation {
         self.offset
     }
 
-    async fn read_entry<T: ByteIO>(&self, io: &T) -> Result<Entry, T::Error> {
+    async fn read_entry<T: ByteIO<ReadOnly>>(&self, io: &T) -> Result<Entry, T::Error> {
         let mut header = Header::new_zeroed();
         io.read(self.offset().try_into().unwrap(), header.as_bytes_mut())
             .await?;
@@ -133,7 +133,7 @@ impl Entry {
         }
     }
 
-    async fn read_name<T: ByteIO>(&self, io: &T) -> Result<String, T::Error> {
+    async fn read_name<T: ByteIO<ReadOnly>>(&self, io: &T) -> Result<String, T::Error> {
         let mut buf = vec![0; self.header().name_size()];
         io.read(self.name_offset().try_into().unwrap(), &mut buf)
             .await?;
@@ -154,7 +154,7 @@ pub struct Index<T> {
     io: T,
 }
 
-impl<T: ByteIO> Index<T> {
+impl<T: ByteIO<ReadOnly>> Index<T> {
     pub async fn create(io: T) -> Result<Self, T::Error> {
         let mut entries = BTreeMap::new();
         let mut location = EntryLocation::first();
