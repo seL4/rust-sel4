@@ -1,14 +1,16 @@
-{ mk }:
+{ mk, localCrates, versions, volatileSource }:
 
 mk {
   package.name = "sel4-externally-shared";
-  package.license = "MIT OR Apache-2.0";
-  features = {
-    alloc = [];
-    unstable = [];
-    very_unstable = ["unstable"];
+  nix.local.dependencies = with localCrates; [
+    # volatile
+  ];
+  dependencies = {
+    inherit (versions) zerocopy;
+    volatile = volatileSource;
   };
-  dev-dependencies = {
-    rand = "0.8.3";
+  features = {
+    "unstable" = [ "volatile/unstable" ];
+    "very_unstable" = [ "volatile/very_unstable" ];
   };
 }

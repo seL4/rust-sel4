@@ -17,7 +17,7 @@ use virtio_drivers::{
     },
 };
 
-use sel4_externally_shared::ExternallySharedRef;
+use sel4_externally_shared::{ExternallySharedRef, ExternallySharedRefExt};
 use sel4_microkit::{memory_region_symbol, protection_domain, var, Channel, Handler, MessageInfo};
 use sel4_microkit_message::MessageInfoExt as _;
 use sel4_shared_ring_buffer::{roles::Use, RingBuffers};

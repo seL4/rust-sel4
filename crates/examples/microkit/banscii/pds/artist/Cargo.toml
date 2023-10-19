@@ -8,11 +8,8 @@ license = "BSD-2-Clause"
 [dependencies]
 banscii-artist-interface-types = { path = "./interface-types" }
 rsa = { version = "0.8.1", default-features = false, features = ["pem", "sha2"] }
+sel4-externally-shared = { path = "../../../../../sel4-externally-shared", features = ["unstable"] }
 sel4-microkit-message = { path = "../../../../../sel4-microkit/message" }
-
-[dependencies.sel4-externally-shared]
-path = "../../../../../sel4-externally-shared"
-features = ["unstable", "alloc"]
 
 [dependencies.sel4-microkit]
 path = "../../../../../sel4-microkit"

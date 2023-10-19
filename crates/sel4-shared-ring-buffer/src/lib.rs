@@ -4,7 +4,11 @@ use core::marker::PhantomData;
 use core::num::Wrapping;
 use core::sync::atomic::Ordering;
 
-use sel4_externally_shared::{map_field, ExternallySharedPtr, ExternallySharedRef};
+use zerocopy::{AsBytes, FromBytes};
+
+use sel4_externally_shared::{
+    map_field, ExternallySharedPtr, ExternallySharedPtrExt, ExternallySharedRef,
+};
 
 pub mod roles;
 
@@ -209,7 +213,7 @@ impl<'a, R: RingBufferRole, T: Copy> RingBuffer<'a, R, T> {
     }
 }
 
-impl<'a, T: Copy> RingBuffer<'a, Write, T> {
+impl<'a, T: Copy + FromBytes + AsBytes> RingBuffer<'a, Write, T> {
     pub fn enqueue_and_commit(&mut self, desc: T) -> Result<Result<(), T>, PeerMisbehaviorError> {
         self.enqueue(desc, true)
     }
@@ -248,11 +252,12 @@ impl<'a, T: Copy> RingBuffer<'a, Write, T> {
     fn expose_write_index(&mut self) {
         let write_index = self.stored_write_index.0;
         self.write_index()
-            .with_atomic(|x| x.store(write_index, Ordering::Release));
+            .atomic()
+            .store(write_index, Ordering::Release);
     }
 }
 
-impl<'a, T: Copy> RingBuffer<'a, Read, T> {
+impl<'a, T: Copy + FromBytes + AsBytes> RingBuffer<'a, Read, T> {
     pub fn dequeue(&mut self) -> Result<Option<T>, PeerMisbehaviorError> {
         if self.is_empty()? {
             return Ok(None);
@@ -270,7 +275,8 @@ impl<'a, T: Copy> RingBuffer<'a, Read, T> {
     fn expose_read_index(&mut self) {
         let read_index = self.stored_read_index.0;
         self.read_index()
-            .with_atomic(|x| x.store(read_index, Ordering::Release));
+            .atomic()
+            .store(read_index, Ordering::Release);
     }
 }
 

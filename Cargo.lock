@@ -3831,7 +3831,8 @@ dependencies = [
 name = "sel4-externally-shared"
 version = "0.1.0"
 dependencies = [
- "rand",
+ "volatile",
+ "zerocopy 0.7.6",
 ]
 
 [[package]]
@@ -4997,6 +4998,11 @@ name = "void"
 version = "1.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6a02e4885ed3bc0f2de90ea6dd45ebcbb66dacffe03547fadbb0eeae2770887d"
+
+[[package]]
+name = "volatile"
+version = "0.5.1"
+source = "git+https://github.com/coliasgroup/volatile.git?tag=keep/8aee5539716d3d38247f46eddd42b382#8aee5539716d3d38247f46eddd42b3828406c008"
 
 [[package]]
 name = "vte"

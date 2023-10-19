@@ -35,7 +35,7 @@ mk {
   ];
   dependencies = {
     inherit (versions) cfg-if log;
-    sel4-externally-shared = { features = [ "alloc" "unstable" "very_unstable" ]; };
+    sel4-externally-shared = { features = [ "unstable" "very_unstable" ]; };
     sel4-root-task = { features = [ "full" ]; optional = true; };
     sel4-microkit = { features = [ "full" ]; optional = true; };
     sel4-microkit-message = { optional = true; };

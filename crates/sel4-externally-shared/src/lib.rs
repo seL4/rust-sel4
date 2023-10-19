@@ -1,26 +1,55 @@
-//! Provides wrapper types for raw pointers to externally shared data.
-//!
-//! This crate provides two different wrapper types: [`ExternallySharedPtr`] and [`ExternallySharedRef`]. The
-//! difference between the two types is that the former behaves like a raw pointer, while the
-//! latter behaves like a Rust reference type.
-
 #![no_std]
-#![cfg_attr(feature = "unstable", feature(atomic_from_ptr))]
-#![cfg_attr(feature = "unstable", feature(core_intrinsics))]
-#![cfg_attr(feature = "unstable", feature(slice_range))]
-#![cfg_attr(feature = "unstable", feature(slice_ptr_get))]
-#![cfg_attr(feature = "very_unstable", feature(const_trait_impl))]
-#![cfg_attr(feature = "very_unstable", feature(unboxed_closures))]
-#![cfg_attr(feature = "very_unstable", feature(fn_traits))]
-#![warn(missing_docs)]
-#![deny(unsafe_op_in_unsafe_fn)]
+#![feature(cfg_target_has_atomic_equal_alignment)]
+#![feature(concat_idents)]
+#![feature(core_intrinsics)]
 
-#[cfg(feature = "alloc")]
-extern crate alloc;
+use core::ptr::NonNull;
 
-pub use externally_shared_ptr::ExternallySharedPtr;
-pub use externally_shared_ref::ExternallySharedRef;
+use volatile::{
+    access::{Access, ReadWrite},
+    VolatilePtr, VolatileRef,
+};
 
-pub mod access;
-mod externally_shared_ptr;
-mod externally_shared_ref;
+pub use volatile::{access, map_field};
+
+mod atomics;
+mod ops;
+
+pub use atomics::{Atomic, AtomicPtr};
+pub use ops::{ByteWiseOps, DistrustfulOps, NormalOps, UnorderedAtomicOps};
+
+// TODO
+pub type ExternallySharedOps = DistrustfulOps<NormalOps>;
+// pub type ExternallySharedOps = DistrustfulOps<volatile::ops::VolatileOps>;
+// pub type ExternallySharedOps = DistrustfulOps<ByteWiseOps<UnorderedAtomicOps>>;
+
+pub type ExternallySharedRef<'a, T, A = ReadWrite> = VolatileRef<'a, T, A, ExternallySharedOps>;
+
+pub type ExternallySharedPtr<'a, T, A = ReadWrite> = VolatilePtr<'a, T, A, ExternallySharedOps>;
+
+pub trait ExternallySharedRefExt<'a, T: ?Sized, A: Access> {
+    unsafe fn new(pointer: NonNull<T>) -> ExternallySharedRef<'a, T, A>;
+}
+
+impl<'a, T: ?Sized, A: Access> ExternallySharedRefExt<'a, T, A> for ExternallySharedRef<'a, T, A> {
+    unsafe fn new(pointer: NonNull<T>) -> ExternallySharedRef<'a, T, A> {
+        unsafe {
+            VolatileRef::new_restricted_with_ops(Default::default(), Default::default(), pointer)
+        }
+    }
+}
+
+pub trait ExternallySharedPtrExt<'a, T: ?Sized, A> {
+    fn atomic(self) -> AtomicPtr<'a, T, A>
+    where
+        T: Atomic;
+}
+
+impl<'a, T: ?Sized, A> ExternallySharedPtrExt<'a, T, A> for ExternallySharedPtr<'a, T, A> {
+    fn atomic(self) -> AtomicPtr<'a, T, A>
+    where
+        T: Atomic,
+    {
+        unsafe { AtomicPtr::new(self.as_raw_ptr()) }
+    }
+}

@@ -16,6 +16,7 @@ sel4-async-block-io-fat = { path = "../../../../../sel4-async/block-io/fat" }
 sel4-async-network = { path = "../../../../../sel4-async/network" }
 sel4-async-time = { path = "../../../../../sel4-async/time" }
 sel4-bounce-buffer-allocator = { path = "../../../../../sel4-bounce-buffer-allocator" }
+sel4-externally-shared = { path = "../../../../../sel4-externally-shared", features = ["unstable"] }
 sel4-immediate-sync-once-cell = { path = "../../../../../sel4-immediate-sync-once-cell" }
 sel4-logging = { path = "../../../../../sel4-logging" }
 sel4-microkit-message = { path = "../../../../../sel4-microkit/message" }
@@ -35,10 +36,6 @@ path = "../virtio-net-driver/interface-types"
 
 [dependencies.sel4-async-single-threaded-executor]
 path = "../../../../../sel4-async/single-threaded-executor"
-
-[dependencies.sel4-externally-shared]
-path = "../../../../../sel4-externally-shared"
-features = ["unstable", "alloc"]
 
 [dependencies.sel4-microkit]
 path = "../../../../../sel4-microkit"
