@@ -10,11 +10,8 @@ banscii-artist-interface-types = { path = "../artist/interface-types" }
 banscii-assistant-core = { path = "./core" }
 banscii-pl011-driver-interface-types = { path = "../pl011-driver/interface-types" }
 hex = { version = "0.4.3", default-features = false, features = ["alloc"] }
+sel4-externally-shared = { path = "../../../../../sel4-externally-shared", features = ["unstable"] }
 sel4-microkit-message = { path = "../../../../../sel4-microkit/message" }
-
-[dependencies.sel4-externally-shared]
-path = "../../../../../sel4-externally-shared"
-features = ["unstable", "alloc"]
 
 [dependencies.sel4-microkit]
 path = "../../../../../sel4-microkit"

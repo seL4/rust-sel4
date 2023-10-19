@@ -6,9 +6,11 @@
 
 extern crate alloc;
 
+use alloc::vec;
+
 use sel4_externally_shared::{
     access::{ReadOnly, ReadWrite},
-    ExternallySharedRef,
+    ExternallySharedRef, ExternallySharedRefExt,
 };
 use sel4_microkit::{memory_region_symbol, protection_domain, Channel, Handler, MessageInfo};
 use sel4_microkit_message::MessageInfoExt as _;
@@ -27,13 +29,11 @@ const REGION_SIZE: usize = 0x4_000;
 #[protection_domain(heap_size = 0x10000)]
 fn init() -> HandlerImpl {
     let region_in = unsafe {
-        ExternallySharedRef::<'static, [u8]>::new_read_only(
-            memory_region_symbol!(region_in_start: *mut [u8], n = REGION_SIZE),
-        )
+        ExternallySharedRef::new(memory_region_symbol!(region_in_start: *mut [u8], n = REGION_SIZE))
     };
 
     let region_out = unsafe {
-        ExternallySharedRef::<'static, [u8]>::new(
+        ExternallySharedRef::new(
             memory_region_symbol!(region_out_start: *mut [u8], n = REGION_SIZE),
         )
     };
@@ -62,11 +62,14 @@ impl Handler for HandlerImpl {
                 Ok(req) => {
                     let draft_height = req.height;
                     let draft_width = req.width;
-                    let draft = self
-                        .region_in
-                        .as_ptr()
-                        .index(req.draft_start..req.draft_start + req.draft_size)
-                        .copy_to_vec();
+                    let draft = {
+                        let mut buf = vec![0; req.draft_size];
+                        self.region_in
+                            .as_ptr()
+                            .index(req.draft_start..req.draft_start + req.draft_size)
+                            .copy_into_slice(&mut buf);
+                        buf
+                    };
 
                     let masterpiece = Masterpiece::complete(draft_height, draft_width, &draft);
 

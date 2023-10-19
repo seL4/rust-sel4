@@ -21,7 +21,7 @@ use sel4_async_block_io::{
     constant_block_sizes::BlockSize512, disk::Disk, CachedBlockIO, ConstantBlockSize,
 };
 use sel4_bounce_buffer_allocator::{Basic, BounceBufferAllocator};
-use sel4_externally_shared::ExternallySharedRef;
+use sel4_externally_shared::{ExternallySharedRef, ExternallySharedRefExt};
 use sel4_logging::{LevelFilter, Logger, LoggerBuilder};
 use sel4_microkit::{memory_region_symbol, protection_domain, var, Channel, Handler};
 use sel4_shared_ring_buffer::RingBuffers;

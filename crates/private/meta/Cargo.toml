@@ -40,7 +40,7 @@ sel4-sys = { path = "../../sel4/sys" }
 
 [dependencies.sel4-externally-shared]
 path = "../../sel4-externally-shared"
-features = ["alloc", "unstable", "very_unstable"]
+features = ["unstable", "very_unstable"]
 
 [target."cfg(not(target_arch = \"x86_64\"))".dependencies]
 sel4-platform-info = { path = "../../sel4-platform-info", optional = true }

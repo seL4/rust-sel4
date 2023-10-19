@@ -31,7 +31,7 @@ mk {
     ];
 
     sel4-microkit = { default-features = false; features = [ "alloc" ]; };
-    sel4-externally-shared.features = [ "unstable" "alloc" ];
+    sel4-externally-shared.features = [ "unstable" ];
   };
   build-dependencies = {
     rcgen = "0.11.1";

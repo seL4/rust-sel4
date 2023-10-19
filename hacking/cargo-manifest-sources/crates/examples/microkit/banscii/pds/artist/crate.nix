@@ -5,7 +5,7 @@ mk {
   dependencies = {
     sel4-microkit = { default-features = false; features = [ "alloc" ]; };
     rsa = { version = "0.8.1"; default-features = false; features = [ "pem" "sha2" ]; };
-    sel4-externally-shared.features = [ "unstable" "alloc" ];
+    sel4-externally-shared.features = [ "unstable" ];
   };
   build-dependencies = {
     rsa = "0.8.1";

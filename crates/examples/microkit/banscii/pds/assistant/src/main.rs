@@ -5,6 +5,7 @@
 
 extern crate alloc;
 
+use alloc::vec;
 use alloc::vec::Vec;
 use core::fmt;
 use core::fmt::Write;
@@ -13,7 +14,7 @@ use core::str;
 
 use sel4_externally_shared::{
     access::{ReadOnly, ReadWrite},
-    ExternallySharedRef,
+    ExternallySharedRef, ExternallySharedRefExt,
 };
 use sel4_microkit::{memory_region_symbol, protection_domain, Channel, Handler, MessageInfo};
 use sel4_microkit_message::MessageInfoExt as _;
@@ -32,13 +33,11 @@ const MAX_SUBJECT_LEN: usize = 16;
 #[protection_domain(heap_size = 0x10000)]
 fn init() -> impl Handler {
     let region_in = unsafe {
-        ExternallySharedRef::<'static, [u8]>::new_read_only(
-            memory_region_symbol!(region_in_start: *mut [u8], n = REGION_SIZE),
-        )
+        ExternallySharedRef::new(memory_region_symbol!(region_in_start: *mut [u8], n = REGION_SIZE))
     };
 
     let region_out = unsafe {
-        ExternallySharedRef::<'static, [u8]>::new(
+        ExternallySharedRef::new(
             memory_region_symbol!(region_out_start: *mut [u8], n = REGION_SIZE),
         )
     };
@@ -135,17 +134,23 @@ impl HandlerImpl {
         let height = resp.height;
         let width = resp.width;
 
-        let pixel_data = self
-            .region_in
-            .as_ptr()
-            .index(resp.masterpiece_start..resp.masterpiece_start + resp.masterpiece_size)
-            .copy_to_vec();
+        let pixel_data = {
+            let mut buf = vec![0; resp.masterpiece_size];
+            self.region_in
+                .as_ptr()
+                .index(resp.masterpiece_start..resp.masterpiece_start + resp.masterpiece_size)
+                .copy_into_slice(&mut buf);
+            buf
+        };
 
-        let signature = self
-            .region_in
-            .as_ptr()
-            .index(resp.signature_start..resp.signature_start + resp.signature_size)
-            .copy_to_vec();
+        let signature = {
+            let mut buf = vec![0; resp.signature_size];
+            self.region_in
+                .as_ptr()
+                .index(resp.signature_start..resp.signature_start + resp.signature_size)
+                .copy_into_slice(&mut buf);
+            buf
+        };
 
         newline();
 

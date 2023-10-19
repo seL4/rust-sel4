@@ -48,6 +48,7 @@ let
     # "mbedtls-sys-auto" = "tmp/rust-mbedtls/mbedtls-sys";
     # "mbedtls-platform-support" = "tmp/rust-mbedtls/mbedtls-platform-support";
     # "embedded-fat" = "tmp/rust-embedded-fat";
+    # "volatile" = "tmp/volatile";
   };
 
   cratePathAttrs = localCratePathAttrs // externalCratePathAttrs;
@@ -166,11 +167,15 @@ let
         "packetmeta-id" "async"
       ];
 
+      volatileSource = {
+        git = "https://github.com/coliasgroup/volatile.git";
+        tag = "keep/8aee5539716d3d38247f46eddd42b382"; # branch coliasgroup
+      };
+
       fatSource = {
         git = "https://github.com/coliasgroup/rust-embedded-fat.git";
         tag = "keep/e1465a43c9f550ef58701a275b313310"; # branch sel4
       };
-
 
       mbedtlsSource = {
         git = "https://github.com/coliasgroup/rust-mbedtls";

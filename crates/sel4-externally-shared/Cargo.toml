@@ -3,12 +3,15 @@ name = "sel4-externally-shared"
 version = "0.1.0"
 authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
 edition = "2021"
-license = "MIT OR Apache-2.0"
+license = "BSD-2-Clause"
 
 [features]
-alloc = []
-unstable = []
-very_unstable = ["unstable"]
+unstable = ["volatile/unstable"]
+very_unstable = ["volatile/very_unstable"]
 
-[dev-dependencies]
-rand = "0.8.3"
+[dependencies]
+zerocopy = "0.7.6"
+
+[dependencies.volatile]
+git = "https://github.com/coliasgroup/volatile.git"
+tag = "keep/8aee5539716d3d38247f46eddd42b382"
