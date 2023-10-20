@@ -16,7 +16,7 @@ impl<'a, T, A> AtomicPtr<'a, T, A> {
 
 impl<'a, T: Atomic, A: Readable> AtomicPtr<'a, T, A> {
     #[inline]
-    pub fn load(&self, order: Ordering) -> T {
+    pub fn load(self, order: Ordering) -> T {
         // SAFETY: data races are prevented by atomic intrinsics.
         unsafe { generic::atomic_load(self.as_const_ptr(), order.into()) }
     }
@@ -24,7 +24,7 @@ impl<'a, T: Atomic, A: Readable> AtomicPtr<'a, T, A> {
 
 impl<'a, T: Atomic, A: Readable + Writable> AtomicPtr<'a, T, A> {
     #[inline]
-    pub fn store(&self, val: T, order: Ordering) {
+    pub fn store(self, val: T, order: Ordering) {
         // SAFETY: data races are prevented by atomic intrinsics.
         unsafe {
             generic::atomic_store(self.as_mut_ptr(), val, order.into());
@@ -32,14 +32,14 @@ impl<'a, T: Atomic, A: Readable + Writable> AtomicPtr<'a, T, A> {
     }
 
     #[inline]
-    pub fn swap(&self, val: T, order: Ordering) -> T {
+    pub fn swap(self, val: T, order: Ordering) -> T {
         // SAFETY: data races are prevented by atomic intrinsics.
         unsafe { generic::atomic_swap(self.as_mut_ptr(), val, order.into()) }
     }
 
     #[inline]
     pub fn compare_exchange(
-        &self,
+        self,
         current: T,
         new: T,
         success: Ordering,
@@ -59,7 +59,7 @@ impl<'a, T: Atomic, A: Readable + Writable> AtomicPtr<'a, T, A> {
 
     #[inline]
     pub fn compare_exchange_weak(
-        &self,
+        self,
         current: T,
         new: T,
         success: Ordering,
@@ -78,44 +78,44 @@ impl<'a, T: Atomic, A: Readable + Writable> AtomicPtr<'a, T, A> {
     }
 
     #[inline]
-    pub fn fetch_add(&self, val: T, order: Ordering) -> T {
+    pub fn fetch_add(self, val: T, order: Ordering) -> T {
         // SAFETY: data races are prevented by atomic intrinsics.
         unsafe { generic::atomic_add(self.as_mut_ptr(), val, order.into()) }
     }
 
     #[inline]
-    pub fn fetch_sub(&self, val: T, order: Ordering) -> T {
+    pub fn fetch_sub(self, val: T, order: Ordering) -> T {
         // SAFETY: data races are prevented by atomic intrinsics.
         unsafe { generic::atomic_sub(self.as_mut_ptr(), val, order.into()) }
     }
 
     #[inline]
-    pub fn fetch_and(&self, val: T, order: Ordering) -> T {
+    pub fn fetch_and(self, val: T, order: Ordering) -> T {
         // SAFETY: data races are prevented by atomic intrinsics.
         unsafe { generic::atomic_and(self.as_mut_ptr(), val, order.into()) }
     }
 
     #[inline]
-    pub fn fetch_nand(&self, val: T, order: Ordering) -> T {
+    pub fn fetch_nand(self, val: T, order: Ordering) -> T {
         // SAFETY: data races are prevented by atomic intrinsics.
         unsafe { generic::atomic_nand(self.as_mut_ptr(), val, order.into()) }
     }
 
     #[inline]
-    pub fn fetch_or(&self, val: T, order: Ordering) -> T {
+    pub fn fetch_or(self, val: T, order: Ordering) -> T {
         // SAFETY: data races are prevented by atomic intrinsics.
         unsafe { generic::atomic_or(self.as_mut_ptr(), val, order.into()) }
     }
 
     #[inline]
-    pub fn fetch_xor(&self, val: T, order: Ordering) -> T {
+    pub fn fetch_xor(self, val: T, order: Ordering) -> T {
         // SAFETY: data races are prevented by atomic intrinsics.
         unsafe { generic::atomic_xor(self.as_mut_ptr(), val, order.into()) }
     }
 
     #[inline]
     pub fn fetch_update<F>(
-        &self,
+        self,
         set_order: Ordering,
         fetch_order: Ordering,
         mut f: F,
@@ -134,7 +134,7 @@ impl<'a, T: Atomic, A: Readable + Writable> AtomicPtr<'a, T, A> {
     }
 
     #[inline]
-    pub fn fetch_max(&self, val: T, order: Ordering) -> T {
+    pub fn fetch_max(self, val: T, order: Ordering) -> T {
         // SAFETY: data races are prevented by atomic intrinsics.
         unsafe {
             if T::IS_SIGNED {
@@ -146,7 +146,7 @@ impl<'a, T: Atomic, A: Readable + Writable> AtomicPtr<'a, T, A> {
     }
 
     #[inline]
-    pub fn fetch_min(&self, val: T, order: Ordering) -> T {
+    pub fn fetch_min(self, val: T, order: Ordering) -> T {
         // SAFETY: data races are prevented by atomic intrinsics.
         unsafe {
             if T::IS_SIGNED {

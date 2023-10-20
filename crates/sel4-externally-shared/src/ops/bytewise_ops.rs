@@ -9,12 +9,12 @@ use zerocopy::{AsBytes, FromBytes};
 use volatile::ops::BulkOps;
 
 #[derive(Debug, Default, Copy, Clone)]
-pub struct ByteWiseOps<O>(O);
+pub struct BytewiseOps<O>(O);
 
-impl<O: Ops> Ops for ByteWiseOps<O> {}
+impl<O: Ops> Ops for BytewiseOps<O> {}
 
 #[cfg(feature = "unstable")]
-impl<O: BulkOps<u8>, T: FromBytes + AsBytes> UnitaryOps<T> for ByteWiseOps<O> {
+impl<O: BulkOps<u8>, T: FromBytes + AsBytes> UnitaryOps<T> for BytewiseOps<O> {
     unsafe fn read(src: *const T) -> T {
         let mut val = T::new_zeroed();
         let view = val.as_bytes_mut();
@@ -29,7 +29,7 @@ impl<O: BulkOps<u8>, T: FromBytes + AsBytes> UnitaryOps<T> for ByteWiseOps<O> {
 }
 
 #[cfg(feature = "unstable")]
-impl<O: BulkOps<u8>, T: FromBytes + AsBytes> BulkOps<T> for ByteWiseOps<O> {
+impl<O: BulkOps<u8>, T: FromBytes + AsBytes> BulkOps<T> for BytewiseOps<O> {
     unsafe fn memmove(dst: *mut T, src: *const T, count: usize) {
         unsafe { O::memmove(dst.cast(), src.cast(), count * mem::size_of::<T>()) }
     }
