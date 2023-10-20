@@ -5,23 +5,20 @@
 
 use core::ptr::NonNull;
 
-use volatile::{
-    access::{Access, ReadWrite},
-    VolatilePtr, VolatileRef,
-};
+use volatile::access::{Access, ReadWrite};
 
-pub use volatile::{access, map_field};
+pub use volatile::{access, map_field, VolatilePtr, VolatileRef};
 
 mod atomics;
-mod ops;
+
+pub mod ops;
 
 pub use atomics::{Atomic, AtomicPtr};
-pub use ops::{ByteWiseOps, DistrustfulOps, NormalOps, UnorderedAtomicOps};
 
 // TODO
-pub type ExternallySharedOps = DistrustfulOps<NormalOps>;
-// pub type ExternallySharedOps = DistrustfulOps<volatile::ops::VolatileOps>;
-// pub type ExternallySharedOps = DistrustfulOps<ByteWiseOps<UnorderedAtomicOps>>;
+pub type ExternallySharedOps = ops::ZerocopyOps<ops::NormalOps>;
+// pub type ExternallySharedOps = ops::ZerocopyOps<ops::VolatileOps>;
+// pub type ExternallySharedOps = ops::ZerocopyOps<ops::BytewiseOps<ops::UnorderedAtomicOps>>;
 
 pub type ExternallySharedRef<'a, T, A = ReadWrite> = VolatileRef<'a, T, A, ExternallySharedOps>;
 

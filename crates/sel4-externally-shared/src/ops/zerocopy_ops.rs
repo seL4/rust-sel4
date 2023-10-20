@@ -5,11 +5,11 @@ use zerocopy::{AsBytes, FromBytes};
 use volatile::ops::BulkOps;
 
 #[derive(Debug, Default, Copy, Clone)]
-pub struct DistrustfulOps<O>(O);
+pub struct ZerocopyOps<O>(O);
 
-impl<O: Ops> Ops for DistrustfulOps<O> {}
+impl<O: Ops> Ops for ZerocopyOps<O> {}
 
-impl<O: UnitaryOps<T>, T: FromBytes + AsBytes> UnitaryOps<T> for DistrustfulOps<O> {
+impl<O: UnitaryOps<T>, T: FromBytes + AsBytes> UnitaryOps<T> for ZerocopyOps<O> {
     unsafe fn read(src: *const T) -> T {
         unsafe { O::read(src) }
     }
@@ -20,7 +20,7 @@ impl<O: UnitaryOps<T>, T: FromBytes + AsBytes> UnitaryOps<T> for DistrustfulOps<
 }
 
 #[cfg(feature = "unstable")]
-impl<O: BulkOps<T>, T: FromBytes + AsBytes> BulkOps<T> for DistrustfulOps<O> {
+impl<O: BulkOps<T>, T: FromBytes + AsBytes> BulkOps<T> for ZerocopyOps<O> {
     unsafe fn memmove(dst: *mut T, src: *const T, count: usize) {
         unsafe { O::memmove(dst, src, count) }
     }
