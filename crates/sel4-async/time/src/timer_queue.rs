@@ -3,6 +3,11 @@ use core::ops::Bound;
 
 use crate::SubKey;
 
+// We opt for a simple B-tree-based implementation rather than implementing a timer wheel. This is
+// good enough for now. Note that this approach is also good enough for `async-std`. If we ever do
+// actually need the scalability of something like a timer wheel, `tokio`'s implementation would be
+// a good place to start.
+
 pub struct TimerQueue<T, U, V> {
     pending: BTreeMap<Key<T, U>, V>,
 }
