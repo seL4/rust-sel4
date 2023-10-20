@@ -6,6 +6,13 @@ on:
   pull_request:
   workflow_dispatch:
 jobs:
+  check-licenses:
+    name: Check licenses
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: REUSE Compliance Check
+      uses: fsfe/reuse-action@v2
   check-source:
     name: Check source
     runs-on: ubuntu-latest
@@ -95,7 +102,7 @@ jobs:
   build-everything:
     name: Build everything
     runs-on: ubuntu-latest
-    needs: [check-source, run-sel4test, run-other-tests, build-docs]
+    needs: [check-licenses, check-source, run-sel4test, run-other-tests, build-docs]
     steps:
       - name: Prepare to maximize build space
         run: sudo mkdir /nix
