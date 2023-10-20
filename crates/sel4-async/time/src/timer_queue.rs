@@ -8,6 +8,8 @@ use crate::SubKey;
 // actually need the scalability of something like a timer wheel, `tokio`'s implementation would be
 // a good place to start.
 
+// TODO: Add feature like `tokio::time::Interval`
+
 pub struct TimerQueue<T, U, V> {
     pending: BTreeMap<Key<T, U>, V>,
 }
