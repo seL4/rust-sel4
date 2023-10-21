@@ -1,4 +1,9 @@
 #!/usr/bin/env python3
+#
+# Copyright 2023, Colias Group, LLC
+#
+# SPDX-License-Identifier: BSD-2-Clause
+#
 
 import sys
 
