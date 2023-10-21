@@ -6,9 +6,10 @@
 
 { mk, localCrates, versions }:
 
-mk {
+mk rec {
   package.name = "sel4";
   package.license = "MIT";
+  nix.reuseFrontmatterArgs.licenseID = package.license;
   dependencies = {
     inherit (versions) cfg-if;
   };
