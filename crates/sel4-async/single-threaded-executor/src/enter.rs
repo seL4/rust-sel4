@@ -1,3 +1,11 @@
+//
+// Copyright (c) 2016 Alex Crichton
+// Copyright (c) 2017 The Tokio Authors
+// Copyright 2023, Colias Group, LLC
+//
+// SPDX-License-Identifier: MIT OR Apache-2.0
+//
+
 use core::cell::Cell;
 use core::fmt;
 
