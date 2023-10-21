@@ -8,7 +8,7 @@
 
 mk {
   package.name = "sel4-kernel-loader";
-  package.license = "GPL-2.0-only";
+  package.license = "BSD-2-Clause AND GPL-2.0-only";
   dependencies = {
     sel4-kernel-loader-payload-types.features = [ "serde" ];
     postcard = postcardWith [];
