@@ -1,5 +1,0 @@
-The top-level 'sel4' crate is derived, with significant modification, from:
-
-https://gitlab.com/icecap-project/icecap/-/tree/main/src/rust/crates/framework/base/icecap-sel4
-
-See sel4.LICENSE for copyright information.
