@@ -67,6 +67,12 @@ let
       mk = args: mkCrate (crateUtils.clobber [
         {
           nix.path = relativePath;
+          nix.reuseFrontmatterArgs = {
+            copyrightLines = [
+              "Copyright 2023, Colias Group, LLC"
+            ];
+            licenseID = "BSD-2-Clause";
+          };
           package = {
             edition = "2021";
             version = "0.1.0";
