@@ -1,6 +1,6 @@
 /*
  * Copyright 2020, Data61, CSIRO (ABN 41 687 119 230)
- * Copyright 2023, Nick Spinale <nick.spinale@coliasgroup.com>
+ * Copyright 2023, Colias Group, LLC
  *
  * SPDX-License-Identifier: GPL-2.0-only
  */

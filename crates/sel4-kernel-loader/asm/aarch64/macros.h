@@ -1,3 +1,9 @@
+/*
+ * Copyright 2023, Colias Group, LLC
+ *
+ * SPDX-License-Identifier: BSD-2-Clause
+ */
+
 #define BEGIN_LOCAL_FUNC(_name) \
     .type _name, %function ; \
 _name:

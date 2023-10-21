@@ -1,3 +1,10 @@
+/*
+ * Copyright 2014, General Dynamics C4 Systems
+ * Copyright 2023, Colias Group, LLC
+ *
+ * SPDX-License-Identifier: GPL-2.0-only
+ */
+
 #include "registers.h"
 
 #ifdef CONFIG_ARM_PA_SIZE_BITS_40

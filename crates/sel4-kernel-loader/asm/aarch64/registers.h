@@ -1,3 +1,10 @@
+/*
+ * Copyright 2014, General Dynamics C4 Systems
+ * Copyright 2023, Colias Group, LLC
+ *
+ * SPDX-License-Identifier: GPL-2.0-only
+ */
+
 #define PSR_F_BIT         0x00000040
 #define PSR_I_BIT         0x00000080
 #define PSR_A_BIT         0x00000100
