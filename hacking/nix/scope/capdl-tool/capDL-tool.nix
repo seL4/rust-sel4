@@ -1,9 +1,3 @@
-#
-# Copyright 2023, Colias Group, LLC
-#
-# SPDX-License-Identifier: BSD-2-Clause
-#
-
 { mkDerivation, aeson, array, base, base-compat, bytestring
 , containers, filepath, lens, lib, MissingH, mtl, parsec, pretty
 , regex-compat, split, text, unix, yaml

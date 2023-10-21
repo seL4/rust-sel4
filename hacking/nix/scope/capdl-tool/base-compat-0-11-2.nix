@@ -1,9 +1,3 @@
-#
-# Copyright 2023, Colias Group, LLC
-#
-# SPDX-License-Identifier: BSD-2-Clause
-#
-
 { mkDerivation, base, lib, unix }:
 mkDerivation {
   pname = "base-compat";
