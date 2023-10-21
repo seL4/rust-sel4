@@ -14,7 +14,7 @@ License: BSD-2-Clause
 
 Files:
   crates/sel4-async/network/mbedtls/mozilla-ca-list/src/cacert.pem
-Copyright: 2023, Colias Group, LLC
+Copyright: 2023, Mozilla Foundation
 License: MPL-2.0
 
 Files:
