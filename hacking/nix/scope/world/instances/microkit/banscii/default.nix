@@ -1,3 +1,9 @@
+#
+# Copyright 2023, Colias Group, LLC
+#
+# SPDX-License-Identifier: BSD-2-Clause
+#
+
 { lib, stdenv
 , buildPackages, pkgsBuildBuild
 , linkFarm, symlinkJoin, writeText, writeScript, runCommand
