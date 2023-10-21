@@ -48,13 +48,17 @@ rec {
     in
       lib.concatStringsSep "/" relSegs;
 
+  # REUSE-IgnoreStart
+  spdxLicenseIdentifierMagic = "SPDX-License-Identifier:";
+  # REUSE-IgnoreEnd
+
   mkReuseFrontmatter = { copyrightLines, licenseID }: ''
     #
   '' + lib.flip lib.concatMapStrings copyrightLines (line: ''
     # ${line}
   '') + ''
     #
-    # SPDX-License-Identifier: ${licenseID}
+    # ${spdxLicenseIdentifierMagic} ${licenseID}
     #
   '';
 
