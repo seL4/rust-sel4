@@ -13,9 +13,9 @@ Copyright: 2023, Colias Group, LLC
 License: BSD-2-Clause
 
 Files:
-  crates/sel4-async/network/mbedtls/mozilla-ca-list/src/cacert.pem
-Copyright: 2023, Mozilla Foundation
-License: MPL-2.0
+  crates/sel4-async/network/mbedtls/mozilla-ca-list/src/included-roots.pem
+Copyright: 2023, Colias Group, LLC
+License: CC0-1.0
 
 Files:
   crates/examples/microkit/banscii/pds/assistant/core/assets/fonts/rock-salt/*.ttf

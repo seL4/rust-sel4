@@ -9,4 +9,4 @@ name = "sel4-async-network-mbedtls-mozilla-ca-list"
 version = "0.1.0"
 authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
 edition = "2021"
-license = "BSD-2-Clause AND MPL-2.0"
+license = "BSD-2-Clause"
