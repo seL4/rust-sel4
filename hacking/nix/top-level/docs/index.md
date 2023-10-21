@@ -1,3 +1,9 @@
+<!--
+     Copyright 2023, Colias Group, LLC
+
+     SPDX-License-Identifier: CC-BY-SA-4.0
+-->
+
 The public APIs of this project's crates depend heavily on the combination of seL4 configuration,
 crate feature selection, and rustc target specification. We have generated rustdoc for a few
 representative combinations. Each entry below provides a consistent view of all relevant crates for

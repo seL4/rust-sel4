@@ -1,3 +1,9 @@
+<!--
+     Copyright 2023, Colias Group, LLC
+
+     SPDX-License-Identifier: CC-BY-SA-4.0
+-->
+
 # Rust support for seL4 userspace
 
 This repository contains crates for supporting the use of Rust in seL4 userspace. So far, this
