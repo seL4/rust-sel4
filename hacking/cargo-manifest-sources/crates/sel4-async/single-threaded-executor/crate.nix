@@ -6,9 +6,10 @@
 
 { mk, versions }:
 
-mk {
+mk rec {
   package.name = "sel4-async-single-threaded-executor";
   package.license = "MIT OR Apache-2.0";
+  nix.reuseFrontmatterArgs.licenseID = package.license;
   dependencies = {
     futures = {
       version = versions.futures;
