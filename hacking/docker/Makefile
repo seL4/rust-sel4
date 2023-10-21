@@ -1,3 +1,9 @@
+#
+# Copyright 2023, Colias Group, LLC
+#
+# SPDX-License-Identifier: BSD-2-Clause
+#
+
 STATEFUL ?= $(if $(findstring Linux,$(shell uname -s)),0,1)
 
 work_root := ../..
