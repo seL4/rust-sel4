@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+     Copyright 2023, Colias Group, LLC
+
+     SPDX-License-Identifier: BSD-2-Clause
+-->
 <system>
 
     <protection_domain name="client" priority="253">
