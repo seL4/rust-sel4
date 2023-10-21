@@ -1,3 +1,9 @@
+//
+// Copyright 2023, Colias Group, LLC
+//
+// SPDX-License-Identifier: BSD-2-Clause
+//
+
 file = { SOI ~ (entity)* ~ EOI }
 
 entity = { base | block | tagged_union }

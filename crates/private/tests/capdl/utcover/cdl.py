@@ -1,3 +1,9 @@
+#
+# Copyright 2023, Colias Group, LLC
+#
+# SPDX-License-Identifier: BSD-2-Clause
+#
+
 from capdl import ObjectType, Cap
 from capdl_simple_composition import BaseComposition, ElfComponent
 
