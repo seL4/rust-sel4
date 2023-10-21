@@ -1,3 +1,9 @@
+#
+# Copyright 2023, Colias Group, LLC
+#
+# SPDX-License-Identifier: BSD-2-Clause
+#
+
 from capdl import ObjectType, CSpaceAllocator, AddressSpaceAllocator, Cap
 
 from capdl_simple_composition.utils import align_up, mk_fill
