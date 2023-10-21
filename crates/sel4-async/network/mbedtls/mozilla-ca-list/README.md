@@ -4,6 +4,9 @@
      SPDX-License-Identifier: CC-BY-SA-4.0
 -->
 
-./src/cacert.pem was downloaded from https://curl.se/ca/cacert.pem.
+./src/included-roots.pem was downloaded from https://www.ccadb.org/resources.
 
-See //.reuse/dep5 for copyright and licensing information.
+This file is described by the CCADB as "PEM of Root Certificates in Mozilla’s Root Store with the
+Websites (TLS/SSL) Trust Bit Enabled (TXT)".
+
+Usage terms for this data can be found at https://www.ccadb.org/rootstores/usage.
