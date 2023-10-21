@@ -1,3 +1,9 @@
+//
+// Copyright 2023, Colias Group, LLC
+//
+// SPDX-License-Identifier: BSD-2-Clause
+//
+
 use core::str::pattern::Pattern;
 
 pub(crate) fn content_type_from_name(name: &str) -> &'static str {

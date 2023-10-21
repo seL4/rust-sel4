@@ -1,3 +1,9 @@
+//
+// Copyright 2023, Colias Group, LLC
+//
+// SPDX-License-Identifier: BSD-2-Clause
+//
+
 fn main() {
     sel4_capdl_initializer_with_embedded_spec_embedded_spec_validate::run(true);
 

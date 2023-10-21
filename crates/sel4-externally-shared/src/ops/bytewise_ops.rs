@@ -1,3 +1,9 @@
+//
+// Copyright 2023, Colias Group, LLC
+//
+// SPDX-License-Identifier: BSD-2-Clause
+//
+
 #![cfg_attr(not(feature = "unstable"), allow(unused_imports))]
 
 use core::mem;

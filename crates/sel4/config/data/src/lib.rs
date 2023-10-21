@@ -1,3 +1,9 @@
+//
+// Copyright 2023, Colias Group, LLC
+//
+// SPDX-License-Identifier: BSD-2-Clause
+//
+
 #![allow(unused_imports)]
 
 pub use sel4_config_generic_types::Configuration;

@@ -1,3 +1,9 @@
+//
+// Copyright 2023, Colias Group, LLC
+//
+// SPDX-License-Identifier: BSD-2-Clause
+//
+
 use cargo::core::source::SourceId;
 use cargo::util::hex::short_hash;
 use cargo_util::registry::make_dep_path;

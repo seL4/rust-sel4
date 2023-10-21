@@ -1,3 +1,9 @@
+//
+// Copyright 2023, Colias Group, LLC
+//
+// SPDX-License-Identifier: BSD-2-Clause
+//
+
 use sel4_shared_ring_buffer::PeerMisbehaviorError as SharedRingBuffersPeerMisbehaviorError;
 use sel4_shared_ring_buffer_bookkeeping::slot_tracker::SlotTrackerError;
 

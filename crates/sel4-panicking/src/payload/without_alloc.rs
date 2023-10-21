@@ -1,3 +1,9 @@
+//
+// Copyright 2023, Colias Group, LLC
+//
+// SPDX-License-Identifier: BSD-2-Clause
+//
+
 use core::any::{Any, TypeId};
 
 use super::{FitsWithinSmallPayload, SmallPayloadValue, UpcastIntoPayload};

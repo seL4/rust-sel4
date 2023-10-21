@@ -1,3 +1,9 @@
+//
+// Copyright 2023, Colias Group, LLC
+//
+// SPDX-License-Identifier: BSD-2-Clause
+//
+
 use sel4::{sel4_cfg, VMAttributes};
 
 #[sel4_cfg(any(ARCH_AARCH32, ARCH_AARCH64))]

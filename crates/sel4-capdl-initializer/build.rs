@@ -1,3 +1,9 @@
+//
+// Copyright 2023, Colias Group, LLC
+//
+// SPDX-License-Identifier: BSD-2-Clause
+//
+
 fn main() {
     // No use in root task.
     // Remove unnecessary alignment gap between segments.

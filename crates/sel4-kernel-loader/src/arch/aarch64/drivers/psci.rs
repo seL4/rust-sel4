@@ -1,3 +1,9 @@
+//
+// Copyright 2023, Colias Group, LLC
+//
+// SPDX-License-Identifier: BSD-2-Clause
+//
+
 use core::arch::global_asm;
 
 pub(crate) fn start_secondary_core(core_id: usize, sp: usize) {

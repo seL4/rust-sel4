@@ -1,3 +1,9 @@
+//
+// Copyright 2023, Colias Group, LLC
+//
+// SPDX-License-Identifier: BSD-2-Clause
+//
+
 pub trait Access: AccessSealed {
     type ReadWitness: Witness;
     type WriteWitness: Witness;

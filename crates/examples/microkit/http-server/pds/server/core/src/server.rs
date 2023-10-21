@@ -1,3 +1,9 @@
+//
+// Copyright 2023, Colias Group, LLC
+//
+// SPDX-License-Identifier: BSD-2-Clause
+//
+
 use alloc::borrow::ToOwned;
 use alloc::format;
 use alloc::rc::Rc;

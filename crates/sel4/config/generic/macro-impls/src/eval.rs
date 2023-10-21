@@ -1,3 +1,9 @@
+//
+// Copyright 2023, Colias Group, LLC
+//
+// SPDX-License-Identifier: BSD-2-Clause
+//
+
 use fallible_iterator::FallibleIterator;
 use proc_macro2::{Span, TokenStream};
 use quote::quote_spanned;
