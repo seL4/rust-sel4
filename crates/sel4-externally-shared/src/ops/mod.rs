@@ -1,3 +1,9 @@
+//
+// Copyright 2023, Colias Group, LLC
+//
+// SPDX-License-Identifier: BSD-2-Clause
+//
+
 pub use volatile::ops::*;
 
 mod bytewise_ops;

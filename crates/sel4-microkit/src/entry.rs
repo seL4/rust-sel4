@@ -1,3 +1,9 @@
+//
+// Copyright 2023, Colias Group, LLC
+//
+// SPDX-License-Identifier: BSD-2-Clause
+//
+
 pub use sel4_panicking::catch_unwind;
 pub use sel4_panicking_env::{abort, debug_print, debug_println};
 

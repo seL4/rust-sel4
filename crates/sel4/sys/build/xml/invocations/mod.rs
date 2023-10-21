@@ -1,3 +1,9 @@
+//
+// Copyright 2023, Colias Group, LLC
+//
+// SPDX-License-Identifier: BSD-2-Clause
+//
+
 #![allow(clippy::eq_op)]
 #![allow(clippy::nonminimal_bool)]
 

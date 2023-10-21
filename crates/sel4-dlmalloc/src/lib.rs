@@ -1,3 +1,9 @@
+//
+// Copyright 2023, Colias Group, LLC
+//
+// SPDX-License-Identifier: BSD-2-Clause
+//
+
 #![no_std]
 #![feature(const_slice_from_raw_parts_mut)]
 #![feature(slice_ptr_get)]

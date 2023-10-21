@@ -1,3 +1,9 @@
+//
+// Copyright 2023, Colias Group, LLC
+//
+// SPDX-License-Identifier: BSD-2-Clause
+//
+
 use sel4_panicking_env::abort_without_info;
 
 #[cfg(panic = "unwind")]

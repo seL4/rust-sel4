@@ -1,3 +1,9 @@
+//
+// Copyright 2023, Colias Group, LLC
+//
+// SPDX-License-Identifier: BSD-2-Clause
+//
+
 //! Utilities for handling IPC messages for protected procedure calls.
 
 pub type MessageLabel = sel4::Word;

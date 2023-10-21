@@ -1,3 +1,9 @@
+//
+// Copyright 2023, Colias Group, LLC
+//
+// SPDX-License-Identifier: BSD-2-Clause
+//
+
 use core::ffi::c_int;
 
 use super::{get_ipc_buffer, get_ipc_buffer_mut, get_ipc_buffer_ptr, set_ipc_buffer_ptr};

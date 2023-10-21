@@ -1,3 +1,9 @@
+//
+// Copyright 2023, Colias Group, LLC
+//
+// SPDX-License-Identifier: BSD-2-Clause
+//
+
 use sel4_config::sel4_cfg;
 
 #[sel4_cfg(all(ARCH_AARCH64, PLAT_QEMU_ARM_VIRT))]

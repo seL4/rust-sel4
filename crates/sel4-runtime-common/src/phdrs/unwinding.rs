@@ -1,3 +1,9 @@
+//
+// Copyright 2023, Colias Group, LLC
+//
+// SPDX-License-Identifier: BSD-2-Clause
+//
+
 use unwinding::custom_eh_frame_finder::{
     set_custom_eh_frame_finder, EhFrameFinder, FrameInfo, FrameInfoKind,
     SetCustomEhFrameFinderError,

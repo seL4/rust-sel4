@@ -1,3 +1,9 @@
+//
+// Copyright 2023, Colias Group, LLC
+//
+// SPDX-License-Identifier: BSD-2-Clause
+//
+
 use num::{NumCast, One, PrimInt, Zero};
 
 use sel4_render_elf_with_data::{FileHeaderExt, Input, SymbolicInjection, SymbolicValue};

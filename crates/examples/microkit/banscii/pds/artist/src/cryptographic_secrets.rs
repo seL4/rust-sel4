@@ -1,3 +1,9 @@
+//
+// Copyright 2023, Colias Group, LLC
+//
+// SPDX-License-Identifier: BSD-2-Clause
+//
+
 use rsa::pkcs1::DecodeRsaPrivateKey;
 use rsa::pkcs1v15::{Signature, SigningKey};
 use rsa::sha2::Sha256;

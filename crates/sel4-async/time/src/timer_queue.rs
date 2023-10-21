@@ -1,3 +1,9 @@
+//
+// Copyright 2023, Colias Group, LLC
+//
+// SPDX-License-Identifier: BSD-2-Clause
+//
+
 use alloc::collections::btree_map::{BTreeMap, CursorMut};
 use core::ops::Bound;
 

@@ -1,3 +1,9 @@
+//
+// Copyright 2023, Colias Group, LLC
+//
+// SPDX-License-Identifier: BSD-2-Clause
+//
+
 use sel4_config::sel4_cfg;
 use sel4_kernel_loader_payload_types::PayloadInfo;
 

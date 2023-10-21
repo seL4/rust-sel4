@@ -1,3 +1,9 @@
+//
+// Copyright 2023, Colias Group, LLC
+//
+// SPDX-License-Identifier: BSD-2-Clause
+//
+
 use core::ffi::{c_char, c_int};
 use core::sync::atomic::{compiler_fence, Ordering};
 

@@ -1,3 +1,9 @@
+//
+// Copyright 2023, Colias Group, LLC
+//
+// SPDX-License-Identifier: BSD-2-Clause
+//
+
 use sel4::{ObjectBlueprint, VMAttributes};
 
 use crate::{cap, Badge, Cap, FillEntryContentBootInfoId, Object, Rights};

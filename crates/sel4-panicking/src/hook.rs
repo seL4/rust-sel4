@@ -1,3 +1,9 @@
+//
+// Copyright 2023, Colias Group, LLC
+//
+// SPDX-License-Identifier: BSD-2-Clause
+//
+
 use sel4_immediate_sync_once_cell::ImmediateSyncOnceCell;
 use sel4_panicking_env::debug_println;
 

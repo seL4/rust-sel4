@@ -1,3 +1,9 @@
+//
+// Copyright 2023, Colias Group, LLC
+//
+// SPDX-License-Identifier: BSD-2-Clause
+//
+
 use std::any;
 use std::fmt::Debug;
 use std::marker::PhantomData;
