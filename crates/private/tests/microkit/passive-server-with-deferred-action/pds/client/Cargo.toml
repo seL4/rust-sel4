@@ -1,3 +1,9 @@
+#
+# Copyright 2023, Colias Group, LLC
+#
+# SPDX-License-Identifier: BSD-2-Clause
+#
+
 [package]
 name = "tests-microkit-passive-server-with-deferred-action-pds-client"
 version = "0.1.0"

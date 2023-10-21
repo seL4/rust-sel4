@@ -1,3 +1,9 @@
+#
+# Copyright 2023, Colias Group, LLC
+#
+# SPDX-License-Identifier: BSD-2-Clause
+#
+
 [package]
 name = "sel4-backtrace-embedded-debug-info-cli"
 version = "0.1.0"
