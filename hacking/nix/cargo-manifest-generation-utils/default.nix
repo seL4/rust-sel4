@@ -48,12 +48,23 @@ rec {
     in
       lib.concatStringsSep "/" relSegs;
 
+  mkReuseFrontmatter = { copyrightLines, licenseID }: ''
+    #
+  '' + lib.flip lib.concatMapStrings copyrightLines (line: ''
+    # ${line}
+  '') + ''
+    #
+    # SPDX-License-Identifier: ${licenseID}
+    #
+  '';
+
   mkCrate =
     let
       elaborateNix =
         { path
         , local ? {}
-        , frontmatter ? null
+        , reuseFrontmatterArgs ? null
+        , frontmatter ? if reuseFrontmatterArgs != null then mkReuseFrontmatter reuseFrontmatterArgs else null
         , justEnsureEquivalence ? false
         , meta ? {}
         , passthru ? {}
