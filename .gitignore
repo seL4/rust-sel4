@@ -7,3 +7,8 @@
 /target/
 /out/
 /tmp/
+
+result
+result-*
+
+__pycache__
