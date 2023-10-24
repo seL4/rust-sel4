@@ -12,6 +12,8 @@ let
 
 in {
 
+  shell = pkgs.build.this.shell;
+
   worldsForEverythingInstances = [
     pkgs.host.aarch64.none.this.worlds.default
     pkgs.host.aarch64.none.this.worlds.qemu-arm-virt.microkit

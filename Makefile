@@ -24,6 +24,8 @@ out := out
 
 nix_build := nix-build $(keep_going) $(jobs_arg) $(cores_arg)
 
+nix_shell := nix-shell -A shell --pure
+
 .PHONY: none
 none:
 
@@ -69,16 +71,15 @@ check-fmt:
 
 .PHONY: check-generic-formatting
 check-generic-formatting:
-	./hacking/scripts/check-generic-formatting.sh
+	$(nix_shell) --run "sh hacking/scripts/check-generic-formatting.sh"
 
 .PHONY: check-source
 check-source: check-generated-sources check-fmt check-generic-formatting
 
 .PHONY: check-dependencies
 check-dependencies:
-	tool=$$($(nix_build) -A pkgs.build.cargo-audit --no-out-link) && \
 	lockfile=$$($(nix_build) -A pkgs.build.this.publicCratesCargoLock --no-out-link) && \
-		$$tool/bin/cargo-audit audit -f $$lockfile
+		$(nix_shell) --run "cargo-audit audit -f $$lockfile"
 
 try_restore_terminal := tput smam 2> /dev/null || true
 

@@ -1,4 +1,3 @@
-#!/bin/sh
 #
 # Copyright 2023, Colias Group, LLC
 #
@@ -25,4 +24,4 @@ git ls-files | \
             [ -f "$path" ] && echo $path;
         done
     ) | \
-    $(nix-build -A pkgs.build.python3 --no-out-link)/bin/python3 $here/check-generic-formatting-helper.py
+    python3 $here/check-generic-formatting-helper.py
