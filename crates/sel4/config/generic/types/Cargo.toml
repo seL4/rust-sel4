@@ -16,8 +16,6 @@ authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
 edition = "2021"
 license = "BSD-2-Clause"
 
-[dependencies]
-
 [dependencies.serde]
 version = "1.0.147"
 default-features = false

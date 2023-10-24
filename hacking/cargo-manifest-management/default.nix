@@ -7,16 +7,48 @@
 rec {
   pkgs = (import ../nix {}).pkgs.build;
 
-  utils = pkgs.callPackage ./utils {};
+  inherit (pkgs) lib;
 
-  manifestScope = pkgs.callPackage ./manifest-scope.nix {};
+  tool = import ./tool.nix {
+    inherit lib;
+  };
+
+  manifestScope = import ./manifest-scope.nix {
+    inherit lib;
+  };
 
   manualManifests = import ./manual-manifests.nix;
 
-  workspace = pkgs.callPackage ./workspace.nix {
-    inherit utils manifestScope manualManifests;
+  workspace = tool {
+    inherit manifestScope manualManifests;
     workspaceRoot = toString ../..;
+    workspaceDirFilter = relativePathSegments: lib.head relativePathSegments == "crates";
   };
 
-  inherit (workspace) script;
+  inherit (workspace) plan;
+
+  prettyJSON = name: value:
+    with pkgs;
+    runCommand name {
+      nativeBuildInputs = [
+        jq
+      ];
+    } ''
+      jq < ${builtins.toFile "plan.json" (builtins.toJSON value)} > $out
+    '';
+
+  planJSON = prettyJSON "plan.json" plan;
+
+  # for debugging:
+
+  test = prettyJSON "Crate.json" testValue;
+
+  testValue = getManifestByPackageName "sel4";
+
+  getManifestByPackageName = name: lib.head
+    (lib.filter
+      (v: v.package.name or null == name)
+      (map
+        (v: v.manifest)
+        (lib.attrValues plan)));
 }
