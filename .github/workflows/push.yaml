@@ -16,7 +16,7 @@ jobs:
     name: Check licenses
     runs-on: ubuntu-latest
     steps:
-    - uses: seL4/ci-actions/license-check@master
+      - uses: seL4/ci-actions/license-check@master
   check-source:
     name: Check source
     runs-on: ubuntu-latest
