@@ -4,10 +4,8 @@
 # SPDX-License-Identifier: BSD-2-Clause
 #
 
-{ lib
-, callPackage
-, runCommand, writeText, writeScript, linkFarm
-, runtimeShell
+{ lib, callPackage
+, runCommand
 , python3, python3Packages
 }:
 
