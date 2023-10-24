@@ -13,6 +13,9 @@ mk {
     unwinding = unwindingWith [] // { optional = true; };
     postcard = postcardWith [] // { optional = true; };
     serde = serdeWith [] // { optional = true; };
+    inherit (localCrates)
+      sel4-backtrace-types
+    ;
   };
   features = {
     alloc = [
@@ -32,7 +35,4 @@ mk {
       "unwinding"
     ];
   };
-  nix.local.dependencies = with localCrates; [
-    sel4-backtrace-types
-  ];
 }

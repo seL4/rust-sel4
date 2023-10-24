@@ -11,12 +11,12 @@ mk {
   dependencies = {
     inherit (versions) cfg-if;
     unwinding = unwindingWith [ "personality" ] // { optional = true; };
+    inherit (localCrates)
+      sel4-panicking-env
+      sel4-immediate-sync-once-cell
+    ;
   };
   features = {
     alloc = [];
   };
-  nix.local.dependencies = with localCrates; [
-    sel4-panicking-env
-    sel4-immediate-sync-once-cell
-  ];
 }

@@ -11,8 +11,8 @@ mk {
   dependencies = {
     num_enum = { version = versions.num_enum; default-features = false; };
     zerocopy = zerocopyWith [ "derive" ];
+    inherit (localCrates)
+      sel4-shared-ring-buffer
+    ;
   };
-  nix.local.dependencies = with localCrates; [
-    sel4-shared-ring-buffer
-  ];
 }

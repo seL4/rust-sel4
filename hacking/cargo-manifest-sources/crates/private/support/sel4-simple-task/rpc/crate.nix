@@ -11,6 +11,7 @@ mk {
   dependencies = {
     serde = serdeWith [] // { optional = true; };
     postcard = postcardWith [] // { optional = true; };
+    inherit (localCrates) sel4;
   };
   features = {
     postcard = [
@@ -18,7 +19,4 @@ mk {
       "dep:postcard"
     ];
   };
-  nix.local.dependencies = with localCrates; [
-    sel4
-  ];
 }

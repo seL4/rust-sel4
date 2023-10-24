@@ -3,6 +3,11 @@
 #
 # SPDX-License-Identifier: BSD-2-Clause
 #
+#
+# This file is generated from './Cargo.nix'. You can edit this file directly
+# if you are not using this project's Cargo manifest management tools.
+# See '//hacking/cargo-manifest-management/README.md' for more information.
+#
 
 [package]
 name = "sel4-microkit-message"
@@ -17,5 +22,5 @@ postcard = ["dep:serde", "sel4-microkit-message-types/postcard"]
 
 [dependencies]
 sel4-microkit = { path = ".." }
-sel4-microkit-message-types = { path = "./types" }
+sel4-microkit-message-types = { path = "types" }
 serde = { version = "1.0.147", default-features = false, optional = true }

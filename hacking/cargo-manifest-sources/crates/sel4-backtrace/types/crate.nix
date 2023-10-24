@@ -4,12 +4,14 @@
 # SPDX-License-Identifier: MIT
 #
 
-{ mk, versions, serdeWith, postcardWith }:
+{ mk, mkDefaultFrontmatterWithReuseArgs, defaultReuseFrontmatterArgs, versions, serdeWith, postcardWith }:
 
 mk rec {
+  nix.frontmatter = mkDefaultFrontmatterWithReuseArgs (defaultReuseFrontmatterArgs // {
+    licenseID = package.license;
+  });
   package.name = "sel4-backtrace-types";
   package.license = "MIT";
-  nix.reuseFrontmatterArgs.licenseID = package.license;
   dependencies = {
     inherit (versions) cfg-if;
     serde = serdeWith [ "derive" ] // { optional = true; };

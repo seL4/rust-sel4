@@ -9,7 +9,13 @@
 mk {
   package.name = "sel4-root-task";
   dependencies = {
-    sel4-runtime-common.features = [ "tls" "start" "static-heap" ];
+    inherit (localCrates)
+      sel4
+      sel4-panicking
+      sel4-panicking-env
+      sel4-root-task-macros
+    ;
+    sel4-runtime-common = localCrates.sel4-runtime-common // { features = [ "tls" "start" "static-heap" ]; };
   };
   features = {
     default = [
@@ -30,11 +36,4 @@ mk {
       "sel4/single-threaded"
     ];
   };
-  nix.local.dependencies = with localCrates; [
-    sel4
-    sel4-panicking
-    sel4-panicking-env
-    sel4-runtime-common
-    sel4-root-task-macros
-  ];
 }

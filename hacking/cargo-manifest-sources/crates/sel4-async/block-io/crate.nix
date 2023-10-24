@@ -8,7 +8,7 @@
 
 mk {
   package.name = "sel4-async-block-io";
-  dependencies = rec {
+  dependencies = {
     inherit (versions) log;
     num_enum = { version = versions.num_enum; default-features = false; };
     futures = {

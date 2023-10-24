@@ -9,11 +9,8 @@
 mk {
   package.name = "sel4-backtrace-cli";
   dependencies = {
-    sel4-backtrace-types.features = [ "full" ];
-    hex = "0.4.3";
     inherit (versions) object addr2line clap;
+    hex = "0.4.3";
+    sel4-backtrace-types = localCrates.sel4-backtrace-types // { features = [ "full" ]; };
   };
-  nix.local.dependencies = with localCrates; [
-    sel4-backtrace-types
-  ];
 }

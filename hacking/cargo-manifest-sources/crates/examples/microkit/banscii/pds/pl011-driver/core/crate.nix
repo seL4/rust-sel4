@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
 #
 
-{ mk, localCrates, versions }:
+{ mk, versions }:
 
 mk {
   package.name = "banscii-pl011-driver-core";

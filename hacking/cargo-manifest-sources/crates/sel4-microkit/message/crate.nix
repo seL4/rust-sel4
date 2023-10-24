@@ -8,14 +8,14 @@
 
 mk {
   package.name = "sel4-microkit-message";
-  nix.local.dependencies = with localCrates; [
-    sel4-microkit
-    sel4-microkit-message-types
-  ];
   dependencies = {
     serde = serdeWith [] // {
       optional = true;
     };
+    inherit (localCrates)
+      sel4-microkit
+      sel4-microkit-message-types
+    ;
   };
   features = {
     default = [ "postcard" ];

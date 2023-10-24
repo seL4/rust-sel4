@@ -10,9 +10,8 @@ mk {
   package.name = "sel4-initialize-tls-on-stack";
   dependencies = {
     inherit (versions) cfg-if;
+    inherit (localCrates)
+      sel4
+    ;
   };
-  nix.local.dependencies = with localCrates; [
-    sel4
-  ];
-  nix.meta.requirements = [ "sel4" ];
 }

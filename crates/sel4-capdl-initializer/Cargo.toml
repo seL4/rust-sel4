@@ -3,6 +3,11 @@
 #
 # SPDX-License-Identifier: BSD-2-Clause
 #
+#
+# This file is generated from './Cargo.nix'. You can edit this file directly
+# if you are not using this project's Cargo manifest management tools.
+# See '//hacking/cargo-manifest-management/README.md' for more information.
+#
 
 [package]
 name = "sel4-capdl-initializer"
@@ -15,8 +20,8 @@ license = "BSD-2-Clause"
 log = "0.4.17"
 postcard = { version = "1.0.2", default-features = false, features = ["alloc"] }
 sel4 = { path = "../sel4" }
-sel4-capdl-initializer-core = { path = "./core" }
-sel4-capdl-initializer-types = { path = "./types", features = ["alloc", "serde", "deflate"] }
+sel4-capdl-initializer-core = { path = "core" }
+sel4-capdl-initializer-types = { path = "types", features = ["alloc", "serde", "deflate"] }
 sel4-dlmalloc = { path = "../sel4-dlmalloc" }
 sel4-logging = { path = "../sel4-logging" }
 sel4-sync = { path = "../sel4-sync" }

@@ -9,11 +9,6 @@
 mk {
   package.name = "sel4-kernel-loader-add-payload";
   dependencies = {
-    sel4-kernel-loader-payload-types.features = [ "serde" ];
-    sel4-config-generic-types.features = [ "serde" ];
-    object = { version = versions.object; features = [ "all" ]; };
-    postcard = postcardWith [ "alloc" ];
-    serde = serdeWith [ "alloc" "derive" ];
     inherit (versions)
       anyhow
       fallible-iterator
@@ -23,11 +18,14 @@ mk {
       num
       clap
     ;
+    object = { version = versions.object; features = [ "all" ]; };
+    postcard = postcardWith [ "alloc" ];
+    serde = serdeWith [ "alloc" "derive" ];
+    inherit (localCrates)
+      sel4-kernel-loader-config-types
+      sel4-render-elf-with-data
+    ;
+    sel4-kernel-loader-payload-types = localCrates.sel4-kernel-loader-payload-types // { features = [ "serde" ]; };
+    sel4-config-generic-types = localCrates.sel4-config-generic-types // { features = [ "serde" ]; };
   };
-  nix.local.dependencies = with localCrates; [
-    sel4-kernel-loader-payload-types
-    sel4-kernel-loader-config-types
-    sel4-render-elf-with-data
-    sel4-config-generic-types
-  ];
 }

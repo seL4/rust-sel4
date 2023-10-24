@@ -4,14 +4,11 @@
 # SPDX-License-Identifier: BSD-2-Clause
 #
 
-{ mk, localCrates, versions, serdeWith }:
+{ mk, versions, serdeWith }:
 
 mk {
   package.name = "banscii-pl011-driver-interface-types";
   dependencies = {
     serde = serdeWith [];
   };
-  nix.local.dependencies = with localCrates; [
-    # sel4-microkit-message
-  ];
 }

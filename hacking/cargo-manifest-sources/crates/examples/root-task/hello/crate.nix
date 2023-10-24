@@ -8,8 +8,10 @@
 
 mk {
   package.name = "hello";
-  nix.local.dependencies = with localCrates; [
-    sel4
-    sel4-root-task
-  ];
+  dependencies = {
+    inherit (localCrates)
+      sel4
+      sel4-root-task
+    ;
+  };
 }

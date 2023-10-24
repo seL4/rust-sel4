@@ -8,7 +8,9 @@
 
 mk {
   package.name = "sel4-config";
-  nix.local.dependencies = with localCrates; [
-    sel4-config-macros
-  ];
+  dependencies = {
+    inherit (localCrates)
+      sel4-config-macros
+    ;
+  };
 }

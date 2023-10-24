@@ -9,11 +9,26 @@
 mk {
   package.name = "sel4-simple-task-runtime";
   dependencies = {
-    sel4-backtrace.features = [ "unwinding" "postcard" ];
-    sel4-runtime-common.features = [ "tls" "unwinding" ];
     serde = serdeWith [];
     postcard = postcardWith [];
     serde_json = { version = versions.serde_json; default-features = false; optional = true; };
+
+    inherit (localCrates)
+      sel4
+      sel4-backtrace-simple
+      sel4-dlmalloc
+      sel4-immediate-sync-once-cell
+      sel4-panicking
+      sel4-panicking-env
+      sel4-initialize-tls-on-stack
+      sel4-simple-task-runtime-config-types
+      sel4-simple-task-runtime-macros
+      sel4-simple-task-threading
+      sel4-sync
+    ;
+
+    sel4-backtrace = localCrates.sel4-backtrace // { features = [ "unwinding" "postcard" ]; };
+    sel4-runtime-common = localCrates.sel4-runtime-common // { features = [ "tls" "unwinding" ]; };
   };
   features = {
     serde_json = [
@@ -30,19 +45,4 @@ mk {
       "alloc"
     ];
   };
-  nix.local.dependencies = with localCrates; [
-    sel4
-    sel4-backtrace
-    sel4-backtrace-simple
-    sel4-dlmalloc
-    sel4-immediate-sync-once-cell
-    sel4-panicking
-    sel4-panicking-env
-    sel4-initialize-tls-on-stack
-    sel4-runtime-common
-    sel4-simple-task-runtime-config-types
-    sel4-simple-task-runtime-macros
-    sel4-simple-task-threading
-    sel4-sync
-  ];
 }

@@ -8,7 +8,7 @@
 
 mk {
   package.name = "microkit-hello";
-  nix.local.dependencies = with localCrates; [
-    sel4-microkit
-  ];
+  dependencies = {
+    inherit (localCrates) sel4-microkit;
+  };
 }

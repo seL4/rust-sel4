@@ -9,7 +9,19 @@
 mk {
   package.name = "sel4-capdl-initializer-with-embedded-spec";
   dependencies = {
-    sel4-root-task = { default-features = false; features = [ "single-threaded" ]; };
+    inherit (localCrates)
+      sel4-capdl-initializer-core
+      sel4-capdl-initializer-with-embedded-spec-embedded-spec
+      sel4-capdl-initializer-types
+      sel4
+      sel4-logging
+    ;
+    sel4-root-task = localCrates.sel4-root-task // { default-features = false; features = [ "single-threaded" ]; };
+  };
+  build-dependencies = {
+    inherit (localCrates)
+      sel4-capdl-initializer-with-embedded-spec-embedded-spec-validate
+    ;
   };
   features = {
     deflate = [
@@ -17,15 +29,4 @@ mk {
       "sel4-capdl-initializer-with-embedded-spec-embedded-spec-validate/deflate"
     ];
   };
-  nix.local.dependencies = with localCrates; [
-    sel4-capdl-initializer-core
-    sel4-capdl-initializer-with-embedded-spec-embedded-spec
-    sel4-capdl-initializer-types
-    sel4
-    sel4-logging
-    sel4-root-task
-  ];
-  nix.local.build-dependencies = with localCrates; [
-    sel4-capdl-initializer-with-embedded-spec-embedded-spec-validate
-  ];
 }

@@ -4,14 +4,18 @@
 # SPDX-License-Identifier: MIT
 #
 
-{ mk, localCrates }:
+{ mk, mkDefaultFrontmatterWithReuseArgs, defaultReuseFrontmatterArgs, localCrates }:
 
 mk rec {
+  nix.frontmatter = mkDefaultFrontmatterWithReuseArgs (defaultReuseFrontmatterArgs // {
+    licenseID = package.license;
+  });
   package.name = "sel4-sync";
   package.license = "MIT";
-  nix.reuseFrontmatterArgs.licenseID = package.license;
-  nix.local.dependencies = with localCrates; [
-    sel4
-    sel4-immediate-sync-once-cell
-  ];
+  dependencies = {
+    inherit (localCrates)
+      sel4
+      sel4-immediate-sync-once-cell
+    ;
+  };
 }

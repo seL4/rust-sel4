@@ -3,6 +3,11 @@
 #
 # SPDX-License-Identifier: BSD-2-Clause
 #
+#
+# This file is generated from './Cargo.nix'. You can edit this file directly
+# if you are not using this project's Cargo manifest management tools.
+# See '//hacking/cargo-manifest-management/README.md' for more information.
+#
 
 [package]
 name = "sel4-backtrace"
@@ -20,7 +25,7 @@ unwinding = ["dep:unwinding"]
 [dependencies]
 cfg-if = "1.0.0"
 postcard = { version = "1.0.2", default-features = false, optional = true }
-sel4-backtrace-types = { path = "./types" }
+sel4-backtrace-types = { path = "types" }
 serde = { version = "1.0.147", default-features = false, optional = true }
 
 [dependencies.unwinding]

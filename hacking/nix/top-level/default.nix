@@ -12,10 +12,6 @@ let
 
 in {
 
-  generatedSources = {
-    inherit (pkgs.build.this.generatedCargoManifests) update check;
-  };
-
   worldsForEverythingInstances = [
     pkgs.host.aarch64.none.this.worlds.default
     pkgs.host.aarch64.none.this.worlds.qemu-arm-virt.microkit
