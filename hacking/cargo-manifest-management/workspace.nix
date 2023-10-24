@@ -22,20 +22,17 @@ let
     in
       scanDirForFilesWithName dirFilter "Cargo.nix" workspaceRoot;
 
-  genrateManifest = absolutePath:
+  genrateManifest = cargoNixAbsolutePath:
     let
-      relativePath =
-        pathBetween
-          workspaceRoot
-          (builtins.dirOf absolutePath);
+      absolutePath = builtins.dirOf cargoNixAbsolutePath;
       manifestExpr = callManifest {
-        inherit relativePath;
-        f = import absolutePath;
+        inherit absolutePath;
+        f = import cargoNixAbsolutePath;
       };
       parsed = parseManifestExpr manifestExpr;
       inherit (parsed) manifestValue frontmatter justEnsureEquivalence;
     in {
-      inherit relativePath manifestValue frontmatter justEnsureEquivalence;
+      inherit absolutePath manifestValue frontmatter justEnsureEquivalence;
       packageName = manifestValue.package.name or null;
       packageVersion = manifestValue.package.version or null;
       manifestTOML = renderManifest {
@@ -65,19 +62,19 @@ let
         inherit (elaboratedNix) frontmatter justEnsureEquivalence;
       };
 
-  callManifest = { relativePath, f }:
+  callManifest = { absolutePath, f }:
     let
       bespokeScope = manifestScope // {
-        localCrates = mkDeps relativePath;
+        localCrates = mkDeps absolutePath;
       };
       args = builtins.intersectAttrs (lib.functionArgs f) bespokeScope;
     in
       f args;
 
-  mkDeps = relativePath:
+  mkDeps = absolutePath:
     let
-      rel = pathBetween relativePath;
-      generated = lib.mapAttrs (_: manifest: { path = rel manifest.relativePath; }) generatedManifestsByPackageName;
+      rel = pathBetween absolutePath;
+      generated = lib.mapAttrs (_: manifest: { path = rel manifest.absolutePath; }) generatedManifestsByPackageName;
       manual = lib.mapAttrs (_: otherPath: { path = rel otherPath; }) manualManifests;
     in
       generated // manual;
@@ -90,7 +87,7 @@ let
         (manifest: lib.optional (manifest.packageName != null) (lib.nameValuePair manifest.packageName manifest)));
 
   plan = lib.listToAttrs (lib.forEach generatedManifestsList (manifest: {
-    name = "${manifest.relativePath}${lib.optionalString (manifest.relativePath != "") "/"}Cargo.toml";
+    name = "${manifest.absolutePath}/Cargo.toml";
     value = {
       src = manifest.manifestTOML;
       inherit (manifest) justEnsureEquivalence;
@@ -105,7 +102,10 @@ let
   '';
 
   # for manual inspection, useful for debugging this script
-  links = linkFarm "crates" (lib.mapAttrs (_: v: v.src) plan);
+  links = linkFarm "crates"
+    (lib.mapAttrs'
+      (absolutePath: v: lib.nameValuePair "root/${absolutePath}" v.src)
+      plan);
 
 in {
   inherit script;

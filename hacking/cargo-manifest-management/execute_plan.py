@@ -16,19 +16,18 @@ from pathlib import Path
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--plan', type=Path)
-    parser.add_argument('--root', type=Path)
     parser.add_argument('--just-check', default=False, action=argparse.BooleanOptionalAction)
     args = parser.parse_args()
 
     with args.plan.open() as f:
         plan = json.load(f)
 
-    run(plan, args.root, args.just_check)
+    run(plan, args.just_check)
 
 
-def run(plan, root, just_check):
-    for relative_manifest_path, v in plan.items():
-        manifest_path = root / relative_manifest_path
+def run(plan, just_check):
+    for manifest_path, v in plan.items():
+        manifest_path = Path(manifest_path)
         src = Path(v['src'])
         just_check_equivalence = v['justEnsureEquivalence']
 
