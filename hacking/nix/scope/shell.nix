@@ -6,14 +6,27 @@
 
 { lib, stdenv, hostPlatform, buildPackages
 , mkShell
+, cacert, git
 , defaultRustToolchain
 , pkgconfig, openssl
 , cmake, perl, python3Packages
 , rustPlatform
+, cargo-audit
 }:
 
 mkShell {
   hardeningDisable = [ "all" ];
+
+  depsBuildBuild = [
+    buildPackages.stdenv.cc
+    cacert
+    git
+    cmake
+    perl
+    python3Packages.jsonschema
+    python3Packages.jinja2
+    cargo-audit
+  ];
 
   nativeBuildInputs = [
     pkgconfig
@@ -23,13 +36,5 @@ mkShell {
 
   buildInputs = [
     openssl
-  ];
-
-  depsBuildBuild = [
-    buildPackages.stdenv.cc
-    cmake
-    perl
-    python3Packages.jsonschema
-    python3Packages.jinja2
   ];
 }
