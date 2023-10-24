@@ -8,7 +8,7 @@
 
 mk {
   package.name = "sel4-async-block-io-cpiofs";
-  dependencies = rec {
+  dependencies = {
     inherit (versions) log;
     zerocopy = zerocopyWith [ "derive" ];
     hex = { version = "0.4.3"; default-features = false; };
@@ -20,8 +20,8 @@ mk {
         "alloc"
       ];
     };
+    inherit (localCrates)
+      sel4-async-block-io
+    ;
   };
-  nix.local.dependencies = with localCrates; [
-    sel4-async-block-io
-  ];
 }

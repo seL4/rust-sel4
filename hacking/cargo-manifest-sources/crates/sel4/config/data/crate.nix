@@ -9,19 +9,13 @@
 mk {
   package.name = "sel4-config-data";
   dependencies = {
-    sel4-config-generic-types.features = [ "serde" ];
-    lazy_static = "1.4.0";
     inherit (versions) serde_json;
+    lazy_static = "1.4.0";
+    sel4-config-generic-types = localCrates.sel4-config-generic-types // { features = [ "serde" ]; };
   };
   build-dependencies = {
-    sel4-config-generic-types.features = [ "serde" ];
     inherit (versions) serde_json;
+    inherit (localCrates) sel4-build-env;
+    sel4-config-generic-types = localCrates.sel4-config-generic-types // { features = [ "serde" ]; };
   };
-  nix.local.dependencies = with localCrates; [
-    sel4-config-generic-types
-  ];
-  nix.local.build-dependencies = with localCrates; [
-    sel4-config-generic-types
-    sel4-build-env
-  ];
 }

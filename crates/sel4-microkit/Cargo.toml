@@ -3,6 +3,11 @@
 #
 # SPDX-License-Identifier: BSD-2-Clause
 #
+#
+# This file is generated from './Cargo.nix'. You can edit this file directly
+# if you are not using this project's Cargo manifest management tools.
+# See '//hacking/cargo-manifest-management/README.md' for more information.
+#
 
 [package]
 name = "sel4-microkit"
@@ -23,7 +28,7 @@ sel4 = { path = "../sel4", features = ["single-threaded"] }
 sel4-externally-shared = { path = "../sel4-externally-shared" }
 sel4-immediate-sync-once-cell = { path = "../sel4-immediate-sync-once-cell" }
 sel4-immutable-cell = { path = "../sel4-immutable-cell" }
-sel4-microkit-macros = { path = "./macros" }
+sel4-microkit-macros = { path = "macros" }
 sel4-panicking = { path = "../sel4-panicking" }
 sel4-panicking-env = { path = "../sel4-panicking/env" }
 

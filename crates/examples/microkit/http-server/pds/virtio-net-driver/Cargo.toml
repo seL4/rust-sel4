@@ -3,6 +3,11 @@
 #
 # SPDX-License-Identifier: BSD-2-Clause
 #
+#
+# This file is generated from './Cargo.nix'. You can edit this file directly
+# if you are not using this project's Cargo manifest management tools.
+# See '//hacking/cargo-manifest-management/README.md' for more information.
+#
 
 [package]
 name = "microkit-http-server-example-virtio-net-driver"
@@ -14,7 +19,7 @@ license = "BSD-2-Clause"
 [dependencies]
 log = "0.4.17"
 microkit-http-server-example-virtio-hal-impl = { path = "../../helpers/virtio-hal-impl" }
-microkit-http-server-example-virtio-net-driver-interface-types = { path = "./interface-types" }
+microkit-http-server-example-virtio-net-driver-interface-types = { path = "interface-types" }
 sel4 = { path = "../../../../../sel4" }
 sel4-bounce-buffer-allocator = { path = "../../../../../sel4-bounce-buffer-allocator" }
 sel4-externally-shared = { path = "../../../../../sel4-externally-shared", features = ["unstable"] }

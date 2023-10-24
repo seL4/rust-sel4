@@ -10,8 +10,8 @@ mk {
   package.name = "sel4-dlmalloc";
   dependencies = {
     dlmalloc = "0.2.3";
+    inherit (localCrates)
+      sel4-sync
+    ;
   };
-  nix.local.dependencies = with localCrates; [
-    sel4-sync
-  ];
 }

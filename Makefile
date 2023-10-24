@@ -43,12 +43,12 @@ generate-target-specs:
 
 .PHONY: update-generated-sources
 update-generated-sources:
-	script=$$($(nix_build) -A generatedSources.update --no-out-link) && $$script
+	$(MAKE) -C hacking/cargo-manifest-management update
 	cargo update -w
 
 .PHONY: check-generated-sources
 check-generated-sources:
-	script=$$($(nix_build) -A generatedSources.check --no-out-link) && $$script
+	$(MAKE) -C hacking/cargo-manifest-management check
 	cargo update -w --locked
 
 .PHONY: update-lockfile

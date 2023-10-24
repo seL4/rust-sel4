@@ -11,8 +11,8 @@ mk {
   dependencies = {
     inherit (versions) clap;
     glob = "0.3.0";
+    inherit (localCrates)
+      sel4-bitfield-parser
+    ;
   };
-  nix.local.dependencies = with localCrates; [
-    sel4-bitfield-parser
-  ];
 }

@@ -3,6 +3,11 @@
 #
 # SPDX-License-Identifier: BSD-2-Clause
 #
+#
+# This file is generated from './Cargo.nix'. You can edit this file directly
+# if you are not using this project's Cargo manifest management tools.
+# See '//hacking/cargo-manifest-management/README.md' for more information.
+#
 
 [package]
 name = "microkit-http-server-example-sp804-driver"
@@ -12,7 +17,7 @@ edition = "2021"
 license = "BSD-2-Clause"
 
 [dependencies]
-microkit-http-server-example-sp804-driver-core = { path = "./core" }
-microkit-http-server-example-sp804-driver-interface-types = { path = "./interface-types" }
+microkit-http-server-example-sp804-driver-core = { path = "core" }
+microkit-http-server-example-sp804-driver-interface-types = { path = "interface-types" }
 sel4-microkit = { path = "../../../../../sel4-microkit", default-features = false }
 sel4-microkit-message = { path = "../../../../../sel4-microkit/message" }

@@ -3,6 +3,11 @@
 #
 # SPDX-License-Identifier: BSD-2-Clause
 #
+#
+# This file is generated from './Cargo.nix'. You can edit this file directly
+# if you are not using this project's Cargo manifest management tools.
+# See '//hacking/cargo-manifest-management/README.md' for more information.
+#
 
 [package]
 name = "sel4-simple-task-runtime"
@@ -32,8 +37,8 @@ sel4-initialize-tls-on-stack = { path = "../../../../sel4-initialize-tls-on-stac
 sel4-panicking = { path = "../../../../sel4-panicking" }
 sel4-panicking-env = { path = "../../../../sel4-panicking/env" }
 sel4-runtime-common = { path = "../../../../sel4-runtime-common", features = ["tls", "unwinding"] }
-sel4-simple-task-runtime-config-types = { path = "./config/types" }
-sel4-simple-task-runtime-macros = { path = "./macros" }
+sel4-simple-task-runtime-config-types = { path = "config/types" }
+sel4-simple-task-runtime-macros = { path = "macros" }
 sel4-simple-task-threading = { path = "../threading" }
 sel4-sync = { path = "../../../../sel4-sync" }
 serde = { version = "1.0.147", default-features = false }

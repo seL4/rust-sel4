@@ -10,10 +10,10 @@ mk {
   package.name = "tests-root-task-loader";
   dependencies = {
     fdt = "0.1.4";
+    inherit (localCrates)
+      sel4
+      sel4-root-task
+      sel4-platform-info
+    ;
   };
-  nix.local.dependencies = with localCrates; [
-    sel4
-    sel4-root-task
-    sel4-platform-info
-  ];
 }

@@ -3,6 +3,11 @@
 #
 # SPDX-License-Identifier: BSD-2-Clause
 #
+#
+# This file is generated from './Cargo.nix'. You can edit this file directly
+# if you are not using this project's Cargo manifest management tools.
+# See '//hacking/cargo-manifest-management/README.md' for more information.
+#
 
 [package]
 name = "sel4-root-task"
@@ -22,7 +27,7 @@ unwinding = ["sel4-panicking/unwinding", "sel4-runtime-common/unwinding"]
 sel4 = { path = "../sel4" }
 sel4-panicking = { path = "../sel4-panicking" }
 sel4-panicking-env = { path = "../sel4-panicking/env" }
-sel4-root-task-macros = { path = "./macros" }
+sel4-root-task-macros = { path = "macros" }
 
 [dependencies.sel4-runtime-common]
 path = "../sel4-runtime-common"

@@ -3,6 +3,11 @@
 #
 # SPDX-License-Identifier: BSD-2-Clause
 #
+#
+# This file is generated from './Cargo.nix'. You can edit this file directly
+# if you are not using this project's Cargo manifest management tools.
+# See '//hacking/cargo-manifest-management/README.md' for more information.
+#
 
 [package]
 name = "sel4-kernel-loader"
@@ -18,8 +23,8 @@ log = "0.4.17"
 postcard = { version = "1.0.2", default-features = false }
 sel4-config = { path = "../sel4/config" }
 sel4-immutable-cell = { path = "../sel4-immutable-cell" }
-sel4-kernel-loader-embed-page-tables-runtime = { path = "./embed-page-tables/runtime" }
-sel4-kernel-loader-payload-types = { path = "./payload-types", features = ["serde"] }
+sel4-kernel-loader-embed-page-tables-runtime = { path = "embed-page-tables/runtime" }
+sel4-kernel-loader-payload-types = { path = "payload-types", features = ["serde"] }
 sel4-logging = { path = "../sel4-logging" }
 sel4-platform-info = { path = "../sel4-platform-info" }
 spin = "0.9.4"
@@ -33,9 +38,9 @@ postcard = { version = "1.0.2", default-features = false, features = ["alloc"] }
 quote = "1.0.23"
 sel4-build-env = { path = "../sel4/build-env" }
 sel4-config = { path = "../sel4/config" }
-sel4-kernel-loader-config-types = { path = "./config-types" }
-sel4-kernel-loader-embed-page-tables = { path = "./embed-page-tables" }
-sel4-kernel-loader-payload-types = { path = "./payload-types" }
+sel4-kernel-loader-config-types = { path = "config-types" }
+sel4-kernel-loader-embed-page-tables = { path = "embed-page-tables" }
+sel4-kernel-loader-payload-types = { path = "payload-types" }
 sel4-platform-info = { path = "../sel4-platform-info" }
 sel4-rustfmt-helper = { path = "../sel4-rustfmt-helper" }
 serde = "1.0.147"

@@ -11,8 +11,8 @@ mk {
   dependencies = {
     addr2line = { version = versions.addr2line; default-features = false; };
     object = { version = versions.object; default-features = false; features = [ "read" ]; };
+    inherit (localCrates)
+      sel4-backtrace-addr2line-context-helper
+    ;
   };
-  nix.local.dependencies = with localCrates; [
-    sel4-backtrace-addr2line-context-helper
-  ];
 }

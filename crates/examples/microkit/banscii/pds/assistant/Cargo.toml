@@ -3,6 +3,11 @@
 #
 # SPDX-License-Identifier: BSD-2-Clause
 #
+#
+# This file is generated from './Cargo.nix'. You can edit this file directly
+# if you are not using this project's Cargo manifest management tools.
+# See '//hacking/cargo-manifest-management/README.md' for more information.
+#
 
 [package]
 name = "banscii-assistant"
@@ -13,7 +18,7 @@ license = "BSD-2-Clause"
 
 [dependencies]
 banscii-artist-interface-types = { path = "../artist/interface-types" }
-banscii-assistant-core = { path = "./core" }
+banscii-assistant-core = { path = "core" }
 banscii-pl011-driver-interface-types = { path = "../pl011-driver/interface-types" }
 hex = { version = "0.4.3", default-features = false, features = ["alloc"] }
 sel4-externally-shared = { path = "../../../../../sel4-externally-shared", features = ["unstable"] }

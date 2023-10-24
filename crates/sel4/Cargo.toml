@@ -3,6 +3,11 @@
 #
 # SPDX-License-Identifier: MIT
 #
+#
+# This file is generated from './Cargo.nix'. You can edit this file directly
+# if you are not using this project's Cargo manifest management tools.
+# See '//hacking/cargo-manifest-management/README.md' for more information.
+#
 
 [package]
 name = "sel4"
@@ -18,5 +23,5 @@ state = []
 
 [dependencies]
 cfg-if = "1.0.0"
-sel4-config = { path = "./config" }
-sel4-sys = { path = "./sys" }
+sel4-config = { path = "config" }
+sel4-sys = { path = "sys" }

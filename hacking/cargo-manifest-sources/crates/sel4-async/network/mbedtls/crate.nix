@@ -25,10 +25,10 @@ mk {
       ];
     };
     mbedtls = mbedtlsWith [];
+    inherit (localCrates)
+      sel4-async-network
+      sel4-async-network-mbedtls-mozilla-ca-list
+      # mbedtls
+    ;
   };
-  nix.local.dependencies = with localCrates; [
-    sel4-async-network
-    sel4-async-network-mbedtls-mozilla-ca-list
-    # mbedtls
-  ];
 }

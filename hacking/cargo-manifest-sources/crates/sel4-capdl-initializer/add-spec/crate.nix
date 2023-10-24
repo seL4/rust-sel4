@@ -9,9 +9,6 @@
 mk {
   package.name = "sel4-capdl-initializer-add-spec";
   dependencies = {
-    sel4-capdl-initializer-types.features = [ "std" "serde" "deflate" ];
-    object = { version = versions.object; features = [ "all" ]; };
-    postcard = postcardWith [ "alloc" ];
     inherit (versions)
       anyhow
       fallible-iterator
@@ -19,9 +16,11 @@ mk {
       num
       clap
     ;
+    object = { version = versions.object; features = [ "all" ]; };
+    postcard = postcardWith [ "alloc" ];
+    inherit (localCrates)
+      sel4-render-elf-with-data
+    ;
+    sel4-capdl-initializer-types = localCrates.sel4-capdl-initializer-types // { features = [ "std" "serde" "deflate" ]; };
   };
-  nix.local.dependencies = with localCrates; [
-    sel4-capdl-initializer-types
-    sel4-render-elf-with-data
-  ];
 }

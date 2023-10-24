@@ -4,16 +4,20 @@
 # SPDX-License-Identifier: MIT
 #
 
-{ mk, localCrates }:
+{ mk, mkDefaultFrontmatterWithReuseArgs, defaultReuseFrontmatterArgs, localCrates }:
 
 mk rec {
+  nix.frontmatter = mkDefaultFrontmatterWithReuseArgs (defaultReuseFrontmatterArgs // {
+    licenseID = package.license;
+  });
   package.name = "sel4-simple-task-threading";
   package.license = "MIT";
-  nix.reuseFrontmatterArgs.licenseID = package.license;
-  nix.local.dependencies = with localCrates; [
-    sel4
-    sel4-panicking
-  ];
+  dependencies = {
+    inherit (localCrates)
+      sel4
+      sel4-panicking
+    ;
+  };
   features = {
     alloc = [];
   };

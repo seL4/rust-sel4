@@ -25,13 +25,12 @@ mk {
   };
   dependencies = {
     inherit (versions) log;
-    sel4-panicking-env = { optional = true; };
+    inherit (localCrates)
+      sel4-immediate-sync-once-cell
+    ;
+    sel4-panicking-env = localCrates.sel4-panicking-env // { optional = true; };
   };
   build-dependencies = {
     cc = "1.0.82";
   };
-  nix.local.dependencies = with localCrates; [
-    sel4-panicking-env
-    sel4-immediate-sync-once-cell
-  ];
 }

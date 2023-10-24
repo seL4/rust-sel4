@@ -3,6 +3,11 @@
 #
 # SPDX-License-Identifier: BSD-2-Clause
 #
+#
+# This file is generated from './Cargo.nix'. You can edit this file directly
+# if you are not using this project's Cargo manifest management tools.
+# See '//hacking/cargo-manifest-management/README.md' for more information.
+#
 
 [package]
 name = "sel4-capdl-initializer-with-embedded-spec"
@@ -21,7 +26,7 @@ deflate = [
 sel4 = { path = "../../sel4" }
 sel4-capdl-initializer-core = { path = "../core" }
 sel4-capdl-initializer-types = { path = "../types" }
-sel4-capdl-initializer-with-embedded-spec-embedded-spec = { path = "./embedded-spec" }
+sel4-capdl-initializer-with-embedded-spec-embedded-spec = { path = "embedded-spec" }
 sel4-logging = { path = "../../sel4-logging" }
 
 [dependencies.sel4-root-task]
@@ -32,4 +37,4 @@ features = ["single-threaded"]
 [build-dependencies]
 
 [build-dependencies.sel4-capdl-initializer-with-embedded-spec-embedded-spec-validate]
-path = "./embedded-spec/validate"
+path = "embedded-spec/validate"

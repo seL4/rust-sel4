@@ -9,13 +9,12 @@
 mk {
   package.name = "banscii-pl011-driver";
   dependencies = {
-    sel4-microkit.default-features = false;
     inherit (versions) heapless;
+    inherit (localCrates)
+      sel4-microkit-message
+      banscii-pl011-driver-core
+      banscii-pl011-driver-interface-types
+    ;
+    sel4-microkit = localCrates.sel4-microkit // { default-features = false; };
   };
-  nix.local.dependencies = with localCrates; [
-    sel4-microkit
-    sel4-microkit-message
-    banscii-pl011-driver-core
-    banscii-pl011-driver-interface-types
-  ];
 }
