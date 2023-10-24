@@ -1,3 +1,9 @@
+//
+// Copyright 2023, Colias Group, LLC
+//
+// SPDX-License-Identifier: MIT
+//
+
 use sel4_config::{sel4_cfg, sel4_cfg_enum, sel4_cfg_match};
 
 use crate::{cap_type, sys, FrameType, ObjectBlueprint, ObjectBlueprintArm, SizedFrameType};

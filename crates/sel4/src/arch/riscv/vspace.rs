@@ -1,3 +1,9 @@
+//
+// Copyright 2023, Colias Group, LLC
+//
+// SPDX-License-Identifier: MIT
+//
+
 #[allow(unused_imports)]
 use crate::{cap_type, sys, FrameType, ObjectBlueprint, ObjectBlueprintRISCV, SizedFrameType};
 

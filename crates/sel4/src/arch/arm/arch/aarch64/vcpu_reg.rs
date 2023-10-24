@@ -1,3 +1,10 @@
+//
+// Copyright 2023, Colias Group, LLC
+// Copyright (c) 2020 Arm Limited
+//
+// SPDX-License-Identifier: MIT
+//
+
 use sel4_config::sel4_cfg_enum;
 
 use crate::sys;

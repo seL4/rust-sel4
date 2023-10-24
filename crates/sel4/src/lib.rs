@@ -1,3 +1,9 @@
+//
+// Copyright 2023, Colias Group, LLC
+//
+// SPDX-License-Identifier: MIT
+//
+
 //! This crate provides straightforward, pure-Rust bindings to the [seL4
 //! API](https://sel4.systems/Info/Docs/seL4-manual-latest.pdf).
 //!

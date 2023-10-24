@@ -1,3 +1,9 @@
+//
+// Copyright 2023, Colias Group, LLC
+//
+// SPDX-License-Identifier: MIT
+//
+
 use crate::{newtype_methods, sys, Word};
 
 /// Corresponds to `seL4_MessageInfo_t`.
