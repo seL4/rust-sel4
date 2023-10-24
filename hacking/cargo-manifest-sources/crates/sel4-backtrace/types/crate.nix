@@ -1,13 +1,15 @@
 #
 # Copyright 2023, Colias Group, LLC
 #
-# SPDX-License-Identifier: BSD-2-Clause
+# SPDX-License-Identifier: MIT
 #
 
 { mk, versions, serdeWith, postcardWith }:
 
-mk {
+mk rec {
   package.name = "sel4-backtrace-types";
+  package.license = "MIT";
+  nix.reuseFrontmatterArgs.licenseID = package.license;
   dependencies = {
     inherit (versions) cfg-if;
     serde = serdeWith [ "derive" ] // { optional = true; };
