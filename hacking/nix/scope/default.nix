@@ -151,10 +151,6 @@ superCallPackage ../rust-utils {} self //
 
   capdl-tool = callBuildBuildPackage ./capdl-tool {};
 
-  ### misc tools
-
-  cargo-index = callPackage ./tools/cargo-index.nix {};
-
   ### local tools
 
   mkTool = rootCrate: buildCrateInLayersHere {
