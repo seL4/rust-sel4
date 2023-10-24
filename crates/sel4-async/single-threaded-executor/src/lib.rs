@@ -1,7 +1,7 @@
 //
-// Copyright (c) 2016 Alex Crichton
-// Copyright (c) 2017 The Tokio Authors
 // Copyright 2023, Colias Group, LLC
+// Copyright (c) 2017 The Tokio Authors
+// Copyright (c) 2016 Alex Crichton
 //
 // SPDX-License-Identifier: MIT OR Apache-2.0
 //
