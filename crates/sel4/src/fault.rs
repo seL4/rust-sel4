@@ -1,3 +1,9 @@
+//
+// Copyright 2023, Colias Group, LLC
+//
+// SPDX-License-Identifier: MIT
+//
+
 //! Fault types.
 
 use crate::{sys, IPCBuffer, MessageInfo};

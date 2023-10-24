@@ -1,3 +1,9 @@
+//
+// Copyright 2023, Colias Group, LLC
+//
+// SPDX-License-Identifier: MIT
+//
+
 #![allow(clippy::assertions_on_constants)]
 
 use sel4_config::sel4_cfg_attr;

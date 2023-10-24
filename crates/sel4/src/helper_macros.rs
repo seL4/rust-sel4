@@ -1,3 +1,9 @@
+//
+// Copyright 2023, Colias Group, LLC
+//
+// SPDX-License-Identifier: MIT
+//
+
 macro_rules! newtype_methods {
     ($inner:path) => {
         pub const fn from_inner(inner: $inner) -> Self {

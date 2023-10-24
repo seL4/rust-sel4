@@ -1,3 +1,10 @@
+//
+// Copyright 2023, Colias Group, LLC
+// Copyright (c) 2020 Arm Limited
+//
+// SPDX-License-Identifier: MIT
+//
+
 use crate::{newtype_methods, sys, Word};
 
 /// Corresponds to `seL4_UserContext`.

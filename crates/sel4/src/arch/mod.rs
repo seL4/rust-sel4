@@ -1,3 +1,9 @@
+//
+// Copyright 2023, Colias Group, LLC
+//
+// SPDX-License-Identifier: MIT
+//
+
 use sel4_config::sel4_cfg;
 
 // [TODO]

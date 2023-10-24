@@ -1,3 +1,9 @@
+//
+// Copyright 2023, Colias Group, LLC
+//
+// SPDX-License-Identifier: MIT
+//
+
 #![allow(clippy::useless_conversion)]
 
 use core::mem;

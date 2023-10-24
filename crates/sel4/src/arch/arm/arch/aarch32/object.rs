@@ -1,3 +1,9 @@
+//
+// Copyright 2023, Colias Group, LLC
+//
+// SPDX-License-Identifier: MIT
+//
+
 use core::ffi::c_uint;
 
 use crate::{const_helpers::u32_into_usize, sys};
