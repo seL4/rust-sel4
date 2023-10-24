@@ -8,33 +8,28 @@
 
 let
 
-  clobber = lib.fold lib.recursiveUpdate {};
-
   filterOutEmptyFeatureList = attrs:
-    builtins.removeAttrs attrs (lib.optional (attrs ? features && attrs.features == []) "features");
+    builtins.removeAttrs attrs (lib.optional ((attrs.features or null) == []) "features");
 
 in rec {
   inherit lib;
 
-  mk = args: (clobber [
+  mk = args: (lib.recursiveUpdate
     {
+      nix.frontmatter = defaultFrontmatter;
       package = {
         edition = "2021";
         version = "0.1.0";
         license = defaultLicense;
         authors = defaultAuthors;
       };
-      nix.frontmatter = defaultFrontmatter;
     }
     args
-  ]);
+  );
 
   defaultFrontmatter = mkDefaultFrontmatterWithReuseArgs defaultReuseFrontmatterArgs;
 
-  mkDefaultFrontmatterWithReuseArgs = args: lib.concatStrings [
-    (mkReuseFrontmatter args)
-    defaultNoteFrontmatter
-  ];
+  mkDefaultFrontmatterWithReuseArgs = args: mkReuseFrontmatter args + defaultNoteFrontmatter;
 
   defaultNoteFrontmatter = ''
     #
@@ -155,7 +150,6 @@ in rec {
   smoltcpAdjustedDefaultFeatures = [
     "alloc" "log"
     "medium-ethernet" "medium-ip" "medium-ieee802154"
-
     "proto-ipv4" "proto-igmp" "proto-dhcpv4" "proto-ipv6" "proto-dns"
     "proto-ipv4-fragmentation" "proto-sixlowpan-fragmentation"
     "socket-raw" "socket-icmp" "socket-udp" "socket-tcp" "socket-dhcpv4" "socket-dns" "socket-mdns"

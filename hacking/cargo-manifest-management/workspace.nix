@@ -4,8 +4,8 @@
 # SPDX-License-Identifier: BSD-2-Clause
 #
 
-{ lib, callPackage, newScope
-, writeText, runCommand, linkFarm, writeScript
+{ lib, callPackage
+, writeText, linkFarm, writeScript
 , runtimeShell
 , python3
 
@@ -18,12 +18,11 @@ let
 
   generatedManifestSources =
     let
-      dirFilter = relativePathSegments:
-        lib.elemAt relativePathSegments 0 == "crates";
+      dirFilter = relativePathSegments: lib.head relativePathSegments == "crates";
     in
       scanDirForFilesWithName dirFilter "Cargo.nix" workspaceRoot;
 
-  generatedManifestsList = lib.forEach generatedManifestSources (absolutePath:
+  genrateManifest = absolutePath:
     let
       relativePath =
         pathBetween
@@ -36,13 +35,13 @@ let
       parsed = parseManifestExpr manifestExpr;
       inherit (parsed) manifestValue frontmatter justEnsureEquivalence;
     in {
-      inherit relativePath;
+      inherit relativePath manifestValue frontmatter justEnsureEquivalence;
       packageName = manifestValue.package.name or null;
+      packageVersion = manifestValue.package.version or null;
       manifestTOML = renderManifest {
         inherit manifestValue frontmatter;
       };
-      inherit manifestValue justEnsureEquivalence;
-    });
+    };
 
   parseManifestExpr =
     let
@@ -82,6 +81,8 @@ let
       manual = lib.mapAttrs (_: otherPath: { path = rel otherPath; }) manualManifests;
     in
       generated // manual;
+
+  generatedManifestsList = map genrateManifest generatedManifestSources;
 
   generatedManifestsByPackageName =
     lib.listToAttrs
