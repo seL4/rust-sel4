@@ -36,7 +36,6 @@ members = [
     "crates/examples/root-task/example-root-task-without-runtime",
     "crates/examples/root-task/hello",
     "crates/private/meta",
-    "crates/private/support/cargo-helpers",
     "crates/private/support/sel4-simple-task/config-types",
     "crates/private/support/sel4-simple-task/rpc",
     "crates/private/support/sel4-simple-task/runtime",
