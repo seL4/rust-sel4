@@ -1,13 +1,15 @@
 #
 # Copyright 2023, Colias Group, LLC
 #
-# SPDX-License-Identifier: BSD-2-Clause
+# SPDX-License-Identifier: MIT
 #
 
 { mk, localCrates }:
 
-mk {
+mk rec {
   package.name = "sel4-simple-task-threading";
+  package.license = "MIT";
+  nix.reuseFrontmatterArgs.licenseID = package.license;
   nix.local.dependencies = with localCrates; [
     sel4
     sel4-panicking
