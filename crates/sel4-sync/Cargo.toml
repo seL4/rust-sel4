@@ -1,7 +1,7 @@
 #
 # Copyright 2023, Colias Group, LLC
 #
-# SPDX-License-Identifier: BSD-2-Clause
+# SPDX-License-Identifier: MIT
 #
 
 [package]
@@ -9,7 +9,7 @@ name = "sel4-sync"
 version = "0.1.0"
 authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
 edition = "2021"
-license = "BSD-2-Clause"
+license = "MIT"
 
 [dependencies]
 sel4 = { path = "../sel4" }

@@ -1,7 +1,8 @@
 //
 // Copyright 2023, Colias Group, LLC
+// Copyright (c) 2020 Arm Limited
 //
-// SPDX-License-Identifier: BSD-2-Clause
+// SPDX-License-Identifier: MIT
 //
 
 use core::cell::UnsafeCell;
