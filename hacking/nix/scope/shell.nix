@@ -11,6 +11,7 @@
 , pkgconfig, openssl
 , cmake, perl, python3Packages
 , rustPlatform
+, reuse
 , cargo-audit
 }:
 
@@ -25,6 +26,7 @@ mkShell {
     perl
     python3Packages.jsonschema
     python3Packages.jinja2
+    reuse
     cargo-audit
   ];
 

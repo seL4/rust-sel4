@@ -76,6 +76,10 @@ check-generic-formatting:
 .PHONY: check-source
 check-source: check-generated-sources check-fmt check-generic-formatting
 
+.PHONY: check-licenses
+check-licenses:
+	$(nix_shell) --run "reuse lint"
+
 .PHONY: check-dependencies
 check-dependencies:
 	lockfile=$$($(nix_build) -A pkgs.build.this.publicCratesCargoLock --no-out-link) && \
@@ -140,17 +144,20 @@ example:
 example-rpi4-b-4gb:
 	$(nix_build) -A $@ -o $(out)/$@
 
-.PHONY: check-fast
-check-fast: check-source check-dependencies
+.PHONY: check-immediately
+check-immediately: check-source check-licenses check-dependencies
+
+.PHONY: check-quickly
+check-quickly: check-immediately
 	$(MAKE) witness-fast-tests
 	$(MAKE) everything-except-non-incremental
 
 .PHONY: check-exhaustively
-check-exhaustively: check-source check-dependencies
+check-exhaustively: check-immediately
 	$(MAKE) witness-tests
 	$(MAKE) everything-with-excess
 
 .PHONY: check-oneshot
-check-oneshot: check-source check-dependencies
+check-oneshot: check-immediately
 	$(MAKE) run-tests
 	$(MAKE) everything-with-excess
