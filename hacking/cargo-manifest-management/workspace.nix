@@ -21,7 +21,7 @@ let
       dirFilter = relativePathSegments:
         lib.elemAt relativePathSegments 0 == "crates";
     in
-      scanDirForFilesWithName dirFilter "crate.nix" workspaceRoot;
+      scanDirForFilesWithName dirFilter "Cargo.nix" workspaceRoot;
 
   generatedManifestsList = lib.forEach generatedManifestSources (absolutePath:
     let

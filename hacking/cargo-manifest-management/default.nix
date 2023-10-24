@@ -15,7 +15,7 @@ rec {
 
   workspace = pkgs.callPackage ./workspace.nix {
     inherit utils manifestScope manualManifests;
-    workspaceRoot = toString ../cargo-manifest-sources;
+    workspaceRoot = toString ../..;
   };
 
   inherit (workspace) script;
