@@ -1,7 +1,8 @@
 //
 // Copyright 2023, Colias Group, LLC
+// Copyright 2023, Rust project contributors
 //
-// SPDX-License-Identifier: BSD-2-Clause
+// SPDX-License-Identifier: MIT OR Apache-2.0
 //
 
 use core::intrinsics;

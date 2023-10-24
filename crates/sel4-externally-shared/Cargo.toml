@@ -1,7 +1,7 @@
 #
 # Copyright 2023, Colias Group, LLC
 #
-# SPDX-License-Identifier: BSD-2-Clause
+# SPDX-License-Identifier: MIT OR Apache-2.0
 #
 
 [package]
@@ -9,7 +9,7 @@ name = "sel4-externally-shared"
 version = "0.1.0"
 authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
 edition = "2021"
-license = "BSD-2-Clause"
+license = "MIT OR Apache-2.0"
 
 [features]
 unstable = ["volatile/unstable"]
