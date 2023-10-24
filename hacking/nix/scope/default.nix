@@ -129,8 +129,6 @@ superCallPackage ../rust-utils {} self //
 
   distribution = callPackage ./distribution.nix {};
 
-  registry = callPackage ./registry.nix {};
-
   buildCrateInLayersHere = buildCrateInLayers {
     # TODO pass vendored lockfile instead
     superLockfile = topLevelLockfile;
