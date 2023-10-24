@@ -6,6 +6,7 @@ Source: http://sel4.systems
 Files:
   Cargo.lock
   support/*.json
+  hacking/cargo-manifest-management/Cargo.lock
   hacking/nix/scope/capdl-tool/capDL-tool.nix
   hacking/nix/scope/capdl-tool/base-compat-0-11-2.nix
   hacking/nix/scope/capdl-tool/base-compat-batteries-0-11-2.nix

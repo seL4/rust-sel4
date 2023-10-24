@@ -4,16 +4,20 @@
 # SPDX-License-Identifier: BSD-2-Clause
 #
 
-run_script := \
-	script=$$(nix-build -A script --no-out-link) && $$script
+plan := $$(nix-build -A planJSON --no-out-link)
+run := cargo run -- --plan $(plan)
 
 .PHONY: none
 none:
 
+.PHONY: clean
+clean:
+	rm -rf target
+
 .PHONY: update
 update:
-	$(run_script)
+	$(run)
 
 .PHONY: check
 check:
-	$(run_script) --just-check
+	$(run) --just-check

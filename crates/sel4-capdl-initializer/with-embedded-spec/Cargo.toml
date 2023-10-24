@@ -34,7 +34,5 @@ path = "../../sel4-root-task"
 default-features = false
 features = ["single-threaded"]
 
-[build-dependencies]
-
 [build-dependencies.sel4-capdl-initializer-with-embedded-spec-embedded-spec-validate]
 path = "embedded-spec/validate"
