@@ -166,8 +166,6 @@ superCallPackage ../rust-utils {} self //
 
   embedDebugInfo = callPackage ./embed-debug-info.nix {};
 
-  cargo-helpers = callPackage ./tools/cargo-helpers.nix {};
-
   shell = callPackage ./shell.nix {};
 
   ### kernel
