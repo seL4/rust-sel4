@@ -29,7 +29,7 @@ use sel4_async_block_io::{
 use sel4_bounce_buffer_allocator::{Basic, BounceBufferAllocator};
 use sel4_externally_shared::{ExternallySharedRef, ExternallySharedRefExt};
 use sel4_logging::{LevelFilter, Logger, LoggerBuilder};
-use sel4_microkit::{memory_region_symbol, protection_domain, var, Channel, Handler};
+use sel4_microkit::{memory_region_symbol, protection_domain, Handler};
 use sel4_shared_ring_buffer::RingBuffers;
 use sel4_shared_ring_buffer_block_io::SharedRingBufferBlockIO;
 use sel4_shared_ring_buffer_smoltcp::DeviceImpl;
@@ -37,11 +37,13 @@ use sel4_shared_ring_buffer_smoltcp::DeviceImpl;
 use microkit_http_server_example_server_core::run_server;
 
 mod block_client;
+mod config;
 mod handler;
 mod net_client;
 mod timer_client;
 
 use block_client::BlockClient;
+use config::channels;
 use handler::HandlerImpl;
 use net_client::NetClient;
 use timer_client::TimerClient;
@@ -66,10 +68,6 @@ static LOGGER: Logger = LoggerBuilder::const_default()
     .write(|s| sel4::debug_print!("{}", s))
     .build();
 
-const TIMER_DRIVER: Channel = Channel::new(0);
-const NET_DRIVER: Channel = Channel::new(1);
-const BLOCK_DRIVER: Channel = Channel::new(2);
-
 #[protection_domain(
     heap_size = 16 * 1024 * 1024,
 )]
@@ -78,17 +76,17 @@ fn init() -> impl Handler {
 
     setup_newlib();
 
-    let timer_client = TimerClient::new(TIMER_DRIVER);
-    let net_client = NetClient::new(NET_DRIVER);
-    let block_client = BlockClient::new(BLOCK_DRIVER);
+    let timer_client = TimerClient::new(channels::TIMER_DRIVER);
+    let net_client = NetClient::new(channels::NET_DRIVER);
+    let block_client = BlockClient::new(channels::BLOCK_DRIVER);
 
-    let notify_net: fn() = || NET_DRIVER.notify();
-    let notify_block: fn() = || BLOCK_DRIVER.notify();
+    let notify_net: fn() = || channels::NET_DRIVER.notify();
+    let notify_block: fn() = || channels::BLOCK_DRIVER.notify();
 
     let net_device = {
         let dma_region = unsafe {
             ExternallySharedRef::<'static, _>::new(
-                memory_region_symbol!(virtio_net_client_dma_vaddr: *mut [u8], n = *var!(virtio_net_client_dma_size: usize = 0)),
+                memory_region_symbol!(virtio_net_client_dma_vaddr: *mut [u8], n = config::VIRTIO_NET_CLIENT_DMA_SIZE),
             )
         };
 
@@ -137,7 +135,7 @@ fn init() -> impl Handler {
     let shared_block_io = {
         let dma_region = unsafe {
             ExternallySharedRef::<'static, _>::new(
-                memory_region_symbol!(virtio_blk_client_dma_vaddr: *mut [u8], n = *var!(virtio_blk_client_dma_size: usize = 0)),
+                memory_region_symbol!(virtio_blk_client_dma_vaddr: *mut [u8], n = config::VIRTIO_BLK_CLIENT_DMA_SIZE),
             )
         };
 
@@ -158,9 +156,9 @@ fn init() -> impl Handler {
     };
 
     HandlerImpl::new(
-        TIMER_DRIVER,
-        NET_DRIVER,
-        BLOCK_DRIVER,
+        channels::TIMER_DRIVER,
+        channels::NET_DRIVER,
+        channels::BLOCK_DRIVER,
         timer_client,
         net_device,
         net_config,

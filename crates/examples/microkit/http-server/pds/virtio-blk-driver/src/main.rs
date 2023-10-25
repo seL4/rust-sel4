@@ -34,8 +34,9 @@ use sel4_shared_ring_buffer_block_io_types::{
 use microkit_http_server_example_virtio_blk_driver_interface_types::*;
 use microkit_http_server_example_virtio_hal_impl::HalImpl;
 
-const DEVICE: Channel = Channel::new(0);
-const CLIENT: Channel = Channel::new(1);
+mod config;
+
+use config::channels;
 
 // HACK hard-coded in virtio-drivers
 const QUEUE_SIZE: usize = 4;
@@ -45,14 +46,14 @@ const QUEUE_SIZE: usize = 4;
 )]
 fn init() -> HandlerImpl {
     HalImpl::init(
-        *var!(virtio_blk_driver_dma_size: usize = 0),
+        config::VIRTIO_BLK_DRIVER_DMA_SIZE,
         *var!(virtio_blk_driver_dma_vaddr: usize = 0),
         *var!(virtio_blk_driver_dma_paddr: usize = 0),
     );
 
     let mut dev = {
         let header = NonNull::new(
-            (*var!(virtio_blk_mmio_vaddr: usize = 0) + *var!(virtio_blk_mmio_offset: usize = 0))
+            (*var!(virtio_blk_mmio_vaddr: usize = 0) + config::VIRTIO_BLK_MMIO_OFFSET)
                 as *mut VirtIOHeader,
         )
         .unwrap();
@@ -63,11 +64,11 @@ fn init() -> HandlerImpl {
 
     let client_region = unsafe {
         ExternallySharedRef::<'static, _>::new(
-            memory_region_symbol!(virtio_blk_client_dma_vaddr: *mut [u8], n = *var!(virtio_blk_client_dma_size: usize = 0)),
+            memory_region_symbol!(virtio_blk_client_dma_vaddr: *mut [u8], n = config::VIRTIO_BLK_CLIENT_DMA_SIZE),
         )
     };
 
-    let notify_client: fn() = || CLIENT.notify();
+    let notify_client: fn() = || channels::CLIENT.notify();
 
     let ring_buffers =
         RingBuffers::<'_, Use, fn(), BlockIORequest>::from_ptrs_using_default_initialization_strategy_for_role(
@@ -77,7 +78,7 @@ fn init() -> HandlerImpl {
         );
 
     dev.ack_interrupt();
-    DEVICE.irq_ack().unwrap();
+    channels::DEVICE.irq_ack().unwrap();
 
     HandlerImpl {
         dev,
@@ -105,7 +106,7 @@ impl Handler for HandlerImpl {
 
     fn notified(&mut self, channel: Channel) -> Result<(), Self::Error> {
         match channel {
-            DEVICE | CLIENT => {
+            channels::DEVICE | channels::CLIENT => {
                 let mut notify = false;
 
                 while self.dev.peek_used().is_some() {
@@ -191,7 +192,7 @@ impl Handler for HandlerImpl {
                 }
 
                 self.dev.ack_interrupt();
-                DEVICE.irq_ack().unwrap();
+                channels::DEVICE.irq_ack().unwrap();
             }
             _ => {
                 unreachable!()
@@ -206,7 +207,7 @@ impl Handler for HandlerImpl {
         msg_info: MessageInfo,
     ) -> Result<MessageInfo, Self::Error> {
         Ok(match channel {
-            CLIENT => match msg_info.recv_using_postcard::<Request>() {
+            channels::CLIENT => match msg_info.recv_using_postcard::<Request>() {
                 Ok(req) => match req {
                     Request::GetNumBlocks => {
                         let num_blocks = self.dev.capacity();
