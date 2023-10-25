@@ -26,8 +26,9 @@ use sel4_shared_ring_buffer::{roles::Use, RingBuffers};
 use microkit_http_server_example_virtio_hal_impl::HalImpl;
 use microkit_http_server_example_virtio_net_driver_interface_types::*;
 
-const DEVICE: Channel = Channel::new(0);
-const CLIENT: Channel = Channel::new(1);
+mod config;
+
+use config::channels;
 
 const NET_QUEUE_SIZE: usize = 16;
 const NET_BUFFER_LEN: usize = 2048;
@@ -37,14 +38,14 @@ const NET_BUFFER_LEN: usize = 2048;
 )]
 fn init() -> HandlerImpl {
     HalImpl::init(
-        *var!(virtio_net_driver_dma_size: usize = 0),
+        config::VIRTIO_NET_DRIVER_DMA_SIZE,
         *var!(virtio_net_driver_dma_vaddr: usize = 0),
         *var!(virtio_net_driver_dma_paddr: usize = 0),
     );
 
     let mut dev = {
         let header = NonNull::new(
-            (*var!(virtio_net_mmio_vaddr: usize = 0) + *var!(virtio_net_mmio_offset: usize = 0))
+            (*var!(virtio_net_mmio_vaddr: usize = 0) + config::VIRTIO_NET_MMIO_OFFSET)
                 as *mut VirtIOHeader,
         )
         .unwrap();
@@ -55,11 +56,11 @@ fn init() -> HandlerImpl {
 
     let client_region = unsafe {
         ExternallySharedRef::<'static, _>::new(
-            memory_region_symbol!(virtio_net_client_dma_vaddr: *mut [u8], n = *var!(virtio_net_client_dma_size: usize = 0)),
+            memory_region_symbol!(virtio_net_client_dma_vaddr: *mut [u8], n = config::VIRTIO_NET_CLIENT_DMA_SIZE),
         )
     };
 
-    let notify_client: fn() = || CLIENT.notify();
+    let notify_client: fn() = || channels::CLIENT.notify();
 
     let rx_ring_buffers =
         RingBuffers::<'_, Use, fn()>::from_ptrs_using_default_initialization_strategy_for_role(
@@ -76,7 +77,7 @@ fn init() -> HandlerImpl {
         );
 
     dev.ack_interrupt();
-    DEVICE.irq_ack().unwrap();
+    channels::DEVICE.irq_ack().unwrap();
 
     HandlerImpl {
         dev,
@@ -98,7 +99,7 @@ impl Handler for HandlerImpl {
 
     fn notified(&mut self, channel: Channel) -> Result<(), Self::Error> {
         match channel {
-            DEVICE | CLIENT => {
+            channels::DEVICE | channels::CLIENT => {
                 let mut notify_rx = false;
 
                 while self.dev.can_recv() && !self.rx_ring_buffers.free_mut().is_empty().unwrap() {
@@ -154,7 +155,7 @@ impl Handler for HandlerImpl {
                 }
 
                 self.dev.ack_interrupt();
-                DEVICE.irq_ack().unwrap();
+                channels::DEVICE.irq_ack().unwrap();
             }
             _ => {
                 unreachable!()
@@ -169,7 +170,7 @@ impl Handler for HandlerImpl {
         msg_info: MessageInfo,
     ) -> Result<MessageInfo, Self::Error> {
         Ok(match channel {
-            CLIENT => match msg_info.recv_using_postcard::<Request>() {
+            channels::CLIENT => match msg_info.recv_using_postcard::<Request>() {
                 Ok(req) => match req {
                     Request::GetMacAddress => {
                         let mac_address = self.dev.mac_address();

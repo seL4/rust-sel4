@@ -10,21 +10,22 @@
 
 use core::time::Duration;
 
-use sel4_microkit::{memory_region_symbol, protection_domain, var, Channel, Handler, MessageInfo};
+use sel4_microkit::{memory_region_symbol, protection_domain, Channel, Handler, MessageInfo};
 use sel4_microkit_message::MessageInfoExt as _;
 
 use microkit_http_server_example_sp804_driver_core::Driver;
 use microkit_http_server_example_sp804_driver_interface_types::*;
 
-const DEVICE: Channel = Channel::new(0);
-const CLIENT: Channel = Channel::new(1);
+mod config;
+
+use config::channels;
 
 #[protection_domain]
 fn init() -> HandlerImpl {
     let driver = unsafe {
         Driver::new(
             memory_region_symbol!(sp804_mmio_vaddr: *mut ()).as_ptr(),
-            (*var!(freq: usize = 0)).try_into().unwrap(),
+            config::FREQ,
         )
     };
     HandlerImpl { driver }
@@ -39,10 +40,10 @@ impl Handler for HandlerImpl {
 
     fn notified(&mut self, channel: Channel) -> Result<(), Self::Error> {
         match channel {
-            DEVICE => {
+            channels::DEVICE => {
                 self.driver.handle_interrupt();
-                DEVICE.irq_ack().unwrap();
-                CLIENT.notify();
+                channels::DEVICE.irq_ack().unwrap();
+                channels::CLIENT.notify();
             }
             _ => {
                 unreachable!()
@@ -57,7 +58,7 @@ impl Handler for HandlerImpl {
         msg_info: MessageInfo,
     ) -> Result<MessageInfo, Self::Error> {
         Ok(match channel {
-            CLIENT => match msg_info.recv_using_postcard::<Request>() {
+            channels::CLIENT => match msg_info.recv_using_postcard::<Request>() {
                 Ok(req) => match req {
                     Request::Now => {
                         let now = self.driver.now();
