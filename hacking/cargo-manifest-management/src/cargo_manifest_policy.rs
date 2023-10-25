@@ -8,10 +8,10 @@ use std::cmp::{Ordering, Reverse};
 
 use crate::{PathSegment, Policy};
 
-pub struct CargoPolicy;
+pub struct CargoManifestPolicy;
 
-impl Policy for CargoPolicy {
-    fn compare_keys(path: &[PathSegment], a: &str, b: &str) -> Ordering {
+impl Policy for CargoManifestPolicy {
+    fn compare_keys(&self, path: &[PathSegment], a: &str, b: &str) -> Ordering {
         let ranking = if path.len() == 0 {
             Ranking {
                 front: &[
@@ -72,13 +72,13 @@ impl Policy for CargoPolicy {
         ranking.compare(a, b)
     }
 
-    fn is_always_table(path: &[PathSegment]) -> bool {
+    fn is_always_table(&self, path: &[PathSegment]) -> bool {
         path.len() <= 1
             || (path.len() <= 3 && path[0].is_table_key("target"))
             || (path.len() <= 3 && path[0].is_table_key("profile"))
     }
 
-    fn is_always_array_of_tables(path: &[PathSegment]) -> bool {
+    fn is_always_array_of_tables(&self, path: &[PathSegment]) -> bool {
         path.len() == 2 && path[1].is_table_key("bin")
     }
 }

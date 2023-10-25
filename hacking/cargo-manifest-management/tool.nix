@@ -82,6 +82,7 @@ let
         inherit manifestValue;
         inherit (elaboratedNix) frontmatter justEnsureEquivalence;
       };
+
 in
 
 { workspaceRoot, workspaceDirFilter
@@ -89,13 +90,13 @@ in
 }:
 
 let
-  generatedManifestSources =
+  cargoNixPaths =
     let
       dirFilter = relativePathSegments: lib.head relativePathSegments == "crates";
     in
       scanDirForFilesWithName workspaceDirFilter "Cargo.nix" workspaceRoot;
 
-  genrateManifest = cargoNixAbsolutePath:
+  generateManifest = cargoNixAbsolutePath:
     let
       absolutePath = builtins.dirOf cargoNixAbsolutePath;
       manifestExpr = callManifest {
@@ -127,7 +128,7 @@ let
     in
       generated // manual;
 
-  generatedManifestsList = map genrateManifest generatedManifestSources;
+  generatedManifestsList = map generateManifest cargoNixPaths;
 
   generatedManifestsByPackageName =
     lib.listToAttrs
