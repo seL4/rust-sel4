@@ -13,7 +13,7 @@ use std::str;
 use serde::Deserialize;
 use serde_json::Value as JsonValue;
 
-use crate::{diff, format, Policy};
+use crate::{diff, Formatter, Policy};
 
 #[derive(Debug, Deserialize)]
 #[serde(transparent)]
@@ -29,17 +29,10 @@ pub struct Entry {
 }
 
 impl Plan {
-    pub fn get_entry_by_package_name(&self, name: &str) -> Option<&Entry> {
-        self.entries
-            .values()
-            .filter(|entry| entry.get_package_name() == Some(name))
-            .next()
-    }
-
-    pub fn execute<P: Policy>(&self, just_check: bool) {
+    pub fn execute<P: Policy>(&self, formatter: &Formatter<P>, just_check: bool) {
         for (path, entry) in self.entries.iter() {
             assert!(!entry.just_ensure_equivalence); // TODO unimplemented
-            let rendered = entry.render::<P>();
+            let rendered = entry.render(formatter);
             let mut write = true;
             if path.is_file() {
                 let existing = fs::read(path).unwrap();
@@ -61,6 +54,13 @@ impl Plan {
             }
         }
     }
+
+    pub fn get_entry_by_package_name(&self, name: &str) -> Option<&Entry> {
+        self.entries
+            .values()
+            .filter(|entry| entry.get_package_name() == Some(name))
+            .next()
+    }
 }
 
 impl Entry {
@@ -79,13 +79,14 @@ impl Entry {
         )
     }
 
-    fn render<P: Policy>(&self) -> String {
+    fn render<P: Policy>(&self, formatter: &Formatter<P>) -> String {
+        let doc = formatter.format(&self.manifest);
         let mut s = String::new();
         if let Some(frontmatter) = self.frontmatter.as_ref() {
             s.push_str(frontmatter);
             s.push('\n');
         }
-        s.push_str(&format::<P>(&self.manifest).to_string());
+        s.push_str(&doc.to_string());
         s
     }
 }

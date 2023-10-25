@@ -6,7 +6,6 @@
 
 use std::cmp::Ordering;
 use std::collections::BTreeMap;
-use std::marker::PhantomData;
 use std::mem;
 
 use either::Either;
@@ -16,11 +15,11 @@ use toml_edit::{Array, ArrayOfTables, Document, Formatted, InlineTable, Item, Ta
 const MAX_WIDTH: usize = 100;
 
 pub trait Policy {
-    fn compare_keys(path: &[PathSegment], a: &str, b: &str) -> Ordering;
+    fn compare_keys(&self, path: &[PathSegment], a: &str, b: &str) -> Ordering;
 
-    fn is_always_table(path: &[PathSegment]) -> bool;
+    fn is_always_table(&self, path: &[PathSegment]) -> bool;
 
-    fn is_always_array_of_tables(path: &[PathSegment]) -> bool;
+    fn is_always_array_of_tables(&self, path: &[PathSegment]) -> bool;
 }
 
 pub enum PathSegment {
@@ -41,27 +40,33 @@ impl PathSegment {
     }
 }
 
-pub fn format<P: Policy>(manifest: &JsonValue) -> Document {
-    let mut state = ValueTranslation {
-        current_path: vec![],
-        _phantom: PhantomData::<P>,
-    };
-    let item = state.translate(manifest).into_item();
-    let mut doc = Document::new();
-    let _ = mem::replace(doc.as_item_mut(), item);
-    doc
+pub struct Formatter<P> {
+    policy: P,
 }
 
-struct ValueTranslation<P> {
-    current_path: Vec<PathSegment>,
-    _phantom: PhantomData<P>,
-}
-
-impl<P: Policy> ValueTranslation<P> {
-    fn current_key(&self) -> Option<&str> {
-        self.current_path.last()?.as_table_key()
+impl<P: Policy> Formatter<P> {
+    pub fn new(policy: P) -> Self {
+        Self { policy }
     }
 
+    pub fn format(&self, manifest: &JsonValue) -> Document {
+        let mut state = FormatterState {
+            formatter: self,
+            current_path: vec![],
+        };
+        let item = state.translate(manifest).into_item();
+        let mut doc = Document::new();
+        let _ = mem::replace(doc.as_item_mut(), item);
+        doc
+    }
+}
+
+struct FormatterState<'a, P> {
+    formatter: &'a Formatter<P>,
+    current_path: Vec<PathSegment>,
+}
+
+impl<'a, P: Policy> FormatterState<'a, P> {
     fn translate(&mut self, v: &JsonValue) -> Translated {
         match v {
             JsonValue::Bool(w) => Value::Boolean(Formatted::new(*w)).into(),
@@ -77,22 +82,18 @@ impl<P: Policy> ValueTranslation<P> {
             JsonValue::Array(w) => {
                 let mut children = vec![];
                 for (i, x) in w.iter().enumerate() {
-                    self.current_path.push(PathSegment::ArrayIndex(i));
+                    self.push(PathSegment::ArrayIndex(i));
                     children.push(self.translate(x));
-                    self.current_path.pop();
+                    self.pop();
                 }
-                let homogenous_children = match TranslatedManyArray::homogenize(&children) {
-                    TranslatedManyArray::Values(values)
-                        if P::is_always_array_of_tables(&self.current_path) =>
-                    {
-                        TranslatedManyArray::Tables(TranslatedManyArray::tables_from_values(
-                            &values,
-                        ))
-                    }
-                    x => x,
-                };
+                let homogenous_children =
+                    if self.policy().is_always_array_of_tables(self.current_path()) {
+                        TranslatedArray::Tables(TranslatedArray::tables_from_translated(&children))
+                    } else {
+                        TranslatedArray::homogenize(&children)
+                    };
                 match homogenous_children {
-                    TranslatedManyArray::Values(values) => {
+                    TranslatedArray::Values(values) => Translated::Value(Value::Array({
                         let mut array = Array::new();
                         for v in values.into_iter() {
                             array.push(v);
@@ -109,70 +110,84 @@ impl<P: Policy> ValueTranslation<P> {
                                 e.decor_mut().set_suffix("\n");
                             });
                         }
-                        Translated::Value(Value::Array(array))
-                    }
-                    TranslatedManyArray::Tables(tables) => {
+                        array
+                    })),
+                    TranslatedArray::Tables(tables) => Translated::Item(Item::ArrayOfTables({
                         let mut array = ArrayOfTables::new();
                         for v in tables.into_iter() {
                             array.push(v);
                         }
-                        Translated::Item(Item::ArrayOfTables(array))
-                    }
+                        array
+                    })),
                 }
             }
             JsonValue::Object(w) => {
                 let mut children = BTreeMap::new();
                 for (k, x) in w.iter() {
-                    self.current_path.push(PathSegment::TableKey(k.clone()));
+                    self.push(PathSegment::TableKey(k.clone()));
                     children.insert(k.clone(), self.translate(x));
-                    self.current_path.pop();
+                    self.pop();
                 }
-                let homogenous_children = match TranslatedManyMap::homogenize(&children) {
-                    TranslatedManyMap::Values(values) if P::is_always_table(&self.current_path) => {
-                        TranslatedManyMap::Items(TranslatedManyMap::items_from_values(values))
-                    }
-                    x => x,
+                let homogenous_children = if self.policy().is_always_table(self.current_path()) {
+                    TranslatedMap::Items(TranslatedMap::items_from_translated(&children))
+                } else {
+                    TranslatedMap::homogenize(&children)
                 };
-                let inline_table_or_items = match homogenous_children {
-                    TranslatedManyMap::Values(values) => {
+                match homogenous_children {
+                    TranslatedMap::Values(values) => {
                         let mut table = InlineTable::new();
                         for (k, v) in values.clone().into_iter() {
                             table.insert(k, v);
                         }
                         table.sort_values_by(|k1, _v1, k2, _v2| {
-                            P::compare_keys(&self.current_path, k1, k2)
+                            self.policy().compare_keys(self.current_path(), k1, k2)
                         });
                         if !self
                             .current_key()
                             .map(|k| is_kv_too_long(k, &Value::InlineTable(table.clone())))
                             .unwrap_or(false)
                         {
-                            Either::Left(table)
+                            Either::Left(Translated::Value(Value::InlineTable(table)))
                         } else {
-                            Either::Right(TranslatedManyMap::items_from_values(values))
+                            Either::Right(TranslatedMap::items_from_values(values))
                         }
                     }
-                    TranslatedManyMap::Items(items) => Either::Right(items),
-                };
-                match inline_table_or_items {
-                    Either::Left(inline_table) => {
-                        Translated::Value(Value::InlineTable(inline_table))
-                    }
-                    Either::Right(items) => {
-                        let mut table = Table::new();
-                        table.set_implicit(true);
-                        for (k, v) in items.into_iter() {
-                            table.insert(&k, v);
-                        }
-                        table.sort_values_by(|k1, _v1, k2, _v2| {
-                            P::compare_keys(&self.current_path, k1, k2)
-                        });
-                        Translated::Item(Item::Table(table))
-                    }
+                    TranslatedMap::Items(items) => Either::Right(items),
                 }
+                .map_right(|items| {
+                    let mut table = Table::new();
+                    table.set_implicit(true);
+                    for (k, v) in items.into_iter() {
+                        table.insert(&k, v);
+                    }
+                    table.sort_values_by(|k1, _v1, k2, _v2| {
+                        self.policy().compare_keys(self.current_path(), k1, k2)
+                    });
+                    Translated::Item(Item::Table(table))
+                })
+                .into_inner()
             }
             _ => panic!(),
         }
+    }
+
+    fn policy(&self) -> &P {
+        &self.formatter.policy
+    }
+
+    fn current_path(&self) -> &[PathSegment] {
+        &self.current_path
+    }
+
+    fn current_key(&self) -> Option<&str> {
+        self.current_path.last()?.as_table_key()
+    }
+    fn push(&mut self, seg: PathSegment) {
+        self.current_path.push(seg);
+    }
+
+    fn pop(&mut self) {
+        self.current_path.pop();
     }
 }
 
@@ -214,28 +229,30 @@ impl Translated {
     }
 }
 
-enum TranslatedManyMap {
+enum TranslatedMap {
     Items(BTreeMap<String, Item>),
     Values(BTreeMap<String, Value>),
 }
 
-impl TranslatedManyMap {
+impl TranslatedMap {
     fn homogenize(heterogeneous: &BTreeMap<String, Translated>) -> Self {
         if heterogeneous.values().all(Translated::is_value) {
-            TranslatedManyMap::Values(
+            Self::Values(
                 heterogeneous
                     .iter()
                     .map(|(k, v)| (k.clone(), v.as_value().unwrap().clone()))
                     .collect(),
             )
         } else {
-            TranslatedManyMap::Items(
-                heterogeneous
-                    .iter()
-                    .map(|(k, v)| (k.clone(), v.clone().into_item()))
-                    .collect(),
-            )
+            Self::Items(Self::items_from_translated(heterogeneous))
         }
+    }
+
+    fn items_from_translated(translated: &BTreeMap<String, Translated>) -> BTreeMap<String, Item> {
+        translated
+            .iter()
+            .map(|(k, v)| (k.clone(), v.clone().into_item()))
+            .collect()
     }
 
     fn items_from_values(values: BTreeMap<String, Value>) -> BTreeMap<String, Item> {
@@ -246,28 +263,30 @@ impl TranslatedManyMap {
     }
 }
 
-enum TranslatedManyArray {
+enum TranslatedArray {
     Tables(Vec<Table>),
     Values(Vec<Value>),
 }
 
-impl TranslatedManyArray {
+impl TranslatedArray {
     fn homogenize(heterogeneous: &[Translated]) -> Self {
         if heterogeneous.iter().all(Translated::is_value) {
-            TranslatedManyArray::Values(
+            Self::Values(
                 heterogeneous
                     .iter()
                     .map(|v| v.as_value().unwrap().clone())
                     .collect(),
             )
         } else {
-            TranslatedManyArray::Tables(
-                heterogeneous
-                    .iter()
-                    .map(|v| v.clone().into_item().as_table().unwrap().clone())
-                    .collect(),
-            )
+            Self::Tables(Self::tables_from_translated(heterogeneous))
         }
+    }
+
+    fn tables_from_translated(translated: &[Translated]) -> Vec<Table> {
+        translated
+            .iter()
+            .map(|v| v.clone().into_item().as_table().unwrap().clone())
+            .collect()
     }
 
     fn tables_from_values(values: &[Value]) -> Vec<Table> {

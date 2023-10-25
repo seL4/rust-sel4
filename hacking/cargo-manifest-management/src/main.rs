@@ -12,14 +12,14 @@ use std::path::PathBuf;
 
 use clap::Parser;
 
-mod cargo_policy;
+mod cargo_manifest_policy;
 mod diff;
 mod format;
 mod plan;
 
-use cargo_policy::CargoPolicy;
+use cargo_manifest_policy::CargoManifestPolicy;
 use diff::diff;
-use format::{format, PathSegment, Policy};
+use format::{Formatter, PathSegment, Policy};
 use plan::Plan;
 
 #[derive(Debug, Parser)]
@@ -35,13 +35,13 @@ fn main() {
     let args = Args::parse();
     let plan_file = File::open(&args.plan).unwrap();
     let plan: Plan = serde_json::from_reader(plan_file).unwrap();
-    plan.execute::<CargoPolicy>(args.just_check);
+    plan.execute(&Formatter::new(CargoManifestPolicy), args.just_check);
 }
 
 // for debugging:
 
 fn test_format() {
     let json_value = serde_json::from_reader(io::stdin()).unwrap();
-    let toml_doc = format::<CargoPolicy>(&json_value);
+    let toml_doc = Formatter::new(CargoManifestPolicy).format(&json_value);
     print!("{}", toml_doc)
 }
