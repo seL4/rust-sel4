@@ -36,67 +36,87 @@ let
     rev = "0a579415c4837c96c4d4629e4b4d4691aaff07ca";
   };
 
-  diskImage = buildPackages.vmTools.runInLinuxVM (runCommand "disk-image" {
-    nativeBuildInputs = [ python3 kmod parted fatresize dosfstools ];
-    preVM = ''
-      mkdir scratch
-      scratch=$(realpath scratch)
-      QEMU_OPTS+=" -virtfs local,path=$scratch,security_model=none,mount_tag=scratch"
-    '';
-  } ''
-    mkdir /tmp/scratch
-    mount -t 9p scratch /tmp/scratch -o trans=virtio,version=9p2000.L,msize=131072
-    cd scratch
+  diskImage = mkDiskImage {};
+  smallDiskImage = mkDiskImage { excludePatterns = [ "*.mp4" "*.pdf" ]; };
 
-    modprobe loop
+  mkDiskImage =
+    { maxIndividualFileSize ? null
+    , excludePatterns ? null
+    }:
+    buildPackages.vmTools.runInLinuxVM (runCommand "disk-image" {
+      nativeBuildInputs = [ python3 kmod parted fatresize dosfstools ];
+      preVM = ''
+        mkdir scratch
+        scratch=$(realpath scratch)
+        QEMU_OPTS+=" -virtfs local,path=$scratch,security_model=none,mount_tag=scratch"
+      '';
+    } ''
+      mkdir /tmp/scratch
+      mount -t 9p scratch /tmp/scratch -o trans=virtio,version=9p2000.L,msize=131072
+      cd scratch
 
-    mkdir /mnt
+      modprobe loop
 
-    # HACK: fatresize segfaults when run on a filesystem that's not on a partition (?)
+      mkdir /mnt
 
-    img_size=500M
-    img=disk.img
-    touch $img
-    truncate -s $img_size $img
+      # HACK: fatresize segfaults when run on a filesystem that's not on a partition (?)
 
-    dev=$(losetup --find --show $img)
+      img_size=500M
+      img=disk.img
+      touch $img
+      truncate -s $img_size $img
 
-    parted -s $dev mklabel msdos
-    parted -s $dev mkpart primary fat16 512B 100%
-  
-    partprobe $dev
-    partition=''${dev}p1 
+      dev=$(losetup --find --show $img)
 
-    mkfs.vfat -F 16 $partition
-  
-    mount $partition /mnt
+      parted -s $dev mklabel msdos
+      parted -s $dev mkpart primary fat16 512B 100%
 
-    # HACK:
-    #  - some filesystem layer doesn't seem to like '?' in filename
-    #  - rsync doesn't play nicely with some filesystem layer
-    cp -r --no-preserve=owner,mode ${content}/localhost x/
-    find x/ -name '*\?' -delete
-    cp -r x/* /mnt/
+      partprobe $dev
+      partition=''${dev}p1
 
-    umount /mnt
+      mkfs.vfat -F 16 $partition
 
-    min=$(fatresize --info $partition | sed -rn 's/Min size: (.*)$/\1/p')
-    min_rounded_up=$(python3 -c "print(512 * ($min // 512 + 1))")
-    total_disk_size=$(expr $min_rounded_up + 512)
+      mount $partition /mnt
 
-    fatresize -v -s $min_rounded_up $partition
+      # HACK:
+      #  - some filesystem layer doesn't seem to like '?' in filename
+      #  - rsync doesn't play nicely with some filesystem layer
+      cp -r --no-preserve=owner,mode ${content}/localhost x/
+      find x/ -name '*\?' -delete
+      ${lib.optionalString (excludePatterns != null) ''
+        find x/ -type f \( ${
+          lib.concatMapStringsSep " -o " (pat: "-name '${pat}'") excludePatterns
+        } \) -delete
+      ''}
+      ${lib.optionalString (maxIndividualFileSize != null) ''
+        find x/ -size +${maxIndividualFileSize} -delete
+      ''}
+      cp -r x/* /mnt/
 
-    real_img=real-disk.img
-    touch $real_img
-    truncate -s $total_disk_size $real_img
-    parted -s $real_img mklabel msdos
-    parted -s $real_img mkpart primary fat16 512B 100%
-    dd if=$partition of=$real_img oflag=seek_bytes seek=512 count=$min_rounded_up
+      umount /mnt
 
-    losetup -d $dev
+      min=$(fatresize --info $partition | sed -rn 's/Min size: (.*)$/\1/p')
+      min_rounded_up=$(python3 -c "print(512 * ($min // 512 + 1))")
+      partition_size=$(python3 -c "print(max(64 << 20, $min_rounded_up))")
+      total_disk_size=$(expr $partition_size + 512)
 
-    mv $real_img $out/disk.img
-  '');
+      # NOTE
+      # Somehow $partition sometimes ends up smaller than $partition_size.
+      # conv=notrunc works around this possibility.
+      fatresize -v -s $partition_size $partition
+
+      real_img=real-disk.img
+      touch $real_img
+      truncate -s $total_disk_size $real_img
+      parted -s $real_img mklabel msdos
+      parted -s $real_img mkpart primary fat16 512B 100%
+
+      dd if=$partition of=$real_img iflag=count_bytes oflag=seek_bytes seek=512 count=$partition_size conv=notrunc
+
+      losetup -d $dev
+
+      mv $real_img $out/disk.img
+    '');
 
   libcDir = "${stdenv.cc.libc}/${hostPlatform.config}";
 
@@ -166,7 +186,7 @@ lib.fix (self: mkMicrokitInstance {
   };
 } // {
   inherit pds;
-  inherit diskImage;
+  inherit diskImage smallDiskImage;
 } // lib.optionalAttrs canSimulate rec {
   automate =
     let
