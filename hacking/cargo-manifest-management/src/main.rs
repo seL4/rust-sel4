@@ -18,7 +18,7 @@ mod format;
 mod plan;
 
 use cargo_manifest_policy::CargoManifestPolicy;
-use diff::diff;
+use diff::display_diff;
 use format::{Formatter, PathSegment, Policy};
 use plan::Plan;
 
@@ -41,7 +41,9 @@ fn main() {
 // for debugging:
 
 fn test_format() {
-    let json_value = serde_json::from_reader(io::stdin()).unwrap();
-    let toml_doc = Formatter::new(CargoManifestPolicy).format(&json_value);
+    let root_table = serde_json::from_reader(io::stdin()).unwrap();
+    let toml_doc = Formatter::new(CargoManifestPolicy)
+        .format(&root_table)
+        .unwrap();
     print!("{}", toml_doc)
 }
