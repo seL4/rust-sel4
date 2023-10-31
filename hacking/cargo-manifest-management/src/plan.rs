@@ -11,9 +11,9 @@ use std::process;
 use std::str;
 
 use serde::Deserialize;
-use serde_json::Value as JsonValue;
+use toml::Table as UnformattedTable;
 
-use crate::{diff, Formatter, Policy};
+use crate::{display_diff, Formatter, Policy};
 
 #[derive(Debug, Deserialize)]
 #[serde(transparent)]
@@ -23,7 +23,7 @@ pub struct Plan {
 
 #[derive(Debug, Deserialize)]
 pub struct Entry {
-    pub manifest: JsonValue,
+    pub manifest: UnformattedTable,
     pub frontmatter: Option<String>,
     pub just_ensure_equivalence: bool,
 }
@@ -41,7 +41,7 @@ impl Plan {
                     write = false;
                 } else if just_check {
                     eprintln!("error: {} is out of date:", path.display());
-                    eprintln!("{}", diff(&rendered, existing));
+                    eprintln!("{}", display_diff(&rendered, existing));
                     process::exit(1);
                 }
             } else if just_check {
@@ -67,10 +67,8 @@ impl Entry {
     pub fn get_package_name(&self) -> Option<&str> {
         Some(
             self.manifest
-                .as_object()
-                .unwrap()
                 .get("package")?
-                .as_object()
+                .as_table()
                 .unwrap()
                 .get("name")
                 .unwrap()
@@ -80,7 +78,7 @@ impl Entry {
     }
 
     fn render<P: Policy>(&self, formatter: &Formatter<P>) -> String {
-        let doc = formatter.format(&self.manifest);
+        let doc = formatter.format(&self.manifest).unwrap();
         let mut s = String::new();
         if let Some(frontmatter) = self.frontmatter.as_ref() {
             s.push_str(frontmatter);

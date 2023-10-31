@@ -5,23 +5,24 @@
 //
 
 use std::cmp::Ordering;
-use std::collections::BTreeMap;
 use std::mem;
 
-use either::Either;
-use serde_json::Value as JsonValue;
-use toml_edit::{Array, ArrayOfTables, Document, Formatted, InlineTable, Item, Table, Value};
-
-const MAX_WIDTH: usize = 100;
+use toml::value::{
+    Array as UnformattedArray, Table as UnformattedTable, Value as UnformattedValue,
+};
+use toml_edit::{Array, ArrayOfTables, Document, Formatted, InlineTable, Item, Key, Table, Value};
 
 pub trait Policy {
+    fn max_width(&self) -> usize;
+
+    fn indent_width(&self) -> usize;
+
+    fn never_inline_table(&self, path: &[PathSegment]) -> bool;
+
     fn compare_keys(&self, path: &[PathSegment], a: &str, b: &str) -> Ordering;
-
-    fn is_always_table(&self, path: &[PathSegment]) -> bool;
-
-    fn is_always_array_of_tables(&self, path: &[PathSegment]) -> bool;
 }
 
+#[derive(Debug, Clone)]
 pub enum PathSegment {
     TableKey(String),
     ArrayIndex(usize),
@@ -49,15 +50,12 @@ impl<P: Policy> Formatter<P> {
         Self { policy }
     }
 
-    pub fn format(&self, manifest: &JsonValue) -> Document {
+    pub fn format(&self, table: &UnformattedTable) -> Result<Document, Error> {
         let mut state = FormatterState {
             formatter: self,
             current_path: vec![],
         };
-        let item = state.translate(manifest).into_item();
-        let mut doc = Document::new();
-        let _ = mem::replace(doc.as_item_mut(), item);
-        doc
+        state.format_top_level(table)
     }
 }
 
@@ -66,109 +64,168 @@ struct FormatterState<'a, P> {
     current_path: Vec<PathSegment>,
 }
 
+#[derive(Debug, Clone)]
+pub enum Error {
+    CannotInlineTable(CannotInlineTableError),
+}
+
+#[derive(Debug, Clone)]
+pub struct CannotInlineTableError {
+    path: Vec<PathSegment>,
+}
+
+impl CannotInlineTableError {
+    fn new(path: Vec<PathSegment>) -> Self {
+        Self { path }
+    }
+}
+
+impl From<CannotInlineTableError> for Error {
+    fn from(err: CannotInlineTableError) -> Error {
+        Self::CannotInlineTable(err)
+    }
+}
+
+struct FormattedTable {
+    table: Table,
+    inline_table: Result<InlineTable, Error>,
+}
+
 impl<'a, P: Policy> FormatterState<'a, P> {
-    fn translate(&mut self, v: &JsonValue) -> Translated {
-        match v {
-            JsonValue::Bool(w) => Value::Boolean(Formatted::new(*w)).into(),
-            JsonValue::Number(w) => if let Some(x) = w.as_i64() {
-                Value::Integer(Formatted::new(x))
-            } else if let Some(x) = w.as_f64() {
-                Value::Float(Formatted::new(x))
-            } else {
-                panic!()
-            }
-            .into(),
-            JsonValue::String(w) => Value::String(Formatted::new(w.clone())).into(),
-            JsonValue::Array(w) => {
-                let mut children = vec![];
-                for (i, x) in w.iter().enumerate() {
-                    self.push(PathSegment::ArrayIndex(i));
-                    children.push(self.translate(x));
-                    self.pop();
-                }
-                let homogenous_children =
-                    if self.policy().is_always_array_of_tables(self.current_path()) {
-                        TranslatedArray::Tables(TranslatedArray::tables_from_translated(&children))
-                    } else {
-                        TranslatedArray::homogenize(&children)
-                    };
-                match homogenous_children {
-                    TranslatedArray::Values(values) => Translated::Value(Value::Array({
-                        let mut array = Array::new();
-                        for v in values.into_iter() {
-                            array.push(v);
-                        }
-                        let wrap = self
-                            .current_key()
-                            .map(|k| is_kv_too_long(k, &Value::Array(array.clone())))
-                            .unwrap_or(false);
-                        if wrap {
-                            array.iter_mut().for_each(|e| {
-                                e.decor_mut().set_prefix("\n    ");
-                            });
-                            array.iter_mut().last().map(|e| {
-                                e.decor_mut().set_suffix("\n");
-                            });
-                        }
-                        array
-                    })),
-                    TranslatedArray::Tables(tables) => Translated::Item(Item::ArrayOfTables({
-                        let mut array = ArrayOfTables::new();
-                        for v in tables.into_iter() {
-                            array.push(v);
-                        }
-                        array
-                    })),
-                }
-            }
-            JsonValue::Object(w) => {
-                let mut children = BTreeMap::new();
-                for (k, x) in w.iter() {
-                    self.push(PathSegment::TableKey(k.clone()));
-                    children.insert(k.clone(), self.translate(x));
-                    self.pop();
-                }
-                let homogenous_children = if self.policy().is_always_table(self.current_path()) {
-                    TranslatedMap::Items(TranslatedMap::items_from_translated(&children))
-                } else {
-                    TranslatedMap::homogenize(&children)
-                };
-                match homogenous_children {
-                    TranslatedMap::Values(values) => {
-                        let mut table = InlineTable::new();
-                        for (k, v) in values.clone().into_iter() {
-                            table.insert(k, v);
-                        }
-                        table.sort_values_by(|k1, _v1, k2, _v2| {
-                            self.policy().compare_keys(self.current_path(), k1, k2)
-                        });
-                        if !self
-                            .current_key()
-                            .map(|k| is_kv_too_long(k, &Value::InlineTable(table.clone())))
-                            .unwrap_or(false)
-                        {
-                            Either::Left(Translated::Value(Value::InlineTable(table)))
-                        } else {
-                            Either::Right(TranslatedMap::items_from_values(values))
-                        }
-                    }
-                    TranslatedMap::Items(items) => Either::Right(items),
-                }
-                .map_right(|items| {
-                    let mut table = Table::new();
-                    table.set_implicit(true);
-                    for (k, v) in items.into_iter() {
-                        table.insert(&k, v);
-                    }
-                    table.sort_values_by(|k1, _v1, k2, _v2| {
-                        self.policy().compare_keys(self.current_path(), k1, k2)
-                    });
-                    Translated::Item(Item::Table(table))
-                })
-                .into_inner()
-            }
-            _ => panic!(),
+    fn format_top_level(&mut self, v: &UnformattedTable) -> Result<Document, Error> {
+        let table = self.format_table_to_table(v)?;
+        let mut doc = Document::new();
+        *doc.as_table_mut() = table;
+        Ok(doc)
+    }
+
+    fn format_to_value(&mut self, v: &UnformattedValue) -> Result<Value, Error> {
+        Ok(match v {
+            UnformattedValue::Boolean(w) => Value::Boolean(Formatted::new(*w)),
+            UnformattedValue::Integer(w) => Value::Integer(Formatted::new(*w)),
+            UnformattedValue::Float(w) => Value::Float(Formatted::new(*w)),
+            UnformattedValue::String(w) => Value::String(Formatted::new(w.clone())),
+            UnformattedValue::Datetime(w) => Value::Datetime(Formatted::new(w.clone())),
+            UnformattedValue::Array(w) => Value::Array(self.format_array_to_array(w)?),
+            UnformattedValue::Table(w) => Value::InlineTable(self.format_table_to_inline_table(w)?),
+        })
+    }
+
+    fn format_table_to_inline_table(&mut self, v: &UnformattedTable) -> Result<InlineTable, Error> {
+        if self.policy().never_inline_table(self.current_path()) {
+            return Err(CannotInlineTableError::new(self.current_path().to_vec()).into());
         }
+        let mut table = InlineTable::new();
+        for (k, x) in v.iter() {
+            table.insert(k, self.with_table_key(k, |this| this.format_to_value(x))?);
+        }
+        table.sort_values_by(self.compare_values_at_current_path());
+        Ok(table)
+    }
+
+    fn format_array_to_array(&mut self, v: &UnformattedArray) -> Result<Array, Error> {
+        let mut array = Array::new();
+        for (i, x) in v.iter().enumerate() {
+            array.push(self.with_array_index(i, |this| this.format_to_value(x))?);
+        }
+        Ok(array)
+    }
+
+    fn format_table_to_table(&mut self, v: &UnformattedTable) -> Result<Table, Error> {
+        let mut table = Table::new();
+        table.set_implicit(true);
+        for (k, x) in v.iter() {
+            table.insert(k, self.with_table_key(k, |this| this.format_to_item(x))?);
+        }
+        table.sort_values_by(self.compare_values_at_current_path());
+        Ok(table)
+    }
+
+    fn format_to_item(&mut self, v: &UnformattedValue) -> Result<Item, Error> {
+        Ok(match v {
+            UnformattedValue::Array(w) => self.format_array_to_item(w)?,
+            UnformattedValue::Table(w) => self.format_table_to_item(w)?,
+            _ => Item::Value(self.format_to_value(v)?),
+        })
+    }
+
+    fn format_array_to_item(&mut self, v: &UnformattedArray) -> Result<Item, Error> {
+        let just_tables = v.iter().all(UnformattedValue::is_table);
+        let mut array = if !just_tables {
+            Some(self.format_array_to_array(v)?)
+        } else {
+            let mut inline_tables = Some(vec![]);
+            for (i, x) in v
+                .iter()
+                .map(UnformattedValue::as_table)
+                .map(Option::unwrap)
+                .enumerate()
+            {
+                let inline_table =
+                    self.with_array_index(i, |this| this.format_table_to_inline_table(x))?;
+                if self.is_inline_table_too_wide_for_array(&inline_table) {
+                    inline_tables = None;
+                    break;
+                } else {
+                    inline_tables.as_mut().unwrap().push(inline_table);
+                }
+            }
+            inline_tables.map(|inline_tables| {
+                let mut array = Array::new();
+                array.extend(inline_tables);
+                array
+            })
+        };
+        if let Some(array) = &mut array {
+            let wrap =
+                self.is_kv_too_wide(self.current_key().unwrap(), &Value::Array(array.clone()));
+            if wrap {
+                array.iter_mut().for_each(|e| {
+                    e.decor_mut().set_prefix("\n    ");
+                });
+                array.iter_mut().last().map(|e| {
+                    e.decor_mut().set_suffix("\n");
+                });
+            }
+        }
+        Ok(if let Some(array) = array {
+            Item::Value(Value::Array(array))
+        } else {
+            let mut array_of_tables = ArrayOfTables::new();
+            for (i, x) in v
+                .iter()
+                .map(UnformattedValue::as_table)
+                .map(Option::unwrap)
+                .enumerate()
+            {
+                let table = self.with_array_index(i, |this| this.format_table_to_table(x))?;
+                array_of_tables.push(table);
+            }
+            Item::ArrayOfTables(array_of_tables)
+        })
+    }
+
+    fn format_table_to_item(&mut self, v: &UnformattedTable) -> Result<Item, Error> {
+        let inline_table = match self.format_table_to_inline_table(v) {
+            Ok(inline_table) => {
+                let too_wide = self.is_kv_too_wide(
+                    self.current_key().unwrap(),
+                    &Value::InlineTable(inline_table.clone()),
+                );
+                if !too_wide {
+                    Some(inline_table)
+                } else {
+                    None
+                }
+            }
+            Err(Error::CannotInlineTable(_)) => None,
+        };
+        Ok(if let Some(inline_table) = inline_table {
+            Item::Value(Value::InlineTable(inline_table))
+        } else {
+            let table = self.format_table_to_table(v)?;
+            Item::Table(table)
+        })
     }
 
     fn policy(&self) -> &P {
@@ -189,120 +246,42 @@ impl<'a, P: Policy> FormatterState<'a, P> {
     fn pop(&mut self) {
         self.current_path.pop();
     }
-}
 
-#[derive(Clone)]
-enum Translated {
-    Item(Item),
-    Value(Value),
-}
-
-impl From<Item> for Translated {
-    fn from(item: Item) -> Self {
-        Self::Item(item)
-    }
-}
-
-impl From<Value> for Translated {
-    fn from(value: Value) -> Self {
-        Self::Value(value)
-    }
-}
-
-impl Translated {
-    fn as_value(&self) -> Option<&Value> {
-        match self {
-            Self::Value(v) => Some(v),
-            _ => None,
-        }
+    fn with_path_segment<R>(&mut self, seg: PathSegment, f: impl FnOnce(&mut Self) -> R) -> R {
+        self.push(seg);
+        let r = f(self);
+        self.pop();
+        r
     }
 
-    fn is_value(&self) -> bool {
-        self.as_value().is_some()
+    fn with_table_key<R>(&mut self, k: &str, f: impl FnOnce(&mut Self) -> R) -> R {
+        self.with_path_segment(PathSegment::TableKey(k.to_owned()), f)
     }
 
-    fn into_item(self) -> Item {
-        match self {
-            Self::Value(value) => Item::Value(value),
-            Self::Item(item) => item,
-        }
-    }
-}
-
-enum TranslatedMap {
-    Items(BTreeMap<String, Item>),
-    Values(BTreeMap<String, Value>),
-}
-
-impl TranslatedMap {
-    fn homogenize(heterogeneous: &BTreeMap<String, Translated>) -> Self {
-        if heterogeneous.values().all(Translated::is_value) {
-            Self::Values(
-                heterogeneous
-                    .iter()
-                    .map(|(k, v)| (k.clone(), v.as_value().unwrap().clone()))
-                    .collect(),
-            )
-        } else {
-            Self::Items(Self::items_from_translated(heterogeneous))
-        }
+    fn with_array_index<R>(&mut self, i: usize, f: impl FnOnce(&mut Self) -> R) -> R {
+        self.with_path_segment(PathSegment::ArrayIndex(i), f)
     }
 
-    fn items_from_translated(translated: &BTreeMap<String, Translated>) -> BTreeMap<String, Item> {
-        translated
-            .iter()
-            .map(|(k, v)| (k.clone(), v.clone().into_item()))
-            .collect()
+    fn compare_values_at_current_path<T>(
+        &mut self,
+    ) -> impl '_ + FnMut(&Key, &T, &Key, &T) -> Ordering {
+        |k1, _v1, k2, _v2| self.policy().compare_keys(self.current_path(), k1, k2)
     }
 
-    fn items_from_values(values: BTreeMap<String, Value>) -> BTreeMap<String, Item> {
-        values
-            .into_iter()
-            .map(|(k, v)| (k, Item::Value(v)))
-            .collect()
-    }
-}
-
-enum TranslatedArray {
-    Tables(Vec<Table>),
-    Values(Vec<Value>),
-}
-
-impl TranslatedArray {
-    fn homogenize(heterogeneous: &[Translated]) -> Self {
-        if heterogeneous.iter().all(Translated::is_value) {
-            Self::Values(
-                heterogeneous
-                    .iter()
-                    .map(|v| v.as_value().unwrap().clone())
-                    .collect(),
-            )
-        } else {
-            Self::Tables(Self::tables_from_translated(heterogeneous))
-        }
+    fn is_kv_too_wide(&self, k: &str, v: &Value) -> bool {
+        let mut table = Table::new();
+        table.insert(k, Item::Value(v.clone()));
+        let mut doc = Document::new();
+        let _ = mem::replace(doc.as_item_mut(), Item::Table(table));
+        let mut s = doc.to_string();
+        assert_eq!(s.pop(), Some('\n'));
+        s.chars().count() > self.policy().max_width()
     }
 
-    fn tables_from_translated(translated: &[Translated]) -> Vec<Table> {
-        translated
-            .iter()
-            .map(|v| v.clone().into_item().as_table().unwrap().clone())
-            .collect()
+    fn is_inline_table_too_wide_for_array(&self, v: &InlineTable) -> bool {
+        let value = format!("{}", v).len();
+        let comma = 1;
+        let total = self.policy().indent_width() + value + comma;
+        total > self.policy().max_width()
     }
-
-    fn tables_from_values(values: &[Value]) -> Vec<Table> {
-        values
-            .into_iter()
-            .map(|v| v.as_inline_table().unwrap().clone().into_table())
-            .collect()
-    }
-}
-
-fn is_kv_too_long(k: &str, v: &Value) -> bool {
-    let mut table = Table::new();
-    table.insert(k, Item::Value(v.clone()));
-    let mut doc = Document::new();
-    let _ = mem::replace(doc.as_item_mut(), Item::Table(table));
-    let mut s = doc.to_string();
-    assert_eq!(s.pop(), Some('\n'));
-    s.chars().count() > MAX_WIDTH
 }

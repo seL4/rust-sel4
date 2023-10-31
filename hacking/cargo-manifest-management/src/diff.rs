@@ -6,7 +6,7 @@
 
 use similar::{ChangeTag, TextDiff};
 
-pub fn diff(a: &str, b: &str) -> String {
+pub fn display_diff(a: &str, b: &str) -> String {
     let mut s = String::new();
     let d = TextDiff::from_lines(a, b);
     for change in d.iter_all_changes() {

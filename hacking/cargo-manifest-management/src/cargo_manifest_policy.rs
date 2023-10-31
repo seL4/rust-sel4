@@ -11,6 +11,21 @@ use crate::{PathSegment, Policy};
 pub struct CargoManifestPolicy;
 
 impl Policy for CargoManifestPolicy {
+    fn max_width(&self) -> usize {
+        100
+    }
+
+    fn indent_width(&self) -> usize {
+        4
+    }
+
+    fn never_inline_table(&self, path: &[PathSegment]) -> bool {
+        path.len() <= 1
+            || (path.len() <= 3 && path[0].is_table_key("target"))
+            || (path.len() <= 3 && path[0].is_table_key("profile"))
+            || (path.len() == 3 && path[1].is_table_key("bin"))
+    }
+
     fn compare_keys(&self, path: &[PathSegment], a: &str, b: &str) -> Ordering {
         let ranking = if path.len() == 0 {
             Ranking {
@@ -70,16 +85,6 @@ impl Policy for CargoManifestPolicy {
             }
         };
         ranking.compare(a, b)
-    }
-
-    fn is_always_table(&self, path: &[PathSegment]) -> bool {
-        path.len() <= 1
-            || (path.len() <= 3 && path[0].is_table_key("target"))
-            || (path.len() <= 3 && path[0].is_table_key("profile"))
-    }
-
-    fn is_always_array_of_tables(&self, path: &[PathSegment]) -> bool {
-        path.len() == 2 && path[1].is_table_key("bin")
     }
 }
 
