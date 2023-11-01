@@ -1,0 +1,77 @@
+//
+// Copyright 2023, Colias Group, LLC
+//
+// SPDX-License-Identifier: BSD-2-Clause
+//
+
+path_regex = {
+    SOI ~ opt_expr ~ EOI
+}
+
+opt_expr = {
+    expr?
+}
+
+expr = {
+    prefix? ~ primary ~ postfix? ~ (infix ~ prefix? ~ primary ~ postfix? )*
+}
+
+primary = _{
+    dot | key_symbol | index_symbol | "(" ~ opt_expr ~ ")"
+}
+
+prefix = _{ not }
+postfix = _{ star | plus | optional | repeat }
+infix = _{ or | and | concat }
+
+not = { "!" }
+
+star = { "*" }
+plus = {"+" }
+optional = { "?" }
+
+repeat = { "{" ~ repeat_inner ~ "}" }
+repeat_inner = { repeat_inclusive_range | repeat_exactly }
+repeat_inclusive_range = { repeat_inclusive_range_side ~ "," ~ repeat_inclusive_range_side }
+repeat_inclusive_range_side = { intlit? }
+repeat_exactly = { intlit }
+
+or = { "|" }
+and = { "&" }
+concat = { "" }
+
+dot = { "." }
+
+key_symbol = {
+    "[" ~ PUSH("\""+) ~ key_symbol_regex ~ POP ~ "]"
+}
+
+key_symbol_regex = {
+    (
+        !(PEEK ~ "]") ~ ANY
+    )*
+}
+
+index_symbol = {
+    "[" ~ opt_index_symbol_ranges ~ "]"
+}
+
+opt_index_symbol_ranges = {
+    index_symbol_ranges?
+}
+
+index_symbol_ranges = {
+    index_symbol_range ~ ("," ~ index_symbol_range)*
+}
+
+index_symbol_range = {
+    index_symbol_range_side ~ "-" ~ index_symbol_range_side
+}
+
+index_symbol_range_side = {
+    intlit?
+}
+
+intlit = @{
+    "0" | ASCII_NONZERO_DIGIT ~ (ASCII_DIGIT)*
+}

@@ -4,105 +4,82 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use std::cmp::{Ordering, Reverse};
+use crate::{path_regex::PathRegex, EasyPolicy, Policy, TableRule, TableRuleOrdering};
 
-use crate::{PathSegment, Policy};
-
-pub struct CargoManifestPolicy;
-
-impl Policy for CargoManifestPolicy {
-    fn max_width(&self) -> usize {
-        100
-    }
-
-    fn indent_width(&self) -> usize {
-        4
-    }
-
-    fn never_inline_table(&self, path: &[PathSegment]) -> bool {
-        path.len() <= 1
-            || (path.len() <= 3 && path[0].is_table_key("target"))
-            || (path.len() <= 3 && path[0].is_table_key("profile"))
-            || (path.len() == 3 && path[1].is_table_key("bin"))
-    }
-
-    fn compare_keys(&self, path: &[PathSegment], a: &str, b: &str) -> Ordering {
-        let ranking = if path.len() == 0 {
-            Ranking {
-                front: &[
-                    "package",
-                    "lib",
-                    "bin",
-                    "features",
-                    "dependencies",
-                    "dev-dependencies",
-                    "build-dependencies",
-                    "workspace",
-                    "profile",
-                ],
-                back: &[],
-            }
-        } else if path.len() == 1 && path[0].is_table_key("package") {
-            Ranking {
-                front: &["name", "version"],
-                back: &["description"],
-            }
-        } else if path.len() >= 2
-            && path[path.len() - 2]
-                .as_table_key()
-                .map(|k| k.ends_with("dependencies"))
-                .unwrap_or(false)
-        {
-            Ranking {
-                front: &[
-                    "path",
-                    "git",
-                    "branch",
-                    "tag",
-                    "rev",
-                    "version",
-                    "registry",
-                    "default-features",
-                    "features",
-                    "optional",
-                ],
-                back: &[],
-            }
-        } else if path.len() == 2 && path[0].is_table_key("target") {
-            Ranking {
-                front: &["dependencies", "dev-dependencies", "build-dependencies"],
-                back: &[],
-            }
-        } else if path.len() == 1 && path[0].is_table_key("workspace") {
-            Ranking {
-                front: &[],
-                back: &["members", "exclude"],
-            }
-        } else {
-            Ranking {
-                front: &[],
-                back: &[],
-            }
-        };
-        ranking.compare(a, b)
-    }
-}
-
-struct Ranking<'a> {
-    front: &'a [&'a str],
-    back: &'a [&'a str],
-}
-
-impl<'a> Ranking<'a> {
-    fn order<'b>(&self, a: &'b str) -> (Reverse<Option<Reverse<usize>>>, Option<usize>, &'b str) {
-        (
-            Reverse(self.front.iter().position(|s| s == &a).map(Reverse)),
-            self.back.iter().position(|s| s == &a),
-            a,
-        )
-    }
-
-    fn compare(&self, a: &str, b: &str) -> Ordering {
-        self.order(a).cmp(&self.order(b))
+pub fn cargo_manifest_policy() -> impl Policy {
+    EasyPolicy {
+        rules: vec![
+            TableRule {
+                path_regex: PathRegex::new(r#".{,1}|["target|profile"].{,2}|["bin"][-]."#),
+                never_inline: true,
+                ..Default::default()
+            },
+            TableRule {
+                path_regex: PathRegex::new(""),
+                sort: TableRuleOrdering {
+                    front: vec![
+                        "package".to_owned(),
+                        "lib".to_owned(),
+                        "bin".to_owned(),
+                        "features".to_owned(),
+                        "dependencies".to_owned(),
+                        "dev-dependencies".to_owned(),
+                        "build-dependencies".to_owned(),
+                        "workspace".to_owned(),
+                        "profile".to_owned(),
+                    ],
+                    ..Default::default()
+                },
+                ..Default::default()
+            },
+            TableRule {
+                path_regex: PathRegex::new(r#"["package"]"#),
+                sort: TableRuleOrdering {
+                    front: vec!["name".to_owned(), "version".to_owned()],
+                    back: vec!["description".to_owned()],
+                },
+                ..Default::default()
+            },
+            TableRule {
+                path_regex: PathRegex::new(r#".*["(.*-)?dependencies"]."#),
+                sort: TableRuleOrdering {
+                    front: vec![
+                        "path".to_owned(),
+                        "git".to_owned(),
+                        "branch".to_owned(),
+                        "tag".to_owned(),
+                        "rev".to_owned(),
+                        "version".to_owned(),
+                        "registry".to_owned(),
+                        "default-features".to_owned(),
+                        "features".to_owned(),
+                        "optional".to_owned(),
+                    ],
+                    ..Default::default()
+                },
+                ..Default::default()
+            },
+            TableRule {
+                path_regex: PathRegex::new(r#"["target"]."#),
+                sort: TableRuleOrdering {
+                    front: vec![
+                        "dependencies".to_owned(),
+                        "dev-dependencies".to_owned(),
+                        "build-dependencies".to_owned(),
+                    ],
+                    ..Default::default()
+                },
+                ..Default::default()
+            },
+            TableRule {
+                path_regex: PathRegex::new(r#"["workspace"]"#),
+                sort: TableRuleOrdering {
+                    back: vec!["members".to_owned(), "exclude".to_owned()],
+                    ..Default::default()
+                },
+                ..Default::default()
+            },
+        ],
+        ..Default::default()
     }
 }
