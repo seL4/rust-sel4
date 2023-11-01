@@ -12,6 +12,8 @@ use toml::value::{
 };
 use toml_edit::{Array, ArrayOfTables, Document, Formatted, InlineTable, Item, Key, Table, Value};
 
+use crate::path_regex::PathSegment;
+
 pub trait Policy {
     fn max_width(&self) -> usize;
 
@@ -22,22 +24,16 @@ pub trait Policy {
     fn compare_keys(&self, path: &[PathSegment], a: &str, b: &str) -> Ordering;
 }
 
-#[derive(Debug, Clone)]
-pub enum PathSegment {
-    TableKey(String),
-    ArrayIndex(usize),
-}
-
 impl PathSegment {
-    pub fn as_table_key(&self) -> Option<&str> {
+    pub fn as_key(&self) -> Option<&str> {
         match self {
-            Self::TableKey(k) => Some(k),
+            Self::Key(k) => Some(k),
             _ => None,
         }
     }
 
-    pub fn is_table_key(&self, key: &str) -> bool {
-        self.as_table_key().map(|k| k == key).unwrap_or(false)
+    pub fn is_key(&self, key: &str) -> bool {
+        self.as_key().map(|k| k == key).unwrap_or(false)
     }
 }
 
@@ -117,7 +113,7 @@ impl<'a, P: Policy> FormatterState<'a, P> {
         }
         let mut table = InlineTable::new();
         for (k, x) in v.iter() {
-            table.insert(k, self.with_table_key(k, |this| this.format_to_value(x))?);
+            table.insert(k, self.with_key(k, |this| this.format_to_value(x))?);
         }
         table.sort_values_by(self.compare_values_at_current_path());
         Ok(table)
@@ -126,7 +122,7 @@ impl<'a, P: Policy> FormatterState<'a, P> {
     fn format_array_to_array(&mut self, v: &UnformattedArray) -> Result<Array, Error> {
         let mut array = Array::new();
         for (i, x) in v.iter().enumerate() {
-            array.push(self.with_array_index(i, |this| this.format_to_value(x))?);
+            array.push(self.with_index(i, |this| this.format_to_value(x))?);
         }
         Ok(array)
     }
@@ -135,7 +131,7 @@ impl<'a, P: Policy> FormatterState<'a, P> {
         let mut table = Table::new();
         table.set_implicit(true);
         for (k, x) in v.iter() {
-            table.insert(k, self.with_table_key(k, |this| this.format_to_item(x))?);
+            table.insert(k, self.with_key(k, |this| this.format_to_item(x))?);
         }
         table.sort_values_by(self.compare_values_at_current_path());
         Ok(table)
@@ -162,7 +158,7 @@ impl<'a, P: Policy> FormatterState<'a, P> {
                 .enumerate()
             {
                 let inline_table =
-                    self.with_array_index(i, |this| this.format_table_to_inline_table(x))?;
+                    self.with_index(i, |this| this.format_table_to_inline_table(x))?;
                 if self.is_inline_table_too_wide_for_array(&inline_table) {
                     inline_tables = None;
                     break;
@@ -198,7 +194,7 @@ impl<'a, P: Policy> FormatterState<'a, P> {
                 .map(Option::unwrap)
                 .enumerate()
             {
-                let table = self.with_array_index(i, |this| this.format_table_to_table(x))?;
+                let table = self.with_index(i, |this| this.format_table_to_table(x))?;
                 array_of_tables.push(table);
             }
             Item::ArrayOfTables(array_of_tables)
@@ -237,7 +233,7 @@ impl<'a, P: Policy> FormatterState<'a, P> {
     }
 
     fn current_key(&self) -> Option<&str> {
-        self.current_path.last()?.as_table_key()
+        self.current_path.last()?.as_key()
     }
     fn push(&mut self, seg: PathSegment) {
         self.current_path.push(seg);
@@ -254,12 +250,12 @@ impl<'a, P: Policy> FormatterState<'a, P> {
         r
     }
 
-    fn with_table_key<R>(&mut self, k: &str, f: impl FnOnce(&mut Self) -> R) -> R {
-        self.with_path_segment(PathSegment::TableKey(k.to_owned()), f)
+    fn with_key<R>(&mut self, k: &str, f: impl FnOnce(&mut Self) -> R) -> R {
+        self.with_path_segment(PathSegment::Key(k.to_owned()), f)
     }
 
-    fn with_array_index<R>(&mut self, i: usize, f: impl FnOnce(&mut Self) -> R) -> R {
-        self.with_path_segment(PathSegment::ArrayIndex(i), f)
+    fn with_index<R>(&mut self, i: usize, f: impl FnOnce(&mut Self) -> R) -> R {
+        self.with_path_segment(PathSegment::Index(i), f)
     }
 
     fn compare_values_at_current_path<T>(
