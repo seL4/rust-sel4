@@ -43,6 +43,8 @@ in rec {
   inherit srcRoot localRoot;
   inherit fetchGit mkKeepRef;
 
+  # NOTE: Be sure to keep the commit hashes in the top-level README up-to-date.
+
   seL4 = {
     rust = fetchGit {
       url = "https://github.com/coliasgroup/seL4.git";
