@@ -12,7 +12,7 @@ use toml::value::{
 };
 use toml_edit::{Array, ArrayOfTables, Document, Formatted, InlineTable, Item, Key, Table, Value};
 
-use toml_path_regex::PathSegment;
+use toml_path_regex::{Path, PathSegment};
 
 pub trait Policy {
     fn max_width(&self) -> usize;
@@ -36,7 +36,7 @@ impl<P: Policy> Formatter<P> {
     pub fn format(&self, table: &UnformattedTable) -> Result<Document, Error> {
         let mut state = FormatterState {
             formatter: self,
-            current_path: vec![],
+            current_path: Path::new(),
         };
         state.format_top_level(table)
     }
@@ -44,7 +44,7 @@ impl<P: Policy> Formatter<P> {
 
 struct FormatterState<'a, P> {
     formatter: &'a Formatter<P>,
-    current_path: Vec<PathSegment>,
+    current_path: Path,
 }
 
 #[derive(Debug, Clone)]
@@ -54,16 +54,16 @@ pub enum Error {
 
 #[derive(Debug, Clone)]
 pub struct CannotInlineTableError {
-    path: Vec<PathSegment>,
+    path: Path,
 }
 
 impl CannotInlineTableError {
-    fn new(path: Vec<PathSegment>) -> Self {
+    fn new(path: Path) -> Self {
         Self { path }
     }
 
     pub fn path(&self) -> &[PathSegment] {
-        &self.path
+        self.path.as_slice()
     }
 }
 
@@ -95,7 +95,7 @@ impl<'a, P: Policy> FormatterState<'a, P> {
 
     fn format_table_to_inline_table(&mut self, v: &UnformattedTable) -> Result<InlineTable, Error> {
         if self.policy().never_inline_table(self.current_path()) {
-            return Err(CannotInlineTableError::new(self.current_path().to_vec()).into());
+            return Err(CannotInlineTableError::new(self.current_path.clone()).into());
         }
         let mut table = InlineTable::new();
         for (k, x) in v.iter() {
@@ -214,11 +214,11 @@ impl<'a, P: Policy> FormatterState<'a, P> {
     }
 
     fn current_path(&self) -> &[PathSegment] {
-        &self.current_path
+        self.current_path.as_slice()
     }
 
     fn current_key(&self) -> Option<&str> {
-        self.current_path.last()?.as_key()
+        self.current_path().last()?.as_key()
     }
     fn push(&mut self, seg: PathSegment) {
         self.current_path.push(seg);

@@ -119,7 +119,7 @@ fn generic_regex_from_expr(expr: &Expr) -> GenericRegex<PathSegmentPredicate> {
         }
         Expr::Dot => GenericRegex::symbol(PathSegmentPredicate::any()),
         Expr::KeySymbol(key_regex) => {
-            GenericRegex::symbol(PathSegmentPredicate::from_key_regex(key_regex))
+            GenericRegex::symbol(PathSegmentPredicate::from_key_regex(key_regex).unwrap())
         }
         Expr::IndexSymbol(index_ranges) => {
             GenericRegex::symbol(PathSegmentPredicate::from_index_ranges(index_ranges))
