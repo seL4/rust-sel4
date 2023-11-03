@@ -12,7 +12,13 @@ pub fn cargo_manifest_policy() -> impl Policy {
     EasyPolicy {
         rules: vec![
             TableRule {
-                path_regex: PathRegex::new(".{,1}|['target|profile'].{,2}|['bin'][-]."),
+                path_regex: PathRegex::new(
+                    r#"
+                        .{,1}
+                        | ['target|profile'] .{,2}
+                        | ['bin'] [-] .
+                    "#,
+                ),
                 never_inline: true,
                 ..Default::default()
             },
@@ -35,7 +41,7 @@ pub fn cargo_manifest_policy() -> impl Policy {
                 ..Default::default()
             },
             TableRule {
-                path_regex: PathRegex::new(r#"["package"]"#),
+                path_regex: PathRegex::new("['package']"),
                 sort: TableRuleOrdering {
                     front: vec!["name".to_owned(), "version".to_owned()],
                     back: vec!["description".to_owned()],
