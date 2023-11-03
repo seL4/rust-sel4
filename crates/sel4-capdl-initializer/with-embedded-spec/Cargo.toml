@@ -19,7 +19,7 @@ license = "BSD-2-Clause"
 [features]
 deflate = [
     "sel4-capdl-initializer-with-embedded-spec-embedded-spec/deflate",
-    "sel4-capdl-initializer-with-embedded-spec-embedded-spec-validate/deflate"
+    "sel4-capdl-initializer-with-embedded-spec-embedded-spec-validate/deflate",
 ]
 
 [dependencies]

@@ -127,5 +127,5 @@ members = [
     "crates/sel4/config/generic/types",
     "crates/sel4/config/macros",
     "crates/sel4/sys",
-    "crates/sel4/sys/wrappers"
+    "crates/sel4/sys/wrappers",
 ]

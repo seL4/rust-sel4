@@ -31,5 +31,5 @@ features = [
     "socket-dns",
     "socket-tcp",
     "async",
-    "alloc"
+    "alloc",
 ]
