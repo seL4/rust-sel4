@@ -43,7 +43,11 @@ concat = { "" }
 dot = { "." }
 
 key_symbol = {
-    "[" ~ PUSH("\""+) ~ key_symbol_regex ~ POP ~ "]"
+    "[" ~ PUSH(key_symbol_quotes) ~ key_symbol_regex ~ POP ~ "]"
+}
+
+key_symbol_quotes = _{
+    "\""+ | "'"+
 }
 
 key_symbol_regex = {
