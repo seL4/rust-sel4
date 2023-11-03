@@ -79,3 +79,5 @@ index_symbol_range_side = {
 intlit = @{
     "0" | ASCII_NONZERO_DIGIT ~ (ASCII_DIGIT)*
 }
+
+WHITESPACE = _{ " " | "\t" | "\r" | "\n" }
