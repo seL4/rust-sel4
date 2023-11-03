@@ -13,7 +13,9 @@ use std::str;
 use serde::Deserialize;
 use toml::Table as UnformattedTable;
 
-use crate::{display_diff, Formatter, Policy};
+use toml_normalize::{Formatter, Policy};
+
+use crate::display_diff;
 
 #[derive(Debug, Deserialize)]
 #[serde(transparent)]

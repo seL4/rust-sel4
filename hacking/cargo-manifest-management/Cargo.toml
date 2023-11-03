@@ -5,24 +5,10 @@
 #
 #
 
-[package]
-name = "cargo-manifest-management"
-version = "0.1.0"
-authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
-edition = "2021"
-license = "BSD-2-Clause"
-
-[dependencies]
-clap = { version = "4.4.6", features = [ "derive" ] }
-serde = { version = "1.0", features = [ "derive" ] }
-serde_json = "1.0"
-toml = "0.8.6"
-toml_edit = "0.20.4"
-similar = "2.3"
-regex = "1.10.2"
-rangemap = "1.4.0"
-pest = "2.7.5"
-pest_derive = "2.7.5"
-
-# exclude from top-level workspace
 [workspace]
+resolver = "2"
+members = [
+    "crates/toml-path-regex",
+    "crates/toml-normalize",
+    "crates/manage-cargo-manifests",
+]

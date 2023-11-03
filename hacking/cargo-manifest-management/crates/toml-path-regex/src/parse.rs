@@ -12,7 +12,7 @@ use pest::{
 use pest_derive::Parser;
 
 #[derive(Parser)]
-#[grammar = "path_regex/grammar.pest"]
+#[grammar = "grammar.pest"]
 struct PathRegexParser;
 
 #[derive(Debug, Clone)]

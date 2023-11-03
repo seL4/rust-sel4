@@ -6,10 +6,9 @@
 
 use std::cmp::{Ordering, Reverse};
 
-use crate::{
-    path_regex::{PathRegex, PathSegment},
-    Policy,
-};
+use toml_path_regex::{PathRegex, PathSegment};
+
+use crate::Policy;
 
 pub struct EasyPolicy {
     pub max_width: usize,

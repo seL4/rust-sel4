@@ -5,7 +5,7 @@
 #
 
 plan := $$(nix-build -A planJSON --no-out-link)
-run := cargo run -- --plan $(plan)
+run := cargo run -p manage-cargo-manifests -- --plan $(plan)
 
 .PHONY: none
 none:

@@ -70,6 +70,7 @@ impl<P> GenericRegex<P> {
         Self::new(self.into_inner().then(rhs.into_inner()))
     }
 
+    #[allow(dead_code)]
     pub fn traverse<Q, E>(
         &self,
         f: &mut impl FnMut(&P) -> Result<Q, E>,
@@ -162,7 +163,7 @@ impl<P> Inner<P> {
     }
 
     fn star(self: Rc<Self>) -> Rc<Self> {
-        Rc::new(Self::Complement(self))
+        Rc::new(Self::Star(self))
     }
 
     fn or(self: Rc<Self>, rhs: Rc<Self>) -> Rc<Self> {

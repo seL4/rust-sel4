@@ -69,22 +69,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "cargo-manifest-management"
-version = "0.1.0"
-dependencies = [
- "clap",
- "pest",
- "pest_derive",
- "rangemap",
- "regex",
- "serde",
- "serde_json",
- "similar",
- "toml",
- "toml_edit",
-]
-
-[[package]]
 name = "cfg-if"
 version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -214,6 +198,20 @@ name = "libc"
 version = "0.2.149"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a08173bc88b7955d1b3145aa561539096c421ac8debde8cbc3612ec635fee29b"
+
+[[package]]
+name = "manage-cargo-manifests"
+version = "0.1.0"
+dependencies = [
+ "clap",
+ "serde",
+ "serde_json",
+ "similar",
+ "toml",
+ "toml-normalize",
+ "toml-path-regex",
+ "toml_edit",
+]
 
 [[package]]
 name = "memchr"
@@ -435,6 +433,25 @@ dependencies = [
  "serde_spanned",
  "toml_datetime",
  "toml_edit",
+]
+
+[[package]]
+name = "toml-normalize"
+version = "0.1.0"
+dependencies = [
+ "toml",
+ "toml-path-regex",
+ "toml_edit",
+]
+
+[[package]]
+name = "toml-path-regex"
+version = "0.1.0"
+dependencies = [
+ "pest",
+ "pest_derive",
+ "rangemap",
+ "regex",
 ]
 
 [[package]]

@@ -20,8 +20,32 @@ pub enum PathSegment {
     Index(usize),
 }
 
+impl PathSegment {
+    pub fn as_key(&self) -> Option<&str> {
+        match self {
+            Self::Key(k) => Some(k),
+            _ => None,
+        }
+    }
+
+    pub fn is_key(&self, key: &str) -> bool {
+        self.as_key().map(|k| k == key).unwrap_or(false)
+    }
+
+    pub fn as_index(&self) -> Option<usize> {
+        match self {
+            Self::Index(i) => Some(*i),
+            _ => None,
+        }
+    }
+
+    pub fn is_index(&self, index: usize) -> bool {
+        self.as_index().map(|i| i == index).unwrap_or(false)
+    }
+}
+
 #[derive(Debug, Clone, PartialOrd, Ord, PartialEq, Eq, Hash, Default)]
-struct Path {
+pub struct Path {
     inner: Vec<PathSegment>,
 }
 

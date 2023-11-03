@@ -4,7 +4,9 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use crate::{path_regex::PathRegex, EasyPolicy, Policy, TableRule, TableRuleOrdering};
+use toml_path_regex::PathRegex;
+
+use crate::{EasyPolicy, Policy, TableRule, TableRuleOrdering};
 
 pub fn cargo_manifest_policy() -> impl Policy {
     EasyPolicy {
