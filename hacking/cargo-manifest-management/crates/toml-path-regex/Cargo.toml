@@ -1,0 +1,19 @@
+#
+# Copyright 2023, Colias Group, LLC
+#
+# SPDX-License-Identifier: BSD-2-Clause
+#
+#
+
+[package]
+name = "toml-path-regex"
+version = "0.1.0"
+authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
+edition = "2021"
+license = "BSD-2-Clause"
+
+[dependencies]
+regex = "1.10.2"
+rangemap = "1.4.0"
+pest = "2.7.5"
+pest_derive = "2.7.5"

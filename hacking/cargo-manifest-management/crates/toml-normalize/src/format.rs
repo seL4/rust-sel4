@@ -12,7 +12,7 @@ use toml::value::{
 };
 use toml_edit::{Array, ArrayOfTables, Document, Formatted, InlineTable, Item, Key, Table, Value};
 
-use crate::path_regex::PathSegment;
+use toml_path_regex::PathSegment;
 
 pub trait Policy {
     fn max_width(&self) -> usize;
@@ -22,19 +22,6 @@ pub trait Policy {
     fn never_inline_table(&self, path: &[PathSegment]) -> bool;
 
     fn compare_keys(&self, path: &[PathSegment], a: &str, b: &str) -> Ordering;
-}
-
-impl PathSegment {
-    pub fn as_key(&self) -> Option<&str> {
-        match self {
-            Self::Key(k) => Some(k),
-            _ => None,
-        }
-    }
-
-    pub fn is_key(&self, key: &str) -> bool {
-        self.as_key().map(|k| k == key).unwrap_or(false)
-    }
 }
 
 pub struct Formatter<P> {
@@ -74,17 +61,16 @@ impl CannotInlineTableError {
     fn new(path: Vec<PathSegment>) -> Self {
         Self { path }
     }
+
+    pub fn path(&self) -> &[PathSegment] {
+        &self.path
+    }
 }
 
 impl From<CannotInlineTableError> for Error {
     fn from(err: CannotInlineTableError) -> Error {
         Self::CannotInlineTable(err)
     }
-}
-
-struct FormattedTable {
-    table: Table,
-    inline_table: Result<InlineTable, Error>,
 }
 
 impl<'a, P: Policy> FormatterState<'a, P> {

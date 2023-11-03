@@ -12,17 +12,12 @@ use std::path::PathBuf;
 
 use clap::Parser;
 
-mod cargo_manifest_policy;
+use toml_normalize::{cargo_manifest_policy, Formatter};
+
 mod diff;
-mod easy_policy;
-mod format;
-mod path_regex;
 mod plan;
 
-use cargo_manifest_policy::cargo_manifest_policy;
 use diff::display_diff;
-use easy_policy::{EasyPolicy, TableRule, TableRuleOrdering};
-use format::{Formatter, Policy};
 use plan::Plan;
 
 #[derive(Debug, Parser)]
