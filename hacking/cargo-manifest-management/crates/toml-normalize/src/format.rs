@@ -165,9 +165,8 @@ impl<'a, P: Policy> FormatterState<'a, P> {
                 array.iter_mut().for_each(|e| {
                     e.decor_mut().set_prefix("\n    ");
                 });
-                array.iter_mut().last().map(|e| {
-                    e.decor_mut().set_suffix("\n");
-                });
+                array.set_trailing_comma(true);
+                array.set_trailing("\n");
             }
         }
         Ok(if let Some(array) = array {

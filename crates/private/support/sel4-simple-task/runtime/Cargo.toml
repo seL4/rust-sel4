@@ -21,7 +21,7 @@ alloc = [
     "sel4-backtrace/alloc",
     "sel4-backtrace-simple/alloc",
     "sel4-simple-task-threading/alloc",
-    "serde_json?/alloc"
+    "serde_json?/alloc",
 ]
 default = ["serde_json", "alloc"]
 serde_json = ["dep:serde_json"]
