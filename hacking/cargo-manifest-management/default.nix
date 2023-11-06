@@ -25,11 +25,13 @@ rec {
     workspaceDirFilter = relativePathSegments: lib.head relativePathSegments == "crates";
   };
 
-  inherit (workspace) generatedManifestsList;
+  inherit (workspace) blueprint debug;
 
-  x = pkgs.callPackage ./x.nix {
-    inherit generatedManifestsList;
-  };
+  prettyJSON = name: value: with pkgs; runCommand name {
+    nativeBuildInputs = [ jq ];
+  } ''
+    jq < ${builtins.toFile name (builtins.toJSON value)} > $out
+  '';
 
-  inherit (x) witness updateScript debug;
+  blueprintJSON = prettyJSON "blueprint.json" blueprint;
 }
