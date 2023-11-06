@@ -1,3 +1,11 @@
+//
+// Copyright 2023, Colias Group, LLC
+//
+// SPDX-License-Identifier: BSD-2-Clause
+//
+
+use std::fmt;
+
 #[derive(Debug, Clone, PartialOrd, Ord, PartialEq, Eq, Hash)]
 pub enum PathSegment {
     Key(String),
@@ -25,6 +33,15 @@ impl PathSegment {
 
     pub fn is_index(&self) -> bool {
         self.as_index().is_some()
+    }
+}
+
+impl fmt::Display for PathSegment {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Self::Key(key) => write!(f, "{:?}", key),
+            Self::Index(index) => write!(f, "{:?}", index),
+        }
     }
 }
 
@@ -56,5 +73,14 @@ impl Path {
 
     pub fn pop(&mut self) -> Option<PathSegment> {
         self.inner.pop()
+    }
+}
+
+impl fmt::Display for Path {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        for seg in self.as_slice().iter() {
+            write!(f, "[{}]", seg)?;
+        }
+        Ok(())
     }
 }

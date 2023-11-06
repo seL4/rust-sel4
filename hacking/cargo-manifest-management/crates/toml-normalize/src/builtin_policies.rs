@@ -6,9 +6,9 @@
 
 use toml_path_regex::PathRegex;
 
-use crate::{AbstractPolicy, KeyOrdering, Policy, TableRule};
+use crate::{KeyOrdering, Policy, TableRule};
 
-pub fn cargo_manifest_policy() -> impl AbstractPolicy {
+pub fn cargo_manifest_policy() -> Policy {
     Policy {
         table_rules: vec![
             TableRule {

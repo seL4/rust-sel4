@@ -5,6 +5,7 @@
 //
 
 use std::cmp::Ordering;
+use std::fmt;
 use std::mem;
 
 use toml::value::{
@@ -52,6 +53,14 @@ pub enum Error {
     CannotInlineTable(CannotInlineTableError),
 }
 
+impl fmt::Display for Error {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Self::CannotInlineTable(err) => write!(f, "error inlining table: {}", err),
+        }
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct CannotInlineTableError {
     path: Path,
@@ -64,6 +73,12 @@ impl CannotInlineTableError {
 
     pub fn path(&self) -> &[PathSegment] {
         self.path.as_slice()
+    }
+}
+
+impl fmt::Display for CannotInlineTableError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "cannot inline table at: {}", self.path)
     }
 }
 
