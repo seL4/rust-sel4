@@ -9,4 +9,5 @@ resolver = "2"
 members = [
     "crates/toml-path-regex",
     "crates/toml-normalize",
+    "crates/manage-cargo-manifests",
 ]

@@ -132,6 +132,20 @@ let
       (lib.flip lib.concatMap generatedManifestsList
         (manifest: lib.optional (manifest.packageName != null) (lib.nameValuePair manifest.packageName manifest)));
 
-in {
-  inherit generatedManifestsList;
+in rec {
+  blueprint = generatedManifestsList;
+
+  debug = {
+    byPath = lib.listToAttrs (lib.forEach blueprint (attrs: {
+      name = attrs.absolutePath;
+      value = attrs;
+    }));
+    byCrateName = lib.listToAttrs
+      (lib.forEach
+        (lib.filter (attrs: attrs.manifestValue.package.name or null != null) blueprint)
+        (attrs: {
+          name = attrs.manifestValue.package.name;
+          value = attrs;
+        }));
+  };
 }

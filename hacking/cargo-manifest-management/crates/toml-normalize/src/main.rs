@@ -22,6 +22,9 @@ struct Args {
     #[arg(long, value_name = "POLICY_FILE")]
     policy: Vec<PathBuf>,
 
+    #[arg(long, value_name = "POLICY")]
+    inline_policy: Vec<String>,
+
     #[arg(long)]
     builtin_policy: Vec<String>,
 }
@@ -74,6 +77,17 @@ fn main() {
                 err
             )
         });
+        policies.push((policy, index));
+    }
+
+    for (s, index) in args.inline_policy.iter().zip(
+        matches
+            .indices_of("inline_policy")
+            .map(Iterator::collect)
+            .unwrap_or_else(Vec::new),
+    ) {
+        let policy = serde_json::from_str(&s)
+            .unwrap_or_else(|err| panic!("error deserializing policy {}: {:?}", s, err));
         policies.push((policy, index));
     }
 
