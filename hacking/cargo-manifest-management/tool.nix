@@ -65,22 +65,19 @@ let
     let
       elaborateNix =
         { frontmatter ? null
+        , formatPolicyOverrides ? []
         , justEnsureEquivalence ? false
         }:
         {
-          inherit
-            frontmatter
-            justEnsureEquivalence
-          ;
+          inherit frontmatter formatPolicyOverrides justEnsureEquivalence;
         };
     in
       { nix ? {}, ... } @ args:
       let
         elaboratedNix = elaborateNix nix;
         manifestValue = removeAttrs args [ "nix" ];
-      in {
+      in elaboratedNix // {
         inherit manifestValue;
-        inherit (elaboratedNix) frontmatter justEnsureEquivalence;
       };
 
 in
@@ -104,9 +101,9 @@ let
         f = import cargoNixAbsolutePath;
       };
       parsed = parseManifestExpr manifestExpr;
-      inherit (parsed) manifestValue frontmatter justEnsureEquivalence;
-    in {
-      inherit absolutePath manifestValue frontmatter justEnsureEquivalence;
+      inherit (parsed) manifestValue;
+    in parsed // {
+      inherit absolutePath;
       packageName = manifestValue.package.name or null;
       packageVersion = manifestValue.package.version or null;
     };

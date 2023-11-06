@@ -6,11 +6,13 @@
 let
   tomlNormalize = ./target/debug/toml-normalize;
 
+  generateJSON = (formats.json {}).generate;
+
   generateTOML = (formats.toml {}).generate;
 
   appendNewline = s: "${s}\n";
 
-  normalize = { frontmatter, inputManifestTOML }:
+  normalize = { inputManifestTOML, formatPolicyOverrides, frontmatter }:
     let
       frontmatterArg = lib.optionalString (frontmatter != null) (
         builtins.toFile "frontmatter.txt" (appendNewline frontmatter)
@@ -20,11 +22,12 @@ let
         ${tomlNormalize} \
           ${inputManifestTOML} \
           --builtin-policy cargo-manifest \
+          ${lib.concatMapStrings (policy: "--policy ${generateJSON "policy.json" policy}") formatPolicyOverrides} \
           | cat ${frontmatterArg} - > $out
       '';
 
-  format = { frontmatter, manifestValue }: normalize {
-    inherit frontmatter;
+  format = { manifestValue, formatPolicyOverrides, frontmatter }: normalize {
+    inherit formatPolicyOverrides frontmatter;
     inputManifestTOML = generateTOML "Cargo.toml" manifestValue;
   };
 
@@ -44,7 +47,7 @@ let
     };
 
     normalizedManifest = format {
-      inherit (attrs) frontmatter manifestValue;
+      inherit (attrs) manifestValue formatPolicyOverrides frontmatter;
     };
 
     witness = if attrs.justEnsureEquivalence then witnessEquivalent else witnessIdentical;
