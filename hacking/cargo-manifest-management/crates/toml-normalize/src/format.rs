@@ -14,7 +14,7 @@ use toml_edit::{Array, ArrayOfTables, Document, Formatted, InlineTable, Item, Ke
 
 use toml_path_regex::{Path, PathSegment};
 
-pub trait Policy {
+pub trait AbstractPolicy {
     fn max_width(&self) -> usize;
 
     fn indent_width(&self) -> usize;
@@ -28,7 +28,7 @@ pub struct Formatter<P> {
     policy: P,
 }
 
-impl<P: Policy> Formatter<P> {
+impl<P: AbstractPolicy> Formatter<P> {
     pub fn new(policy: P) -> Self {
         Self { policy }
     }
@@ -73,7 +73,7 @@ impl From<CannotInlineTableError> for Error {
     }
 }
 
-impl<'a, P: Policy> FormatterState<'a, P> {
+impl<'a, P: AbstractPolicy> FormatterState<'a, P> {
     fn format_top_level(&mut self, v: &UnformattedTable) -> Result<Document, Error> {
         let table = self.format_table_to_table(v)?;
         let mut doc = Document::new();

@@ -4,10 +4,10 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-mod cargo_manifest_policy;
-mod easy_policy;
 mod format;
+mod policy;
 
-pub use cargo_manifest_policy::cargo_manifest_policy;
-pub use easy_policy::{EasyPolicy, TableRule, TableRuleOrdering};
-pub use format::{Formatter, Policy};
+pub mod builtin_policies;
+
+pub use format::{AbstractPolicy, Formatter};
+pub use policy::{KeyOrdering, Policy, TableRule};

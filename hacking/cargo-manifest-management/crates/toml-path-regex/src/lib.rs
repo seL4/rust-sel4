@@ -5,6 +5,7 @@
 //
 
 use std::borrow::Borrow;
+use std::fmt;
 
 use pest::error::{Error as PestError, ErrorVariant};
 use regex::Regex;
@@ -22,6 +23,7 @@ pub use path::{Path, PathSegment};
 
 pub type Error = PestError<Rule>;
 
+#[derive(Clone)]
 pub struct PathRegex {
     pattern: String,
     inner: GenericRegex<PathSegmentPredicate>,
@@ -82,6 +84,20 @@ fn generic_regex_from_expr(expr: &Expr) -> Result<GenericRegex<PathSegmentPredic
             GenericRegex::symbol(PathSegmentPredicate::from_index_ranges(index_ranges))
         }
     })
+}
+
+impl fmt::Display for PathRegex {
+    /// Shows the original regular expression.
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.as_str())
+    }
+}
+
+impl fmt::Debug for PathRegex {
+    /// Shows the original regular expression.
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_tuple("PathRegex").field(&self.as_str()).finish()
+    }
 }
 
 #[cfg(test)]
