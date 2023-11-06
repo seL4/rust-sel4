@@ -4,9 +4,6 @@
 # SPDX-License-Identifier: BSD-2-Clause
 #
 
-plan := $$(nix-build -A planJSON --no-out-link)
-run := cargo run -p manage-cargo-manifests -- --plan $(plan)
-
 .PHONY: none
 none:
 
@@ -16,8 +13,8 @@ clean:
 
 .PHONY: update
 update:
-	$(run)
+	script=$$(nix-build -A updateScript --no-out-link) && $$script
 
 .PHONY: check
 check:
-	$(run) --just-check
+	nix-build -A witness --no-out-link
