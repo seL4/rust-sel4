@@ -7,7 +7,7 @@
 use std::borrow::Borrow;
 use std::rc::Rc;
 
-// TODO mitigate regex size explosions with smart constructors
+// TODO mitigate regex size explosion with smart constructors
 
 pub trait Predicate<T> {
     fn is_match(&self, c: &T) -> bool;

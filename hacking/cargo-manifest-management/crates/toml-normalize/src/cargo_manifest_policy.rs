@@ -18,12 +18,13 @@ pub fn cargo_manifest_policy() -> impl Policy {
                         | ['target|profile'] .{,2}
                         | ['bin'] [-] .
                     "#,
-                ),
+                )
+                .unwrap(),
                 never_inline: true,
                 ..Default::default()
             },
             TableRule {
-                path_regex: PathRegex::new(""),
+                path_regex: PathRegex::new("").unwrap(),
                 sort: TableRuleOrdering {
                     front: vec![
                         "package".to_owned(),
@@ -41,7 +42,7 @@ pub fn cargo_manifest_policy() -> impl Policy {
                 ..Default::default()
             },
             TableRule {
-                path_regex: PathRegex::new("['package']"),
+                path_regex: PathRegex::new("['package']").unwrap(),
                 sort: TableRuleOrdering {
                     front: vec!["name".to_owned(), "version".to_owned()],
                     back: vec!["description".to_owned()],
@@ -49,7 +50,7 @@ pub fn cargo_manifest_policy() -> impl Policy {
                 ..Default::default()
             },
             TableRule {
-                path_regex: PathRegex::new(r#".*["(.*-)?dependencies"]."#),
+                path_regex: PathRegex::new(r#".*["(.*-)?dependencies"]."#).unwrap(),
                 sort: TableRuleOrdering {
                     front: vec![
                         "path".to_owned(),
@@ -68,7 +69,7 @@ pub fn cargo_manifest_policy() -> impl Policy {
                 ..Default::default()
             },
             TableRule {
-                path_regex: PathRegex::new(r#"["target"]."#),
+                path_regex: PathRegex::new(r#"["target"]."#).unwrap(),
                 sort: TableRuleOrdering {
                     front: vec![
                         "dependencies".to_owned(),
@@ -80,7 +81,7 @@ pub fn cargo_manifest_policy() -> impl Policy {
                 ..Default::default()
             },
             TableRule {
-                path_regex: PathRegex::new(r#"["workspace"]"#),
+                path_regex: PathRegex::new(r#"["workspace"]"#).unwrap(),
                 sort: TableRuleOrdering {
                     back: vec!["members".to_owned(), "exclude".to_owned()],
                     ..Default::default()
