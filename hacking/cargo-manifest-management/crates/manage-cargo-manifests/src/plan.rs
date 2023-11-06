@@ -13,7 +13,7 @@ use std::str;
 use serde::Deserialize;
 use toml::Table as UnformattedTable;
 
-use toml_normalize::{Formatter, Policy};
+use toml_normalize::{AbstractPolicy, Formatter};
 
 use crate::display_diff;
 
@@ -31,7 +31,7 @@ pub struct Entry {
 }
 
 impl Plan {
-    pub fn execute<P: Policy>(&self, formatter: &Formatter<P>, just_check: bool) {
+    pub fn execute<P: AbstractPolicy>(&self, formatter: &Formatter<P>, just_check: bool) {
         for (path, entry) in self.entries.iter() {
             assert!(!entry.just_ensure_equivalence); // TODO unimplemented
             let rendered = entry.render(formatter);
@@ -79,7 +79,7 @@ impl Entry {
         )
     }
 
-    fn render<P: Policy>(&self, formatter: &Formatter<P>) -> String {
+    fn render<P: AbstractPolicy>(&self, formatter: &Formatter<P>) -> String {
         let doc = formatter.format(&self.manifest).unwrap();
         let mut s = String::new();
         if let Some(frontmatter) = self.frontmatter.as_ref() {
