@@ -3,7 +3,6 @@
 #
 # SPDX-License-Identifier: BSD-2-Clause
 #
-#
 
 [package]
 name = "toml-path-regex"

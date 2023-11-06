@@ -6,6 +6,9 @@
 
 use std::cmp::{Ordering, Reverse};
 
+use serde::{Deserialize, Serialize};
+use serde_with::{serde_as, DisplayFromStr};
+
 use toml_path_regex::{PathRegex, PathSegment};
 
 use crate::AbstractPolicy;
@@ -13,21 +16,23 @@ use crate::AbstractPolicy;
 const DEFAULT_MAX_WIDTH: usize = 100;
 const DEFAULT_INDENT_WIDTH: usize = 4;
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct Policy {
     pub max_width: Option<usize>,
     pub indent_width: Option<usize>,
     pub table_rules: Vec<TableRule>,
 }
 
-#[derive(Debug, Clone)]
+#[serde_as]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TableRule {
+    #[serde_as(as = "DisplayFromStr")]
     pub path_regex: PathRegex,
     pub never_inline: Option<bool>,
     pub key_ordering: KeyOrdering,
 }
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct KeyOrdering {
     pub front: Vec<String>,
     pub back: Vec<String>,

@@ -6,6 +6,7 @@
 
 use std::borrow::Borrow;
 use std::fmt;
+use std::str::FromStr;
 
 use pest::error::{Error as PestError, ErrorVariant};
 use regex::Regex;
@@ -97,6 +98,15 @@ impl fmt::Debug for PathRegex {
     /// Shows the original regular expression.
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_tuple("PathRegex").field(&self.as_str()).finish()
+    }
+}
+
+impl FromStr for PathRegex {
+    type Err = Error;
+
+    /// Attempts to parse a string into a regular expression
+    fn from_str(s: &str) -> Result<Self, Error> {
+        Self::new(s)
     }
 }
 
