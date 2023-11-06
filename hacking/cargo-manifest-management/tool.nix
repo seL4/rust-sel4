@@ -135,15 +135,6 @@ let
       (lib.flip lib.concatMap generatedManifestsList
         (manifest: lib.optional (manifest.packageName != null) (lib.nameValuePair manifest.packageName manifest)));
 
-  plan = lib.listToAttrs (lib.forEach generatedManifestsList (manifest: {
-    name = "${manifest.absolutePath}/Cargo.toml";
-    value = with manifest; {
-      inherit frontmatter;
-      manifest = manifestValue;
-      just_ensure_equivalence = justEnsureEquivalence;
-    };
-  }));
-
 in {
-  inherit plan;
+  inherit generatedManifestsList;
 }
