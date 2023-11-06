@@ -53,7 +53,7 @@ impl Default for EasyPolicy {
 impl Default for TableRule {
     fn default() -> Self {
         Self {
-            path_regex: PathRegex::new("!(.*)"),
+            path_regex: PathRegex::new("!(.*)").unwrap(),
             never_inline: Default::default(),
             sort: Default::default(),
         }

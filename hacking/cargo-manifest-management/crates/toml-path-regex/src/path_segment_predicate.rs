@@ -5,11 +5,9 @@
 //
 
 use rangemap::inclusive_set::RangeInclusiveSet;
-use regex::{Error as RegexError, Regex};
+use regex::Regex;
 
-use super::generic_regex::Predicate;
-use super::parse::IndexRange;
-use super::PathSegment;
+use super::{generic_regex::Predicate, parse::IndexRange, PathSegment};
 
 pub struct PathSegmentPredicate {
     inner: Inner,
@@ -30,10 +28,8 @@ impl PathSegmentPredicate {
         Self::new(Inner::Any)
     }
 
-    pub fn from_key_regex(re: &str) -> Result<Self, RegexError> {
-        let anchored_re = format!("^{re}$"); // TODO is this sound?
-        let compiled = Regex::new(&anchored_re)?;
-        Ok(Self::new(Inner::Key(compiled)))
+    pub fn from_key_regex(re: Regex) -> Self {
+        Self::new(Inner::Key(re))
     }
 
     pub fn from_index_ranges(ranges: &[IndexRange]) -> Self {

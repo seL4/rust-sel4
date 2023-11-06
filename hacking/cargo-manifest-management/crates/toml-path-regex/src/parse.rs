@@ -5,9 +5,10 @@
 //
 
 use pest::{
+    error::Error,
     iterators::Pair,
     pratt_parser::{Assoc, Op, PrattParser},
-    Parser,
+    Parser, Span,
 };
 use pest_derive::Parser;
 
@@ -16,7 +17,7 @@ use pest_derive::Parser;
 struct PathRegexParser;
 
 #[derive(Debug, Clone)]
-pub enum Expr {
+pub enum Expr<'i> {
     Epsilon,
     Not(Box<Self>),
     Star(Box<Self>),
@@ -27,7 +28,7 @@ pub enum Expr {
     Or(Box<Self>, Box<Self>),
     Concat(Box<Self>, Box<Self>),
     Dot,
-    KeySymbol(String),
+    KeySymbol(Span<'i>),
     IndexSymbol(Vec<IndexRange>),
 }
 
@@ -43,17 +44,16 @@ pub struct IndexRange {
     pub end: Option<usize>,
 }
 
-pub fn parse(s: &str) -> Expr {
-    let mut top_level_pairs =
-        PathRegexParser::parse(Rule::path_regex, &s).unwrap_or_else(|err| panic!("{}", err));
+pub fn parse(s: &str) -> Result<Expr, Error<Rule>> {
+    let mut top_level_pairs = PathRegexParser::parse(Rule::path_regex, &s)?;
     assert_eq!(top_level_pairs.len(), 1);
     let path_regex_pair = top_level_pairs.next().unwrap();
     assert_eq!(path_regex_pair.as_rule(), Rule::path_regex);
     let expr_pair = path_regex_pair.into_inner().next().unwrap();
-    *Expr::parse(expr_pair)
+    Ok(*Expr::parse(expr_pair))
 }
 
-impl Expr {
+impl<'i> Expr<'i> {
     fn pratt() -> PrattParser<Rule> {
         PrattParser::new()
             .op(Op::infix(Rule::or, Assoc::Right))
@@ -66,11 +66,11 @@ impl Expr {
             .op(Op::prefix(Rule::not))
     }
 
-    fn parse(pair: Pair<Rule>) -> Box<Self> {
+    fn parse(pair: Pair<'i, Rule>) -> Box<Self> {
         Self::parse_inner(pair, &Self::pratt())
     }
 
-    fn parse_inner(pair: Pair<Rule>, pratt: &PrattParser<Rule>) -> Box<Self> {
+    fn parse_inner(pair: Pair<'i, Rule>, pratt: &PrattParser<Rule>) -> Box<Self> {
         assert_eq!(pair.as_rule(), Rule::opt_expr);
 
         if let Some(expr_pair) = pair.into_inner().next() {
@@ -114,11 +114,11 @@ impl Expr {
         }
     }
 
-    fn parse_key_symbol(pair: Pair<Rule>) -> String {
+    fn parse_key_symbol(pair: Pair<Rule>) -> Span {
         assert_eq!(pair.as_rule(), Rule::key_symbol);
         let key_symbol_regex_pair = pair.into_inner().next().unwrap();
         assert_eq!(key_symbol_regex_pair.as_rule(), Rule::key_symbol_regex);
-        key_symbol_regex_pair.as_str().to_owned()
+        key_symbol_regex_pair.as_span()
     }
 
     fn parse_index_symbol(pair: Pair<Rule>) -> Vec<IndexRange> {
@@ -226,7 +226,7 @@ mod test {
             ".().",
         ];
         for s in ss {
-            parse(s);
+            parse(s).unwrap();
         }
     }
 }
