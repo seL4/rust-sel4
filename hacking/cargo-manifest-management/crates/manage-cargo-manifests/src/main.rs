@@ -5,16 +5,16 @@
 //
 
 use std::fs::{self, File};
-use std::io::Write;
 use std::path::PathBuf;
-use std::process::{self, Command, Stdio};
+use std::process;
 use std::str;
 
 use clap::Parser;
 use serde::Deserialize;
-use serde_json::Value as JsonValue;
 use similar::{ChangeTag, TextDiff};
 use toml::Table as TomlTable;
+
+use toml_normalize::{builtin_policies, Error as TomlNormalizeError, Formatter, Policy};
 
 #[derive(Debug, Parser)]
 struct Args {
@@ -47,7 +47,7 @@ pub struct Entry {
     #[serde(rename = "frontmatter")]
     pub frontmatter: Option<String>,
     #[serde(rename = "formatPolicyOverrides")]
-    pub format_policy_overrides: Vec<JsonValue>,
+    pub format_policy_overrides: Vec<Policy>,
     #[serde(rename = "justEnsureEquivalence")]
     pub just_ensure_equivalence: bool,
 }
@@ -63,12 +63,26 @@ impl Blueprint {
 impl Entry {
     fn execute(&self, just_check: bool) {
         let manifest_path = self.absolute_path.join("Cargo.toml");
-        let rendered = self.render(&format!("{}", self.manifest_value));
+        let rendered = self.render(&self.manifest_value).unwrap_or_else(|err| {
+            eprintln!(
+                "error normalizing structured value for {}: {}",
+                manifest_path.display(),
+                err
+            );
+            die();
+        });
         let mut write = true;
         if manifest_path.is_file() {
             let existing = fs::read_to_string(&manifest_path).unwrap();
             if self.just_ensure_equivalence {
-                let existing_rendered = self.render(&existing);
+                let existing_toml = toml::from_str(&existing).unwrap_or_else(|err| {
+                    eprintln!("error parsing {} as TOML: {}", manifest_path.display(), err);
+                    die();
+                });
+                let existing_rendered = self.render(&existing_toml).unwrap_or_else(|err| {
+                    eprintln!("error normalizing {}: {}", manifest_path.display(), err);
+                    die();
+                });
                 if existing_rendered != rendered {
                     eprintln!(
                         "error: {} is out of date (note that this is a structural comparison):",
@@ -77,49 +91,38 @@ impl Entry {
                     eprintln!("{}", format_diff(&rendered, &existing_rendered));
                     die();
                 }
-            } else {
-                if existing == rendered {
-                    write = false;
-                } else if just_check {
-                    eprintln!("error: {} is out of date:", manifest_path.display());
-                    eprintln!("{}", format_diff(&rendered, &existing));
-                    die();
-                }
+            } else if existing == rendered {
+                write = false;
+            } else if just_check {
+                eprintln!("error: {} is out of date:", manifest_path.display());
+                eprintln!("{}", format_diff(&rendered, &existing));
+                die();
             }
         } else if just_check || self.just_ensure_equivalence {
             eprintln!("error: {} does not exist", manifest_path.display());
             die();
         }
         if write {
+            assert!(!just_check);
             eprintln!("writing {}", manifest_path.display());
             fs::write(manifest_path, rendered).unwrap();
         }
     }
 
-    fn render(&self, unformatted_toml: &str) -> String {
-        let mut cmd = Command::new("toml-normalize");
-        cmd.stdin(Stdio::piped())
-            .stdout(Stdio::piped())
-            .arg("--builtin-policy=cargo-manifest");
+    fn render(&self, unformatted_toml: &TomlTable) -> Result<String, TomlNormalizeError> {
+        let mut composite_policy = builtin_policies::cargo_manifest_policy();
         for policy in self.format_policy_overrides.iter() {
-            cmd.arg(format!("--inline-policy={}", policy));
+            composite_policy = composite_policy.override_with(policy);
         }
-        let mut child = cmd.spawn().unwrap();
-        child
-            .stdin
-            .take()
-            .unwrap()
-            .write_all(unformatted_toml.as_bytes())
-            .unwrap();
-        let output = child.wait_with_output().unwrap();
-        assert!(output.status.success());
+        let formatter = Formatter::new(composite_policy);
+        let doc = formatter.format(unformatted_toml)?;
         let mut s = String::new();
         if let Some(frontmatter) = self.frontmatter.as_ref() {
             s.push_str(frontmatter);
             s.push('\n');
         }
-        s.push_str(str::from_utf8(&output.stdout).unwrap());
-        s
+        s.push_str(&doc.to_string());
+        Ok(s)
     }
 }
 

@@ -27,11 +27,7 @@ rec {
 
   inherit (workspace) blueprint debug;
 
-  prettyJSON = name: value: with pkgs; runCommand name {
-    nativeBuildInputs = [ jq ];
-  } ''
-    jq < ${builtins.toFile name (builtins.toJSON value)} > $out
-  '';
+  prettyJSON = (pkgs.formats.json {}).generate;
 
   blueprintJSON = prettyJSON "blueprint.json" blueprint;
 }

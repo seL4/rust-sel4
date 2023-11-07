@@ -4,29 +4,25 @@
 # SPDX-License-Identifier: BSD-2-Clause
 #
 
-blueprint := $$(nix-build -A blueprintJSON --no-out-link)
+blueprint := blueprint.json
 
-target_dir := target
-
-bin_dir := $(target_dir)/debug
-
-run := PATH=$(bin_dir):$$PATH $(bin_dir)/manage-cargo-manifests --blueprint $(blueprint)
+run := cargo run -p manage-cargo-manifests --
 
 .PHONY: none
 none:
 
 .PHONY: clean
 clean:
-	rm -rf $(target_dir)
+	rm -rf $(target_dir) $(blueprint)
 
-.INTERMEDIATE: bins
-bins:
-	cargo build
+.PHONY: $(blueprint)
+$(blueprint):
+	nix-build -A blueprintJSON --out-link $@
 
 .PHONY: update
-update: bins
-	$(run)
+update: $(blueprint)
+	$(run) --blueprint $<
 
 .PHONY: check
-check: bins
-	$(run) --just-check
+check: $(blueprint)
+	$(run) --blueprint $< --just-check

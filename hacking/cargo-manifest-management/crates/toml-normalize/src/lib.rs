@@ -9,5 +9,5 @@ mod policy;
 
 pub mod builtin_policies;
 
-pub use format::{AbstractPolicy, Formatter};
+pub use format::{AbstractPolicy, Error, Formatter};
 pub use policy::{KeyOrdering, Policy, TableRule};
