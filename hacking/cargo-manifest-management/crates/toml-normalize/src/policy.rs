@@ -20,6 +20,7 @@ const DEFAULT_INDENT_WIDTH: usize = 4;
 pub struct Policy {
     pub max_width: Option<usize>,
     pub indent_width: Option<usize>,
+    #[serde(default)]
     pub table_rules: Vec<TableRule>,
 }
 
@@ -34,7 +35,9 @@ pub struct TableRule {
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct KeyOrdering {
+    #[serde(default)]
     pub front: Vec<String>,
+    #[serde(default)]
     pub back: Vec<String>,
 }
 

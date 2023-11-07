@@ -5,13 +5,15 @@
 //
 
 use std::fs::{self, File};
+use std::io;
 use std::path::PathBuf;
-use std::process;
+use std::result::Result as StdResult;
 use std::str;
 
+use anyhow::{bail, Context, Result};
 use clap::Parser;
 use serde::Deserialize;
-use similar::{ChangeTag, TextDiff};
+use similar::TextDiff;
 use toml::Table as TomlTable;
 
 use toml_normalize::{builtin_policies, Error as TomlNormalizeError, Formatter, Policy};
@@ -25,11 +27,12 @@ struct Args {
     just_check: bool,
 }
 
-fn main() {
+fn main() -> Result<()> {
     let args = Args::parse();
     let blueprint_file = File::open(&args.blueprint).unwrap();
-    let blueprint: Blueprint = serde_json::from_reader(blueprint_file).unwrap();
-    blueprint.execute(args.just_check);
+    let blueprint: Blueprint =
+        serde_json::from_reader(blueprint_file).context("error deserializeing blueprint")?;
+    blueprint.execute(args.just_check)
 }
 
 #[derive(Debug, Deserialize)]
@@ -53,63 +56,65 @@ pub struct Entry {
 }
 
 impl Blueprint {
-    pub fn execute(&self, just_check: bool) {
+    pub fn execute(&self, just_check: bool) -> Result<()> {
         for entry in self.entries.iter() {
-            entry.execute(just_check);
+            entry.execute(just_check)?;
         }
+        Ok(())
     }
 }
 
 impl Entry {
-    fn execute(&self, just_check: bool) {
+    fn execute(&self, just_check: bool) -> Result<()> {
         let manifest_path = self.absolute_path.join("Cargo.toml");
-        let rendered = self.render(&self.manifest_value).unwrap_or_else(|err| {
-            eprintln!(
-                "error normalizing structured value for {}: {}",
-                manifest_path.display(),
-                err
-            );
-            die();
-        });
-        let mut write = true;
+        let rendered_new = self.render(&self.manifest_value).with_context(|| {
+            format!(
+                "Failed to normalize structured value for {}",
+                manifest_path.display()
+            )
+        })?;
+        let mut write = false;
         if manifest_path.is_file() {
-            let existing = fs::read_to_string(&manifest_path).unwrap();
+            let orig = fs::read_to_string(&manifest_path).unwrap();
             if self.just_ensure_equivalence {
-                let existing_toml = toml::from_str(&existing).unwrap_or_else(|err| {
-                    eprintln!("error parsing {} as TOML: {}", manifest_path.display(), err);
-                    die();
-                });
-                let existing_rendered = self.render(&existing_toml).unwrap_or_else(|err| {
-                    eprintln!("error normalizing {}: {}", manifest_path.display(), err);
-                    die();
-                });
-                if existing_rendered != rendered {
-                    eprintln!(
-                        "error: {} is out of date (note that this is a structural comparison):",
-                        manifest_path.display()
+                let orig_table = toml::from_str(&orig).with_context(|| {
+                    format!("Failed to parse {} as TOML", manifest_path.display())
+                })?;
+                let normalized_orig = self
+                    .render(&orig_table)
+                    .with_context(|| format!("Failed to normalize {}", manifest_path.display()))?;
+                if normalized_orig != rendered_new {
+                    bail!(
+                        "{} is out of date (note that this is a structural comparison):\n{}",
+                        manifest_path.display(),
+                        TextDiff::from_lines(&rendered_new, &normalized_orig).unified_diff(),
                     );
-                    eprintln!("{}", format_diff(&rendered, &existing_rendered));
-                    die();
                 }
-            } else if existing == rendered {
-                write = false;
-            } else if just_check {
-                eprintln!("error: {} is out of date:", manifest_path.display());
-                eprintln!("{}", format_diff(&rendered, &existing));
-                die();
+            } else if orig != rendered_new {
+                if just_check {
+                    bail!(
+                        "{} is out of date:\n{}",
+                        manifest_path.display(),
+                        TextDiff::from_lines(&rendered_new, &orig).unified_diff(),
+                    );
+                } else {
+                    write = true;
+                }
             }
         } else if just_check || self.just_ensure_equivalence {
-            eprintln!("error: {} does not exist", manifest_path.display());
-            die();
+            bail!("{} does not exist", manifest_path.display());
+        } else {
+            write = true;
         }
         if write {
             assert!(!just_check);
             eprintln!("writing {}", manifest_path.display());
-            fs::write(manifest_path, rendered).unwrap();
+            fs::write(manifest_path, rendered_new).unwrap();
         }
+        Ok(())
     }
 
-    fn render(&self, unformatted_toml: &TomlTable) -> Result<String, TomlNormalizeError> {
+    fn render(&self, unformatted_toml: &TomlTable) -> StdResult<String, TomlNormalizeError> {
         let mut composite_policy = builtin_policies::cargo_manifest_policy();
         for policy in self.format_policy_overrides.iter() {
             composite_policy = composite_policy.override_with(policy);
@@ -124,22 +129,4 @@ impl Entry {
         s.push_str(&doc.to_string());
         Ok(s)
     }
-}
-
-fn format_diff(a: &str, b: &str) -> String {
-    let d = TextDiff::from_lines(a, b);
-    let mut s = String::new();
-    for change in d.iter_all_changes() {
-        let sign = match change.tag() {
-            ChangeTag::Delete => "-",
-            ChangeTag::Insert => "+",
-            ChangeTag::Equal => " ",
-        };
-        s.push_str(&format!("{}{}", sign, change))
-    }
-    s
-}
-
-fn die() -> ! {
-    process::exit(1)
 }
