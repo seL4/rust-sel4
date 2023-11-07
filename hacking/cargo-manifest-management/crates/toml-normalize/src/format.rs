@@ -8,6 +8,7 @@ use std::cmp::Ordering;
 use std::fmt;
 use std::mem;
 
+use thiserror::Error;
 use toml::value::{
     Array as UnformattedArray, Table as UnformattedTable, Value as UnformattedValue,
 };
@@ -48,7 +49,7 @@ struct FormatterState<'a, P> {
     current_path: Path,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Error)]
 pub enum Error {
     CannotInlineTable(CannotInlineTableError),
 }

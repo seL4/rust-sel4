@@ -9,7 +9,7 @@ rec {
 
   inherit (pkgs) lib;
 
-  tool = import ./tool.nix {
+  makeBlueprint = import ./make-blueprint.nix {
     inherit lib;
   };
 
@@ -19,7 +19,7 @@ rec {
 
   manualManifests = import ./manual-manifests.nix;
 
-  workspace = tool {
+  workspace = makeBlueprint {
     inherit manifestScope manualManifests;
     workspaceRoot = toString ../..;
     workspaceDirFilter = relativePathSegments: lib.head relativePathSegments == "crates";
