@@ -5,7 +5,6 @@
 //
 
 use std::fs::{self, File};
-use std::io;
 use std::path::PathBuf;
 use std::result::Result as StdResult;
 use std::str;
