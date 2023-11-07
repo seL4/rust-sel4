@@ -6,7 +6,7 @@
 
 blueprint := blueprint.json
 
-run := cargo run -p manage-cargo-manifests --
+run := cargo run --manifest-path=tool/Cargo.toml -p manage-cargo-manifests --
 
 .PHONY: none
 none:

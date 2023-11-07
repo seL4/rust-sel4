@@ -9,7 +9,7 @@ rec {
 
   inherit (pkgs) lib;
 
-  makeBlueprint = import ./make-blueprint.nix {
+  makeBlueprint = import ./tool/make-blueprint.nix {
     inherit lib;
   };
 
