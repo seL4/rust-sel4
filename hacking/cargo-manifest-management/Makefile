@@ -13,7 +13,7 @@ none:
 
 .PHONY: clean
 clean:
-	rm -rf $(target_dir) $(blueprint)
+	rm -rf tool/target $(blueprint)
 
 .PHONY: $(blueprint)
 $(blueprint):
