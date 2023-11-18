@@ -86,6 +86,7 @@ members = [
     "crates/sel4-dlmalloc",
     "crates/sel4-externally-shared",
     "crates/sel4-generate-target-specs",
+    "crates/sel4-hal-adapters",
     "crates/sel4-immediate-sync-once-cell",
     "crates/sel4-immutable-cell",
     "crates/sel4-initialize-tls-on-stack",
