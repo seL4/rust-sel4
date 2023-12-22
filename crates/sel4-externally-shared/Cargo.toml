@@ -21,7 +21,7 @@ unstable = ["volatile/unstable"]
 very_unstable = ["volatile/very_unstable"]
 
 [dependencies]
-zerocopy = "0.7.6"
+zerocopy = "0.7.32"
 
 [dependencies.volatile]
 git = "https://github.com/coliasgroup/volatile.git"

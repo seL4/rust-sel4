@@ -22,4 +22,4 @@ hex = { version = "0.4.3", default-features = false }
 log = "0.4.17"
 lru = "0.10.0"
 sel4-async-block-io = { path = ".." }
-zerocopy = { version = "0.7.6", features = ["derive"] }
+zerocopy = { version = "0.7.32", features = ["derive"] }
