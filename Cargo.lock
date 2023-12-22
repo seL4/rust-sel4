@@ -61,7 +61,7 @@ dependencies = [
  "cfg-if",
  "once_cell",
  "version_check",
- "zerocopy 0.7.6",
+ "zerocopy 0.7.32",
 ]
 
 [[package]]
@@ -1929,7 +1929,7 @@ dependencies = [
  "log",
  "lru",
  "sel4-async-block-io",
- "zerocopy 0.7.6",
+ "zerocopy 0.7.32",
 ]
 
 [[package]]
@@ -2266,7 +2266,7 @@ name = "sel4-externally-shared"
 version = "0.1.0"
 dependencies = [
  "volatile",
- "zerocopy 0.7.6",
+ "zerocopy 0.7.32",
 ]
 
 [[package]]
@@ -2421,7 +2421,7 @@ dependencies = [
  "num_enum",
  "postcard",
  "serde",
- "zerocopy 0.7.6",
+ "zerocopy 0.7.32",
 ]
 
 [[package]]
@@ -2523,7 +2523,7 @@ version = "0.1.0"
 dependencies = [
  "log",
  "sel4-externally-shared",
- "zerocopy 0.7.6",
+ "zerocopy 0.7.32",
 ]
 
 [[package]]
@@ -2547,7 +2547,7 @@ version = "0.1.0"
 dependencies = [
  "num_enum",
  "sel4-shared-ring-buffer",
- "zerocopy 0.7.6",
+ "zerocopy 0.7.32",
 ]
 
 [[package]]
@@ -2623,7 +2623,7 @@ name = "sel4-simple-task-runtime-config-types"
 version = "0.1.0"
 dependencies = [
  "serde",
- "zerocopy 0.7.6",
+ "zerocopy 0.7.32",
 ]
 
 [[package]]
@@ -3417,12 +3417,12 @@ dependencies = [
 
 [[package]]
 name = "zerocopy"
-version = "0.7.6"
+version = "0.7.32"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3acf0fc2746d3e32f07be6067e170628e3b3d558c68f5dbada298039a6726331"
+checksum = "74d4d3961e53fa4c9a25a8637fc2bfaf2595b3d3ae34875568a5cf64787716be"
 dependencies = [
  "byteorder",
- "zerocopy-derive 0.7.6",
+ "zerocopy-derive 0.7.32",
 ]
 
 [[package]]
@@ -3438,9 +3438,9 @@ dependencies = [
 
 [[package]]
 name = "zerocopy-derive"
-version = "0.7.6"
+version = "0.7.32"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b539ef18157ab9e248758ab68041c0179e639024ca17c794c6afa7a691f4c271"
+checksum = "9ce1b18ccd8e73a9321186f97e46f9f04b778851177567b1975109d26a08d2a6"
 dependencies = [
  "proc-macro2",
  "quote",

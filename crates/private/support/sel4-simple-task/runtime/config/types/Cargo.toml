@@ -22,4 +22,4 @@ serde = ["dep:serde"]
 
 [dependencies]
 serde = { version = "1.0.147", default-features = false, features = ["derive"], optional = true }
-zerocopy = { version = "0.7.6", features = ["derive"] }
+zerocopy = { version = "0.7.32", features = ["derive"] }
