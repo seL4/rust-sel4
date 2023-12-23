@@ -31,6 +31,15 @@ in rec {
 
   mkDefaultFrontmatterWithReuseArgs = args: mkReuseFrontmatter args + defaultNoteFrontmatter;
 
+  overrideDefaultFrontmatter =
+    { copyrightLines ? defaultReuseFrontmatterArgs.copyrightLines ++ extraCopyrightLines
+    , extraCopyrightLines ? []
+    , licenseID ? defaultReuseFrontmatterArgs.licenseID
+    }:
+    mkDefaultFrontmatterWithReuseArgs {
+      inherit copyrightLines licenseID;
+    };
+
   defaultNoteFrontmatter = ''
     #
     # This file is generated from './Cargo.nix'. You can edit this file directly
@@ -54,11 +63,13 @@ in rec {
   # REUSE-IgnoreEnd
 
   defaultReuseFrontmatterArgs = {
-    copyrightLines = [
-      "Copyright 2023, Colias Group, LLC"
-    ];
+    copyrightLines = defaultCopyrightLines;
     licenseID = defaultLicense;
   };
+
+  defaultCopyrightLines = with copyrightLines; [
+    coliasgroup
+  ];
 
   defaultLicense = "BSD-2-Clause";
 
@@ -68,6 +79,10 @@ in rec {
 
   authors = {
     nspin = "Nick Spinale <nick.spinale@coliasgroup.com>";
+  };
+
+  copyrightLines = {
+    coliasgroup = "Copyright 2023, Colias Group, LLC";
   };
 
   versions = {
