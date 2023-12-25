@@ -53,7 +53,6 @@ stdenv.mkDerivation {
 
     cmake \
       -DCROSS_COMPILER_PREFIX=${stdenv.cc.targetPrefix} \
-      -DCMAKE_TOOLCHAIN_FILE=gcc.cmake \
       -DCMAKE_INSTALL_PREFIX=$out \
       -C ${settings} \
       -G Ninja \
