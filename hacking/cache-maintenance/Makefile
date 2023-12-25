@@ -4,11 +4,13 @@
 # SPDX-License-Identifier: BSD-2-Clause
 #
 
-expr_path = ../..
+P ?= ../..
+A ?= everythingWithExcess
 
-attr_args := -A everythingWithExcess
+path := $(P)
+attr := $(A)
 
-nix_build_cmd := nix-build $(expr_path) $(attr_args) -j1 --no-out-link
+nix_build_cmd := nix-build $(path) -A $(attr) --no-out-link
 
 cache_name := coliasgroup
 
