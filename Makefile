@@ -11,7 +11,7 @@ endif
 ifneq ($(J),)
 	jobs_arg := -j$(J)
 else
-	jobs_arg := -j$$(nproc)
+	jobs_arg :=
 endif
 
 ifneq ($(CORES),)
