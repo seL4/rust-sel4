@@ -6,21 +6,21 @@
 
 let
 
-  defaultNixpkgsSource =
+  defaultNixpkgsPath =
     let
-      rev = "185442f0f70497d8a02f26f8bc36688933a7b5eb";
+      rev = "1811c4fec88995679397d6fa20f4f3395a0bebe5";
     in
       builtins.fetchTarball {
         url = "https://github.com/coliasgroup/nixpkgs/archive/refs/tags/keep/${builtins.substring 0 32 rev}.tar.gz";
-        sha256 = "sha256:0swvdlw1qb2xxp50in78lqkx3gkjvzmj4zrhlhnzzjf3aqdqn722";
+        sha256 = "sha256:0ad2c7vlr9fidzjjg8szigfhmp1gvlf62ckd6cir8ymrxc93pby7";
       };
-
-  defaultNixpkgsFn = import defaultNixpkgsSource;
-  defaultNixpkgsLib = import (defaultNixpkgsSource + "/lib");
 
 in
 
-{ lib ? defaultNixpkgsLib, nixpkgsFn ? defaultNixpkgsFn }:
+{ nixpkgsPath ? defaultNixpkgsPath
+, nixpkgsFn ? import nixpkgsPath
+, lib ? import (nixpkgsPath + "/lib")
+}:
 
 let
 
