@@ -39,11 +39,16 @@ let
   diskImage = mkDiskImage {};
   smallDiskImage = mkDiskImage { excludePatterns = [ "*.mp4" "*.pdf" ]; };
 
+  vmTools = buildPackages.vmTools.override {
+    # HACK
+    requireKVM = false;
+  };
+
   mkDiskImage =
     { maxIndividualFileSize ? null
     , excludePatterns ? null
     }:
-    buildPackages.vmTools.runInLinuxVM (runCommand "disk-image" {
+    vmTools.runInLinuxVM (runCommand "disk-image" {
       nativeBuildInputs = [ python3 kmod parted fatresize dosfstools ];
       preVM = ''
         mkdir scratch
