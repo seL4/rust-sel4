@@ -13,6 +13,9 @@
 , rustPlatform
 , reuse
 , cargo-audit
+, strace
+, cntr
+, cachix
 }:
 
 mkShell {
@@ -28,6 +31,9 @@ mkShell {
     python3Packages.jinja2
     reuse
     cargo-audit
+    strace
+    cntr
+    cachix
   ];
 
   nativeBuildInputs = [
