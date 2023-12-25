@@ -35,7 +35,7 @@ let
   srcRoot = ../../..;
 
   # TODO
-  localRoot = srcRoot + "/../x";
+  localRoot = srcRoot + "/tmp/src";
 
   mkKeepRef = rev: "refs/tags/keep/${builtins.substring 0 32 rev}";
 
