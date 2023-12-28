@@ -32,10 +32,9 @@ RUN set -eux; \
     if ! [ $UID = 0 -a $GID = 0 ]; then \
         ! getent passwd $UID; \
         # NOTE
-        # This is a bit of a hack. For example, GID for "staff" on MacOS is
-        # "dialout" on Debian. In an ideal world, we'd ensure that an
-        # already-occupied GID corresponds to either "users" or "staff" on
-        # Debian. 
+        # This is a bit of a hack. For example, GID for "staff" on MacOS is "dialout" on Debian. In
+        # an ideal world, we'd ensure that an already-occupied GID corresponds to either "users" or
+        # "staff" on Debian.
         if ! getent group $GID; then \
             groupadd -g $GID x; \
         fi; \
@@ -71,8 +70,8 @@ RUN set -eux; \
     nix-channel --remove nixpkgs; \
     nix-collect-garbage -d
 
-# Add gcroot for store paths required by this image so that fresh images can use
-# persistent /nix volumes.
+# Add gcroot for store paths required by this image so that fresh images can use persistent /nix
+# volumes.
 RUN set -eux; \
     export USER=$(whoami); \
     . ~/.nix-profile/etc/profile.d/nix.sh; \
