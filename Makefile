@@ -22,9 +22,22 @@ endif
 
 out := out
 
-nix_build := nix-build $(keep_going_args) $(jobs_args) $(cores_args)
+nix_args := $(keep_going_args) $(jobs_args) $(cores_args)
 
-nix_shell := nix-shell -A shell --pure
+nix_build := nix-build $(nix_args)
+
+nix_shell := nix-shell $(nix_args)
+
+run_in_nix_shell := $(nix_shell) --run
+
+ifeq ($(IN_NIX_SHELL_FOR_MAKEFILE),)
+	# TODO
+	# Should this use --pure? One consideration is that 'make shell' below
+	# doesn't, and consistency might be more important here.
+	run_in_nix_shell := $(nix_shell) -A shellForMakefile --pure --run
+else
+	run_in_nix_shell := $(SHELL) -c
+endif
 
 .PHONY: none
 none:
@@ -35,6 +48,10 @@ clean:
 
 $(out):
 	mkdir -p $@
+
+.PHONY: shell
+shell:
+	$(nix_shell) -A shellForHacking
 
 rustc_target_spec_dir := support/targets
 
@@ -71,19 +88,19 @@ check-fmt:
 
 .PHONY: check-generic-formatting
 check-generic-formatting:
-	$(nix_shell) --run "sh hacking/scripts/check-generic-formatting.sh"
+	$(run_in_nix_shell) "sh hacking/scripts/check-generic-formatting.sh"
 
 .PHONY: check-source
 check-source: check-generated-sources check-fmt check-generic-formatting
 
 .PHONY: check-licenses
 check-licenses:
-	$(nix_shell) --run "reuse lint"
+	$(run_in_nix_shell) "reuse lint"
 
 .PHONY: check-dependencies
 check-dependencies:
 	lockfile=$$($(nix_build) -A pkgs.build.this.publicCratesCargoLock --no-out-link) && \
-		$(nix_shell) --run "cargo-audit audit -f $$lockfile"
+		$(run_in_nix_shell) "cargo-audit audit -f $$lockfile"
 
 try_restore_terminal := tput smam 2> /dev/null || true
 
