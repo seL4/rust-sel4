@@ -53,7 +53,7 @@ RUN set -eux; \
         useradd -u $UID -g $GID -G sudo -m -p x x; \
     fi
 
-    # NOTE would prefer this, but "staff" on MacOS is "dialout" on debian
+    # NOTE would prefer this, but GID for "staff" on MacOS is "dialout" on debian
     # if getent group $GID; then \
     #     group_name="$(getent group $GID | cut -d: -f1)"; \
     #     [ "$group_name" = "users" -o "$group_name" = "staff" ]; \
@@ -80,7 +80,7 @@ ENV PATH=$CARGO_HOME/bin:$PATH
 RUN curl -sSf -L https://nixos.org/nix/install | \
         bash -s -- --yes --no-modify-profile --no-channel-add
 
-# # Install bash completion for Nix
+# Install bash completion for Nix
 RUN set -eux; \
     export USER=$(whoami); \
     . ~/.nix-profile/etc/profile.d/nix.sh; \
@@ -88,8 +88,16 @@ RUN set -eux; \
     nix-channel --update; \
     nix-env -i nix-bash-completions; \
     nix-channel --remove nixpkgs; \
-    nix-collect-garbage -d; \
-    nix-store --optimize
+    nix-collect-garbage -d
+
+# Add gcroot for store paths required by this image so that fresh images can use
+# persistent /nix volumes.
+RUN set -eux; \
+    export USER=$(whoami); \
+    . ~/.nix-profile/etc/profile.d/nix.sh; \
+    nix-store -r \
+        --add-root /nix/var/nix/gcroots-for-image/profile \
+        $(readlink --canonicalize-existing ~/.nix-profile)
 
 COPY nix.conf /etc/nix/
 
@@ -104,5 +112,7 @@ RUN ( \
         echo 'set show-mode-in-prompt on'; \
         echo 'set editing-mode vi'; \
     ) >> ~/.inputrc
+
+VOLUME /nix
 
 WORKDIR /work
