@@ -24,10 +24,7 @@ nix_build := $(append_to_nix_config) nix-build $(nix_args)
 nix_shell := $(append_to_nix_config) nix-shell $(nix_args)
 
 ifeq ($(IN_NIX_SHELL_FOR_MAKEFILE),)
-	# TODO
-	# Should this use --pure? One consideration is that 'make shell' below
-	# doesn't, and consistency might be more important here.
-	run_in_nix_shell := $(nix_shell) -A shellForMakefile --pure --run
+	run_in_nix_shell := $(nix_shell) -A shellForMakefile --run
 else
 	run_in_nix_shell := $(SHELL) -c
 endif
