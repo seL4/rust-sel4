@@ -166,7 +166,8 @@ superCallPackage ../rust-utils {} self //
 
   embedDebugInfo = callPackage ./embed-debug-info.nix {};
 
-  shell = callPackage ./shell.nix {};
+  shellForMakefile = callPackage ./shell-for-makefile.nix {};
+  shellForHacking = callPackage ./shell-for-hacking.nix {};
 
   ### kernel
 

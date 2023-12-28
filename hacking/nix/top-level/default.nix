@@ -12,7 +12,7 @@ let
 
 in {
 
-  shell = pkgs.build.this.shell;
+  inherit (pkgs.build.this) shellForMakefile shellForHacking;
 
   worldsForEverythingInstances = [
     pkgs.host.aarch64.none.this.worlds.default
