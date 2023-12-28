@@ -48,13 +48,6 @@ $(out):
 shell:
 	$(nix_shell) -A shellForHacking
 
-rustc_target_spec_dir := support/targets
-
-.PHONY: generate-target-specs
-generate-target-specs:
-	rm -f $(rustc_target_spec_dir)/*.json && \
-		cargo run -p sel4-generate-target-specs -- write --target-dir $(rustc_target_spec_dir) --all
-
 .PHONY: update-generated-sources
 update-generated-sources:
 	$(MAKE) -C hacking/cargo-manifest-management update
@@ -96,6 +89,13 @@ check-licenses:
 check-dependencies:
 	lockfile=$$($(nix_build) -A pkgs.build.this.publicCratesCargoLock --no-out-link) && \
 		$(run_in_nix_shell) "cargo-audit audit -f $$lockfile"
+
+rustc_target_spec_dir := support/targets
+
+.PHONY: generate-target-specs
+generate-target-specs:
+	rm -f $(rustc_target_spec_dir)/*.json && \
+		cargo run -p sel4-generate-target-specs -- write --target-dir $(rustc_target_spec_dir) --all
 
 try_restore_terminal := tput smam 2> /dev/null || true
 
