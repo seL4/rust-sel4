@@ -122,9 +122,10 @@ the crates which use them:
 ### Quick start for running the tests in this repository
 
 The only requirements for building and running the tests in this repository are
-Linux, Make, and [Nix](https://nix.dev/). This repository contains scripts for
-setting up a Docker container with a suitable development environment in case
-you aren't on Linux or don't want to install Nix.
+Linux, Make, [rustup](https://rustup.rs/), and [Nix](https://nix.dev/). This
+repository contains scripts for setting up a Docker container with a suitable
+development environment in case you aren't on Linux or don't want to install
+Nix.
 
 First, clone this repository:
 
