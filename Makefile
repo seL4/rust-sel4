@@ -10,24 +10,15 @@ endif
 
 ifneq ($(J),)
 	jobs_args := -j$(J)
-else
-	jobs_args :=
 endif
 
 ifneq ($(CORES),)
 	cores_args := --cores $(CORES)
-else
-	cores_args :=
 endif
 
-out := out
-
 nix_args := $(keep_going_args) $(jobs_args) $(cores_args)
-
 nix_build := nix-build $(nix_args)
-
 nix_shell := nix-shell $(nix_args)
-
 run_in_nix_shell := $(nix_shell) --run
 
 ifeq ($(IN_NIX_SHELL_FOR_MAKEFILE),)
@@ -38,6 +29,8 @@ ifeq ($(IN_NIX_SHELL_FOR_MAKEFILE),)
 else
 	run_in_nix_shell := $(SHELL) -c
 endif
+
+out := out
 
 .PHONY: none
 none:
