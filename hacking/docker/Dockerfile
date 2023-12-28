@@ -23,22 +23,6 @@ RUN apt-get update && apt-get install -y \
     bash-completion \
     && rm -rf /var/lib/apt/lists/*
 
-# # Install bash completion for Nix
-# RUN set -eux; \
-#     d=/usr/local/share/bash-completion/completions; \
-#     mkdir -p $d; \
-#     cd $d; \
-#     curl -sSf -L -o _nix \
-#         https://raw.githubusercontent.com/hedning/nix-bash-completions/v0.6.8/_nix; \
-#     commands=$(bash -c ' \
-#       function complete() { shift 2; echo "$@"; }; \
-#       shopt -s extglob; \
-#       source _nix; \
-#     '); \
-#     for c in $commands; do \
-#       ln -s _nix $c; \
-#     done
-
 RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers # for convenience
 
 ARG UID
@@ -47,19 +31,16 @@ ARG GID
 RUN set -eux; \
     if ! [ $UID = 0 -a $GID = 0 ]; then \
         ! getent passwd $UID; \
+        # NOTE
+        # This is a bit of a hack. For example, GID for "staff" on MacOS is
+        # "dialout" on Debian. In an ideal world, we'd ensure that an
+        # already-occupied GID corresponds to either "users" or "staff" on
+        # Debian. 
         if ! getent group $GID; then \
             groupadd -g $GID x; \
         fi; \
         useradd -u $UID -g $GID -G sudo -m -p x x; \
     fi
-
-    # NOTE would prefer this, but GID for "staff" on MacOS is "dialout" on debian
-    # if getent group $GID; then \
-    #     group_name="$(getent group $GID | cut -d: -f1)"; \
-    #     [ "$group_name" = "users" -o "$group_name" = "staff" ]; \
-    # else \
-    #     groupadd -g $GID x; \
-    # fi; \
 
 # So that they don't depend on $HOME
 ENV RUSTUP_HOME=/opt/rustup
