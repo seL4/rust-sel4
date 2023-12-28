@@ -159,14 +159,17 @@ impl<'a, P: AbstractPolicy> FormatterState<'a, P> {
                 .map(Option::unwrap)
                 .enumerate()
             {
-                let inline_table =
-                    self.with_index(i, |this| this.format_table_to_inline_table(x))?;
-                if self.is_inline_table_too_wide_for_array(&inline_table) {
-                    inline_tables = None;
-                    break;
-                } else {
-                    inline_tables.as_mut().unwrap().push(inline_table);
+                match self.with_index(i, |this| this.format_table_to_inline_table(x)) {
+                    Err(Error::CannotInlineTable(_)) => {}
+                    Ok(inline_table) => {
+                        if !self.is_inline_table_too_wide_for_array(&inline_table) {
+                            inline_tables.as_mut().unwrap().push(inline_table);
+                            continue;
+                        }
+                    }
                 }
+                inline_tables = None;
+                break;
             }
             inline_tables.map(|inline_tables| {
                 let mut array = Array::new();
@@ -236,6 +239,7 @@ impl<'a, P: AbstractPolicy> FormatterState<'a, P> {
     fn current_key(&self) -> Option<&str> {
         self.current_path().last()?.as_key()
     }
+
     fn push(&mut self, seg: PathSegment) {
         self.current_path.push(seg);
     }
