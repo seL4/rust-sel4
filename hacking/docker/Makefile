@@ -45,6 +45,8 @@ run: build $(statefulness_run_prerequisites)
 	docker run --privileged -d --name $(container_name) --label $(label) \
 		$(statefulness_docker_run_args) \
 		--mount type=bind,src=$(abspath $(work_root)),dst=/work \
+		--publish 8080:8080/tcp \
+		--publish 8443:8443/tcp \
 		$(image_tag) sleep inf
 
 .PHONY: exec
