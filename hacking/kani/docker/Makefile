@@ -50,7 +50,10 @@ rm-container:
 
 .PHONY: check
 check: build
-	docker run --rm -it \
+	if [ -t 0 ]; then \
+		tty_args="-it"; \
+	fi && \
+	docker run --rm $$tty_args \
 		--mount $(mount_params),readonly \
 		$(image_tag) \
 		make -C $(here_relative) check BUILD=/tmp/build
