@@ -17,9 +17,11 @@ ifneq ($(CORES),)
 endif
 
 nix_args := $(keep_going_args) $(jobs_args) $(cores_args)
-nix_build := nix-build $(nix_args)
-nix_shell := nix-shell $(nix_args)
-run_in_nix_shell := $(nix_shell) --run
+
+append_to_nix_config := NIX_CONFIG="$$(printf "%s\n" "$$NIX_CONFIG" && cat hacking/binary-cache/fragment.nix.conf)"
+
+nix_build := $(append_to_nix_config) nix-build $(nix_args)
+nix_shell := $(append_to_nix_config) nix-shell $(nix_args)
 
 ifeq ($(IN_NIX_SHELL_FOR_MAKEFILE),)
 	# TODO

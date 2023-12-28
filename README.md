@@ -121,7 +121,10 @@ the crates which use them:
 
 ### Quick start for running the tests in this repository
 
-The only requirements for running the tests in this repository are Git, Make, and Docker.
+The only requirements for building and running the tests in this repository are
+Linux, Make, and [Nix](https://nix.dev/). This repository contains scripts for
+setting up a Docker container with a suitable development environment in case
+you aren't on Linux or don't want to install Nix.
 
 First, clone this repository:
 
@@ -130,22 +133,22 @@ git clone https://github.com/seL4/rust-sel4
 cd rust-sel4
 ```
 
-Next, build, run, and enter a Docker container for development:
+If you are using Docker, build, run, and enter a Docker container for
+development. This container mounts this repository's top-level at `/work`.
 
 ```
 cd hacking/docker && make run && make exec
 ```
 
-Inside the container at the repository's top-level directory, build and simulate a simple seL4-based
-system with a [root task](./crates/examples/root-task/example-root-task) written in Rust (this will
-take a few minutes):
+At this repository's top-level directory, build and simulate a simple seL4-based
+system with a [root task](./crates/examples/root-task/example-root-task) written
+in Rust (this will take a few minutes):
 
 ```
 make example
 ```
 
-Also inside the container at the repository's top-level directory, build and run all of this
-repository's automated tests:
+Build and run all of this repository's automated tests:
 
 ```
 make run-tests
