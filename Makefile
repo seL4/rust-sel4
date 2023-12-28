@@ -5,24 +5,24 @@
 #
 
 ifeq ($(K),1)
-	keep_going := -k
+	keep_going_args := -k
 endif
 
 ifneq ($(J),)
-	jobs_arg := -j$(J)
+	jobs_args := -j$(J)
 else
-	jobs_arg :=
+	jobs_args :=
 endif
 
 ifneq ($(CORES),)
-	cores_arg := --cores $(CORES)
+	cores_args := --cores $(CORES)
 else
-	cores_arg :=
+	cores_args :=
 endif
 
 out := out
 
-nix_build := nix-build $(keep_going) $(jobs_arg) $(cores_arg)
+nix_build := nix-build $(keep_going_args) $(jobs_args) $(cores_args)
 
 nix_shell := nix-shell -A shell --pure
 

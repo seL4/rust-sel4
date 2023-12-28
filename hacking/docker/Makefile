@@ -23,6 +23,9 @@ endif
 .PHONY: none
 none:
 
+.PHONY: clean
+clean: rm-container rm-volume
+
 .PHONY: build
 build:
 	docker build \
@@ -55,7 +58,7 @@ rm-container:
 	done
 
 .PHONY: rm-volume
-rm-volume:
+rm-volume: rm-container
 	for id in $$(docker volume ls -q -f "name=^$(volume_name)$$"); do \
 		docker volume rm $$id; \
 	done
