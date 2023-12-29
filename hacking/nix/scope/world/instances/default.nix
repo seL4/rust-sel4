@@ -16,7 +16,7 @@
 , crates
 , crateUtils
 
-, mkTask, mkSeL4KernelWithPayload
+, mkTask, mkSeL4KernelLoaderWithPayload
 , embedDebugInfo
 , seL4RustTargetInfoWithConfig, defaultRustTargetInfo
 , worldConfig

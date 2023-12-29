@@ -37,7 +37,7 @@ in rec {
             , hypervisor ? false
             , cpu ? "cortex-a57"
             , isMicrokit ? false
-            , mkSeL4KernelWithPayloadArgs ? loader: [ "-kernel" loader ]
+            , mkSeL4KernelLoaderWithPayloadArgs ? loader: [ "-kernel" loader ]
             }:
             let
               numCores = if smp then "2" else "1";
@@ -72,7 +72,7 @@ in rec {
                       "-cpu" cpu "-smp" numCores "-m" "1024"
                       "-nographic"
                       "-serial" "mon:stdio"
-                  ] ++ mkSeL4KernelWithPayloadArgs loader;
+                  ] ++ mkSeL4KernelLoaderWithPayloadArgs loader;
                 };
               };
         in rec {
@@ -85,7 +85,7 @@ in rec {
             mcs = true;
             isMicrokit = true;
             cpu = "cortex-a53";
-            mkSeL4KernelWithPayloadArgs = loader: [ "-device" "loader,file=${loader},addr=0x70000000,cpu-num=0" ];
+            mkSeL4KernelLoaderWithPayloadArgs = loader: [ "-device" "loader,file=${loader},addr=0x70000000,cpu-num=0" ];
           };
         };
 
