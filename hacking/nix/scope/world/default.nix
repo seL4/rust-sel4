@@ -130,7 +130,7 @@ self: with self;
     inherit (worldConfig) kernelLoaderConfig;
   };
 
-  mkSeL4KernelWithPayload = { appELF } : callPackage ./mk-sel4-kernel-loader-with-payload.nix {} {
+  mkSeL4KernelLoaderWithPayload = { appELF } : callPackage ./mk-sel4-kernel-loader-with-payload.nix {} {
     app = appELF;
   };
 
