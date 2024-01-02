@@ -44,19 +44,16 @@ let
         "assets"
       ];
     };
-    # mbedtls-sys-auto = {
-    #   extraPaths = [
-    #     "build"
-    #     "vendor"
-    #   ];
-    # };
-    # mbedtls = {
-    #   extraPaths = [
-    #     "benches"
-    #     "examples"
-    #     "tests"
-    #   ];
-    # };
+    ring = {
+      resolveLinks = true;
+      extraPaths = [
+        "tests"
+        "include"
+        "crypto"
+        "third_party"
+        ".git/HEAD"
+      ];
+    };
   };
 
   unAugmentedCrates = lib.listToAttrs (lib.forEach workspaceMemberPaths (cratePath: rec {

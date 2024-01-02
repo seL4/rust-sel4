@@ -2505,6 +2505,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "sel4-root-task-default-test-harness"
+version = "0.1.0"
+dependencies = [
+ "sel4",
+ "sel4-root-task",
+ "sel4-test-harness",
+]
+
+[[package]]
 name = "sel4-root-task-macros"
 version = "0.1.0"
 dependencies = [
@@ -2690,6 +2699,15 @@ name = "sel4-sys-wrappers"
 version = "0.1.0"
 dependencies = [
  "sel4-sys",
+]
+
+[[package]]
+name = "sel4-test-harness"
+version = "0.1.0"
+dependencies = [
+ "sel4-immediate-sync-once-cell",
+ "sel4-panicking",
+ "sel4-panicking-env",
 ]
 
 [[package]]
@@ -2966,6 +2984,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "tests-root-task-default-test-harness"
+version = "0.1.0"
+dependencies = [
+ "log",
+ "sel4-root-task-default-test-harness",
+]
+
+[[package]]
 name = "tests-root-task-loader"
 version = "0.1.0"
 dependencies = [
@@ -2996,6 +3022,18 @@ dependencies = [
  "cfg-if",
  "sel4",
  "sel4-root-task",
+]
+
+[[package]]
+name = "tests-root-task-ring-test-harness"
+version = "0.1.0"
+dependencies = [
+ "getrandom",
+ "rand",
+ "sel4",
+ "sel4-newlib",
+ "sel4-root-task",
+ "sel4-test-harness",
 ]
 
 [[package]]
