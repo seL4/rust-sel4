@@ -44,6 +44,7 @@ let
 
 in rec {
 
+  # TODO collect automatically
   all = lib.filter (v: v != null) [
     tests.root-task.loader
     tests.root-task.core-libs
