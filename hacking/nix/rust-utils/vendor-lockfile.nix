@@ -165,6 +165,10 @@ let
         cp -prvd "$tree/" $out
         chmod u+w $out
 
+        # HACK: Recreate some of .git for crates which try to detect whether they're a git dependency
+        mkdir $out/.git
+        echo "${rev}" > $out/.git/HEAD
+
         # Cargo is happy with empty metadata.
         printf '{"files": {}, "package": null}' > "$out/.cargo-checksum.json"
       '';
