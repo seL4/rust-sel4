@@ -39,12 +39,12 @@ let
         minimal = true;
       }
       { id = "riscv64-root-task";
-        world = pkgs.host.riscv64.none.this.worlds.default;
+        world = pkgs.host.riscv64.default.none.this.worlds.default;
         runtime = "sel4-root-task";
         minimal = false;
       }
       { id = "riscv32-root-task";
-        world = pkgs.host.riscv32.none.this.worlds.default;
+        world = pkgs.host.riscv32.default.none.this.worlds.default;
         runtime = "sel4-root-task";
         minimal = false;
       }

@@ -13,7 +13,6 @@
 , python3Packages
 , qemuForSeL4
 , git
-, gccMultiStdenvGeneric
 , sources
 , crateUtils
 , defaultRustToolchain
@@ -40,10 +39,6 @@
 with lib;
 
 let
-  thisStdenv = if hostPlatform.isRiscV then gccMultiStdenvGeneric else stdenv;
-in
-
-let
   rustToolchain = defaultRustToolchain;
   rustTargetInfo = bareMetalRustTargetInfo;
 
@@ -51,7 +46,7 @@ let
     let
       bool = v: if v then "TRUE" else "FALSE";
     in [
-      "-DCROSS_COMPILER_PREFIX=${thisStdenv.cc.targetPrefix}"
+      "-DCROSS_COMPILER_PREFIX=${stdenv.cc.targetPrefix}"
       "-DKernelSel4Arch=${seL4Arch}"
       "-DMCS=${bool mcs}"
       "-DSMP=${bool smp}"
@@ -59,6 +54,7 @@ let
       "-DLibSel4UseRust=${bool rust}"
       "-DLibSel4TestPrinterRegex='${filter}'"
     ] ++ lib.optionals rust [
+      "-DHACK_RUST_TARGET=${rustTargetInfo.name}"
       "-DHACK_CARGO_MANIFEST_PATH=${workspace}/Cargo.toml"
       "-DHACK_CARGO_CONFIG=${cargoConfig}"
       "-DHACK_CARGO_NO_BUILD_SYSROOT=TRUE"
@@ -67,6 +63,8 @@ let
       "-DPLATFORM=pc99"
     ] ++ lib.optionals hostPlatform.isRiscV [
       "-DPLATFORM=spike"
+      "-DOPENSBI_PLAT_ISA=${hostPlatform.this.gccParams.arch}"
+      "-DOPENSBI_PLAT_ABI=${hostPlatform.this.gccParams.abi}"
     ] ++ lib.optionals hostPlatform.isAarch [
       "-DPLATFORM=qemu-arm-virt"
       "-DARM_HYP=${bool virtualization}"
@@ -129,7 +127,7 @@ let
     compilerBuiltinsWeakIntrinsics = true;
   };
 
-  tests = thisStdenv.mkDerivation {
+  tests = stdenv.mkDerivation {
     name = "sel4test";
 
     src = fetchRepoProject {
