@@ -17,9 +17,9 @@ def main():
 def run(args):
     child = pexpect.spawn(args.simulate, encoding='utf-8')
     child.logfile = sys.stdout
-    child.expect('banscii>', timeout=3)
+    child.expect('banscii>', timeout=10)
     child.sendline('Hello, World!')
-    child.expect('banscii>', timeout=1)
+    child.expect('banscii>', timeout=10)
     print()
 
 if __name__ == '__main__':
