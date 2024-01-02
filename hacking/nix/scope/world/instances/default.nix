@@ -10,6 +10,7 @@
 
 , cpio
 , cmake, perl, python3Packages
+, breakpointHook, bashInteractive
 
 , sources
 
@@ -55,6 +56,7 @@ in rec {
     tests.root-task.panicking.abort.withoutAlloc
     tests.root-task.panicking.unwind.withAlloc
     tests.root-task.panicking.unwind.withoutAlloc
+    tests.root-task.default-test-harness
     tests.root-task.c
     tests.capdl.threads
     tests.capdl.utcover
@@ -190,6 +192,77 @@ in rec {
       c = maybe (haveFullRuntime && hostPlatform.isAarch64) (callPackage ./c.nix {
         inherit canSimulate;
       });
+
+      default-test-harness = maybe haveFullRuntime (mkInstance {
+        rootTask = mkTask {
+          rootCrate = crates.tests-root-task-default-test-harness;
+          test = true;
+        };
+        extraPlatformArgs = lib.optionalAttrs canSimulate {
+          canAutomateSimply = true;
+        };
+      });
+
+      ring = maybe haveFullRuntime (
+        let
+          rootTask = lib.makeOverridable mkTask {
+            rootCrate = crates.ring;
+            test = true;
+            features = [
+              "less-safe-getrandom-custom-or-rdrand"
+              # "slow_tests"
+            ];
+            release = true;
+            lastLayerModifications.modifyDerivation = drv: drv.overrideAttrs (attrs: {
+              nativeBuildInputs = (attrs.nativeBuildInputs or []) ++ [
+                perl
+              ];
+            });
+          };
+
+          fnamesFile = runCommand "elfs.txt" {} ''
+            cd ${rootTask}/bin
+            echo -n *.elf > $out
+          '';
+
+          fnames = lib.splitString " " (builtins.readFile fnamesFile);
+
+          byElf = lib.listToAttrs (lib.forEach fnames (fname:
+            let
+              name = lib.head (lib.splitString "." fname);
+            in
+              lib.nameValuePair name (mkInstance {
+                rootTask = rootTask.override {
+                  getELF = drv: runCommand "test.elf" {} ''
+                    ln -s ${drv}/bin/${fname} $out
+                  '';
+                };
+                extraPlatformArgs = lib.optionalAttrs canSimulate {
+                  canAutomateSimply = true;
+                  simpleAutomationParams.timeout = 10 * 60;
+                };
+              }
+            )
+          ));
+        in {
+          inherit byElf;
+
+          all = buildPackages.writeScript "run-tests" ''
+            #!${buildPackages.runtimeShell}
+            set -eu
+
+            ${lib.concatStrings (lib.flip lib.mapAttrsToList byElf (k: v: ''
+              echo "<<< running test: ${k} >>>"
+              ${v.automate}
+            ''))}
+
+            echo
+            echo '# All tests passed.'
+            echo
+          '';
+        }
+      );
+
     };
 
     capdl = {

@@ -16,7 +16,8 @@ with cmakeConfigHelpers;
 let
   kernelConfigCommon = {
     KernelVerificationBuild = off;
-    KernelRootCNodeSizeBits = mkString "14"; # For backtrace test with embedded debug info
+    # KernelRootCNodeSizeBits = mkString "14"; # For backtrace test with embedded debug info
+    KernelRootCNodeSizeBits = mkString "20"; # For ring test
   };
 
   kernelLoaderConfig = {};
