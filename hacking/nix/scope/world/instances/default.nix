@@ -77,7 +77,7 @@ in rec {
           rootCrate = crates.tests-root-task-loader;
           release = false;
         };
-        extraPlatformArgs = lib.optionalAttrs canSimulate  {
+        extraPlatformArgs = lib.optionalAttrs canSimulate {
           canAutomateSimply = true;
         };
       });
@@ -87,7 +87,7 @@ in rec {
           rootCrate = crates.tests-root-task-core-libs;
           release = false;
         };
-        extraPlatformArgs = lib.optionalAttrs canSimulate  {
+        extraPlatformArgs = lib.optionalAttrs canSimulate {
           canAutomateSimply = true;
         };
       });
@@ -97,7 +97,7 @@ in rec {
           rootCrate = crates.tests-root-task-config;
           release = false;
         };
-        extraPlatformArgs = lib.optionalAttrs canSimulate  {
+        extraPlatformArgs = lib.optionalAttrs canSimulate {
           canAutomateSimply = true;
         };
       });
@@ -107,7 +107,7 @@ in rec {
           rootCrate = crates.tests-root-task-tls;
           release = false;
         };
-        extraPlatformArgs = lib.optionalAttrs canSimulate  {
+        extraPlatformArgs = lib.optionalAttrs canSimulate {
           canAutomateSimply = true;
         };
       });
@@ -126,7 +126,7 @@ in rec {
             elf = embedDebugInfo orig.elf;
             inherit orig;
           };
-        extraPlatformArgs = lib.optionalAttrs canSimulate  {
+        extraPlatformArgs = lib.optionalAttrs canSimulate {
           canAutomateSimply = true;
         };
         extraLinks = [
@@ -157,7 +157,7 @@ in rec {
                       panic = panicStrategyName;
                     };
                   };
-                  extraPlatformArgs = lib.optionalAttrs canSimulate  {
+                  extraPlatformArgs = lib.optionalAttrs canSimulate {
                     canAutomateSimply = panicStrategyName == "unwind";
                   };
                 })));
@@ -181,7 +181,7 @@ in rec {
             });
           };
         };
-        extraPlatformArgs = lib.optionalAttrs canSimulate  {
+        extraPlatformArgs = lib.optionalAttrs canSimulate {
           canAutomateSimply = true;
         };
       });
@@ -207,7 +207,7 @@ in rec {
             };
           };
         };
-        extraPlatformArgs = lib.optionalAttrs canSimulate  {
+        extraPlatformArgs = lib.optionalAttrs canSimulate {
           canAutomateSimply = true;
         };
       });
@@ -228,7 +228,7 @@ in rec {
             };
           };
         };
-        extraPlatformArgs = lib.optionalAttrs canSimulate  {
+        extraPlatformArgs = lib.optionalAttrs canSimulate {
           canAutomateSimply = true;
         };
       });
@@ -256,7 +256,7 @@ in rec {
           rootCrate = crates.example-root-task;
           release = false;
         };
-        extraPlatformArgs = lib.optionalAttrs canSimulate  {
+        extraPlatformArgs = lib.optionalAttrs canSimulate {
           canAutomateSimply = true;
         };
       });
@@ -267,7 +267,7 @@ in rec {
           release = false;
           rustTargetInfo = seL4RustTargetInfoWithConfig { minimal = true; };
         };
-        extraPlatformArgs = lib.optionalAttrs canSimulate  {
+        extraPlatformArgs = lib.optionalAttrs canSimulate {
           canAutomateSimply = true;
         };
       });

@@ -34,6 +34,7 @@ stdenv.mkDerivation {
     dtc libxml2
     python3Packages.sel4-deps
   ];
+
   depsBuildBuild = [
     # NOTE: cause drv.__spliced.buildBuild to be used to work around splicing issue
     qemuForSeL4
