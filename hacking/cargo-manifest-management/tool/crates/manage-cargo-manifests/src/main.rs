@@ -40,6 +40,7 @@ pub struct Blueprint {
     pub entries: Vec<Entry>,
 }
 
+// TODO these rename attributes cause a mix of caml and snake case
 #[derive(Debug, Deserialize)]
 pub struct Entry {
     #[serde(rename = "absolutePath")]
