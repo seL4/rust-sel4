@@ -60,20 +60,14 @@ superCallPackage ../rust-utils {} self //
 
   sources = callPackage ./sources.nix {};
 
-  seL4Arch =
-    lib.head
-      (map
-        (x: lib.elemAt x 1)
-        (lib.filter
-          (x: lib.elemAt x 0)
-          (with hostPlatform; [
-            [ isAarch64 "aarch64" ]
-            [ isAarch32 "aarch32" ]
-            [ isRiscV64 "riscv64" ]
-            [ isRiscV32 "riscv32" ]
-            [ isx86_64 "x86_64" ]
-            [ isx86_32 "ia32" ]
-          ])));
+  seL4Arch = with hostPlatform;
+    if isAarch64 then "aarch64" else
+    if isAarch32 then "aarch32" else
+    if isRiscV64 then "riscv64" else
+    if isRiscV32 then "riscv32" else
+    if isx86_64 then "x86_64" else
+    if isx86_32 then "ia32" else
+    throw "unkown platform";
 
   ### rust
 
