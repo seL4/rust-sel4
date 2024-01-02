@@ -21,6 +21,7 @@ let
 in
 
 { release ? true
+, profile ? if release then "release" else null
 , extraManifest ? {}
 , extraConfig ? {}
 , rustTargetInfo ? defaultRustTargetInfo
@@ -87,7 +88,7 @@ runCommand "sysroot" {
     --offline \
     --frozen \
     --config ${config} \
-    ${lib.optionalString release "--release"} \
+    ${lib.optionalString (profile != null) "--profile ${profile}"} \
     --target ${rustTargetInfo.name} \
     -Z build-std=core,alloc,compiler_builtins \
     -Z build-std-features=${features} \
@@ -96,7 +97,7 @@ runCommand "sysroot" {
 
   d=$out/lib/rustlib/${rustTargetInfo.name}/lib
   mkdir -p $d
-  mv target/${rustTargetInfo.name}/${if release then "release" else "debug"}/deps/* $d
+  mv target/${rustTargetInfo.name}/*/deps/* $d
 ''
 
 # TODO

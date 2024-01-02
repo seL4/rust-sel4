@@ -42,19 +42,25 @@ rec {
     fn main() {}
   '';
 
-  dummyLib = writeText "lib.rs" ''
-    #![no_std]
-  '';
+  # dummyLib = writeText "lib.rs" ''
+  #   #![no_std]
+  # '';
 
-  dummyMainWithOrWithoutStd = writeText "main.rs" ''
+  # HACK for cargo test (required by harness = "false")
+  dummyLib = dummyMainOrLibWithOrWithoutStd;
+
+  dummyMainWithOrWithoutStd = dummyMainOrLibWithOrWithoutStd;
+
+  dummyMainOrLibWithOrWithoutStd = writeText "main_or_lib.rs" ''
     #![cfg_attr(target_os = "none", no_std)]
     #![cfg_attr(target_os = "none", no_main)]
     #![cfg_attr(target_os = "none", feature(lang_items))]
+    #![cfg_attr(target_os = "none", feature(core_intrinsics))]
 
     #[cfg(target_os = "none")]
     #[panic_handler]
     extern fn panic_handler(_: &core::panic::PanicInfo) -> ! {
-      todo!()
+      core::intrinsics::abort()
     }
 
     #[cfg(target_os = "none")]
@@ -63,6 +69,7 @@ rec {
     }
 
     #[cfg(not(target_os = "none"))]
+    #[allow(dead_code)]
     fn main() {
     }
   '';
@@ -246,15 +253,16 @@ rec {
           if depAttrs ? path
           then
             let
-              consistent = if state' ? depName then state'.depName == depAttrs.path else true;
+              realDepName = depAttrs.package or depName;
+              consistent = if state' ? "${realDepName}" then state'."${realDepName}" == depAttrs.path else true;
             in
               assert consistent;
               {
                 value = depAttrs // {
-                  path = patch depName depAttrs.path;
+                  path = patch realDepName depAttrs.path;
                 };
                 state = state' // {
-                  "${depName}" = depAttrs.path;
+                  "${realDepName}" = depAttrs.path;
                 };
               }
           else
@@ -293,7 +301,7 @@ rec {
       hasExplicitBuildScript = manifest.package ? "build";
       hasAnyBuildScript = hasImplicitBuildScript || hasExplicitBuildScript;
 
-      extractedAndPatched = extractAndPatchPathDependencies (depName: pathValue: "../${depName}") manifest;
+      extractedAndPatched = extractAndPatchPathDependencies (realDepName: pathValue: "../${realDepName}") manifest;
       pathDependencies = extractedAndPatched.pathDependencies;
       manifestWithPatchedPathDependencies = extractedAndPatched.patchedManifest;
 
@@ -309,7 +317,10 @@ rec {
           package.build = dummyMainWithStdInSrc;
         })
         {
-          lib.path = dummyLibInSrc;
+          lib = {
+            path = dummyLibInSrc;
+            harness = false;
+          };
         }
         {
           bin = lib.forEach (manifest.bin or []) (bin:

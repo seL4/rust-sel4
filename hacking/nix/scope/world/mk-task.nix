@@ -5,6 +5,7 @@
 #
 
 { lib, buildPackages
+, runCommand
 , buildCrateInLayersHere, buildSysroot, crateUtils
 , crates
 , defaultRustTargetInfo
@@ -12,20 +13,29 @@
 , seL4RustEnvVars
 } @ scopeArgs:
 
+let
+  getELFDefault = drv: "${drv}/bin/${drv.rootCrate.name}.elf";
+  getELFDefaultForTest = drv: runCommand "test.elf" {} ''
+    ln -sT ${drv}/bin/*.elf $out
+  '';
+in
+
 { commonModifications ? {}
 , lastLayerModifications ? {}
 
 , extraProfile ? {}
 , replaceSysroot ? null
+, getELF ? if test then getELFDefaultForTest else getELFDefault
 
 , rustTargetInfo ? defaultRustTargetInfo
+
+, test ? false
 , release ? true
+, profile ? if release then "release" else (if test then "test" else "dev")
 , ...
 } @ args:
 
 let
-  profile = if release then "release" else "dev";
-
   profiles = crateUtils.clobber [
     {
       profile.release = {
@@ -49,7 +59,7 @@ let
   ];
 
   sysroot = (if replaceSysroot != null then replaceSysroot else buildSysroot) {
-    inherit release rustTargetInfo;
+    inherit profile rustTargetInfo;
     extraManifest = profiles;
   };
 
@@ -73,12 +83,12 @@ let
 
   theseLastLayerModifications = crateUtils.elaborateModifications {
     modifyDerivation = drv: drv.overrideAttrs (self: super: seL4RustEnvVars // {
-      passthru = (super.passthru or {}) // rec {
-        elf = "${self.finalPackage}/bin/${args.rootCrate.name}.elf";
+      passthru = (super.passthru or {}) // {
+        elf = getELF self.finalPackage;
         # HACK
         split = {
-          min = elf;
-          full = elf;
+          min = self.finalPackage.elf;
+          full = self.finalPackage.elf;
         };
       };
     });
@@ -87,6 +97,7 @@ let
   prunedArgs = builtins.removeAttrs args [
     "extraProfile"
     "replaceSysroot"
+    "getELF"
   ];
 
 in

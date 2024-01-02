@@ -19,10 +19,8 @@ let
 
   rootCrate = crates.sel4-kernel-loader;
 
-  release = true;
-  # release = false;
-
-  profile = if release then "release" else "dev";
+  profile = "release";
+  # profile = "dev";
 
   profiles = crateUtils.clobber [
     {
@@ -41,7 +39,7 @@ let
   ];
 
   sysroot = buildSysroot {
-    inherit release rustTargetInfo;
+    inherit profile rustTargetInfo;
     extraManifest = profiles;
   };
 
@@ -49,7 +47,7 @@ in
 buildCrateInLayersHere {
 
   inherit rootCrate;
-  inherit release;
+  inherit profile;
 
   rustTargetInfo = bareMetalRustTargetInfo;
 

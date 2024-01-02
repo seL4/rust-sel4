@@ -149,7 +149,6 @@ superCallPackage ../rust-utils {} self //
 
   mkTool = rootCrate: buildCrateInLayersHere {
     inherit rootCrate;
-    release = false;
   };
 
   sel4-backtrace-embedded-debug-cli = mkTool crates.sel4-backtrace-embedded-debug-info-cli;
