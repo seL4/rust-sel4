@@ -28,9 +28,26 @@ struct Config {
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 enum Arch {
     AArch64,
-    Riscv64,
-    Riscv32,
+    Riscv64(RiscVArch),
+    Riscv32(RiscVArch),
     X86_64,
+}
+
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+enum RiscVArch {
+    IMAC,
+    IMAFC,
+    GC,
+}
+
+impl RiscVArch {
+    fn arch_suffix_for_target_name(&self) -> String {
+        match self {
+            Self::IMAFC => "imafc".to_owned(),
+            Self::IMAC => "imac".to_owned(),
+            Self::GC => "gc".to_owned(),
+        }
+    }
 }
 
 impl Config {
@@ -56,8 +73,14 @@ impl Config {
                 )]);
                 target
             }
-            Arch::Riscv64 => builtin("riscv64imac-unknown-none-elf"),
-            Arch::Riscv32 => builtin("riscv32imac-unknown-none-elf"),
+            Arch::Riscv64(riscv_arch) => builtin(&format!(
+                "riscv64{}-unknown-none-elf",
+                riscv_arch.arch_suffix_for_target_name()
+            )),
+            Arch::Riscv32(riscv_arch) => builtin(&format!(
+                "riscv32{}-unknown-none-elf",
+                riscv_arch.arch_suffix_for_target_name()
+            )),
             Arch::X86_64 => {
                 let mut target = builtin("x86_64-unknown-none");
                 let options = &mut target.options;
@@ -132,8 +155,12 @@ impl Arch {
     fn name(&self) -> String {
         match self {
             Self::AArch64 => "aarch64".to_owned(),
-            Self::Riscv64 => "riscv64imac".to_owned(),
-            Self::Riscv32 => "riscv32imac".to_owned(),
+            Self::Riscv64(riscv_arch) => {
+                format!("riscv64{}", riscv_arch.arch_suffix_for_target_name())
+            }
+            Self::Riscv32(riscv_arch) => {
+                format!("riscv32{}", riscv_arch.arch_suffix_for_target_name())
+            }
             Self::X86_64 => "x86_64".to_owned(),
         }
     }
@@ -146,7 +173,14 @@ impl Arch {
     }
 
     fn all() -> Vec<Self> {
-        vec![Self::AArch64, Self::Riscv64, Self::Riscv32, Self::X86_64]
+        let mut v = vec![];
+        v.push(Self::AArch64);
+        v.push(Self::Riscv64(RiscVArch::IMAC));
+        v.push(Self::Riscv64(RiscVArch::GC));
+        v.push(Self::Riscv32(RiscVArch::IMAC));
+        // v.push(Self::Riscv32(RiscVArch::IMAFC)); # TODO add after bumping Rust toolchain
+        v.push(Self::X86_64);
+        v
     }
 }
 
