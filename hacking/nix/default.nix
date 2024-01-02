@@ -17,6 +17,10 @@ let
 
 in
 
+# let
+#   defaultNixpkgsPath = ../../../x/nixpkgs;
+# in
+
 { nixpkgsPath ? defaultNixpkgsPath
 , nixpkgsFn ? import nixpkgsPath
 , lib ? import (nixpkgsPath + "/lib")
@@ -63,20 +67,64 @@ let
               config = "armv7l-unknown-linux-gnueabihf";
             };
           };
-          riscv64 = {
-            none = mkLeafWithGuard {
-              config = "riscv64-none-elf";
+          riscv64 = rec {
+            default = imac;
+            imac = {
+              none = mkLeafWithGuard (rec {
+                config = "riscv64-none-elf";
+                gcc = this.gccParams;
+                this = {
+                  rustTargetRiscVArch = "imac";
+                  gccParams = { arch = "rv64imac_zicsr_zifencei"; abi = "lp64"; };
+                };
+              });
             };
-            linux = mkLeafWithGuard {
-              config = "riscv64-unknown-linux-gnu";
+            # TODO
+            # Currently incompatible with the "cc" crate. Must do something like
+            # https://github.com/rust-lang/cc-rs/pull/460 (except for bare metal) or
+            # https://github.com/rust-lang/cc-rs/pull/796.
+            # TODO
+            # Will require KernelRiscvExtD in sel4test.
+            gc = {
+              none = mkLeafWithGuard (rec {
+                config = "riscv64-none-elf";
+                gcc = {}; # equivalent to default, omitting means we can use cached binary
+                this = {
+                  rustTargetRiscVArch = "gc";
+                  gccParams = { arch = "rv64gc"; abi = "lp64d"; };
+                };
+              });
+              linux = mkLeafWithGuard {
+                config = "riscv64-unknown-linux-gnu";
+              };
             };
           };
-          riscv32 = {
-            none = mkLeafWithGuard {
-              config = "riscv32-none-elf";
+          riscv32 = rec {
+            default = imac;
+            imac = {
+              none = mkLeafWithGuard (rec {
+                config = "riscv32-none-elf";
+                gcc = this.gccParams;
+                this = {
+                  rustTargetRiscVArch = "imac";
+                  gccParams = { arch = "rv32imac_zicsr_zifencei"; abi = "ilp32"; };
+                };
+              });
             };
-            linux = mkLeafWithGuard {
-              config = "riscv32-unknown-linux-gnu";
+            # TODO (see note for riscv64.gc)
+            # TODO will require KernelRiscvExtF in sel4test
+            imafc = {
+              none = mkLeafWithGuard (rec {
+                config = "riscv32-none-elf";
+                gcc = {}; # equivalent to default, omitting means we can use cached binary
+                this = {
+                  rustTargetRiscVArch = "imafc";
+                  gccParams = { arch = "rv64imafc_zicsr_zifencei"; abi = "ilp32f"; };
+                };
+              });
+              linux = mkLeafWithGuard {
+                config = "riscv32-unknown-linux-gnu";
+              };
             };
           };
           x86_64 = {

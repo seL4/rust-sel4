@@ -76,8 +76,8 @@ superCallPackage ../rust-utils {} self //
   rustTargetArchName = {
     aarch64 = "aarch64";
     aarch32 = "armv7a";
-    riscv64 = "riscv64imac";
-    riscv32 = "riscv32imac";
+    riscv64 = "riscv64${hostPlatform.this.rustTargetRiscVArch}";
+    riscv32 = "riscv32${hostPlatform.this.rustTargetRiscVArch}";
     x86_64 = "x86_64";
     ia32 = "i686";
   }."${seL4Arch}";
@@ -92,8 +92,8 @@ superCallPackage ../rust-utils {} self //
   bareMetalRustTargetInfo = mkBuiltinRustTargetInfo {
     aarch64 = "aarch64-unknown-none";
     aarch32 = "armv7a-none-eabi"; # armv7a-none-eabihf?
-    riscv64 = "riscv64imac-unknown-none-elf"; # gc?
-    riscv32 = "riscv32imac-unknown-none-elf"; # gc?
+    riscv64 = "riscv64${hostPlatform.this.rustTargetRiscVArch}-unknown-none-elf";
+    riscv32 = "riscv32${hostPlatform.this.rustTargetRiscVArch}-unknown-none-elf";
     x86_64 = "x86_64-unknown-none";
     ia32 = "i686-unknown-linux-gnu"; # HACK
   }."${seL4Arch}";

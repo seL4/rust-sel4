@@ -35,7 +35,8 @@ let
   srcRoot = ../../..;
 
   # TODO
-  localRoot = srcRoot + "/tmp/src";
+  # localRoot = srcRoot + "/tmp/src";
+  localRoot = srcRoot + "/../x";
 
   mkKeepRef = rev: "refs/tags/keep/${builtins.substring 0 32 rev}";
 
@@ -60,7 +61,7 @@ in rec {
 
     rust-sel4test = fetchGit {
       url = "https://github.com/coliasgroup/seL4.git";
-      rev = "b31b459876e01008336394bfa90388d8729ff5f5"; # rust-sel4test
+      rev = "85e36760bd158cf12a170450685eb7b0b05d2076"; # rust-sel4test
       local = localRoot + "/seL4";
     };
   };
