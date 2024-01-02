@@ -31,7 +31,11 @@ in
 , commonModifications ? {}
 , lastLayerModifications ? {}
 
-, release ? true
+, test ? false
+
+, release ? false
+, profile ? if release then "release" else null
+
 , features ? []
 , noDefaultFeatures ? false
 
@@ -66,6 +70,7 @@ let
     superLockfile = superLockfile;
     superLockfileVendoringConfig = superVendoredLockfile.configFragment;
     rootCrates = [ rootCrate ];
+    extraManifest = elaboratedCommonModifications.modifyManifest {}; # TODO
   };
 
   elaboratedCommonModifications = elaborateModifications commonModifications;
@@ -119,23 +124,36 @@ let
     "--features" (lib.concatStringsSep "," features)
   ] ++ lib.optionals noDefaultFeatures [
     "--no-default-features"
-  ] ++ lib.optionals release [
-    "--release"
+  ] ++ lib.optionals (profile != null) [
+    "--profile" profile
   ] ++ [
     "--target" rustTargetInfo.name
     "-j" "$NIX_BUILD_CORES"
   ];
 
-  mkCargoInvocation = commonArgs: buildArgs:
+  cargoSubcommand = if test then "test" else "build";
+
+  mkCargoInvocation = commonArgs: subcommandArgs:
     let
       joinedCommonArgs = lib.concatStringsSep " " commonArgs;
-      joinedBuildArgs = lib.concatStringsSep " " buildArgs;
+      joinedSubcommandArgs = lib.concatStringsSep " "
+        (subcommandArgs ++ lib.optionals test [
+          "--no-run"
+        ]);
     in ''
       ${lib.optionalString runClippy ''
         cargo clippy ${joinedCommonArgs} -- -D warnings
       ''}
-      cargo build ${joinedCommonArgs} ${joinedBuildArgs}
+      cargo ${cargoSubcommand} ${joinedCommonArgs} ${joinedSubcommandArgs}
     '';
+
+  findTestsCommandPrefix = targetDir: [
+    "find"
+      "${targetDir}/${rustTargetInfo.name}/*/deps"
+      "-maxdepth" "1"
+      "-executable"
+      "-name" "'*.elf'"
+  ];
 
   f = accumulatedLayers:
     if lib.length accumulatedLayers == 0
@@ -177,11 +195,16 @@ let
               "--target-dir" "$out"
             ]) []}
 
+            ${lib.optionalString test (lib.concatStringsSep " " (findTestsCommandPrefix "$out" ++ [
+              "-delete"
+            ]))}
+
             runHook postBuild
           '';
 
           passthru = {
-            inherit prev;
+            # for debugging
+            inherit prev workspace config;
           };
         }));
 
@@ -216,15 +239,19 @@ in let
         "--config" "${config}"
         "--manifest-path" "${workspace}/Cargo.toml"
         "--target-dir" "$target_dir"
-      ]) [
+      ]) (lib.optionals (!test) [
         "--out-dir" "$out/bin"
-      ]}
+      ])}
+
+      ${lib.optionalString test (lib.concatStringsSep " " (findTestsCommandPrefix "$target_dir" ++ [
+        "-exec" "install" "-D" "-t" "$out/bin" "'{}'" "';'"
+      ]))}
 
       runHook postBuild
     '';
 
     passthru = {
-      inherit workspace lastIntermediateLayer;
+      inherit rootCrate workspace lastIntermediateLayer;
     };
   }));
 

@@ -121,7 +121,7 @@ let
   ];
 
   sysroot = buildSysroot {
-    release = false;
+    release = false; # TODO why?
     inherit rustTargetInfo;
     extraManifest = profiles;
     compilerBuiltinsWeakIntrinsics = true;
