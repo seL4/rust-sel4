@@ -8,11 +8,9 @@ let
 
   relativeToWorkspaceRoot = relativePath: "${toString ../..}/${relativePath}";
 
+  relativeToTmpSrc = relativePath: relativeToWorkspaceRoot "tmp/src/${relativePath}";
+
 in {
-  # "virtio-drivers" = relativeToWorkspaceRoot "tmp/virtio-drivers";
-  # "mbedtls" = relativeToWorkspaceRoot "tmp/rust-mbedtls/mbedtls";
-  # "mbedtls-sys-auto" = relativeToWorkspaceRoot "tmp/rust-mbedtls/mbedtls-sys";
-  # "mbedtls-platform-support" = relativeToWorkspaceRoot "tmp/rust-mbedtls/mbedtls-platform-support";
-  # "embedded-fat" = relativeToWorkspaceRoot "tmp/rust-embedded-fat";
-  # "volatile" = relativeToWorkspaceRoot "tmp/volatile";
+  # ring = relativeToTmpSrc "ring";
+  # rustls = relativeToTmpSrc "rustls/rustls";
 }
