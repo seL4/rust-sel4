@@ -119,7 +119,7 @@ superCallPackage ../rust-utils {} self //
     then "${rustToolchain}/lib/rustlib/${buildPlatform.config}/bin/rust-lld"
     else null;
 
-  inherit (callPackage ./crates.nix {}) crates publicCrates publicCratesTxt;
+  inherit (callPackage ./crates.nix {}) crates globalPatchSection publicCrates publicCratesTxt;
 
   distribution = callPackage ./distribution.nix {};
 

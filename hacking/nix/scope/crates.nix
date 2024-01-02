@@ -17,6 +17,8 @@ let
   workspaceManifestPath = workspaceDir + "/Cargo.toml";
   workspaceMemberPaths = map (member: workspaceDir + "/${member}") workspaceManifest.workspace.members;
 
+  globalPatchSection = workspaceManifest.patch;
+
   overrides = {
     sel4-sys = {
       extraPaths = [
@@ -73,5 +75,5 @@ let
     (lib.concatMapStrings (crateName: "${crateName}\n") (lib.attrNames publicCrates));
 
 in {
-  inherit crates publicCrates publicCratesTxt;
+  inherit crates globalPatchSection publicCrates publicCratesTxt;
 }
