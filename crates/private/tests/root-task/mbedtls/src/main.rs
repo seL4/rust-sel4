@@ -10,7 +10,6 @@
 use core::ffi::{c_char, c_int, CStr};
 
 use sel4_logging::{LevelFilter, Logger, LoggerBuilder};
-use sel4_newlib as _;
 use sel4_root_task::{debug_print, debug_println, root_task};
 
 const LOG_LEVEL: LevelFilter = LevelFilter::Debug;
@@ -31,21 +30,9 @@ fn main(_: &sel4::BootInfo) -> ! {
     unreachable!()
 }
 
+sel4_newlib::declare_sbrk_with_static_heap!(HEAP_SIZE);
+
 fn run_tests() {
-    {
-        use sel4_newlib::*;
-
-        set_static_heap_for_sbrk({
-            static HEAP: StaticHeap<{ HEAP_SIZE }> = StaticHeap::new();
-            &HEAP
-        });
-
-        let mut impls = Implementations::default();
-        impls._sbrk = Some(sbrk_with_static_heap);
-        impls._write = Some(write_with_debug_put_char);
-        set_implementations(impls)
-    }
-
     unsafe {
         mbedtls::self_test::enable(rand, Some(log));
     }
@@ -112,3 +99,15 @@ const TESTS: &[(&str, Test)] = tests! {
     ecp,
     ecjpake,
 };
+
+#[allow(non_snake_case)]
+mod hack {
+    #[repr(C, align(16))]
+    #[derive(Debug)]
+    pub struct LongDoublePlaceholder(pub [u8; 16]);
+
+    #[no_mangle]
+    extern "C" fn __trunctfdf2(a: LongDoublePlaceholder) -> f64 {
+        sel4_root_task::abort!("__trunctfdf2({:?})", a)
+    }
+}

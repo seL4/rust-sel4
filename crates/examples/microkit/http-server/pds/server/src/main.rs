@@ -74,8 +74,6 @@ static LOGGER: Logger = LoggerBuilder::const_default()
 fn init() -> impl Handler {
     LOGGER.set().unwrap();
 
-    setup_newlib();
-
     let timer_client = TimerClient::new(channels::TIMER_DRIVER);
     let net_client = NetClient::new(channels::NET_DRIVER);
     let block_client = BlockClient::new(channels::BLOCK_DRIVER);
@@ -184,17 +182,4 @@ fn init() -> impl Handler {
     )
 }
 
-fn setup_newlib() {
-    use sel4_newlib::*;
-
-    set_static_heap_for_sbrk({
-        static HEAP: StaticHeap<{ 1024 * 1024 }> = StaticHeap::new();
-        &HEAP
-    });
-
-    set_implementations(Implementations {
-        _sbrk: Some(sbrk_with_static_heap),
-        _write: Some(write_with_debug_put_char),
-        ..Default::default()
-    })
-}
+sel4_newlib::declare_sbrk_with_static_heap!(1024 * 1024);

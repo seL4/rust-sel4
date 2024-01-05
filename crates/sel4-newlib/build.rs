@@ -14,11 +14,13 @@ fn main() {
     if cfg!(feature = "nosys") {
         println!("cargo:rustc-link-lib=static=nosys");
     }
-    if cfg!(feature = "detect-libc") {
+    #[cfg(feature = "detect-libc")]
+    {
         detect_libc();
     }
 }
 
+#[cfg(feature = "detect-libc")]
 fn detect_libc() {
     let tool = cc::Build::new().get_compiler();
 

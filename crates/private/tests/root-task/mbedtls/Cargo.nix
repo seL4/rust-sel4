@@ -29,7 +29,6 @@ mk {
       features = [
         "nosys"
         "all-symbols"
-        "sel4-panicking-env"
       ];
     };
   };

@@ -10,27 +10,22 @@ mk {
   package.name = "sel4-newlib";
   features = {
     default = [ "detect-libc" ];
-    detect-libc = [];
+    detect-libc = [ "cc" ];
     nosys = [];
     _exit = [];
-    __trunctfdf2 = [];
-    _sbrk = [];
     _write = [];
+    errno = [];
     all-symbols = [
       "_exit"
-      "_sbrk"
       "_write"
-      "__trunctfdf2"
+      "errno"
     ];
   };
   dependencies = {
-    inherit (versions) log;
-    inherit (localCrates)
-      sel4-immediate-sync-once-cell
-    ;
-    sel4-panicking-env = localCrates.sel4-panicking-env // { optional = true; };
+    inherit (localCrates) sel4-panicking-env;
+    log = { version = versions.log; optional = true; };
   };
   build-dependencies = {
-    cc = "1.0.82";
+    cc = { version = "1.0.82"; optional = true; };
   };
 }

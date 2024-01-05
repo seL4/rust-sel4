@@ -20,9 +20,6 @@ license = "BSD-2-Clause"
 getrandom = { version = "0.2.10", features = ["custom"] }
 rand = { version = "0.8.5", default-features = false, features = ["small_rng"] }
 sel4 = { path = "../../../../sel4" }
+sel4-newlib = { path = "../../../../sel4-newlib", features = ["nosys", "all-symbols"] }
 sel4-root-task = { path = "../../../../sel4-root-task" }
 sel4-test-harness = { path = "../../../../sel4-test-harness" }
-
-[dependencies.sel4-newlib]
-path = "../../../../sel4-newlib"
-features = ["nosys", "all-symbols", "sel4-panicking-env"]

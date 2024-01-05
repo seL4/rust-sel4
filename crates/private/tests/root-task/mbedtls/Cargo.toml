@@ -20,6 +20,7 @@ license = "BSD-2-Clause"
 log = "0.4.17"
 sel4 = { path = "../../../../sel4" }
 sel4-logging = { path = "../../../../sel4-logging" }
+sel4-newlib = { path = "../../../../sel4-newlib", features = ["nosys", "all-symbols"] }
 sel4-root-task = { path = "../../../../sel4-root-task" }
 
 [dependencies.mbedtls]
@@ -37,7 +38,3 @@ default-features = false
 git = "https://github.com/coliasgroup/rust-mbedtls"
 tag = "keep/30d001b63baea36135b2590c4fd05e95"
 default-features = false
-
-[dependencies.sel4-newlib]
-path = "../../../../sel4-newlib"
-features = ["nosys", "all-symbols", "sel4-panicking-env"]
