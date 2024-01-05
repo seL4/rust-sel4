@@ -1,0 +1,34 @@
+#
+# Copyright 2023, Colias Group, LLC
+#
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+#
+# This file is generated from './Cargo.nix'. You can edit this file directly
+# if you are not using this project's Cargo manifest management tools.
+# See 'hacking/cargo-manifest-management/README.md' for more information.
+#
+
+[package]
+name = "sel4-async-network-rustls"
+version = "0.1.0"
+authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
+edition = "2021"
+license = "Apache-2.0 OR ISC OR MIT"
+
+[dependencies]
+async-trait = "0.1.73"
+futures = { version = "0.3.28", default-features = false, features = ["alloc"] }
+getrandom = { version = "0.2.10", features = ["custom"] }
+log = "0.4.17"
+rand = { version = "0.8.5", default-features = false, features = ["small_rng"] }
+ring = { version = "0.17.7", features = ["less-safe-getrandom-custom-or-rdrand"] }
+sel4-async-network = { path = ".." }
+sel4-async-time = { path = "../../time" }
+sel4-newlib = { path = "../../../sel4-newlib", features = ["nosys", "all-symbols"] }
+
+[dependencies.rustls]
+git = "https://github.com/coliasgroup/rustls.git"
+rev = "c315801aa0c1e9c765b27106b3969dd458995cc7"
+default-features = false
+features = ["logging", "ring", "tls12"]
