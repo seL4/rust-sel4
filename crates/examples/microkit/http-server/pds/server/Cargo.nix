@@ -44,6 +44,7 @@ mk {
       sel4-shared-ring-buffer-block-io-types
       sel4-async-block-io
       sel4-async-block-io-fat
+      microkit-http-server-example-pl031-driver-interface-types
       microkit-http-server-example-sp804-driver-interface-types
       microkit-http-server-example-virtio-blk-driver-interface-types
       microkit-http-server-example-virtio-net-driver-interface-types

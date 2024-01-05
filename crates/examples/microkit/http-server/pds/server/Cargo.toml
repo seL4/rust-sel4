@@ -37,6 +37,9 @@ sel4-shared-ring-buffer-block-io = { path = "../../../../../sel4-shared-ring-buf
 sel4-shared-ring-buffer-smoltcp = { path = "../../../../../sel4-shared-ring-buffer/smoltcp" }
 sel4-sync = { path = "../../../../../sel4-sync" }
 
+[dependencies.microkit-http-server-example-pl031-driver-interface-types]
+path = "../pl031-driver/interface-types"
+
 [dependencies.microkit-http-server-example-sp804-driver-interface-types]
 path = "../sp804-driver/interface-types"
 

@@ -5,8 +5,8 @@
      SPDX-License-Identifier: BSD-2-Clause
 -->
 <system>
+    <memory_region name="pl031_mmio" size="0x1000" phys_addr="0x9010000" />
     <memory_region name="sp804_mmio" size="0x1000" phys_addr="0x90d0000" />
-
     <memory_region name="virtio_mmio" size="0x1000" phys_addr="0xa003000" />
 
     <memory_region name="virtio_net_driver_dma" size="0x200_000" page_size="0x200_000" />
@@ -37,6 +37,12 @@
 
         <map mr="virtio_blk_free" vaddr="0x4_000_000_000" perms="rw" cached="true" setvar_vaddr="virtio_blk_free" />
         <map mr="virtio_blk_used" vaddr="0x4_001_000_000" perms="rw" cached="true" setvar_vaddr="virtio_blk_used" />
+    </protection_domain>
+
+    <protection_domain name="pl031_driver" pp="true" priority="251">
+        <program_image path="microkit-http-server-example-pl031-driver.elf" />
+        <map mr="pl031_mmio"  vaddr="0x5_000_000_000" perms="rw" cached="false" setvar_vaddr="pl031_mmio_vaddr" />
+        <irq irq="34" id="0" />
     </protection_domain>
 
     <protection_domain name="sp804_driver" pp="true" priority="254">
@@ -81,16 +87,21 @@
 
     <channel>
         <end pd="http_server" id="0" />
-        <end pd="sp804_driver" id="1" />
+        <end pd="pl031_driver" id="1" />
     </channel>
 
     <channel>
         <end pd="http_server" id="1" />
-        <end pd="virtio_net_driver" id="1" />
+        <end pd="sp804_driver" id="1" />
     </channel>
 
     <channel>
         <end pd="http_server" id="2" />
+        <end pd="virtio_net_driver" id="1" />
+    </channel>
+
+    <channel>
+        <end pd="http_server" id="3" />
         <end pd="virtio_blk_driver" id="1" />
     </channel>
 </system>
