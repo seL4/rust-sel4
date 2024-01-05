@@ -1745,7 +1745,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "52c4f3084aa3bc7dfbba4eff4fab2a54db4324965d8872ab933565e6fbd83bc6"
 dependencies = [
  "pem",
- "ring",
+ "ring 0.16.20",
  "time",
  "yasna",
 ]
@@ -1789,9 +1789,22 @@ dependencies = [
  "libc",
  "once_cell",
  "spin 0.5.2",
- "untrusted",
+ "untrusted 0.7.1",
  "web-sys",
  "winapi",
+]
+
+[[package]]
+name = "ring"
+version = "0.17.7"
+source = "git+https://github.com/coliasgroup/ring.git?rev=10a2b3cbe68da77f9f20ebb3776ab4c605f2b40e#10a2b3cbe68da77f9f20ebb3776ab4c605f2b40e"
+dependencies = [
+ "cc",
+ "getrandom",
+ "libc",
+ "spin 0.9.8",
+ "untrusted 0.9.0",
+ "windows-sys",
 ]
 
 [[package]]
@@ -1868,6 +1881,36 @@ dependencies = [
  "libc",
  "linux-raw-sys",
  "windows-sys",
+]
+
+[[package]]
+name = "rustls"
+version = "0.23.0-alpha.0"
+source = "git+https://github.com/coliasgroup/rustls.git?rev=c315801aa0c1e9c765b27106b3969dd458995cc7#c315801aa0c1e9c765b27106b3969dd458995cc7"
+dependencies = [
+ "log",
+ "ring 0.17.7",
+ "rustls-pki-types",
+ "rustls-webpki",
+ "subtle",
+ "zeroize",
+]
+
+[[package]]
+name = "rustls-pki-types"
+version = "1.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9e9d979b3ce68192e42760c7810125eb6cf2ea10efae545a156063e61f314e2a"
+
+[[package]]
+name = "rustls-webpki"
+version = "0.102.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ef4ca26037c909dedb327b48c3327d0ba91d3dd3c4e05dad328f210ffb68e95b"
+dependencies = [
+ "ring 0.17.7",
+ "rustls-pki-types",
+ "untrusted 0.9.0",
 ]
 
 [[package]]
@@ -1969,6 +2012,22 @@ dependencies = [
 [[package]]
 name = "sel4-async-network-mbedtls-mozilla-ca-list"
 version = "0.1.0"
+
+[[package]]
+name = "sel4-async-network-rustls"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "futures",
+ "getrandom",
+ "log",
+ "rand",
+ "ring 0.17.7",
+ "rustls",
+ "sel4-async-network",
+ "sel4-async-time",
+ "sel4-newlib",
+]
 
 [[package]]
 name = "sel4-async-single-threaded-executor"
@@ -3181,6 +3240,12 @@ name = "untrusted"
 version = "0.7.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a156c684c91ea7d62626509bce3cb4e1d9ed5c4d978f7b4352658f96a4c26b4a"
+
+[[package]]
+name = "untrusted"
+version = "0.9.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8ecb6da28b8a351d773b68d5825ac39017e680750f980f3a1a85cd8dd28a47c1"
 
 [[package]]
 name = "unwinding"

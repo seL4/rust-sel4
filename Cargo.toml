@@ -64,6 +64,7 @@ members = [
     "crates/sel4-async/network",
     "crates/sel4-async/network/mbedtls",
     "crates/sel4-async/network/mbedtls/mozilla-ca-list",
+    "crates/sel4-async/network/rustls",
     "crates/sel4-async/single-threaded-executor",
     "crates/sel4-async/time",
     "crates/sel4-async/unsync",
@@ -134,3 +135,7 @@ members = [
     "crates/sel4/sys",
     "crates/sel4/sys/wrappers",
 ]
+
+[patch.crates-io.ring]
+git = "https://github.com/coliasgroup/ring.git"
+rev = "10a2b3cbe68da77f9f20ebb3776ab4c605f2b40e"
