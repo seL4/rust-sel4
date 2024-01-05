@@ -18,7 +18,6 @@ mk rec {
       features = [
         "nosys"
         "all-symbols"
-        "sel4-panicking-env"
       ];
     };
     getrandom = {
