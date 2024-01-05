@@ -4,6 +4,8 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
+// TODO *const vs *mut
+
 use core::ops::Deref;
 
 use tock_registers::interfaces::{ReadWriteable, Readable, Writeable};
