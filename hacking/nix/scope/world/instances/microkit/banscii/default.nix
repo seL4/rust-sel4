@@ -25,13 +25,16 @@ let
   pds = {
     pl011-driver = mkPD rec {
       rootCrate = crates.banscii-pl011-driver;
+      release = true;
     };
     assistant = mkPD rec {
       rootCrate = crates.banscii-assistant;
+      release = true;
       rustTargetInfo = seL4RustTargetInfoWithConfig { microkit = true; minimal = false; };
     };
     artist = mkPD rec {
       rootCrate = crates.banscii-artist;
+      release = true;
       extraProfile = {
         # For RSA key generation
         build-override = {
