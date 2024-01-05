@@ -155,6 +155,11 @@ let
       };
       # lastLayerModifications = seL4Modifications;
     };
+    pl031-driver = mkPD {
+      rootCrate = crates.microkit-http-server-example-pl031-driver;
+      release = true;
+      inherit rustTargetInfo;
+    };
     sp804-driver = mkPD {
       rootCrate = crates.microkit-http-server-example-sp804-driver;
       release = true;
@@ -179,6 +184,7 @@ lib.fix (self: mkMicrokitInstance {
       name = "x";
       paths = [
         "${pds.http-server}/bin"
+        "${pds.pl031-driver}/bin"
         "${pds.sp804-driver}/bin"
         "${pds.virtio-net-driver}/bin"
         "${pds.virtio-blk-driver}/bin"
