@@ -93,6 +93,7 @@ in rec {
     clap = "4.4.6";
     fallible-iterator = "0.2.0";
     futures = "0.3.28";
+    getrandom = "0.2.10";
     gimli = "0.28.0";
     heapless = "0.7.16";
     log = "0.4.17";
@@ -104,6 +105,7 @@ in rec {
     postcard = "1.0.2";
     proc-macro2 = "1.0.50";
     quote = "1.0.23";
+    rand = "0.8.5";
     serde = "1.0.147";
     serde_json = "1.0.87";
     serde_yaml = "0.9.14";
