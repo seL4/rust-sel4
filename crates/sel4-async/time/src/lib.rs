@@ -139,11 +139,13 @@ impl Future for Sleep {
 
 impl Drop for Sleep {
     fn drop(&mut self) {
-        self.timer_manager
-            .shared()
-            .borrow_mut()
-            .pending
-            .remove(&self.timer_key);
+        if !self.timer_shared.borrow().expired {
+            self.timer_manager
+                .shared()
+                .borrow_mut()
+                .pending
+                .remove(&self.timer_key);
+        }
     }
 }
 
