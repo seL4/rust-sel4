@@ -17,6 +17,8 @@ mkTask {
 
   rootCrate = crates.sel4-capdl-initializer;
 
+  release = true;
+
   rustTargetInfo = seL4RustTargetInfoWithConfig { minimal = true; };
 
   # release = false;
