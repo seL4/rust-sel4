@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
 #
 
-{ mk, localCrates, versions, serdeWith, smoltcpWith }:
+{ mk, localCrates, versions, serdeWith, smoltcpWith, ringWith }:
 
 mk {
   package.name = "microkit-http-server-example-server";
@@ -21,7 +21,9 @@ mk {
       ];
     };
 
-    smoltcp = smoltcpWith [];
+    smoltcp = smoltcpWith [
+      "log"
+    ];
 
     async-unsync = { version = versions.async-unsync; default-features = false; };
 

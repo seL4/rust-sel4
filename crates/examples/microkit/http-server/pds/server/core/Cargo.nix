@@ -4,12 +4,12 @@
 # SPDX-License-Identifier: BSD-2-Clause
 #
 
-{ mk, localCrates, versions, smoltcpWith, mbedtlsWith }:
+{ mk, localCrates, versions, smoltcpWith, rustlsWith }:
 
 mk {
   package.name = "microkit-http-server-example-server-core";
   dependencies = {
-    inherit (versions) log;
+    inherit (versions) log webpki-roots;
 
     futures = {
       version = versions.futures;
@@ -22,22 +22,21 @@ mk {
 
     httparse = { version = "1.8.0"; default-features = false; };
 
-    mbedtls = mbedtlsWith [];
+    smoltcp = smoltcpWith [];
+
+    rustls = rustlsWith [];
+
+    rustls-pemfile = { version = "2.0.0"; default-features = false; };
 
     inherit (localCrates)
       sel4-async-single-threaded-executor
       sel4-async-unsync
-      sel4-async-network
-      sel4-async-network-mbedtls
       sel4-async-time
+      sel4-async-network
+      sel4-async-network-rustls
       sel4-panicking-env
       sel4-async-block-io
       sel4-async-block-io-fat
-      # mbedtls
     ;
-  };
-
-  features = {
-    debug = [ "mbedtls/debug" ];
   };
 }
