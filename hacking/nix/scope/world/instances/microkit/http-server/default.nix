@@ -12,6 +12,7 @@
 , microkit
 
 , crates
+, globalPatchSection
 , crateUtils
 , sources
 
@@ -140,18 +141,19 @@ let
       # ];
       inherit rustTargetInfo;
       commonModifications = {
+        modifyManifest = lib.flip lib.recursiveUpdate {
+          patch.crates-io = {
+            inherit (globalPatchSection.crates-io) ring;
+          };
+        };
         modifyDerivation = drv: drv.overrideAttrs (self: super: {
           HOST_CC = "${buildPackages.stdenv.cc.targetPrefix}gcc";
-          "BINDGEN_EXTRA_CLANG_ARGS_${rustTargetInfo.name}" = [ "-I${libcDir}/include" ];
-          nativeBuildInputs = super.nativeBuildInputs ++ [
-            cmake
+          nativeBuildInputs = (super.nativeBuildInputs or []) ++ [
             perl
-            python3Packages.jsonschema
-            python3Packages.jinja2
           ];
         });
       };
-      lastLayerModifications = seL4Modifications;
+      # lastLayerModifications = seL4Modifications;
     };
     sp804-driver = mkPD {
       rootCrate = crates.microkit-http-server-example-sp804-driver;

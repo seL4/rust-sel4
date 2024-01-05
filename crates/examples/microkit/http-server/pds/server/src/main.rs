@@ -17,6 +17,8 @@
 extern crate alloc;
 
 use alloc::rc::Rc;
+use alloc::sync::Arc;
+use core::time::Duration;
 
 use smoltcp::iface::Config;
 use smoltcp::phy::{Device, Medium};
@@ -25,6 +27,7 @@ use smoltcp::wire::{EthernetAddress, HardwareAddress};
 use sel4_async_block_io::{
     constant_block_sizes::BlockSize512, disk::Disk, CachedBlockIO, ConstantBlockSize,
 };
+use sel4_async_time::Instant;
 use sel4_bounce_buffer_allocator::{Basic, BounceBufferAllocator};
 use sel4_externally_shared::{ExternallySharedRef, ExternallySharedRefExt};
 use sel4_logging::{LevelFilter, Logger, LoggerBuilder};
@@ -76,6 +79,8 @@ fn init() -> impl Handler {
     let timer_client = TimerClient::new(channels::TIMER_DRIVER);
     let net_client = NetClient::new(channels::NET_DRIVER);
     let block_client = BlockClient::new(channels::BLOCK_DRIVER);
+
+    let timer_client = Arc::new(timer_client);
 
     let notify_net: fn() = || channels::NET_DRIVER.notify();
     let notify_block: fn() = || channels::BLOCK_DRIVER.notify();
@@ -152,6 +157,11 @@ fn init() -> impl Handler {
         )
     };
 
+    let now_fn = {
+        let timer_client = timer_client.clone();
+        move || Instant::ZERO + Duration::from_micros(timer_client.now())
+    };
+
     HandlerImpl::new(
         channels::TIMER_DRIVER,
         channels::NET_DRIVER,
@@ -168,6 +178,7 @@ fn init() -> impl Handler {
             let fs_block_io = disk.partition_using_mbr(&entry);
             let fs_block_io = Rc::new(fs_block_io);
             run_server(
+                now_fn,
                 timers_ctx,
                 network_ctx,
                 fs_block_io,
@@ -181,4 +192,5 @@ fn init() -> impl Handler {
     )
 }
 
+// TODO remove
 sel4_newlib::declare_sbrk_with_static_heap!(1024 * 1024);
