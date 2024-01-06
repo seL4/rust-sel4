@@ -1,6 +1,7 @@
 {
   "arch": "riscv32",
   "cpu": "generic-rv32",
+  "crt-objects-fallback": "false",
   "data-layout": "e-m:e-p:32:32-i64:64-n32-S128",
   "eh-frame-header": false,
   "emit-debug-gdb-scripts": false,
@@ -8,7 +9,7 @@
   "exe-suffix": ".elf",
   "features": "+m,+a,+c",
   "linker": "rust-lld",
-  "linker-flavor": "ld.lld",
+  "linker-flavor": "gnu-lld",
   "llvm-target": "riscv32",
   "max-atomic-width": 32,
   "panic-strategy": "abort",

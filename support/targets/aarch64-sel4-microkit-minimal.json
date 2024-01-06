@@ -1,5 +1,6 @@
 {
   "arch": "aarch64",
+  "crt-objects-fallback": "false",
   "data-layout": "e-m:e-i8:8:32-i16:16:32-i64:64-i128:128-n32:64-S128",
   "disable-redzone": true,
   "eh-frame-header": false,
@@ -8,17 +9,20 @@
   "features": "+v8a,+strict-align,+neon,+fp-armv8",
   "link-script": "__sel4_ipc_buffer_obj = (_end + 4096 - 1) & ~(4096 - 1);",
   "linker": "rust-lld",
-  "linker-flavor": "ld.lld",
+  "linker-flavor": "gnu-lld",
   "llvm-target": "aarch64-none-elf",
   "max-atomic-width": 128,
   "panic-strategy": "abort",
   "pre-link-args": {
-    "ld.lld": [
+    "gnu-lld": [
       "-z",
       "max-page-size=4096"
     ]
   },
   "relocation-model": "static",
+  "stack-probes": {
+    "kind": "inline"
+  },
   "supported-sanitizers": [
     "kcfi",
     "kernel-address"
