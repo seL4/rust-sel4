@@ -52,6 +52,7 @@ rec {
   dummyMainWithOrWithoutStd = dummyMainOrLibWithOrWithoutStd;
 
   dummyMainOrLibWithOrWithoutStd = writeText "main_or_lib.rs" ''
+    #![allow(internal_features)]
     #![cfg_attr(target_os = "none", no_std)]
     #![cfg_attr(target_os = "none", no_main)]
     #![cfg_attr(target_os = "none", feature(lang_items))]
