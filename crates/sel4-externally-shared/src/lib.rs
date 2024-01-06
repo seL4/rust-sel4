@@ -31,6 +31,8 @@ pub type ExternallySharedRef<'a, T, A = ReadWrite> = VolatileRef<'a, T, A, Exter
 pub type ExternallySharedPtr<'a, T, A = ReadWrite> = VolatilePtr<'a, T, A, ExternallySharedOps>;
 
 pub trait ExternallySharedRefExt<'a, T: ?Sized, A: Access> {
+    #[allow(clippy::missing_safety_doc)]
+    #[allow(clippy::new_ret_no_self)]
     unsafe fn new(pointer: NonNull<T>) -> ExternallySharedRef<'a, T, A>;
 }
 

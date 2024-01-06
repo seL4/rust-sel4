@@ -104,7 +104,7 @@ impl<A: AbstractBounceBufferAllocator> Inner<A> {
 
         while let Some(desc) = self.rx_ring_buffers.used_mut().dequeue()? {
             let ix = desc.cookie();
-            if !(ix < self.rx_buffers.capacity()) {
+            if ix >= self.rx_buffers.capacity() {
                 return Err(PeerMisbehaviorError::OutOfBoundsCookie);
             }
 

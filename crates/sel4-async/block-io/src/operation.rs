@@ -170,6 +170,7 @@ impl<'a, A: Access> Iterator for OperationChunks<'a, A> {
 }
 
 impl<'a> Operation<'a, ReadOnly> {
+    #[allow(clippy::explicit_auto_deref)]
     pub fn as_read(&'a mut self) -> &'a mut [u8] {
         match self {
             Self::Read { buf, .. } => buf,
@@ -179,6 +180,7 @@ impl<'a> Operation<'a, ReadOnly> {
 }
 
 impl<'a> Operation<'a, WriteOnly> {
+    #[allow(clippy::explicit_auto_deref)]
     pub fn as_write(&'a self) -> &'a [u8] {
         match self {
             Self::Read { witness, .. } => *witness,

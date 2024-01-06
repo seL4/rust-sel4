@@ -603,7 +603,7 @@ pub async fn read_bytes<T: BlockIO<A>, A: ReadAccess>(
 pub async fn write_bytes<T: BlockIO<A>, A: ReadAccess + WriteAccess>(
     io: &T,
     offset: u64,
-    buf: &mut [u8],
+    buf: &[u8],
 ) -> Result<(), T::Error> {
     read_or_write_bytes(io, offset, Operation::write(buf)).await
 }

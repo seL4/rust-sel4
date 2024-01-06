@@ -129,9 +129,9 @@ impl<'a, T: Atomic, A: Readable + Writable> AtomicPtr<'a, T, A> {
     where
         F: FnMut(T) -> Option<T>,
     {
-        let mut prev = self.load(fetch_order.into());
+        let mut prev = self.load(fetch_order);
         while let Some(next) = f(prev) {
-            match self.compare_exchange_weak(prev, next, set_order.into(), fetch_order.into()) {
+            match self.compare_exchange_weak(prev, next, set_order, fetch_order) {
                 x @ Ok(_) => return x,
                 Err(next_prev) => prev = next_prev,
             }
