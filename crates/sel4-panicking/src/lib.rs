@@ -12,6 +12,7 @@
 #![feature(panic_can_unwind)]
 #![feature(panic_info_message)]
 #![feature(thread_local)]
+#![allow(internal_features)]
 
 #[cfg(feature = "alloc")]
 extern crate alloc;

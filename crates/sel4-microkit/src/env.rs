@@ -57,5 +57,3 @@ macro_rules! var {
         $symbol.get()
     }};
 }
-
-pub use var;

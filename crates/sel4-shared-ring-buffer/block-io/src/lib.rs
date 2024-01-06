@@ -5,8 +5,6 @@
 //
 
 #![no_std]
-#![feature(async_fn_in_trait)]
-#![feature(return_position_impl_trait_in_trait)]
 #![allow(clippy::useless_conversion)]
 
 extern crate alloc;

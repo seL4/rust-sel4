@@ -7,6 +7,7 @@
 #![no_std]
 #![feature(core_intrinsics)]
 #![feature(linkage)]
+#![allow(internal_features)]
 
 use core::fmt;
 use core::panic::Location;

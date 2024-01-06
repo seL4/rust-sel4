@@ -9,12 +9,14 @@
 #![feature(c_size_t)]
 #![feature(const_trait_impl)]
 #![feature(core_intrinsics)]
+#![feature(exposed_provenance)]
 #![feature(lang_items)]
 #![feature(linkage)]
 #![feature(never_type)]
 #![feature(strict_provenance)]
 #![feature(thread_local)]
 #![feature(unwrap_infallible)]
+#![allow(internal_features)]
 
 #[cfg(feature = "alloc")]
 extern crate alloc;

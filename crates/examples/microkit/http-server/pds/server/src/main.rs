@@ -6,7 +6,6 @@
 
 #![no_std]
 #![no_main]
-#![feature(async_fn_in_trait)]
 #![feature(int_roundings)]
 #![feature(never_type)]
 #![feature(pattern)]

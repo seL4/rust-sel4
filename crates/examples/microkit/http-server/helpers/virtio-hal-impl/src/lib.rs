@@ -5,6 +5,7 @@
 //
 
 #![no_std]
+#![feature(exposed_provenance)]
 #![feature(ptr_metadata)]
 #![feature(slice_ptr_get)]
 #![feature(strict_provenance)]

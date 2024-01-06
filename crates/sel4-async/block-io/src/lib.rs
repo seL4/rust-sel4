@@ -6,7 +6,6 @@
 
 #![no_std]
 #![feature(associated_type_bounds)]
-#![feature(async_fn_in_trait)]
 #![feature(const_option)]
 #![feature(int_roundings)]
 #![feature(never_type)]
@@ -47,12 +46,14 @@ pub trait BlockIOLayout {
 }
 
 pub trait BlockIO<A: Access>: BlockIOLayout {
+    #[allow(async_fn_in_trait)]
     async fn read_or_write_blocks(
         &self,
         start_block_idx: u64,
         operation: Operation<'_, A>,
     ) -> Result<(), Self::Error>;
 
+    #[allow(async_fn_in_trait)]
     async fn read_blocks(&self, start_block_idx: u64, buf: &mut [u8]) -> Result<(), Self::Error>
     where
         A: ReadAccess,
@@ -67,6 +68,7 @@ pub trait BlockIO<A: Access>: BlockIOLayout {
         .await
     }
 
+    #[allow(async_fn_in_trait)]
     async fn write_blocks(&self, start_block_idx: u64, buf: &[u8]) -> Result<(), Self::Error>
     where
         A: WriteAccess,
@@ -342,12 +344,14 @@ pub trait ByteIOLayout {
 }
 
 pub trait ByteIO<A: Access>: ByteIOLayout {
+    #[allow(async_fn_in_trait)]
     async fn read_or_write(
         &self,
         offset: u64,
         operation: Operation<'_, A>,
     ) -> Result<(), Self::Error>;
 
+    #[allow(async_fn_in_trait)]
     async fn read(&self, offset: u64, buf: &mut [u8]) -> Result<(), Self::Error>
     where
         A: ReadAccess,
@@ -355,6 +359,7 @@ pub trait ByteIO<A: Access>: ByteIOLayout {
         self.read_or_write(offset, Operation::read(buf)).await
     }
 
+    #[allow(async_fn_in_trait)]
     async fn write(&self, offset: u64, buf: &[u8]) -> Result<(), Self::Error>
     where
         A: WriteAccess,

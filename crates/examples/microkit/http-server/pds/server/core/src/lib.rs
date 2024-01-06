@@ -36,7 +36,7 @@ const HTTP_PORT: u16 = 80;
 const HTTPS_PORT: u16 = 443;
 
 pub async fn run_server<
-    T: BlockIO<ReadOnly, BlockSize = constant_block_sizes::BlockSize512> + Clone,
+    T: BlockIO<ReadOnly, BlockSize = constant_block_sizes::BlockSize512> + Clone + 'static,
 >(
     _timers_ctx: TimerManager,
     network_ctx: ManagedInterface,

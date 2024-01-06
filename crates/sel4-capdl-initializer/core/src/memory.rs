@@ -11,7 +11,7 @@ use sel4::SizedFrameType;
 use super::frame_types;
 
 #[repr(align(4096))]
-struct SmallPagePlaceHolder([u8; frame_types::FrameType0::FRAME_SIZE.bytes()]);
+struct SmallPagePlaceHolder(#[allow(dead_code)] [u8; frame_types::FrameType0::FRAME_SIZE.bytes()]);
 
 static SMALL_PAGE_PLACEHOLDER: SmallPagePlaceHolder =
     SmallPagePlaceHolder([0; frame_types::FrameType0::FRAME_SIZE.bytes()]);
