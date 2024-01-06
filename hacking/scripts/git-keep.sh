@@ -7,7 +7,7 @@
 
 # example usage: git-keep origin HEAD
 
-set -eu
+set -eu -o pipefail
 
 remote="${1:-origin}"
 ref="${2:-HEAD}"

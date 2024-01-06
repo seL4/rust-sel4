@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
 #
 
-set -eu
+set -eu -o pipefail
 
 here=$(realpath $(dirname $0))
 top_level_dir=$here/../..
