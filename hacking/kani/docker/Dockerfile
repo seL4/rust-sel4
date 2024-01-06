@@ -42,7 +42,7 @@ RUN set -eux; \
 USER $UID
 
 # Optimize by matching rust-toolchain.toml
-ENV DEFAULT_TOOLCHAIN=nightly-2023-08-02
+ENV DEFAULT_TOOLCHAIN=nightly-2024-01-06
 
 RUN curl -sSf -L https://sh.rustup.rs | \
         bash -s -- -y --no-modify-path --default-toolchain $DEFAULT_TOOLCHAIN
