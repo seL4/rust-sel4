@@ -23,6 +23,7 @@ pub trait SlotSemaphore {
 }
 
 pub trait AsyncSlotSemaphore: SlotSemaphore {
+    #[allow(clippy::needless_lifetimes)]
     fn take<'a>(
         &'a self,
         n: usize,
@@ -205,6 +206,7 @@ impl From<SlotCountTrackerError> for Error {
 pub struct SlotSemaphoreClosedError(());
 
 impl SlotSemaphoreClosedError {
+    #[allow(clippy::new_without_default)]
     pub fn new() -> Self {
         Self(())
     }
@@ -214,6 +216,7 @@ impl SlotSemaphoreClosedError {
 pub struct SlotReservationExhaustedError(());
 
 impl SlotReservationExhaustedError {
+    #![allow(clippy::new_without_default)]
     pub fn new() -> Self {
         Self(())
     }

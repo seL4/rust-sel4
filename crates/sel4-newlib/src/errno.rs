@@ -21,6 +21,7 @@ pub(crate) fn set_errno(err: c_int) {
     }
 }
 
+#[allow(dead_code)]
 pub(crate) mod values {
     use super::*;
 

@@ -45,7 +45,9 @@ impl TimerShared {
     fn mark_expired(&mut self) {
         assert!(!self.expired);
         self.expired = true;
-        self.waker.take().map(Waker::wake);
+        if let Some(waker) = self.waker.take() {
+            waker.wake();
+        };
     }
 }
 
@@ -71,6 +73,7 @@ impl TimerManagerShared {
 }
 
 impl TimerManager {
+    #![allow(clippy::new_without_default)]
     pub fn new() -> Self {
         Self {
             shared: Rc::new(RefCell::new(TimerManagerShared::new())),
@@ -155,6 +158,7 @@ pub struct Timeout<F> {
 impl<F: Future> Future for Timeout<F> {
     type Output = Result<F::Output, Elapsed>;
 
+    #[allow(clippy::redundant_pattern_matching)]
     fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
         let this = self.project();
         if let Poll::Ready(v) = this.value.poll(cx) {

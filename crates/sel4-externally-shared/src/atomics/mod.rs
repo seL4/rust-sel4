@@ -41,6 +41,7 @@ impl<T, A> fmt::Debug for AtomicPtr<'_, T, A> {
 }
 
 impl<'a, T, A> AtomicPtr<'a, T, A> {
+    #[allow(clippy::missing_safety_doc)]
     pub const unsafe fn new(pointer: NonNull<T>) -> Self {
         AtomicPtr {
             pointer,
@@ -62,6 +63,7 @@ impl<'a, T, A> AtomicPtr<'a, T, A> {
     }
 }
 
+#[allow(clippy::missing_safety_doc)]
 pub unsafe trait Atomic: AtomicSealed + Copy {
     const IS_SIGNED: bool;
 }

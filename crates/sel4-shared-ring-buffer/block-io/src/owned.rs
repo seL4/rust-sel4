@@ -174,7 +174,7 @@ impl<S: SlotSemaphore, A: AbstractBounceBufferAllocator, F: FnMut()>
         )
     }
 
-    pub fn issue_request<'a>(
+    pub fn issue_request(
         &mut self,
         reservation: &mut SlotSetReservation<'_, S, NUM_SLOT_POOLS>,
         start_block_idx: u64,
@@ -209,7 +209,7 @@ impl<S: SlotSemaphore, A: AbstractBounceBufferAllocator, F: FnMut()>
 
         self.requests
             .occupy(Occupied {
-                req: req.clone(),
+                req,
                 state: OccupiedState::Pending { waker: None },
             })
             .unwrap();
@@ -355,7 +355,9 @@ impl<S: SlotSemaphore, A: AbstractBounceBufferAllocator, F: FnMut()>
                         },
                     };
 
-                    waker.map(Waker::wake);
+                    if let Some(waker) = waker {
+                        waker.wake();
+                    }
                 }
                 OccupiedState::Canceled => {
                     let range = occupied.req.buf().encoded_addr_range();

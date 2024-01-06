@@ -78,7 +78,7 @@ impl<N, P: Access, A: AbstractBounceBufferAllocator, F: FnMut()>
     async fn request<'a>(
         &'a self,
         start_block_idx: u64,
-        mut operation: Operation<'a, P>,
+        operation: Operation<'a, P>,
     ) -> Result<(), Error> {
         let request_index = {
             let sem = self.shared.borrow().owned.slot_set_semaphore().clone();
@@ -89,7 +89,7 @@ impl<N, P: Access, A: AbstractBounceBufferAllocator, F: FnMut()>
                 .issue_request(
                     &mut reservation,
                     start_block_idx,
-                    &mut IssueRequestBuf::new(&mut operation),
+                    &mut IssueRequestBuf::new(&operation),
                 )
                 .map_err(ErrorOrUserError::unwrap_error)?
         };
@@ -147,7 +147,7 @@ pub struct RequestFuture<'a, N, P: Access, A: AbstractBounceBufferAllocator, F: 
 }
 
 impl<'a, N, P: Access, A: AbstractBounceBufferAllocator, F: FnMut()> RequestFuture<'a, N, P, A, F> {
-    fn poll_inner<'b>(&'b mut self, cx: &mut Context<'_>) -> Poll<Result<(), Error>>
+    fn poll_inner<'b>(&'b mut self, cx: &Context<'_>) -> Poll<Result<(), Error>>
     where
         'a: 'b,
     {
