@@ -21,6 +21,6 @@ pub(crate) fn start_panic(_payload: Payload) -> i32 {
 
 #[cfg(panic = "unwind")]
 #[lang = "eh_personality"]
-extern "C" fn personality() -> ! {
+fn eh_personality() -> ! {
     abort!("unexpected call to eh_personality")
 }

@@ -59,13 +59,13 @@ rec {
 
     #[cfg(target_os = "none")]
     #[panic_handler]
-    extern fn panic_handler(_: &core::panic::PanicInfo) -> ! {
+    fn panic_handler(_: &core::panic::PanicInfo) -> ! {
       core::intrinsics::abort()
     }
 
     #[cfg(target_os = "none")]
     #[lang = "eh_personality"]
-    extern fn eh_personality() {
+    fn eh_personality() {
     }
 
     #[cfg(not(target_os = "none"))]
