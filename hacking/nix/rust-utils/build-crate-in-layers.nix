@@ -133,7 +133,7 @@ let
 
   cargoSubcommand = if test then "test" else "build";
 
-  mkCargoInvocation = commonArgs: subcommandArgs:
+  mkCargoInvocation = runClippy: commonArgs: subcommandArgs:
     let
       joinedCommonArgs = lib.concatStringsSep " " commonArgs;
       joinedSubcommandArgs = lib.concatStringsSep " "
@@ -177,6 +177,9 @@ let
           { name = "Cargo.lock"; path = lockfile; }
           { name = "src"; path = src; }
         ];
+
+        # HACK don't run clippy if this layer has no local crates
+        runClippyThisLayer = runClippy && layer.reals != {};
       in
         modifications.modifyDerivation (stdenv.mkDerivation (baseArgs // {
           name = "${rootCrate.name}-intermediate";
@@ -189,7 +192,7 @@ let
             cp -r --preserve=timestamps ${prev} $out
             chmod -R +w $out
 
-            ${mkCargoInvocation (flags ++ [
+            ${mkCargoInvocation runClippyThisLayer (flags ++ [
               "--config" "${config}"
               "--manifest-path" "${workspace}/Cargo.toml"
               "--target-dir" "$out"
@@ -235,7 +238,7 @@ in let
       cp -r --preserve=timestamps ${lastIntermediateLayer} $target_dir
       chmod -R +w $target_dir
 
-      ${mkCargoInvocation (flags ++ [
+      ${mkCargoInvocation runClippy (flags ++ [
         "--config" "${config}"
         "--manifest-path" "${workspace}/Cargo.toml"
         "--target-dir" "$target_dir"
