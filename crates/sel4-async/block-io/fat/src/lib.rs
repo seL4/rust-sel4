@@ -5,7 +5,6 @@
 //
 
 #![no_std]
-#![feature(async_fn_in_trait)]
 #![feature(never_type)]
 
 pub use embedded_fat::*;

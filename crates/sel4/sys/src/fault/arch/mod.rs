@@ -21,5 +21,3 @@ sel4_cfg_if! {
         mod imp;
     }
 }
-
-pub use imp::*;

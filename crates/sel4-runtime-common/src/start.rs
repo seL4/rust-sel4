@@ -26,7 +26,7 @@ impl<const N: usize> Stack<N> {
 }
 
 #[repr(transparent)]
-pub struct StackTop(Exclusive<*mut u8>);
+pub struct StackTop(#[allow(dead_code)] Exclusive<*mut u8>);
 
 #[macro_export]
 macro_rules! declare_stack {

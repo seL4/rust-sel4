@@ -5,8 +5,6 @@
 //
 
 #![no_std]
-#![feature(const_pointer_byte_offsets)]
-#![feature(pointer_byte_offsets)]
 
 use core::marker::PhantomData;
 

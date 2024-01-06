@@ -5,7 +5,7 @@
 //
 
 pub use sel4_panicking::catch_unwind;
-pub use sel4_panicking_env::{abort, debug_print, debug_println};
+pub use sel4_panicking_env::abort;
 
 use crate::env::get_ipc_buffer;
 use crate::handler::{run_handler, Handler};

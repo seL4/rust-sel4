@@ -7,8 +7,8 @@
 #![no_std]
 #![no_main]
 #![feature(const_trait_impl)]
+#![feature(exposed_provenance)]
 #![feature(int_roundings)]
-#![feature(pointer_byte_offsets)]
 #![feature(strict_provenance)]
 
 extern crate alloc;
