@@ -14,7 +14,10 @@
 #![feature(proc_macro_hygiene)]
 #![feature(strict_provenance)]
 #![feature(stdsimd)]
-#![cfg_attr(any(target_arch = "riscv32", target_arch = "riscv64"), feature(riscv_ext_intrinsics))]
+#![cfg_attr(
+    any(target_arch = "riscv32", target_arch = "riscv64"),
+    feature(riscv_ext_intrinsics)
+)]
 #![allow(dead_code)]
 #![allow(unreachable_code)]
 #![allow(clippy::reversed_empty_ranges)]
