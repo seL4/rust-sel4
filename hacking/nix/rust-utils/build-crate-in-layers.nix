@@ -259,5 +259,3 @@ in let
   }));
 
 in final
-
-# NOTE "-Z avoid-dev-deps" for deps of std
