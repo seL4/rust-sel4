@@ -17,6 +17,6 @@ mk {
     ;
     hex = "0.4.3";
     syn = { version = versions.syn; features = [ "full" ]; };
-    sel4-capdl-initializer-types = localCrates.sel4-capdl-initializer-types // { features = [ "std" "deflate" ]; };
+    sel4-capdl-initializer-types = localCrates.sel4-capdl-initializer-types // { features = [ "serde" "std" "deflate" ]; };
   };
 }
