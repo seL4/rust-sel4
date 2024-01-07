@@ -5,7 +5,6 @@
 //
 
 #![no_std]
-#![feature(result_flattening)]
 
 #[cfg(feature = "alloc")]
 extern crate alloc;
