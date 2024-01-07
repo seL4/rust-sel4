@@ -4,8 +4,6 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use core::array;
-
 use sel4::{AbsoluteCPtr, InitCSpaceSlot};
 
 use crate::{CSlotAllocator, CapDLInitializerError};
@@ -25,7 +23,11 @@ impl<T> HoldSlots<T> {
         relative_cptr_of: T,
     ) -> Result<Self, CapDLInitializerError> {
         Ok(Self {
-            slots: array::try_from_fn(|_| cslot_allocator.alloc())?,
+            slots: {
+                // NOTE(rustc_wishlist) array_try_from_fn
+                let mut f = || cslot_allocator.alloc();
+                [f()?, f()?]
+            },
             slots_occupied: [false; NUM_SLOTS],
             which_slot: 0,
             relative_cptr_of,
