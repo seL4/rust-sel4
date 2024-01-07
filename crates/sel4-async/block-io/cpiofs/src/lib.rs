@@ -5,7 +5,6 @@
 //
 
 #![no_std]
-#![feature(async_fn_in_trait)]
 #![feature(slice_as_chunks)]
 
 extern crate alloc;
