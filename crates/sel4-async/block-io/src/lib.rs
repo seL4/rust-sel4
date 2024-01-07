@@ -6,7 +6,6 @@
 
 #![no_std]
 #![feature(associated_type_bounds)]
-#![feature(const_option)]
 #![feature(never_type)]
 #![feature(slice_as_chunks)]
 
