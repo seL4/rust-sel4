@@ -11,7 +11,6 @@
 #![feature(const_ptr_is_null)]
 #![feature(const_trait_impl)]
 #![feature(int_roundings)]
-#![feature(maybe_uninit_slice)]
 #![feature(never_type)]
 #![feature(pointer_is_aligned)]
 #![feature(proc_macro_hygiene)]
