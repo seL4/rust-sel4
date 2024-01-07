@@ -43,12 +43,14 @@ mod block_client;
 mod config;
 mod handler;
 mod net_client;
+mod rtc_client;
 mod timer_client;
 
 use block_client::BlockClient;
 use config::channels;
 use handler::HandlerImpl;
 use net_client::NetClient;
+use rtc_client::RTCClient;
 use timer_client::TimerClient;
 
 const BLOCK_CACHE_SIZE_IN_BLOCKS: usize = 128;
@@ -77,11 +79,17 @@ static LOGGER: Logger = LoggerBuilder::const_default()
 fn init() -> impl Handler {
     LOGGER.set().unwrap();
 
-    let timer_client = TimerClient::new(channels::TIMER_DRIVER);
+    let rtc_client = RTCClient::new(channels::RTC_DRIVER);
+    let timer_client = Arc::new(TimerClient::new(channels::TIMER_DRIVER));
     let net_client = NetClient::new(channels::NET_DRIVER);
     let block_client = BlockClient::new(channels::BLOCK_DRIVER);
 
-    let timer_client = Arc::new(timer_client);
+    let now_unix_time = Duration::from_secs(rtc_client.now().into());
+
+    let now_fn = {
+        let timer_client = timer_client.clone();
+        move || Instant::ZERO + Duration::from_micros(timer_client.now())
+    };
 
     let notify_net: fn() = || channels::NET_DRIVER.notify();
     let notify_block: fn() = || channels::BLOCK_DRIVER.notify();
@@ -158,11 +166,6 @@ fn init() -> impl Handler {
         )
     };
 
-    let now_fn = {
-        let timer_client = timer_client.clone();
-        move || Instant::ZERO + Duration::from_micros(timer_client.now())
-    };
-
     HandlerImpl::new(
         channels::TIMER_DRIVER,
         channels::NET_DRIVER,
@@ -179,6 +182,7 @@ fn init() -> impl Handler {
             let fs_block_io = disk.partition_using_mbr(&entry);
             let fs_block_io = Rc::new(fs_block_io);
             run_server(
+                now_unix_time,
                 now_fn,
                 timers_ctx,
                 network_ctx,

@@ -17,5 +17,5 @@ pub enum Request {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct NowResponse {
-    pub micros: Seconds,
+    pub unix_time: Seconds,
 }
