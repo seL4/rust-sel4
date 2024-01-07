@@ -5,7 +5,6 @@
 //
 
 #![no_std]
-#![feature(cell_update)]
 #![feature(cfg_target_thread_local)]
 #![feature(core_intrinsics)]
 #![feature(lang_items)]
