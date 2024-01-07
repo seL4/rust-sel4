@@ -5,7 +5,6 @@
 //
 
 #![no_std]
-#![feature(const_mut_refs)]
 
 use core::fmt::{self, Write};
 
