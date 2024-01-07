@@ -21,7 +21,7 @@ impl<const N: usize> BackingMemory<N> {
         Self(SyncUnsafeCell::new([0; N]))
     }
 
-    const fn bounds(&self) -> *mut [u8] {
+    fn bounds(&self) -> *mut [u8] {
         ptr::slice_from_raw_parts_mut(self.0.get().cast(), N)
     }
 }
