@@ -5,7 +5,6 @@
 //
 
 #![no_std]
-#![feature(let_chains)]
 #![feature(proc_macro_hygiene)]
 #![feature(stmt_expr_attributes)]
 #![feature(thread_local)]

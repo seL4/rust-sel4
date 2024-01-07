@@ -63,17 +63,21 @@ macro_rules! fill_mrs_from_args {
 
         let n = $msg_info.get_length();
 
-        if let Some(msg) = &$msg0 && n > 0 {
-            $mr0 = **msg;
+        match &$msg0 {
+            Some(msg) if n > 0 => $mr0 = **msg,
+            _ => (),
         }
-        if let Some(msg) = &$msg1 && n > 1 {
-            $mr1 = **msg;
+        match &$msg1 {
+            Some(msg) if n > 1 => $mr1 = **msg,
+            _ => (),
         }
-        if let Some(msg) = &$msg2 && n > 2 {
-            $mr2 = **msg;
+        match &$msg2 {
+            Some(msg) if n > 2 => $mr2 = **msg,
+            _ => (),
         }
-        if let Some(msg) = &$msg3 && n > 3 {
-            $mr3 = **msg;
+        match &$msg3 {
+            Some(msg) if n > 3 => $mr3 = **msg,
+            _ => (),
         }
     };
 }
