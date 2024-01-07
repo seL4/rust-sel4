@@ -192,6 +192,3 @@ fn init() -> impl Handler {
         },
     )
 }
-
-// TODO remove
-sel4_newlib::declare_sbrk_with_static_heap!(1024 * 1024);
