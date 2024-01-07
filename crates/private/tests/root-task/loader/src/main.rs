@@ -6,8 +6,6 @@
 
 #![no_std]
 #![no_main]
-#![feature(is_sorted)]
-#![feature(iter_intersperse)]
 #![feature(thread_local)]
 #![allow(clippy::single_match)]
 
@@ -48,8 +46,9 @@ fn main(bootinfo: &sel4::BootInfo) -> ! {
         match extra.id {
             sel4::BootInfoExtraId::Fdt => {
                 let dt = fdt::Fdt::new(extra.content()).unwrap();
-                for s in dt.strings().intersperse(" ") {
-                    debug_print!("{}", s);
+                debug_print!("device tree strings: ");
+                for s in dt.strings() {
+                    debug_print!(" {}", s);
                 }
                 debug_println!("");
             }
