@@ -31,7 +31,6 @@ use sel4_async_network_traits::ClosedError;
 use sel4_async_single_threaded_executor::LocalSpawner;
 use sel4_async_time::{Instant, TimerManager};
 
-// mod client_test;
 mod mime;
 mod server;
 
@@ -55,8 +54,6 @@ pub async fn run_server<
     priv_pem: &str,
     max_num_simultaneous_connections: usize,
 ) -> ! {
-    // client_test::run(now_fn, network_ctx.clone(), timers_ctx.clone()).await;
-
     let use_socket_for_http_closure: SocketUser<T> = Box::new({
         move |server, socket| {
             Box::pin(async move {
