@@ -4,8 +4,6 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-#![feature(int_roundings)]
-
 use std::env;
 use std::fs;
 use std::path::{Path, PathBuf};

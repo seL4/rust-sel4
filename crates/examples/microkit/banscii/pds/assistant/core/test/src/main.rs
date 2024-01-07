@@ -4,8 +4,6 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-#![feature(int_roundings)]
-
 use banscii_assistant_core::Draft;
 
 fn main() {

@@ -6,7 +6,6 @@
 
 #![no_std]
 #![feature(async_fn_in_trait)]
-#![feature(int_roundings)]
 #![feature(slice_as_chunks)]
 
 extern crate alloc;

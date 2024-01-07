@@ -5,7 +5,6 @@
 //
 
 #![feature(associated_type_bounds)]
-#![feature(int_roundings)]
 
 use anyhow::{bail, Result};
 use num::{NumCast, PrimInt};

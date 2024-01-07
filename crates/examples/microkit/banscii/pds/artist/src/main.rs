@@ -7,7 +7,6 @@
 #![no_std]
 #![no_main]
 #![feature(const_trait_impl)]
-#![feature(int_roundings)]
 #![feature(never_type)]
 
 extern crate alloc;

@@ -5,7 +5,6 @@
 //
 
 #![feature(associated_type_bounds)]
-#![feature(int_roundings)]
 #![feature(never_type)]
 #![feature(unwrap_infallible)]
 

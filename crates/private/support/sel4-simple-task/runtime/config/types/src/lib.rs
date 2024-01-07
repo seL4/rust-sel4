@@ -5,7 +5,6 @@
 //
 
 #![no_std]
-#![feature(int_roundings)]
 #![feature(result_flattening)]
 
 #[cfg(feature = "alloc")]
