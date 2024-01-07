@@ -5,8 +5,6 @@
 //
 
 #![no_std]
-#![feature(const_trait_impl)]
-#![feature(derive_const)]
 
 mod mutex;
 

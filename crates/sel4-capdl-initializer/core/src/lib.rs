@@ -6,7 +6,6 @@
 
 #![no_std]
 #![feature(array_try_from_fn)]
-#![feature(const_trait_impl)]
 #![feature(exposed_provenance)]
 #![feature(never_type)]
 #![feature(pointer_is_aligned)]

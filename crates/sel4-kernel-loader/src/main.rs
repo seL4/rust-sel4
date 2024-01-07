@@ -8,7 +8,6 @@
 #![no_main]
 #![feature(associated_type_bounds)]
 #![feature(atomic_from_mut)]
-#![feature(const_trait_impl)]
 #![feature(exclusive_wrapper)]
 #![feature(exposed_provenance)]
 #![feature(proc_macro_hygiene)]
