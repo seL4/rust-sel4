@@ -37,8 +37,6 @@ impl fmt::Display for EnterError {
     }
 }
 
-impl core::error::Error for EnterError {}
-
 /// Marks the current thread as being within the dynamic extent of an
 /// executor.
 ///
