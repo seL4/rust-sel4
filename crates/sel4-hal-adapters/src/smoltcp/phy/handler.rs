@@ -81,9 +81,12 @@ impl<Device: phy::Device + IrqAck + HasMac> Handler for PhyDeviceHandler<Device>
         if channel == self.device_channel || channel == self.client_channel {
             let mut notify_rx = false;
 
-            while !self.rx_ring_buffers.free_mut().is_empty().unwrap()
-                && let Some((rx_tok, _tx_tok)) = self.dev.receive(Instant::ZERO)
-            {
+            while !self.rx_ring_buffers.free_mut().is_empty().unwrap() {
+                let rx_tok = match self.dev.receive(Instant::ZERO) {
+                    Some((rx_tok, _tx_tok)) => rx_tok,
+                    None => break,
+                };
+
                 let desc = self.rx_ring_buffers.free_mut().dequeue().unwrap().unwrap();
                 let desc_len = usize::try_from(desc.len()).unwrap();
 
@@ -113,9 +116,12 @@ impl<Device: phy::Device + IrqAck + HasMac> Handler for PhyDeviceHandler<Device>
 
             let mut notify_tx = false;
 
-            while !self.tx_ring_buffers.free_mut().is_empty().unwrap()
-                && let Some(tx_tok) = self.dev.transmit(Instant::ZERO)
-            {
+            while !self.tx_ring_buffers.free_mut().is_empty().unwrap() {
+                let tx_tok = match self.dev.transmit(Instant::ZERO) {
+                    Some(tx_tok) => tx_tok,
+                    None => break,
+                };
+
                 let desc = self.tx_ring_buffers.free_mut().dequeue().unwrap().unwrap();
                 let tx_len = usize::try_from(desc.len()).unwrap();
 
