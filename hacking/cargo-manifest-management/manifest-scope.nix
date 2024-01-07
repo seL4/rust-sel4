@@ -203,26 +203,6 @@ in rec {
     ] ++ features;
   };
 
-  mbedtlsSource = {
-    git = "https://github.com/coliasgroup/rust-mbedtls";
-    tag = "keep/30d001b63baea36135b2590c4fd05e95"; # branch sel4
-  };
-
-  mbedtlsWith = features: filterOutEmptyFeatureList (mbedtlsSource // {
-    default-features = false;
-    features = [ "no_std_deps" ] ++ features;
-  });
-
-  mbedtlsSysAutoWith = features: filterOutEmptyFeatureList (mbedtlsSource // {
-    default-features = false;
-    inherit features;
-  });
-
-  mbedtlsPlatformSupportWith = features: filterOutEmptyFeatureList (mbedtlsSource // {
-    default-features = false;
-    inherit features;
-  });
-
   virtioDriversWith = features: filterOutEmptyFeatureList {
     version = versions.virtio-drivers;
     # git = "https://github.com/rcore-os/virtio-drivers.git";

@@ -18,7 +18,6 @@ license = "BSD-2-Clause"
 
 [dependencies]
 sel4 = { path = "../../../../sel4" }
-sel4-async-network-mbedtls = { path = "../../../../sel4-async/network/mbedtls" }
 sel4-newlib = { path = "../../../../sel4-newlib" }
 sel4-root-task = { path = "../../../../sel4-root-task" }
 

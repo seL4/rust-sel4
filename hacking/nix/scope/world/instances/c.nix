@@ -26,27 +26,18 @@ mkInstance {
 
     release = false;
 
-    layers = [
-      crateUtils.defaultIntermediateLayer
-      {
-        crates = [
-          "sel4"
-          "sel4-root-task"
-        ];
-        modifications = seL4Modifications;
-      }
-    ];
+    # layers = [
+    #   crateUtils.defaultIntermediateLayer
+    #   {
+    #     crates = [
+    #       "sel4"
+    #       "sel4-root-task"
+    #     ];
+    #     modifications = seL4Modifications;
+    #   }
+    # ];
 
     commonModifications = {
-      modifyDerivation = drv: drv.overrideAttrs (self: super: {
-        BINDGEN_EXTRA_CLANG_ARGS = [ "-I${libcDir}/include" ];
-        nativeBuildInputs = super.nativeBuildInputs ++ [
-          cmake
-          perl
-          python3Packages.jsonschema
-          python3Packages.jinja2
-        ];
-      });
       modifyConfig = old: lib.recursiveUpdate old {
         target.${defaultRustTargetInfo.name} = {
           rustflags = (old.target.${defaultRustTargetInfo.name}.rustflags or []) ++ [

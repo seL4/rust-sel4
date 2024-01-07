@@ -74,31 +74,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "android-tzdata"
-version = "0.1.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e999941b234f3131b00bc13c22d06e8c5ff726d1b6318ac7eb276997bbb4fef0"
-
-[[package]]
-name = "android_system_properties"
-version = "0.1.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "819e7219dbd41043ac279b19830f2efc897156490d7fd6ea916720117ee66311"
-dependencies = [
- "libc",
-]
-
-[[package]]
-name = "annotate-snippets"
-version = "0.9.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c3b9d411ecbaf79885c6df4d75fff75858d5995ff25385657a28af47e82f9c36"
-dependencies = [
- "unicode-width",
- "yansi-term",
-]
-
-[[package]]
 name = "anstream"
 version = "0.6.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -151,17 +126,6 @@ name = "anyhow"
 version = "1.0.75"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a4668cab20f66d8d020e1fbc0ebe47217433c1b6c8f2040faf858554e394ace6"
-
-[[package]]
-name = "async-trait"
-version = "0.1.73"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bc00ceb34980c03614e35a3a4e218276a0a824e911d07651cd0d858a51e8c0f0"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 2.0.37",
-]
 
 [[package]]
 name = "async-unsync"
@@ -269,30 +233,6 @@ name = "base64ct"
 version = "1.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8c3c1a368f70d6cf7302d78f8f7093da241fb8e8807c05cc9e51a125895a6d5b"
-
-[[package]]
-name = "bindgen"
-version = "0.65.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cfdf7b466f9a4903edc73f95d6d2bcd5baf8ae620638762244d3f60143643cc5"
-dependencies = [
- "annotate-snippets",
- "bitflags 1.3.2",
- "cexpr",
- "clang-sys",
- "lazy_static",
- "lazycell",
- "log",
- "peeking_take_while",
- "prettyplease",
- "proc-macro2",
- "quote",
- "regex",
- "rustc-hash",
- "shlex",
- "syn 2.0.37",
- "which",
-]
 
 [[package]]
 name = "bindgen"
@@ -407,20 +347,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
 
 [[package]]
-name = "chrono"
-version = "0.4.31"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7f2c685bad3eb3d45a01354cedb7d5faa66194d1d58ba6e267a8de788f79db38"
-dependencies = [
- "android-tzdata",
- "iana-time-zone",
- "js-sys",
- "num-traits",
- "wasm-bindgen",
- "windows-targets",
-]
-
-[[package]]
 name = "clang-sys"
 version = "1.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -459,15 +385,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cd7cc57abe963c6d3b9d8be5b06ba7c8957a930305ca90304f24ef040aa6f961"
 
 [[package]]
-name = "cmake"
-version = "0.1.50"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a31c789563b815f77f4250caee12365734369f942439b7defd71e18a48197130"
-dependencies = [
- "cc",
-]
-
-[[package]]
 name = "cobs"
 version = "0.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -484,12 +401,6 @@ name = "const-oid"
 version = "0.9.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "28c122c3980598d243d63d9a704629a2d748d101f278052ff068be5a4423ab6f"
-
-[[package]]
-name = "core-foundation-sys"
-version = "0.8.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e496a50fda8aacccc86d7529e2c1e0892dbd0f898a6b5645b5561b89c3210efa"
 
 [[package]]
 name = "cpp_demangle"
@@ -945,29 +856,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9a3a5bfb195931eeb336b2a7b4d761daec841b97f947d34394601737a7bba5e4"
 
 [[package]]
-name = "iana-time-zone"
-version = "0.1.57"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2fad5b825842d2b38bd206f3e81d6957625fd7f0a361e345c30e01a0ae2dd613"
-dependencies = [
- "android_system_properties",
- "core-foundation-sys",
- "iana-time-zone-haiku",
- "js-sys",
- "wasm-bindgen",
- "windows",
-]
-
-[[package]]
-name = "iana-time-zone-haiku"
-version = "0.1.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f31827a206f56af32e590ba56d5d2d085f558508192593743f16b2306495269f"
-dependencies = [
- "cc",
-]
-
-[[package]]
 name = "indexmap"
 version = "2.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1076,53 +964,6 @@ name = "managed"
 version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0ca88d725a0a943b096803bd34e73a4437208b6077654cc4ecb2947a5f91618d"
-
-[[package]]
-name = "mbedtls"
-version = "0.11.0"
-source = "git+https://github.com/coliasgroup/rust-mbedtls?tag=keep/30d001b63baea36135b2590c4fd05e95#30d001b63baea36135b2590c4fd05e95e464234c"
-dependencies = [
- "async-trait",
- "bitflags 1.3.2",
- "byteorder",
- "cc",
- "cfg-if",
- "futures",
- "mbedtls-platform-support",
- "mbedtls-sys-auto",
- "rs-libc",
- "serde",
- "serde_derive",
-]
-
-[[package]]
-name = "mbedtls-platform-support"
-version = "0.3.0"
-source = "git+https://github.com/coliasgroup/rust-mbedtls?tag=keep/30d001b63baea36135b2590c4fd05e95#30d001b63baea36135b2590c4fd05e95e464234c"
-dependencies = [
- "cc",
- "cfg-if",
- "chrono",
- "mbedtls-sys-auto",
- "once_cell",
- "spin 0.5.2",
- "zeroize",
-]
-
-[[package]]
-name = "mbedtls-sys-auto"
-version = "3.5.0-alpha.3+0b3de6f"
-source = "git+https://github.com/coliasgroup/rust-mbedtls?tag=keep/30d001b63baea36135b2590c4fd05e95#30d001b63baea36135b2590c4fd05e95e464234c"
-dependencies = [
- "bindgen 0.65.1",
- "cc",
- "cfg-if",
- "cmake",
- "lazy_static",
- "libc",
- "quote",
- "syn 1.0.109",
-]
 
 [[package]]
 name = "memchr"
@@ -1850,16 +1691,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "rs-libc"
-version = "0.2.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "683e8c8e8aac6ffa4b2287bac3c69575d5346accac4f218ae1e084303bb174ca"
-dependencies = [
- "cc",
- "zeroize",
-]
-
-[[package]]
 name = "rsa"
 version = "0.8.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2038,22 +1869,6 @@ dependencies = [
  "sel4-async-network-traits",
  "smoltcp",
 ]
-
-[[package]]
-name = "sel4-async-network-mbedtls"
-version = "0.1.0"
-dependencies = [
- "futures",
- "log",
- "mbedtls",
- "rand",
- "sel4-async-network",
- "sel4-async-network-mbedtls-mozilla-ca-list",
-]
-
-[[package]]
-name = "sel4-async-network-mbedtls-mozilla-ca-list"
-version = "0.1.0"
 
 [[package]]
 name = "sel4-async-network-rustls"
@@ -2790,7 +2605,7 @@ dependencies = [
 name = "sel4-sys"
 version = "0.1.0"
 dependencies = [
- "bindgen 0.68.1",
+ "bindgen",
  "glob",
  "log",
  "proc-macro2",
@@ -3073,7 +2888,6 @@ dependencies = [
  "cc",
  "glob",
  "sel4",
- "sel4-async-network-mbedtls",
  "sel4-newlib",
  "sel4-root-task",
 ]
@@ -3111,20 +2925,6 @@ dependencies = [
  "fdt",
  "sel4",
  "sel4-platform-info",
- "sel4-root-task",
-]
-
-[[package]]
-name = "tests-root-task-mbedtls"
-version = "0.1.0"
-dependencies = [
- "log",
- "mbedtls",
- "mbedtls-platform-support",
- "mbedtls-sys-auto",
- "sel4",
- "sel4-logging",
- "sel4-newlib",
  "sel4-root-task",
 ]
 
@@ -3271,12 +3071,6 @@ name = "unicode-ident"
 version = "1.0.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3354b9ac3fae1ff6755cb6db53683adb661634f67557942dea4facebec0fee4b"
-
-[[package]]
-name = "unicode-width"
-version = "0.1.11"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e51733f11c9c4f72aa0c160008246859e340b00807569a0da0e7a1079b27ba85"
 
 [[package]]
 name = "unicode-xid"
@@ -3478,15 +3272,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "712e227841d057c1ee1cd2fb22fa7e5a5461ae8e48fa2ca79ec42cfc1931183f"
 
 [[package]]
-name = "windows"
-version = "0.48.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e686886bc078bc1b0b600cac0147aadb815089b6e4da64016cbd754b6342700f"
-dependencies = [
- "windows-targets",
-]
-
-[[package]]
 name = "windows-sys"
 version = "0.48.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3565,15 +3350,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d7d8a75eaf6557bb84a65ace8609883db44a29951042ada9b393151532e41fcb"
 dependencies = [
  "xml-rs",
-]
-
-[[package]]
-name = "yansi-term"
-version = "0.1.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fe5c30ade05e61656247b2e334a031dfd0cc466fadef865bdcdea8d537951bf1"
-dependencies = [
- "winapi",
 ]
 
 [[package]]
