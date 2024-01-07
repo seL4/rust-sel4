@@ -105,3 +105,5 @@ runCommand "sysroot" {
 # d=$out/$rel
 # mkdir -p $d
 # ln -s ${rustToolchain}/$rel/* $d
+
+# NOTE "-Z avoid-dev-deps" for deps of std
