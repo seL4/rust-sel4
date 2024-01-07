@@ -9,7 +9,6 @@ use alloc::format;
 use alloc::rc::Rc;
 use alloc::string::{String, ToString};
 use alloc::vec;
-use core::str::pattern::Pattern;
 
 use sel4_async_block_io_fat as fat;
 use sel4_async_network_traits::{AsyncIO, AsyncIOExt, ClosedError};
@@ -202,10 +201,10 @@ impl<D: fat::BlockDevice + 'static, T: fat::TimeSource + 'static> Server<D, T> {
 
     async fn lookup_request_path(&self, request_path: &str) -> RequestPathStatus {
         let mut volume_manager = self.volume_manager.lock().await;
-        if !"/".is_prefix_of(request_path) {
+        if !request_path.starts_with('/') {
             return RequestPathStatus::NotFound;
         }
-        let has_trailing_slash = "/".is_suffix_of(request_path);
+        let has_trailing_slash = request_path.ends_with('/');
         let mut cur = self.dir;
         for seg in request_path.split('/') {
             if seg.is_empty() {

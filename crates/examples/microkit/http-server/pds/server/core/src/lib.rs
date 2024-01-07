@@ -5,7 +5,6 @@
 //
 
 #![no_std]
-#![feature(pattern)]
 
 extern crate alloc;
 
