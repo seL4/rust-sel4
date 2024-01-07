@@ -10,7 +10,6 @@
 #![feature(const_pointer_is_aligned)]
 #![feature(const_ptr_is_null)]
 #![feature(const_trait_impl)]
-#![feature(int_roundings)]
 #![feature(never_type)]
 #![feature(pointer_is_aligned)]
 #![feature(proc_macro_hygiene)]

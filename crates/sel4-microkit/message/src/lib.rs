@@ -5,7 +5,6 @@
 //
 
 #![no_std]
-#![feature(int_roundings)]
 #![feature(never_type)]
 #![feature(unwrap_infallible)]
 

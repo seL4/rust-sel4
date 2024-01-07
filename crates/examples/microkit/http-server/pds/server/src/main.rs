@@ -6,7 +6,6 @@
 
 #![no_std]
 #![no_main]
-#![feature(int_roundings)]
 #![feature(never_type)]
 #![feature(pattern)]
 #![feature(ptr_metadata)]

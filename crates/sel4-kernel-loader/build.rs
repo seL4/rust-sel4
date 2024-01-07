@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-#![feature(int_roundings)]
 #![allow(clippy::useless_conversion)]
 
 use std::env;

@@ -6,7 +6,6 @@
 
 #![no_std]
 #![feature(exposed_provenance)]
-#![feature(int_roundings)]
 
 use core::arch::{asm, global_asm};
 use core::ffi::c_void;
