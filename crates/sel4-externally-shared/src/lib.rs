@@ -6,7 +6,6 @@
 
 #![no_std]
 #![feature(cfg_target_has_atomic_equal_alignment)]
-#![feature(concat_idents)]
 #![feature(core_intrinsics)]
 #![allow(internal_features)]
 
