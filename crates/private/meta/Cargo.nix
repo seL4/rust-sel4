@@ -36,7 +36,7 @@ mk {
       sel4-sync
     ;
 
-    sel4-externally-shared = localCrates.sel4-externally-shared // { features = [ "unstable" "very_unstable" ]; };
+    sel4-externally-shared = localCrates.sel4-externally-shared // { features = [ "unstable" ]; };
     sel4-root-task = localCrates.sel4-root-task // { features = [ "full" ]; optional = true; };
     sel4-microkit = localCrates.sel4-microkit // { features = [ "full" ]; optional = true; };
     sel4-microkit-message = localCrates.sel4-microkit-message // { optional = true; };
