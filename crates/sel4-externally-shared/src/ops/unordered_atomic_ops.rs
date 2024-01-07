@@ -37,7 +37,13 @@ impl<T: UnsignedPrimitiveWithUnorderedAtomics + Copy> UnitaryOps<T> for Unordere
 pub unsafe trait UnsignedPrimitiveWithUnorderedAtomics {}
 
 macro_rules! impl_unsigned_primitive_with_unordered_atomics {
-    ($prim:path, $target_has_atomic_key:literal, $bulk_op_suffix:ident) => {
+    (
+        $prim:path,
+        $target_has_atomic_key:literal,
+        $memmove:ident,
+        $memcpy:ident,
+        $memset:ident,
+    ) => {
         #[cfg(target_has_atomic = $target_has_atomic_key)]
         unsafe impl UnsignedPrimitiveWithUnorderedAtomics for $prim {}
 
@@ -45,42 +51,57 @@ macro_rules! impl_unsigned_primitive_with_unordered_atomics {
         #[cfg(target_has_atomic = $target_has_atomic_key)]
         impl BulkOps<$prim> for UnorderedAtomicOps {
             unsafe fn memmove(dst: *mut $prim, src: *const $prim, count: usize) {
-                unsafe {
-                    concat_idents!(__llvm_memmove_element_unordered_atomic, $bulk_op_suffix)(
-                        dst,
-                        src,
-                        count * mem::size_of::<$prim>(),
-                    )
-                }
+                unsafe { $memmove(dst, src, count * mem::size_of::<$prim>()) }
             }
 
             unsafe fn memcpy(dst: *mut $prim, src: *const $prim, count: usize) {
-                unsafe {
-                    concat_idents!(__llvm_memcpy_element_unordered_atomic, $bulk_op_suffix)(
-                        dst,
-                        src,
-                        count * mem::size_of::<$prim>(),
-                    )
-                }
+                unsafe { $memcpy(dst, src, count * mem::size_of::<$prim>()) }
             }
 
             unsafe fn memset(dst: *mut $prim, val: u8, count: usize) {
-                unsafe {
-                    concat_idents!(__llvm_memset_element_unordered_atomic, $bulk_op_suffix)(
-                        dst,
-                        val,
-                        count * mem::size_of::<$prim>(),
-                    )
-                }
+                unsafe { $memset(dst, val, count * mem::size_of::<$prim>()) }
             }
+        }
+
+        extern "C" {
+            fn $memmove(dest: *mut $prim, src: *const $prim, bytes: usize);
+            fn $memcpy(dest: *mut $prim, src: *const $prim, bytes: usize);
+            fn $memset(s: *mut $prim, c: u8, bytes: usize);
         }
     };
 }
 
-impl_unsigned_primitive_with_unordered_atomics!(u8, "8", _1);
-impl_unsigned_primitive_with_unordered_atomics!(u16, "16", _2);
-impl_unsigned_primitive_with_unordered_atomics!(u32, "32", _4);
-impl_unsigned_primitive_with_unordered_atomics!(u64, "64", _8);
+impl_unsigned_primitive_with_unordered_atomics! {
+    u8,
+    "8",
+    __llvm_memmove_element_unordered_atomic_1,
+    __llvm_memcpy_element_unordered_atomic_1,
+    __llvm_memset_element_unordered_atomic_1,
+}
+
+impl_unsigned_primitive_with_unordered_atomics! {
+    u16,
+    "16",
+    __llvm_memmove_element_unordered_atomic_2,
+    __llvm_memcpy_element_unordered_atomic_2,
+    __llvm_memset_element_unordered_atomic_2,
+}
+
+impl_unsigned_primitive_with_unordered_atomics! {
+    u32,
+    "32",
+    __llvm_memmove_element_unordered_atomic_4,
+    __llvm_memcpy_element_unordered_atomic_4,
+    __llvm_memset_element_unordered_atomic_4,
+}
+
+impl_unsigned_primitive_with_unordered_atomics! {
+    u64,
+    "64",
+    __llvm_memmove_element_unordered_atomic_8,
+    __llvm_memcpy_element_unordered_atomic_8,
+    __llvm_memset_element_unordered_atomic_8,
+}
 
 #[cfg(target_pointer_width = "32")]
 type UsizeCastTarget = u32;
@@ -109,39 +130,4 @@ impl BulkOps<usize> for UnorderedAtomicOps {
     unsafe fn memset(dst: *mut usize, val: u8, count: usize) {
         unsafe { <UnorderedAtomicOps as BulkOps<UsizeCastTarget>>::memset(dst.cast(), val, count) }
     }
-}
-
-macro_rules! decl_intrinsics {
-    ($ty:ty, $memcpy:ident, $memmove:ident, $memset:ident) => {
-        fn $memcpy(dest: *mut $ty, src: *const $ty, bytes: usize);
-        fn $memmove(dest: *mut $ty, src: *const $ty, bytes: usize);
-        fn $memset(s: *mut $ty, c: u8, bytes: usize);
-    };
-}
-
-extern "C" {
-    decl_intrinsics!(
-        u8,
-        __llvm_memcpy_element_unordered_atomic_1,
-        __llvm_memmove_element_unordered_atomic_1,
-        __llvm_memset_element_unordered_atomic_1
-    );
-    decl_intrinsics!(
-        u16,
-        __llvm_memcpy_element_unordered_atomic_2,
-        __llvm_memmove_element_unordered_atomic_2,
-        __llvm_memset_element_unordered_atomic_2
-    );
-    decl_intrinsics!(
-        u32,
-        __llvm_memcpy_element_unordered_atomic_4,
-        __llvm_memmove_element_unordered_atomic_4,
-        __llvm_memset_element_unordered_atomic_4
-    );
-    decl_intrinsics!(
-        u64,
-        __llvm_memcpy_element_unordered_atomic_8,
-        __llvm_memmove_element_unordered_atomic_8,
-        __llvm_memset_element_unordered_atomic_8
-    );
 }
