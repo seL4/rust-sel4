@@ -41,8 +41,7 @@ impl<T: BlockIO<A, BlockSize = constant_block_sizes::BlockSize512>, A: Access> f
         _reason: &str,
     ) -> Result<(), Self::Error> {
         future::join_all(blocks.iter_mut().enumerate().map(|(i, block)| async move {
-            let block_idx = u64::try_from(start_block_idx.0)
-                .unwrap()
+            let block_idx = u64::from(start_block_idx.0)
                 .checked_add(i.try_into().unwrap())
                 .unwrap();
             self.inner
@@ -65,8 +64,7 @@ impl<T: BlockIO<A, BlockSize = constant_block_sizes::BlockSize512>, A: Access> f
         start_block_idx: fat::BlockIdx,
     ) -> Result<(), Self::Error> {
         future::join_all(blocks.iter().enumerate().map(|(i, block)| async move {
-            let block_idx = u64::try_from(start_block_idx.0)
-                .unwrap()
+            let block_idx = u64::from(start_block_idx.0)
                 .checked_add(i.try_into().unwrap())
                 .unwrap();
             self.inner

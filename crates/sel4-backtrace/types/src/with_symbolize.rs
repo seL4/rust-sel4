@@ -17,8 +17,6 @@ use addr2line::gimli::read::Reader;
 use addr2line::gimli::Error;
 use addr2line::Context;
 
-pub use addr2line::object::File;
-
 use crate::Backtrace;
 
 // TODO handle inlining better (see TODOs scattered throughout this file)

@@ -84,10 +84,11 @@ pub unsafe fn run_main<T>(
     T: Termination,
     T::Error: fmt::Debug,
 {
-    match panicking::catch_unwind(|| {
+    let result = panicking::catch_unwind(|| {
         let bootinfo = sel4::BootInfo::from_ptr(bootinfo);
         f(&bootinfo).report()
-    }) {
+    });
+    match result {
         Ok(err) => abort!("main thread terminated with error: {err:?}"),
         Err(_) => abort!("main thread panicked"),
     }

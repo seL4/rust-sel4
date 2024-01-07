@@ -605,8 +605,8 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
                 let ipc_buffer_frame = self.orig_local_cptr(obj.ipc_buffer().object);
 
                 let authority = BootInfo::init_thread_tcb();
-                let max_prio = obj.extra.max_prio.try_into()?;
-                let prio = obj.extra.prio.try_into()?;
+                let max_prio = obj.extra.max_prio.into();
+                let prio = obj.extra.prio.into();
 
                 #[allow(unused_variables)]
                 let affinity: usize = obj.extra.affinity.try_into()?;
