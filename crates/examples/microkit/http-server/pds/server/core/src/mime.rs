@@ -4,11 +4,9 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use core::str::pattern::Pattern;
-
 pub(crate) fn content_type_from_name(name: &str) -> &'static str {
     for (ext, ty) in MIME_ASSOCS {
-        if ext.is_suffix_of(name) {
+        if name.ends_with(ext) {
             return ty;
         }
     }
