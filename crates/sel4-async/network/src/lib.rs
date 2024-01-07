@@ -13,6 +13,7 @@ use alloc::vec;
 use alloc::vec::Vec;
 use core::cell::RefCell;
 use core::marker::PhantomData;
+use core::pin::Pin;
 use core::task::{self, Poll};
 
 use futures::prelude::*;
@@ -24,6 +25,8 @@ use smoltcp::{
     time::{Duration, Instant},
     wire::{DnsQueryType, IpAddress, IpCidr, IpEndpoint, IpListenEndpoint, Ipv4Address, Ipv4Cidr},
 };
+
+use sel4_async_network_traits::AsyncIO;
 
 pub(crate) const DEFAULT_KEEP_ALIVE_INTERVAL: u64 = 75000;
 pub(crate) const DEFAULT_TCP_SOCKET_BUFFER_SIZE: usize = 65535;
@@ -412,6 +415,42 @@ impl Socket<tcp::Socket<'static>> {
 
     pub fn abort(&mut self) {
         self.with_mut(|socket| socket.abort())
+    }
+}
+
+impl AsyncIO for Socket<tcp::Socket<'static>> {
+    type Error = TcpSocketError;
+
+    fn poll_read(
+        mut self: Pin<&mut Self>,
+        cx: &mut task::Context<'_>,
+        buf: &mut [u8],
+    ) -> Poll<Result<usize, Self::Error>> {
+        self.poll_recv(cx, buf)
+    }
+
+    fn poll_write(
+        mut self: Pin<&mut Self>,
+        cx: &mut task::Context<'_>,
+        buf: &[u8],
+    ) -> Poll<Result<usize, Self::Error>> {
+        self.poll_send(cx, buf)
+    }
+
+    fn poll_flush(
+        self: Pin<&mut Self>,
+        _cx: &mut task::Context<'_>,
+    ) -> Poll<Result<(), Self::Error>> {
+        // TODO
+        Poll::Ready(Ok(()))
+    }
+
+    fn poll_close(
+        self: Pin<&mut Self>,
+        _cx: &mut task::Context<'_>,
+    ) -> Poll<Result<(), Self::Error>> {
+        // TODO
+        Poll::Ready(Ok(()))
     }
 }
 

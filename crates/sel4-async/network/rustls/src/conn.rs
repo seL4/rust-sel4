@@ -23,9 +23,11 @@ use rustls::unbuffered::{
 };
 use rustls::{ClientConfig, ServerConfig, SideData, UnbufferedConnectionCommon};
 
-use super::{
+use sel4_async_network_traits::AsyncIO;
+
+use crate::{
     utils::{poll_read, poll_write, try_or_resize_and_retry, Buffer, WriteCursor},
-    AsyncIO, Error,
+    Error,
 };
 
 pub struct ClientConnector {
@@ -280,6 +282,12 @@ pub struct TlsStream<T, D, IO> {
     outgoing: Buffer,
 }
 
+impl<T, D, IO> TlsStream<T, D, IO> {
+    pub fn into_io(self) -> IO {
+        self.io
+    }
+}
+
 impl<T, D, IO> AsyncIO for TlsStream<T, D, IO>
 where
     T: DerefMut<Target = UnbufferedConnectionCommon<D>> + Unpin,
@@ -356,8 +364,6 @@ where
                             discard: new_discard,
                             payload,
                         } = res?;
-                        // log::debug!("payload: {:x?}", payload);
-                        log::debug!("payload: {}", core::str::from_utf8(payload).unwrap());
                         discard += new_discard;
 
                         let remainder = cursor.append(payload);
@@ -374,7 +380,7 @@ where
 
                     if would_block {
                         self.incoming = incoming;
-                        // ?
+                        // TODO(nspin) new
                         if cursor.used() != 0 {
                             break;
                         }
@@ -411,17 +417,19 @@ where
 
         self.outgoing = outgoing;
 
-        // Pin::new(&mut self.io).poll_flush(cx)
-        Poll::Ready(Ok(()))
+        Pin::new(&mut self.io)
+            .poll_flush(cx)
+            .map_err(Error::TransitError)
     }
 
     #[allow(unused_mut)]
     fn poll_close(
         mut self: Pin<&mut Self>,
-        _cx: &mut task::Context<'_>,
+        cx: &mut task::Context<'_>,
     ) -> Poll<Result<(), Error<IO::Error>>> {
         // XXX write out close_notify here?
-        // Pin::new(&mut self.io).poll_close(cx)
-        Poll::Ready(Ok(()))
+        Pin::new(&mut self.io)
+            .poll_close(cx)
+            .map_err(Error::TransitError)
     }
 }

@@ -4,13 +4,11 @@
 # SPDX-License-Identifier: BSD-2-Clause
 #
 
-{ mk, localCrates, versions, smoltcpWith }:
+{ mk, versions }:
 
 mk {
-  package.name = "sel4-async-network";
+  package.name = "sel4-async-network-traits";
   dependencies = {
-    inherit (localCrates) sel4-async-network-traits;
-    inherit (versions) log;
     futures = {
       version = versions.futures;
       default-features = false;
@@ -18,10 +16,5 @@ mk {
         "alloc"
       ];
     };
-    smoltcp = smoltcpWith [
-      "async"
-      "alloc"
-      # "verbose"
-    ];
   };
 }

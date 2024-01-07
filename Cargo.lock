@@ -1254,6 +1254,8 @@ dependencies = [
  "sel4-async-block-io-fat",
  "sel4-async-network",
  "sel4-async-network-rustls",
+ "sel4-async-network-rustls-utils",
+ "sel4-async-network-traits",
  "sel4-async-single-threaded-executor",
  "sel4-async-time",
  "sel4-async-unsync",
@@ -2033,6 +2035,7 @@ version = "0.1.0"
 dependencies = [
  "futures",
  "log",
+ "sel4-async-network-traits",
  "smoltcp",
 ]
 
@@ -2056,16 +2059,28 @@ version = "0.1.0"
 name = "sel4-async-network-rustls"
 version = "0.1.0"
 dependencies = [
- "async-trait",
  "futures",
- "getrandom",
  "log",
+ "rustls",
+ "sel4-async-network-traits",
+]
+
+[[package]]
+name = "sel4-async-network-rustls-utils"
+version = "0.1.0"
+dependencies = [
+ "getrandom",
  "rand",
  "ring 0.17.7",
  "rustls",
- "sel4-async-network",
  "sel4-async-time",
- "sel4-newlib",
+]
+
+[[package]]
+name = "sel4-async-network-traits"
+version = "0.1.0"
+dependencies = [
+ "futures",
 ]
 
 [[package]]
