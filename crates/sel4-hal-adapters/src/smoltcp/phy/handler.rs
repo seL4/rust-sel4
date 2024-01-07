@@ -17,7 +17,7 @@ use serde::{Deserialize, Serialize};
 use sel4_externally_shared::ExternallySharedRef;
 use sel4_microkit::{Channel, Handler, MessageInfo};
 use sel4_microkit_message::MessageInfoExt as _;
-use sel4_shared_ring_buffer::RingBuffers;
+use sel4_shared_ring_buffer::{roles::Use, RingBuffers};
 
 pub trait IrqAck {
     fn irq_ack(&mut self);
@@ -44,8 +44,8 @@ pub struct PhyDeviceHandler<Device> {
     dev: Device,
     client_region: ExternallySharedRef<'static, [u8]>,
     client_region_paddr: usize,
-    rx_ring_buffers: RingBuffers<'static, fn() -> Result<(), !>>,
-    tx_ring_buffers: RingBuffers<'static, fn() -> Result<(), !>>,
+    rx_ring_buffers: RingBuffers<'static, Use, fn() -> Result<(), !>>,
+    tx_ring_buffers: RingBuffers<'static, Use, fn() -> Result<(), !>>,
     device_channel: Channel,
     client_channel: Channel,
 }
@@ -55,8 +55,8 @@ impl<Device> PhyDeviceHandler<Device> {
         dev: Device,
         client_region: ExternallySharedRef<'static, [u8]>,
         client_region_paddr: usize,
-        rx_ring_buffers: RingBuffers<'static, fn() -> Result<(), !>>,
-        tx_ring_buffers: RingBuffers<'static, fn() -> Result<(), !>>,
+        rx_ring_buffers: RingBuffers<'static, Use, fn() -> Result<(), !>>,
+        tx_ring_buffers: RingBuffers<'static, Use, fn() -> Result<(), !>>,
         device_channel: Channel,
         client_channel: Channel,
     ) -> Self {
@@ -81,10 +81,10 @@ impl<Device: phy::Device + IrqAck + HasMac> Handler for PhyDeviceHandler<Device>
         if channel == self.device_channel || channel == self.client_channel {
             let mut notify_rx = false;
 
-            while !self.rx_ring_buffers.free().is_empty()
+            while !self.rx_ring_buffers.free_mut().is_empty().unwrap()
                 && let Some((rx_tok, _tx_tok)) = self.dev.receive(Instant::ZERO)
             {
-                let desc = self.rx_ring_buffers.free_mut().dequeue().unwrap();
+                let desc = self.rx_ring_buffers.free_mut().dequeue().unwrap().unwrap();
                 let desc_len = usize::try_from(desc.len()).unwrap();
 
                 rx_tok.consume(|rx_buf| {
@@ -99,7 +99,11 @@ impl<Device: phy::Device + IrqAck + HasMac> Handler for PhyDeviceHandler<Device>
                         .copy_from_slice(&rx_buf);
                 });
 
-                self.rx_ring_buffers.used_mut().enqueue(desc).unwrap();
+                self.rx_ring_buffers
+                    .used_mut()
+                    .enqueue(desc, true)
+                    .unwrap()
+                    .unwrap();
                 notify_rx = true;
             }
 
@@ -109,10 +113,10 @@ impl<Device: phy::Device + IrqAck + HasMac> Handler for PhyDeviceHandler<Device>
 
             let mut notify_tx = false;
 
-            while !self.tx_ring_buffers.free().is_empty()
+            while !self.tx_ring_buffers.free_mut().is_empty().unwrap()
                 && let Some(tx_tok) = self.dev.transmit(Instant::ZERO)
             {
-                let desc = self.tx_ring_buffers.free_mut().dequeue().unwrap();
+                let desc = self.tx_ring_buffers.free_mut().dequeue().unwrap().unwrap();
                 let tx_len = usize::try_from(desc.len()).unwrap();
 
                 tx_tok.consume(tx_len, |tx_buf| {
@@ -126,7 +130,11 @@ impl<Device: phy::Device + IrqAck + HasMac> Handler for PhyDeviceHandler<Device>
                         .copy_into_slice(tx_buf);
                 });
 
-                self.tx_ring_buffers.used_mut().enqueue(desc).unwrap();
+                self.tx_ring_buffers
+                    .used_mut()
+                    .enqueue(desc, true)
+                    .unwrap()
+                    .unwrap();
                 notify_tx = true;
             }
 
