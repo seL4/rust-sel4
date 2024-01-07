@@ -22,7 +22,9 @@ impl seL4_MessageInfo {
     }
 
     pub(crate) fn msg_helper(&self, msg: Option<seL4_Word>, i: seL4_Word) -> seL4_Word {
-        if let Some(msg) = msg && i < self.get_length() {
+        if let Some(msg) = msg
+            && i < self.get_length()
+        {
             msg
         } else {
             0

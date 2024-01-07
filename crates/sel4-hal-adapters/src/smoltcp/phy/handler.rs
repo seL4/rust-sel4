@@ -82,25 +82,26 @@ impl<Device: phy::Device + IrqAck + HasMac> Handler for PhyDeviceHandler<Device>
             let mut notify_rx = false;
 
             while !self.rx_ring_buffers.free().is_empty()
-                && let Some((rx_tok, _tx_tok)) = self.dev.receive(Instant::ZERO) {
-                    let desc = self.rx_ring_buffers.free_mut().dequeue().unwrap();
-                    let desc_len = usize::try_from(desc.len()).unwrap();
+                && let Some((rx_tok, _tx_tok)) = self.dev.receive(Instant::ZERO)
+            {
+                let desc = self.rx_ring_buffers.free_mut().dequeue().unwrap();
+                let desc_len = usize::try_from(desc.len()).unwrap();
 
-                    rx_tok.consume(|rx_buf| {
-                        assert!(desc_len >= rx_buf.len());
-                        let buf_range = {
-                            let start = desc.encoded_addr() - self.client_region_paddr;
-                            start..start + rx_buf.len()
-                        };
-                        self.client_region
-                            .as_mut_ptr()
-                            .index(buf_range)
-                            .copy_from_slice(&rx_buf);
-                    });
+                rx_tok.consume(|rx_buf| {
+                    assert!(desc_len >= rx_buf.len());
+                    let buf_range = {
+                        let start = desc.encoded_addr() - self.client_region_paddr;
+                        start..start + rx_buf.len()
+                    };
+                    self.client_region
+                        .as_mut_ptr()
+                        .index(buf_range)
+                        .copy_from_slice(&rx_buf);
+                });
 
-                    self.rx_ring_buffers.used_mut().enqueue(desc).unwrap();
-                    notify_rx = true;
-                }
+                self.rx_ring_buffers.used_mut().enqueue(desc).unwrap();
+                notify_rx = true;
+            }
 
             if notify_rx {
                 self.rx_ring_buffers.notify().unwrap();
@@ -109,24 +110,25 @@ impl<Device: phy::Device + IrqAck + HasMac> Handler for PhyDeviceHandler<Device>
             let mut notify_tx = false;
 
             while !self.tx_ring_buffers.free().is_empty()
-                && let Some(tx_tok) = self.dev.transmit(Instant::ZERO) {
-                    let desc = self.tx_ring_buffers.free_mut().dequeue().unwrap();
-                    let tx_len = usize::try_from(desc.len()).unwrap();
+                && let Some(tx_tok) = self.dev.transmit(Instant::ZERO)
+            {
+                let desc = self.tx_ring_buffers.free_mut().dequeue().unwrap();
+                let tx_len = usize::try_from(desc.len()).unwrap();
 
-                    tx_tok.consume(tx_len, |tx_buf| {
-                        let buf_range = {
-                            let start = desc.encoded_addr() - self.client_region_paddr;
-                            start..start + tx_len
-                        };
-                        self.client_region
-                            .as_ptr()
-                            .index(buf_range)
-                            .copy_into_slice(tx_buf);
-                    });
+                tx_tok.consume(tx_len, |tx_buf| {
+                    let buf_range = {
+                        let start = desc.encoded_addr() - self.client_region_paddr;
+                        start..start + tx_len
+                    };
+                    self.client_region
+                        .as_ptr()
+                        .index(buf_range)
+                        .copy_into_slice(tx_buf);
+                });
 
-                    self.tx_ring_buffers.used_mut().enqueue(desc).unwrap();
-                    notify_tx = true;
-                }
+                self.tx_ring_buffers.used_mut().enqueue(desc).unwrap();
+                notify_tx = true;
+            }
 
             if notify_tx {
                 self.tx_ring_buffers.notify().unwrap();
