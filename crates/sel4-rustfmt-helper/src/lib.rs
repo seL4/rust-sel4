@@ -4,8 +4,6 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-#![feature(exit_status_error)]
-
 use std::env;
 use std::path::{Path, PathBuf};
 use std::process::Command;
@@ -30,14 +28,13 @@ impl Rustfmt {
 
     pub fn format(&self, path: impl AsRef<Path>) {
         if let Some(rustfmt_path) = &self.path {
-            let output = Command::new(rustfmt_path)
+            let status = Command::new(rustfmt_path)
                 .arg(path.as_ref())
-                .output()
+                .status()
                 .unwrap();
-            output.status.exit_ok().unwrap_or_else(|err| {
-                eprint!("{}", str::from_utf8(&output.stderr).unwrap());
-                panic!("{err:?}")
-            });
+            if !status.success() {
+                panic!("{} failed with {}", rustfmt_path.display(), status);
+            };
         }
     }
 }
