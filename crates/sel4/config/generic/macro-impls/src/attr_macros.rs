@@ -136,9 +136,11 @@ impl<'a> Helper<'a> {
 
     fn process_attrs(&mut self, attrs: &mut Vec<syn::Attribute>) -> bool /* keep */ {
         let synthetic_attr = self.impls.synthetic_attr();
-        let keep = attrs
-            .extract_if(|attr| attr.path.is_ident(&format_ident!("{}", synthetic_attr)))
-            .all(|attr| match attr.parse_args::<syn::NestedMeta>() {
+        // NOTE(rustc_wishlist) revert to extract_if once #![feature(extract_if)] stabilizes
+        let key = |attr: &syn::Attribute| !attr.path.is_ident(&format_ident!("{}", synthetic_attr));
+        attrs.sort_by_key(key);
+        let keep = attrs.drain(attrs.partition_point(key)..).all(|attr| {
+            match attr.parse_args::<syn::NestedMeta>() {
                 Ok(expr) => {
                     let r = self.impls.eval_nested_meta(&expr);
                     match r {
@@ -153,7 +155,8 @@ impl<'a> Helper<'a> {
                     self.report_err(err.to_compile_error());
                     false
                 }
-            });
+            }
+        });
         keep
     }
 

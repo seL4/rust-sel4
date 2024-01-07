@@ -4,8 +4,6 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-#![feature(extract_if)]
-
 mod attr_macros;
 mod cfg_if;
 mod common_helpers;
