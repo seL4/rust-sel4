@@ -39,12 +39,10 @@ use server::Server;
 const HTTP_PORT: u16 = 80;
 const HTTPS_PORT: u16 = 443;
 
-// TODO
-const NOW: u64 = 1704284617;
-
 pub async fn run_server<
     T: BlockIO<ReadOnly, BlockSize = constant_block_sizes::BlockSize512> + Clone + 'static,
 >(
+    now_unix_time: Duration,
     now_fn: impl 'static + Send + Sync + Fn() -> Instant,
     _timers_ctx: TimerManager,
     network_ctx: ManagedInterface,
@@ -66,7 +64,7 @@ pub async fn run_server<
         }
     });
 
-    let tls_config = Arc::new(mk_tls_config(cert_pem, priv_pem, now_fn));
+    let tls_config = Arc::new(mk_tls_config(cert_pem, priv_pem, now_unix_time, now_fn));
 
     let use_socket_for_https_closure: SocketUser<T> = Box::new({
         move |server, socket| {
@@ -153,6 +151,7 @@ async fn use_socket_for_https<D: fat::BlockDevice + 'static, T: fat::TimeSource 
 fn mk_tls_config(
     cert_pem: &str,
     priv_pem: &str,
+    now_unix_time: Duration,
     now_fn: impl 'static + Send + Sync + Fn() -> Instant,
 ) -> ServerConfig {
     let cert_der = match rustls_pemfile::read_one_from_slice(cert_pem.as_bytes())
@@ -180,7 +179,7 @@ fn mk_tls_config(
         .with_single_cert(vec![cert_der], key_der)
         .unwrap();
     config.time_provider = TimeProvider::new(GetCurrentTimeImpl::new(
-        UnixTime::since_unix_epoch(Duration::from_secs(NOW)),
+        UnixTime::since_unix_epoch(now_unix_time),
         now_fn,
     ));
 

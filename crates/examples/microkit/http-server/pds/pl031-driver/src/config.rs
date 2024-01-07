@@ -4,6 +4,8 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
+#![allow(dead_code)]
+
 pub mod channels {
     use sel4_microkit::Channel;
 
