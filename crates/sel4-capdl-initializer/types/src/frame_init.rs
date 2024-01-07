@@ -87,7 +87,7 @@ impl EmbeddedFrame {
         self.ptr
     }
 
-    pub const fn check(&self, frame_size: usize) {
+    pub fn check(&self, frame_size: usize) {
         assert!(self.ptr().is_aligned_to(frame_size));
     }
 }

@@ -6,7 +6,6 @@
 
 #![cfg_attr(not(feature = "std"), no_std)]
 #![feature(never_type)]
-#![feature(const_pointer_is_aligned)]
 #![feature(pointer_is_aligned)]
 #![feature(proc_macro_hygiene)]
 #![feature(slice_ptr_len)]
