@@ -15,7 +15,6 @@ pub(crate) mod fault;
 pub(crate) mod top_level {
     pub use super::{
         arch::top_level::*,
-        fault::Fault,
         object::{ObjectBlueprintArch, ObjectBlueprintX86, ObjectTypeArch, ObjectTypeX86},
         vm_attributes::VMAttributes,
         NUM_FAST_MESSAGE_REGISTERS,

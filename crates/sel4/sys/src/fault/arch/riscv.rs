@@ -11,7 +11,7 @@ use sel4_config::sel4_cfg_match;
 
 impl seL4_Fault {
     pub(crate) fn arch_get_with(label: seL4_Word, length: seL4_Word, f: impl Fn(core::ffi::c_ulong) -> seL4_Word) -> Option<Self> {
-        let f = |i: core::ffi::c_uint| f(i.try_into().unwrap());
+        let f = |i: core::ffi::c_uint| f(i.into());
         let length: core::ffi::c_uint = length.try_into().unwrap();
         Some({
             #[sel4_cfg_match]

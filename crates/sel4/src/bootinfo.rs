@@ -120,51 +120,27 @@ impl BootInfo {
     }
 
     pub fn init_thread_cnode() -> CNode {
-        CNode::from_bits(
-            sys::seL4_RootCapSlot::seL4_CapInitThreadCNode
-                .try_into()
-                .unwrap(),
-        )
+        CNode::from_bits(sys::seL4_RootCapSlot::seL4_CapInitThreadCNode.into())
     }
 
     pub fn irq_control() -> IRQControl {
-        IRQControl::from_bits(
-            sys::seL4_RootCapSlot::seL4_CapIRQControl
-                .try_into()
-                .unwrap(),
-        )
+        IRQControl::from_bits(sys::seL4_RootCapSlot::seL4_CapIRQControl.into())
     }
 
     pub fn asid_control() -> ASIDControl {
-        ASIDControl::from_bits(
-            sys::seL4_RootCapSlot::seL4_CapASIDControl
-                .try_into()
-                .unwrap(),
-        )
+        ASIDControl::from_bits(sys::seL4_RootCapSlot::seL4_CapASIDControl.into())
     }
 
     pub fn init_thread_asid_pool() -> ASIDPool {
-        ASIDPool::from_bits(
-            sys::seL4_RootCapSlot::seL4_CapInitThreadASIDPool
-                .try_into()
-                .unwrap(),
-        )
+        ASIDPool::from_bits(sys::seL4_RootCapSlot::seL4_CapInitThreadASIDPool.into())
     }
 
     pub fn init_thread_vspace() -> VSpace {
-        VSpace::from_bits(
-            sys::seL4_RootCapSlot::seL4_CapInitThreadVSpace
-                .try_into()
-                .unwrap(),
-        )
+        VSpace::from_bits(sys::seL4_RootCapSlot::seL4_CapInitThreadVSpace.into())
     }
 
     pub fn init_thread_tcb() -> TCB {
-        TCB::from_bits(
-            sys::seL4_RootCapSlot::seL4_CapInitThreadTCB
-                .try_into()
-                .unwrap(),
-        )
+        TCB::from_bits(sys::seL4_RootCapSlot::seL4_CapInitThreadTCB.into())
     }
 
     pub fn init_cspace_cptr(slot: InitCSpaceSlot) -> CPtr {
@@ -196,7 +172,7 @@ impl UntypedDesc {
     }
 
     pub fn size_bits(&self) -> usize {
-        self.inner().sizeBits.try_into().unwrap()
+        self.inner().sizeBits.into()
     }
 
     pub fn is_device(&self) -> bool {

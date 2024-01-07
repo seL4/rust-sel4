@@ -36,7 +36,7 @@ impl<C: InvocationContext> Untyped<C> {
         Error::wrap(self.invoke(|cptr, ipc_buffer| {
             ipc_buffer.inner_mut().seL4_Untyped_Retype(
                 cptr.bits(),
-                blueprint.ty().into_sys().try_into().unwrap(),
+                blueprint.ty().into_sys().into(),
                 blueprint.api_size_bits().unwrap_or(0).try_into().unwrap(),
                 dst.root().bits(),
                 dst.path().bits(),

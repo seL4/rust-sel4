@@ -7,6 +7,7 @@
 #![no_std]
 #![feature(lang_items)]
 #![feature(never_type)]
+#![allow(internal_features)]
 
 extern crate alloc;
 

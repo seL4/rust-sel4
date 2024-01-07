@@ -10,6 +10,7 @@
 #![feature(exclusive_wrapper)]
 #![feature(never_type)]
 #![feature(unwrap_infallible)]
+#![allow(internal_features)]
 
 use core::arch::global_asm;
 use core::sync::Exclusive;
@@ -94,7 +95,7 @@ impl<const N: usize> Stack<N> {
 }
 
 #[repr(transparent)]
-pub struct StackTop(Exclusive<*mut u8>);
+pub struct StackTop(#[allow(dead_code)] Exclusive<*mut u8>);
 
 const STACK_SIZE: usize = 0x4000;
 

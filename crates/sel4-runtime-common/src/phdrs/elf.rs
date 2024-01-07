@@ -59,7 +59,7 @@ impl ElfHeader {
                 .cast::<u8>()
                 .offset(self.e_phoff.try_into().unwrap())
                 .cast::<ProgramHeader>();
-            slice::from_raw_parts(ptr, self.e_phnum.try_into().unwrap())
+            slice::from_raw_parts(ptr, self.e_phnum.into())
         }
     }
 }
