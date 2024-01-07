@@ -7,7 +7,6 @@
 #![no_std]
 #![feature(alloc_error_handler)]
 #![feature(c_size_t)]
-#![feature(const_trait_impl)]
 #![feature(core_intrinsics)]
 #![feature(exposed_provenance)]
 #![feature(lang_items)]

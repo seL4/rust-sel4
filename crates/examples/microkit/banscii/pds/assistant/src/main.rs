@@ -6,7 +6,6 @@
 
 #![no_std]
 #![no_main]
-#![feature(const_trait_impl)]
 #![feature(never_type)]
 
 extern crate alloc;
