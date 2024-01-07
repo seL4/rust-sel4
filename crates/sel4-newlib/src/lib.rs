@@ -7,7 +7,6 @@
 // TODO address thread safety and reentrancy (init reentrancy structs and figure out what's up with errno)
 
 #![no_std]
-#![feature(const_slice_from_raw_parts_mut)]
 #![feature(slice_ptr_get)]
 #![feature(slice_ptr_len)]
 #![feature(sync_unsafe_cell)]
