@@ -8,7 +8,6 @@
 
 #![no_std]
 #![feature(error_in_core)]
-#![feature(lazy_cell)]
 #![feature(thread_local)]
 
 extern crate alloc;
@@ -16,7 +15,7 @@ extern crate alloc;
 use alloc::rc::{Rc, Weak};
 use alloc::sync::Arc;
 use alloc::vec::Vec;
-use core::cell::{LazyCell, RefCell};
+use core::cell::{OnceCell, RefCell};
 use core::pin::Pin;
 use core::sync::atomic::{AtomicBool, Ordering};
 
@@ -67,10 +66,6 @@ impl ThreadNotify {
     }
 }
 
-#[thread_local]
-static CURRENT_THREAD_NOTIFY: LazyCell<Arc<ThreadNotify>> =
-    LazyCell::new(|| Arc::new(ThreadNotify::new()));
-
 impl ArcWake for ThreadNotify {
     fn wake_by_ref(arc_self: &Arc<Self>) {
         ThreadNotify::wake(arc_self);
@@ -78,17 +73,22 @@ impl ArcWake for ThreadNotify {
 }
 
 fn run_executor_until_stalled<T, F: FnMut(&mut Context<'_>) -> Poll<T>>(mut f: F) -> Poll<T> {
+    #[thread_local]
+    static CURRENT_THREAD_NOTIFY: OnceCell<Arc<ThreadNotify>> = OnceCell::new();
+
     let _enter =
         enter::enter().expect("cannot execute `LocalPool` executor from within another executor");
 
-    let waker = waker_ref(&CURRENT_THREAD_NOTIFY);
+    let current_thread_notify = CURRENT_THREAD_NOTIFY.get_or_init(|| Arc::new(ThreadNotify::new()));
+
+    let waker = waker_ref(&current_thread_notify);
     let mut cx = Context::from_waker(&waker);
     loop {
         if let Poll::Ready(t) = f(&mut cx) {
             return Poll::Ready(t);
         }
 
-        if !CURRENT_THREAD_NOTIFY.take_wakeup() {
+        if !current_thread_notify.take_wakeup() {
             return Poll::Pending;
         }
     }
