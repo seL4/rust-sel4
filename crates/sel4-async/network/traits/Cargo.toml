@@ -1,7 +1,7 @@
 #
 # Copyright 2023, Colias Group, LLC
 #
-# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+# SPDX-License-Identifier: BSD-2-Clause
 #
 #
 # This file is generated from './Cargo.nix'. You can edit this file directly
@@ -10,19 +10,11 @@
 #
 
 [package]
-name = "sel4-async-network-rustls"
+name = "sel4-async-network-traits"
 version = "0.1.0"
 authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
 edition = "2021"
-license = "Apache-2.0 OR ISC OR MIT"
+license = "BSD-2-Clause"
 
 [dependencies]
 futures = { version = "0.3.28", default-features = false, features = ["alloc"] }
-log = "0.4.17"
-sel4-async-network-traits = { path = "../traits" }
-
-[dependencies.rustls]
-git = "https://github.com/coliasgroup/rustls.git"
-rev = "c315801aa0c1e9c765b27106b3969dd458995cc7"
-default-features = false
-features = ["logging", "ring", "tls12"]

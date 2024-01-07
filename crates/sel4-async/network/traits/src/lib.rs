@@ -1,19 +1,17 @@
 //
 // Copyright 2023, Colias Group, LLC
 //
-// SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+// SPDX-License-Identifier: BSD-2-Clause
 //
 
 // TODO use Pin
 
-use alloc::boxed::Box;
+#![no_std]
+
 use core::pin::Pin;
 use core::task::{Context, Poll};
 
 use futures::future;
-
-// TODO remove after bumping rust toolchain
-use async_trait::async_trait;
 
 pub trait AsyncIO {
     type Error;
@@ -47,8 +45,8 @@ impl<E> From<E> for ClosedError<E> {
     }
 }
 
-#[async_trait(?Send)]
 pub trait AsyncIOExt: AsyncIO {
+    #[allow(async_fn_in_trait)]
     async fn read(&mut self, buf: &mut [u8]) -> Result<usize, Self::Error>
     where
         Self: Unpin,
@@ -57,6 +55,7 @@ pub trait AsyncIOExt: AsyncIO {
         future::poll_fn(move |cx| pin.as_mut().poll_read(cx, buf)).await
     }
 
+    #[allow(async_fn_in_trait)]
     async fn read_exact(&mut self, buf: &mut [u8]) -> Result<(), ClosedError<Self::Error>>
     where
         Self: Unpin,
@@ -73,6 +72,7 @@ pub trait AsyncIOExt: AsyncIO {
         Ok(())
     }
 
+    #[allow(async_fn_in_trait)]
     async fn write(&mut self, buf: &[u8]) -> Result<usize, Self::Error>
     where
         Self: Unpin,
@@ -81,6 +81,7 @@ pub trait AsyncIOExt: AsyncIO {
         future::poll_fn(|cx| pin.as_mut().poll_write(cx, buf)).await
     }
 
+    #[allow(async_fn_in_trait)]
     async fn write_all(&mut self, buf: &[u8]) -> Result<(), ClosedError<Self::Error>>
     where
         Self: Unpin,
@@ -97,6 +98,7 @@ pub trait AsyncIOExt: AsyncIO {
         Ok(())
     }
 
+    #[allow(async_fn_in_trait)]
     async fn flush(&mut self) -> Result<(), Self::Error>
     where
         Self: Unpin,

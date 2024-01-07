@@ -68,6 +68,8 @@ members = [
     "crates/sel4-async/network/mbedtls",
     "crates/sel4-async/network/mbedtls/mozilla-ca-list",
     "crates/sel4-async/network/rustls",
+    "crates/sel4-async/network/rustls/utils",
+    "crates/sel4-async/network/traits",
     "crates/sel4-async/single-threaded-executor",
     "crates/sel4-async/time",
     "crates/sel4-async/unsync",

@@ -32,6 +32,7 @@ use sel4_bounce_buffer_allocator::{Basic, BounceBufferAllocator};
 use sel4_externally_shared::{ExternallySharedRef, ExternallySharedRefExt};
 use sel4_logging::{LevelFilter, Logger, LoggerBuilder};
 use sel4_microkit::{memory_region_symbol, protection_domain, Handler};
+use sel4_newlib as _;
 use sel4_shared_ring_buffer::RingBuffers;
 use sel4_shared_ring_buffer_block_io::SharedRingBufferBlockIO;
 use sel4_shared_ring_buffer_smoltcp::DeviceImpl;

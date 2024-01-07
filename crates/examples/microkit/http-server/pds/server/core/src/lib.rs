@@ -24,11 +24,10 @@ use rustls::ServerConfig;
 
 use sel4_async_block_io::{access::ReadOnly, constant_block_sizes, BlockIO};
 use sel4_async_block_io_fat as fat;
-use sel4_async_network::{ManagedInterface, TcpSocketError};
-use sel4_async_network_rustls::async_io::{
-    ClosedError, Error as AsyncRustlsError, ServerConnector, TcpSocketWrapper,
-};
-use sel4_async_network_rustls::GetCurrentTimeImpl;
+use sel4_async_network::{ManagedInterface, TcpSocket, TcpSocketError};
+use sel4_async_network_rustls::{Error as AsyncRustlsError, ServerConnector};
+use sel4_async_network_rustls_utils::GetCurrentTimeImpl;
+use sel4_async_network_traits::ClosedError;
 use sel4_async_single_threaded_executor::LocalSpawner;
 use sel4_async_time::{Instant, TimerManager};
 
@@ -102,7 +101,7 @@ pub async fn run_server<
                             let dir = volume_manager.open_root_dir().unwrap();
                             let server = Server::new(volume_manager, dir);
                             let socket = network_ctx.new_tcp_socket_with_buffer_sizes(8192, 65535);
-                            f(server, TcpSocketWrapper::new(socket)).await;
+                            f(server, socket).await;
                         }
                     }
                 })
@@ -116,26 +115,26 @@ pub async fn run_server<
 type SocketUser<T> = Box<
     dyn Fn(
         Server<fat::BlockIOWrapper<T, ReadOnly>, fat::DummyTimeSource>,
-        TcpSocketWrapper,
+        TcpSocket,
     ) -> LocalBoxFuture<'static, ()>,
 >;
 
 async fn use_socket_for_http<D: fat::BlockDevice + 'static, T: fat::TimeSource + 'static>(
     server: Server<D, T>,
-    mut socket: TcpSocketWrapper,
+    mut socket: TcpSocket,
 ) -> Result<(), ClosedError<TcpSocketError>> {
-    socket.inner_mut().accept(HTTP_PORT).await?;
+    socket.accept(HTTP_PORT).await?;
     server.handle_connection(&mut socket).await?;
-    socket.inner_mut().close().await?;
+    socket.close().await?;
     Ok(())
 }
 
 async fn use_socket_for_https<D: fat::BlockDevice + 'static, T: fat::TimeSource + 'static>(
     server: Server<D, T>,
     tls_config: Arc<ServerConfig>,
-    mut socket: TcpSocketWrapper,
+    mut socket: TcpSocket,
 ) -> Result<(), ClosedError<AsyncRustlsError<TcpSocketError>>> {
-    socket.inner_mut().accept(HTTPS_PORT).await.unwrap(); // TODO
+    socket.accept(HTTPS_PORT).await.unwrap(); // TODO
 
     let mut conn = ServerConnector::from(tls_config)
         .connect(socket)
@@ -144,9 +143,13 @@ async fn use_socket_for_https<D: fat::BlockDevice + 'static, T: fat::TimeSource 
         .unwrap();
 
     server.handle_connection(&mut conn).await?;
-    // TODO
-    // ctx.close_async().await?;
-    // let _ = ctx.take_io().unwrap().inner_mut().close().await; // TODO
+
+    // TODO TcpSocket doesn't support stateless .poll_close() yet, so we close the socket directly
+    conn.into_io()
+        .close()
+        .await
+        .map_err(AsyncRustlsError::TransitError)?;
+
     Ok(())
 }
 

@@ -33,7 +33,9 @@ mk {
       sel4-async-unsync
       sel4-async-time
       sel4-async-network
+      sel4-async-network-traits
       sel4-async-network-rustls
+      sel4-async-network-rustls-utils
       sel4-panicking-env
       sel4-async-block-io
       sel4-async-block-io-fat

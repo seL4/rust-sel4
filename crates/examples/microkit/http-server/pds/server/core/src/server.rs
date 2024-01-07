@@ -12,7 +12,7 @@ use alloc::vec;
 use core::str::pattern::Pattern;
 
 use sel4_async_block_io_fat as fat;
-use sel4_async_network_rustls::async_io::{AsyncIO, AsyncIOExt, ClosedError};
+use sel4_async_network_traits::{AsyncIO, AsyncIOExt, ClosedError};
 use sel4_async_unsync::Mutex;
 
 use crate::mime::content_type_from_name;

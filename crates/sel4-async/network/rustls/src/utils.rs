@@ -12,7 +12,9 @@ use core::task::{self, Poll};
 
 use rustls::unbuffered::InsufficientSizeError;
 
-use super::{AsyncIO, Error};
+use sel4_async_network_traits::AsyncIO;
+
+use crate::Error;
 
 pub(crate) struct WriteCursor<'a> {
     buf: &'a mut [u8],
@@ -24,7 +26,7 @@ impl<'a> WriteCursor<'a> {
         Self { buf, used: 0 }
     }
 
-    // TODO new
+    // TODO(nspin) new
     pub(crate) fn used(&self) -> usize {
         self.used
     }
@@ -145,8 +147,7 @@ where
 {
     if incoming.unfilled().is_empty() {
         // XXX should this be user configurable?
-        // incoming.reserve(1024);
-        incoming.reserve(1024 * 256);
+        incoming.reserve(1024);
     }
 
     let would_block = match Pin::new(io).poll_read(cx, incoming.unfilled()) {
