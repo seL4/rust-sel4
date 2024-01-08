@@ -9,9 +9,11 @@ use sel4_sync::DeferredNotificationMutexSyncOps;
 
 pub use sel4_dlmalloc::StaticHeap;
 
+#[doc(hidden)]
 pub type GlobalAllocator<const N: usize> =
     StaticDlmallocGlobalAlloc<DeferredNotificationMutexSyncOps, &'static StaticHeap<N>>;
 
+#[doc(hidden)]
 pub const fn new_global_allocator<const N: usize>(
     bounds: &'static StaticHeap<N>,
 ) -> GlobalAllocator<N> {

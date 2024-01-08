@@ -11,7 +11,7 @@
 
 use core::alloc::{GlobalAlloc, Layout};
 use core::cell::{RefCell, SyncUnsafeCell};
-use core::ops::Range;
+use core::mem;
 use core::ptr;
 
 use dlmalloc::{Allocator as DlmallocAllocator, Dlmalloc};
@@ -65,33 +65,6 @@ unsafe impl<O: MutexSyncOps, T: DlmallocAllocator> GlobalAlloc for DlmallocGloba
     }
 }
 
-pub trait StaticHeapBounds {
-    fn bounds(&self) -> *mut [u8];
-}
-
-// TODO alignment should depend on configuration
-// TODO does this alignment provide any benefit?
-#[repr(C, align(4096))]
-pub struct StaticHeap<const N: usize>(SyncUnsafeCell<[u8; N]>);
-
-impl<const N: usize> StaticHeap<N> {
-    pub const fn new() -> Self {
-        Self(SyncUnsafeCell::new([0; N]))
-    }
-}
-
-impl<const N: usize> StaticHeapBounds for &StaticHeap<N> {
-    fn bounds(&self) -> *mut [u8] {
-        ptr::slice_from_raw_parts_mut(self.0.get().cast(), N)
-    }
-}
-
-impl<T: Fn() -> *mut [u8]> StaticHeapBounds for T {
-    fn bounds(&self) -> *mut [u8] {
-        (self)()
-    }
-}
-
 pub struct StaticDlmallocAllocator<T> {
     state: RefCell<StaticDlmallocAllocatorState<T>>,
 }
@@ -100,7 +73,35 @@ unsafe impl<T: Send> Send for StaticDlmallocAllocatorState<T> {}
 
 enum StaticDlmallocAllocatorState<T> {
     Uninitialized { get_initial_bounds: T },
-    Initialized { free: Range<*mut u8> },
+    Initializing,
+    Initialized { free: Free },
+}
+
+struct Free {
+    watermark: *mut u8,
+    end: *mut u8,
+}
+
+impl Free {
+    fn new(bounds: *mut [u8]) -> Self {
+        let start = bounds.as_mut_ptr();
+        let end = start.wrapping_add(bounds.len());
+        Self {
+            watermark: start,
+            end,
+        }
+    }
+
+    fn alloc(&mut self, size: usize) -> Option<*mut u8> {
+        let start = self.watermark;
+        let end = start.wrapping_offset(size.try_into().unwrap());
+        if end < start || end > self.end {
+            None
+        } else {
+            self.watermark = end;
+            Some(start)
+        }
+    }
 }
 
 impl<T> StaticDlmallocAllocator<T> {
@@ -112,18 +113,19 @@ impl<T> StaticDlmallocAllocator<T> {
 }
 
 impl<T: StaticHeapBounds> StaticDlmallocAllocatorState<T> {
-    fn as_free(&mut self) -> &mut Range<*mut u8> {
-        if let StaticDlmallocAllocatorState::Uninitialized { get_initial_bounds } = self {
-            *self = StaticDlmallocAllocatorState::Initialized {
-                free: {
-                    let raw_slice = get_initial_bounds.bounds();
-                    let start = raw_slice.as_mut_ptr();
-                    let end = start.wrapping_add(raw_slice.len());
-                    start..end
-                },
-            };
+    fn as_free(&mut self) -> &mut Free {
+        if matches!(self, Self::Uninitialized { .. }) {
+            if let Self::Uninitialized { get_initial_bounds } =
+                mem::replace(self, Self::Initializing)
+            {
+                *self = Self::Initialized {
+                    free: Free::new(get_initial_bounds.bounds()),
+                };
+            } else {
+                unreachable!()
+            }
         }
-        if let StaticDlmallocAllocatorState::Initialized { free } = self {
+        if let Self::Initialized { free } = self {
             free
         } else {
             unreachable!()
@@ -133,15 +135,9 @@ impl<T: StaticHeapBounds> StaticDlmallocAllocatorState<T> {
 
 unsafe impl<T: StaticHeapBounds + Send> DlmallocAllocator for StaticDlmallocAllocator<T> {
     fn alloc(&self, size: usize) -> (*mut u8, usize, u32) {
-        let mut state = self.state.borrow_mut();
-        let free = state.as_free();
-        let start = free.start;
-        let end = start.wrapping_offset(size.try_into().unwrap());
-        if end > free.end {
-            (ptr::null_mut(), 0, 0)
-        } else {
-            free.start = end;
-            (start, size, 0)
+        match self.state.borrow_mut().as_free().alloc(size) {
+            Some(start) => (start, size, 0),
+            None => (ptr::null_mut(), 0, 0),
         }
     }
 
@@ -168,5 +164,32 @@ unsafe impl<T: StaticHeapBounds + Send> DlmallocAllocator for StaticDlmallocAllo
     fn page_size(&self) -> usize {
         // TODO should depend on configuration
         4096
+    }
+}
+
+pub trait StaticHeapBounds {
+    fn bounds(self) -> *mut [u8];
+}
+
+impl<T: FnOnce() -> *mut [u8]> StaticHeapBounds for T {
+    fn bounds(self) -> *mut [u8] {
+        (self)()
+    }
+}
+
+// TODO alignment should depend on configuration
+// TODO does this alignment provide any benefit?
+#[repr(C, align(4096))]
+pub struct StaticHeap<const N: usize>(SyncUnsafeCell<[u8; N]>);
+
+impl<const N: usize> StaticHeap<N> {
+    pub const fn new() -> Self {
+        Self(SyncUnsafeCell::new([0; N]))
+    }
+}
+
+impl<const N: usize> StaticHeapBounds for &StaticHeap<N> {
+    fn bounds(self) -> *mut [u8] {
+        ptr::slice_from_raw_parts_mut(self.0.get().cast(), N)
     }
 }
