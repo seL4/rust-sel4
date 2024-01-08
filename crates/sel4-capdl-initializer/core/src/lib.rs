@@ -9,7 +9,6 @@
 #![feature(never_type)]
 #![feature(pointer_is_aligned)]
 #![feature(proc_macro_hygiene)]
-#![feature(slice_ptr_len)]
 #![feature(stmt_expr_attributes)]
 #![feature(strict_provenance)]
 
