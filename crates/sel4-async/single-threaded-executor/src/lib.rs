@@ -80,7 +80,7 @@ fn run_executor_until_stalled<T, F: FnMut(&mut Context<'_>) -> Poll<T>>(mut f: F
 
     let current_thread_notify = CURRENT_THREAD_NOTIFY.get_or_init(|| Arc::new(ThreadNotify::new()));
 
-    let waker = waker_ref(&current_thread_notify);
+    let waker = waker_ref(current_thread_notify);
     let mut cx = Context::from_waker(&waker);
     loop {
         if let Poll::Ready(t) = f(&mut cx) {

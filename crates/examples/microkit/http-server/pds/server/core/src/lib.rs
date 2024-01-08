@@ -38,6 +38,7 @@ use server::Server;
 const HTTP_PORT: u16 = 80;
 const HTTPS_PORT: u16 = 443;
 
+#[allow(clippy::too_many_arguments)] // TODO
 pub async fn run_server<
     T: BlockIO<ReadOnly, BlockSize = constant_block_sizes::BlockSize512> + Clone + 'static,
 >(
