@@ -5,12 +5,8 @@
 //
 
 #![no_std]
-#![feature(core_intrinsics)]
-#![feature(lang_items)]
-#![feature(linkage)]
 #![feature(never_type)]
 #![feature(thread_local)]
-#![feature(unwrap_infallible)]
 #![allow(internal_features)]
 
 #[cfg(feature = "alloc")]
