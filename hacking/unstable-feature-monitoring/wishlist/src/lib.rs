@@ -5,7 +5,6 @@
 //
 
 #![feature(array_methods)]
-#![feature(array_try_from_fn)]
 #![feature(cell_update)]
 #![feature(exclusive_wrapper)]
 #![feature(exposed_provenance)]
