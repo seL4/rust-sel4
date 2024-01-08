@@ -7,7 +7,6 @@
 // TODO address thread safety and reentrancy (init reentrancy structs and figure out what's up with errno)
 
 #![no_std]
-#![feature(slice_ptr_get)]
 
 #[allow(unused_imports)]
 use core::ffi::{c_char, c_int, c_uint};

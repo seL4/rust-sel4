@@ -5,7 +5,6 @@
 //
 
 #![no_std]
-#![feature(slice_ptr_get)]
 #![feature(slice_ptr_len)]
 
 use core::alloc::{GlobalAlloc, Layout};
@@ -83,7 +82,7 @@ struct Free {
 
 impl Free {
     fn new(bounds: *mut [u8]) -> Self {
-        let start = bounds.as_mut_ptr();
+        let start = bounds.cast::<u8>();
         let end = start.wrapping_add(bounds.len());
         Self {
             watermark: start,
