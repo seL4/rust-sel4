@@ -42,9 +42,9 @@
 
 #![no_std]
 #![feature(cfg_target_thread_local)]
+#![feature(pointer_is_aligned)]
 #![feature(proc_macro_hygiene)]
 #![feature(stmt_expr_attributes)]
-#![feature(strict_provenance)]
 #![feature(thread_local)]
 #![allow(clippy::unit_arg)]
 

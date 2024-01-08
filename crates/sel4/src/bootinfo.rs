@@ -28,7 +28,7 @@ pub struct BootInfo {
 impl BootInfo {
     #[allow(clippy::missing_safety_doc)]
     pub unsafe fn from_ptr(ptr: *const sys::seL4_BootInfo) -> Self {
-        assert_eq!(ptr.addr() % GRANULE_SIZE.bytes(), 0); // sanity check
+        assert!(ptr.is_aligned_to(GRANULE_SIZE.bytes())); // sanity check
         Self { ptr }
     }
 
@@ -116,7 +116,7 @@ impl BootInfo {
     }
 
     pub fn footprint(&self) -> Range<usize> {
-        self.ptr.addr()..self.extra_ptr().addr() + self.extra_len()
+        (self.ptr as usize)..(self.extra_ptr() as usize + self.extra_len())
     }
 
     pub fn init_thread_cnode() -> CNode {
