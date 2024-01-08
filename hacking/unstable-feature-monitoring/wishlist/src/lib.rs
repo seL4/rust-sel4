@@ -19,3 +19,6 @@
 //   - pointer::as_mut_ptr
 //   - NonNull::as_non_null_ptr
 #![feature(slice_ptr_get)]
+
+// For sel4_microkit::Handler::Error = !
+#![feature(associated_type_defaults)]

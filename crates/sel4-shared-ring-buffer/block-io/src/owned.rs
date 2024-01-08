@@ -36,6 +36,8 @@ const NUM_SLOT_POOLS: usize = 2;
 enum StateTypesImpl {}
 
 impl SlotStateTypes for StateTypesImpl {
+    type Common = ();
+    type Free = ();
     type Occupied = Occupied;
 }
 

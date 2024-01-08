@@ -17,7 +17,7 @@ const EVENT_TYPE_MASK: sel4::Word = 1 << (sel4::WORD_SIZE - 1);
 /// Trait for the application-specific part of a protection domain's main loop.
 pub trait Handler {
     /// Error type returned by this protection domain's entrypoints.
-    type Error: fmt::Display = !;
+    type Error: fmt::Display;
 
     /// This method has the same meaning and type as its analog in `libmicrokit`.
     ///

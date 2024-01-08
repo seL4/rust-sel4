@@ -6,6 +6,7 @@
 
 #![no_std]
 #![no_main]
+#![feature(never_type)]
 
 use sel4_microkit::{debug_println, protection_domain, Handler};
 
@@ -17,4 +18,6 @@ fn init() -> HandlerImpl {
 
 struct HandlerImpl;
 
-impl Handler for HandlerImpl {}
+impl Handler for HandlerImpl {
+    type Error = !;
+}

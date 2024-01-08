@@ -50,6 +50,8 @@ pub(crate) type TxBufferIndex = usize;
 enum TxStateTypesImpl {}
 
 impl SlotStateTypes for TxStateTypesImpl {
+    type Common = ();
+    type Free = ();
     type Occupied = TxOccupied;
 }
 

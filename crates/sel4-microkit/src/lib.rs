@@ -5,7 +5,6 @@
 //
 
 #![no_std]
-#![feature(associated_type_defaults)]
 #![feature(cfg_target_thread_local)]
 #![feature(never_type)]
 #![feature(pointer_is_aligned)]

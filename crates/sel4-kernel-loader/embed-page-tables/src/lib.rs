@@ -4,8 +4,6 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-#![feature(associated_type_defaults)]
-
 mod embed;
 mod glue;
 mod regions;

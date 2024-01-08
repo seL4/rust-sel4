@@ -6,7 +6,6 @@
 
 #![no_std]
 #![feature(associated_type_bounds)]
-#![feature(associated_type_defaults)]
 
 extern crate alloc;
 

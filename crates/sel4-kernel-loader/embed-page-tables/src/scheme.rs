@@ -27,8 +27,6 @@ pub trait Scheme {
     const SYMBOLIC_BRANCH_DESCRIPTOR_OFFSET: Self::WordPrimitive;
 
     const RUNTIME_SCHEME_IDENT: &'static str;
-
-    type Hepers = SchemeHelpers<Self>;
 }
 
 pub trait SchemeLeafDescriptor<WordPrimitive> {
