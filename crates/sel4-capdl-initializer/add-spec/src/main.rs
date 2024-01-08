@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-#![feature(associated_type_bounds)]
 #![feature(never_type)]
 #![feature(unwrap_infallible)]
 
