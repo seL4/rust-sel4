@@ -13,7 +13,7 @@ clean:
 
 .PHONY: used
 used:
-	./enumerate-unstable-features-used.sh
+	./enumerate-used-unstable-features.sh
 
 .PHONY: wishlist
 wishlist:
