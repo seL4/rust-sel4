@@ -8,4 +8,5 @@
 #![feature(cell_update)]
 #![feature(extract_if)]
 #![feature(let_chains)]
+#![feature(sync_unsafe_cell)]
 #![feature(variant_count)]

@@ -6,19 +6,22 @@
 
 use super::*;
 
-use core::cell::SyncUnsafeCell;
+use core::cell::UnsafeCell;
 use core::ffi::{c_int, c_void};
 use core::ptr;
 use core::sync::atomic::{AtomicIsize, Ordering};
 
 use sel4_panicking_env::abort;
 
+// NOTE(rustc_wishlist) use SyncUnsafeCell once #![feature(sync_unsafe_cell)] stabilizes
 #[repr(align(4096))] // no real reason for this
-struct BackingMemory<const N: usize>(SyncUnsafeCell<[u8; N]>);
+struct BackingMemory<const N: usize>(UnsafeCell<[u8; N]>);
+
+unsafe impl<const N: usize> Sync for BackingMemory<N> {}
 
 impl<const N: usize> BackingMemory<N> {
     const fn new() -> Self {
-        Self(SyncUnsafeCell::new([0; N]))
+        Self(UnsafeCell::new([0; N]))
     }
 
     fn bounds(&self) -> *mut [u8] {

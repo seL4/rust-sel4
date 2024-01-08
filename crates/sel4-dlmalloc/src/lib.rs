@@ -7,10 +7,9 @@
 #![no_std]
 #![feature(slice_ptr_get)]
 #![feature(slice_ptr_len)]
-#![feature(sync_unsafe_cell)]
 
 use core::alloc::{GlobalAlloc, Layout};
-use core::cell::{RefCell, SyncUnsafeCell};
+use core::cell::{RefCell, UnsafeCell};
 use core::mem;
 use core::ptr;
 
@@ -179,12 +178,15 @@ impl<T: FnOnce() -> *mut [u8]> StaticHeapBounds for T {
 
 // TODO alignment should depend on configuration
 // TODO does this alignment provide any benefit?
+// NOTE(rustc_wishlist) use SyncUnsafeCell once #![feature(sync_unsafe_cell)] stabilizes
 #[repr(C, align(4096))]
-pub struct StaticHeap<const N: usize>(SyncUnsafeCell<[u8; N]>);
+pub struct StaticHeap<const N: usize>(UnsafeCell<[u8; N]>);
+
+unsafe impl<const N: usize> Sync for StaticHeap<N> {}
 
 impl<const N: usize> StaticHeap<N> {
     pub const fn new() -> Self {
-        Self(SyncUnsafeCell::new([0; N]))
+        Self(UnsafeCell::new([0; N]))
     }
 }
 

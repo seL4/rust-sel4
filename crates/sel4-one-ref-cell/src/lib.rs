@@ -5,15 +5,17 @@
 //
 
 #![no_std]
-#![feature(sync_unsafe_cell)]
 
-use core::cell::SyncUnsafeCell;
+use core::cell::UnsafeCell;
 use core::sync::atomic::{AtomicBool, Ordering};
 
+// NOTE(rustc_wishlist) use SyncUnsafeCell once #![feature(sync_unsafe_cell)] stabilizes
 pub struct OneRefCell<T> {
     taken: AtomicBool,
-    value: SyncUnsafeCell<T>,
+    value: UnsafeCell<T>,
 }
+
+unsafe impl<T> Sync for OneRefCell<T> {}
 
 impl<T: Default> Default for OneRefCell<T> {
     fn default() -> Self {
@@ -31,7 +33,7 @@ impl<T> OneRefCell<T> {
     pub const fn new(value: T) -> Self {
         Self {
             taken: AtomicBool::new(false),
-            value: SyncUnsafeCell::new(value),
+            value: UnsafeCell::new(value),
         }
     }
 
