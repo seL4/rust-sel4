@@ -7,7 +7,6 @@
 #![no_std]
 #![no_main]
 #![feature(associated_type_bounds)]
-#![feature(exclusive_wrapper)]
 #![feature(exposed_provenance)]
 #![feature(proc_macro_hygiene)]
 #![feature(strict_provenance)]

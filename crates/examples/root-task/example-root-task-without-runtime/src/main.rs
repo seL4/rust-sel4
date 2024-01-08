@@ -7,13 +7,11 @@
 #![no_std]
 #![no_main]
 #![feature(core_intrinsics)]
-#![feature(exclusive_wrapper)]
 #![feature(never_type)]
 #![feature(unwrap_infallible)]
 #![allow(internal_features)]
 
 use core::arch::global_asm;
-use core::sync::Exclusive;
 
 fn main(bootinfo: &sel4::BootInfo) -> sel4::Result<!> {
     sel4::debug_println!("Hello, World!");
@@ -81,28 +79,36 @@ fn main(bootinfo: &sel4::BootInfo) -> sel4::Result<!> {
 
 // minimal ad-hoc runtime
 
-#[repr(C, align(16))]
-pub struct Stack<const N: usize>([u8; N]);
+mod stack {
+    use core::cell::UnsafeCell;
 
-impl<const N: usize> Stack<N> {
-    pub const fn new() -> Self {
-        Self([0; N])
+    #[repr(C, align(16))]
+    pub struct Stack<const N: usize>(UnsafeCell<[u8; N]>);
+
+    unsafe impl<const N: usize> Sync for Stack<N> {}
+
+    impl<const N: usize> Stack<N> {
+        pub const fn new() -> Self {
+            Self(UnsafeCell::new([0; N]))
+        }
+
+        pub const fn top(&self) -> StackTop {
+            StackTop(self.0.get().cast::<u8>().wrapping_add(N))
+        }
     }
 
-    pub const fn top(&self) -> StackTop {
-        StackTop(Exclusive::new(self.0.as_ptr_range().end.cast_mut()))
-    }
+    #[repr(transparent)]
+    pub struct StackTop(#[allow(dead_code)] *mut u8);
+
+    unsafe impl Sync for StackTop {}
+
+    const STACK_SIZE: usize = 0x4000;
+
+    static STACK: Stack<STACK_SIZE> = Stack::new();
+
+    #[no_mangle]
+    static __stack_top: StackTop = STACK.top();
 }
-
-#[repr(transparent)]
-pub struct StackTop(#[allow(dead_code)] Exclusive<*mut u8>);
-
-const STACK_SIZE: usize = 0x4000;
-
-static mut STACK: Stack<STACK_SIZE> = Stack::new();
-
-#[no_mangle]
-static __stack_top: StackTop = unsafe { STACK.top() };
 
 cfg_if::cfg_if! {
     if #[cfg(target_arch = "aarch64")] {
