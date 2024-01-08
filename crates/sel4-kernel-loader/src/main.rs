@@ -10,7 +10,7 @@
 #![feature(proc_macro_hygiene)]
 #![cfg_attr(
     any(target_arch = "riscv32", target_arch = "riscv64"),
-    feature(riscv_ext_intrinsics)
+    feature(riscv_ext_intrinsics, stdsimd)
 )]
 #![allow(dead_code)]
 #![allow(unreachable_code)]
