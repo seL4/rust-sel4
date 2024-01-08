@@ -4,7 +4,9 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
+use core::ptr;
 use core::sync::atomic::{AtomicI32, AtomicUsize, Ordering};
+
 use sel4_config::sel4_cfg_usize;
 
 use crate::plat::Plat;
@@ -43,8 +45,8 @@ impl Plat for PlatImpl {
 
     fn start_secondary_core(core_id: usize, sp: usize) {
         unsafe {
-            AtomicUsize::from_mut(&mut secondary_core_sp).store(sp, Ordering::SeqCst);
-            AtomicI32::from_mut(&mut start_core_by_logical_id)
+            AtomicUsize::from_ptr(ptr::addr_of_mut!(secondary_core_sp)).store(sp, Ordering::SeqCst);
+            AtomicI32::from_ptr(ptr::addr_of_mut!(start_core_by_logical_id))
                 .store(core_id.try_into().unwrap(), Ordering::SeqCst);
         }
     }

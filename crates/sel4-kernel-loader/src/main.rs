@@ -7,7 +7,6 @@
 #![no_std]
 #![no_main]
 #![feature(associated_type_bounds)]
-#![feature(atomic_from_mut)]
 #![feature(exclusive_wrapper)]
 #![feature(exposed_provenance)]
 #![feature(proc_macro_hygiene)]

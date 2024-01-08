@@ -21,7 +21,7 @@ pub(crate) fn start_secondary_core(spin_table: &[usize], core_id: usize, sp: usi
 
         // Emits strl instruction. Ensures jump address is observed by spinning
         // core only after stack address, without the need for an explicit barrier.
-        AtomicUsize::from_mut(&mut *start_ptr).store(start, Ordering::Release);
+        AtomicUsize::from_ptr(start_ptr).store(start, Ordering::Release);
 
         dc_cvac(start_ptr.expose_addr());
         dc_cvac((&spin_table_secondary_stack_bottom as *const usize).expose_addr());
