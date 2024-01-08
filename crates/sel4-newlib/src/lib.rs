@@ -8,7 +8,6 @@
 
 #![no_std]
 #![feature(slice_ptr_get)]
-#![feature(slice_ptr_len)]
 #![feature(sync_unsafe_cell)]
 
 #[allow(unused_imports)]
