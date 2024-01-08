@@ -4,36 +4,36 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use alloc::alloc::Global;
 use alloc::collections::BTreeMap;
-use core::alloc::{Allocator, Layout};
+use core::alloc::Layout;
 use core::ops::Bound;
 
 use crate::{AbstractBounceBufferAllocator, Offset, Size};
 
 const GRANULE_SIZE: usize = 2048;
 
-pub struct Basic<A: Allocator + Clone = Global> {
-    holes: BTreeMap<Offset, Size, A>,
+// NOTE(rustc_wishlist)
+//
+// #![feature(allocator_api)] and #![feature(btreemap_alloc)]
+//
+// Should be parameterized with an allocator A, to enable this type to be used without a global
+// allocator.
+//
+pub struct Basic {
+    holes: BTreeMap<Offset, Size>,
 }
 
 impl Basic {
     pub fn new(size: Size) -> Self {
-        Self::new_in(Global, size)
-    }
-}
-
-impl<A: Allocator + Clone> Basic<A> {
-    pub fn new_in(alloc: A, size: Size) -> Self {
         assert_eq!(size % GRANULE_SIZE, 0);
         let offset = 0;
-        let mut holes = BTreeMap::new_in(alloc.clone());
+        let mut holes = BTreeMap::new();
         holes.insert(offset, size);
         Self { holes }
     }
 }
 
-impl<A: Allocator + Clone> AbstractBounceBufferAllocator for Basic<A> {
+impl AbstractBounceBufferAllocator for Basic {
     type Error = ();
 
     fn allocate(&mut self, layout: Layout) -> Result<Offset, Self::Error> {

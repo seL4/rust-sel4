@@ -25,3 +25,7 @@
 
 // Would greatly simplify sel4_render_elf_with_data::FileHeaderExt
 #![feature(associated_type_bounds)]
+
+// Would enable sel4_bounce_buffer_allocator::Basic without a global heap
+#![feature(allocator_api)]
+#![feature(btreemap_alloc)]

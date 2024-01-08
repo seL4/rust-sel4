@@ -5,9 +5,7 @@
 //
 
 #![no_std]
-#![feature(allocator_api)]
 #![feature(btree_cursors)]
-#![feature(btreemap_alloc)]
 #![feature(pointer_is_aligned)]
 
 extern crate alloc;
