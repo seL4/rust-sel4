@@ -7,7 +7,6 @@
 #![no_std]
 #![feature(associated_type_bounds)]
 #![feature(never_type)]
-#![feature(slice_as_chunks)]
 
 #[cfg(feature = "alloc")]
 extern crate alloc;
