@@ -29,3 +29,10 @@
 // Would enable sel4_bounce_buffer_allocator::Basic without a global heap
 #![feature(allocator_api)]
 #![feature(btreemap_alloc)]
+
+// For core::arch::riscv*
+#![feature(stdsimd)]
+#![cfg_attr(
+    any(target_arch = "riscv32", target_arch = "riscv64"),
+    feature(riscv_ext_intrinsics),
+)]

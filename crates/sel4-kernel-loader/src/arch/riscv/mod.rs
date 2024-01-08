@@ -124,25 +124,15 @@ sel4_cfg_if! {
 
 fn switch_page_tables() {
     #[cfg(target_pointer_width = "32")]
-    unsafe fn by_ptr_width(ppn: usize) {
-        use core::arch::riscv32::{fence_i, sfence_vma_all};
-
-        sfence_vma_all();
-        satp::set(satp::Mode::Sv32, 0, ppn);
-        fence_i();
-    }
+    const MODE: satp::Mode = satp::Mode::Sv32;
 
     #[cfg(target_pointer_width = "64")]
-    unsafe fn by_ptr_width(ppn: usize) {
-        use core::arch::riscv64::{fence_i, sfence_vma_all};
-
-        sfence_vma_all();
-        satp::set(satp::Mode::Sv39, 0, ppn);
-        fence_i();
-    }
+    const MODE: satp::Mode = satp::Mode::Sv39;
 
     unsafe {
         let ppn = kernel_boot_level_0_table.root() as usize >> 12;
-        by_ptr_width(ppn);
+        asm!("sfence.vma", options(nostack));
+        satp::set(MODE, 0, ppn);
+        asm!("fence.i", options(nostack));
     }
 }
