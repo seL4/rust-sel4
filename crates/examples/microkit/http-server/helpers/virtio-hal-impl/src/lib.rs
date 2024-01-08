@@ -7,7 +7,6 @@
 #![no_std]
 #![feature(exposed_provenance)]
 #![feature(slice_ptr_get)]
-#![feature(strict_provenance)]
 
 use core::alloc::Layout;
 use core::ptr::{self, NonNull};

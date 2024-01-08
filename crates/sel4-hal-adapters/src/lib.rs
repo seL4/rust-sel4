@@ -7,7 +7,6 @@
 
 #![no_std]
 #![feature(never_type)]
-#![feature(strict_provenance)]
 
 #[cfg(feature = "smoltcp-hal")]
 pub mod smoltcp;

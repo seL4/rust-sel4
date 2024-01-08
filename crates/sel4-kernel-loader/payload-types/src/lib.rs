@@ -6,7 +6,6 @@
 
 #![no_std]
 #![feature(exposed_provenance)]
-#![feature(strict_provenance)]
 #![deny(unsafe_op_in_unsafe_fn)]
 #![allow(clippy::useless_conversion)]
 
