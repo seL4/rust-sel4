@@ -6,7 +6,6 @@
 
 #![no_std]
 #![no_main]
-#![feature(strict_provenance)]
 
 use core::ops::Range;
 
@@ -56,5 +55,5 @@ fn user_image_bounds() -> Range<usize> {
 }
 
 fn addr_of_ref<T>(x: &T) -> usize {
-    (x as *const T).addr()
+    x as *const T as usize
 }

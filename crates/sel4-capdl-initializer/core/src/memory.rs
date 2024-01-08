@@ -79,5 +79,5 @@ const fn round_down(n: usize, b: usize) -> usize {
 }
 
 fn addr_of_ref<T>(x: &T) -> usize {
-    (x as *const T).addr()
+    x as *const T as usize
 }

@@ -10,7 +10,6 @@
 #![feature(pointer_is_aligned)]
 #![feature(proc_macro_hygiene)]
 #![feature(stmt_expr_attributes)]
-#![feature(strict_provenance)]
 
 use core::array;
 use core::borrow::BorrowMut;
@@ -375,7 +374,7 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
         frame: &EmbeddedFrame,
     ) -> Result<()> {
         frame.check(frame_types::FrameType0::FRAME_SIZE.bytes());
-        let addr = frame.ptr().addr();
+        let addr = frame.ptr() as usize;
         let slot = get_user_image_frame_slot(self.bootinfo, &self.user_image_bounds, addr);
         self.set_orig_cslot(obj_id, slot);
         Ok(())
