@@ -5,7 +5,6 @@
 //
 
 #![no_std]
-#![feature(alloc_error_handler)]
 #![feature(core_intrinsics)]
 #![feature(exposed_provenance)]
 #![feature(lang_items)]
