@@ -8,7 +8,6 @@
 
 #![no_std]
 #![feature(slice_ptr_get)]
-#![feature(sync_unsafe_cell)]
 
 #[allow(unused_imports)]
 use core::ffi::{c_char, c_int, c_uint};

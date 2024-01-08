@@ -5,14 +5,16 @@
 //
 
 #![no_std]
-#![feature(sync_unsafe_cell)]
 
-use core::cell::SyncUnsafeCell;
+use core::cell::UnsafeCell;
 
+// NOTE(rustc_wishlist) use SyncUnsafeCell once #![feature(sync_unsafe_cell)] stabilizes
 #[repr(transparent)]
 pub struct ImmutableCell<T: ?Sized> {
-    value: SyncUnsafeCell<T>,
+    value: UnsafeCell<T>,
 }
+
+unsafe impl<T> Sync for ImmutableCell<T> {}
 
 impl<T: Default> Default for ImmutableCell<T> {
     fn default() -> Self {
@@ -29,7 +31,7 @@ impl<T> From<T> for ImmutableCell<T> {
 impl<T> ImmutableCell<T> {
     pub const fn new(value: T) -> Self {
         Self {
-            value: SyncUnsafeCell::new(value),
+            value: UnsafeCell::new(value),
         }
     }
 }
