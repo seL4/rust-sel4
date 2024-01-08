@@ -5,45 +5,18 @@
 //
 
 #![no_std]
-#![feature(const_slice_from_raw_parts_mut)]
 #![feature(slice_ptr_get)]
 #![feature(slice_ptr_len)]
+#![feature(sync_unsafe_cell)]
 
 use core::alloc::{GlobalAlloc, Layout};
-use core::cell::{RefCell, UnsafeCell};
+use core::cell::{RefCell, SyncUnsafeCell};
 use core::ops::Range;
 use core::ptr;
 
 use dlmalloc::{Allocator as DlmallocAllocator, Dlmalloc};
 
 use sel4_sync::{GenericMutex, MutexSyncOps};
-
-// TODO alignment should depend on configuration
-// TODO does this alignment provide any benefit?
-// TODO use SyncUnsafeCell
-#[repr(C, align(4096))]
-pub struct StaticHeap<const N: usize>(UnsafeCell<[u8; N]>);
-
-impl<const N: usize> StaticHeap<N> {
-    pub const fn new() -> Self {
-        Self(UnsafeCell::new([0; N]))
-    }
-
-    pub const fn bounds(&self) -> ConstantStaticHeapBounds {
-        ConstantStaticHeapBounds::new(ptr::slice_from_raw_parts_mut(self.0.get().cast(), N))
-    }
-}
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct ConstantStaticHeapBounds(*mut [u8]);
-
-unsafe impl Send for ConstantStaticHeapBounds {}
-
-impl ConstantStaticHeapBounds {
-    pub const fn new(inner: *mut [u8]) -> Self {
-        Self(inner)
-    }
-}
 
 pub type StaticDlmallocGlobalAlloc<O, T> = DlmallocGlobalAlloc<O, StaticDlmallocAllocator<T>>;
 
@@ -96,9 +69,20 @@ pub trait StaticHeapBounds {
     fn bounds(&self) -> *mut [u8];
 }
 
-impl StaticHeapBounds for ConstantStaticHeapBounds {
+// TODO alignment should depend on configuration
+// TODO does this alignment provide any benefit?
+#[repr(C, align(4096))]
+pub struct StaticHeap<const N: usize>(SyncUnsafeCell<[u8; N]>);
+
+impl<const N: usize> StaticHeap<N> {
+    pub const fn new() -> Self {
+        Self(SyncUnsafeCell::new([0; N]))
+    }
+}
+
+impl<const N: usize> StaticHeapBounds for &StaticHeap<N> {
     fn bounds(&self) -> *mut [u8] {
-        self.0
+        ptr::slice_from_raw_parts_mut(self.0.get().cast(), N)
     }
 }
 

@@ -4,15 +4,17 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use sel4_dlmalloc::{ConstantStaticHeapBounds, StaticDlmallocGlobalAlloc};
+use sel4_dlmalloc::StaticDlmallocGlobalAlloc;
 use sel4_sync::DeferredNotificationMutexSyncOps;
 
 pub use sel4_dlmalloc::StaticHeap;
 
-pub type GlobalAllocator =
-    StaticDlmallocGlobalAlloc<DeferredNotificationMutexSyncOps, ConstantStaticHeapBounds>;
+pub type GlobalAllocator<const N: usize> =
+    StaticDlmallocGlobalAlloc<DeferredNotificationMutexSyncOps, &'static StaticHeap<N>>;
 
-pub const fn new_global_allocator(bounds: ConstantStaticHeapBounds) -> GlobalAllocator {
+pub const fn new_global_allocator<const N: usize>(
+    bounds: &'static StaticHeap<N>,
+) -> GlobalAllocator<N> {
     StaticDlmallocGlobalAlloc::new(DeferredNotificationMutexSyncOps::new(), bounds)
 }
 
@@ -24,10 +26,10 @@ macro_rules! declare_static_heap {
     } => {
         #[global_allocator]
         $(#[$attrs])*
-        $vis static $ident: $crate::_private::static_heap::GlobalAllocator = {
-            static mut STATIC_HEAP: $crate::_private::static_heap::StaticHeap<{ $size }> =
+        $vis static $ident: $crate::_private::static_heap::GlobalAllocator<{ $size }> = {
+            static STATIC_HEAP: $crate::_private::static_heap::StaticHeap<{ $size }> =
                 $crate::_private::static_heap::StaticHeap::new();
-            $crate::_private::static_heap::new_global_allocator(unsafe { STATIC_HEAP.bounds() })
+            $crate::_private::static_heap::new_global_allocator(&STATIC_HEAP)
         };
     }
 }
