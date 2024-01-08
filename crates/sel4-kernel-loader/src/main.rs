@@ -7,7 +7,6 @@
 #![no_std]
 #![no_main]
 #![feature(associated_type_bounds)]
-#![feature(exposed_provenance)]
 #![feature(proc_macro_hygiene)]
 #![cfg_attr(
     any(target_arch = "riscv32", target_arch = "riscv64"),

@@ -5,7 +5,6 @@
 //
 
 use core::arch::{asm, global_asm};
-use core::ptr;
 use core::sync::atomic::{AtomicUsize, Ordering};
 
 #[used]
@@ -16,15 +15,15 @@ pub(crate) fn start_secondary_core(spin_table: &[usize], core_id: usize, sp: usi
     unsafe {
         spin_table_secondary_stack_bottom = sp;
 
-        let start = (spin_table_secondary_entry as *const SpinTableSecondaryEntryFn).expose_addr();
-        let start_ptr = ptr::from_exposed_addr_mut(spin_table[core_id]);
+        let start = spin_table_secondary_entry as *const SpinTableSecondaryEntryFn as usize;
+        let start_ptr = spin_table[core_id] as *mut _;
 
         // Emits strl instruction. Ensures jump address is observed by spinning
         // core only after stack address, without the need for an explicit barrier.
         AtomicUsize::from_ptr(start_ptr).store(start, Ordering::Release);
 
-        dc_cvac(start_ptr.expose_addr());
-        dc_cvac((&spin_table_secondary_stack_bottom as *const usize).expose_addr());
+        dc_cvac(start_ptr as usize);
+        dc_cvac(&spin_table_secondary_stack_bottom as *const _ as usize);
 
         // Barrier ensure both strl and dc cvac happen before sev
         asm!("dsb sy");

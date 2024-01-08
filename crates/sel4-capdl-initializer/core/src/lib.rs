@@ -5,7 +5,6 @@
 //
 
 #![no_std]
-#![feature(exposed_provenance)]
 #![feature(never_type)]
 #![feature(pointer_is_aligned)]
 #![feature(proc_macro_hygiene)]
@@ -14,7 +13,6 @@
 use core::array;
 use core::borrow::BorrowMut;
 use core::ops::Range;
-use core::ptr;
 use core::result;
 use core::slice;
 use core::sync::atomic::{self, Ordering};
@@ -465,7 +463,7 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
             let offset = entry.range.start;
             let length = entry.range.end - entry.range.start;
             assert!(entry.range.end <= U::FRAME_SIZE.bytes());
-            let dst_frame = ptr::from_exposed_addr_mut::<u8>(self.copy_addr::<U>());
+            let dst_frame = self.copy_addr::<U>() as *mut u8;
             let dst = unsafe { slice::from_raw_parts_mut(dst_frame.add(offset), length) };
             match &entry.content {
                 FillEntryContent::Data(content_data) => {

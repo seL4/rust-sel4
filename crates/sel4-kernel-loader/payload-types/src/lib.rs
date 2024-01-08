@@ -5,7 +5,6 @@
 //
 
 #![no_std]
-#![feature(exposed_provenance)]
 #![deny(unsafe_op_in_unsafe_fn)]
 #![allow(clippy::useless_conversion)]
 
@@ -129,7 +128,7 @@ impl<U: RegionContent, const N: usize> Payload<usize, U, N> {
         for region in self.data.iter() {
             let dst = unsafe {
                 slice::from_raw_parts_mut(
-                    ptr::from_exposed_addr_mut(region.phys_addr_range.start.try_into().unwrap()),
+                    usize::try_from(region.phys_addr_range.start).unwrap() as *mut _,
                     (region.phys_addr_range.end - region.phys_addr_range.start)
                         .try_into()
                         .unwrap(),
