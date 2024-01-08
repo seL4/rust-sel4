@@ -6,7 +6,6 @@
 
 #![no_std]
 #![no_main]
-#![feature(exposed_provenance)]
 
 extern crate alloc;
 
@@ -99,8 +98,7 @@ fn get_spec_with_sources<'a>() -> SpecWithSources<
 
 fn user_image_bounds() -> Range<usize> {
     unsafe {
-        sel4_capdl_initializer_image_start.expose_addr()
-            ..sel4_capdl_initializer_image_end.expose_addr()
+        (sel4_capdl_initializer_image_start as usize)..(sel4_capdl_initializer_image_end as usize)
     }
 }
 

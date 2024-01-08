@@ -95,8 +95,7 @@ pub(crate) mod stacks {
             SECONDARY_STACKS
                 .0
                 .get()
-                .offset((core_id * SECONDARY_STACK_SIZE).try_into().unwrap())
-                .expose_addr()
+                .offset((core_id * SECONDARY_STACK_SIZE).try_into().unwrap()) as usize
         }
     }
 }

@@ -5,7 +5,6 @@
 //
 
 #![no_std]
-#![feature(exposed_provenance)]
 #![feature(slice_ptr_get)]
 
 use core::alloc::Layout;
@@ -42,7 +41,7 @@ pub struct HalImpl;
 impl HalImpl {
     pub fn init(dma_region_size: usize, dma_region_vaddr: usize, dma_region_paddr: usize) {
         let dma_region_ptr = NonNull::new(ptr::slice_from_raw_parts_mut(
-            ptr::from_exposed_addr_mut(dma_region_vaddr),
+            dma_region_vaddr as *mut _,
             dma_region_size,
         ))
         .unwrap();

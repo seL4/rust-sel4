@@ -6,7 +6,6 @@
 
 #![no_std]
 #![feature(core_intrinsics)]
-#![feature(exposed_provenance)]
 #![feature(lang_items)]
 #![feature(linkage)]
 #![feature(never_type)]
@@ -80,9 +79,9 @@ pub unsafe extern "C" fn cont_fn(cont_arg: *mut c_void) -> ! {
 
     THREAD_INDEX.set(thread_index).unwrap();
 
-    sel4::set_ipc_buffer(sel4::IPCBuffer::from_ptr(ptr::from_exposed_addr_mut(
-        thread_config.ipc_buffer_addr().try_into().unwrap(),
-    )));
+    sel4::set_ipc_buffer(sel4::IPCBuffer::from_ptr(
+        usize::try_from(thread_config.ipc_buffer_addr()).unwrap() as *mut _,
+    ));
 
     if thread_index == 0 {
         CONFIG.set(config.clone()).unwrap();
@@ -142,7 +141,7 @@ fn panic_hook(info: &ExternalPanicInfo<'_>) {
 fn get_static_heap_bounds() -> *mut [u8] {
     let addrs = CONFIG.get().unwrap().static_heap().unwrap();
     ptr::slice_from_raw_parts_mut(
-        ptr::from_exposed_addr_mut(addrs.start.try_into().unwrap()),
+        usize::try_from(addrs.start).unwrap() as *mut _,
         (addrs.end - addrs.start).try_into().unwrap(),
     )
 }

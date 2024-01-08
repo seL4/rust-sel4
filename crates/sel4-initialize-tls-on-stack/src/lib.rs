@@ -5,11 +5,9 @@
 //
 
 #![no_std]
-#![feature(exposed_provenance)]
 
 use core::arch::{asm, global_asm};
 use core::ffi::c_void;
-use core::ptr;
 use core::slice;
 
 // NOTE
@@ -68,14 +66,14 @@ impl TlsImage {
 
     unsafe fn init(&self, tp: usize) {
         let addr = self.tls_base_addr(tp);
-        let window = slice::from_raw_parts_mut(ptr::from_exposed_addr_mut(addr), self.memsz);
+        let window = slice::from_raw_parts_mut(addr as *mut _, self.memsz);
         let (tdata, tbss) = window.split_at_mut(self.filesz);
         tdata.copy_from_slice(self.data());
         tbss.fill(0);
     }
 
     unsafe fn data(&self) -> &'static [u8] {
-        slice::from_raw_parts(ptr::from_exposed_addr_mut(self.vaddr), self.filesz)
+        slice::from_raw_parts(self.vaddr as *mut _, self.filesz)
     }
 }
 
@@ -178,7 +176,7 @@ unsafe extern "C" fn continue_with(args: *const InternalContArgs, tp: usize) -> 
     set_thread_pointer(tp);
 
     if cfg!(target_arch = "x86_64") {
-        ptr::from_exposed_addr_mut::<usize>(tp).write(tp);
+        (tp as *mut usize).write(tp);
     }
 
     (args.cont_fn)(args.cont_arg)
