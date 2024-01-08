@@ -5,7 +5,6 @@
 //
 
 #![no_std]
-#![feature(btree_cursors)]
 
 extern crate alloc;
 
