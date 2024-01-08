@@ -10,5 +10,6 @@
 #![feature(exclusive_wrapper)]
 #![feature(extract_if)]
 #![feature(let_chains)]
+#![feature(strict_provenance)]
 #![feature(sync_unsafe_cell)]
 #![feature(variant_count)]
