@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use num::{NumCast, One, PrimInt, Zero};
+use num::{NumCast, One, Zero};
 
 use sel4_render_elf_with_data::{FileHeaderExt, Input, SymbolicInjection, SymbolicValue};
 
@@ -16,7 +16,7 @@ pub(crate) struct RenderElfArgs<'a> {
 }
 
 impl<'a> RenderElfArgs<'a> {
-    pub(crate) fn call_with<T: FileHeaderExt<Word: PrimInt, Sword: PrimInt>>(&self) -> Vec<u8> {
+    pub(crate) fn call_with<T: FileHeaderExt>(&self) -> Vec<u8> {
         let data_len: T::Word = NumCast::from(self.data.len()).unwrap();
         let heap_size: T::Word = NumCast::from(self.heap_size).unwrap();
         let align_modulus = T::Word::one() << self.granule_size_bits;

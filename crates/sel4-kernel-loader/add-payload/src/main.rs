@@ -4,8 +4,6 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-#![feature(associated_type_bounds)]
-
 use std::fs::{self, File};
 
 use anyhow::Result;
@@ -48,12 +46,9 @@ fn main() -> Result<()> {
 
 fn continue_with_word_size<T>(args: &Args) -> Result<()>
 where
-    T: FileHeaderExt
-        + FileHeader<
-            Word: PrimInt + WrappingSub + Integer + Serialize,
-            Sword: PrimInt,
-            Endian = Endianness,
-        >,
+    T: FileHeaderExt + FileHeader<Endian = Endianness>,
+    T::Word: PrimInt + WrappingSub + Integer + Serialize,
+    T::Sword: PrimInt,
 {
     let loader_bytes = fs::read(&args.loader_path)?;
 
