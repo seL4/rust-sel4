@@ -10,7 +10,9 @@ set -eu -o pipefail
 here=$(realpath $(dirname $0))
 top_level_dir=$here/../..
 
-find $top_level_dir/crates \
+find \
+        $top_level_dir/crates \
+        $here/extra-used-unstable-features.rs \
         -type f -name '*.rs' \
         -exec grep '^#!\[feature(' '{}' ';' \
     | sort \
