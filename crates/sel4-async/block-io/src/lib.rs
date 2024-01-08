@@ -5,7 +5,6 @@
 //
 
 #![no_std]
-#![feature(associated_type_bounds)]
 #![feature(never_type)]
 
 #[cfg(feature = "alloc")]
@@ -214,7 +213,10 @@ impl<T> NextBlockSizeAdapter<T> {
     wrapper_methods!(T);
 }
 
-impl<T: BlockIOLayout<BlockSize: HasNextBlockSize>> BlockIOLayout for NextBlockSizeAdapter<T> {
+impl<T: BlockIOLayout> BlockIOLayout for NextBlockSizeAdapter<T>
+where
+    T::BlockSize: HasNextBlockSize,
+{
     type Error = T::Error;
 
     type BlockSize = <T::BlockSize as HasNextBlockSize>::NextBlockSize;
@@ -230,7 +232,10 @@ impl<T: BlockIOLayout<BlockSize: HasNextBlockSize>> BlockIOLayout for NextBlockS
     }
 }
 
-impl<T: BlockIO<A, BlockSize: HasNextBlockSize>, A: Access> BlockIO<A> for NextBlockSizeAdapter<T> {
+impl<T: BlockIO<A>, A: Access> BlockIO<A> for NextBlockSizeAdapter<T>
+where
+    T::BlockSize: HasNextBlockSize,
+{
     async fn read_or_write_blocks(
         &self,
         start_block_idx: u64,
@@ -256,7 +261,10 @@ impl<T> PrevBlockSizeAdapter<T> {
     wrapper_methods!(T);
 }
 
-impl<T: BlockIOLayout<BlockSize: HasPrevBlockSize>> BlockIOLayout for PrevBlockSizeAdapter<T> {
+impl<T: BlockIOLayout> BlockIOLayout for PrevBlockSizeAdapter<T>
+where
+    T::BlockSize: HasPrevBlockSize,
+{
     type Error = T::Error;
 
     type BlockSize = <T::BlockSize as HasPrevBlockSize>::PrevBlockSize;
@@ -270,8 +278,9 @@ impl<T: BlockIOLayout<BlockSize: HasPrevBlockSize>> BlockIOLayout for PrevBlockS
     }
 }
 
-impl<T: BlockIO<A, BlockSize: HasPrevBlockSize>, A: ReadAccess> BlockIO<A>
-    for PrevBlockSizeAdapter<T>
+impl<T: BlockIO<A>, A: ReadAccess> BlockIO<A> for PrevBlockSizeAdapter<T>
+where
+    T::BlockSize: HasPrevBlockSize,
 {
     async fn read_or_write_blocks(
         &self,
