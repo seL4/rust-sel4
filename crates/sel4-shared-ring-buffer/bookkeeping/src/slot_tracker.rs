@@ -13,9 +13,9 @@ use core::mem;
 type Result<T> = core::result::Result<T, SlotTrackerError>;
 
 pub trait SlotStateTypes {
-    type Common = ();
-    type Free = ();
-    type Occupied = ();
+    type Common;
+    type Free;
+    type Occupied;
 }
 
 pub struct SlotTracker<T: SlotStateTypes> {
