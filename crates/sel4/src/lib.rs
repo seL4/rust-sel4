@@ -47,7 +47,6 @@
 #![feature(stmt_expr_attributes)]
 #![feature(strict_provenance)]
 #![feature(thread_local)]
-#![feature(variant_count)]
 #![allow(clippy::unit_arg)]
 
 pub use sel4_config::{

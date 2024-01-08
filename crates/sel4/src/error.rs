@@ -5,7 +5,7 @@
 // SPDX-License-Identifier: MIT
 //
 
-use core::{fmt, mem, result};
+use core::{fmt, result};
 
 use crate::sys;
 
@@ -42,7 +42,16 @@ impl Error {
     pub fn from_sys(err: sys::seL4_Error::Type) -> Option<Self> {
         match err {
             sys::seL4_Error::seL4_NoError => None,
-            err if err < sys::seL4_Error::seL4_NumErrors => Some(unsafe { mem::transmute(err) }),
+            sys::seL4_Error::seL4_InvalidArgument => Some(Self::InvalidArgument),
+            sys::seL4_Error::seL4_InvalidCapability => Some(Self::InvalidCapability),
+            sys::seL4_Error::seL4_IllegalOperation => Some(Self::IllegalOperation),
+            sys::seL4_Error::seL4_RangeError => Some(Self::RangeError),
+            sys::seL4_Error::seL4_AlignmentError => Some(Self::AlignmentError),
+            sys::seL4_Error::seL4_FailedLookup => Some(Self::FailedLookup),
+            sys::seL4_Error::seL4_TruncatedMessage => Some(Self::TruncatedMessage),
+            sys::seL4_Error::seL4_DeleteFirst => Some(Self::DeleteFirst),
+            sys::seL4_Error::seL4_RevokeFirst => Some(Self::RevokeFirst),
+            sys::seL4_Error::seL4_NotEnoughMemory => Some(Self::NotEnoughMemory),
             _ => panic!("invalid seL4_Error: {}", err),
         }
     }
@@ -59,12 +68,31 @@ impl Error {
     }
 }
 
-#[allow(dead_code)]
-#[allow(non_upper_case_globals)]
-mod __assertions {
+// TODO no way to run this test
+#[cfg(test)]
+mod test {
     use super::*;
 
-    const __assert_all_errors_accounted_for: () = {
-        assert!(mem::variant_count::<Error>() == sys::seL4_Error::seL4_NumErrors as usize - 1);
-    };
+    #[test]
+    fn all_sys_errors_are_accounted_for() {
+        for i in 0..sys::seL4_Error::seL4_NumErrors {
+            if i != sys::seL4_Error::seL4_NoError {
+                assert!(Error::from_sys(i).is_some())
+            }
+        }
+    }
 }
+
+// NOTE(rustc_wishlist)
+// Use this static test once #![feature(variant_count)] stabilizes.
+// With this test, consider replacing `Error::from_sys` with mem::transmute-based implementation.
+//
+// #[allow(dead_code)]
+// #[allow(non_upper_case_globals)]
+// mod __assertions {
+//     use super::*;
+//
+//     const __assert_all_errors_accounted_for: () = {
+//         assert!(mem::variant_count::<Error>() == sys::seL4_Error::seL4_NumErrors as usize - 1);
+//     };
+// }
