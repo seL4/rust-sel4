@@ -10,7 +10,6 @@
 #![feature(exposed_provenance)]
 #![feature(proc_macro_hygiene)]
 #![feature(strict_provenance)]
-#![feature(stdsimd)]
 #![cfg_attr(
     any(target_arch = "riscv32", target_arch = "riscv64"),
     feature(riscv_ext_intrinsics)
