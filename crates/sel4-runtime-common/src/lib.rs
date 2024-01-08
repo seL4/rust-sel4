@@ -6,7 +6,6 @@
 
 #![no_std]
 #![feature(cfg_target_thread_local)]
-#![feature(exclusive_wrapper)]
 #![feature(stmt_expr_attributes)]
 
 #[cfg(feature = "start")]

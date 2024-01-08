@@ -9,11 +9,12 @@
 
 use core::arch::global_asm;
 use core::cell::UnsafeCell;
-use core::sync::Exclusive;
 
 // TODO alignment should depend on configuration
 #[repr(C, align(16))]
 pub struct Stack<const N: usize>(UnsafeCell<[u8; N]>);
+
+unsafe impl<const N: usize> Sync for Stack<N> {}
 
 impl<const N: usize> Stack<N> {
     pub const fn new() -> Self {
@@ -21,19 +22,21 @@ impl<const N: usize> Stack<N> {
     }
 
     pub const fn top(&self) -> StackTop {
-        StackTop(Exclusive::new(self.0.get().cast::<u8>().wrapping_add(N)))
+        StackTop(self.0.get().cast::<u8>().wrapping_add(N))
     }
 }
 
 #[repr(transparent)]
-pub struct StackTop(#[allow(dead_code)] Exclusive<*mut u8>);
+pub struct StackTop(#[allow(dead_code)] *mut u8);
+
+unsafe impl Sync for StackTop {}
 
 #[macro_export]
 macro_rules! declare_stack {
     ($size:expr) => {
         #[no_mangle]
         static __sel4_runtime_stack_top: $crate::_private::start::StackTop = {
-            static mut STACK: $crate::_private::start::Stack<{ $size }> =
+            static STACK: $crate::_private::start::Stack<{ $size }> =
                 $crate::_private::start::Stack::new();
             unsafe { STACK.top() }
         };

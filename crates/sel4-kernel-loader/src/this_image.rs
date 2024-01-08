@@ -52,33 +52,49 @@ pub(crate) mod page_tables {
 }
 
 pub(crate) mod stacks {
-    use core::sync::Exclusive;
+    use core::cell::UnsafeCell;
 
     use sel4_config::sel4_cfg_usize;
 
     #[repr(C, align(16))]
-    struct Stack<const N: usize>([u8; N]);
+    struct Stack<const N: usize>(UnsafeCell<[u8; N]>);
+
+    unsafe impl<const N: usize> Sync for Stack<N> {}
+
+    impl<const N: usize> Stack<N> {
+        pub const fn new() -> Self {
+            Self(UnsafeCell::new([0; N]))
+        }
+
+        pub const fn top(&self) -> StackTop {
+            StackTop(self.0.get().cast::<u8>().wrapping_add(N))
+        }
+    }
+
+    #[repr(transparent)]
+    pub struct StackTop(#[allow(dead_code)] *mut u8);
+
+    unsafe impl Sync for StackTop {}
 
     const PRIMARY_STACK_SIZE: usize = 4096 * 8; // TODO this is excessive
 
-    static mut PRIMARY_STACK: Stack<PRIMARY_STACK_SIZE> = Stack([0; PRIMARY_STACK_SIZE]);
+    static PRIMARY_STACK: Stack<PRIMARY_STACK_SIZE> = Stack::new();
 
     #[no_mangle]
-    static __primary_stack_bottom: Exclusive<*const u8> =
-        Exclusive::new(unsafe { PRIMARY_STACK.0.as_ptr_range().end });
+    static __primary_stack_top: StackTop = PRIMARY_STACK.top();
 
     const NUM_SECONDARY_CORES: usize = sel4_cfg_usize!(MAX_NUM_NODES) - 1;
 
     const SECONDARY_STACK_SIZE: usize = 4096 * 2;
     const SECONDARY_STACKS_SIZE: usize = SECONDARY_STACK_SIZE * NUM_SECONDARY_CORES;
 
-    static SECONDARY_STACKS: Stack<SECONDARY_STACKS_SIZE> = Stack([0; SECONDARY_STACKS_SIZE]);
+    static SECONDARY_STACKS: Stack<SECONDARY_STACKS_SIZE> = Stack::new();
 
     pub(crate) fn get_secondary_stack_bottom(core_id: usize) -> usize {
         unsafe {
             SECONDARY_STACKS
                 .0
-                .as_ptr()
+                .get()
                 .offset((core_id * SECONDARY_STACK_SIZE).try_into().unwrap())
                 .expose_addr()
         }

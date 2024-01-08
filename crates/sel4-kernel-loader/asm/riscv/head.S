@@ -8,7 +8,7 @@
 #include <kernel/gen_config.h>
 
 .extern __global_pointer$
-.extern __primary_stack_bottom
+.extern __primary_stack_top
 .extern hsm_exists
 .extern next_logical_core_id
 .extern start_core_by_logical_id
@@ -66,7 +66,7 @@ _start:
   mv s2, a1 /* preserve a1 (dtb) in s2 */
 
   /* Attach the stack to sp before calling any C functions */
-  la sp, __primary_stack_bottom
+  la sp, __primary_stack_top
   lx sp, (sp)
 
   /* Check if the Heart State Management (HSM) extension exists, so it can be
@@ -123,7 +123,7 @@ _start1: /* a0 must hold current hard ID passed by bootloader */
   /* This HART may be a different HART to the one that started at _start
    * If we've switched HARTs then the other HART will get a different stack
    * region in secondary_harts. */
-  la sp, __primary_stack_bottom
+  la sp, __primary_stack_top
   lx sp, (sp)
   /* The C code expects the registers to be set up as:
    *   a0 = hart id
