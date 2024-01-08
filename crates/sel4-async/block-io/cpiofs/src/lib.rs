@@ -5,7 +5,6 @@
 //
 
 #![no_std]
-#![feature(slice_as_chunks)]
 
 extern crate alloc;
 
