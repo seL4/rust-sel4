@@ -8,6 +8,7 @@
 #![feature(array_try_from_fn)]
 #![feature(cell_update)]
 #![feature(exclusive_wrapper)]
+#![feature(exposed_provenance)]
 #![feature(extract_if)]
 #![feature(let_chains)]
 #![feature(strict_provenance)]
