@@ -10,7 +10,6 @@
 #![feature(lang_items)]
 #![feature(linkage)]
 #![feature(never_type)]
-#![feature(strict_provenance)]
 #![feature(thread_local)]
 #![feature(unwrap_infallible)]
 #![allow(internal_features)]

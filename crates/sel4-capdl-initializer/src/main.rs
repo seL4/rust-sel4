@@ -7,7 +7,6 @@
 #![no_std]
 #![no_main]
 #![feature(exposed_provenance)]
-#![feature(strict_provenance)]
 
 extern crate alloc;
 
