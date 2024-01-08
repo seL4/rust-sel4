@@ -41,7 +41,6 @@
 //! `$SEL4_PREFIX/libsel4/include` is used.
 
 #![no_std]
-#![feature(array_methods)]
 #![feature(cfg_target_thread_local)]
 #![feature(proc_macro_hygiene)]
 #![feature(stmt_expr_attributes)]
