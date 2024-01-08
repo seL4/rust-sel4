@@ -6,7 +6,6 @@
 
 #![no_std]
 #![feature(cfg_target_thread_local)]
-#![feature(stmt_expr_attributes)]
 
 #[cfg(feature = "start")]
 mod start;

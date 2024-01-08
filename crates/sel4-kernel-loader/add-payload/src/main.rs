@@ -5,8 +5,6 @@
 //
 
 #![feature(associated_type_bounds)]
-#![feature(never_type)]
-#![feature(unwrap_infallible)]
 
 use std::fs::{self, File};
 

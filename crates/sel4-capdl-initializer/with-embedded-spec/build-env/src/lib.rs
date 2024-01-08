@@ -5,7 +5,6 @@
 //
 
 #![feature(never_type)]
-#![feature(unwrap_infallible)]
 
 use std::borrow::Cow;
 use std::env;
