@@ -8,7 +8,6 @@ use super::*;
 
 use core::cell::UnsafeCell;
 use core::ffi::{c_int, c_void};
-use core::ptr;
 use core::sync::atomic::{AtomicIsize, Ordering};
 
 use sel4_panicking_env::abort;
@@ -24,8 +23,12 @@ impl<const N: usize> BackingMemory<N> {
         Self(UnsafeCell::new([0; N]))
     }
 
-    fn bounds(&self) -> *mut [u8] {
-        ptr::slice_from_raw_parts_mut(self.0.get().cast(), N)
+    const fn start(&self) -> *mut u8 {
+        self.0.get().cast()
+    }
+
+    const fn size(&self) -> usize {
+        N
     }
 }
 
@@ -57,12 +60,12 @@ impl<const N: usize> StaticHeap<N> {
         if new < 0 {
             abort!("program break below data segment start")
         }
-        if new > N.try_into().unwrap_or_else(|_| abort!()) {
+        if new > self.memory.size().try_into().unwrap_or_else(|_| abort!()) {
             self.watermark.fetch_sub(incr, Ordering::SeqCst);
             errno::set_errno(errno::values::ENOMEM);
             return usize::MAX as *mut c_void;
         }
-        unsafe { self.memory.bounds().as_mut_ptr().offset(old).cast() }
+        self.memory.start().wrapping_offset(old).cast::<c_void>()
     }
 }
 

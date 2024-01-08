@@ -14,3 +14,8 @@
 #![feature(strict_provenance)]
 #![feature(sync_unsafe_cell)]
 #![feature(variant_count)]
+
+// For operations on *(const|mut) [T]:
+//   - pointer::as_mut_ptr
+//   - NonNull::as_non_null_ptr
+#![feature(slice_ptr_get)]

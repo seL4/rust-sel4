@@ -5,7 +5,6 @@
 //
 
 #![no_std]
-#![feature(slice_ptr_get)]
 
 use core::alloc::Layout;
 use core::ptr::{self, NonNull};
@@ -81,7 +80,7 @@ unsafe impl Hal for HalImpl {
             .as_mut_ptr()
             .index(bounce_buffer_range.clone());
         bounce_buffer_ptr.fill(0);
-        let vaddr = bounce_buffer_ptr.as_raw_ptr().as_non_null_ptr();
+        let vaddr = bounce_buffer_ptr.as_raw_ptr().cast::<u8>();
         let paddr = state.offset_to_paddr(bounce_buffer_range.start);
         (paddr, vaddr)
     }
