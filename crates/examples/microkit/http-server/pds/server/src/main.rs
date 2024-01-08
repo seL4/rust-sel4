@@ -7,7 +7,6 @@
 #![no_std]
 #![no_main]
 #![feature(never_type)]
-#![feature(ptr_metadata)]
 #![feature(slice_ptr_get)]
 #![feature(strict_provenance)]
 
