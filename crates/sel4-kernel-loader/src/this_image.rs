@@ -90,6 +90,7 @@ pub(crate) mod stacks {
 
     static SECONDARY_STACKS: Stack<SECONDARY_STACKS_SIZE> = Stack::new();
 
+    #[allow(clippy::zst_offset)] // for case where NUM_SECONDARY_CORES == 0
     pub(crate) fn get_secondary_stack_bottom(core_id: usize) -> usize {
         unsafe {
             SECONDARY_STACKS
