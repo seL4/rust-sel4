@@ -7,7 +7,6 @@
 #![no_std]
 #![feature(cfg_target_thread_local)]
 #![feature(never_type)]
-#![feature(pointer_is_aligned)]
 #![feature(proc_macro_hygiene)]
 #![feature(stmt_expr_attributes)]
 #![feature(unwrap_infallible)]

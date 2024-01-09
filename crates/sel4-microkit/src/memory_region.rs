@@ -75,15 +75,19 @@ macro_rules! memory_region_symbol {
 
 pub fn cast_memory_region_checked<T: Sized>(bytes_ptr: NonNull<[u8]>) -> NonNull<T> {
     let ptr = bytes_ptr.cast::<T>();
-    assert!(ptr.as_ptr().is_aligned());
+    assert!(is_aligned(ptr.as_ptr()));
     assert!(mem::size_of::<T>() <= bytes_ptr.len());
     ptr
 }
 
 pub fn cast_memory_region_to_slice_checked<T: Sized>(bytes_ptr: NonNull<[u8]>) -> NonNull<[T]> {
     let ptr = bytes_ptr.cast::<T>();
-    assert!(ptr.as_ptr().is_aligned());
+    assert!(is_aligned(ptr.as_ptr()));
     assert!(bytes_ptr.len() % mem::size_of::<T>() == 0);
     let n = bytes_ptr.len() / mem::size_of::<T>();
     NonNull::slice_from_raw_parts(ptr, n)
+}
+
+fn is_aligned<T: Sized>(p: *mut T) -> bool {
+    p.cast::<()>().align_offset(mem::align_of::<T>()) == 0
 }
