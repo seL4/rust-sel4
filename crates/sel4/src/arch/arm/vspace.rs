@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: MIT
 //
 
-use sel4_config::{sel4_cfg, sel4_cfg_enum, sel4_cfg_match};
+use sel4_config::{sel4_cfg, sel4_cfg_enum, sel4_cfg_wrap_match};
 
 use crate::{cap_type, sys, FrameType, ObjectBlueprint, ObjectBlueprintArm, SizedFrameType};
 
@@ -23,14 +23,15 @@ pub enum FrameSize {
 
 impl FrameSize {
     pub const fn blueprint(self) -> ObjectBlueprint {
-        #[sel4_cfg_match]
-        match self {
-            Self::Small => ObjectBlueprint::Arch(ObjectBlueprintArm::SmallPage),
-            Self::Large => ObjectBlueprint::Arch(ObjectBlueprintArm::LargePage),
-            #[sel4_cfg(ARCH_AARCH64)]
-            Self::Huge => ObjectBlueprint::Arch(ObjectBlueprintArm::SeL4Arch(
-                ObjectBlueprintAArch64::HugePage,
-            )),
+        sel4_cfg_wrap_match! {
+            match self {
+                Self::Small => ObjectBlueprint::Arch(ObjectBlueprintArm::SmallPage),
+                Self::Large => ObjectBlueprint::Arch(ObjectBlueprintArm::LargePage),
+                #[sel4_cfg(ARCH_AARCH64)]
+                Self::Huge => ObjectBlueprint::Arch(ObjectBlueprintArm::SeL4Arch(
+                    ObjectBlueprintAArch64::HugePage,
+                )),
+            }
         }
     }
 

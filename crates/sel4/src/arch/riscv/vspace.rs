@@ -4,6 +4,8 @@
 // SPDX-License-Identifier: MIT
 //
 
+use sel4_config::sel4_cfg_wrap_match;
+
 #[allow(unused_imports)]
 use crate::{cap_type, sys, FrameType, ObjectBlueprint, ObjectBlueprintRISCV, SizedFrameType};
 
@@ -18,12 +20,13 @@ pub enum FrameSize {
 
 impl FrameSize {
     pub const fn blueprint(self) -> ObjectBlueprint {
-        #[sel4_config::sel4_cfg_match]
-        match self {
-            FrameSize::_4K => ObjectBlueprint::Arch(ObjectBlueprintRISCV::_4KPage),
-            FrameSize::Mega => ObjectBlueprint::Arch(ObjectBlueprintRISCV::MegaPage),
-            #[sel4_cfg(any(PT_LEVELS = "3", PT_LEVELS = "4"))]
-            FrameSize::Giga => ObjectBlueprint::Arch(ObjectBlueprintRISCV::GigaPage),
+        sel4_cfg_wrap_match! {
+            match self {
+                FrameSize::_4K => ObjectBlueprint::Arch(ObjectBlueprintRISCV::_4KPage),
+                FrameSize::Mega => ObjectBlueprint::Arch(ObjectBlueprintRISCV::MegaPage),
+                #[sel4_cfg(any(PT_LEVELS = "3", PT_LEVELS = "4"))]
+                FrameSize::Giga => ObjectBlueprint::Arch(ObjectBlueprintRISCV::GigaPage),
+            }
         }
     }
 

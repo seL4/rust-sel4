@@ -5,7 +5,7 @@
 // SPDX-License-Identifier: MIT
 //
 
-use sel4_config::{sel4_cfg, sel4_cfg_enum, sel4_cfg_if, sel4_cfg_match};
+use sel4_config::{sel4_cfg, sel4_cfg_enum, sel4_cfg_if, sel4_cfg_wrap_match};
 
 use crate::{declare_fault_newtype, sys, Word};
 
@@ -46,32 +46,33 @@ pub enum Fault {
 
 impl Fault {
     pub fn from_sys(raw: sys::seL4_Fault) -> Self {
-        #[sel4_cfg_match]
-        match raw.splay() {
-            sys::seL4_Fault_Splayed::NullFault(inner) => {
-                Self::NullFault(NullFault::from_inner(inner))
-            }
-            sys::seL4_Fault_Splayed::CapFault(inner) => Self::CapFault(CapFault::from_inner(inner)),
-            sys::seL4_Fault_Splayed::UnknownSyscall(inner) => {
-                Self::UnknownSyscall(UnknownSyscall::from_inner(inner))
-            }
-            sys::seL4_Fault_Splayed::UserException(inner) => {
-                Self::UserException(UserException::from_inner(inner))
-            }
-            sys::seL4_Fault_Splayed::VMFault(inner) => Self::VMFault(VMFault::from_inner(inner)),
-            #[sel4_cfg(KERNEL_MCS)]
-            sys::seL4_Fault_Splayed::Timeout(inner) => Self::Timeout(Timeout::from_inner(inner)),
-            #[sel4_cfg(ARM_HYPERVISOR_SUPPORT)]
-            sys::seL4_Fault_Splayed::VGICMaintenance(inner) => {
-                Self::VGICMaintenance(VGICMaintenance::from_inner(inner))
-            }
-            #[sel4_cfg(ARM_HYPERVISOR_SUPPORT)]
-            sys::seL4_Fault_Splayed::VCPUFault(inner) => {
-                Self::VCPUFault(VCPUFault::from_inner(inner))
-            }
-            #[sel4_cfg(ARM_HYPERVISOR_SUPPORT)]
-            sys::seL4_Fault_Splayed::VPPIEvent(inner) => {
-                Self::VPPIEvent(VPPIEvent::from_inner(inner))
+        sel4_cfg_wrap_match! {
+            match raw.splay() {
+                sys::seL4_Fault_Splayed::NullFault(inner) => {
+                    Self::NullFault(NullFault::from_inner(inner))
+                }
+                sys::seL4_Fault_Splayed::CapFault(inner) => Self::CapFault(CapFault::from_inner(inner)),
+                sys::seL4_Fault_Splayed::UnknownSyscall(inner) => {
+                    Self::UnknownSyscall(UnknownSyscall::from_inner(inner))
+                }
+                sys::seL4_Fault_Splayed::UserException(inner) => {
+                    Self::UserException(UserException::from_inner(inner))
+                }
+                sys::seL4_Fault_Splayed::VMFault(inner) => Self::VMFault(VMFault::from_inner(inner)),
+                #[sel4_cfg(KERNEL_MCS)]
+                sys::seL4_Fault_Splayed::Timeout(inner) => Self::Timeout(Timeout::from_inner(inner)),
+                #[sel4_cfg(ARM_HYPERVISOR_SUPPORT)]
+                sys::seL4_Fault_Splayed::VGICMaintenance(inner) => {
+                    Self::VGICMaintenance(VGICMaintenance::from_inner(inner))
+                }
+                #[sel4_cfg(ARM_HYPERVISOR_SUPPORT)]
+                sys::seL4_Fault_Splayed::VCPUFault(inner) => {
+                    Self::VCPUFault(VCPUFault::from_inner(inner))
+                }
+                #[sel4_cfg(ARM_HYPERVISOR_SUPPORT)]
+                sys::seL4_Fault_Splayed::VPPIEvent(inner) => {
+                    Self::VPPIEvent(VPPIEvent::from_inner(inner))
+                }
             }
         }
     }

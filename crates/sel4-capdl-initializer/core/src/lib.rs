@@ -6,8 +6,6 @@
 
 #![no_std]
 #![feature(never_type)]
-#![feature(proc_macro_hygiene)]
-#![feature(stmt_expr_attributes)]
 
 use core::array;
 use core::borrow::BorrowMut;
@@ -103,8 +101,11 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
         self.init_frames()?;
         self.init_vspaces()?;
 
-        #[sel4::sel4_cfg(KERNEL_MCS)]
-        self.init_sched_contexts()?;
+        sel4::sel4_cfg_if! {
+            if #[cfg(KERNEL_MCS)] {
+                self.init_sched_contexts()?;
+            }
+        }
 
         self.init_tcbs()?;
         self.init_cspaces()?;
@@ -329,33 +330,34 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
         {
             for IRQEntry { irq, handler } in self.spec().irqs.iter() {
                 let slot = self.cslot_alloc_or_panic();
-                #[sel4::sel4_cfg_match]
-                match self.spec().object(*handler) {
-                    Object::IRQ(_) => {
-                        BootInfo::irq_control()
-                            .irq_control_get(*irq, &cslot_relative_cptr(slot))?;
-                    }
-                    #[sel4_cfg(any(ARCH_AARCH32, ARCH_AARCH64))]
-                    Object::ArmIRQ(obj) => {
-                        sel4::sel4_cfg_if! {
-                            if #[cfg(MAX_NUM_NODES = "1")] {
-                                BootInfo::irq_control().irq_control_get_trigger(
-                                    *irq,
-                                    obj.extra.trigger,
-                                    &cslot_relative_cptr(slot),
-                                )?;
-                            } else {
-                                BootInfo::irq_control().irq_control_get_trigger_core(
-                                    *irq,
-                                    obj.extra.trigger,
-                                    obj.extra.target,
-                                    &cslot_relative_cptr(slot),
-                                )?;
+                sel4::sel4_cfg_wrap_match! {
+                    match self.spec().object(*handler) {
+                        Object::IRQ(_) => {
+                            BootInfo::irq_control()
+                                .irq_control_get(*irq, &cslot_relative_cptr(slot))?;
+                        }
+                        #[sel4_cfg(any(ARCH_AARCH32, ARCH_AARCH64))]
+                        Object::ArmIRQ(obj) => {
+                            sel4::sel4_cfg_if! {
+                                if #[cfg(MAX_NUM_NODES = "1")] {
+                                    BootInfo::irq_control().irq_control_get_trigger(
+                                        *irq,
+                                        obj.extra.trigger,
+                                        &cslot_relative_cptr(slot),
+                                    )?;
+                                } else {
+                                    BootInfo::irq_control().irq_control_get_trigger_core(
+                                        *irq,
+                                        obj.extra.trigger,
+                                        obj.extra.target,
+                                        &cslot_relative_cptr(slot),
+                                    )?;
+                                }
                             }
                         }
-                    }
-                    _ => {
-                        panic!();
+                        _ => {
+                            panic!();
+                        }
                     }
                 }
                 self.set_orig_cslot(*handler, slot);
@@ -578,11 +580,12 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
                 tcb.tcb_bind_notification(bound_notification)?;
             }
 
-            #[sel4::sel4_cfg(all(ARCH_AARCH64, ARM_HYPERVISOR_SUPPORT))]
-            {
-                if let Some(vcpu) = obj.vcpu() {
-                    let vcpu = self.orig_local_cptr::<cap_type::VCPU>(vcpu.object);
-                    vcpu.vcpu_set_tcb(tcb)?;
+            sel4::sel4_cfg_if! {
+                if #[cfg(all(ARCH_AARCH64, ARM_HYPERVISOR_SUPPORT))] {
+                    if let Some(vcpu) = obj.vcpu() {
+                        let vcpu = self.orig_local_cptr::<cap_type::VCPU>(vcpu.object);
+                        vcpu.vcpu_set_tcb(tcb)?;
+                    }
                 }
             }
 
@@ -675,9 +678,10 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
                             prio,
                         )?;
 
-                        #[sel4::sel4_cfg(not(MAX_NUM_NODES = "1"))]
-                        {
-                            tcb.tcb_set_affinity(affinity.try_into().unwrap())?;
+                        sel4::sel4_cfg_if! {
+                            if #[cfg(not(MAX_NUM_NODES = "1"))] {
+                                tcb.tcb_set_affinity(affinity.try_into().unwrap())?;
+                            }
                         }
                     }
                 }

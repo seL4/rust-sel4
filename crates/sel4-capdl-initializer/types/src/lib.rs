@@ -6,8 +6,6 @@
 
 #![cfg_attr(not(feature = "std"), no_std)]
 #![feature(never_type)]
-#![feature(proc_macro_hygiene)]
-#![feature(stmt_expr_attributes)]
 #![feature(unwrap_infallible)]
 
 #[cfg(feature = "alloc")]

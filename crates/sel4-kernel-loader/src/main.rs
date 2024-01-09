@@ -6,7 +6,6 @@
 
 #![no_std]
 #![no_main]
-#![feature(proc_macro_hygiene)]
 #![allow(dead_code)]
 #![allow(unreachable_code)]
 #![allow(clippy::reversed_empty_ranges)]

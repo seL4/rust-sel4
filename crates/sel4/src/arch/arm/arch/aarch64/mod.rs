@@ -8,7 +8,14 @@ mod fault;
 mod object;
 mod user_context;
 
-#[sel4_config::sel4_cfg(ARM_HYPERVISOR_SUPPORT)]
+sel4_config::sel4_cfg_if! {
+    if #[cfg(ARM_HYPERVISOR_SUPPORT)] {
+        mod vcpu_reg;
+    }
+}
+
+// HACK for rustfmt
+#[cfg(any())]
 mod vcpu_reg;
 
 pub(crate) mod top_level {
