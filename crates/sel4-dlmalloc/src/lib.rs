@@ -5,7 +5,6 @@
 //
 
 #![no_std]
-#![feature(slice_ptr_len)]
 
 use core::alloc::{GlobalAlloc, Layout};
 use core::cell::{RefCell, UnsafeCell};
@@ -81,11 +80,10 @@ struct Free {
 }
 
 impl Free {
-    fn new(bounds: *mut [u8]) -> Self {
-        let start = bounds.cast::<u8>();
-        let end = start.wrapping_add(bounds.len());
+    fn new(bounds: StaticHeapBounds) -> Self {
+        let end = bounds.ptr.wrapping_add(bounds.size);
         Self {
-            watermark: start,
+            watermark: bounds.ptr,
             end,
         }
     }
@@ -110,7 +108,7 @@ impl<T> StaticDlmallocAllocator<T> {
     }
 }
 
-impl<T: StaticHeapBounds> StaticDlmallocAllocatorState<T> {
+impl<T: GetStaticHeapBounds> StaticDlmallocAllocatorState<T> {
     fn as_free(&mut self) -> &mut Free {
         if matches!(self, Self::Uninitialized { .. }) {
             if let Self::Uninitialized { get_initial_bounds } =
@@ -131,7 +129,7 @@ impl<T: StaticHeapBounds> StaticDlmallocAllocatorState<T> {
     }
 }
 
-unsafe impl<T: StaticHeapBounds + Send> DlmallocAllocator for StaticDlmallocAllocator<T> {
+unsafe impl<T: GetStaticHeapBounds + Send> DlmallocAllocator for StaticDlmallocAllocator<T> {
     fn alloc(&self, size: usize) -> (*mut u8, usize, u32) {
         match self.state.borrow_mut().as_free().alloc(size) {
             Some(start) => (start, size, 0),
@@ -165,12 +163,23 @@ unsafe impl<T: StaticHeapBounds + Send> DlmallocAllocator for StaticDlmallocAllo
     }
 }
 
-pub trait StaticHeapBounds {
-    fn bounds(self) -> *mut [u8];
+pub trait GetStaticHeapBounds {
+    fn bounds(self) -> StaticHeapBounds;
 }
 
-impl<T: FnOnce() -> *mut [u8]> StaticHeapBounds for T {
-    fn bounds(self) -> *mut [u8] {
+pub struct StaticHeapBounds {
+    ptr: *mut u8,
+    size: usize,
+}
+
+impl StaticHeapBounds {
+    pub fn new(ptr: *mut u8, size: usize) -> Self {
+        Self { ptr, size }
+    }
+}
+
+impl<T: FnOnce() -> StaticHeapBounds> GetStaticHeapBounds for T {
+    fn bounds(self) -> StaticHeapBounds {
         (self)()
     }
 }
@@ -189,8 +198,8 @@ impl<const N: usize> StaticHeap<N> {
     }
 }
 
-impl<const N: usize> StaticHeapBounds for &StaticHeap<N> {
-    fn bounds(self) -> *mut [u8] {
-        ptr::slice_from_raw_parts_mut(self.0.get().cast(), N)
+impl<const N: usize> GetStaticHeapBounds for &StaticHeap<N> {
+    fn bounds(self) -> StaticHeapBounds {
+        StaticHeapBounds::new(self.0.get().cast(), N)
     }
 }

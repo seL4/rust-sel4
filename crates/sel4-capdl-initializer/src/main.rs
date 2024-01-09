@@ -20,6 +20,7 @@ use sel4_capdl_initializer_types::{
     IndirectDeflatedBytesContent, IndirectEmbeddedFrame, IndirectObjectName, SpecWithIndirection,
     SpecWithSources,
 };
+use sel4_dlmalloc::StaticHeapBounds;
 use sel4_logging::{LevelFilter, Logger, LoggerBuilder};
 use sel4_root_task::root_task;
 
@@ -102,9 +103,9 @@ fn user_image_bounds() -> Range<usize> {
     }
 }
 
-fn static_heap_bounds() -> *mut [u8] {
+fn static_heap_bounds() -> StaticHeapBounds {
     unsafe {
-        ptr::slice_from_raw_parts_mut(
+        StaticHeapBounds::new(
             sel4_capdl_initializer_heap_start,
             sel4_capdl_initializer_heap_size,
         )
@@ -112,12 +113,14 @@ fn static_heap_bounds() -> *mut [u8] {
 }
 
 mod heap {
-    use sel4_dlmalloc::StaticDlmallocGlobalAlloc;
+    use sel4_dlmalloc::{StaticDlmallocGlobalAlloc, StaticHeapBounds};
     use sel4_sync::PanickingMutexSyncOps;
 
     use super::static_heap_bounds;
 
     #[global_allocator]
-    static GLOBAL_ALLOCATOR: StaticDlmallocGlobalAlloc<PanickingMutexSyncOps, fn() -> *mut [u8]> =
-        StaticDlmallocGlobalAlloc::new(PanickingMutexSyncOps::new(), static_heap_bounds);
+    static GLOBAL_ALLOCATOR: StaticDlmallocGlobalAlloc<
+        PanickingMutexSyncOps,
+        fn() -> StaticHeapBounds,
+    > = StaticDlmallocGlobalAlloc::new(PanickingMutexSyncOps::new(), static_heap_bounds);
 }

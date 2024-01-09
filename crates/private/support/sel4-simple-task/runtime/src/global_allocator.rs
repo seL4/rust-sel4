@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use sel4_dlmalloc::StaticDlmallocGlobalAlloc;
+use sel4_dlmalloc::{StaticDlmallocGlobalAlloc, StaticHeapBounds};
 use sel4_sync::AbstractMutexSyncOps;
 
 use crate::{get_static_heap_bounds, get_static_heap_mutex_notification};
@@ -13,7 +13,7 @@ use crate::{get_static_heap_bounds, get_static_heap_mutex_notification};
 #[allow(clippy::type_complexity)]
 static GLOBAL_ALLOCATOR: StaticDlmallocGlobalAlloc<
     AbstractMutexSyncOps<fn(), fn()>,
-    fn() -> *mut [u8],
+    fn() -> StaticHeapBounds,
 > = StaticDlmallocGlobalAlloc::new(
     AbstractMutexSyncOps {
         signal: || {
