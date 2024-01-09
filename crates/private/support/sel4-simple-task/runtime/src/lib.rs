@@ -13,11 +13,11 @@
 extern crate alloc;
 
 use core::ffi::{c_char, c_void};
-use core::ptr;
 use core::slice;
 
 use sel4::Endpoint;
 use sel4_backtrace_simple::SimpleBacktracing;
+use sel4_dlmalloc::StaticHeapBounds;
 use sel4_immediate_sync_once_cell::ImmediateSyncOnceCell;
 use sel4_panicking::ExternalPanicInfo;
 use sel4_panicking_env::{abort, AbortInfo};
@@ -134,9 +134,9 @@ fn panic_hook(info: &ExternalPanicInfo<'_>) {
     get_backtracing().collect_and_send();
 }
 
-fn get_static_heap_bounds() -> *mut [u8] {
+fn get_static_heap_bounds() -> StaticHeapBounds {
     let addrs = CONFIG.get().unwrap().static_heap().unwrap();
-    ptr::slice_from_raw_parts_mut(
+    StaticHeapBounds::new(
         usize::try_from(addrs.start).unwrap() as *mut _,
         (addrs.end - addrs.start).try_into().unwrap(),
     )
