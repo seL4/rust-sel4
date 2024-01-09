@@ -43,8 +43,9 @@ pub(crate) fn init_panicking() {
 #[no_mangle]
 #[allow(unused_variables)]
 fn sel4_runtime_debug_put_char(c: u8) {
-    #[sel4::sel4_cfg(PRINTING)]
-    {
-        sel4::debug_put_char(c as core::ffi::c_char)
+    sel4::sel4_cfg_if! {
+        if #[cfg(PRINTING)] {
+            sel4::debug_put_char(c as core::ffi::c_char)
+        }
     }
 }
