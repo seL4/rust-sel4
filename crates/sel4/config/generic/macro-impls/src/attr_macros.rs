@@ -85,6 +85,14 @@ impl<'a> Impls<'a> {
 
     pub fn cfg_match_impl(&self, input: TokenStream, item: TokenStream) -> TokenStream {
         ensure_empty!(input);
+        self.cfg_match_impl_inner(item)
+    }
+
+    pub fn cfg_wrap_match_impl(&self, item: TokenStream) -> TokenStream {
+        self.cfg_match_impl_inner(item)
+    }
+
+    fn cfg_match_impl_inner(&self, item: TokenStream) -> TokenStream {
         let mut match_expr = parse_or_return!(item as syn::ExprMatch);
         let mut helper = Helper::new(self);
         match_expr
