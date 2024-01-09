@@ -5,7 +5,6 @@
 //
 
 #![no_std]
-#![feature(cfg_target_has_atomic_equal_alignment)]
 #![feature(core_intrinsics)]
 #![allow(internal_features)]
 
@@ -55,6 +54,8 @@ impl<'a, T: ?Sized, A> ExternallySharedPtrExt<'a, T, A> for ExternallySharedPtr<
     where
         T: Atomic,
     {
-        unsafe { AtomicPtr::new(self.as_raw_ptr()) }
+        let p = self.as_raw_ptr();
+        assert_eq!(p.as_ptr().align_offset(T::ALIGNMENT), 0);
+        unsafe { AtomicPtr::new(p) }
     }
 }
