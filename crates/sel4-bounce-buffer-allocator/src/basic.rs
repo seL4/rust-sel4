@@ -6,11 +6,13 @@
 
 use alloc::collections::BTreeMap;
 use core::alloc::Layout;
-use core::ops::Bound;
 
 use crate::{AbstractBounceBufferAllocator, Offset, Size};
 
 const GRANULE_SIZE: usize = 2048;
+
+// TODO
+// This is just a temporary implementation to server as a stand-in.
 
 // NOTE(rustc_wishlist)
 //
@@ -18,7 +20,12 @@ const GRANULE_SIZE: usize = 2048;
 //
 // Should be parameterized with an allocator A, to enable this type to be used without a global
 // allocator.
+
+// NOTE(rustc_wishlist)
 //
+// #![feature(btree_cursors)] would make this stand-in implementation simpler and more efficient.
+// See git history.
+
 pub struct Basic {
     holes: BTreeMap<Offset, Size>,
 }
@@ -42,51 +49,83 @@ impl AbstractBounceBufferAllocator for Basic {
             layout.align().max(GRANULE_SIZE),
         )
         .unwrap();
-        let mut cursor = self.holes.lower_bound_mut(Bound::Unbounded);
-        loop {
-            if let Some((&hole_offset, &hole_size)) = cursor.key_value() {
+
+        let (buffer_offset, hole_offset, hole_size) = self
+            .holes
+            .iter()
+            .find_map(|(&hole_offset, &hole_size)| {
                 let buffer_offset = hole_offset.next_multiple_of(layout.align());
                 if buffer_offset + layout.size() <= hole_offset + hole_size {
-                    cursor.remove_current();
-                    if hole_offset < buffer_offset {
-                        cursor.insert_before(hole_offset, buffer_offset - hole_offset);
-                    }
-                    if buffer_offset + layout.size() < hole_offset + hole_size {
-                        cursor.insert_before(
-                            buffer_offset + layout.size(),
-                            (hole_offset + hole_size) - (buffer_offset + layout.size()),
-                        );
-                    }
-                    return Ok(buffer_offset);
+                    Some((buffer_offset, hole_offset, hole_size))
                 } else {
-                    cursor.move_next();
+                    None
                 }
-            } else {
-                return Err(());
-            }
+            })
+            .ok_or(())?;
+
+        self.holes.remove(&hole_offset).unwrap();
+
+        if hole_offset < buffer_offset {
+            self.holes.insert(hole_offset, buffer_offset - hole_offset);
         }
+
+        if buffer_offset + layout.size() < hole_offset + hole_size {
+            self.holes.insert(
+                buffer_offset + layout.size(),
+                (hole_offset + hole_size) - (buffer_offset + layout.size()),
+            );
+        }
+
+        Ok(buffer_offset)
     }
 
     fn deallocate(&mut self, offset: Offset, size: Size) {
         assert_eq!(offset % GRANULE_SIZE, 0);
         let size = size.next_multiple_of(GRANULE_SIZE);
-        let mut cursor = self.holes.upper_bound_mut(Bound::Included(&offset));
-        if let Some((&prev_hole_offset, prev_hole_size)) = cursor.key_value_mut() {
-            assert!(prev_hole_offset + *prev_hole_size <= offset);
-            if prev_hole_offset + *prev_hole_size == offset {
-                *prev_hole_size += size;
-                return;
+
+        let holes = self
+            .holes
+            .range(..&offset)
+            .rev()
+            .next()
+            .map(copy_typle_fields)
+            .map(|prev_hole| {
+                (
+                    prev_hole,
+                    self.holes.range(&offset..).next().map(copy_typle_fields),
+                )
+            });
+
+        let mut island = true;
+
+        if let Some(((prev_hole_offset, prev_hole_size), next_hole)) = holes {
+            assert!(prev_hole_offset + prev_hole_size <= offset);
+            let adjacent_to_prev = prev_hole_offset + prev_hole_size == offset;
+            if adjacent_to_prev {
+                island = false;
+                *self.holes.get_mut(&prev_hole_offset).unwrap() += size;
+            }
+            if let Some((next_hole_offset, next_hole_size)) = next_hole {
+                assert!(offset + size <= next_hole_offset);
+                let adjacent_to_next = offset + size == next_hole_offset;
+                if adjacent_to_next {
+                    island = false;
+                    self.holes.remove(&next_hole_offset).unwrap();
+                    if adjacent_to_prev {
+                        *self.holes.get_mut(&prev_hole_offset).unwrap() += next_hole_size;
+                    } else {
+                        self.holes.insert(offset, size + next_hole_size);
+                    }
+                }
             }
         }
-        cursor.move_next();
-        if let Some((&next_hole_offset, &next_hole_size)) = cursor.key_value() {
-            assert!(offset + size <= next_hole_offset);
-            if offset + size == next_hole_offset {
-                cursor.remove_current();
-                cursor.insert_before(offset, size + next_hole_size);
-                return;
-            }
+
+        if island {
+            self.holes.insert(offset, size);
         }
-        cursor.insert_before(offset, size);
     }
+}
+
+fn copy_typle_fields<T: Copy, U: Copy>((&t, &u): (&T, &U)) -> (T, U) {
+    (t, u)
 }
