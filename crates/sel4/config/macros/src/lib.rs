@@ -43,6 +43,11 @@ pub fn sel4_cfg_match(input: TokenStream, item: TokenStream) -> TokenStream {
 }
 
 #[proc_macro]
+pub fn sel4_cfg_wrap_match(item: TokenStream) -> TokenStream {
+    get_impls().cfg_wrap_match_impl(item.into()).into()
+}
+
+#[proc_macro]
 pub fn sel4_cfg_if(toks: TokenStream) -> TokenStream {
     get_impls().cfg_if_impl(toks.into()).into()
 }
