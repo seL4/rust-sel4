@@ -88,7 +88,7 @@ impl EmbeddedFrame {
     }
 
     pub fn check(&self, frame_size: usize) {
-        assert!(self.ptr().is_aligned_to(frame_size));
+        assert_eq!(self.ptr().cast::<()>().align_offset(frame_size), 0);
     }
 }
 

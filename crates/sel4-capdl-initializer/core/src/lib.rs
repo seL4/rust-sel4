@@ -6,7 +6,6 @@
 
 #![no_std]
 #![feature(never_type)]
-#![feature(pointer_is_aligned)]
 #![feature(proc_macro_hygiene)]
 #![feature(stmt_expr_attributes)]
 

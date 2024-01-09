@@ -35,3 +35,12 @@
     any(target_arch = "riscv32", target_arch = "riscv64"),
     feature(riscv_ext_intrinsics),
 )]
+
+// For pointer::is_aligned(_to)?
+//
+// For now, use:
+// ```
+// assert_eq!(ptr.cast::<()>().align_offset(x), 0)
+// ```
+// (See definitions of pointer::is_aligned(_to)?)
+#![feature(pointer_is_aligned)]

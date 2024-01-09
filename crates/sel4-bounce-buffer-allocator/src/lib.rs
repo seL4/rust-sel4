@@ -6,7 +6,6 @@
 
 #![no_std]
 #![feature(btree_cursors)]
-#![feature(pointer_is_aligned)]
 
 extern crate alloc;
 
@@ -53,7 +52,7 @@ impl<T> BounceBufferAllocator<T> {
     }
 
     pub fn check_alignment(&self, region: *mut u8) {
-        assert!(region.is_aligned_to(self.max_alignment()));
+        assert_eq!(region.cast::<()>().align_offset(self.max_alignment()), 0); // sanity check
     }
 }
 

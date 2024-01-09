@@ -22,7 +22,7 @@ unsafe impl Sync for IPCBuffer {}
 impl IPCBuffer {
     #[allow(clippy::missing_safety_doc)]
     pub unsafe fn from_ptr(ptr: *mut sys::seL4_IPCBuffer) -> Self {
-        assert!(ptr.is_aligned_to(GRANULE_SIZE.bytes())); // sanity check
+        assert_eq!(ptr.cast::<()>().align_offset(GRANULE_SIZE.bytes()), 0); // sanity check
         Self { ptr }
     }
 
