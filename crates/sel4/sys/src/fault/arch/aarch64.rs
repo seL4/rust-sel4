@@ -7,7 +7,7 @@
 use crate::bf::*;
 use crate::c::*;
 
-use sel4_config::sel4_cfg_match;
+use sel4_config::sel4_cfg_wrap_match;
 
 impl seL4_Fault {
     pub(crate) fn arch_get_with(
@@ -15,8 +15,7 @@ impl seL4_Fault {
         length: seL4_Word,
         f: impl Fn(core::ffi::c_ulong) -> seL4_Word,
     ) -> Option<Self> {
-        Some({
-            #[sel4_cfg_match]
+        Some(sel4_cfg_wrap_match! {
             match label {
                 seL4_Fault_tag::seL4_Fault_UnknownSyscall => {
                     assert!(length == seL4_UnknownSyscall_Msg::seL4_UnknownSyscall_Length);

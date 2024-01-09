@@ -7,7 +7,7 @@
 use crate::bf::*;
 use crate::c::*;
 
-use sel4_config::sel4_cfg_match;
+use sel4_config::sel4_cfg_wrap_match;
 
 impl seL4_Fault {
     pub(crate) fn arch_get_with(
@@ -17,8 +17,7 @@ impl seL4_Fault {
     ) -> Option<Self> {
         let f = |i: core::ffi::c_uint| f(i.into());
         let length: core::ffi::c_uint = length.try_into().unwrap();
-        Some({
-            #[sel4_cfg_match]
+        Some(sel4_cfg_wrap_match! {
             match label {
                 seL4_Fault_tag::seL4_Fault_UnknownSyscall => {
                     assert!(length == seL4_UnknownSyscall_Msg::seL4_UnknownSyscall_Length);

@@ -5,8 +5,6 @@
 //
 
 #![no_std]
-#![feature(proc_macro_hygiene)]
-#![feature(stmt_expr_attributes)]
 #![feature(thread_local)]
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
