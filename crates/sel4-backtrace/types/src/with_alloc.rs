@@ -6,6 +6,7 @@
 
 use alloc::vec;
 use alloc::vec::Vec;
+use core::convert::Infallible;
 
 #[cfg(feature = "postcard")]
 use core::fmt;
@@ -29,7 +30,7 @@ impl<T: Serialize> Backtrace<T> {
         let mut acc = vec![];
         let mut send_byte = |b| {
             acc.push(b);
-            Ok::<_, !>(())
+            Ok::<_, Infallible>(())
         };
         self.preamble.send(&mut send_byte)?;
         for entry in &self.entries {
