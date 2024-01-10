@@ -10,7 +10,11 @@ use crate::c::*;
 use sel4_config::sel4_cfg_match;
 
 impl seL4_Fault {
-    pub(crate) fn arch_get_with(label: seL4_Word, length: seL4_Word, f: impl Fn(core::ffi::c_ulong) -> seL4_Word) -> Option<Self> {
+    pub(crate) fn arch_get_with(
+        label: seL4_Word,
+        length: seL4_Word,
+        f: impl Fn(core::ffi::c_ulong) -> seL4_Word,
+    ) -> Option<Self> {
         let f = |i: core::ffi::c_uint| f(i.into());
         let length: core::ffi::c_uint = length.try_into().unwrap();
         Some({
@@ -53,9 +57,7 @@ impl seL4_Fault {
                     }
                     .unsplay()
                 }
-                _ => {
-                    return None
-                }
+                _ => return None,
             }
         })
     }
