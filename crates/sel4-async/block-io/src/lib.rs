@@ -5,12 +5,12 @@
 //
 
 #![no_std]
-#![feature(never_type)]
 
 #[cfg(feature = "alloc")]
 extern crate alloc;
 
 use core::cell::RefCell;
+use core::convert::Infallible;
 use core::fmt;
 use core::ops::Range;
 
@@ -459,7 +459,7 @@ impl<T> SliceByteIO<T> {
 }
 
 impl<T: AsRef<[u8]>> ByteIOLayout for SliceByteIO<T> {
-    type Error = !;
+    type Error = Infallible;
 
     fn size(&self) -> u64 {
         self.inner().as_ref().len().try_into().unwrap()
@@ -477,14 +477,14 @@ impl<T: AsRef<[u8]>> ByteIO<ReadOnly> for SliceByteIO<T> {
             Operation::Read { buf, .. } => {
                 buf.copy_from_slice(&self.inner().as_ref()[offset..][..buf.len()]);
             }
-            Operation::Write { witness, .. } => witness,
+            Operation::Write { witness, .. } => witness.absurd(),
         }
         Ok(())
     }
 }
 
 impl<T: AsRef<[u8]> + AsMut<[u8]>> ByteIOLayout for RefCell<SliceByteIO<T>> {
-    type Error = !;
+    type Error = Infallible;
 
     fn size(&self) -> u64 {
         self.borrow().size()
