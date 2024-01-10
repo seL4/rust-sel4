@@ -6,7 +6,6 @@
 
 #![no_std]
 #![no_main]
-#![feature(never_type)]
 
 use core::ptr::NonNull;
 
@@ -19,7 +18,9 @@ use virtio_drivers::{
 };
 
 use sel4_externally_shared::{ExternallySharedRef, ExternallySharedRefExt};
-use sel4_microkit::{memory_region_symbol, protection_domain, var, Channel, Handler, MessageInfo};
+use sel4_microkit::{
+    memory_region_symbol, protection_domain, var, Channel, Handler, Infallible, MessageInfo,
+};
 use sel4_microkit_message::MessageInfoExt as _;
 use sel4_shared_ring_buffer::{roles::Use, RingBuffers};
 
@@ -95,7 +96,7 @@ struct HandlerImpl {
 }
 
 impl Handler for HandlerImpl {
-    type Error = !;
+    type Error = Infallible;
 
     fn notified(&mut self, channel: Channel) -> Result<(), Self::Error> {
         match channel {
