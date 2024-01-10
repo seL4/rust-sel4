@@ -5,8 +5,6 @@
 //
 
 #![cfg_attr(not(feature = "std"), no_std)]
-#![feature(never_type)]
-#![feature(unwrap_infallible)]
 
 #[cfg(feature = "alloc")]
 extern crate alloc;
@@ -36,7 +34,7 @@ pub use footprint::Footprint;
 pub use frame_init::{
     BytesContent, Content, EmbeddedFrame, Fill, FillEntry, FillEntryContent,
     FillEntryContentBootInfo, FillEntryContentBootInfoId, FrameInit, GetEmbeddedFrame,
-    IndirectBytesContent, IndirectEmbeddedFrame, SelfContainedContent,
+    IndirectBytesContent, IndirectEmbeddedFrame, NeverEmbedded, SelfContainedContent,
     SelfContainedGetEmbeddedFrame,
 };
 pub use indirect::Indirect;

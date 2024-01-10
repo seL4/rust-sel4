@@ -4,9 +4,6 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-#![feature(never_type)]
-#![feature(unwrap_infallible)]
-
 // TODO(nspin)
 // In a few cases, we use a local const declaration to appease the borrow checker.
 // Using an exposed constructor of `Indirect` would be one way around this.
@@ -323,7 +320,7 @@ impl<'a> Embedding<'a> {
         let mut embedded_frame_count = 0usize;
         let spec = self
             .spec()
-            .traverse_data::<Ident, !>(|data| {
+            .traverse_data(|data| {
                 let id = hex::encode_upper(format!(
                     "{},{},{}",
                     data.file_range().start,
@@ -338,10 +335,9 @@ impl<'a> Embedding<'a> {
                     });
                     self.pack_fill(self.fill_map.get(data))
                 });
-                Ok(ident)
+                ident
             })
-            .into_ok()
-            .traverse_embedded_frames::<Ident, !>(|fill| {
+            .traverse_embedded_frames(|fill| {
                 let ident = format_ident!("FRAME_{}", embedded_frame_count);
                 let fname = format!("frame.{}.bin", embedded_frame_count);
                 file_inclusion_toks.extend(quote! {
@@ -351,9 +347,8 @@ impl<'a> Embedding<'a> {
                 });
                 files_for_inclusion.insert(fname, self.fill_map.get_frame(self.granule_size(), fill));
                 embedded_frame_count += 1;
-                Ok(ident)
-            })
-            .into_ok();
+                ident
+            });
 
         let types_mod = self.types_mod();
         let name_type = self.name_type(true);

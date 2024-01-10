@@ -51,17 +51,17 @@ impl<'a, D, M> FrameInit<'a, D, M> {
     }
 }
 
-impl<'a, D> FrameInit<'a, D, !> {
+impl<'a, D> FrameInit<'a, D, NeverEmbedded> {
     #[allow(clippy::explicit_auto_deref)]
     pub const fn as_fill_infallible(&self) -> &Fill<'a, D> {
         match self {
             Self::Fill(fill) => fill,
-            Self::Embedded(never) => *never,
+            Self::Embedded(absurdity) => match *absurdity {},
         }
     }
 }
 
-impl<'a, D> object::Frame<'a, D, !> {
+impl<'a, D> object::Frame<'a, D, NeverEmbedded> {
     pub fn can_embed(&self, granule_size_bits: usize, is_root: bool) -> bool {
         is_root
             && self.paddr.is_none()
@@ -70,6 +70,11 @@ impl<'a, D> object::Frame<'a, D, !> {
             && !self.init.as_fill_infallible().depends_on_bootinfo()
     }
 }
+
+// // //
+
+#[derive(Copy, Clone)]
+pub enum NeverEmbedded {}
 
 // // //
 

@@ -24,29 +24,26 @@ pub fn reserialize_spec<'a>(
     let mut sources = SourcesBuilder::new();
     let mut num_embedded_frames = 0;
     let final_spec: SpecWithIndirection<'a> = input_spec
-        .traverse_names_with_context::<_, !>(|named_obj| {
-            Ok(object_names_level
+        .traverse_names_with_context(|named_obj| {
+            object_names_level
                 .apply(named_obj)
                 .map(|s| IndirectObjectName {
                     range: sources.append(s.as_bytes()),
-                }))
+                })
         })
-        .into_ok()
         .split_embedded_frames(embed_frames, granule_size_bits)
-        .traverse_data::<IndirectDeflatedBytesContent, !>(|key| {
+        .traverse_data(|key| {
             let compressed = DeflatedBytesContent::pack(fill_map.get(key));
-            Ok(IndirectDeflatedBytesContent {
+            IndirectDeflatedBytesContent {
                 deflated_bytes_range: sources.append(&compressed),
-            })
+            }
         })
-        .into_ok()
-        .traverse_embedded_frames::<IndirectEmbeddedFrame, !>(|fill| {
+        .traverse_embedded_frames(|fill| {
             num_embedded_frames += 1;
             sources.align_to(granule_size);
             let range = sources.append(&fill_map.get_frame(granule_size, fill));
-            Ok(IndirectEmbeddedFrame::new(range.start))
-        })
-        .into_ok();
+            IndirectEmbeddedFrame::new(range.start)
+        });
 
     if verbose {
         eprintln!("embedded frames count: {}", num_embedded_frames);
