@@ -6,12 +6,11 @@
 
 #![no_std]
 #![no_main]
-#![feature(never_type)]
 
-use sel4_root_task::root_task;
+use sel4_root_task::{root_task, Never};
 
 #[root_task]
-fn main(bootinfo: &sel4::BootInfo) -> sel4::Result<!> {
+fn main(bootinfo: &sel4::BootInfo) -> sel4::Result<Never> {
     sel4::debug_println!("Hello, World!");
 
     let blueprint = sel4::ObjectBlueprint::Notification;
