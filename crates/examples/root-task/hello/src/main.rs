@@ -6,7 +6,6 @@
 
 #![no_std]
 #![no_main]
-#![feature(never_type)]
 
 use sel4_root_task::root_task;
 
