@@ -49,3 +49,6 @@
 // #[sel4_cfg] and #[sel4_cfg_match] on expressions and non-inline module declarations.
 #![feature(proc_macro_hygiene)]
 #![feature(stmt_expr_attributes)]
+
+#![feature(never_type)]
+#![feature(unwrap_infallible)]
