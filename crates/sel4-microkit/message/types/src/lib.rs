@@ -5,8 +5,8 @@
 //
 
 #![no_std]
-#![feature(never_type)]
 
+use core::convert::Infallible;
 use core::fmt;
 use core::mem;
 
@@ -91,7 +91,7 @@ pub enum RecvFromBytesError {
 pub struct EmptyMessageValue;
 
 impl MessageValueSend for EmptyMessageValue {
-    type Error = !;
+    type Error = Infallible;
 
     fn write_message_value(self, _buf: &mut [u8]) -> Result<usize, Self::Error> {
         Ok(0)
@@ -99,7 +99,7 @@ impl MessageValueSend for EmptyMessageValue {
 }
 
 impl MessageValueRecv for EmptyMessageValue {
-    type Error = !;
+    type Error = Infallible;
 
     fn read_message_value(_buf: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self)
@@ -114,7 +114,7 @@ pub struct EmptyMessage;
 impl MessageSend for EmptyMessage {
     type Label = DefaultMessageLabel;
 
-    type Error = !;
+    type Error = Infallible;
 
     fn write_message(self, buf: &mut [u8]) -> Result<(Self::Label, usize), Self::Error> {
         TriviallyLabeled(EmptyMessageValue).write_message(buf)
@@ -124,7 +124,7 @@ impl MessageSend for EmptyMessage {
 impl MessageRecv for EmptyMessage {
     type Label = DefaultMessageLabel;
 
-    type Error = !;
+    type Error = Infallible;
 
     fn read_message(label: Self::Label, buf: &[u8]) -> Result<Self, Self::Error> {
         TriviallyLabeled::<EmptyMessageValue>::read_message(label, buf).map(|_| Self)

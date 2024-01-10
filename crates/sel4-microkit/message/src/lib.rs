@@ -5,7 +5,6 @@
 //
 
 #![no_std]
-#![feature(unwrap_infallible)]
 
 use core::fmt;
 use core::mem;
@@ -35,7 +34,7 @@ pub trait MessageInfoExt: Sized {
     fn send_unspecified_error() -> Self;
 
     fn send_empty() -> Self {
-        Self::send(EmptyMessage).into_ok()
+        Self::send(EmptyMessage).unwrap_or_else(|absurdity| match absurdity {})
     }
 
     fn recv_empty(self) -> Result<(), MessageRecvErrorFor<EmptyMessage>> {
