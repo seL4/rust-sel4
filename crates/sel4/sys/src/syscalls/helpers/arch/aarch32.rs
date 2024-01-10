@@ -9,8 +9,8 @@ use core::ffi::c_int;
 
 use sel4_config::sel4_cfg;
 
-use crate::{seL4_Word, seL4_MessageInfo};
 use super::sys_id_to_word;
+use crate::{seL4_MessageInfo, seL4_Word};
 
 // NOTE:
 // asm!() does not allow r6 to be used for input or output operands, because it's sometimes used by LLVM.
@@ -58,11 +58,7 @@ pub fn sys_reply(
     }
 }
 
-pub fn sys_send_null(
-    sys: c_int,
-    src: seL4_Word,
-    info_arg: seL4_MessageInfo,
-) {
+pub fn sys_send_null(sys: c_int, src: seL4_Word, info_arg: seL4_MessageInfo) {
     unsafe {
         asm!("swi 0",
             in("r7") sys_id_to_word(sys),
@@ -170,9 +166,7 @@ pub fn sys_nb_send_recv(
     (seL4_MessageInfo::from_word(out_info), out_badge)
 }
 
-pub fn sys_null(
-    sys: c_int,
-) {
+pub fn sys_null(sys: c_int) {
     unsafe {
         asm!("swi 0",
             in("r7") sys_id_to_word(sys),

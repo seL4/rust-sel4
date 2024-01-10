@@ -26,6 +26,16 @@ sel4_cfg_if! {
     }
 }
 
+// HACK for rustfmt
+#[cfg(any())]
+mod aarch32;
+#[cfg(any())]
+mod aarch64;
+#[cfg(any())]
+mod riscv;
+#[cfg(any())]
+mod x86_64;
+
 pub use imp::*;
 
 fn sys_id_to_word(sys_id: c_int) -> seL4_Word {

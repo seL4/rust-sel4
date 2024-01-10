@@ -9,8 +9,8 @@ use core::ffi::c_int;
 
 use sel4_config::sel4_cfg;
 
-use crate::{seL4_Word, seL4_MessageInfo};
 use super::sys_id_to_word;
+use crate::{seL4_MessageInfo, seL4_Word};
 
 #[sel4_cfg(not(SYSCALL))]
 compile_error!("unsupported configuration");
@@ -70,11 +70,7 @@ pub fn sys_reply(
     }
 }
 
-pub fn sys_send_null(
-    sys: c_int,
-    src: seL4_Word,
-    info_arg: seL4_MessageInfo,
-) {
+pub fn sys_send_null(sys: c_int, src: seL4_Word, info_arg: seL4_MessageInfo) {
     unsafe {
         asm!(
             "mov r14, rsp",
@@ -191,9 +187,7 @@ pub fn sys_nb_send_recv(
     (seL4_MessageInfo::from_word(out_info), out_badge)
 }
 
-pub fn sys_null(
-    sys: c_int,
-) {
+pub fn sys_null(sys: c_int) {
     unsafe {
         asm!(
             "mov r14, rsp",
