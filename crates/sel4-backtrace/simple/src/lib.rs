@@ -5,8 +5,8 @@
 //
 
 #![no_std]
-#![feature(never_type)]
-#![feature(unwrap_infallible)]
+
+use core::convert::Infallible;
 
 use sel4_backtrace::{BacktraceSendWithToken, BacktraceSendWithoutToken};
 use sel4_panicking_env::{debug_print, debug_println};
@@ -28,7 +28,10 @@ impl SimpleBacktracing {
     pub fn collect_and_send(&self) {
         debug_println!("collecting and sending stack backtrace");
         debug_print!("    ");
-        let r = self.0.collect_and_send().into_ok();
+        let r = self
+            .0
+            .collect_and_send()
+            .unwrap_or_else(|absurdity| match absurdity {});
         debug_println!();
         debug_println!();
         if r.is_err() {
@@ -46,7 +49,10 @@ impl SimpleBacktracing {
     pub fn send(&self, bt: &Backtrace<Option<&'static str>>) {
         debug_println!("sending stack backtrace");
         debug_print!("    ");
-        let r = self.0.send(bt).into_ok();
+        let r = self
+            .0
+            .send(bt)
+            .unwrap_or_else(|absurdity| match absurdity {});
         debug_println!();
         debug_println!();
         if r.is_err() {
@@ -67,7 +73,7 @@ impl SimpleBacktraceSend {
 
 impl BacktraceSendWithoutToken for SimpleBacktraceSend {
     type Image = Option<&'static str>;
-    type TxError = !;
+    type TxError = Infallible;
 
     fn image(&self) -> Self::Image {
         self.image

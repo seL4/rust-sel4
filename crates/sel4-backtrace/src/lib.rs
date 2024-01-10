@@ -5,7 +5,8 @@
 //
 
 #![no_std]
-#![feature(never_type)]
+
+use core::convert::Infallible;
 
 #[cfg(feature = "postcard")]
 use serde::Serialize;
@@ -67,7 +68,7 @@ cfg_if::cfg_if! {
             let mut builder = Backtrace::builder(image);
             let error = collect_with(|entry| {
                 builder.append(entry);
-                Ok::<_, !>(())
+                Ok::<_, Infallible>(())
             });
             builder.finalize(error)
         }
@@ -120,7 +121,7 @@ cfg_if::cfg_if! {
         impl<T: BacktraceSendWithoutToken> BacktraceSendWithToken for T {
             type Image = <Self as BacktraceSendWithoutToken>::Image;
             type Token = ();
-            type ControlError = !;
+            type ControlError = Infallible;
             type TxError = <Self as BacktraceSendWithoutToken>::TxError;
 
             fn image(&self) -> Self::Image {
