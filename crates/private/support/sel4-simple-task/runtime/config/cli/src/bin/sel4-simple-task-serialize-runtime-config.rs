@@ -4,9 +4,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-#![feature(never_type)]
-#![feature(unwrap_infallible)]
-
+use std::convert::Infallible;
 use std::fs;
 use std::io::{self, Write};
 use std::path::PathBuf;
@@ -18,8 +16,8 @@ fn main() -> Result<(), std::io::Error> {
     let config = config.traverse(fs::read)?;
     let packed = config.pack();
     let unpacked_for_sanity_check = RuntimeConfigForPacking::unpack(&RuntimeConfig::new(&packed))
-        .traverse(|bytes| Ok::<_, !>(bytes.to_vec()))
-        .into_ok();
+        .traverse(|bytes| Ok::<_, Infallible>(bytes.to_vec()))
+        .unwrap_or_else(|absurdity| match absurdity {});
     assert_eq!(config, unpacked_for_sanity_check);
     io::stdout().write_all(&packed)?;
     Ok(())
