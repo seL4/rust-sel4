@@ -6,9 +6,8 @@
 
 #![no_std]
 #![no_main]
-#![feature(never_type)]
 
-use sel4_microkit::{debug_println, protection_domain, Handler};
+use sel4_microkit::{debug_println, protection_domain, Handler, Infallible};
 
 #[protection_domain]
 fn init() -> HandlerImpl {
@@ -19,5 +18,5 @@ fn init() -> HandlerImpl {
 struct HandlerImpl;
 
 impl Handler for HandlerImpl {
-    type Error = !;
+    type Error = Infallible;
 }

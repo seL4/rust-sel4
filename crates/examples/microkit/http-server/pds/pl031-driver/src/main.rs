@@ -6,9 +6,10 @@
 
 #![no_std]
 #![no_main]
-#![feature(never_type)]
 
-use sel4_microkit::{memory_region_symbol, protection_domain, Channel, Handler, MessageInfo};
+use sel4_microkit::{
+    memory_region_symbol, protection_domain, Channel, Handler, Infallible, MessageInfo,
+};
 use sel4_microkit_message::MessageInfoExt as _;
 
 use microkit_http_server_example_pl031_driver_core::Driver;
@@ -29,7 +30,7 @@ struct HandlerImpl {
 }
 
 impl Handler for HandlerImpl {
-    type Error = !;
+    type Error = Infallible;
 
     fn protected(
         &mut self,
