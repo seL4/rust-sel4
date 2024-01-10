@@ -7,7 +7,6 @@
 #![no_std]
 #![feature(cfg_target_thread_local)]
 #![feature(never_type)]
-#![feature(unwrap_infallible)]
 
 use core::ffi::c_char;
 use core::fmt;
@@ -23,7 +22,7 @@ pub use sel4_panicking as panicking;
 
 mod termination;
 
-use termination::Termination;
+pub use termination::{Never, Termination};
 
 #[cfg(target_thread_local)]
 #[no_mangle]

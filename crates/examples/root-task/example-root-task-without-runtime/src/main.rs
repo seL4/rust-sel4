@@ -7,13 +7,11 @@
 #![no_std]
 #![no_main]
 #![feature(core_intrinsics)]
-#![feature(never_type)]
-#![feature(unwrap_infallible)]
 #![allow(internal_features)]
 
 use core::arch::global_asm;
 
-fn main(bootinfo: &sel4::BootInfo) -> sel4::Result<!> {
+fn main(bootinfo: &sel4::BootInfo) -> sel4::Result<Never> {
     sel4::debug_println!("Hello, World!");
 
     let mut ipc_buffer = unsafe { bootinfo.ipc_buffer() };
@@ -78,6 +76,8 @@ fn main(bootinfo: &sel4::BootInfo) -> sel4::Result<!> {
 }
 
 // minimal ad-hoc runtime
+
+enum Never {}
 
 mod stack {
     use core::cell::UnsafeCell;
@@ -203,8 +203,10 @@ cfg_if::cfg_if! {
 #[no_mangle]
 unsafe extern "C" fn __rust_entry(bootinfo: *const sel4::sys::seL4_BootInfo) -> ! {
     let bootinfo = sel4::BootInfo::from_ptr(bootinfo);
-    let err = main(&bootinfo).into_err();
-    panic!("Error: {}", err)
+    match main(&bootinfo) {
+        Ok(absurdity) => match absurdity {},
+        Err(err) => panic!("Error: {}", err),
+    }
 }
 
 #[panic_handler]
