@@ -63,7 +63,11 @@ macro_rules! declare_init {
 
 #[allow(clippy::missing_safety_doc)]
 pub unsafe fn run_main<T: Handler>(init: impl FnOnce() -> T) {
-    match catch_unwind(|| run_handler(init()).into_err()) {
+    let result = catch_unwind(|| match run_handler(init()) {
+        Ok(absurdity) => match absurdity {},
+        Err(err) => err,
+    });
+    match result {
         Ok(err) => abort!("main thread terminated with error: {err}"),
         Err(_) => abort!("main thread panicked"),
     }

@@ -6,8 +6,6 @@
 
 #![no_std]
 #![feature(cfg_target_thread_local)]
-#![feature(never_type)]
-#![feature(unwrap_infallible)]
 #![feature(used_with_arg)]
 
 //! A foundation for pure-Rust [seL4 Microkit](https://github.com/seL4/microkit) protection domains.
@@ -55,7 +53,7 @@ pub use cspace::{
     Channel, DeferredAction, DeferredActionInterface, DeferredActionSlot, IrqAckError,
 };
 pub use env::{pd_is_passive, pd_name};
-pub use handler::{Handler, NullHandler};
+pub use handler::{Handler, Infallible, NullHandler};
 pub use memory_region::{cast_memory_region_checked, cast_memory_region_to_slice_checked};
 pub use message::{
     get_mr, set_mr, with_msg_bytes, with_msg_bytes_mut, with_msg_regs, with_msg_regs_mut,

@@ -6,6 +6,8 @@
 
 use core::fmt;
 
+pub use core::convert::Infallible;
+
 use crate::cspace::{
     Channel, DeferredAction, PreparedDeferredAction, INPUT_CAP, MONITOR_EP_CAP, REPLY_CAP,
 };
@@ -47,7 +49,9 @@ pub trait Handler {
     }
 }
 
-pub(crate) fn run_handler<T: Handler>(mut handler: T) -> Result<!, T::Error> {
+pub(crate) enum Never {}
+
+pub(crate) fn run_handler<T: Handler>(mut handler: T) -> Result<Never, T::Error> {
     let mut reply_tag: Option<MessageInfo> = None;
 
     let mut prepared_deferred_action: Option<PreparedDeferredAction> = if pd_is_passive() {
@@ -111,5 +115,5 @@ impl NullHandler {
 }
 
 impl Handler for NullHandler {
-    type Error = !;
+    type Error = Infallible;
 }
