@@ -15,7 +15,7 @@ use smoltcp::{
 use serde::{Deserialize, Serialize};
 
 use sel4_externally_shared::ExternallySharedRef;
-use sel4_microkit::{Channel, Handler, MessageInfo};
+use sel4_microkit::{Channel, Handler, Infallible, MessageInfo};
 use sel4_microkit_message::MessageInfoExt as _;
 use sel4_shared_ring_buffer::{roles::Use, RingBuffers};
 
@@ -44,8 +44,8 @@ pub struct PhyDeviceHandler<Device> {
     dev: Device,
     client_region: ExternallySharedRef<'static, [u8]>,
     client_region_paddr: usize,
-    rx_ring_buffers: RingBuffers<'static, Use, fn() -> Result<(), !>>,
-    tx_ring_buffers: RingBuffers<'static, Use, fn() -> Result<(), !>>,
+    rx_ring_buffers: RingBuffers<'static, Use, fn() -> Result<(), Infallible>>,
+    tx_ring_buffers: RingBuffers<'static, Use, fn() -> Result<(), Infallible>>,
     device_channel: Channel,
     client_channel: Channel,
 }
@@ -55,8 +55,8 @@ impl<Device> PhyDeviceHandler<Device> {
         dev: Device,
         client_region: ExternallySharedRef<'static, [u8]>,
         client_region_paddr: usize,
-        rx_ring_buffers: RingBuffers<'static, Use, fn() -> Result<(), !>>,
-        tx_ring_buffers: RingBuffers<'static, Use, fn() -> Result<(), !>>,
+        rx_ring_buffers: RingBuffers<'static, Use, fn() -> Result<(), Infallible>>,
+        tx_ring_buffers: RingBuffers<'static, Use, fn() -> Result<(), Infallible>>,
         device_channel: Channel,
         client_channel: Channel,
     ) -> Self {
@@ -75,7 +75,7 @@ impl<Device> PhyDeviceHandler<Device> {
 }
 
 impl<Device: phy::Device + IrqAck + HasMac> Handler for PhyDeviceHandler<Device> {
-    type Error = !;
+    type Error = Infallible;
 
     fn notified(&mut self, channel: Channel) -> Result<(), Self::Error> {
         if channel == self.device_channel || channel == self.client_channel {
