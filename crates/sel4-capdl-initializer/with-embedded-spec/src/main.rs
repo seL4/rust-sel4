@@ -42,7 +42,6 @@ fn main(bootinfo: &BootInfo) -> ! {
     Initializer::initialize(bootinfo, user_image_bounds(), &spec_with_sources, unsafe {
         &mut BUFFERS
     })
-    .unwrap_or_else(|err| panic!("Error: {}", err))
 }
 
 extern "C" {

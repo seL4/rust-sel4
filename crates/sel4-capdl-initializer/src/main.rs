@@ -49,7 +49,6 @@ fn main(bootinfo: &BootInfo) -> ! {
         &spec_with_sources,
         &mut buffers,
     )
-    .unwrap_or_else(|err| panic!("Error: {}", err))
 }
 
 #[no_mangle]

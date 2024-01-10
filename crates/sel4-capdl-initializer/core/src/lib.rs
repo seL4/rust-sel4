@@ -5,7 +5,6 @@
 //
 
 #![no_std]
-#![feature(never_type)]
 
 use core::array;
 use core::borrow::BorrowMut;
@@ -63,11 +62,11 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
         user_image_bounds: Range<usize>,
         spec_with_sources: &SpecWithSources<N, D, M>,
         buffers: &mut InitializerBuffers<B>,
-    ) -> Result<!> {
+    ) -> ! {
         info!("Starting CapDL initializer");
 
         let (small_frame_copy_addr, large_frame_copy_addr) =
-            init_copy_addrs(bootinfo, &user_image_bounds)?;
+            init_copy_addrs(bootinfo, &user_image_bounds).unwrap();
 
         let mut cslot_allocator = CSlotAllocator::new(bootinfo.empty());
 
@@ -81,6 +80,13 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
             buffers,
         }
         .run()
+        .unwrap_or_else(|err| panic!("Error: {}", err));
+
+        info!("CapDL initializer done, suspending");
+
+        BootInfo::init_thread_tcb().tcb_suspend().unwrap();
+
+        unreachable!()
     }
 
     fn spec(&self) -> &'a Spec<'a, N, D, M> {
@@ -93,7 +99,7 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
 
     // // //
 
-    fn run(&mut self) -> Result<!> {
+    fn run(&mut self) -> Result<()> {
         self.create_objects()?;
 
         self.init_irqs()?;
@@ -112,11 +118,7 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
 
         self.start_threads()?;
 
-        info!("CapDL initializer done, suspending");
-
-        BootInfo::init_thread_tcb().tcb_suspend()?;
-
-        unreachable!()
+        Ok(())
     }
 
     fn create_objects(&mut self) -> Result<()> {

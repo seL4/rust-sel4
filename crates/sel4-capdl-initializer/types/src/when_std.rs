@@ -11,23 +11,21 @@ use std::ops::Deref;
 use std::os::unix::fs::FileExt;
 use std::path::{Path, PathBuf};
 
-use crate::{FileContent, FileContentRange, Fill, Spec};
+use crate::{FileContent, FileContentRange, Fill, NeverEmbedded, Spec};
 
-pub type InputSpec = Spec<'static, String, FileContentRange, !>;
+pub type InputSpec = Spec<'static, String, FileContentRange, NeverEmbedded>;
 
 impl InputSpec {
     pub fn parse(s: &str) -> Self {
         serde_json::from_str::<Spec<String, FileContent, ()>>(s)
             .unwrap()
-            .traverse_embedded_frames::<!, !>(|_| panic!())
-            .into_ok()
-            .traverse_data_with_context(|length, data| Ok::<_, !>(data.with_length(length)))
-            .into_ok()
+            .traverse_embedded_frames::<NeverEmbedded>(|_| panic!())
+            .traverse_data_with_context(|length, data| data.with_length(length))
     }
 
     pub fn collect_fill(&self, fill_dirs: impl IntoIterator<Item = impl AsRef<Path>>) -> FillMap {
         let mut builder = FillMapBuilder::new(fill_dirs);
-        self.traverse_data(|key| builder.add(key)).unwrap();
+        self.traverse_data_fallible(|key| builder.add(key)).unwrap();
         builder.build()
     }
 }

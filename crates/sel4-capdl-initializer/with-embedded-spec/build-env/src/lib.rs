@@ -4,8 +4,6 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-#![feature(never_type)]
-
 use std::borrow::Cow;
 use std::env;
 use std::fs;

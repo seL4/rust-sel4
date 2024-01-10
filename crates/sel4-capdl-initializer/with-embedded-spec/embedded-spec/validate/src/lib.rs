@@ -4,9 +4,6 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-#![feature(never_type)]
-#![feature(unwrap_infallible)]
-
 use std::slice;
 
 use sel4_capdl_initializer_types::*;
@@ -23,38 +20,30 @@ pub fn run(tell_cargo: bool) {
 
     let embedded = &sel4_capdl_initializer_with_embedded_spec_embedded_spec::SPEC;
     let adapted_embedded: SpecCommon = embedded
-        .traverse_names_with_context::<_, !>(|named_obj| {
-            Ok(named_obj.name.inner().to_common().map(ToOwned::to_owned))
+        .traverse_names_with_context(|named_obj| {
+            named_obj.name.inner().to_common().map(ToOwned::to_owned)
         })
-        .into_ok()
-        .traverse_data_with_context::<_, !>(|length, data| {
+        .traverse_data_with_context(|length, data| {
             let mut buf = vec![0; length];
             data.inner().self_contained_copy_out(&mut buf);
-            Ok(buf)
+            buf
         })
-        .into_ok()
-        .traverse_embedded_frames::<_, !>(|frame| {
-            Ok(unsafe {
-                slice::from_raw_parts(frame.inner().ptr(), embedding.granule_size()).to_vec()
-            })
-        })
-        .into_ok();
+        .traverse_embedded_frames(|frame| unsafe {
+            slice::from_raw_parts(frame.inner().ptr(), embedding.granule_size()).to_vec()
+        });
 
     let input = &embedding.spec;
     let adapted_input: SpecCommon = input
-        .traverse_names_with_context::<_, !>(|named_obj| {
-            Ok(embedding
+        .traverse_names_with_context(|named_obj| {
+            embedding
                 .object_names_level
                 .apply(named_obj)
-                .map(Clone::clone))
+                .map(Clone::clone)
         })
-        .into_ok()
-        .traverse_data::<_, !>(|key| Ok(embedding.fill_map.get(key).to_vec()))
-        .into_ok()
-        .traverse_embedded_frames::<_, !>(|fill| {
-            Ok(embedding.fill_map.get_frame(embedding.granule_size(), fill))
-        })
-        .into_ok();
+        .traverse_data(|key| embedding.fill_map.get(key).to_vec())
+        .traverse_embedded_frames(|fill| {
+            embedding.fill_map.get_frame(embedding.granule_size(), fill)
+        });
 
     if adapted_embedded != adapted_input {
         // NOTE for debugging:
