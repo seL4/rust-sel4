@@ -9,6 +9,15 @@ pub trait Access: AccessSealed {
     type WriteWitness: Witness;
 }
 
+#[derive(Copy, Clone)]
+pub enum Absurdity {}
+
+impl Absurdity {
+    pub(crate) fn absurd<T>(self) -> T {
+        match self {}
+    }
+}
+
 pub trait Witness: Sized + Copy + Unpin {
     const TRY_WITNESS: Option<Self>;
 }
@@ -17,7 +26,7 @@ impl Witness for () {
     const TRY_WITNESS: Option<Self> = Some(());
 }
 
-impl Witness for ! {
+impl Witness for Absurdity {
     const TRY_WITNESS: Option<Self> = None;
 }
 
@@ -45,7 +54,7 @@ pub enum ReadOnly {}
 
 impl Access for ReadOnly {
     type ReadWitness = ();
-    type WriteWitness = !;
+    type WriteWitness = Absurdity;
 }
 
 impl ReadAccess for ReadOnly {
@@ -55,7 +64,7 @@ impl ReadAccess for ReadOnly {
 pub enum WriteOnly {}
 
 impl Access for WriteOnly {
-    type ReadWitness = !;
+    type ReadWitness = Absurdity;
     type WriteWitness = ();
 }
 

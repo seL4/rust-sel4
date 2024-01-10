@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
+use core::convert::Infallible;
 use core::marker::PhantomData;
 
 use futures::future;
@@ -32,7 +33,7 @@ impl<T, A> BlockIOWrapper<T, A> {
 impl<T: BlockIO<A, BlockSize = constant_block_sizes::BlockSize512>, A: Access> fat::BlockDevice
     for BlockIOWrapper<T, A>
 {
-    type Error = !;
+    type Error = Infallible;
 
     async fn read(
         &self,
