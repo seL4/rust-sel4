@@ -36,9 +36,10 @@
 let
   inherit (worldConfig) isMicrokit canSimulate;
 
-  haveFullRuntime = !isMicrokit && (hostPlatform.isAarch64 || hostPlatform.isRiscV || hostPlatform.isx86_64);
+  haveFullRuntime = !isMicrokit && (hostPlatform.isAarch || hostPlatform.isRiscV || hostPlatform.isx86_64);
   haveMinimalRuntime = haveFullRuntime;
-  haveKernelLoader = hostPlatform.isAarch64 || hostPlatform.isRiscV;
+  haveUnwindingSupport = !hostPlatform.isAarch32;
+  haveKernelLoader = hostPlatform.isAarch || hostPlatform.isRiscV;
   haveCapDLInitializer = hostPlatform.isAarch64 || hostPlatform.isRiscV64 || hostPlatform.isx86_64;
 
   maybe = condition: v: if condition then v else null;
@@ -126,7 +127,7 @@ in rec {
         };
       });
 
-      backtrace = maybe haveFullRuntime (mkInstance rec {
+      backtrace = maybe (haveFullRuntime && haveUnwindingSupport) (mkInstance rec {
         rootTask =
           let
             orig = mkTask {
@@ -163,7 +164,7 @@ in rec {
           byConfig = lib.flip lib.mapAttrs panicStrategy
             (panicStrategyName: _:
               lib.flip lib.mapAttrs alloc
-                (_: allocFeatures: maybe haveFullRuntime (mkInstance {
+                (_: allocFeatures: maybe (haveFullRuntime && haveUnwindingSupport) (mkInstance {
                   rootTask = mkTask {
                     rootCrate = crates.tests-root-task-panicking;
                     release = false;
@@ -201,7 +202,7 @@ in rec {
         inherit canSimulate;
       });
 
-      default-test-harness = maybe haveFullRuntime (mkInstance {
+      default-test-harness = maybe (haveFullRuntime && haveUnwindingSupport) (mkInstance {
         rootTask = mkTask {
           rootCrate = crates.tests-root-task-default-test-harness;
           test = true;
@@ -211,7 +212,7 @@ in rec {
         };
       });
 
-      ring = maybe haveFullRuntime (
+      ring = maybe (haveFullRuntime && haveUnwindingSupport) (
         let
           rootTask = lib.makeOverridable mkTask {
             rootCrate = crates.ring;
