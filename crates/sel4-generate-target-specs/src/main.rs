@@ -56,7 +56,7 @@ impl Config {
         let mut target = match &self.arch {
             Arch::AArch64 => {
                 let mut target = builtin("aarch64-unknown-none");
-                target.llvm_target = "aarch64-none-elf".into();
+                // target.llvm_target = "aarch64-none-elf".into(); // TODO why or why not?
                 let options = &mut target.options;
                 let linker_flavor = LinkerFlavor::Gnu(Cc::No, Lld::Yes);
                 assert_eq!(options.linker_flavor, linker_flavor);

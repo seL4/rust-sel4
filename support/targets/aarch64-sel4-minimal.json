@@ -9,7 +9,7 @@
   "features": "+v8a,+strict-align,+neon,+fp-armv8",
   "linker": "rust-lld",
   "linker-flavor": "gnu-lld",
-  "llvm-target": "aarch64-none-elf",
+  "llvm-target": "aarch64-unknown-none",
   "max-atomic-width": 128,
   "panic-strategy": "abort",
   "pre-link-args": {

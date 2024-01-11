@@ -9,7 +9,7 @@
   "has-thread-local": true,
   "linker": "rust-lld",
   "linker-flavor": "gnu-lld",
-  "llvm-target": "aarch64-none-elf",
+  "llvm-target": "aarch64-unknown-none",
   "max-atomic-width": 128,
   "pre-link-args": {
     "gnu-lld": [
