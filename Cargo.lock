@@ -2232,7 +2232,6 @@ name = "sel4-initialize-tls-on-stack"
 version = "0.1.0"
 dependencies = [
  "cfg-if",
- "sel4",
 ]
 
 [[package]]
@@ -2454,8 +2453,10 @@ name = "sel4-runtime-common"
 version = "0.1.0"
 dependencies = [
  "cfg-if",
+ "sel4",
  "sel4-dlmalloc",
  "sel4-initialize-tls-on-stack",
+ "sel4-panicking-env",
  "sel4-sync",
  "unwinding",
 ]

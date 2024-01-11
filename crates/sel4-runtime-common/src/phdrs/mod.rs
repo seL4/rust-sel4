@@ -4,6 +4,8 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
+use sel4_panicking_env::abort;
+
 mod elf;
 
 use elf::{ElfHeader, ProgramHeader};
@@ -12,7 +14,7 @@ use elf::{ElfHeader, ProgramHeader};
 mod tls;
 
 #[cfg(all(feature = "tls", target_thread_local))]
-pub use tls::locate_tls_image;
+pub use tls::initialize_tls_on_stack_and_continue;
 
 #[cfg(feature = "unwinding")]
 mod unwinding;
@@ -25,7 +27,9 @@ pub(crate) fn locate_phdrs() -> &'static [ProgramHeader] {
         static __ehdr_start: ElfHeader;
     }
     unsafe {
-        assert!(__ehdr_start.check_magic());
+        if !__ehdr_start.check_magic() {
+            abort!()
+        }
         __ehdr_start.locate_phdrs()
     }
 }

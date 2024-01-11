@@ -10,8 +10,5 @@ mk {
   package.name = "sel4-initialize-tls-on-stack";
   dependencies = {
     inherit (versions) cfg-if;
-    inherit (localCrates)
-      sel4
-    ;
   };
 }

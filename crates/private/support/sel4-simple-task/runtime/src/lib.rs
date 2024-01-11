@@ -13,6 +13,7 @@
 extern crate alloc;
 
 use core::ffi::{c_char, c_void};
+use core::ptr;
 use core::slice;
 
 use sel4::Endpoint;
@@ -46,18 +47,14 @@ static THREAD_INDEX: ImmediateSyncOnceCell<usize> = ImmediateSyncOnceCell::new()
 #[allow(clippy::missing_safety_doc)]
 pub unsafe extern "C" fn _start(config: *const u8, config_size: usize, thread_index: usize) -> ! {
     let config = RuntimeConfig::new(slice::from_raw_parts(config, config_size));
-    let cont_arg = ContinueArg {
+    let mut cont_arg = ContinueArg {
         config,
         thread_index,
     };
-    sel4_runtime_common::locate_tls_image()
-        .unwrap()
-        .initialize_on_stack_and_continue(
-            cont_fn,
-            (&cont_arg as *const ContinueArg)
-                .cast::<c_void>()
-                .cast_mut(),
-        )
+    sel4_runtime_common::initialize_tls_on_stack_and_continue(
+        cont_fn,
+        ptr::addr_of_mut!(cont_arg).cast::<c_void>(),
+    )
 }
 
 pub struct ContinueArg {
