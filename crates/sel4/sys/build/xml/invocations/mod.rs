@@ -6,7 +6,7 @@
 
 #![allow(clippy::eq_op)]
 #![allow(clippy::nonminimal_bool)]
-
+#![feature(int_roundings)]
 use std::collections::BTreeMap;
 use std::fmt::Write;
 use std::ops::Range;
