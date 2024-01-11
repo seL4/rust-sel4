@@ -178,7 +178,7 @@ impl Arch {
         v.push(Self::Riscv64(RiscVArch::IMAC));
         v.push(Self::Riscv64(RiscVArch::GC));
         v.push(Self::Riscv32(RiscVArch::IMAC));
-        // v.push(Self::Riscv32(RiscVArch::IMAFC)); # TODO add after bumping Rust toolchain
+        v.push(Self::Riscv32(RiscVArch::IMAFC));
         v.push(Self::X86_64);
         v
     }
