@@ -173,10 +173,7 @@ impl Arch {
     }
 
     fn microkit_support(&self) -> bool {
-        match self {
-            Self::AArch64 => true,
-            _ => false,
-        }
+        matches!(self, Self::AArch64)
     }
 
     fn unwinding_support(&self) -> bool {
