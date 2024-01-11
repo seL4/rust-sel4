@@ -80,6 +80,18 @@ cfg_if::cfg_if! {
                 1:  b 1b
             "#
         }
+    } else if #[cfg(target_arch = "arm")] {
+        global_asm! {
+            common_asm_prefix!(),
+            r#"
+                    ldr r8, =__sel4_runtime_common__stack_top
+                    ldr r8, [r8]
+                    mov sp, r8
+                    b sel4_runtime_rust_entry
+
+                1:  b 1b
+            "#
+        }
     } else if #[cfg(any(target_arch = "riscv64", target_arch = "riscv32"))] {
         macro_rules! riscv_common_asm_body {
             () => {

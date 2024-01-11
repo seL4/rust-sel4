@@ -31,3 +31,16 @@ pub mod _private {
     #[cfg(feature = "start")]
     pub use crate::start::_private as start;
 }
+
+#[cfg(target_arch = "arm")]
+core::arch::global_asm! {
+    r#"
+        .global __aeabi_read_tp
+
+        .section .text
+
+        __aeabi_read_tp:
+            mrc p15, 0, r0, c13, c0, 2
+            bx lr
+    "#
+}

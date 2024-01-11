@@ -129,6 +129,24 @@ cfg_if::cfg_if! {
                 1:  b 1b
             "#
         }
+    } else if #[cfg(target_arch = "arm")] {
+            global_asm! {
+                r#"
+                    .extern __rust_entry
+                    .extern __stack_top
+
+                    .section .text
+
+                    .global _start
+                    _start:
+                        ldr r8, =__stack_top
+                        ldr r8, [r8]
+                        mov sp, r8
+                        b __rust_entry
+
+                    1:  b 1b
+                "#
+            }
     } else if #[cfg(any(target_arch = "riscv64", target_arch = "riscv32"))] {
         macro_rules! riscv_common {
             () => {

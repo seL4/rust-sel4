@@ -199,6 +199,24 @@ cfg_if! {
                     b __sel4_initialize_tls_on_stack__continue
             "#
         }
+    } else if #[cfg(target_arch = "arm")] {
+        global_asm! {
+            common_asm!(),
+            r#"
+                    mov r4, sp
+                    sub r4, r4, r1  // r1: segment_size
+                    and r4, r4, r2  // r2: segment_align_down_mask
+                    mov r5, r4      // save tls_base_addr for later
+                    sub r4, r4, #8  // reserve for TCB
+                    and r4, r4, r2  // r2: segment_align_down_mask
+                    mov r6, r4      // save thread_pointer for later
+                    and r4, r4, r3  // r3: stack_align_down_mask
+                    mov sp, r4
+                    mov r1, r6      // pass thread_pointer to continuation
+                    mov r2, r5      // pass tls_base_addr to continuation
+                    b __sel4_initialize_tls_on_stack__continue
+            "#
+        }
     } else if #[cfg(any(target_arch = "riscv32", target_arch = "riscv64"))] {
         global_asm! {
             common_asm!(),
@@ -248,6 +266,8 @@ unsafe extern "C" fn default_set_thread_pointer(thread_pointer: usize) {
     cfg_if! {
         if #[cfg(target_arch = "aarch64")] {
             asm!("msr tpidr_el0, {val}", val = in(reg) val);
+        } else if #[cfg(target_arch = "arm")] {
+            asm!("mcr p15, 0, {val}, c13, c0, 2", val = in(reg) val);
         } else if #[cfg(any(target_arch = "riscv32", target_arch = "riscv64"))] {
             asm!("mv tp, {val}", val = in(reg) val);
         } else if #[cfg(target_arch = "x86_64")] {
