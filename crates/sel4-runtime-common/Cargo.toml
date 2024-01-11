@@ -19,12 +19,14 @@ license = "BSD-2-Clause"
 [features]
 start = []
 static-heap = ["sel4-sync", "sel4-dlmalloc"]
-tls = ["dep:sel4-initialize-tls-on-stack"]
+tls = ["dep:sel4-initialize-tls-on-stack", "dep:sel4"]
 
 [dependencies]
 cfg-if = "1.0.0"
+sel4 = { path = "../sel4", default-features = false, optional = true }
 sel4-dlmalloc = { path = "../sel4-dlmalloc", optional = true }
 sel4-initialize-tls-on-stack = { path = "../sel4-initialize-tls-on-stack", optional = true }
+sel4-panicking-env = { path = "../sel4-panicking/env" }
 sel4-sync = { path = "../sel4-sync", optional = true }
 
 [dependencies.unwinding]
