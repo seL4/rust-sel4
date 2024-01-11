@@ -110,7 +110,12 @@ in rec {
       default = qemu-arm-virt.default;
       qemu-arm-virt =
         let
-          mk = { smp ? false, mcs ? false, cpu ? "cortex-a15" }:
+          mk =
+            { smp ? false
+            , mcs ? false
+            , bootInHyp ? true
+            , cpu ? "cortex-a15"
+            }:
             let
               numCores = if smp then "2" else "1";
             in
@@ -125,10 +130,11 @@ in rec {
                   KernelMaxNumNodes = mkString numCores;
                   KernelIsMCS = fromBool mcs;
                 };
+                canSimulate = true;
                 mkInstanceForPlatform = platUtils.qemu.mkMkInstanceForPlatform {
                   mkQemuCmd = loader: [
-                    "${pkgsBuildBuild.this.qemuForSeL4}/bin/qemu-system-aarch32"
-                      "-machine" "virt"
+                    "${pkgsBuildBuild.this.qemuForSeL4}/bin/qemu-system-arm"
+                      "-machine" "virt,highmem=off,secure=off,virtualization=${if bootInHyp then "on" else "off"}"
                       "-cpu" cpu "-smp" numCores "-m" "1024"
                       "-nographic"
                       "-serial" "mon:stdio"
@@ -137,10 +143,24 @@ in rec {
                 };
               };
         in rec {
-          default = legacy;
+          default = smp;
           legacy = mk {};
+          smp = mk { smp = true; };
           mcs = mk { mcs = true; };
         };
+
+      bcm2711 = mkWorld {
+        inherit kernelLoaderConfig;
+        kernelConfig = kernelConfigCommon // {
+          RPI4_MEMORY = mkString "1024";
+          KernelArch = mkString "arm";
+          KernelSel4Arch = mkString "aarch32";
+          KernelPlatform = mkString "bcm2711";
+          KernelArmHypervisorSupport = off;
+          KernelMaxNumNodes = mkString "4";
+        };
+        mkInstanceForPlatform = platUtils.rpi4.mkInstanceForPlatform;
+      };
     };
 
   riscv64 =
