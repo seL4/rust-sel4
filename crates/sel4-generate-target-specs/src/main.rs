@@ -112,7 +112,9 @@ impl Config {
         if !self.minimal {
             let options = &mut target.options;
             options.has_thread_local = true;
-            options.panic_strategy = PanicStrategy::Unwind;
+            if self.arch.unwinding_support() {
+                options.panic_strategy = PanicStrategy::Unwind;
+            }
         }
 
         target
@@ -175,6 +177,11 @@ impl Arch {
             Self::AArch64 => true,
             _ => false,
         }
+    }
+
+    fn unwinding_support(&self) -> bool {
+        // Due to lack of support (so far) for aarch32 in the 'unwinding' crate
+        !matches!(self, Self::Armv7a)
     }
 
     fn all() -> Vec<Self> {
