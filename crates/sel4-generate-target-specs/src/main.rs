@@ -58,8 +58,10 @@ impl Config {
                 let mut target = builtin("aarch64-unknown-none");
                 target.llvm_target = "aarch64-none-elf".into();
                 let options = &mut target.options;
+                let linker_flavor = LinkerFlavor::Gnu(Cc::No, Lld::Yes);
+                assert_eq!(options.linker_flavor, linker_flavor);
                 options.pre_link_args = BTreeMap::from_iter([(
-                    LinkerFlavor::Gnu(Cc::No, Lld::Yes),
+                    linker_flavor,
                     vec![
                         // Determines p_align. Default is 64K, which results in wasted space when
                         // the ELF file is loaded as a single contiguous region as it is in the case
