@@ -28,6 +28,7 @@ struct Config {
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 enum Arch {
     AArch64,
+    Armv7a,
     Riscv64(RiscVArch),
     Riscv32(RiscVArch),
     X86_64,
@@ -73,6 +74,7 @@ impl Config {
                 )]);
                 target
             }
+            Arch::Armv7a => builtin("armv7a-none-eabi"),
             Arch::Riscv64(riscv_arch) => builtin(&format!(
                 "riscv64{}-unknown-none-elf",
                 riscv_arch.arch_suffix_for_target_name()
@@ -155,6 +157,7 @@ impl Arch {
     fn name(&self) -> String {
         match self {
             Self::AArch64 => "aarch64".to_owned(),
+            Self::Armv7a => "armv7a".to_owned(),
             Self::Riscv64(riscv_arch) => {
                 format!("riscv64{}", riscv_arch.arch_suffix_for_target_name())
             }
@@ -175,6 +178,7 @@ impl Arch {
     fn all() -> Vec<Self> {
         let mut v = vec![];
         v.push(Self::AArch64);
+        v.push(Self::Armv7a);
         v.push(Self::Riscv64(RiscVArch::IMAC));
         v.push(Self::Riscv64(RiscVArch::GC));
         v.push(Self::Riscv32(RiscVArch::IMAC));
