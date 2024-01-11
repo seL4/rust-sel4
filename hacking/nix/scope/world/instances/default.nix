@@ -108,7 +108,7 @@ in rec {
       tls = maybe haveFullRuntime (mkInstance {
         rootTask = mkTask {
           rootCrate = crates.tests-root-task-tls;
-          release = false;
+          release = true; # test optimizations
         };
         extraPlatformArgs = lib.optionalAttrs canSimulate {
           canAutomateSimply = true;
@@ -254,6 +254,7 @@ in rec {
           passthru = {
             test = mkTask {
               rootCrate = crates.tests-capdl-threads-components-test;
+              release = true; # test optimizations
             };
           };
         };

@@ -9,6 +9,8 @@
 use core::ops::Range;
 use core::slice;
 
+use sel4_panicking_env::abort;
+
 #[cfg(target_pointer_width = "32")]
 pub type Word = u32;
 
@@ -57,7 +59,7 @@ impl ElfHeader {
         unsafe {
             let ptr = (self as *const Self)
                 .cast::<u8>()
-                .offset(self.e_phoff.try_into().unwrap())
+                .offset(self.e_phoff.try_into().unwrap_or_else(|_| abort!()))
                 .cast::<ProgramHeader>();
             slice::from_raw_parts(ptr, self.e_phnum.into())
         }
@@ -89,6 +91,6 @@ impl ProgramHeader {
     pub fn vaddr_range(&self) -> Range<usize> {
         let start = self.p_vaddr;
         let end = start + self.p_memsz;
-        start.try_into().unwrap()..end.try_into().unwrap()
+        start.try_into().unwrap_or_else(|_| abort!())..end.try_into().unwrap_or_else(|_| abort!())
     }
 }
