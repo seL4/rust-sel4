@@ -10,11 +10,13 @@ mk {
   package.name = "sel4-panicking";
   dependencies = {
     inherit (versions) cfg-if;
-    unwinding = unwindingWith [ "personality" ] // { optional = true; };
     inherit (localCrates)
       sel4-panicking-env
       sel4-immediate-sync-once-cell
     ;
+  };
+  target."cfg(not(target_arch = \"arm\"))".dependencies = {
+    unwinding = unwindingWith [ "personality" ] // { optional = true; };
   };
   features = {
     alloc = [];
