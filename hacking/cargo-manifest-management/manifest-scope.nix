@@ -96,6 +96,7 @@ in rec {
     getrandom = "0.2.10";
     gimli = "0.28.0";
     heapless = "0.7.16";
+    lock_api = "0.4.11";
     log = "0.4.17";
     num = "0.4.1";
     num_enum = "0.5.9";

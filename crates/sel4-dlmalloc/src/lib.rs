@@ -12,31 +12,30 @@ use core::mem;
 use core::ptr;
 
 use dlmalloc::{Allocator as DlmallocAllocator, Dlmalloc};
+use lock_api::{Mutex, RawMutex};
 
-use sel4_sync::{GenericMutex, MutexSyncOps};
+pub type StaticDlmallocGlobalAlloc<R, T> = DlmallocGlobalAlloc<R, StaticDlmallocAllocator<T>>;
 
-pub type StaticDlmallocGlobalAlloc<O, T> = DlmallocGlobalAlloc<O, StaticDlmallocAllocator<T>>;
-
-impl<O, T> StaticDlmallocGlobalAlloc<O, T> {
-    pub const fn new(mutex_sync_ops: O, get_bounds: T) -> Self {
+impl<R, T> StaticDlmallocGlobalAlloc<R, T> {
+    pub const fn new(raw_mutex: R, get_bounds: T) -> Self {
         Self {
-            dlmalloc: GenericMutex::new(
-                mutex_sync_ops,
+            dlmalloc: Mutex::const_new(
+                raw_mutex,
                 Dlmalloc::new_with_allocator(StaticDlmallocAllocator::new(get_bounds)),
             ),
         }
     }
 
-    pub const fn mutex(&self) -> &GenericMutex<O, Dlmalloc<StaticDlmallocAllocator<T>>> {
+    pub const fn mutex(&self) -> &Mutex<R, Dlmalloc<StaticDlmallocAllocator<T>>> {
         &self.dlmalloc
     }
 }
 
-pub struct DlmallocGlobalAlloc<O, T> {
-    dlmalloc: GenericMutex<O, Dlmalloc<T>>,
+pub struct DlmallocGlobalAlloc<R, T> {
+    dlmalloc: Mutex<R, Dlmalloc<T>>,
 }
 
-unsafe impl<O: MutexSyncOps, T: DlmallocAllocator> GlobalAlloc for DlmallocGlobalAlloc<O, T> {
+unsafe impl<R: RawMutex, T: DlmallocAllocator> GlobalAlloc for DlmallocGlobalAlloc<R, T> {
     #[inline]
     unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
         self.dlmalloc.lock().malloc(layout.size(), layout.align())

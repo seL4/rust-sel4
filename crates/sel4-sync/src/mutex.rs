@@ -5,16 +5,93 @@
 // SPDX-License-Identifier: MIT
 //
 
-use core::cell::UnsafeCell;
-use core::ops::{Deref, DerefMut};
-use core::sync::atomic::{fence, AtomicIsize, Ordering};
+use core::sync::atomic::{fence, AtomicBool, AtomicIsize, Ordering};
 
 use sel4::Notification;
 use sel4_immediate_sync_once_cell::ImmediateSyncOnceCell;
 
+pub struct PanickingRawMutex {
+    locked: AtomicBool,
+}
+
+unsafe impl lock_api::RawMutex for PanickingRawMutex {
+    type GuardMarker = lock_api::GuardNoSend; // TODO
+
+    const INIT: Self = Self {
+        locked: AtomicBool::new(false),
+    };
+
+    fn lock(&self) {
+        if !self.try_lock() {
+            panic!("lock contention")
+        }
+    }
+
+    fn try_lock(&self) -> bool {
+        let was_locked = self.locked.swap(true, Ordering::Acquire);
+        !was_locked
+    }
+
+    unsafe fn unlock(&self) {
+        self.locked.store(false, Ordering::Release)
+    }
+}
+
+pub struct GenericRawMutex<O> {
+    sync_ops: O,
+    value: AtomicIsize,
+}
+
+impl<O> GenericRawMutex<O> {
+    pub const fn new(sync_ops: O) -> Self {
+        Self {
+            sync_ops,
+            value: AtomicIsize::new(1),
+        }
+    }
+}
+
+impl<O: MutexSyncOpsWithInteriorMutability> GenericRawMutex<O> {
+    pub fn modify(&self, input: O::ModifyInput) -> O::ModifyOutput {
+        self.sync_ops.modify(input)
+    }
+}
+
+unsafe impl<O: MutexSyncOps> lock_api::RawMutex for GenericRawMutex<O> {
+    type GuardMarker = lock_api::GuardNoSend; // TODO
+
+    const INIT: Self = unimplemented!();
+
+    fn lock(&self) {
+        let old_value = self.value.fetch_sub(1, Ordering::Acquire);
+        if old_value <= 0 {
+            self.sync_ops.wait();
+            fence(Ordering::Acquire);
+        }
+    }
+
+    fn try_lock(&self) -> bool {
+        unimplemented!()
+    }
+
+    unsafe fn unlock(&self) {
+        let old_value = self.value.fetch_add(1, Ordering::Release);
+        if old_value < 0 {
+            self.sync_ops.signal();
+        }
+    }
+}
+
 pub trait MutexSyncOps {
     fn signal(&self);
     fn wait(&self);
+}
+
+pub trait MutexSyncOpsWithInteriorMutability {
+    type ModifyInput;
+    type ModifyOutput;
+
+    fn modify(&self, input: Self::ModifyInput) -> Self::ModifyOutput;
 }
 
 pub trait MutexSyncOpsWithNotification {
@@ -31,123 +108,11 @@ impl<O: MutexSyncOpsWithNotification> MutexSyncOps for O {
     }
 }
 
-pub trait MutexSyncOpsWithInteriorMutability {
-    type ModifyInput;
-    type ModifyOutput;
-
-    fn modify(&self, input: Self::ModifyInput) -> Self::ModifyOutput;
-}
-
-struct RawGenericMutex<O> {
-    sync_ops: O,
-    value: AtomicIsize,
-}
-
-impl<O> RawGenericMutex<O> {
-    pub const fn new(sync_ops: O) -> Self {
-        Self {
-            sync_ops,
-            value: AtomicIsize::new(1),
-        }
-    }
-}
-
-impl<O: MutexSyncOps> RawGenericMutex<O> {
-    fn lock(&self) {
-        let old_value = self.value.fetch_sub(1, Ordering::Acquire);
-        if old_value <= 0 {
-            self.sync_ops.wait();
-            fence(Ordering::Acquire);
-        }
-    }
-
-    fn unlock(&self) {
-        let old_value = self.value.fetch_add(1, Ordering::Release);
-        if old_value < 0 {
-            self.sync_ops.signal();
-        }
-    }
-}
-
-pub struct GenericMutex<O, T: ?Sized> {
-    raw: RawGenericMutex<O>,
-    data: UnsafeCell<T>,
-}
-
-unsafe impl<O, T: ?Sized + Send> Send for GenericMutex<O, T> {}
-unsafe impl<O, T: ?Sized + Send> Sync for GenericMutex<O, T> {}
-
-pub struct GenericMutexGuard<'a, O: MutexSyncOps, T: ?Sized + 'a> {
-    mutex: &'a GenericMutex<O, T>,
-}
-
-impl<O, T> GenericMutex<O, T> {
-    pub const fn new(sync_ops: O, val: T) -> Self {
-        Self {
-            raw: RawGenericMutex::new(sync_ops),
-            data: UnsafeCell::new(val),
-        }
-    }
-
-    pub fn into_inner(self) -> T {
-        self.data.into_inner()
-    }
-}
-
-impl<O: MutexSyncOps, T> GenericMutex<O, T> {
-    unsafe fn guard(&self) -> GenericMutexGuard<'_, O, T> {
-        GenericMutexGuard { mutex: self }
-    }
-
-    pub fn lock(&self) -> GenericMutexGuard<'_, O, T> {
-        self.raw.lock();
-        unsafe { self.guard() }
-    }
-}
-
-impl<O: MutexSyncOpsWithInteriorMutability, T> GenericMutex<O, T> {
-    pub fn modify_sync_ops(&self, input: O::ModifyInput) -> O::ModifyOutput {
-        self.raw.sync_ops.modify(input)
-    }
-}
-
-impl<'a, O: MutexSyncOps, T: ?Sized + 'a> GenericMutexGuard<'a, O, T> {
-    pub fn mutex(this: &Self) -> &'a GenericMutex<O, T> {
-        this.mutex
-    }
-}
-
-impl<'a, O: MutexSyncOps, T: ?Sized + 'a> Deref for GenericMutexGuard<'a, O, T> {
-    type Target = T;
-
-    fn deref(&self) -> &T {
-        unsafe { &*self.mutex.data.get() }
-    }
-}
-
-impl<'a, O: MutexSyncOps, T: ?Sized + 'a> DerefMut for GenericMutexGuard<'a, O, T> {
-    fn deref_mut(&mut self) -> &mut T {
-        unsafe { &mut *self.mutex.data.get() }
-    }
-}
-
-impl<'a, O: MutexSyncOps, T: ?Sized + 'a> Drop for GenericMutexGuard<'a, O, T> {
-    fn drop(&mut self) {
-        self.mutex.raw.unlock();
-    }
-}
-
-pub type Mutex<T> = GenericMutex<Notification, T>;
-pub type MutexGuard<'a, T> = GenericMutexGuard<'a, Notification, T>;
-
 impl MutexSyncOpsWithNotification for Notification {
     fn notification(&self) -> Notification {
         *self
     }
 }
-
-pub type DeferredMutex<T> = GenericMutex<DeferredNotificationMutexSyncOps, T>;
-pub type DeferredMutexGuard<'a, T> = GenericMutexGuard<'a, DeferredNotificationMutexSyncOps, T>;
 
 pub struct DeferredNotificationMutexSyncOps {
     inner: ImmediateSyncOnceCell<Notification>,
