@@ -6,11 +6,12 @@
 
 #![no_std]
 
+pub use lock_api;
+
 mod mutex;
 
 pub use mutex::{
-    AbstractMutexSyncOps, DeferredMutex, DeferredMutexGuard, DeferredNotificationMutexSyncOps,
-    GenericMutex, GenericMutexGuard, IndirectNotificationMutexSyncOps, Mutex, MutexGuard,
-    MutexSyncOps, MutexSyncOpsWithInteriorMutability, MutexSyncOpsWithNotification,
-    PanickingMutexSyncOps,
+    AbstractMutexSyncOps, DeferredNotificationMutexSyncOps, GenericRawMutex,
+    IndirectNotificationMutexSyncOps, MutexSyncOps, MutexSyncOpsWithInteriorMutability,
+    MutexSyncOpsWithNotification, PanickingMutexSyncOps,
 };

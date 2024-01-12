@@ -936,9 +936,9 @@ checksum = "3852614a3bd9ca9804678ba6be5e3b8ce76dfc902cae004e3e0c44051b6e88db"
 
 [[package]]
 name = "lock_api"
-version = "0.4.10"
+version = "0.4.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c1cc9717a20b1bb222f333e6a92fd32f7d8a18ddc5a3191a11af45dcbf4dcd16"
+checksum = "3c168f8615b12bc01f9c17e2eb0cc07dcae1940121185446edc3744920e8ef45"
 dependencies = [
  "autocfg",
  "scopeguard",
@@ -1078,7 +1078,6 @@ dependencies = [
  "sel4-shared-ring-buffer-block-io-types",
  "sel4-shared-ring-buffer-bookkeeping",
  "sel4-shared-ring-buffer-smoltcp",
- "sel4-sync",
  "smoltcp",
 ]
 
@@ -1146,7 +1145,6 @@ dependencies = [
  "sel4-microkit-message",
  "sel4-shared-ring-buffer",
  "sel4-shared-ring-buffer-block-io-types",
- "sel4-sync",
  "virtio-drivers",
 ]
 
@@ -1184,7 +1182,6 @@ dependencies = [
  "sel4-microkit",
  "sel4-microkit-message",
  "sel4-shared-ring-buffer",
- "sel4-sync",
  "virtio-drivers",
 ]
 
@@ -2186,7 +2183,7 @@ name = "sel4-dlmalloc"
 version = "0.1.0"
 dependencies = [
  "dlmalloc",
- "sel4-sync",
+ "lock_api",
 ]
 
 [[package]]
@@ -2598,6 +2595,7 @@ dependencies = [
 name = "sel4-sync"
 version = "0.1.0"
 dependencies = [
+ "lock_api",
  "sel4",
  "sel4-immediate-sync-once-cell",
 ]

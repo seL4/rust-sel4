@@ -4,14 +4,14 @@
 # SPDX-License-Identifier: BSD-2-Clause
 #
 
-{ mk, localCrates }:
+{ mk, versions }:
 
 mk {
   package.name = "sel4-dlmalloc";
   dependencies = {
     dlmalloc = "0.2.3";
-    inherit (localCrates)
-      sel4-sync
+    inherit (versions)
+      lock_api
     ;
   };
 }
