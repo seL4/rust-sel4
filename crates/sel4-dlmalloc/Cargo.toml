@@ -18,4 +18,4 @@ license = "BSD-2-Clause"
 
 [dependencies]
 dlmalloc = "0.2.3"
-sel4-sync = { path = "../sel4-sync" }
+lock_api = "0.4.11"

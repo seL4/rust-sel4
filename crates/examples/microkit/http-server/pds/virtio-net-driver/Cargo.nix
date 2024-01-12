@@ -16,7 +16,6 @@ mk {
     inherit (localCrates)
       sel4-microkit-message
       sel4
-      sel4-sync
       sel4-logging
       sel4-immediate-sync-once-cell
       sel4-shared-ring-buffer

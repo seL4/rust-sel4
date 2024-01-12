@@ -35,7 +35,6 @@ sel4-newlib = { path = "../../../../../sel4-newlib", features = ["nosys", "all-s
 sel4-shared-ring-buffer = { path = "../../../../../sel4-shared-ring-buffer" }
 sel4-shared-ring-buffer-block-io = { path = "../../../../../sel4-shared-ring-buffer/block-io" }
 sel4-shared-ring-buffer-smoltcp = { path = "../../../../../sel4-shared-ring-buffer/smoltcp" }
-sel4-sync = { path = "../../../../../sel4-sync" }
 
 [dependencies.microkit-http-server-example-pl031-driver-interface-types]
 path = "../pl031-driver/interface-types"
