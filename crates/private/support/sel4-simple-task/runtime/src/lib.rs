@@ -112,8 +112,7 @@ pub fn idle() -> ! {
     abort!("idle failed")
 }
 
-#[no_mangle]
-fn sel4_runtime_abort_hook(info: Option<&AbortInfo>) {
+fn abort_hook(info: Option<&AbortInfo>) {
     match info {
         Some(info) => debug_println!("{}", info),
         None => debug_println!("(aborted)"),
@@ -121,10 +120,13 @@ fn sel4_runtime_abort_hook(info: Option<&AbortInfo>) {
     try_idle()
 }
 
-#[no_mangle]
-fn sel4_runtime_debug_put_char(c: c_char) {
-    sel4::debug_put_char(c)
+sel4_panicking_env::register_abort_hook!(abort_hook);
+
+fn debug_put_char(c: u8) {
+    sel4::debug_put_char(c as c_char)
 }
+
+sel4_panicking_env::register_debug_put_char!(debug_put_char);
 
 fn panic_hook(info: &ExternalPanicInfo<'_>) {
     debug_println!("{}", info);
