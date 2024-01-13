@@ -91,13 +91,14 @@ impl<'a> AbortInfo<'a> {
 impl fmt::Display for AbortInfo<'_> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         f.write_str("aborted at ")?;
-        if let Some(message) = self.message {
-            write!(f, "'{message}', ")?;
-        }
         if let Some(location) = self.location {
             location.fmt(f)?;
         } else {
-            write!(f, "unknown location")?;
+            f.write_str("unknown location")?;
+        }
+        if let Some(message) = self.message {
+            f.write_str(":\n")?;
+            f.write_fmt(*message)?;
         }
         Ok(())
     }
