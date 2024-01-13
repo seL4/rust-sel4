@@ -12,7 +12,7 @@
 #[cfg(feature = "alloc")]
 extern crate alloc;
 
-use core::ffi::{c_char, c_void};
+use core::ffi::c_char;
 use core::ptr;
 use core::slice;
 
@@ -47,24 +47,24 @@ static THREAD_INDEX: ImmediateSyncOnceCell<usize> = ImmediateSyncOnceCell::new()
 #[allow(clippy::missing_safety_doc)]
 pub unsafe extern "C" fn _start(config: *const u8, config_size: usize, thread_index: usize) -> ! {
     let config = RuntimeConfig::new(slice::from_raw_parts(config, config_size));
-    let mut cont_arg = ContinueArg {
+    let mut cont_arg = ContArg {
         config,
         thread_index,
     };
     sel4_runtime_common::initialize_tls_on_stack_and_continue(
         cont_fn,
-        ptr::addr_of_mut!(cont_arg).cast::<c_void>(),
+        ptr::addr_of_mut!(cont_arg).cast(),
     )
 }
 
-pub struct ContinueArg {
+pub struct ContArg {
     config: RuntimeConfig<'static>,
     thread_index: usize,
 }
 
 #[allow(clippy::missing_safety_doc)]
-pub unsafe extern "C" fn cont_fn(cont_arg: *mut c_void) -> ! {
-    let cont_arg: &ContinueArg = &*(cont_arg.cast::<ContinueArg>().cast_const());
+pub unsafe extern "C" fn cont_fn(cont_arg: *mut sel4_runtime_common::ContArg) -> ! {
+    let cont_arg: &ContArg = &*cont_arg.cast_const().cast();
 
     let config = &cont_arg.config;
     let thread_index = cont_arg.thread_index;
