@@ -10,8 +10,17 @@
 use core::arch::global_asm;
 use core::cell::UnsafeCell;
 
-// TODO alignment should depend on configuration
-#[repr(C, align(16))]
+#[repr(C)]
+#[cfg_attr(
+    any(
+        target_arch = "aarch64",
+        target_arch = "riscv32",
+        target_arch = "riscv64",
+        target_arch = "x86_64",
+    ),
+    repr(align(16))
+)]
+#[cfg_attr(target_arch = "arm", repr(align(4)))]
 pub struct Stack<const N: usize>(UnsafeCell<[u8; N]>);
 
 unsafe impl<const N: usize> Sync for Stack<N> {}
@@ -35,7 +44,7 @@ unsafe impl Sync for StackTop {}
 macro_rules! declare_stack {
     ($size:expr) => {
         #[no_mangle]
-        static __sel4_runtime_stack_top: $crate::_private::start::StackTop = {
+        static __sel4_runtime_common__stack_top: $crate::_private::start::StackTop = {
             static STACK: $crate::_private::start::Stack<{ $size }> =
                 $crate::_private::start::Stack::new();
             unsafe { STACK.top() }
@@ -43,18 +52,27 @@ macro_rules! declare_stack {
     };
 }
 
+macro_rules! common_asm_prefix {
+    () => {
+        r#"
+            .extern sel4_runtime_rust_entry
+            .extern __sel4_runtime_common__stack_top
+
+            .global _start
+
+            .section .text
+
+            _start:
+        "#
+    };
+}
+
 cfg_if::cfg_if! {
     if #[cfg(target_arch = "aarch64")] {
         global_asm! {
+            common_asm_prefix!(),
             r#"
-                .extern sel4_runtime_rust_entry
-                .extern __sel4_runtime_stack_top
-
-                .section .text
-
-                .global _start
-                _start:
-                    ldr x9, =__sel4_runtime_stack_top
+                    ldr x9, =__sel4_runtime_common__stack_top
                     ldr x9, [x9]
                     mov sp, x9
                     b sel4_runtime_rust_entry
@@ -63,17 +81,9 @@ cfg_if::cfg_if! {
             "#
         }
     } else if #[cfg(any(target_arch = "riscv64", target_arch = "riscv32"))] {
-        macro_rules! riscv_common {
+        macro_rules! riscv_common_asm_body {
             () => {
                 r#"
-                    .extern sel4_runtime_rust_entry
-                    .extern __sel4_runtime_stack_top
-
-                    .section .text
-
-                    .global _start
-                    _start:
-
                         # See https://www.sifive.com/blog/all-aboard-part-3-linker-relaxation-in-riscv-toolchain
                     .option push
                     .option norelax
@@ -81,7 +91,7 @@ cfg_if::cfg_if! {
                         addi gp, gp, %pcrel_lo(1b)
                     .option pop
 
-                        la sp, __sel4_runtime_stack_top
+                        la sp, __sel4_runtime_common__stack_top
                         lx sp, (sp)
                         jal sel4_runtime_rust_entry
 
@@ -97,7 +107,8 @@ cfg_if::cfg_if! {
                     ld \dst, \src
                 .endm
             "#,
-            riscv_common!()
+            common_asm_prefix!(),
+            riscv_common_asm_body!()
         }
 
         #[cfg(target_arch = "riscv32")]
@@ -107,19 +118,14 @@ cfg_if::cfg_if! {
                     lw \dst, \src
                 .endm
             "#,
-            riscv_common!()
+            common_asm_prefix!(),
+            riscv_common_asm_body!()
         }
     } else if #[cfg(target_arch = "x86_64")] {
         global_asm! {
+            common_asm_prefix!(),
             r#"
-                .extern sel4_runtime_rust_entry
-                .extern __sel4_runtime_stack_top
-
-                .section .text
-
-                .global _start
-                _start:
-                    mov rsp, __sel4_runtime_stack_top
+                    mov rsp, __sel4_runtime_common__stack_top
                     mov rbp, rsp
                     sub rsp, 0x8 // Stack must be 16-byte aligned before call
                     push rbp
