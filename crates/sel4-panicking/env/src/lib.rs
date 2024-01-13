@@ -14,18 +14,8 @@ use core::panic::Location;
 use core::str;
 
 extern "Rust" {
-    fn sel4_runtime_abort_hook(info: Option<&AbortInfo>);
-    fn sel4_runtime_debug_put_char(c: u8);
-}
-
-mod defaults {
-    use super::{default_abort_hook, AbortInfo};
-
-    #[no_mangle]
-    #[linkage = "weak"]
-    fn sel4_runtime_abort_hook(info: Option<&AbortInfo>) {
-        default_abort_hook(info)
-    }
+    fn __sel4_panicking_env__abort_hook(info: Option<&AbortInfo>);
+    fn __sel4_panicking_env__debug_put_char(c: u8);
 }
 
 // // //
@@ -36,11 +26,11 @@ mod defaults {
 ///
 /// ```rust
 /// extern "Rust" {
-///     fn sel4_runtime_debug_put_char(c: u8);
+///     fn __sel4_panicking_env__debug_put_char(c: u8);
 /// }
 /// ```
 pub fn debug_put_char(c: u8) {
-    unsafe { sel4_runtime_debug_put_char(c) }
+    unsafe { __sel4_panicking_env__debug_put_char(c) }
 }
 
 struct DebugWrite;
@@ -115,7 +105,7 @@ impl fmt::Display for AbortInfo<'_> {
 
 fn abort(info: Option<&AbortInfo>) -> ! {
     unsafe {
-        sel4_runtime_abort_hook(info);
+        __sel4_panicking_env__abort_hook(info);
     }
     core::intrinsics::abort()
 }
@@ -127,6 +117,11 @@ fn default_abort_hook(info: Option<&AbortInfo>) {
     }
 }
 
+register_abort_hook!(
+    #[linkage = "weak"]
+    default_abort_hook
+);
+
 /// Abort without any [`AbortInfo`].
 ///
 /// This function does the same thing as [`abort!`], except it passes `None` to the abort hook.
@@ -136,9 +131,9 @@ pub fn abort_without_info() -> ! {
 
 #[doc(hidden)]
 #[track_caller]
-pub fn abort_helper(args: fmt::Arguments) -> ! {
+pub fn abort_helper(message: Option<fmt::Arguments>) -> ! {
     abort(Some(&AbortInfo {
-        message: Some(&args),
+        message: message.as_ref(),
         location: Some(Location::caller()),
     }))
 }
@@ -149,6 +144,38 @@ pub fn abort_helper(args: fmt::Arguments) -> ! {
 /// and then calls `core::intrinsics::abort()`.
 #[macro_export]
 macro_rules! abort {
-    () => ($crate::abort!(""));
-    ($($arg:tt)*) => ($crate::abort_helper(format_args!($($arg)*)));
+    () => ($crate::abort_helper(::core::option::Option::None));
+    ($($arg:tt)*) => ($crate::abort_helper(::core::option::Option::Some(format_args!($($arg)*))));
+}
+
+// // //
+
+#[macro_export]
+macro_rules! register_abort_hook {
+    ($(#[$attrs:meta])* $path:path) => {
+        #[allow(non_snake_case)]
+        const _: () = {
+            $(#[$attrs])*
+            #[no_mangle]
+            fn __sel4_panicking_env__abort_hook(info: ::core::option::Option<&$crate::AbortInfo>) {
+                const F: fn(::core::option::Option<&$crate::AbortInfo>) = $path;
+                F(info)
+            }
+        };
+    };
+}
+
+#[macro_export]
+macro_rules! register_debug_put_char {
+    ($(#[$attrs:meta])* $path:path) => {
+        #[allow(non_snake_case)]
+        const _: () = {
+            $(#[$attrs])*
+            #[no_mangle]
+            fn __sel4_panicking_env__debug_put_char(c: u8) {
+                const F: fn(u8) = $path;
+                F(c)
+            }
+        };
+    };
 }

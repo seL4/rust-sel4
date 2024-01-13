@@ -85,10 +85,11 @@ pub unsafe fn run_main<T>(
     }
 }
 
-#[no_mangle]
-fn sel4_runtime_debug_put_char(c: u8) {
+fn debug_put_char(c: u8) {
     sel4::debug_put_char(c as c_char)
 }
+
+sel4_panicking_env::register_debug_put_char!(debug_put_char);
 
 #[macro_export]
 macro_rules! declare_root_task {
