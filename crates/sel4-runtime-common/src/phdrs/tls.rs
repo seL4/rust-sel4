@@ -8,7 +8,7 @@ use sel4_panicking_env::abort;
 
 #[allow(unused_imports)]
 use sel4_initialize_tls_on_stack::{
-    ContArg, ContFn, DefaultSetThreadPointer, SetThreadPointer, TlsImage,
+    ContArg, ContFn, SetThreadPointerFn, TlsImage, DEFAULT_SET_THREAD_POINTER_FN,
 };
 
 use crate::phdrs::{elf::PT_TLS, locate_phdrs};
@@ -24,21 +24,17 @@ pub unsafe fn initialize_tls_on_stack_and_continue(cont_fn: ContFn, cont_arg: Co
             align: phdr.p_align.try_into().unwrap(),
         })
         .unwrap_or_else(|| abort!())
-        .initialize_on_stack_and_continue::<ChosenSetThreadPointer>(cont_fn, cont_arg)
+        .initialize_on_stack_and_continue(CHOSEN_SET_THREAD_POINTER_FN, cont_fn, cont_arg)
 }
 
 sel4::sel4_cfg_if! {
     if #[cfg(all(ARCH_X86_64, SET_TLS_BASE_SELF))] {
-        type ChosenSetThreadPointer = SyscallSetThreadPointer;
+        const CHOSEN_SET_THREAD_POINTER_FN: SetThreadPointerFn = set_thread_pointer_via_syscall;
 
-        struct SyscallSetThreadPointer;
-
-        impl SetThreadPointer for SyscallSetThreadPointer {
-            unsafe extern "C" fn set_thread_pointer(val: usize) {
-                sel4::sys::seL4_SetTLSBase(val.try_into().unwrap());
-            }
+        unsafe extern "C" fn set_thread_pointer_via_syscall(val: usize) {
+            sel4::sys::seL4_SetTLSBase(val.try_into().unwrap());
         }
     } else {
-        type ChosenSetThreadPointer = DefaultSetThreadPointer;
+        const CHOSEN_SET_THREAD_POINTER_FN: SetThreadPointerFn = DEFAULT_SET_THREAD_POINTER_FN;
     }
 }
