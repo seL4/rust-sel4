@@ -20,7 +20,8 @@ const STACK_ALIGNMENT: usize = 16;
 // https://akkadia.org/drepper/tls.pdf
 const RESERVED_ABOVE_THREAD_POINTER: usize = 16;
 
-pub type ContFn = unsafe extern "C" fn(*mut c_void) -> !;
+pub type SetThreadPointerFn = unsafe extern "C" fn(thread_pointer: usize);
+pub type ContFn = unsafe extern "C" fn(cont_arg: ContArg) -> !;
 pub type ContArg = *mut c_void;
 
 #[repr(C)]
@@ -34,14 +35,15 @@ pub struct TlsImage {
 
 impl TlsImage {
     #[allow(clippy::missing_safety_doc)]
-    pub unsafe fn initialize_on_stack_and_continue<T: SetThreadPointer>(
+    pub unsafe fn initialize_on_stack_and_continue(
         &self,
+        set_thread_pointer_fn: SetThreadPointerFn,
         cont_fn: ContFn,
         cont_arg: ContArg,
     ) -> ! {
         let args = InternalContArgs {
             tls_image: self as *const TlsImage,
-            set_thread_pointer_fn: T::set_thread_pointer,
+            set_thread_pointer_fn,
             cont_fn,
             cont_arg,
         };
@@ -90,7 +92,7 @@ impl TlsImage {
 #[derive(Debug, Clone, PartialEq, Eq)]
 struct InternalContArgs {
     tls_image: *const TlsImage,
-    set_thread_pointer_fn: unsafe extern "C" fn(val: usize),
+    set_thread_pointer_fn: SetThreadPointerFn,
     cont_fn: ContFn,
     cont_arg: ContArg,
 }
@@ -192,29 +194,19 @@ unsafe extern "C" fn continue_with(args: *const InternalContArgs, thread_pointer
     (args.cont_fn)(args.cont_arg)
 }
 
-pub trait SetThreadPointer {
-    unsafe extern "C" fn set_thread_pointer(val: usize);
-}
-
-pub struct DefaultSetThreadPointer(());
+pub const DEFAULT_SET_THREAD_POINTER_FN: SetThreadPointerFn = default_set_thread_pointer;
 
 #[cfg(target_arch = "aarch64")]
-impl SetThreadPointer for DefaultSetThreadPointer {
-    unsafe extern "C" fn set_thread_pointer(val: usize) {
-        asm!("msr tpidr_el0, {val}", val = in(reg) val);
-    }
+unsafe extern "C" fn default_set_thread_pointer(val: usize) {
+    asm!("msr tpidr_el0, {val}", val = in(reg) val);
 }
 
 #[cfg(any(target_arch = "riscv64", target_arch = "riscv32"))]
-impl SetThreadPointer for DefaultSetThreadPointer {
-    unsafe extern "C" fn set_thread_pointer(val: usize) {
-        asm!("mv tp, {val}", val = in(reg) val);
-    }
+unsafe extern "C" fn default_set_thread_pointer(val: usize) {
+    asm!("mv tp, {val}", val = in(reg) val);
 }
 
 #[cfg(target_arch = "x86_64")]
-impl SetThreadPointer for DefaultSetThreadPointer {
-    unsafe extern "C" fn set_thread_pointer(val: usize) {
-        asm!("wrfsbase {val}", val = in(reg) val);
-    }
+unsafe extern "C" fn default_set_thread_pointer(val: usize) {
+    asm!("wrfsbase {val}", val = in(reg) val);
 }
