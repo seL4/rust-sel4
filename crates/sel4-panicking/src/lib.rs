@@ -66,13 +66,14 @@ impl<'a> ExternalPanicInfo<'a> {
 impl fmt::Display for ExternalPanicInfo<'_> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         f.write_str("panicked at ")?;
-        if let Some(message) = self.message {
-            write!(f, "'{message}', ")?;
-        }
         if let Some(location) = self.location {
             location.fmt(f)?;
         } else {
-            write!(f, "unknown location")?;
+            f.write_str("unknown location")?;
+        }
+        if let Some(message) = self.message {
+            f.write_str(":\n")?;
+            f.write_fmt(*message)?;
         }
         Ok(())
     }
