@@ -14,16 +14,11 @@ use crate::panicking::init_panicking;
 #[cfg(target_thread_local)]
 #[no_mangle]
 unsafe extern "C" fn sel4_runtime_rust_entry() -> ! {
-    use core::ffi::c_void;
-    use core::ptr;
-
-    unsafe extern "C" fn cont_fn(_cont_arg: *mut c_void) -> ! {
+    unsafe extern "C" fn cont_fn(_cont_arg: *mut sel4_runtime_common::ContArg) -> ! {
         inner_entry()
     }
 
-    let cont_arg = ptr::null_mut();
-
-    sel4_runtime_common::initialize_tls_on_stack_and_continue(cont_fn, cont_arg)
+    sel4_runtime_common::initialize_tls_on_stack_and_continue(cont_fn, core::ptr::null_mut())
 }
 
 #[cfg(not(target_thread_local))]
