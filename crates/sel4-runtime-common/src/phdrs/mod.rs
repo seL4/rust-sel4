@@ -28,7 +28,7 @@ pub(crate) fn locate_phdrs() -> &'static [ProgramHeader] {
     }
     unsafe {
         if !__ehdr_start.check_magic() {
-            abort!()
+            abort!("ELF header magic mismatch")
         }
         __ehdr_start.locate_phdrs()
     }
