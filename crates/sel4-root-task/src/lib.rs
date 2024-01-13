@@ -11,9 +11,6 @@
 use core::ffi::c_char;
 use core::fmt;
 
-#[cfg(target_thread_local)]
-use core::ffi::c_void;
-
 pub use sel4_panicking_env::{abort, debug_print, debug_println};
 pub use sel4_root_task_macros::root_task;
 
@@ -27,14 +24,11 @@ pub use termination::{Never, Termination};
 #[cfg(target_thread_local)]
 #[no_mangle]
 unsafe extern "C" fn sel4_runtime_rust_entry(bootinfo: *const sel4::sys::seL4_BootInfo) -> ! {
-    unsafe extern "C" fn cont_fn(cont_arg: *mut c_void) -> ! {
-        let bootinfo = cont_arg.cast_const().cast::<sel4::sys::seL4_BootInfo>();
-        inner_entry(bootinfo)
+    unsafe extern "C" fn cont_fn(cont_arg: *mut sel4_runtime_common::ContArg) -> ! {
+        inner_entry(cont_arg.cast_const().cast())
     }
 
-    let cont_arg = bootinfo.cast::<c_void>().cast_mut();
-
-    sel4_runtime_common::initialize_tls_on_stack_and_continue(cont_fn, cont_arg)
+    sel4_runtime_common::initialize_tls_on_stack_and_continue(cont_fn, bootinfo.cast_mut().cast())
 }
 
 #[cfg(not(target_thread_local))]

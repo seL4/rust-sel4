@@ -8,20 +8,27 @@ use sel4_panicking_env::abort;
 
 #[allow(unused_imports)]
 use sel4_initialize_tls_on_stack::{
-    ContArg, ContFn, SetThreadPointerFn, TlsImage, DEFAULT_SET_THREAD_POINTER_FN,
+    SetThreadPointerFn, UncheckedTlsImage, DEFAULT_SET_THREAD_POINTER_FN,
 };
+
+pub use sel4_initialize_tls_on_stack::{ContArg, ContFn};
 
 use crate::phdrs::{elf::PT_TLS, locate_phdrs};
 
-pub unsafe fn initialize_tls_on_stack_and_continue(cont_fn: ContFn, cont_arg: ContArg) -> ! {
+pub unsafe fn initialize_tls_on_stack_and_continue(cont_fn: ContFn, cont_arg: *mut ContArg) -> ! {
     locate_phdrs()
         .iter()
         .find(|phdr| phdr.p_type == PT_TLS)
-        .map(|phdr| TlsImage {
-            vaddr: phdr.p_vaddr.try_into().unwrap(),
-            filesz: phdr.p_filesz.try_into().unwrap(),
-            memsz: phdr.p_memsz.try_into().unwrap(),
-            align: phdr.p_align.try_into().unwrap(),
+        .map(|phdr| {
+            let unchecked = UncheckedTlsImage {
+                vaddr: phdr.p_vaddr.try_into().unwrap(),
+                filesz: phdr.p_filesz.try_into().unwrap(),
+                memsz: phdr.p_memsz.try_into().unwrap(),
+                align: phdr.p_align.try_into().unwrap(),
+            };
+            unchecked
+                .check()
+                .unwrap_or_else(|| abort!("invalid TLS image: {unchecked:#x?}"))
         })
         .unwrap_or_else(|| abort!())
         .initialize_on_stack_and_continue(CHOSEN_SET_THREAD_POINTER_FN, cont_fn, cont_arg)

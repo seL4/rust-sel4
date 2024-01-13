@@ -14,7 +14,7 @@ use elf::{ElfHeader, ProgramHeader};
 mod tls;
 
 #[cfg(all(feature = "tls", target_thread_local))]
-pub use tls::initialize_tls_on_stack_and_continue;
+pub use tls::{initialize_tls_on_stack_and_continue, ContArg, ContFn};
 
 #[cfg(feature = "unwinding")]
 mod unwinding;
