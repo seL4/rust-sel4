@@ -28,7 +28,7 @@ unsafe extern "C" fn sel4_runtime_rust_entry() -> ! {
 }
 
 fn inner_entry() -> ! {
-    #[cfg(feature = "unwinding")]
+    #[cfg(all(feature = "unwinding", panic = "unwind"))]
     {
         sel4_runtime_common::set_eh_frame_finder().unwrap();
     }

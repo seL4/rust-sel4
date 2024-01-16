@@ -16,10 +16,10 @@ mod tls;
 #[cfg(all(feature = "tls", target_thread_local))]
 pub use tls::{initialize_tls_on_stack_and_continue, ContArg, ContFn};
 
-#[cfg(feature = "unwinding")]
+#[cfg(all(feature = "unwinding", panic = "unwind"))]
 mod unwinding;
 
-#[cfg(feature = "unwinding")]
+#[cfg(all(feature = "unwinding", panic = "unwind"))]
 pub use self::unwinding::set_eh_frame_finder;
 
 pub(crate) fn locate_phdrs() -> &'static [ProgramHeader] {

@@ -10,10 +10,16 @@
 #[cfg(feature = "start")]
 mod start;
 
-#[cfg(any(all(feature = "tls", target_thread_local), feature = "unwinding"))]
+#[cfg(any(
+    all(feature = "tls", target_thread_local),
+    all(feature = "unwinding", panic = "unwind")
+))]
 mod phdrs;
 
-#[cfg(any(all(feature = "tls", target_thread_local), feature = "unwinding"))]
+#[cfg(any(
+    all(feature = "tls", target_thread_local),
+    all(feature = "unwinding", panic = "unwind")
+))]
 pub use phdrs::*;
 
 #[doc(hidden)]
