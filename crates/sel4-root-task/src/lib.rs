@@ -38,20 +38,20 @@ unsafe extern "C" fn sel4_runtime_rust_entry(bootinfo: *const sel4::sys::seL4_Bo
     inner_entry(bootinfo)
 }
 
-unsafe extern "C" fn inner_entry(bootinfo: *const sel4::sys::seL4_BootInfo) -> ! {
+unsafe fn inner_entry(bootinfo: *const sel4::sys::seL4_BootInfo) -> ! {
     #[cfg(feature = "unwinding")]
     {
         sel4_runtime_common::set_eh_frame_finder().unwrap();
     }
 
-    let ipc_buffer = sel4::BootInfo::from_ptr(bootinfo).ipc_buffer();
-    sel4::set_ipc_buffer(ipc_buffer);
-    __sel4_root_task_main(bootinfo);
-    abort!("main thread returned")
+    let bootinfo = sel4::BootInfo::from_ptr(bootinfo);
+    sel4::set_ipc_buffer(bootinfo.ipc_buffer());
+    __sel4_root_task__main(&bootinfo);
+    abort!("__sel4_root_task__main returned")
 }
 
-extern "C" {
-    fn __sel4_root_task_main(bootinfo: *const sel4::sys::seL4_BootInfo);
+extern "Rust" {
+    fn __sel4_root_task__main(bootinfo: &sel4::BootInfo);
 }
 
 #[doc(hidden)]
@@ -59,9 +59,7 @@ extern "C" {
 macro_rules! declare_main {
     ($main:expr) => {
         #[no_mangle]
-        pub unsafe extern "C" fn __sel4_root_task_main(
-            bootinfo: *const $crate::_private::seL4_BootInfo,
-        ) {
+        unsafe fn __sel4_root_task__main(bootinfo: &$crate::_private::BootInfo) {
             $crate::_private::run_main($main, bootinfo);
         }
     };
@@ -69,17 +67,12 @@ macro_rules! declare_main {
 
 #[doc(hidden)]
 #[allow(clippy::missing_safety_doc)]
-pub unsafe fn run_main<T>(
-    f: impl Fn(&sel4::BootInfo) -> T,
-    bootinfo: *const sel4::sys::seL4_BootInfo,
-) where
+pub unsafe fn run_main<T>(f: impl Fn(&sel4::BootInfo) -> T, bootinfo: &sel4::BootInfo)
+where
     T: Termination,
     T::Error: fmt::Debug,
 {
-    let result = panicking::catch_unwind(|| {
-        let bootinfo = sel4::BootInfo::from_ptr(bootinfo);
-        f(&bootinfo).report()
-    });
+    let result = panicking::catch_unwind(|| f(bootinfo).report());
     match result {
         Ok(err) => abort!("main thread terminated with error: {err:?}"),
         Err(_) => abort!("main thread panicked"),
@@ -128,7 +121,7 @@ pub const DEFAULT_STACK_SIZE: usize = 0x10000;
 // For macros
 #[doc(hidden)]
 pub mod _private {
-    pub use sel4::sys::seL4_BootInfo;
+    pub use sel4::BootInfo;
     pub use sel4_runtime_common::declare_stack;
 
     pub use crate::heap::_private as heap;
