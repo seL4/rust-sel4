@@ -39,15 +39,18 @@ unsafe extern "C" fn sel4_runtime_rust_entry(bootinfo: *const sel4::sys::seL4_Bo
     inner_entry(bootinfo)
 }
 
-unsafe fn inner_entry(bootinfo: *const sel4::sys::seL4_BootInfo) -> ! {
+fn inner_entry(bootinfo: *const sel4::sys::seL4_BootInfo) -> ! {
     #[cfg(feature = "unwinding")]
     {
         sel4_runtime_common::set_eh_frame_finder().unwrap();
     }
 
-    let bootinfo = sel4::BootInfo::from_ptr(bootinfo);
-    sel4::set_ipc_buffer(bootinfo.ipc_buffer());
-    __sel4_root_task__main(&bootinfo);
+    unsafe {
+        let bootinfo = sel4::BootInfo::from_ptr(bootinfo);
+        sel4::set_ipc_buffer(bootinfo.ipc_buffer());
+        __sel4_root_task__main(&bootinfo);
+    }
+
     abort!("__sel4_root_task__main returned")
 }
 
@@ -60,7 +63,7 @@ extern "Rust" {
 macro_rules! declare_main {
     ($main:expr) => {
         #[no_mangle]
-        unsafe fn __sel4_root_task__main(bootinfo: &$crate::_private::BootInfo) {
+        fn __sel4_root_task__main(bootinfo: &$crate::_private::BootInfo) {
             $crate::_private::run_main($main, bootinfo);
         }
     };
@@ -68,7 +71,7 @@ macro_rules! declare_main {
 
 #[doc(hidden)]
 #[allow(clippy::missing_safety_doc)]
-pub unsafe fn run_main<T>(f: impl Fn(&sel4::BootInfo) -> T, bootinfo: &sel4::BootInfo)
+pub fn run_main<T>(f: impl Fn(&sel4::BootInfo) -> T, bootinfo: &sel4::BootInfo)
 where
     T: Termination,
     T::Error: fmt::Debug,

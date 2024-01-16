@@ -27,20 +27,24 @@ unsafe extern "C" fn sel4_runtime_rust_entry() -> ! {
     inner_entry()
 }
 
-unsafe extern "C" fn inner_entry() -> ! {
+fn inner_entry() -> ! {
     #[cfg(feature = "unwinding")]
     {
         sel4_runtime_common::set_eh_frame_finder().unwrap();
     }
 
     init_panicking();
-    sel4::set_ipc_buffer(get_ipc_buffer());
-    __sel4_microkit_main();
+
+    unsafe {
+        sel4::set_ipc_buffer(get_ipc_buffer());
+        __sel4_microkit__main();
+    }
+
     abort!("main thread returned")
 }
 
 extern "C" {
-    fn __sel4_microkit_main();
+    fn __sel4_microkit__main();
 }
 
 #[doc(hidden)]
@@ -48,14 +52,14 @@ extern "C" {
 macro_rules! declare_init {
     ($init:expr) => {
         #[no_mangle]
-        pub unsafe extern "C" fn __sel4_microkit_main() {
+        fn __sel4_microkit__main() {
             $crate::_private::run_main($init);
         }
     };
 }
 
 #[allow(clippy::missing_safety_doc)]
-pub unsafe fn run_main<T: Handler>(init: impl FnOnce() -> T) {
+pub fn run_main<T: Handler>(init: impl FnOnce() -> T) {
     let result = catch_unwind(|| match run_handler(init()) {
         Ok(absurdity) => match absurdity {},
         Err(err) => err,
