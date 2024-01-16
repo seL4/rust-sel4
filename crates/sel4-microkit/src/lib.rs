@@ -44,6 +44,7 @@ mod cspace;
 mod entry;
 mod env;
 mod handler;
+mod heap;
 mod memory_region;
 mod message;
 
@@ -85,10 +86,7 @@ macro_rules! declare_protection_domain {
         $(stack_size = $stack_size:expr,)?
         heap_size = $heap_size:expr $(,)?
     } => {
-        $crate::_private::declare_static_heap! {
-            #[doc(hidden)]
-            __GLOBAL_ALLOCATOR: $heap_size;
-        }
+        $crate::_private::declare_heap!($heap_size);
         $crate::_private::declare_protection_domain! {
             init = $init,
             $(stack_size = $stack_size,)?
@@ -96,16 +94,20 @@ macro_rules! declare_protection_domain {
     };
 }
 
+#[doc(hidden)]
+pub const DEFAULT_STACK_SIZE: usize = 0x10000;
+
 // For macros
 #[doc(hidden)]
 pub mod _private {
     pub use sel4_immutable_cell::ImmutableCell;
+    pub use sel4_runtime_common::declare_stack;
 
-    pub use sel4_runtime_common::{declare_stack, declare_static_heap};
+    pub use crate::heap::_private as heap;
 
-    pub use crate::{declare_init, declare_protection_domain, entry::run_main};
-
-    pub const DEFAULT_STACK_SIZE: usize = 0x10000;
+    pub use crate::{
+        declare_heap, declare_init, declare_protection_domain, entry::run_main, DEFAULT_STACK_SIZE,
+    };
 }
 
 sel4::config::sel4_cfg_if! {
