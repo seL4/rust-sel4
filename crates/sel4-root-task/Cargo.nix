@@ -13,9 +13,11 @@ mk {
       sel4
       sel4-panicking
       sel4-panicking-env
+      sel4-dlmalloc
+      sel4-sync
       sel4-root-task-macros
     ;
-    sel4-runtime-common = localCrates.sel4-runtime-common // { features = [ "tls" "start" "static-heap" ]; };
+    sel4-runtime-common = localCrates.sel4-runtime-common // { features = [ "tls" "start" ]; };
   };
   features = {
     default = [
