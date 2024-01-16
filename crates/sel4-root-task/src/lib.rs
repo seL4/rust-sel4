@@ -17,6 +17,7 @@ pub use sel4_root_task_macros::root_task;
 #[doc(inline)]
 pub use sel4_panicking as panicking;
 
+mod heap;
 mod termination;
 
 pub use termination::{Never, Termination};
@@ -113,10 +114,7 @@ macro_rules! declare_root_task {
        $(stack_size = $stack_size:expr,)?
        heap_size = $heap_size:expr $(,)?
    } => {
-       $crate::_private::declare_static_heap! {
-           #[doc(hidden)]
-           __GLOBAL_ALLOCATOR: $heap_size;
-       }
+       $crate::_private::declare_heap!($heap_size);
        $crate::_private::declare_root_task! {
            main = $main,
            $(stack_size = $stack_size,)?
@@ -124,13 +122,16 @@ macro_rules! declare_root_task {
    };
 }
 
+#[doc(hidden)]
+pub const DEFAULT_STACK_SIZE: usize = 0x10000;
+
 // For macros
 #[doc(hidden)]
 pub mod _private {
     pub use sel4::sys::seL4_BootInfo;
-    pub use sel4_runtime_common::{declare_stack, declare_static_heap};
+    pub use sel4_runtime_common::declare_stack;
 
-    pub use crate::{declare_main, declare_root_task, run_main};
+    pub use crate::heap::_private as heap;
 
-    pub const DEFAULT_STACK_SIZE: usize = 0x10000;
+    pub use crate::{declare_heap, declare_main, declare_root_task, run_main, DEFAULT_STACK_SIZE};
 }

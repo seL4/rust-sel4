@@ -25,10 +25,9 @@ unwinding = ["sel4-panicking/unwinding", "sel4-runtime-common/unwinding"]
 
 [dependencies]
 sel4 = { path = "../sel4" }
+sel4-dlmalloc = { path = "../sel4-dlmalloc" }
 sel4-panicking = { path = "../sel4-panicking" }
 sel4-panicking-env = { path = "../sel4-panicking/env" }
 sel4-root-task-macros = { path = "macros" }
-
-[dependencies.sel4-runtime-common]
-path = "../sel4-runtime-common"
-features = ["tls", "start", "static-heap"]
+sel4-runtime-common = { path = "../sel4-runtime-common", features = ["tls", "start"] }
+sel4-sync = { path = "../sel4-sync" }
