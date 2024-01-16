@@ -20,6 +20,7 @@ pub use sel4_panicking as panicking;
 mod heap;
 mod termination;
 
+pub use heap::set_global_allocator_mutex_notification;
 pub use termination::{Never, Termination};
 
 #[cfg(target_thread_local)]
@@ -75,7 +76,7 @@ where
     let result = panicking::catch_unwind(|| f(bootinfo).report());
     match result {
         Ok(err) => abort!("main thread terminated with error: {err:?}"),
-        Err(_) => abort!("main thread panicked"),
+        Err(_) => abort!("uncaught panic in main thread"),
     }
 }
 
