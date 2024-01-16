@@ -40,7 +40,7 @@ unsafe extern "C" fn sel4_runtime_rust_entry(bootinfo: *const sel4::sys::seL4_Bo
 }
 
 fn inner_entry(bootinfo: *const sel4::sys::seL4_BootInfo) -> ! {
-    #[cfg(feature = "unwinding")]
+    #[cfg(all(feature = "unwinding", panic = "unwind"))]
     {
         sel4_runtime_common::set_eh_frame_finder().unwrap();
     }

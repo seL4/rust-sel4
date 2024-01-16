@@ -14,7 +14,7 @@ use serde::Serialize;
 use sel4_backtrace_types::{Entry, Error as BacktraceError};
 
 cfg_if::cfg_if! {
-    if #[cfg(feature = "unwinding")] {
+    if #[cfg(all(feature = "unwinding", panic = "unwind"))] {
         use core::ffi::c_void;
 
         use unwinding::abi::*;
