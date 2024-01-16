@@ -11,6 +11,7 @@ mk {
   dependencies = {
     inherit (localCrates)
       sel4
+      sel4-immediate-sync-once-cell
       sel4-panicking
       sel4-panicking-env
       sel4-dlmalloc

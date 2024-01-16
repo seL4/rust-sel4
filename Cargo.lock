@@ -2422,6 +2422,7 @@ version = "0.1.0"
 dependencies = [
  "sel4",
  "sel4-dlmalloc",
+ "sel4-immediate-sync-once-cell",
  "sel4-panicking",
  "sel4-panicking-env",
  "sel4-root-task-macros",
