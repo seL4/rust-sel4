@@ -2325,6 +2325,7 @@ version = "0.1.0"
 dependencies = [
  "cfg-if",
  "sel4",
+ "sel4-dlmalloc",
  "sel4-externally-shared",
  "sel4-immediate-sync-once-cell",
  "sel4-immutable-cell",
@@ -2332,6 +2333,7 @@ dependencies = [
  "sel4-panicking",
  "sel4-panicking-env",
  "sel4-runtime-common",
+ "sel4-sync",
 ]
 
 [[package]]
