@@ -6,7 +6,7 @@
 
 { lib, stdenv, hostPlatform, buildPackages
 , callPackage
-, writeScript, runCommand, linkFarm
+, runCommand, linkFarm, writeText, writeScript
 
 , cpio
 , cmake, perl, python3Packages
@@ -43,6 +43,28 @@ let
 
   maybe = condition: v: if condition then v else null;
 
+  mkRunTests = name: tests: writeScript name ''
+    #!${buildPackages.runtimeShell}
+    set -eu
+
+    say() {
+      printf '\n<<< %s >>>\n\n' "$1"
+    }
+
+    ${lib.concatStrings (lib.forEach tests ({ name, value }: ''
+      say 'running test: ${name}'
+      ${
+        if value != null
+        then value
+        else ''
+          say '(skipping)'
+        ''
+      }
+    ''))}
+
+    say 'all tests passed'
+  '';
+
 in rec {
 
   # TODO collect automatically
@@ -52,10 +74,10 @@ in rec {
     tests.root-task.config
     tests.root-task.tls
     tests.root-task.backtrace
-    tests.root-task.panicking.abort.withAlloc
-    tests.root-task.panicking.abort.withoutAlloc
-    tests.root-task.panicking.unwind.withAlloc
-    tests.root-task.panicking.unwind.withoutAlloc
+    tests.root-task.panicking.byConfig.abort.withAlloc
+    tests.root-task.panicking.byConfig.abort.withoutAlloc
+    tests.root-task.panicking.byConfig.unwind.withAlloc
+    tests.root-task.panicking.byConfig.unwind.withoutAlloc
     tests.root-task.default-test-harness
     tests.root-task.c
     tests.capdl.threads
@@ -74,7 +96,7 @@ in rec {
     (lib.filter (instance: (instance.automate or null) != null) all);
 
   tests = {
-    root-task = {
+    root-task = rec {
       loader = maybe (haveKernelLoader && haveFullRuntime) (mkInstance {
         rootTask = mkTask {
           rootCrate = crates.tests-root-task-loader;
@@ -143,12 +165,13 @@ in rec {
             withAlloc = [ "alloc" ];
             withoutAlloc = [];
           };
+
           panicStrategy = {
             unwind = null;
             abort = null;
           };
-        in
-          lib.flip lib.mapAttrs panicStrategy
+
+          byConfig = lib.flip lib.mapAttrs panicStrategy
             (panicStrategyName: _:
               lib.flip lib.mapAttrs alloc
                 (_: allocFeatures: maybe haveFullRuntime (mkInstance {
@@ -164,6 +187,26 @@ in rec {
                     canAutomateSimply = panicStrategyName == "unwind";
                   };
                 })));
+
+          paths = [
+            [ "abort" "withAlloc" ]
+            [ "abort" "withoutAlloc" ]
+            [ "unwind" "withAlloc" ]
+            [ "unwind" "withoutAlloc" ]
+          ];
+
+          automate = mkRunTests "run-all-panicking-tests" (lib.forEach paths (path: {
+            name = lib.concatStringsSep "." path;
+            value = (lib.attrByPath path (throw "x") byConfig).automate;
+          }));
+
+          simulate = writeText "all-panicking-scripts" (toString (lib.forEach paths (path:
+            (lib.attrByPath path (throw "x") byConfig).simulate
+          )));
+
+        in {
+          inherit byConfig automate simulate;
+        };
 
       c = maybe (haveFullRuntime && hostPlatform.isAarch64) (callPackage ./c.nix {
         inherit canSimulate;
@@ -223,19 +266,7 @@ in rec {
         in {
           inherit byElf;
 
-          all = buildPackages.writeScript "run-tests" ''
-            #!${buildPackages.runtimeShell}
-            set -eu
-
-            ${lib.concatStrings (lib.flip lib.mapAttrsToList byElf (k: v: ''
-              echo "<<< running test: ${k} >>>"
-              ${v.automate}
-            ''))}
-
-            echo
-            echo '# All tests passed.'
-            echo
-          '';
+          all = mkRunTests "run-all-ring-test" (lib.flip lib.mapAttrsToList byElf (k: v: lib.nameValuePair k v.automate));
         }
       );
 
