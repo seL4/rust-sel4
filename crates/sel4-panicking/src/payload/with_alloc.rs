@@ -13,7 +13,7 @@ use super::UpcastIntoPayload;
 pub struct Payload(Box<dyn Any + Send + 'static>);
 
 impl Payload {
-    pub fn new(inner: Box<dyn Any + Send + 'static>) -> Self {
+    fn new(inner: Box<dyn Any + Send + 'static>) -> Self {
         Self(inner)
     }
 

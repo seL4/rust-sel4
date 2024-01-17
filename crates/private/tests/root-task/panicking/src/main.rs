@@ -58,7 +58,7 @@ cfg_if::cfg_if! {
             assert_eq!(r.err().unwrap().inner().downcast_ref::<String>().unwrap().as_str(), "foo");
         }
     } else {
-        use panicking::FitsWithinSmallPayload;
+        use panicking::SmallPayload;
 
         fn whether_alloc() {
             let r = panicking::catch_unwind(|| {
@@ -70,6 +70,6 @@ cfg_if::cfg_if! {
         #[derive(Copy, Clone)]
         struct Foo(usize);
 
-        impl FitsWithinSmallPayload for Foo {}
+        impl SmallPayload for Foo {}
     }
 }
