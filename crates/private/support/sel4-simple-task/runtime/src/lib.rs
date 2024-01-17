@@ -12,7 +12,6 @@
 #[cfg(feature = "alloc")]
 extern crate alloc;
 
-use core::ffi::c_char;
 use core::ptr;
 use core::slice;
 
@@ -122,11 +121,7 @@ fn abort_hook(info: Option<&AbortInfo>) {
 
 sel4_panicking_env::register_abort_hook!(abort_hook);
 
-fn debug_put_char(c: u8) {
-    sel4::debug_put_char(c as c_char)
-}
-
-sel4_panicking_env::register_debug_put_char!(debug_put_char);
+sel4_panicking_env::register_debug_put_char!(sel4::debug_put_char);
 
 fn panic_hook(info: &ExternalPanicInfo<'_>) {
     debug_println!("{}", info);

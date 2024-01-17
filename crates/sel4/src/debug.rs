@@ -5,12 +5,10 @@
 // SPDX-License-Identifier: MIT
 //
 
-use core::ffi::c_char;
-
 use crate::{sys, InvocationContext, CapType, TCB, LocalCPtr};
 
 /// Corresponds to `seL4_DebugPutChar`.
-pub fn debug_put_char(c: c_char) {
+pub fn debug_put_char(c: u8) {
     sys::seL4_DebugPutChar(c)
 }
 

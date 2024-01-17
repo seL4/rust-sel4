@@ -8,7 +8,6 @@
 #![feature(cfg_target_thread_local)]
 #![feature(never_type)]
 
-use core::ffi::c_char;
 use core::fmt;
 
 pub use sel4_panicking_env::{abort, debug_print, debug_println};
@@ -83,11 +82,7 @@ where
     }
 }
 
-fn debug_put_char(c: u8) {
-    sel4::debug_put_char(c as c_char)
-}
-
-sel4_panicking_env::register_debug_put_char!(debug_put_char);
+sel4_panicking_env::register_debug_put_char!(sel4::debug_put_char);
 
 #[macro_export]
 macro_rules! declare_root_task {
