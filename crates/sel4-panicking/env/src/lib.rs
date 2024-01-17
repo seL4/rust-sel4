@@ -14,8 +14,50 @@ use core::panic::Location;
 use core::str;
 
 extern "Rust" {
-    fn __sel4_panicking_env__abort_hook(info: Option<&AbortInfo>);
     fn __sel4_panicking_env__debug_put_char(c: u8);
+    fn __sel4_panicking_env__abort_hook(info: Option<&AbortInfo>);
+}
+
+#[macro_export]
+macro_rules! register_debug_put_char {
+    ($(#[$attrs:meta])* $path:path) => {
+        #[allow(non_snake_case)]
+        const _: () = {
+            $(#[$attrs])*
+            #[no_mangle]
+            fn __sel4_panicking_env__debug_put_char(c: u8) {
+                const F: fn(u8) = $path;
+                F(c)
+            }
+        };
+    };
+}
+
+#[macro_export]
+macro_rules! register_abort_hook {
+    ($(#[$attrs:meta])* $path:path) => {
+        #[allow(non_snake_case)]
+        const _: () = {
+            $(#[$attrs])*
+            #[no_mangle]
+            fn __sel4_panicking_env__abort_hook(info: ::core::option::Option<&$crate::AbortInfo>) {
+                const F: fn(::core::option::Option<&$crate::AbortInfo>) = $path;
+                F(info)
+            }
+        };
+    };
+}
+
+register_abort_hook!(
+    #[linkage = "weak"]
+    default_abort_hook
+);
+
+fn default_abort_hook(info: Option<&AbortInfo>) {
+    match info {
+        Some(info) => debug_println!("{}", info),
+        None => debug_println!("(aborted)"),
+    }
 }
 
 // // //
@@ -45,9 +87,9 @@ impl fmt::Write for DebugWrite {
 }
 
 #[doc(hidden)]
-pub fn debug_print_helper(args: fmt::Arguments) {
+pub fn __debug_print_macro_helper(args: fmt::Arguments) {
     fmt::write(&mut DebugWrite, args).unwrap_or_else(|err| {
-        // Just report error. This this function must not fail.
+        // Just report error. This function must not fail.
         let _ = fmt::write(&mut DebugWrite, format_args!("({err})"));
     })
 }
@@ -55,7 +97,7 @@ pub fn debug_print_helper(args: fmt::Arguments) {
 /// Like `std::print`, except backed by [`debug_put_char`].
 #[macro_export]
 macro_rules! debug_print {
-    ($($arg:tt)*) => ($crate::debug_print_helper(format_args!($($arg)*)));
+    ($($arg:tt)*) => ($crate::__debug_print_macro_helper(format_args!($($arg)*)));
 }
 
 /// Like `std::println`, except backed by [`debug_put_char`].
@@ -111,18 +153,6 @@ fn abort(info: Option<&AbortInfo>) -> ! {
     core::intrinsics::abort()
 }
 
-fn default_abort_hook(info: Option<&AbortInfo>) {
-    match info {
-        Some(info) => debug_println!("{}", info),
-        None => debug_println!("(aborted)"),
-    }
-}
-
-register_abort_hook!(
-    #[linkage = "weak"]
-    default_abort_hook
-);
-
 /// Abort without any [`AbortInfo`].
 ///
 /// This function does the same thing as [`abort!`], except it passes `None` to the abort hook.
@@ -132,7 +162,7 @@ pub fn abort_without_info() -> ! {
 
 #[doc(hidden)]
 #[track_caller]
-pub fn abort_helper(message: Option<fmt::Arguments>) -> ! {
+pub fn __abort_macro_helper(message: Option<fmt::Arguments>) -> ! {
     abort(Some(&AbortInfo {
         message: message.as_ref(),
         location: Some(Location::caller()),
@@ -145,38 +175,6 @@ pub fn abort_helper(message: Option<fmt::Arguments>) -> ! {
 /// and then calls `core::intrinsics::abort()`.
 #[macro_export]
 macro_rules! abort {
-    () => ($crate::abort_helper(::core::option::Option::None));
-    ($($arg:tt)*) => ($crate::abort_helper(::core::option::Option::Some(format_args!($($arg)*))));
-}
-
-// // //
-
-#[macro_export]
-macro_rules! register_abort_hook {
-    ($(#[$attrs:meta])* $path:path) => {
-        #[allow(non_snake_case)]
-        const _: () = {
-            $(#[$attrs])*
-            #[no_mangle]
-            fn __sel4_panicking_env__abort_hook(info: ::core::option::Option<&$crate::AbortInfo>) {
-                const F: fn(::core::option::Option<&$crate::AbortInfo>) = $path;
-                F(info)
-            }
-        };
-    };
-}
-
-#[macro_export]
-macro_rules! register_debug_put_char {
-    ($(#[$attrs:meta])* $path:path) => {
-        #[allow(non_snake_case)]
-        const _: () = {
-            $(#[$attrs])*
-            #[no_mangle]
-            fn __sel4_panicking_env__debug_put_char(c: u8) {
-                const F: fn(u8) = $path;
-                F(c)
-            }
-        };
-    };
+    () => ($crate::__abort_macro_helper(::core::option::Option::None));
+    ($($arg:tt)*) => ($crate::__abort_macro_helper(::core::option::Option::Some(format_args!($($arg)*))));
 }
