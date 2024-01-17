@@ -6,6 +6,7 @@
 
 use alloc::string::String;
 use core::fmt;
+use core::panic::AssertUnwindSafe;
 
 use sel4_panicking::catch_unwind;
 use sel4_panicking_env::{debug_print, debug_println};
@@ -111,7 +112,7 @@ impl fmt::Display for TestResult {
 }
 
 fn wrap_run(should_panic: ShouldPanic, f: impl FnOnce() -> Result<(), String>) -> TestResult {
-    match catch_unwind(f) {
+    match catch_unwind(AssertUnwindSafe(f)) {
         Err(_) => TestResult::from(should_panic.should_panic()),
         Ok(Ok(())) => TestResult::from(!should_panic.should_panic()),
         Ok(Err(msg)) => {

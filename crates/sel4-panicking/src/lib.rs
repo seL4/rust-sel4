@@ -19,7 +19,7 @@ extern crate alloc;
 use core::fmt;
 use core::mem::ManuallyDrop;
 use core::panic::Location;
-use core::panic::PanicInfo;
+use core::panic::{PanicInfo, UnwindSafe};
 
 use sel4_panicking_env::abort;
 
@@ -108,7 +108,7 @@ fn do_panic(info: ExternalPanicInfo) -> ! {
     }
 }
 
-pub fn catch_unwind<R, F: FnOnce() -> R>(f: F) -> Result<R, Payload> {
+pub fn catch_unwind<R, F: FnOnce() -> R + UnwindSafe>(f: F) -> Result<R, Payload> {
     union Data<F, R> {
         f: ManuallyDrop<F>,
         r: ManuallyDrop<R>,

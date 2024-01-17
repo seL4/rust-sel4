@@ -5,6 +5,7 @@
 //
 
 use core::fmt;
+use core::panic::UnwindSafe;
 
 use serde::Deserialize;
 
@@ -45,7 +46,7 @@ where
     }
 }
 
-pub fn wrap(f: impl FnOnce()) {
+pub fn wrap(f: impl FnOnce() + UnwindSafe) {
     let _ = catch_unwind(|| {
         f();
     });

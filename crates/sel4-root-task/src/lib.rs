@@ -9,6 +9,7 @@
 #![feature(never_type)]
 
 use core::fmt;
+use core::panic::UnwindSafe;
 
 pub use sel4_panicking_env::{abort, debug_print, debug_println};
 pub use sel4_root_task_macros::root_task;
@@ -70,12 +71,12 @@ macro_rules! declare_main {
 
 #[doc(hidden)]
 #[allow(clippy::missing_safety_doc)]
-pub fn run_main<T>(f: impl Fn(&sel4::BootInfo) -> T, bootinfo: &sel4::BootInfo)
+pub fn run_main<T>(f: impl FnOnce(&sel4::BootInfo) -> T + UnwindSafe, bootinfo: &sel4::BootInfo)
 where
     T: Termination,
     T::Error: fmt::Debug,
 {
-    let result = panicking::catch_unwind(|| f(bootinfo).report());
+    let result = panicking::catch_unwind(move || f(bootinfo).report());
     match result {
         Ok(err) => abort!("main thread terminated with error: {err:?}"),
         Err(_) => abort!("uncaught panic in main thread"),

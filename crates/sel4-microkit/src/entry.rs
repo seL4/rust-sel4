@@ -4,6 +4,8 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
+use core::panic::UnwindSafe;
+
 pub use sel4_panicking::catch_unwind;
 pub use sel4_panicking_env::abort;
 
@@ -59,7 +61,7 @@ macro_rules! declare_init {
 }
 
 #[allow(clippy::missing_safety_doc)]
-pub fn run_main<T: Handler>(init: impl FnOnce() -> T) {
+pub fn run_main<T: Handler>(init: impl FnOnce() -> T + UnwindSafe) {
     let result = catch_unwind(|| match run_handler(init()) {
         Ok(absurdity) => match absurdity {},
         Err(err) => err,

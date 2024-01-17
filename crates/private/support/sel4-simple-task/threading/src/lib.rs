@@ -44,6 +44,7 @@ impl From<Endpoint> for StaticThread {
 #[cfg(feature = "alloc")]
 mod when_alloc {
     use alloc::boxed::Box;
+    use core::panic::UnwindSafe;
 
     use sel4::Word;
     use sel4_panicking::catch_unwind;
@@ -62,7 +63,7 @@ mod when_alloc {
     }
 
     extern "C" fn entry(f_arg: Word) {
-        let f = unsafe { Box::from_raw(f_arg as *mut Box<dyn FnOnce()>) };
+        let f = unsafe { Box::from_raw(f_arg as *mut Box<dyn FnOnce() + UnwindSafe>) };
         let _ = catch_unwind(f);
     }
 }
