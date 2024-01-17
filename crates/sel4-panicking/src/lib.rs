@@ -34,9 +34,7 @@ use payload::NoPayload;
 use strategy::{panic_cleanup, start_panic};
 
 pub use hook::{set_hook, PanicHook};
-pub use payload::{FitsWithinSmallPayload, Payload, SmallPayloadValue, UpcastIntoPayload};
-
-// // //
+pub use payload::{Payload, SmallPayload, UpcastIntoPayload, SMALL_PAYLOAD_MAX_SIZE};
 
 pub struct ExternalPanicInfo<'a> {
     payload: Payload,
@@ -109,8 +107,6 @@ fn do_panic(info: ExternalPanicInfo) -> ! {
         abort!("can't unwind this panic")
     }
 }
-
-// // //
 
 pub fn catch_unwind<R, F: FnOnce() -> R>(f: F) -> Result<R, Payload> {
     union Data<F, R> {
