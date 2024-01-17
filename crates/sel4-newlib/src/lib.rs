@@ -53,8 +53,8 @@ mod impl_write {
             1 | 2 => {
                 let bytes =
                     unsafe { slice::from_raw_parts(ptr.cast::<u8>(), len.try_into().unwrap()) };
-                for b in bytes {
-                    debug_put_char(*b);
+                for &b in bytes {
+                    debug_put_char(b);
                 }
                 len
             }

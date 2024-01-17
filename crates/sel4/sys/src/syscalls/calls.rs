@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use core::ffi::{c_char, c_int};
+use core::ffi::c_int;
 use core::sync::atomic::{compiler_fence, Ordering};
 
 use sel4_config::{sel4_cfg, sel4_cfg_if};
@@ -631,7 +631,7 @@ pub fn seL4_Yield() {
 
 sel4_cfg_if! {
     if #[cfg(DEBUG_BUILD)] {
-        pub fn seL4_DebugPutChar(c: c_char) {
+        pub fn seL4_DebugPutChar(c: u8) {
             sys_send_recv_simple(syscall_id::DebugPutChar, c as seL4_Word);
         }
 

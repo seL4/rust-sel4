@@ -5,7 +5,6 @@
 // SPDX-License-Identifier: MIT
 //
 
-use core::ffi::c_char;
 use core::fmt;
 
 use crate::debug_put_char;
@@ -21,7 +20,7 @@ pub struct DebugWrite;
 impl fmt::Write for DebugWrite {
     fn write_str(&mut self, s: &str) -> fmt::Result {
         for &c in s.as_bytes() {
-            debug_put_char(c as c_char)
+            debug_put_char(c)
         }
         Ok(())
     }

@@ -385,9 +385,11 @@ pub unsafe extern "C" fn seL4_Poll(src: seL4_CPtr, sender: *mut seL4_Word) -> se
 
 sel4_cfg_if! {
     if #[cfg(DEBUG_BUILD)] {
+        // Doesn't actually matter, but libsel4 uses char, which may be signed. Use c_char here and
+        // cast to u8 for the sake of principles.
         #[no_mangle]
         pub unsafe extern "C" fn seL4_DebugPutChar(c: c_char) {
-            crate::seL4_DebugPutChar(c)
+            crate::seL4_DebugPutChar(c as u8)
         }
 
         #[no_mangle]
