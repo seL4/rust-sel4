@@ -70,7 +70,6 @@ in rec {
   # TODO collect automatically
   all = lib.filter (v: v != null) [
     tests.root-task.loader
-    tests.root-task.core-libs
     tests.root-task.config
     tests.root-task.tls
     tests.root-task.backtrace
@@ -100,16 +99,6 @@ in rec {
       loader = maybe (haveKernelLoader && haveFullRuntime) (mkInstance {
         rootTask = mkTask {
           rootCrate = crates.tests-root-task-loader;
-          release = false;
-        };
-        extraPlatformArgs = lib.optionalAttrs canSimulate {
-          canAutomateSimply = true;
-        };
-      });
-
-      core-libs = maybe haveFullRuntime (mkInstance {
-        rootTask = mkTask {
-          rootCrate = crates.tests-root-task-core-libs;
           release = false;
         };
         extraPlatformArgs = lib.optionalAttrs canSimulate {

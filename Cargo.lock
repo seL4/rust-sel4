@@ -2903,16 +2903,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "tests-root-task-core-libs"
-version = "0.1.0"
-dependencies = [
- "sel4",
- "sel4-config",
- "sel4-root-task",
- "sel4-sys",
-]
-
-[[package]]
 name = "tests-root-task-default-test-harness"
 version = "0.1.0"
 dependencies = [

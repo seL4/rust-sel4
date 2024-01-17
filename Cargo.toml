@@ -53,7 +53,6 @@ members = [
     "crates/private/tests/root-task/backtrace",
     "crates/private/tests/root-task/c",
     "crates/private/tests/root-task/config",
-    "crates/private/tests/root-task/core-libs",
     "crates/private/tests/root-task/default-test-harness",
     "crates/private/tests/root-task/loader",
     "crates/private/tests/root-task/panicking",
