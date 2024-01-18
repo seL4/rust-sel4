@@ -88,31 +88,31 @@ sel4_panicking_env::register_debug_put_char!(sel4::debug_put_char);
 #[macro_export]
 macro_rules! declare_root_task {
     {
-       main = $main:expr $(,)?
-   } => {
-       $crate::_private::declare_root_task! {
-           main = $main,
-           stack_size = $crate::_private::DEFAULT_STACK_SIZE,
-       }
-   };
-   {
-       main = $main:expr,
-       stack_size = $stack_size:expr $(,)?
-   } => {
-       $crate::_private::declare_main!($main);
-       $crate::_private::declare_stack!($stack_size);
-   };
-   {
-       main = $main:expr,
-       $(stack_size = $stack_size:expr,)?
-       heap_size = $heap_size:expr $(,)?
-   } => {
-       $crate::_private::declare_heap!($heap_size);
-       $crate::_private::declare_root_task! {
-           main = $main,
-           $(stack_size = $stack_size,)?
-       }
-   };
+        main = $main:expr $(,)?
+    } => {
+        $crate::_private::declare_root_task! {
+            main = $main,
+            stack_size = $crate::_private::DEFAULT_STACK_SIZE,
+        }
+    };
+    {
+        main = $main:expr,
+        stack_size = $stack_size:expr $(,)?
+    } => {
+        $crate::_private::declare_main!($main);
+        $crate::_private::declare_stack!($stack_size);
+    };
+    {
+        main = $main:expr,
+        $(stack_size = $stack_size:expr,)?
+        heap_size = $heap_size:expr $(,)?
+    } => {
+        $crate::_private::declare_heap!($heap_size);
+        $crate::_private::declare_root_task! {
+            main = $main,
+            $(stack_size = $stack_size,)?
+        }
+    };
 }
 
 #[doc(hidden)]
