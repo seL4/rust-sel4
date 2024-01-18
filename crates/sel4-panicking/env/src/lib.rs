@@ -64,7 +64,7 @@ fn default_abort_hook(info: Option<&AbortInfo>) {
 
 /// Prints via a link-time hook.
 ///
-/// This function uses the following externally defined symobol:
+/// This function uses the following externally defined symbol:
 ///
 /// ```rust
 /// extern "Rust" {
