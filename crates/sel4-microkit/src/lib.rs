@@ -66,7 +66,7 @@ pub use message::{
 /// See the [`protection_domain`] attribute macro for more detail.
 #[macro_export]
 macro_rules! declare_protection_domain {
-     {
+    {
         init = $init:expr $(,)?
     } => {
         $crate::_private::declare_protection_domain! {
