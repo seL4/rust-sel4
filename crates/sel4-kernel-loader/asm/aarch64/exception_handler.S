@@ -35,6 +35,8 @@
     b       exception_handler
 .endm
 
+.text
+
 .align 12
 BEGIN_FUNC(arm_vector_table)
     ventry  #0

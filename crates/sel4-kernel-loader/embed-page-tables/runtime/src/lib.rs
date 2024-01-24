@@ -6,75 +6,82 @@
 
 #![no_std]
 
-use core::marker::PhantomData;
+use core::cell::UnsafeCell;
 
-pub trait Scheme<const NUM_ENTRIES: usize> {}
+#[repr(align(1024))]
+pub struct A1024;
 
-pub enum AArch64 {}
+#[repr(align(4096))]
+pub struct A4096;
 
-impl Scheme<512> for AArch64 {}
-
-pub enum RiscV64 {}
-
-impl Scheme<512> for RiscV64 {}
-
-pub enum RiscV32 {}
-
-impl Scheme<1024> for RiscV32 {}
-
-pub trait RiscVScheme {}
-
-impl RiscVScheme for RiscV64 {}
-
-impl RiscVScheme for RiscV32 {}
-
-const RISCV_SCHEME_ROTATE_RIGHT_FOR_FINISH: u32 = 2;
+#[repr(align(16384))]
+pub struct A16384;
 
 #[repr(C)]
-pub struct Tables<T: Scheme<NUM_ENTRIES>, const NUM_ENTRIES: usize, const NUM_TABLES: usize> {
-    tables: [Table<T, NUM_ENTRIES>; NUM_TABLES],
+pub struct Table<A, const N: usize> {
+    _alignment: [A; 0],
+    entries: UnsafeCell<[Entry; N]>,
 }
 
-impl<T: Scheme<NUM_ENTRIES>, const NUM_ENTRIES: usize, const NUM_TABLES: usize>
-    Tables<T, NUM_ENTRIES, NUM_TABLES>
-{
-    pub const fn new(tables: [Table<T, NUM_ENTRIES>; NUM_TABLES]) -> Self {
-        Self { tables }
+unsafe impl<A, const N: usize> Sync for Table<A, N> {}
+
+impl<A, const N: usize> Table<A, N> {
+    pub const fn new(entries: [Entry; N]) -> Self {
+        Self {
+            _alignment: [],
+            entries: UnsafeCell::new(entries),
+        }
     }
 
-    pub const fn table(&self, index: usize) -> *const () {
-        &self.tables[index] as *const _ as *const ()
+    pub const fn ptr(&self) -> TablePtr {
+        TablePtr::new(self.entries.get())
+    }
+}
+
+#[derive(Copy, Clone)]
+pub struct TablePtr {
+    ptr: *mut [Entry],
+}
+
+unsafe impl Sync for TablePtr {}
+
+impl TablePtr {
+    pub const fn new(ptr: *mut [Entry]) -> Self {
+        Self { ptr }
     }
 
-    pub const fn root(&self) -> *const () {
+    pub const fn value(&self) -> *mut () {
+        self.ptr.cast()
+    }
+}
+
+pub struct TablePtrs<'a> {
+    ptrs: &'a [TablePtr],
+}
+
+impl<'a> TablePtrs<'a> {
+    pub const fn new(ptrs: &'a [TablePtr]) -> Self {
+        Self { ptrs }
+    }
+
+    pub const fn table(&self, index: usize) -> TablePtr {
+        self.ptrs[index]
+    }
+
+    pub const fn root(&self) -> TablePtr {
         self.table(0)
     }
-}
 
-impl<T: Scheme<NUM_ENTRIES> + RiscVScheme, const NUM_ENTRIES: usize, const NUM_TABLES: usize>
-    Tables<T, NUM_ENTRIES, NUM_TABLES>
-{
-    pub fn finish(&mut self) {
-        for table in self.tables.iter_mut() {
-            for entry in table.entries.iter_mut() {
-                *entry = entry.rotate_right(RISCV_SCHEME_ROTATE_RIGHT_FOR_FINISH);
+    unsafe fn rotate_each_entry_right(&self, n: u32) {
+        for table in self.ptrs.iter() {
+            for entry in table.ptr.as_mut().unwrap().iter_mut() {
+                *entry = entry.rotate_right(n);
             }
         }
     }
-}
 
-#[repr(C, align(4096))]
-pub struct Table<T: Scheme<NUM_ENTRIES>, const NUM_ENTRIES: usize> {
-    _phantom: PhantomData<T>,
-    entries: [Entry; NUM_ENTRIES],
-}
-
-impl<T: Scheme<NUM_ENTRIES>, const NUM_ENTRIES: usize> Table<T, NUM_ENTRIES> {
-    pub const fn new(entries: [Entry; NUM_ENTRIES]) -> Self {
-        Self {
-            _phantom: PhantomData,
-            entries,
-        }
+    pub unsafe fn finish_for_riscv(&self) {
+        self.rotate_each_entry_right(RISCV_ROTATE_RIGHT_FOR_FINISH);
     }
 }
 
@@ -83,29 +90,16 @@ impl<T: Scheme<NUM_ENTRIES>, const NUM_ENTRIES: usize> Table<T, NUM_ENTRIES> {
 pub struct Entry(*const ());
 
 impl Entry {
-    pub const fn new(ptr: Option<*const ()>, offset: usize) -> Self {
+    pub const fn new(ptr: Option<*mut ()>, offset: usize) -> Self {
         Self(match ptr {
             Some(ptr) => unsafe { ptr.byte_add(offset) },
-            None => offset as *const (),
+            None => offset as *mut (),
         })
     }
 
     fn rotate_right(self, n: u32) -> Self {
-        Self((self.0 as usize).rotate_right(n) as *const ())
+        Self((self.0 as usize).rotate_right(n) as *mut ())
     }
 }
 
-pub enum Test {}
-
-impl Scheme<1> for Test {}
-
-impl RiscVScheme for Test {}
-
-#[no_mangle]
-pub static mut these_tables: Tables<Test, 1, 2> = Tables::new(unsafe {
-    [
-        // Table::new([&these_tables.tables[1] as *const Table<A4096, 1> as *const ()]),
-        Table::new([Entry::new(Some(these_tables.table(1)), 1)]),
-        Table::new([Entry::new(None, 0)]),
-    ]
-});
+const RISCV_ROTATE_RIGHT_FOR_FINISH: u32 = 2;

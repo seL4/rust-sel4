@@ -42,7 +42,7 @@ pub(crate) fn get_user_image_bounds() -> Range<usize> {
 }
 
 pub(crate) mod page_tables {
-    #[sel4_config::sel4_cfg(ARCH_AARCH64)]
+    #[sel4_config::sel4_cfg(any(ARCH_AARCH64, ARCH_AARCH32))]
     pub(crate) mod loader {
         include!(concat!(env!("OUT_DIR"), "/loader_page_tables.rs"));
     }

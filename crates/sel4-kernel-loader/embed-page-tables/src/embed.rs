@@ -9,7 +9,7 @@ use std::collections::BTreeMap;
 use proc_macro2::{Ident, TokenStream};
 use quote::{format_ident, quote, ToTokens};
 
-use crate::scheme::{Scheme, SchemeHelpers, SchemeLeafDescriptor};
+use crate::scheme::{Scheme, SchemeLeafDescriptor};
 use crate::table::{AbstractEntry, Table};
 
 impl<T: Scheme> Table<T> {
@@ -63,22 +63,23 @@ impl Embedding {
     }
 
     fn embed<T: Scheme>(mut self, table: &Table<T>) -> TokenStream {
-        let _ = self.embed_inner(table);
+        let _ = self.embed_inner(table, 0);
         self.check_tables_order();
         let runtime_mod_ident = self.runtime_mod_ident;
-        let symbol_ident = self.symbol_ident;
-        let runtime_scheme_ident = format_ident!("{}", T::RUNTIME_SCHEME_IDENT);
-        let num_tables = self.next_index;
-        let num_entries = SchemeHelpers::<T>::num_entries_in_table();
+        let symbol_ident = format_ident!("{}", self.symbol_ident);
+        let symbol_access_ident = format_ident!("{}_access", self.symbol_ident);
         let tables = self.tables.values();
         quote! {
             use #runtime_mod_ident::*;
 
+            #[allow(non_upper_case_globals)]
+            pub static #symbol_access_ident: TablePtrs = TablePtrs::new(&[
+                #(#tables,)*
+            ]);
+
             #[no_mangle]
             #[allow(unused_unsafe)]
-            pub static mut #symbol_ident: Tables<#runtime_scheme_ident, #num_entries, #num_tables> = Tables::new(unsafe {
-                [#(#tables,)*]
-            });
+            pub static #symbol_ident: TablePtr = #symbol_access_ident.root();
         }
     }
 
@@ -88,7 +89,7 @@ impl Embedding {
         });
     }
 
-    fn embed_inner<T: Scheme>(&mut self, table: &Table<T>) -> usize {
+    fn embed_inner<T: Scheme>(&mut self, table: &Table<T>, level: usize) -> usize {
         let index = self.allocate_index();
         let entries = table.entries.iter().map(|entry| {
             let entry = EntryForEmbedding::<T>::from_abstract_entry(entry);
@@ -99,10 +100,10 @@ impl Embedding {
                     }
                 }
                 Some(ptr) => {
-                    let child_index = self.embed_inner(ptr);
-                    let symbol_ident = &self.symbol_ident;
+                    let child_index = self.embed_inner(ptr, level + 1);
+                    let symbol_access_ident = format_ident!("{}_access", self.symbol_ident);
                     quote! {
-                        Some(#symbol_ident.table(#child_index))
+                        Some(#symbol_access_ident.table(#child_index).value())
                     }
                 }
             };
@@ -111,8 +112,13 @@ impl Embedding {
                 Entry::new(#ptr, #offset as usize)
             }
         });
+        let align_type = format_ident!("A{}", 1usize << T::level_align_bits(level));
+        let num_entries = table.entries.len();
         let toks = quote! {
-            Table::new([#(#entries,)*])
+            {
+                static TABLE: Table<#align_type, #num_entries> = Table::new([#(#entries,)*]);
+                TABLE.ptr()
+            }
         };
         self.tables.insert(index, toks);
         index

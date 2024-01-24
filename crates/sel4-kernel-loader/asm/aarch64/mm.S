@@ -64,6 +64,8 @@ finished_\op:
     isb
 .endm
 
+.text
+
 BEGIN_FUNC(invalidate_dcache)
     dcache  isw
     ret

@@ -8,8 +8,8 @@ use sel4_config::sel4_cfg_if;
 use sel4_kernel_loader_payload_types::PayloadInfo;
 
 sel4_cfg_if! {
-    if #[cfg(ARCH_AARCH64)] {
-        #[path = "aarch64/mod.rs"]
+    if #[cfg(any(ARCH_AARCH64, ARCH_AARCH32))] {
+        #[path = "arm/mod.rs"]
         mod imp;
     } else if #[cfg(any(ARCH_RISCV64, ARCH_RISCV32))] {
         #[path = "riscv/mod.rs"]
@@ -19,7 +19,7 @@ sel4_cfg_if! {
 
 // HACK for rustfmt
 #[cfg(any())]
-mod aarch64;
+mod arm;
 #[cfg(any())]
 mod riscv;
 

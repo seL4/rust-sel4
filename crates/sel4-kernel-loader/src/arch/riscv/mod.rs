@@ -13,7 +13,11 @@ use sel4_config::sel4_cfg_if;
 use sel4_kernel_loader_payload_types::PayloadInfo;
 
 use crate::{
-    arch::Arch, main, secondary_main, this_image::page_tables::kernel::kernel_boot_level_0_table,
+    arch::Arch,
+    main, secondary_main,
+    this_image::page_tables::kernel::{
+        kernel_boot_level_0_table, kernel_boot_level_0_table_access,
+    },
 };
 
 pub(crate) struct PerCoreImpl {
@@ -37,7 +41,7 @@ impl Arch for ArchImpl {
 
     fn init() {
         unsafe {
-            kernel_boot_level_0_table.finish();
+            kernel_boot_level_0_table_access.finish_for_riscv();
         }
     }
 
@@ -130,7 +134,7 @@ fn switch_page_tables() {
     const MODE: satp::Mode = satp::Mode::Sv39;
 
     unsafe {
-        let ppn = kernel_boot_level_0_table.root() as usize >> 12;
+        let ppn = kernel_boot_level_0_table.value() as usize >> 12;
         asm!("sfence.vma", options(nostack));
         satp::set(MODE, 0, ppn);
         asm!("fence.i", options(nostack));
