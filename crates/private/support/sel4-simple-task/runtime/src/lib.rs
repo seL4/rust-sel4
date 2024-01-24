@@ -79,6 +79,7 @@ pub unsafe extern "C" fn cont_fn(cont_arg: *mut sel4_runtime_common::ContArg) ->
         CONFIG.set(config.clone()).unwrap();
         sel4_runtime_common::set_eh_frame_finder().unwrap();
         sel4_panicking::set_hook(&panic_hook);
+        sel4_runtime_common::run_ctors();
         __sel4_simple_task_main(config.arg());
     } else {
         let endpoint = Endpoint::from_bits(thread_config.endpoint().unwrap());

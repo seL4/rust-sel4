@@ -7,6 +7,10 @@
 #![no_std]
 #![feature(cfg_target_thread_local)]
 
+mod ctors;
+
+pub use ctors::run_ctors;
+
 #[cfg(feature = "start")]
 mod start;
 
