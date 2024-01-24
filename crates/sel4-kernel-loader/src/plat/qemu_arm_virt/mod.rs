@@ -6,6 +6,8 @@
 
 use spin::Mutex;
 
+use sel4_config::sel4_cfg_bool;
+
 use crate::{
     arch::{drivers::psci, reset_cntvoff},
     drivers::pl011::Pl011Device,
@@ -28,8 +30,10 @@ impl Plat for PlatImpl {
     }
 
     fn init_per_core() {
-        unsafe {
-            reset_cntvoff();
+        if sel4_cfg_bool!(ARM_HYPERVISOR_SUPPORT) {
+            unsafe {
+                reset_cntvoff();
+            }
         }
     }
 

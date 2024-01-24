@@ -40,6 +40,8 @@ sel4_cfg_if! {
 sel4_cfg_if! {
     if #[cfg(SEL4_ARCH = "aarch64")] {
         type SchemeImpl = schemes::AArch64;
+    } else if #[cfg(SEL4_ARCH = "aarch32")] {
+        type SchemeImpl = schemes::AArch32;
     } else if #[cfg(SEL4_ARCH = "riscv64")] {
         sel4_cfg_if! {
             if #[cfg(PT_LEVELS = "3")] {
@@ -124,18 +126,22 @@ fn main() {
 // // //
 
 fn mk_loader_map() -> String {
+    let device_range_end = match sel4_cfg_str!(SEL4_ARCH) {
+        "aarch64" => 1 << 39,
+        "aarch32" => SchemeHelpers::<SchemeImpl>::virt_bounds().end,
+        _ => unreachable!(),
+    };
+
     let mut regions = RegionsBuilder::<SchemeImpl>::new();
+    regions = regions.insert(Region::valid(
+        0..device_range_end,
+        SchemeImpl::mk_device_leaf_for_loader_map,
+    ));
     for range in PLATFORM_INFO.memory.iter() {
         let range = range.start.into()..range.end.into();
         regions = regions.insert(Region::valid(
             range,
             SchemeImpl::mk_normal_leaf_for_loader_map,
-        ));
-    }
-    for range in get_device_regions() {
-        regions = regions.insert(Region::valid(
-            range,
-            SchemeImpl::mk_device_leaf_for_loader_map,
         ));
     }
 
@@ -145,18 +151,6 @@ fn mk_loader_map() -> String {
     );
 
     format!("{toks}")
-}
-
-// HACK
-fn get_device_regions() -> Vec<Range<u64>> {
-    let page = |start| start..start + GRANULE_SIZE;
-    match sel4_cfg_str!(PLAT) {
-        "qemu-arm-virt" => vec![page(0x0900_0000)],
-        "bcm2711" => vec![page(0x0000_0000), page(0xfe21_5000)],
-        "spike" => vec![],
-        "qemu-riscv-virt" => vec![],
-        _ => panic!("unsupported platform"),
-    }
 }
 
 fn mk_kernel_map(kernel_phys_addr_range: Range<u64>, kernel_phys_to_virt_offset: u64) -> String {
@@ -239,6 +233,32 @@ const AARCH64_NORMAL_SHAREABILITY: u64 = if sel4_cfg_usize!(MAX_NUM_NODES) > 1 {
 } else {
     0b00
 };
+
+impl SchemeExt for schemes::AArch32 {
+    fn mk_normal_leaf_for_loader_map(loc: LeafLocation) -> Self::LeafDescriptor {
+        loc.map_identity::<schemes::AArch32>()
+            .set_access_flag(true)
+            .set_attributes(0b101, false, true)
+            .set_shareability(true)
+    }
+
+    fn mk_device_leaf_for_loader_map(loc: LeafLocation) -> Self::LeafDescriptor {
+        loc.map_identity::<schemes::AArch32>().set_access_flag(true)
+    }
+
+    fn mk_identity_leaf_for_kernel_map(loc: LeafLocation) -> Self::LeafDescriptor {
+        loc.map_identity::<schemes::AArch32>().set_access_flag(true)
+    }
+
+    fn mk_kernel_leaf_for_kernel_map(
+        phys_to_virt_offset: u64,
+        loc: LeafLocation,
+    ) -> Self::LeafDescriptor {
+        loc.map::<schemes::AArch32>(|vaddr| virt_to_phys(vaddr, phys_to_virt_offset))
+            .set_access_flag(true)
+            .set_shareability(true)
+    }
+}
 
 impl SchemeExt for schemes::Riscv64Sv39 {
     fn mk_identity_leaf_for_kernel_map(loc: LeafLocation) -> Self::LeafDescriptor {

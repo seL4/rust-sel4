@@ -6,13 +6,9 @@
 
 use spin::Mutex;
 
-use crate::{
-    arch::{drivers::spin_table, reset_cntvoff},
-    drivers::bcm2835_aux_uart::Bcm2835AuxUartDevice,
-    plat::Plat,
-};
+use sel4_config::sel4_cfg;
 
-const SPIN_TABLE: &[usize] = &[0xd8, 0xe0, 0xe8, 0xf0];
+use crate::{arch::reset_cntvoff, drivers::bcm2835_aux_uart::Bcm2835AuxUartDevice, plat::Plat};
 
 const SERIAL_DEVICE_BASE_ADDR: usize = 0xfe21_5000;
 
@@ -43,7 +39,17 @@ impl Plat for PlatImpl {
         get_serial_device().put_char(c);
     }
 
+    #[sel4_cfg(ARCH_AARCH64)]
     fn start_secondary_core(core_id: usize, sp: usize) {
-        spin_table::start_secondary_core(SPIN_TABLE, core_id, sp)
+        const SPIN_TABLE: &[usize] = &[0xd8, 0xe0, 0xe8, 0xf0];
+
+        crate::arch::drivers::spin_table::start_secondary_core(SPIN_TABLE, core_id, sp)
+    }
+
+    #[sel4_cfg(ARCH_AARCH32)]
+    fn start_secondary_core(core_id: usize, sp: usize) {
+        const SPIN_TABLE: &[usize] = &[0xff80_008C, 0xff80_009C, 0xff80_00AC, 0xff80_00BC];
+
+        crate::arch::drivers::spin_table::start_secondary_core(SPIN_TABLE, core_id, sp)
     }
 }

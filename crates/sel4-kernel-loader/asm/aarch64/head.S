@@ -42,9 +42,11 @@ clear_bss_loop:
     bl      init_core_state
     b       arch_main
 
+
 secondary_entry:
     bl      init_core_state
     b       arch_secondary_main
+
 
 hang:
     wfe
@@ -80,7 +82,8 @@ BEGIN_LOCAL_FUNC(init_core_state)
     msr     tcr_el2, x8
     isb
 
-    adrp    x8, loader_level_0_table
+    ldr     x8, =loader_level_0_table
+    ldr     x8, [x8]
     msr     ttbr0_el2, x8
     isb
 
@@ -103,5 +106,4 @@ BEGIN_LOCAL_FUNC(init_core_state)
 
     ldp     x29, x30, [sp], #16
     ret
-
 END_FUNC(init_core_state)

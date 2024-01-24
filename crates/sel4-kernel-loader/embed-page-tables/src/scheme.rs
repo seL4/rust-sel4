@@ -16,8 +16,14 @@ pub trait Scheme {
     type WordPrimitive: ToTokens + fmt::Debug;
 
     const PAGE_BITS: usize;
-    const LEVEL_BITS: usize;
     const NUM_LEVELS: usize;
+
+    fn level_bits(level: usize) -> usize;
+
+    fn level_align_bits(level: usize) -> usize {
+        Self::level_bits(level)
+            + usize::try_from(mem::size_of::<Self::WordPrimitive>().trailing_zeros()).unwrap()
+    }
 
     const MIN_LEVEL_FOR_LEAF: usize;
 
@@ -38,35 +44,41 @@ pub trait SchemeLeafDescriptor<WordPrimitive> {
 pub struct SchemeHelpers<T: ?Sized>(PhantomData<T>);
 
 impl<T: Scheme> SchemeHelpers<T> {
-    pub const fn word_bits() -> usize {
+    pub fn word_bits() -> usize {
         mem::size_of::<T::WordPrimitive>() * 8
     }
 
-    pub const fn num_entries_in_table() -> usize {
-        1 << T::LEVEL_BITS
+    pub fn num_entries_in_table(level: usize) -> usize {
+        1 << T::level_bits(level)
     }
 
-    pub const fn vaddr_bits() -> usize {
-        T::LEVEL_BITS * T::NUM_LEVELS + T::PAGE_BITS
+    pub fn vaddr_bits() -> usize {
+        (0..T::NUM_LEVELS).map(T::level_bits).sum::<usize>() + T::PAGE_BITS
     }
 
-    pub const fn vaddr_mask() -> u64 {
+    pub fn vaddr_mask() -> u64 {
         (1 << Self::vaddr_bits()) - 1
     }
 
-    pub const fn virt_bounds() -> Range<u64> {
+    pub fn virt_bounds() -> Range<u64> {
         0..(1 << Self::vaddr_bits())
     }
 
     pub fn largest_leaf_size_bits() -> usize {
-        T::LEVEL_BITS * (T::NUM_LEVELS - T::MIN_LEVEL_FOR_LEAF - 1) + T::PAGE_BITS
+        ((T::MIN_LEVEL_FOR_LEAF + 1)..T::NUM_LEVELS)
+            .map(T::level_bits)
+            .sum::<usize>()
+            + T::PAGE_BITS
     }
 
     pub(crate) fn leaf_descriptor_from_paddr_with_check(
         paddr: u64,
         level: usize,
     ) -> T::LeafDescriptor {
-        let num_zero_bits = (T::NUM_LEVELS - level - 1) * T::LEVEL_BITS + T::PAGE_BITS;
+        let num_zero_bits = ((level + 1)..T::NUM_LEVELS)
+            .map(T::level_bits)
+            .sum::<usize>()
+            + T::PAGE_BITS;
         let mask = (1 << num_zero_bits) - 1;
         assert_eq!(paddr & mask, 0);
         T::LeafDescriptor::from_paddr(paddr, level)
@@ -80,8 +92,11 @@ impl Scheme for AArch64 {
     type WordPrimitive = u64;
 
     const PAGE_BITS: usize = 12;
-    const LEVEL_BITS: usize = 9;
     const NUM_LEVELS: usize = 4;
+
+    fn level_bits(_level: usize) -> usize {
+        9
+    }
 
     const MIN_LEVEL_FOR_LEAF: usize = 1;
 
@@ -127,9 +142,88 @@ impl AArch64LeafDescriptor {
     }
 }
 
+#[derive(Debug)]
+pub enum AArch32 {}
+
+impl Scheme for AArch32 {
+    type WordPrimitive = u32;
+
+    const PAGE_BITS: usize = 12;
+    const NUM_LEVELS: usize = 2;
+
+    fn level_bits(level: usize) -> usize {
+        match level {
+            0 => 12,
+            1 => 8,
+            _ => unreachable!(),
+        }
+    }
+
+    const MIN_LEVEL_FOR_LEAF: usize = 0;
+
+    type LeafDescriptor = AArch32LeafDescriptor;
+
+    const EMPTY_DESCRIPTOR: Self::WordPrimitive = 0b00;
+    const SYMBOLIC_BRANCH_DESCRIPTOR_OFFSET: Self::WordPrimitive = 0b01;
+
+    const RUNTIME_SCHEME_IDENT: &'static str = "AArch32";
+}
+
+#[derive(Debug)]
+pub struct AArch32LeafDescriptor {
+    value: u32,
+    level: usize,
+}
+
+impl SchemeLeafDescriptor<u32> for AArch32LeafDescriptor {
+    fn from_paddr(paddr: u64, level: usize) -> Self {
+        let mut desc: u32 = paddr.try_into().unwrap();
+        desc.set_bit_range(1, 0, 0b10);
+        Self { value: desc, level }
+    }
+
+    fn to_raw(&self) -> u32 {
+        self.value
+    }
+}
+
+impl AArch32LeafDescriptor {
+    pub fn set_access_flag(mut self, value: bool) -> Self {
+        let ix = match self.level {
+            0 => 10,
+            1 => 4,
+            _ => unreachable!(),
+        };
+        self.value.set_bit(ix, value);
+        self
+    }
+
+    pub fn set_attributes(mut self, tex: u32, c: bool, b: bool) -> Self {
+        assert_eq!(tex >> 3, 0);
+        let (tex_hi, tex_lo) = match self.level {
+            0 => (14, 12),
+            1 => (8, 6),
+            _ => unreachable!(),
+        };
+        self.value.set_bit_range(tex_hi, tex_lo, tex);
+        self.value.set_bit(3, c);
+        self.value.set_bit(2, b);
+        self
+    }
+
+    pub fn set_shareability(mut self, value: bool) -> Self {
+        let ix = match self.level {
+            0 => 16,
+            1 => 10,
+            _ => unreachable!(),
+        };
+        self.value.set_bit(ix, value);
+        self
+    }
+}
+
 const RISCV_ENCODE_FOR_LINKING_LEFT_ROTATION: u32 = 2;
 
-#[allow(dead_code)]
 const fn riscv32_encode_for_linking(word: u32) -> u32 {
     word.rotate_left(RISCV_ENCODE_FOR_LINKING_LEFT_ROTATION)
 }
@@ -145,8 +239,11 @@ impl Scheme for Riscv64Sv39 {
     type WordPrimitive = u64;
 
     const PAGE_BITS: usize = 12;
-    const LEVEL_BITS: usize = 9;
     const NUM_LEVELS: usize = 3;
+
+    fn level_bits(_level: usize) -> usize {
+        9
+    }
 
     const MIN_LEVEL_FOR_LEAF: usize = 0;
 
@@ -206,8 +303,11 @@ impl Scheme for Riscv32Sv32 {
     type WordPrimitive = u32;
 
     const PAGE_BITS: usize = 12;
-    const LEVEL_BITS: usize = 10;
     const NUM_LEVELS: usize = 2;
+
+    fn level_bits(_level: usize) -> usize {
+        10
+    }
 
     const MIN_LEVEL_FOR_LEAF: usize = 0;
 

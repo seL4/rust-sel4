@@ -92,8 +92,11 @@ where
 
     fn construct_inner(&mut self, level: usize, table_vaddr: u64) -> Table<T> {
         assert!(level < T::NUM_LEVELS);
-        let num_entries = SchemeHelpers::<T>::num_entries_in_table();
-        let step_bits = (T::NUM_LEVELS - level - 1) * T::LEVEL_BITS + T::PAGE_BITS;
+        let num_entries = SchemeHelpers::<T>::num_entries_in_table(level);
+        let step_bits = ((level + 1)..T::NUM_LEVELS)
+            .map(T::level_bits)
+            .sum::<usize>()
+            + T::PAGE_BITS;
         let step = 1 << step_bits;
         Table {
             entries: (0..num_entries)

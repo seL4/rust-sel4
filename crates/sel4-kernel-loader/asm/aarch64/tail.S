@@ -9,6 +9,8 @@
 #include "registers.h"
 #include "mm.h"
 
+.text
+
 BEGIN_FUNC(switch_translation_tables_el2)
 
     stp     x29, x30, [sp, #-16]!
@@ -20,7 +22,8 @@ BEGIN_FUNC(switch_translation_tables_el2)
 
     bl      invalidate_icache
 
-    adrp    x8, kernel_boot_level_0_table
+    ldr     x8, =kernel_boot_level_0_table
+    ldr     x8, [x8]
     msr     ttbr0_el2, x8
     isb
 
