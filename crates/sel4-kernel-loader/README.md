@@ -26,10 +26,34 @@ they are for the `sel4-config` crate and its dependants (i.e. via `SEL4_PREFIX` 
 `SEL4_INCLUDE_DIRS`).
 
 Future versions of `sel4-kernel-loader` will be configurable with a JSON file provided at compile
-time via `SEL4_KERNEL_LOADER_CONFIG`. If not configuration is provided, defaults will be used.
+time via `SEL4_KERNEL_LOADER_CONFIG`. If no configuration is provided, defaults will be used.
 
 Here is an example of how to build and use this crate. First, independantly of the application,
 build the loader and accompanying CLI tool:
+
+```bash
+CC=aarch64-linux-gnu-gcc \
+SEL4_PREFIX=$my_sel4_prefix \
+    cargo build \
+        -Z build-std=core,alloc,compiler_builtins \
+        -Z build-std-features=compiler-builtins-mem \
+        --target aarch64-unknown-none \
+        --release \
+        -p sel4-kernel-loader
+```
+
+Later, prepare the loader by adding the kernel+application payload:
+
+```bash
+cargo run -p sel4-kernel-loader-add-payload -- \
+    --sel4-prefix $my_sel4_prefix \
+    --loader target/aarch64-unknown-none/release/sel4-kernel-loader \
+    --app $my_app \
+    -o image.elf
+```
+
+There are other ways to acquire and build this code. For example, one could use `cargo install`
+without having to clone this repository:
 
 ```bash
 url="https://github.com/seL4/rust-sel4"
@@ -41,6 +65,7 @@ SEL4_PREFIX=$my_sel4_prefix \
         -Z build-std=core,alloc,compiler_builtins \
         -Z build-std-features=compiler-builtins-mem \
         --target aarch64-unknown-none \
+        --release \
         --root $my_project_local_cargo_root \
         --git $url \
         sel4-kernel-loader
@@ -49,11 +74,7 @@ cargo install \
     --root $my_project_local_cargo_root \
     --git $url \
     sel4-kernel-loader-add-payload
-```
 
-Later, prepare the loader by adding the kernel+application payload:
-
-```bash
 $my_project_local_cargo_root/bin/sel4-kernel-loader-add-payload \
     --sel4-prefix $my_sel4_prefix \
     --loader $my_project_local_cargo_root/bin/sel4-kernel-loader \
