@@ -1,12 +1,12 @@
 //
 // Copyright 2023, Colias Group, LLC
 //
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: BSD-2-Clause
 //
 
 #![no_std]
-#![feature(core_intrinsics)]
-#![allow(internal_features)]
+#![cfg_attr(feature = "unstable", feature(core_intrinsics))]
+#![cfg_attr(feature = "unstable", allow(internal_features))]
 
 use core::ptr::NonNull;
 
@@ -14,11 +14,9 @@ use volatile::access::{Access, ReadWrite};
 
 pub use volatile::{access, map_field, VolatilePtr, VolatileRef};
 
-mod atomics;
-
 pub mod ops;
 
-pub use atomics::{Atomic, AtomicPtr};
+pub use sel4_atomic_ptr::{Atomic, AtomicPtr};
 
 // TODO
 pub type ExternallySharedOps = ops::ZerocopyOps<ops::NormalOps>;
@@ -26,7 +24,6 @@ pub type ExternallySharedOps = ops::ZerocopyOps<ops::NormalOps>;
 // pub type ExternallySharedOps = ops::ZerocopyOps<ops::BytewiseOps<ops::UnorderedAtomicOps>>;
 
 pub type ExternallySharedRef<'a, T, A = ReadWrite> = VolatileRef<'a, T, A, ExternallySharedOps>;
-
 pub type ExternallySharedPtr<'a, T, A = ReadWrite> = VolatilePtr<'a, T, A, ExternallySharedOps>;
 
 pub trait ExternallySharedRefExt<'a, T: ?Sized, A: Access> {
@@ -43,14 +40,14 @@ impl<'a, T: ?Sized, A: Access> ExternallySharedRefExt<'a, T, A> for ExternallySh
     }
 }
 
-pub trait ExternallySharedPtrExt<'a, T: ?Sized, A> {
-    fn atomic(self) -> AtomicPtr<'a, T, A>
+pub trait ExternallySharedPtrExt<'a, T: ?Sized> {
+    fn atomic(self) -> AtomicPtr<'a, T>
     where
         T: Atomic;
 }
 
-impl<'a, T: ?Sized, A> ExternallySharedPtrExt<'a, T, A> for ExternallySharedPtr<'a, T, A> {
-    fn atomic(self) -> AtomicPtr<'a, T, A>
+impl<'a, T: ?Sized> ExternallySharedPtrExt<'a, T> for ExternallySharedPtr<'a, T, ReadWrite> {
+    fn atomic(self) -> AtomicPtr<'a, T>
     where
         T: Atomic,
     {

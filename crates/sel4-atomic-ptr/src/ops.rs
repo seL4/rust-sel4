@@ -6,11 +6,9 @@
 
 use core::sync::atomic::Ordering;
 
-use volatile::access::{Readable, Writable};
-
 use super::{generic, Atomic, AtomicPtr};
 
-impl<'a, T, A> AtomicPtr<'a, T, A> {
+impl<'a, T> AtomicPtr<'a, T> {
     fn as_mut_ptr(self) -> *mut T {
         self.pointer.as_ptr()
     }
@@ -20,15 +18,13 @@ impl<'a, T, A> AtomicPtr<'a, T, A> {
     }
 }
 
-impl<'a, T: Atomic, A: Readable> AtomicPtr<'a, T, A> {
+impl<'a, T: Atomic> AtomicPtr<'a, T> {
     #[inline]
     pub fn load(self, order: Ordering) -> T {
         // SAFETY: data races are prevented by atomic intrinsics.
         unsafe { generic::atomic_load(self.as_const_ptr(), order.into()) }
     }
-}
 
-impl<'a, T: Atomic, A: Readable + Writable> AtomicPtr<'a, T, A> {
     #[inline]
     pub fn store(self, val: T, order: Ordering) {
         // SAFETY: data races are prevented by atomic intrinsics.

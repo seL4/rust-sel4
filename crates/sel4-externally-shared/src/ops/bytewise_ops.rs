@@ -1,25 +1,22 @@
 //
 // Copyright 2023, Colias Group, LLC
 //
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: BSD-2-Clause
 //
 
-#![cfg_attr(not(feature = "unstable"), allow(unused_imports))]
-
+use core::marker::PhantomData;
 use core::mem;
 
-use volatile::ops::{Ops, UnitaryOps};
+use volatile::ops::{BulkOps, Ops, UnitaryOps};
 use zerocopy::{AsBytes, FromBytes};
 
-#[cfg(feature = "unstable")]
-use volatile::ops::BulkOps;
-
-#[derive(Debug, Default, Copy, Clone)]
-pub struct BytewiseOps<O>(O);
+#[derive(Default, Copy, Clone)]
+pub struct BytewiseOps<O> {
+    _phantom: PhantomData<O>,
+}
 
 impl<O: Ops> Ops for BytewiseOps<O> {}
 
-#[cfg(feature = "unstable")]
 impl<O: BulkOps<u8>, T: FromBytes + AsBytes> UnitaryOps<T> for BytewiseOps<O> {
     unsafe fn read(src: *const T) -> T {
         let mut val = T::new_zeroed();
@@ -34,7 +31,6 @@ impl<O: BulkOps<u8>, T: FromBytes + AsBytes> UnitaryOps<T> for BytewiseOps<O> {
     }
 }
 
-#[cfg(feature = "unstable")]
 impl<O: BulkOps<u8>, T: FromBytes + AsBytes> BulkOps<T> for BytewiseOps<O> {
     unsafe fn memmove(dst: *mut T, src: *const T, count: usize) {
         unsafe { O::memmove(dst.cast(), src.cast(), count * mem::size_of::<T>()) }
