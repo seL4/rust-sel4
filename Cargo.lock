@@ -1918,6 +1918,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "sel4-atomic-ptr"
+version = "0.1.0"
+dependencies = [
+ "cfg-if",
+]
+
+[[package]]
 name = "sel4-backtrace"
 version = "0.1.0"
 dependencies = [
@@ -2190,6 +2197,8 @@ dependencies = [
 name = "sel4-externally-shared"
 version = "0.1.0"
 dependencies = [
+ "cfg-if",
+ "sel4-atomic-ptr",
  "volatile",
  "zerocopy 0.7.32",
 ]
@@ -3129,7 +3138,7 @@ checksum = "6a02e4885ed3bc0f2de90ea6dd45ebcbb66dacffe03547fadbb0eeae2770887d"
 [[package]]
 name = "volatile"
 version = "0.5.1"
-source = "git+https://github.com/coliasgroup/volatile.git?tag=keep/8aee5539716d3d38247f46eddd42b382#8aee5539716d3d38247f46eddd42b3828406c008"
+source = "git+https://github.com/coliasgroup/volatile.git?tag=keep/aa7512906e9b76066ed928eb6986b0f9#aa7512906e9b76066ed928eb6986b0f9b1750e91"
 
 [[package]]
 name = "wasi"

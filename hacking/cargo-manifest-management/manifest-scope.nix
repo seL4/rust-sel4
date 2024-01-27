@@ -177,7 +177,7 @@ in rec {
 
   volatileSource = {
     git = "https://github.com/coliasgroup/volatile.git";
-    tag = "keep/8aee5539716d3d38247f46eddd42b382"; # branch coliasgroup
+    tag = "keep/aa7512906e9b76066ed928eb6986b0f9"; # branch coliasgroup
   };
 
   fatSource = {

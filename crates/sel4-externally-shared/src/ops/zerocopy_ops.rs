@@ -1,17 +1,18 @@
 //
 // Copyright 2023, Colias Group, LLC
 //
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: BSD-2-Clause
 //
 
-use volatile::ops::{Ops, UnitaryOps};
+use core::marker::PhantomData;
+
+use volatile::ops::{BulkOps, Ops, UnitaryOps};
 use zerocopy::{AsBytes, FromBytes};
 
-#[cfg(feature = "unstable")]
-use volatile::ops::BulkOps;
-
-#[derive(Debug, Default, Copy, Clone)]
-pub struct ZerocopyOps<O>(O);
+#[derive(Default, Copy, Clone)]
+pub struct ZerocopyOps<O> {
+    _phantom: PhantomData<O>,
+}
 
 impl<O: Ops> Ops for ZerocopyOps<O> {}
 
@@ -25,7 +26,6 @@ impl<O: UnitaryOps<T>, T: FromBytes + AsBytes> UnitaryOps<T> for ZerocopyOps<O> 
     }
 }
 
-#[cfg(feature = "unstable")]
 impl<O: BulkOps<T>, T: FromBytes + AsBytes> BulkOps<T> for ZerocopyOps<O> {
     unsafe fn memmove(dst: *mut T, src: *const T, count: usize) {
         unsafe { O::memmove(dst, src, count) }

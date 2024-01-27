@@ -1,18 +1,15 @@
 //
 // Copyright 2023, Colias Group, LLC
 //
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: BSD-2-Clause
 //
 
 use core::ptr;
 
-use volatile::ops::{Ops, UnitaryOps};
+use volatile::ops::{BulkOps, Ops, UnitaryOps};
 
-#[cfg(feature = "unstable")]
-use volatile::ops::BulkOps;
-
-#[derive(Debug, Default, Copy, Clone)]
-pub struct NormalOps;
+#[derive(Default, Copy, Clone)]
+pub struct NormalOps(());
 
 impl Ops for NormalOps {}
 
@@ -26,7 +23,6 @@ impl<T> UnitaryOps<T> for NormalOps {
     }
 }
 
-#[cfg(feature = "unstable")]
 impl<T> BulkOps<T> for NormalOps {
     unsafe fn memmove(dst: *mut T, src: *const T, count: usize) {
         unsafe { ptr::copy(src, dst, count) }

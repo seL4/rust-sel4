@@ -1,7 +1,7 @@
 //
 // Copyright 2023, Colias Group, LLC
 //
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: BSD-2-Clause
 //
 
 pub use volatile::ops::*;

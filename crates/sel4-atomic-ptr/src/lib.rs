@@ -4,13 +4,15 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 //
 
+#![no_std]
+#![feature(core_intrinsics)]
+#![allow(internal_features)]
+
 use core::fmt;
 use core::marker::PhantomData;
 use core::mem;
 use core::ptr::NonNull;
 use core::sync::atomic;
-
-use volatile::access::{ReadOnly, ReadWrite, WriteOnly};
 
 mod generic;
 mod ops;
@@ -19,30 +21,26 @@ mod ordering;
 use ordering::OrderingExhaustive;
 
 #[repr(transparent)]
-pub struct AtomicPtr<'a, T, A = ReadWrite> {
+pub struct AtomicPtr<'a, T> {
     pointer: NonNull<T>,
     reference: PhantomData<&'a T>,
-    access: PhantomData<A>,
 }
 
-impl<'a, T, A> Copy for AtomicPtr<'a, T, A> {}
+impl<'a, T> Copy for AtomicPtr<'a, T> {}
 
-impl<T, A> Clone for AtomicPtr<'_, T, A> {
+impl<T> Clone for AtomicPtr<'_, T> {
     fn clone(&self) -> Self {
         *self
     }
 }
 
-impl<T, A> fmt::Debug for AtomicPtr<'_, T, A> {
+impl<T> fmt::Debug for AtomicPtr<'_, T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_struct("AtomicPtr")
-            .field("pointer", &self.pointer)
-            .field("access", &self.access)
-            .finish()
+        f.debug_tuple("AtomicPtr").field(&self.pointer).finish()
     }
 }
 
-impl<'a, T, A> AtomicPtr<'a, T, A> {
+impl<'a, T> AtomicPtr<'a, T> {
     /// # Safety
     ///
     /// Necessary but not sufficient:
@@ -52,20 +50,11 @@ impl<'a, T, A> AtomicPtr<'a, T, A> {
         AtomicPtr {
             pointer,
             reference: PhantomData,
-            access: PhantomData,
         }
     }
 
     pub fn as_raw_ptr(self) -> NonNull<T> {
         self.pointer
-    }
-
-    pub fn read_only(self) -> AtomicPtr<'a, T, ReadOnly> {
-        unsafe { AtomicPtr::new(self.pointer) }
-    }
-
-    pub fn write_only(self) -> AtomicPtr<'a, T, WriteOnly> {
-        unsafe { AtomicPtr::new(self.pointer) }
     }
 }
 
