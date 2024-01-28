@@ -173,8 +173,7 @@ impl Default for LocalPool {
 ///
 /// This function will block the caller until the given future has completed.
 ///
-/// Use a [`LocalPool`](LocalPool) if you need finer-grained control over
-/// spawned tasks.
+/// Use a [`LocalPool`] if you need finer-grained control over spawned tasks.
 pub fn run_until_stalled<F: Future>(mut future: Pin<&mut F>) -> Poll<F::Output> {
     run_executor_until_stalled(|cx| future.as_mut().poll(cx))
 }
