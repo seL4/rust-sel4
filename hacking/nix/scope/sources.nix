@@ -49,28 +49,27 @@ in rec {
   seL4 = {
     rust = fetchGit {
       url = "https://github.com/coliasgroup/seL4.git";
-      rev = "360030019e45adf559c13a98400a7be4e7fb0ab9"; # branch "rust"
+      rev = "2404473ed2e68c8e627cb4d6588bd57633038109"; # branch "rust"
       local = localRoot + "/seL4";
     };
 
     rust-microkit = fetchGit {
       url = "https://github.com/coliasgroup/seL4.git";
-      rev = "7b8c552b36fe13b8a846b06a659c23697b7df926"; # branch "rust-microkit"
+      rev = "5f71dc4a5cd90b823876bec10265da92eae486ab"; # branch "rust-microkit"
       local = localRoot + "/seL4";
     };
 
     rust-sel4test = fetchGit {
       url = "https://github.com/coliasgroup/seL4.git";
-      rev = "85e36760bd158cf12a170450685eb7b0b05d2076"; # rust-sel4test
+      rev = "e1b3a2bfc5f9d122f3cebc5b6f2751b83f0e97ac"; # rust-sel4test
       local = localRoot + "/seL4";
     };
   };
 
   microkit = fetchGit {
     url = "https://github.com/coliasgroup/microkit.git";
-    rev = "1e561e5b11970a3b61167225ebcaf11aa7ad4959"; # branch "rust-nix"
+    rev = "5f7b2da0a6233b4cc763d3dff4451532958a8877"; # branch "rust-nix"
     local = localRoot + "/microkit";
-    # useLocal = true;
   };
 
   capdlTool = fetchGit (capdlCommon // {
