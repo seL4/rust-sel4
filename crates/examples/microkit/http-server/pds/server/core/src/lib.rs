@@ -129,13 +129,12 @@ async fn use_socket_for_https<D: fat::BlockDevice + 'static, T: fat::TimeSource 
     tls_config: Arc<ServerConfig>,
     mut socket: TcpSocket,
 ) -> Result<(), ClosedError<AsyncRustlsError<TcpSocketError>>> {
-    socket.accept(HTTPS_PORT).await.unwrap(); // TODO
-
-    let mut conn = ServerConnector::from(tls_config)
-        .connect(socket)
-        .unwrap()
+    socket
+        .accept(HTTPS_PORT)
         .await
-        .unwrap();
+        .map_err(AsyncRustlsError::TransitError)?;
+
+    let mut conn = ServerConnector::from(tls_config).connect(socket)?.await?;
 
     server.handle_connection(&mut conn).await?;
 
