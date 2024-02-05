@@ -38,7 +38,9 @@ impl<D: fat::BlockDevice + 'static, T: fat::TimeSource + 'static> Server<D, T> {
             let mut i = 0;
             loop {
                 let n = conn.read(&mut buf[i..]).await?;
-                assert_ne!(n, 0);
+                if n == 0 {
+                    return Err(ClosedError::Closed);
+                }
                 i += n;
                 if is_request_complete(&buf[..i]).unwrap_or(false) {
                     break;
