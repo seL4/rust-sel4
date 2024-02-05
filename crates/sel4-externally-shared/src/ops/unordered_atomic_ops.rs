@@ -10,7 +10,10 @@ use core::mem;
 use core::intrinsics;
 
 use cfg_if::cfg_if;
-use volatile::ops::{BulkOps, Ops, UnitaryOps};
+use volatile::ops::{BulkOps, Ops};
+
+#[cfg(feature = "unstable")]
+use volatile::ops::UnitaryOps;
 
 #[derive(Default, Copy, Clone)]
 pub struct UnorderedAtomicOps(());
