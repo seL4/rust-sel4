@@ -6,7 +6,7 @@
 
 use spin::Mutex;
 
-use sel4_config::sel4_cfg;
+use sel4_config::{sel4_cfg, sel4_cfg_bool};
 
 use crate::{arch::reset_cntvoff, drivers::bcm2835_aux_uart::Bcm2835AuxUartDevice, plat::Plat};
 
@@ -26,8 +26,10 @@ impl Plat for PlatImpl {
     }
 
     fn init_per_core() {
-        unsafe {
-            reset_cntvoff();
+        if sel4_cfg_bool!(ARM_HYPERVISOR_SUPPORT) {
+            unsafe {
+                reset_cntvoff();
+            }
         }
     }
 
