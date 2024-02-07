@@ -19,7 +19,7 @@ const BLOCKLIST: &[&str] = &[
     "seL4_Syscall_ID",
     ".*invocation_label",
 
-    // depricated
+    // deprecated
     "seL4_AsyncEndpointObject",
     "seL4_PageFaultIpcRegisters.*",
 

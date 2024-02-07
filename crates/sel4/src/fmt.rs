@@ -28,12 +28,6 @@ impl fmt::Write for DebugWrite {
 
 pub fn debug_print_helper(args: fmt::Arguments) {
     fmt::write(&mut DebugWrite, args).unwrap_or_else(|err| {
-        // NOTE(nspin)
-        // If a runtime's #[panic_handler] uses this debug_print{ln}, then this
-        // would result in a panic-within-panic. I think it is best to rely
-        // on any downstream #[panic_handler]'s panic-within-panic handling
-        // rather than making an opinionated choice of a lower-level abort
-        // mechanism here.
         panic!("write error: {:?}", err)
     })
 }

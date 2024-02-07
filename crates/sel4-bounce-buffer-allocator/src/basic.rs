@@ -12,7 +12,7 @@ use crate::{AbstractBounceBufferAllocator, Offset, Size};
 const GRANULE_SIZE: usize = 2048;
 
 // TODO
-// This is just a temporary implementation to server as a stand-in.
+// This is just a temporary implementation to serve as a stand-in.
 
 // NOTE(rustc_wishlist)
 //

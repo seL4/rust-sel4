@@ -6,7 +6,7 @@
 
 use sel4_config::sel4_cfg_if;
 
-// [TODO]
+// TODO
 // sel4-config doesn't yet play nicely with:
 //   - ARCH_ARM
 //   - ARCH_RISCV
