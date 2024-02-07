@@ -14,16 +14,6 @@
 , qemuForSeL4
 , git
 , sources
-, crateUtils
-, defaultRustToolchain
-, bareMetalRustTargetInfo
-, libclangPath
-, vendoredTopLevelLockfile
-, buildSysroot
-, crates
-, pruneLockfile
-, topLevelLockfile
-, vendorLockfile
 , runCommandCC
 , seL4Arch
 }:
@@ -31,17 +21,12 @@
 { mcs ? false
 , smp ? false
 , virtualization ? false
-, rust ? true
-, release ? false
 , filter ? ".*"
 }:
 
 with lib;
 
 let
-  rustToolchain = defaultRustToolchain;
-  rustTargetInfo = bareMetalRustTargetInfo;
-
   initBuildArgs =
     let
       bool = v: if v then "TRUE" else "FALSE";
@@ -51,14 +36,7 @@ let
       "-DMCS=${bool mcs}"
       "-DSMP=${bool smp}"
       "-DSIMULATION=TRUE"
-      "-DLibSel4UseRust=${bool rust}"
       "-DLibSel4TestPrinterRegex='${filter}'"
-    ] ++ lib.optionals rust [
-      "-DHACK_RUST_TARGET=${rustTargetInfo.name}"
-      "-DHACK_CARGO_MANIFEST_PATH=${workspace}/Cargo.toml"
-      "-DHACK_CARGO_CONFIG=${cargoConfig}"
-      "-DHACK_CARGO_NO_BUILD_SYSROOT=TRUE"
-      "-DHACK_CARGO_RELEASE=${bool release}"
     ] ++ lib.optionals hostPlatform.isi686 [
       "-DPLATFORM=pc99"
     ] ++ lib.optionals hostPlatform.isRiscV [
@@ -72,60 +50,7 @@ let
       "-DARM_CPU=cortex-a15"
     ];
 
-  kernelSrc = sources.seL4.rust-sel4test;
-
-  cratesSrc = crateUtils.collectReals (lib.attrValues (crateUtils.getClosureOfCrate rootCrate));
-
-  rootCrate = crates.sel4-sys-wrappers;
-
-  lockfile = builtins.toFile "Cargo.lock" lockfileContents;
-  lockfileContents = builtins.readFile lockfileDrv;
-  lockfileDrv = pruneLockfile {
-    superLockfile = topLevelLockfile;
-    superLockfileVendoringConfig = vendoredTopLevelLockfile.configFragment;
-    rootCrates = [ rootCrate ];
-  };
-
-  cargoConfig = crateUtils.toTOMLFile "config" (crateUtils.clobber [
-    (crateUtils.baseConfig {
-      inherit rustToolchain;
-      rustTargetName = rustTargetInfo.name;
-    })
-    {
-      target.${rustTargetInfo.name}.rustflags = [
-        "--sysroot" sysroot
-      ];
-    }
-    (vendorLockfile { inherit lockfileContents; }).configFragment
-  ]);
-
-  profiles = {
-    profile.release = {
-      debug = 0;
-      opt-level = "z";
-    };
-  };
-
-  manifest = crateUtils.toTOMLFile "Cargo.toml" (crateUtils.clobber [
-    {
-      workspace.resolver = "2";
-      workspace.members = [ "src/${rootCrate.name}" ];
-    }
-    profiles
-  ]);
-
-  workspace = linkFarm "workspace" [
-    { name = "Cargo.toml"; path = manifest; }
-    { name = "Cargo.lock"; path = lockfile; }
-    { name = "src"; path = cratesSrc; }
-  ];
-
-  sysroot = buildSysroot {
-    release = false; # TODO why?
-    inherit rustTargetInfo;
-    extraManifest = profiles;
-    compilerBuiltinsWeakIntrinsics = true;
-  };
+  kernelSrc = sources.seL4.rust;
 
   tests = stdenv.mkDerivation {
     name = "sel4test";
@@ -137,8 +62,6 @@ let
       sha256 = "sha256-1Gmbksgh2VTUggM6qcawRC9b+g/bwB8tWGfUzCg1A0U=";
     };
 
-    LIBCLANG_PATH = libclangPath;
-
     depsBuildBuild = lib.optionals (buildPlatform != hostPlatform) [
       buildPackages.stdenv.cc
       # NOTE: cause drv.__spliced.buildBuild to be used to work around splicing issue
@@ -149,7 +72,6 @@ let
       cmake ninja
       libxml2 dtc cpio protobuf
       git
-      defaultRustToolchain
     ] ++ (with python3Packages; [
       aenum plyplus pyelftools simpleeval
       sel4-deps
@@ -204,7 +126,6 @@ let
     installPhase = ''
       cd ..
       mv build $out
-      rm -rf $out/libsel4/rust/target
     '';
 
     dontFixup = true;
