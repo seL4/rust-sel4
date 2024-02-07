@@ -17,7 +17,7 @@ use crate::{
 use crate::IPCBuffer;
 
 /// Number of message registers in the IPC buffer.
-pub const NUM_MESSAGE_REGISTERS: usize = u32_into_usize(sys::seL4_MsgMaxLength);
+pub const NUM_MESSAGE_REGISTERS: usize = u32_into_usize(sys::seL4_MsgLimits::seL4_MsgMaxLength);
 
 /// A capability badge.
 pub type Badge = Word;

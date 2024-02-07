@@ -120,27 +120,27 @@ impl BootInfo {
     }
 
     pub fn init_thread_cnode() -> CNode {
-        CNode::from_bits(sys::seL4_RootCapSlot::seL4_CapInitThreadCNode.into())
+        CNode::from_bits(sys::seL4_RootCNodeCapSlots::seL4_CapInitThreadCNode.into())
     }
 
     pub fn irq_control() -> IRQControl {
-        IRQControl::from_bits(sys::seL4_RootCapSlot::seL4_CapIRQControl.into())
+        IRQControl::from_bits(sys::seL4_RootCNodeCapSlots::seL4_CapIRQControl.into())
     }
 
     pub fn asid_control() -> ASIDControl {
-        ASIDControl::from_bits(sys::seL4_RootCapSlot::seL4_CapASIDControl.into())
+        ASIDControl::from_bits(sys::seL4_RootCNodeCapSlots::seL4_CapASIDControl.into())
     }
 
     pub fn init_thread_asid_pool() -> ASIDPool {
-        ASIDPool::from_bits(sys::seL4_RootCapSlot::seL4_CapInitThreadASIDPool.into())
+        ASIDPool::from_bits(sys::seL4_RootCNodeCapSlots::seL4_CapInitThreadASIDPool.into())
     }
 
     pub fn init_thread_vspace() -> VSpace {
-        VSpace::from_bits(sys::seL4_RootCapSlot::seL4_CapInitThreadVSpace.into())
+        VSpace::from_bits(sys::seL4_RootCNodeCapSlots::seL4_CapInitThreadVSpace.into())
     }
 
     pub fn init_thread_tcb() -> TCB {
-        TCB::from_bits(sys::seL4_RootCapSlot::seL4_CapInitThreadTCB.into())
+        TCB::from_bits(sys::seL4_RootCNodeCapSlots::seL4_CapInitThreadTCB.into())
     }
 
     pub fn init_cspace_cptr(slot: InitCSpaceSlot) -> CPtr {

@@ -51,12 +51,15 @@ fn main() {
     {
         let interface_definition_files = vec![
             // order must be consistent with C libsel4
-            get_or_find_in_libsel4_include_dirs("SEL4_OBJECT_API", "interfaces/sel4.xml"),
+            get_or_find_in_libsel4_include_dirs("SEL4_OBJECT_API", "interfaces/object-api.xml"),
             get_or_find_in_libsel4_include_dirs(
                 "SEL4_OBJECT_API_SEL4_ARCH",
-                "interfaces/sel4-sel4arch.xml",
+                "interfaces/object-api-sel4-arch.xml",
             ),
-            get_or_find_in_libsel4_include_dirs("SEL4_OBJECT_API_ARCH", "interfaces/sel4-arch.xml"),
+            get_or_find_in_libsel4_include_dirs(
+                "SEL4_OBJECT_API_ARCH",
+                "interfaces/object-api-arch.xml",
+            ),
         ];
 
         let (invocation_labels_fragment, native_fragment, wrappers_fragment) =
