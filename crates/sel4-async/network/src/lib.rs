@@ -503,7 +503,7 @@ impl ManagedInterfaceShared {
                         self.set_router(config.router);
                     }
                     if self.dhcp_overrides.dns_servers.is_none() {
-                        self.set_dns_servers(&config.dns_servers);
+                        self.set_dns_servers(&convert_dns_servers(&config.dns_servers));
                     }
                 }
                 dhcpv4::Event::Deconfigured => {
@@ -560,16 +560,11 @@ impl ManagedInterfaceShared {
         self.iface.routes_mut().remove_default_ipv4_route();
     }
 
-    fn set_dns_servers(&mut self, dns_servers: &[Ipv4Address]) {
+    fn set_dns_servers(&mut self, dns_servers: &[IpAddress]) {
         for (i, s) in dns_servers.iter().enumerate() {
             info!("DNS server {}: {}", i, s);
         }
-        let dns_servers = dns_servers
-            .iter()
-            .copied()
-            .map(From::from)
-            .collect::<Vec<_>>();
-        self.dns_socket_mut().update_servers(&dns_servers);
+        self.dns_socket_mut().update_servers(dns_servers);
     }
 
     fn clear_dns_servers(&mut self) {
@@ -583,8 +578,12 @@ impl ManagedInterfaceShared {
         if let Some(router) = self.dhcp_overrides.router {
             self.set_router(router);
         }
-        if let Some(dns_servers) = self.dhcp_overrides.dns_servers.clone() {
-            // lazy, appease borrow checker
+        if let Some(dns_servers) = self
+            .dhcp_overrides
+            .dns_servers
+            .as_deref()
+            .map(convert_dns_servers)
+        {
             self.set_dns_servers(&dns_servers);
         }
     }
@@ -605,4 +604,12 @@ fn free_dhcp_config(config: dhcpv4::Config) -> dhcpv4::Config<'static> {
         dns_servers: config.dns_servers,
         packet: None,
     }
+}
+
+fn convert_dns_servers(dns_servers: &[Ipv4Address]) -> Vec<IpAddress> {
+    dns_servers
+        .iter()
+        .copied()
+        .map(From::from)
+        .collect::<Vec<_>>()
 }
