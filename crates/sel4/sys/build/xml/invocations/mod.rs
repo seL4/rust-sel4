@@ -33,7 +33,7 @@ type Word = u64;
 pub fn generate_rust(
     blocklist_for_bindgen: &mut Vec<String>,
     interface_xml_paths: &[impl AsRef<Path>],
-) -> (TokenStream, TokenStream, TokenStream) {
+) -> (TokenStream, TokenStream) {
     let mut structs = vec![];
     let mut interfaces = vec![];
     for f in interface_xml_paths {
@@ -82,9 +82,9 @@ pub fn generate_rust(
             }
         }
     }
-    let (native_toks, wrapper_toks) = invocation_generator.generate_module();
+    let toks = invocation_generator.generate_module();
 
-    (invocation_label_toks, native_toks, wrapper_toks)
+    (invocation_label_toks, toks)
 }
 
 pub struct InvocationGenerator<'a> {
@@ -92,7 +92,6 @@ pub struct InvocationGenerator<'a> {
     blocklist_for_bindgen: &'a mut Vec<String>,
     ret_struct_toks: TokenStream,
     ipc_buffer_method_toks: TokenStream,
-    wrapper_toks: TokenStream,
 }
 
 impl<'a> InvocationGenerator<'a> {
@@ -102,16 +101,14 @@ impl<'a> InvocationGenerator<'a> {
             blocklist_for_bindgen,
             ret_struct_toks: quote!(),
             ipc_buffer_method_toks: quote!(),
-            wrapper_toks: quote!(),
         }
     }
 
-    pub fn generate_module(self) -> (TokenStream, TokenStream) {
+    pub fn generate_module(self) -> TokenStream {
         let ret_struct_toks = self.ret_struct_toks;
         let ipc_buffer_method_toks = self.ipc_buffer_method_toks;
-        let wrapper_toks = self.wrapper_toks;
 
-        let native_toks = quote! {
+        let toks = quote! {
             #ret_struct_toks
 
             impl seL4_IPCBuffer {
@@ -119,7 +116,7 @@ impl<'a> InvocationGenerator<'a> {
             }
         };
 
-        (native_toks, wrapper_toks)
+        toks
     }
 
     pub fn generate_invocation(
@@ -137,12 +134,7 @@ impl<'a> InvocationGenerator<'a> {
 
         let param_list_generator =
             ParameterListGenerator::new(&self.parameter_types, in_params, out_params);
-        let param_list_for_type_sig =
-            param_list_generator.generate(ParameterListRole::NativeFunctionTypeSignature);
-        let param_list_for_wrapper_type_sig =
-            param_list_generator.generate(ParameterListRole::WrapperFunctionTypeSignature);
-        let param_list_for_wrapper_expr =
-            param_list_generator.generate(ParameterListRole::WrapperFunctionArguments);
+        let param_list_for_type_sig = param_list_generator.generate();
 
         let out_params_passed_by_value = out_params
             .iter()
@@ -223,13 +215,6 @@ impl<'a> InvocationGenerator<'a> {
                 #ret_expr
             }
         });
-
-        self.wrapper_toks.extend(quote! {
-            #[no_mangle]
-            pub extern "C" fn #fn_ident(service: crate::#interface_ident, #(#param_list_for_wrapper_type_sig,)*) -> crate::#ret_type_path {
-                get_ipc_buffer_mut().#fn_ident(service, #(#param_list_for_wrapper_expr,)*)
-            }
-        });
     }
 
     fn generate_ret_struct_definition(
@@ -245,7 +230,6 @@ impl<'a> InvocationGenerator<'a> {
             }
         });
         quote! {
-            #[cfg_attr(feature = "wrappers", repr(C))] // TODO better to just be unconditionally repr(C) for the sake of consistency?
             #[derive(Default)]
             pub struct #ret_struct_ident {
                 pub error: seL4_Error::Type,
@@ -351,23 +335,6 @@ struct ParameterListGenerator<'a> {
     out_params: &'a [Parameter],
 }
 
-#[derive(Clone, PartialEq, Eq)]
-enum ParameterListRole {
-    NativeFunctionTypeSignature,
-    WrapperFunctionTypeSignature,
-    WrapperFunctionArguments,
-}
-
-impl ParameterListRole {
-    fn is_type_signature(&self) -> bool {
-        *self != Self::WrapperFunctionArguments
-    }
-
-    fn is_native(&self) -> bool {
-        *self == Self::NativeFunctionTypeSignature
-    }
-}
-
 impl<'a> ParameterListGenerator<'a> {
     fn new(
         parameter_types: &'a ParameterTypes,
@@ -381,13 +348,7 @@ impl<'a> ParameterListGenerator<'a> {
         }
     }
 
-    // TODO use * instead of & for wrappers
-    fn generate(&self, role: ParameterListRole) -> Vec<TokenStream> {
-        let ty_path_prefix = if role.is_native() {
-            quote!()
-        } else {
-            quote!(crate::)
-        };
+    fn generate(&self) -> Vec<TokenStream> {
         let mut param_list = vec![];
         for param in self.in_params.iter().chain(self.out_params.iter()) {
             let var_ident = raw_ident(&param.name);
@@ -405,30 +366,18 @@ impl<'a> ParameterListGenerator<'a> {
                     } else {
                         quote!()
                     };
-                    param_list.push((
-                        quote!(#var_ident),
-                        quote!(#ty_modifier #ty_path_prefix #ty #ty_suffix),
-                    ));
+                    param_list.push((quote!(#var_ident), quote!(#ty_modifier #ty #ty_suffix)));
                 }
                 ParameterDirection::Out => {
                     if self.parameter_types.get(&param.ty).pass_by_reference() {
-                        param_list.push((
-                            quote!(#var_ident),
-                            quote!(&mut #ty_path_prefix #ty #ty_suffix),
-                        ));
+                        param_list.push((quote!(#var_ident), quote!(&mut #ty #ty_suffix)));
                     }
                 }
             }
         }
         param_list
             .into_iter()
-            .map(move |(var, ty)| {
-                if role.is_type_signature() {
-                    quote!(#var: #ty)
-                } else {
-                    quote!(#var)
-                }
-            })
+            .map(move |(var, ty)| quote!(#var: #ty))
             .collect()
     }
 }

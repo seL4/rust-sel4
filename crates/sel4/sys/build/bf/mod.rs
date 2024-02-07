@@ -8,7 +8,7 @@ use std::fs;
 use std::path::Path;
 
 use proc_macro2::{Literal, TokenStream};
-use quote::{format_ident, quote, IdentFragment};
+use quote::{format_ident, quote};
 use syn::Ident;
 
 mod simplified;
@@ -17,7 +17,7 @@ use simplified::*;
 pub fn generate_rust(
     blocklist_for_bindgen: &mut Vec<String>,
     bf_path: impl AsRef<Path>,
-) -> (TokenStream, TokenStream) {
+) -> TokenStream {
     let text = fs::read_to_string(bf_path).unwrap();
     let file = sel4_bitfield_parser::parse(&text);
     let file = simplify(&file);
@@ -28,21 +28,19 @@ pub fn generate_rust(
     for tagged_union in file.tagged_unions.iter() {
         generator.generate_tagged_union(tagged_union);
     }
-    (generator.native_toks, generator.wrapper_toks)
+    generator.toks
 }
 
 struct BitfieldGenerator<'a> {
     blocklist_for_bindgen: &'a mut Vec<String>,
-    native_toks: TokenStream,
-    wrapper_toks: TokenStream,
+    toks: TokenStream,
 }
 
 impl<'a> BitfieldGenerator<'a> {
     fn new(blocklist_for_bindgen: &'a mut Vec<String>) -> Self {
         Self {
             blocklist_for_bindgen,
-            native_toks: quote!(),
-            wrapper_toks: quote!(),
+            toks: quote!(),
         }
     }
 
@@ -62,7 +60,6 @@ impl<'a> BitfieldGenerator<'a> {
 
         self.blocklist_for_bindgen.push(name_ident.to_string());
 
-        let qualified_name = quote!(crate::#name_ident);
         let unpacked_ident = format_ident!("{}_Unpacked", name_ident);
 
         let primitive_type = backing_type.primitive();
@@ -73,7 +70,6 @@ impl<'a> BitfieldGenerator<'a> {
         let mut unpack_field_assignments = vec![];
         let mut new_body = quote!();
         let mut methods = quote!();
-        let mut wrapper_functions = quote!();
 
         for field in fields.iter() {
             let field_name_ident = format_ident!("{}", field.name);
@@ -128,37 +124,6 @@ impl<'a> BitfieldGenerator<'a> {
                     #field_range_end - #field_range_start
                 }
             });
-
-            let wrapper_get_prefix =
-                mk_wrapper_prefix(format!("{}_get_{}", name_ident, field.name));
-            let wrapper_set_prefix =
-                mk_wrapper_prefix(format!("{}_set_{}", name_ident, field.name));
-            let wrapper_ptr_get_prefix =
-                mk_wrapper_prefix(format!("{}_ptr_get_{}", name_ident, field.name));
-            let wrapper_ptr_set_prefix =
-                mk_wrapper_prefix(format!("{}_ptr_set_{}", name_ident, field.name));
-
-            if !is_tag {
-                wrapper_functions.extend(quote! {
-                    #wrapper_get_prefix(this: #qualified_name) -> #primitive_type {
-                        this.#get_method_ident()
-                    }
-                    #wrapper_set_prefix(mut this: #qualified_name, #field_name_ident: #primitive_type) -> #qualified_name {
-                        this.#set_method_ident(#field_name_ident);
-                        this
-                    }
-                    #wrapper_ptr_get_prefix(this: *mut #qualified_name) -> #primitive_type {
-                        unsafe {
-                            (&*this).#get_method_ident()
-                        }
-                    }
-                    #wrapper_ptr_set_prefix(this: *mut #qualified_name, #field_name_ident: #primitive_type) {
-                        unsafe {
-                            (&mut *this).#set_method_ident(#field_name_ident);
-                        }
-                    }
-                })
-            }
         }
 
         let alias_stmt = if tag_info.is_none() {
@@ -171,7 +136,7 @@ impl<'a> BitfieldGenerator<'a> {
             quote!()
         };
 
-        self.native_toks.extend(quote! {
+        self.toks.extend(quote! {
             #[repr(transparent)]
             #[derive(Clone, Eq, PartialEq)]
             pub struct #name_ident(pub #bitfield_type);
@@ -215,28 +180,10 @@ impl<'a> BitfieldGenerator<'a> {
                 }
             }
         });
-
-        let wrapper_new_prefix = mk_wrapper_prefix(format!("{name_ident}_new"));
-        let wrapper_ptr_new_prefix = mk_wrapper_prefix(format!("{name_ident}_ptr_new"));
-
-        self.wrapper_toks.extend(quote! {
-            #wrapper_new_prefix(#(#non_tag_fields_with_types,)*) -> #qualified_name {
-                #qualified_name::new(#(#non_tag_fields,)*)
-            }
-
-            #wrapper_ptr_new_prefix(this: *mut #qualified_name, #(#non_tag_fields_with_types,)*) {
-                unsafe {
-                    *this = #qualified_name::new(#(#non_tag_fields,)*);
-                }
-            }
-
-            #wrapper_functions
-        });
     }
 
     fn generate_tagged_union(&mut self, tagged_union: &TaggedUnion) {
         let name_ident = format_ident!("{}", tagged_union.name);
-        let qualified_name = quote!(crate::#name_ident);
         let splayed_ident = format_ident!("{}_Splayed", tagged_union.name);
         let primitive_type = tagged_union.backing_type.primitive();
         let bitfield_type = tagged_union.backing_type.bitfield();
@@ -303,7 +250,7 @@ impl<'a> BitfieldGenerator<'a> {
         let tag_range_start = tagged_union.tag_range.start;
         let tag_range_end = tagged_union.tag_range.end;
 
-        self.native_toks.extend(quote! {
+        self.toks.extend(quote! {
             pub mod #tag_values_module_ident {
                 #(#tag_value_consts;)*
             }
@@ -348,37 +295,6 @@ impl<'a> BitfieldGenerator<'a> {
 
             #block_unsplay_toks
         });
-
-        let wrapper_get_tag_prefix = mk_wrapper_prefix(format!(
-            "{}_get_{}",
-            tagged_union.name, tagged_union.tag_name
-        ));
-        let wrapper_ptr_get_tag_prefix = mk_wrapper_prefix(format!(
-            "{}_ptr_get_{}",
-            tagged_union.name, tagged_union.tag_name
-        ));
-        let wrapper_tag_equals_prefix = mk_wrapper_prefix(format!(
-            "{}_{}_equals",
-            tagged_union.name, tagged_union.tag_name
-        ));
-
-        let c_int = quote!(::core::ffi::c_int);
-
-        self.wrapper_toks.extend(quote! {
-            #wrapper_get_tag_prefix(this: #qualified_name) -> #primitive_type {
-                this.get_tag()
-            }
-
-            #wrapper_ptr_get_tag_prefix(this: *mut #qualified_name) -> #primitive_type {
-                unsafe {
-                    (&*this).get_tag()
-                }
-            }
-
-            #wrapper_tag_equals_prefix(this: #qualified_name, tag: #primitive_type) -> #c_int {
-                (this.get_tag() == tag) as #c_int
-            }
-        });
     }
 }
 
@@ -405,12 +321,4 @@ fn mk_tagged_union_variant_block_type_ident(tagged_union_name: &str, tag_name: &
 
 fn mk_tag_values_module_ident(tagged_union_name: &str) -> Ident {
     format_ident!("{}_tag", tagged_union_name)
-}
-
-fn mk_wrapper_prefix(fn_name: impl IdentFragment) -> TokenStream {
-    let fn_ident = format_ident!("{}", fn_name);
-    quote! {
-        #[no_mangle]
-        pub extern "C" fn #fn_ident
-    }
 }

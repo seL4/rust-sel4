@@ -17,9 +17,6 @@ build = "build/main.rs"
 edition = "2021"
 license = "BSD-2-Clause"
 
-[features]
-wrappers = []
-
 [dependencies]
 log = "0.4.17"
 sel4-bitfield-ops = { path = "../bitfield-ops" }

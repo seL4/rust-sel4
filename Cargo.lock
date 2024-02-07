@@ -2632,13 +2632,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "sel4-sys-wrappers"
-version = "0.1.0"
-dependencies = [
- "sel4-sys",
-]
-
-[[package]]
 name = "sel4-test-harness"
 version = "0.1.0"
 dependencies = [
