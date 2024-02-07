@@ -31,11 +31,8 @@ macro_rules! debug_print {
 }
 
 macro_rules! debug_println {
-    () => ($crate::fmt::debug_print!("\n"));
-    ($($arg:tt)*) => ({
-        $crate::fmt::debug_print!($($arg)*);
-        $crate::fmt::debug_print!("\n");
-    })
+    () => ($crate::fmt::debug_println!(""));
+    ($($arg:tt)*) => ($crate::fmt::debug_print!("{}\n", format_args!($($arg)*)));
 }
 
 pub(crate) use debug_print;
