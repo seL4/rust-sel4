@@ -2621,7 +2621,6 @@ dependencies = [
  "log",
  "proc-macro2",
  "quote",
- "regex",
  "sel4-bitfield-ops",
  "sel4-bitfield-parser",
  "sel4-build-env",

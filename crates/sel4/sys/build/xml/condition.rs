@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use regex::Regex;
 use xmltree::{Element, XMLNode};
 
 use sel4_config_data::Configuration;
@@ -46,14 +45,7 @@ impl Condition {
     }
 
     fn parse_var(var: &str) -> String {
-        Regex::new(r"^CONFIG_(.+)$")
-            .unwrap()
-            .captures(var)
-            .unwrap()
-            .get(1)
-            .unwrap()
-            .as_str()
-            .to_owned()
+        var.strip_prefix("CONFIG_").unwrap().to_owned()
     }
 
     // // //
