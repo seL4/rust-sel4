@@ -28,11 +28,11 @@
 , seL4Arch
 }:
 
-{ rust ? true
-, release ? false
-, mcs ? false
+{ mcs ? false
 , smp ? false
 , virtualization ? false
+, rust ? true
+, release ? false
 , filter ? ".*"
 }:
 
