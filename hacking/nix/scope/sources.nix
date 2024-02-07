@@ -49,19 +49,19 @@ in rec {
   seL4 = {
     rust = fetchGit {
       url = "https://github.com/coliasgroup/seL4.git";
-      rev = "2404473ed2e68c8e627cb4d6588bd57633038109"; # branch "rust-testing"
+      rev = "1fe22fba488290545f95a74dd7c01b242953930f"; # branch "rust-testing"
       local = localRoot + "/seL4";
     };
 
     rust-microkit = fetchGit {
       url = "https://github.com/coliasgroup/seL4.git";
-      rev = "5f71dc4a5cd90b823876bec10265da92eae486ab"; # branch "rust-microkit"
+      rev = "b9fb3fec722e65fedc2a3038726f5183c4c7a6b9"; # branch "rust-microkit"
       local = localRoot + "/seL4";
     };
 
     rust-sel4test = fetchGit {
       url = "https://github.com/coliasgroup/seL4.git";
-      rev = "e1b3a2bfc5f9d122f3cebc5b6f2751b83f0e97ac"; # rust-sel4test
+      rev = "0c5ee228b0de8e7d87c0961252598bb0a07ed80c"; # rust-sel4test
       local = localRoot + "/seL4";
     };
   };

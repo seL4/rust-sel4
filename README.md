@@ -33,10 +33,10 @@ This work is funded by the [seL4 Foundation](https://sel4.systems/Foundation/hom
 This project builds upon [seL4](https://github.com/seL4/seL4) and the [seL4 Microkit](https://github.com/seL4/microkit).
 In particular, this project works with the following versions of those related projects:
 
-- seL4, when used without Microkit: `c9989664e312d971048f687895d4917758fcfd3b`
+- seL4, when used without Microkit: `9bac64c6ceb1ece54fe00eae44065a836bd224f3`
   ([github.com/coliasgroup/seL4:rust](https://github.com/coliasgroup/seL4/tree/rust), an ancestor of
   [github.com/seL4/seL4:master](https://github.com/seL4/seL4/tree/master)).
-- seL4, when used with Microkit: `5f71dc4a5cd90b823876bec10265da92eae486ab`
+- seL4, when used with Microkit: `b9fb3fec722e65fedc2a3038726f5183c4c7a6b9`
   ([github.com/coliasgroup/seL4:rust-microkit](https://github.com/coliasgroup/seL4/tree/rust-microkit),
   not an ancestor of [github.com/seL4/seL4:master](https://github.com/seL4/seL4/tree/master)). For
   now, Microkit (both upstream trunk and the branch used by this project) requires [a
