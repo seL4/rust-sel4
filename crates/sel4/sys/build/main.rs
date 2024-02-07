@@ -32,13 +32,8 @@ fn main() {
             .unwrap()
             .map(Result::unwrap)
         {
-            let (native_fragment, wrappers_fragment) =
-                bf::generate_rust(&mut blocklist_for_bindgen, &f);
-            out_dir.write_file(native_fragment, f.with_extension("rs").file_name().unwrap());
-            out_dir.write_file(
-                wrappers_fragment,
-                f.with_extension("wrappers.rs").file_name().unwrap(),
-            );
+            let fragment = bf::generate_rust(&mut blocklist_for_bindgen, &f);
+            out_dir.write_file(fragment, f.with_extension("rs").file_name().unwrap());
         }
     }
 
@@ -62,15 +57,13 @@ fn main() {
             ),
         ];
 
-        let (invocation_labels_fragment, native_fragment, wrappers_fragment) =
-            xml::invocations::generate_rust(
-                &mut blocklist_for_bindgen,
-                &interface_definition_files,
-            );
+        let (invocation_labels_fragment, invocations_fragment) = xml::invocations::generate_rust(
+            &mut blocklist_for_bindgen,
+            &interface_definition_files,
+        );
 
         out_dir.write_file(invocation_labels_fragment, "invocation_labels.rs");
-        out_dir.write_file(native_fragment, "invocations.rs");
-        out_dir.write_file(wrappers_fragment, "invocations.wrappers.rs");
+        out_dir.write_file(invocations_fragment, "invocations.rs");
     }
 
     {
