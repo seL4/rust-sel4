@@ -68,31 +68,4 @@ impl Error {
     }
 }
 
-// TODO no way to run this test
-#[cfg(test)]
-mod test {
-    use super::*;
-
-    #[test]
-    fn all_sys_errors_are_accounted_for() {
-        for i in 0..sys::seL4_Error::seL4_NumErrors {
-            if i != sys::seL4_Error::seL4_NoError {
-                assert!(Error::from_sys(i).is_some())
-            }
-        }
-    }
-}
-
-// NOTE(rustc_wishlist)
-// Use this static test once #![feature(variant_count)] stabilizes.
-// With this test, consider replacing `Error::from_sys` with mem::transmute-based implementation.
-//
-// #[allow(dead_code)]
-// #[allow(non_upper_case_globals)]
-// mod __assertions {
-//     use super::*;
-//
-//     const __assert_all_errors_accounted_for: () = {
-//         assert!(mem::variant_count::<Error>() == sys::seL4_Error::seL4_NumErrors as usize - 1);
-//     };
-// }
+const _: () = assert!(sys::seL4_Error::seL4_NumErrors == 11);
