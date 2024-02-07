@@ -176,7 +176,7 @@ impl<'a> InvocationGenerator<'a> {
 
         let ret_struct_declaration = if use_ret_struct {
             quote! {
-                let mut ret: #ret_struct_ident = unsafe { core::mem::zeroed() }; // TODO
+                let mut ret: #ret_struct_ident = Default::default();
                 ret.error = err;
             }
         } else {
@@ -246,6 +246,7 @@ impl<'a> InvocationGenerator<'a> {
         });
         quote! {
             #[cfg_attr(feature = "wrappers", repr(C))] // TODO better to just be unconditionally repr(C) for the sake of consistency?
+            #[derive(Default)]
             pub struct #ret_struct_ident {
                 pub error: seL4_Error::Type,
                 #(pub #ret_struct_fields),*
