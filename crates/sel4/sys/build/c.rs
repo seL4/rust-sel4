@@ -60,13 +60,11 @@ pub fn generate_rust(
     }
 
     builder
-        .rust_target(bindgen::RustTarget::Nightly)
         .constified_enum_module(".*")
         .derive_eq(true)
         .derive_default(true)
         .generate_comments(false)
         .use_core()
-        .ctypes_prefix("::core::ffi")
         .generate()
         .unwrap()
 }
