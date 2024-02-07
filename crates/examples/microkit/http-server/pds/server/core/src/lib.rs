@@ -120,7 +120,7 @@ async fn use_socket_for_http<D: fat::BlockDevice + 'static, T: fat::TimeSource +
 ) -> Result<(), ClosedError<TcpSocketError>> {
     socket.accept(HTTP_PORT).await?;
     server.handle_connection(&mut socket).await?;
-    socket.close().await?;
+    socket.close();
     Ok(())
 }
 
@@ -139,10 +139,7 @@ async fn use_socket_for_https<D: fat::BlockDevice + 'static, T: fat::TimeSource 
     server.handle_connection(&mut conn).await?;
 
     // TODO TcpSocket doesn't support stateless .poll_close() yet, so we close the socket directly
-    conn.into_io()
-        .close()
-        .await
-        .map_err(AsyncRustlsError::TransitError)?;
+    conn.into_io().close();
 
     Ok(())
 }

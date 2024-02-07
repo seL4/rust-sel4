@@ -64,7 +64,9 @@ pub enum TcpSocketError {
     InvalidState(tcp::State), // TODO just use InvalidState variants of below errors?
     RecvError(tcp::RecvError),
     SendError(tcp::SendError),
+    ListenError(tcp::ListenError),
     ConnectError(tcp::ConnectError),
+    ConnectionResetDuringConnect,
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
@@ -82,10 +84,8 @@ impl ManagedInterface {
     ) -> Self {
         let iface = Interface::new(config, device, instant);
         let mut socket_set = SocketSet::new(vec![]);
-        let dns_socket = dns::Socket::new(&[], vec![]);
-        let dns_socket_handle = socket_set.add(dns_socket);
-        let dhcp_socket = dhcpv4::Socket::new();
-        let dhcp_socket_handle = socket_set.add(dhcp_socket);
+        let dns_socket_handle = socket_set.add(dns::Socket::new(&[], vec![]));
+        let dhcp_socket_handle = socket_set.add(dhcpv4::Socket::new());
 
         let mut this = ManagedInterfaceShared {
             iface,
@@ -190,7 +190,7 @@ impl<T: AnySocket<'static>> Socket<T> {
         f(socket)
     }
 
-    pub fn with_and_context_mut<R>(&mut self, f: impl FnOnce(&mut Context, &mut T) -> R) -> R {
+    pub fn with_context_mut<R>(&mut self, f: impl FnOnce(&mut Context, &mut T) -> R) -> R {
         let network = &mut *self.shared.inner().borrow_mut();
         let context = network.iface.context();
         let socket = network.socket_set.get_mut(self.handle);
@@ -208,7 +208,7 @@ impl Socket<tcp::Socket<'static>> {
         T: Into<IpEndpoint>,
         U: Into<IpListenEndpoint>,
     {
-        self.with_and_context_mut(|cx, socket| socket.connect(cx, remote_endpoint, local_endpoint))
+        self.with_context_mut(|cx, socket| socket.connect(cx, remote_endpoint, local_endpoint))
             .map_err(TcpSocketError::ConnectError)?;
 
         future::poll_fn(|cx| {
@@ -216,12 +216,9 @@ impl Socket<tcp::Socket<'static>> {
                 let state = socket.state();
                 match state {
                     tcp::State::Closed | tcp::State::TimeWait => {
-                        Poll::Ready(Err(TcpSocketError::InvalidState(state)))
+                        Poll::Ready(Err(TcpSocketError::ConnectionResetDuringConnect))
                     }
-                    tcp::State::Listen => {
-                        // TODO handle differently
-                        Poll::Ready(Err(TcpSocketError::InvalidState(state)))
-                    }
+                    tcp::State::Listen => unreachable!(), // because future holds &mut self
                     tcp::State::SynSent | tcp::State::SynReceived => {
                         socket.register_send_waker(cx.waker());
                         Poll::Pending
@@ -235,43 +232,22 @@ impl Socket<tcp::Socket<'static>> {
 
     pub async fn accept_with_keep_alive(
         &mut self,
-        port: u16,
+        local_endpoint: impl Into<IpListenEndpoint>,
         keep_alive_interval: Option<Duration>,
     ) -> Result<(), TcpSocketError> {
+        self.with_mut(|socket| {
+            socket
+                .listen(local_endpoint)
+                .map_err(TcpSocketError::ListenError)
+        })?;
+
         future::poll_fn(|cx| {
             self.with_mut(|socket| match socket.state() {
-                tcp::State::Closed => {
-                    socket.listen(port).unwrap();
-                    Poll::Ready(())
-                }
-                tcp::State::Listen => Poll::Ready(()),
-                _ => {
+                tcp::State::Listen | tcp::State::SynSent | tcp::State::SynReceived => {
                     socket.register_recv_waker(cx.waker());
                     Poll::Pending
                 }
-            })
-        })
-        .await;
-
-        future::poll_fn(|cx| {
-            self.with_mut(|socket| {
-                if socket.is_active() {
-                    Poll::Ready(Ok(()))
-                } else {
-                    let state = socket.state();
-                    match state {
-                        tcp::State::Closed
-                        | tcp::State::Closing
-                        | tcp::State::FinWait1
-                        | tcp::State::FinWait2 => {
-                            Poll::Ready(Err(TcpSocketError::InvalidState(state)))
-                        }
-                        _ => {
-                            socket.register_recv_waker(cx.waker());
-                            Poll::Pending
-                        }
-                    }
-                }
+                _ => Poll::Ready(Ok(())),
             })
         })
         .await?;
@@ -281,9 +257,12 @@ impl Socket<tcp::Socket<'static>> {
         Ok(())
     }
 
-    pub async fn accept(&mut self, port: u16) -> Result<(), TcpSocketError> {
+    pub async fn accept(
+        &mut self,
+        local_endpoint: impl Into<IpListenEndpoint>,
+    ) -> Result<(), TcpSocketError> {
         self.accept_with_keep_alive(
-            port,
+            local_endpoint,
             Some(Duration::from_millis(DEFAULT_KEEP_ALIVE_INTERVAL)),
         )
         .await
@@ -300,32 +279,15 @@ impl Socket<tcp::Socket<'static>> {
         cx: &mut task::Context<'_>,
         buffer: &mut [u8],
     ) -> Poll<Result<usize, TcpSocketError>> {
-        self.with_mut(|socket| {
-            if socket.can_recv() {
-                Poll::Ready(
-                    socket
-                        .recv_slice(buffer)
-                        .map_err(TcpSocketError::RecvError)
-                        .map(|n| {
-                            assert!(n > 0); // check assumption about smoltcp
-                            n
-                        }),
-                )
-            } else {
-                let state = socket.state();
-                match state {
-                    tcp::State::FinWait1
-                    | tcp::State::FinWait2
-                    | tcp::State::Closed
-                    | tcp::State::Closing
-                    | tcp::State::CloseWait
-                    | tcp::State::TimeWait => Poll::Ready(Err(TcpSocketError::InvalidState(state))),
-                    _ => {
-                        socket.register_recv_waker(cx.waker());
-                        Poll::Pending
-                    }
-                }
+        self.with_mut(|socket| match socket.recv_slice(buffer) {
+            Ok(0) if buffer.is_empty() => Poll::Ready(Ok(0)),
+            Ok(0) => {
+                socket.register_recv_waker(cx.waker());
+                Poll::Pending
             }
+            Ok(n) => Poll::Ready(Ok(n)),
+            Err(tcp::RecvError::Finished) => Poll::Ready(Ok(0)),
+            Err(err) => Poll::Ready(Err(TcpSocketError::RecvError(err))),
         })
     }
 
@@ -350,67 +312,33 @@ impl Socket<tcp::Socket<'static>> {
         cx: &mut task::Context<'_>,
         buffer: &[u8],
     ) -> Poll<Result<usize, TcpSocketError>> {
+        self.with_mut(|socket| match socket.send_slice(buffer) {
+            Ok(0) if buffer.is_empty() => Poll::Ready(Ok(0)),
+            Ok(0) => {
+                socket.register_send_waker(cx.waker());
+                Poll::Pending
+            }
+            Ok(n) => Poll::Ready(Ok(n)),
+            Err(err) => Poll::Ready(Err(TcpSocketError::SendError(err))),
+        })
+    }
+
+    #[allow(clippy::needless_pass_by_ref_mut)]
+    pub fn poll_flush(&mut self, cx: &mut task::Context<'_>) -> Poll<Result<(), TcpSocketError>> {
         self.with_mut(|socket| {
-            if socket.can_send() {
-                Poll::Ready(socket.send_slice(buffer).map_err(TcpSocketError::SendError))
+            let waiting_close =
+                socket.state() == tcp::State::Closed && socket.remote_endpoint().is_some();
+            if socket.send_queue() > 0 || waiting_close {
+                socket.register_send_waker(cx.waker());
+                Poll::Pending
             } else {
-                let state = socket.state();
-                match state {
-                    tcp::State::FinWait1
-                    | tcp::State::FinWait2
-                    | tcp::State::Closed
-                    | tcp::State::Closing
-                    | tcp::State::CloseWait
-                    | tcp::State::TimeWait => Poll::Ready(Err(TcpSocketError::InvalidState(state))),
-                    _ => {
-                        socket.register_send_waker(cx.waker());
-                        Poll::Pending
-                    }
-                }
+                Poll::Ready(Ok(()))
             }
         })
     }
 
-    pub async fn close(&mut self) -> Result<(), TcpSocketError> {
-        future::poll_fn(|cx| {
-            self.with_mut(|socket| {
-                let state = socket.state();
-                match state {
-                    tcp::State::FinWait1
-                    | tcp::State::FinWait2
-                    | tcp::State::Closed
-                    | tcp::State::Closing
-                    | tcp::State::TimeWait => Poll::Ready(Err(TcpSocketError::InvalidState(state))),
-                    _ => {
-                        if socket.send_queue() > 0 {
-                            socket.register_send_waker(cx.waker());
-                            Poll::Pending
-                        } else {
-                            socket.close();
-                            Poll::Ready(Ok(()))
-                        }
-                    }
-                }
-            })
-        })
-        .await?;
-
-        future::poll_fn(|cx| {
-            self.with_mut(|socket| match socket.state() {
-                tcp::State::FinWait1
-                | tcp::State::FinWait2
-                | tcp::State::Closed
-                | tcp::State::Closing
-                | tcp::State::TimeWait => Poll::Ready(()),
-                _ => {
-                    socket.register_send_waker(cx.waker());
-                    Poll::Pending
-                }
-            })
-        })
-        .await;
-
-        Ok(())
+    pub fn close(&mut self) {
+        self.with_mut(|socket| socket.close())
     }
 
     pub fn abort(&mut self) {
