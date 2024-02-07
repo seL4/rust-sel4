@@ -41,12 +41,6 @@ macro_rules! debug_print {
 /// Prints using `seL4_DebugPutChar`, with a newline.
 #[macro_export]
 macro_rules! debug_println {
-    () => ($crate::debug_print!("\n"));
-    ($($arg:tt)*) => ({
-        // NOTE
-        // If #[feature(format_args_nl)] is ever stabilized, replace with:
-        // $crate::_private::fmt::debug_print_helper(format_args_nl!($($arg)*));
-        $crate::debug_print!($($arg)*);
-        $crate::debug_print!("\n");
-    })
+    () => ($crate::debug_println!(""));
+    ($($arg:tt)*) => ($crate::debug_print!("{}\n", format_args!($($arg)*)));
 }
