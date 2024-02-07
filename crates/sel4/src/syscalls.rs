@@ -134,11 +134,6 @@ impl<C: InvocationContext> Endpoint<C> {
     }
 
     pub fn recv_with_mrs(self, reply_authority: impl ConveysReplyAuthority) -> RecvWithMRs {
-        // NOTE(rustc_wishlist)
-        //   Use each_mut once #![feature(array_methods)] stabilizes:
-        //   ```
-        //   let [mr0, mr1, mr2, mr3] = msg.each_mut().map(Some);
-        //   ```
         let mut msg = [0; NUM_FAST_MESSAGE_REGISTERS];
         let [ref mut mr0, ref mut mr1, ref mut mr2, ref mut mr3] = &mut msg;
         let (raw_msg_info, badge) = self.invoke(|cptr, ipc_buffer| {
@@ -161,7 +156,6 @@ impl<C: InvocationContext> Endpoint<C> {
     }
 
     pub fn call_with_mrs<T: FastMessages>(self, info: MessageInfo, messages: T) -> CallWithMRs {
-        // NOTE(rustc_wishlist) (see recv_with_mrs)
         let mut msg = messages.prepare_in_out();
         let [ref mut mr0, ref mut mr1, ref mut mr2, ref mut mr3] = &mut msg;
         let raw_msg_info = self.invoke(|cptr, ipc_buffer| {

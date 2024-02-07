@@ -67,6 +67,7 @@ fn main() {
                 &mut blocklist_for_bindgen,
                 &interface_definition_files,
             );
+
         out_dir.write_file(invocation_labels_fragment, "invocation_labels.rs");
         out_dir.write_file(native_fragment, "invocations.rs");
         out_dir.write_file(wrappers_fragment, "invocations.wrappers.rs");
