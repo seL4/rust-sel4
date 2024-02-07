@@ -28,9 +28,6 @@ const BLOCKLIST: &[&str] = &[
 ];
 
 const HEADER_CONTENTS: &str = r#"
-    // HACK for upstream Docker container toolchain issue (very temporary)
-    #define __thread
-
     #include <sel4/sel4.h>
     #include <sel4/arch/mapping.h>
     #include <sel4/sel4_arch/mapping.h>
