@@ -21,7 +21,6 @@ mk {
     bindgen = "0.68.1";
     xmltree = "0.10.3";
     glob = "0.3.0";
-    regex = "1.7.0";
     inherit (localCrates)
       sel4-build-env
       sel4-rustfmt-helper
