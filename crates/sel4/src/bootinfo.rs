@@ -238,18 +238,21 @@ impl<'a> Iterator for BootInfoExtraIter<'a> {
 
     fn next(&mut self) -> Option<Self::Item> {
         while self.cursor < self.bootinfo.extra_slice().len() {
-            let header = unsafe {
-                &*self
-                    .bootinfo
-                    .extra_slice()
-                    .as_ptr()
-                    .offset(self.cursor.try_into().unwrap())
-                    .cast::<sys::seL4_BootInfoHeader>()
+            let header = {
+                let mut it = self.bootinfo.extra_slice()[self.cursor..]
+                    .chunks(mem::size_of::<sys::seL4_Word>());
+                let mut munch_word =
+                    || sys::seL4_Word::from_ne_bytes(it.next().unwrap().try_into().unwrap());
+                let id = munch_word();
+                let len = munch_word();
+                sys::seL4_BootInfoHeader { id, len }
             };
+            let id = BootInfoExtraId::from_sys(header.id);
+            let len = usize::try_from(header.len).unwrap();
             let content_with_header_start = self.cursor;
-            let content_with_header_end = self.cursor + usize::try_from(header.len).unwrap();
+            let content_with_header_end = content_with_header_start + len;
             self.cursor = content_with_header_end;
-            if let Some(id) = BootInfoExtraId::from_sys(header.id) {
+            if let Some(id) = id {
                 return Some(BootInfoExtra {
                     id,
                     content_with_header: &self.bootinfo.extra_slice()
