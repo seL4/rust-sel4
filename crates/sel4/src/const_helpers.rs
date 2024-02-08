@@ -8,9 +8,25 @@
 
 use sel4_config::sel4_cfg_attr;
 
-pub(crate) const fn u32_into_usize(x: u32) -> usize {
-    assert!(u32::BITS <= usize::BITS);
+use crate::Word;
+
+const _: () = assert!(Word::BITS == usize::BITS);
+const _: () = assert!(u32::BITS <= usize::BITS);
+
+pub(crate) const fn word_into_usize(x: Word) -> usize {
     x as usize
+}
+
+pub(crate) const fn usize_into_word(x: usize) -> Word {
+    x as Word
+}
+
+pub(crate) const fn u32_into_usize(x: u32) -> usize {
+    x as usize
+}
+
+pub(crate) const fn u32_into_word(x: u32) -> Word {
+    x as Word
 }
 
 #[sel4_cfg_attr(not(KERNEL_MCS), allow(dead_code))]
