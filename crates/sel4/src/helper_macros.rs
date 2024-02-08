@@ -56,13 +56,7 @@ macro_rules! declare_fault_newtype {
         pub struct $t($sys);
 
         impl $t {
-            pub const fn from_inner(inner: $sys) -> Self {
-                Self(inner)
-            }
-
-            pub const fn inner(&self) -> &$sys {
-                &self.0
-            }
+            $crate::newtype_methods!($sys);
         }
     };
 }
