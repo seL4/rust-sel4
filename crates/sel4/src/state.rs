@@ -16,11 +16,11 @@ cfg_if::cfg_if! {
         use core::cell::RefCell;
 
         #[thread_local]
-        static IPC_BUFFER: RefCell<Option<IPCBuffer>> = RefCell::new(None);
+        static IPC_BUFFER: RefCell<Option<&'static mut IPCBuffer>> = RefCell::new(None);
 
         fn try_with_ipc_buffer_internal<F, T>(f: F) -> T
         where
-            F: FnOnce(Result<&mut Option<IPCBuffer>, BorrowError>) -> T,
+            F: FnOnce(Result<&mut Option<&'static mut IPCBuffer>, BorrowError>) -> T,
         {
             match IPC_BUFFER.try_borrow_mut() {
                 Ok(mut buf) => f(Ok(&mut *buf)),
@@ -30,13 +30,13 @@ cfg_if::cfg_if! {
     } else if #[cfg(feature = "single-threaded")] {
         use core::sync::atomic::{AtomicBool, Ordering};
 
-        static mut IPC_BUFFER: Option<IPCBuffer> = None;
+        static mut IPC_BUFFER: Option<&'static mut IPCBuffer> = None;
 
         static IPC_BUFFER_BORROWED: AtomicBool = AtomicBool::new(false);
 
         fn try_with_ipc_buffer_internal<F, T>(f: F) -> T
         where
-            F: FnOnce(Result<&mut Option<IPCBuffer>, BorrowError>) -> T,
+            F: FnOnce(Result<&mut Option<&'static mut IPCBuffer>, BorrowError>) -> T,
         {
             // release on panic
             struct Guard;
@@ -63,7 +63,7 @@ cfg_if::cfg_if! {
 
 fn try_with_ipc_buffer_raw<F, T>(f: F) -> T
 where
-    F: FnOnce(Result<&mut Option<IPCBuffer>, BorrowError>) -> T,
+    F: FnOnce(Result<&mut Option<&'static mut IPCBuffer>, BorrowError>) -> T,
 {
     try_with_ipc_buffer_internal(f)
 }
@@ -85,7 +85,7 @@ impl fmt::Display for BorrowError {
 
 fn with_ipc_buffer_raw<F, T>(f: F) -> T
 where
-    F: FnOnce(&mut Option<IPCBuffer>) -> T,
+    F: FnOnce(&mut Option<&'static mut IPCBuffer>) -> T,
 {
     try_with_ipc_buffer_raw(|r| f(r.unwrap()))
 }
@@ -95,7 +95,7 @@ where
 /// This function does not modify kernel state. It only affects this crate's thread-local state.
 ///
 /// Requires the `"state"` feature to be enabled.
-pub fn set_ipc_buffer(ipc_buffer: IPCBuffer) {
+pub fn set_ipc_buffer(ipc_buffer: &'static mut IPCBuffer) {
     with_ipc_buffer_raw(|buf| {
         let _ = buf.replace(ipc_buffer);
     })

@@ -73,9 +73,8 @@ impl BootInfo {
         self.inner().extraLen.try_into().unwrap()
     }
 
-    #[allow(clippy::missing_safety_doc)]
-    pub unsafe fn ipc_buffer(&self) -> IPCBuffer {
-        IPCBuffer::from_ptr(self.inner().ipcBuffer)
+    pub fn ipc_buffer(&self) -> *mut IPCBuffer {
+        self.inner().ipcBuffer.cast()
     }
 
     pub fn empty(&self) -> SlotRegion<cap_type::Null> {
