@@ -8,35 +8,14 @@
 use core::mem;
 use core::slice;
 
-use crate::{sys, AbsoluteCPtr, CNode, Word, GRANULE_SIZE};
+use crate::{newtype_methods, sys, AbsoluteCPtr, CNode, Word};
 
 /// Corresponds to `seL4_IPCBuffer`.
-#[derive(Debug)]
-pub struct IPCBuffer {
-    ptr: *mut sys::seL4_IPCBuffer,
-}
-
-unsafe impl Send for IPCBuffer {}
-unsafe impl Sync for IPCBuffer {}
+#[repr(transparent)]
+pub struct IPCBuffer(sys::seL4_IPCBuffer);
 
 impl IPCBuffer {
-    #[allow(clippy::missing_safety_doc)]
-    pub unsafe fn from_ptr(ptr: *mut sys::seL4_IPCBuffer) -> Self {
-        assert_eq!(ptr.cast::<()>().align_offset(GRANULE_SIZE.bytes()), 0); // sanity check
-        Self { ptr }
-    }
-
-    pub fn ptr(&self) -> *mut sys::seL4_IPCBuffer {
-        self.ptr
-    }
-
-    pub fn inner(&self) -> &sys::seL4_IPCBuffer {
-        unsafe { self.ptr().as_ref().unwrap() }
-    }
-
-    pub fn inner_mut(&mut self) -> &mut sys::seL4_IPCBuffer {
-        unsafe { self.ptr().as_mut().unwrap() }
-    }
+    newtype_methods!(sys::seL4_IPCBuffer);
 
     pub fn msg_regs(&self) -> &[Word] {
         &self.inner().msg[..]
