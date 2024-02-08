@@ -55,7 +55,7 @@ pub fn generate_rust(
     }
 
     {
-        // HACK for risc64imac (already handled in upstream bindgen for riscv64gc)
+        // TODO remove once https://github.com/rust-lang/rust-bindgen/pull/2751 is released
         let target = env::var("TARGET").unwrap();
         if let Some(rest) = target.strip_prefix("riscv64imac-") {
             builder = builder.clang_arg(format!("--target=riscv64-{}", rest));
