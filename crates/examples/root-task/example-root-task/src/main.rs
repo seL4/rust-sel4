@@ -10,7 +10,7 @@
 use sel4_root_task::{root_task, Never};
 
 #[root_task]
-fn main(bootinfo: &sel4::BootInfo) -> sel4::Result<Never> {
+fn main(bootinfo: &sel4::BootInfoPtr) -> sel4::Result<Never> {
     sel4::debug_println!("Hello, World!");
 
     let blueprint = sel4::ObjectBlueprint::Notification;

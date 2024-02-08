@@ -25,7 +25,7 @@ pub use termination::{Never, Termination};
 
 #[cfg(target_thread_local)]
 #[no_mangle]
-unsafe extern "C" fn sel4_runtime_rust_entry(bootinfo: *const sel4::sys::seL4_BootInfo) -> ! {
+unsafe extern "C" fn sel4_runtime_rust_entry(bootinfo: *const sel4::BootInfo) -> ! {
     unsafe extern "C" fn cont_fn(cont_arg: *mut sel4_runtime_common::ContArg) -> ! {
         inner_entry(cont_arg.cast_const().cast())
     }
@@ -35,19 +35,19 @@ unsafe extern "C" fn sel4_runtime_rust_entry(bootinfo: *const sel4::sys::seL4_Bo
 
 #[cfg(not(target_thread_local))]
 #[no_mangle]
-unsafe extern "C" fn sel4_runtime_rust_entry(bootinfo: *const sel4::sys::seL4_BootInfo) -> ! {
+unsafe extern "C" fn sel4_runtime_rust_entry(bootinfo: *const sel4::BootInfo) -> ! {
     inner_entry(bootinfo)
 }
 
-fn inner_entry(bootinfo: *const sel4::sys::seL4_BootInfo) -> ! {
+fn inner_entry(bootinfo: *const sel4::BootInfo) -> ! {
     #[cfg(all(feature = "unwinding", panic = "unwind"))]
     {
         sel4_runtime_common::set_eh_frame_finder().unwrap();
     }
 
     unsafe {
-        let bootinfo = sel4::BootInfo::from_ptr(bootinfo);
-        sel4::set_ipc_buffer(bootinfo.ipc_buffer());
+        let bootinfo = sel4::BootInfoPtr::new(bootinfo);
+        sel4::set_ipc_buffer(&mut *bootinfo.ipc_buffer());
         sel4_runtime_common::run_ctors();
         __sel4_root_task__main(&bootinfo);
     }
@@ -56,7 +56,7 @@ fn inner_entry(bootinfo: *const sel4::sys::seL4_BootInfo) -> ! {
 }
 
 extern "Rust" {
-    fn __sel4_root_task__main(bootinfo: &sel4::BootInfo);
+    fn __sel4_root_task__main(bootinfo: &sel4::BootInfoPtr);
 }
 
 #[doc(hidden)]
@@ -64,7 +64,7 @@ extern "Rust" {
 macro_rules! declare_main {
     ($main:expr) => {
         #[no_mangle]
-        fn __sel4_root_task__main(bootinfo: &$crate::_private::BootInfo) {
+        fn __sel4_root_task__main(bootinfo: &$crate::_private::BootInfoPtr) {
             $crate::_private::run_main($main, bootinfo);
         }
     };
@@ -72,8 +72,10 @@ macro_rules! declare_main {
 
 #[doc(hidden)]
 #[allow(clippy::missing_safety_doc)]
-pub fn run_main<T>(f: impl FnOnce(&sel4::BootInfo) -> T + UnwindSafe, bootinfo: &sel4::BootInfo)
-where
+pub fn run_main<T>(
+    f: impl FnOnce(&sel4::BootInfoPtr) -> T + UnwindSafe,
+    bootinfo: &sel4::BootInfoPtr,
+) where
     T: Termination,
     T::Error: fmt::Debug,
 {
@@ -122,7 +124,7 @@ pub const DEFAULT_STACK_SIZE: usize = 0x10000;
 // For macros
 #[doc(hidden)]
 pub mod _private {
-    pub use sel4::BootInfo;
+    pub use sel4::BootInfoPtr;
     pub use sel4_runtime_common::declare_stack;
 
     pub use crate::heap::_private as heap;

@@ -14,7 +14,7 @@ use sel4_root_task::{debug_println, panicking, root_task};
 static F1_DROPPED: AtomicBool = AtomicBool::new(false);
 
 #[root_task(stack_size = 4096 * 64, heap_size = 4096 * 16)] // TODO decrease stack size
-fn main(_: &sel4::BootInfo) -> ! {
+fn main(_: &sel4::BootInfoPtr) -> ! {
     let _ = panicking::catch_unwind(|| {
         f1();
     });
@@ -22,8 +22,7 @@ fn main(_: &sel4::BootInfo) -> ! {
     whether_alloc();
     debug_println!("TEST_PASS");
 
-    sel4::BootInfo::init_thread_tcb().tcb_suspend().unwrap();
-    unreachable!()
+    sel4::init_thread::suspend_self()
 }
 
 fn f1() {

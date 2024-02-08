@@ -22,11 +22,10 @@ struct T(i32);
 static Y: T = T(X);
 
 #[root_task]
-fn main(_: &sel4::BootInfo) -> ! {
+fn main(_: &sel4::BootInfoPtr) -> ! {
     let observed = Y.0;
     debug_println!("{}", observed);
     assert_eq!(observed, black_box(X));
     debug_println!("TEST_PASS");
-    sel4::BootInfo::init_thread_tcb().tcb_suspend().unwrap();
-    unreachable!()
+    sel4::init_thread::suspend_self()
 }

@@ -11,7 +11,7 @@ use sel4_root_task::{debug_println, root_task};
 
 #[sel4::sel4_cfg(not(KERNEL_STACK_BITS = "0"))]
 #[root_task]
-fn main(_: &sel4::BootInfo) -> ! {
+fn main(_: &sel4::BootInfoPtr) -> ! {
     debug_println!(
         "RETYPE_FAN_OUT_LIMIT: {}",
         sel4::sel4_cfg_usize!(RETYPE_FAN_OUT_LIMIT),
@@ -25,6 +25,5 @@ fn main(_: &sel4::BootInfo) -> ! {
     }
     debug_println!("TEST_PASS");
 
-    sel4::BootInfo::init_thread_tcb().tcb_suspend().unwrap();
-    unreachable!()
+    sel4::init_thread::suspend_self()
 }

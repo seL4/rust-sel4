@@ -71,9 +71,11 @@ pub unsafe extern "C" fn cont_fn(cont_arg: *mut sel4_runtime_common::ContArg) ->
 
     THREAD_INDEX.set(thread_index).unwrap();
 
-    sel4::set_ipc_buffer(sel4::IPCBuffer::from_ptr(
-        usize::try_from(thread_config.ipc_buffer_addr()).unwrap() as *mut _,
-    ));
+    sel4::set_ipc_buffer(
+        (usize::try_from(thread_config.ipc_buffer_addr()).unwrap() as *mut sel4::IPCBuffer)
+            .as_mut()
+            .unwrap(),
+    );
 
     if thread_index == 0 {
         CONFIG.set(config.clone()).unwrap();
