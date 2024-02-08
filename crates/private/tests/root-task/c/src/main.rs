@@ -17,12 +17,11 @@ extern "C" {
 }
 
 #[root_task]
-fn main(_: &sel4::BootInfo) -> ! {
+fn main(_: &sel4::BootInfoPtr) -> ! {
     let s = CStr::from_bytes_with_nul(b"1234\0").unwrap();
     let n = unsafe { test(s.as_ptr()) };
     debug_println!("n = {}", n);
     assert_eq!(n, 1234 + 234);
     debug_println!("TEST_PASS");
-    sel4::BootInfo::init_thread_tcb().tcb_suspend().unwrap();
-    unreachable!()
+    sel4::init_thread::suspend_self()
 }

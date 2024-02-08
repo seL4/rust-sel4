@@ -20,13 +20,12 @@ use sel4_root_task::{debug_println, panicking, root_task};
 // Why are such a large stack and heap required? The unwinding part seems to consume the stack, and
 // addr2line the heap.
 #[root_task(stack_size = 4096 * 64, heap_size = 16 << 20)]
-fn main(_: &sel4::BootInfo) -> ! {
+fn main(_: &sel4::BootInfoPtr) -> ! {
     let _ = panicking::catch_unwind(|| {
         f();
     });
 
-    sel4::BootInfo::init_thread_tcb().tcb_suspend().unwrap();
-    unreachable!()
+    sel4::init_thread::suspend_self()
 }
 
 pub fn f() {

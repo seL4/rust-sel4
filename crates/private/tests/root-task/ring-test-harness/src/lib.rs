@@ -18,11 +18,10 @@ pub use sel4_test_harness::for_generated_code::*;
 const HEAP_SIZE: usize = 256 * 1024 * 1024;
 
 #[root_task(heap_size = HEAP_SIZE)]
-fn main(_bootinfo: &sel4::BootInfo) -> ! {
+fn main(_bootinfo: &sel4::BootInfoPtr) -> ! {
     init();
     run_test_main();
-    sel4::BootInfo::init_thread_tcb().tcb_suspend().unwrap();
-    unreachable!()
+    sel4::init_thread::suspend_self()
 }
 
 fn init() {

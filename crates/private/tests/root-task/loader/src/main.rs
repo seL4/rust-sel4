@@ -20,13 +20,13 @@ struct Y(i32);
 static X: Y = Y(1337);
 
 #[root_task]
-fn main(bootinfo: &sel4::BootInfo) -> ! {
+fn main(bootinfo: &sel4::BootInfoPtr) -> ! {
     debug_println!("{}", X.0);
     assert_eq!(X.0, 1337);
 
     debug_println!("Gaps in device untypeds:");
     let mut last_end = 0;
-    for ut in bootinfo.device_untyped_list() {
+    for ut in &bootinfo.untyped_list()[bootinfo.device_untyped_range()] {
         if ut.paddr() > last_end {
             debug_println!("{:x?}", last_end..ut.paddr());
         }
@@ -35,7 +35,7 @@ fn main(bootinfo: &sel4::BootInfo) -> ! {
 
     debug_println!("Gaps in kernel untypeds:");
     let mut last_end = PLATFORM_INFO.memory[0].start.try_into().unwrap();
-    for ut in bootinfo.kernel_untyped_list() {
+    for ut in &bootinfo.untyped_list()[bootinfo.kernel_untyped_range()] {
         if ut.paddr() > last_end {
             debug_println!("{:x?}", last_end..ut.paddr());
         }
@@ -66,6 +66,5 @@ fn main(bootinfo: &sel4::BootInfo) -> ! {
 
     debug_println!("TEST_PASS");
 
-    sel4::BootInfo::init_thread_tcb().tcb_suspend().unwrap();
-    unreachable!()
+    sel4::init_thread::suspend_self()
 }

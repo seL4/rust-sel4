@@ -11,7 +11,7 @@
 
 use core::arch::global_asm;
 
-fn main(bootinfo: &sel4::BootInfo) -> sel4::Result<Never> {
+fn main(bootinfo: &sel4::BootInfoPtr) -> sel4::Result<Never> {
     sel4::debug_println!("Hello, World!");
 
     let mut ipc_buffer = unsafe { bootinfo.ipc_buffer().as_mut().unwrap() };
