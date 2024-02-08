@@ -25,6 +25,7 @@ pub(crate) const fn u32_into_usize(x: u32) -> usize {
     x as usize
 }
 
+#[allow(dead_code)]
 pub(crate) const fn u32_into_word(x: u32) -> Word {
     x as Word
 }
