@@ -86,9 +86,9 @@ impl From<CPtr> for CPtrWithDepth {
 ///   an invocation context before the capability is invoked.
 #[derive(Copy, Clone, Eq, PartialEq)]
 pub struct LocalCPtr<T: CapType, C = NoExplicitInvocationContext> {
-    phantom: PhantomData<T>,
     cptr: CPtr,
     invocation_context: C,
+    _phantom: PhantomData<T>,
 }
 
 impl<T: CapType, C> LocalCPtr<T, C> {
@@ -102,31 +102,35 @@ impl<T: CapType, C> LocalCPtr<T, C> {
 
     pub fn cast<T1: CapType>(self) -> LocalCPtr<T1, C> {
         LocalCPtr {
-            phantom: PhantomData,
             cptr: self.cptr,
             invocation_context: self.invocation_context,
+            _phantom: PhantomData,
         }
     }
 
     pub fn with<C1>(self, context: C1) -> LocalCPtr<T, C1> {
         LocalCPtr {
-            phantom: self.phantom,
             cptr: self.cptr,
             invocation_context: context,
+            _phantom: PhantomData,
         }
     }
 
     pub fn without_context(self) -> LocalCPtr<T> {
         self.with(NoExplicitInvocationContext::new())
     }
+
+    pub fn into_invocation_context(self) -> C {
+        self.invocation_context
+    }
 }
 
 impl<T: CapType> LocalCPtr<T> {
     pub const fn from_cptr(cptr: CPtr) -> Self {
         Self {
-            phantom: PhantomData,
             cptr,
             invocation_context: NoExplicitInvocationContext::new(),
+            _phantom: PhantomData,
         }
     }
 
@@ -136,9 +140,9 @@ impl<T: CapType> LocalCPtr<T> {
 }
 
 impl<T: CapType, C: InvocationContext> LocalCPtr<T, C> {
-    pub fn invoke<R>(self, f: impl FnOnce(CPtr, &mut IPCBuffer) -> R) -> R {
+    pub(crate) fn invoke<R>(self, f: impl FnOnce(CPtr, &mut IPCBuffer) -> R) -> R {
         let cptr = self.cptr();
-        self.invocation_context
+        self.into_invocation_context()
             .invoke(|ipc_buffer| f(cptr, ipc_buffer))
     }
 }
@@ -283,6 +287,12 @@ pub mod local_cptr {
     }
 }
 
+impl<T: CapType, C> LocalCPtr<T, C> {
+    pub fn upcast(self) -> Unspecified<C> {
+        self.cast()
+    }
+}
+
 impl<C> Unspecified<C> {
     pub fn downcast<T: CapType>(self) -> LocalCPtr<T, C> {
         self.cast()
@@ -299,6 +309,10 @@ pub struct AbsoluteCPtr<C = NoExplicitInvocationContext> {
 impl<C> AbsoluteCPtr<C> {
     pub const fn root(&self) -> &CNode<C> {
         &self.root
+    }
+
+    pub fn into_root(self) -> CNode<C> {
+        self.root
     }
 
     pub const fn path(&self) -> &CPtrWithDepth {
@@ -318,9 +332,9 @@ impl<C> AbsoluteCPtr<C> {
 }
 
 impl<C: InvocationContext> AbsoluteCPtr<C> {
-    pub fn invoke<R>(self, f: impl FnOnce(CPtr, CPtrWithDepth, &mut IPCBuffer) -> R) -> R {
+    pub(crate) fn invoke<R>(self, f: impl FnOnce(CPtr, CPtrWithDepth, &mut IPCBuffer) -> R) -> R {
         let path = *self.path();
-        self.root
+        self.into_root()
             .invoke(|cptr, ipc_buffer| f(cptr, path, ipc_buffer))
     }
 }
