@@ -70,8 +70,9 @@ mod syscalls;
 mod vspace;
 
 pub mod fault;
+pub mod init_thread;
 
-pub use bootinfo::{BootInfo, BootInfoExtra, BootInfoExtraId, InitCSpaceSlot, UntypedDesc};
+pub use bootinfo::{BootInfo, BootInfoExtra, BootInfoExtraId, BootInfoPtr, UntypedDesc};
 pub use cap_rights::{CapRights, CapRightsBuilder};
 pub use cnode_cap_data::CNodeCapData;
 pub use cptr::{
