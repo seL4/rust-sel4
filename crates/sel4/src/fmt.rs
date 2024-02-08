@@ -26,6 +26,7 @@ impl fmt::Write for DebugWrite {
     }
 }
 
+#[doc(hidden)]
 pub fn debug_print_helper(args: fmt::Arguments) {
     fmt::write(&mut DebugWrite, args).unwrap_or_else(|err| {
         panic!("write error: {:?}", err)
