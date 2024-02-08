@@ -301,13 +301,4 @@ mod fast_messages_sealing {
     impl FastMessagesSealed for &[Word] {}
 }
 
-#[allow(dead_code)]
-#[allow(non_upper_case_globals)]
-#[allow(clippy::assertions_on_constants)]
-mod __assertions {
-    use super::*;
-
-    const __assert_num_fast_message_registers: () = {
-        assert!(NUM_FAST_MESSAGE_REGISTERS == 4);
-    };
-}
+const _: () = assert!(NUM_FAST_MESSAGE_REGISTERS == 4);
