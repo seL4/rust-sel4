@@ -146,7 +146,7 @@ impl<T: CapType, C: InvocationContext> LocalCPtr<T, C> {
     pub(crate) fn invoke<R>(self, f: impl FnOnce(CPtr, &mut IPCBuffer) -> R) -> R {
         let cptr = self.cptr();
         self.into_invocation_context()
-            .invoke(|ipc_buffer| f(cptr, ipc_buffer))
+            .with_context(|ipc_buffer| f(cptr, ipc_buffer))
     }
 }
 
