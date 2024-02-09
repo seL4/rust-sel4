@@ -19,7 +19,7 @@ use crate::Result;
 pub type CPtrBits = sys::seL4_CPtr;
 
 /// A capability pointer.
-#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct CPtr {
     bits: CPtrBits,
 }
@@ -39,7 +39,7 @@ impl CPtr {
 }
 
 /// A capability pointer with a number of bits to resolve.
-#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct CPtrWithDepth {
     bits: CPtrBits,
     depth: usize,
@@ -84,7 +84,7 @@ impl From<CPtr> for CPtrWithDepth {
 ///   [`NoInvocationContext`](crate::NoInvocationContext), which does not implement
 ///   [`InvocationContext`]. In such cases, the [`with`](LocalCPtr::with) method is used to specify
 ///   an invocation context before the capability is invoked.
-#[derive(Copy, Clone, Eq, PartialEq)]
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct LocalCPtr<T: CapType, C = NoExplicitInvocationContext> {
     cptr: CPtr,
     invocation_context: C,
