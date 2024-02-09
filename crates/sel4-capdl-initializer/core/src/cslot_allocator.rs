@@ -6,10 +6,10 @@
 
 use core::ops::Range;
 
-use sel4::InitCSpaceSlot;
+use sel4::init_thread::Slot;
 
 pub(crate) struct CSlotAllocator {
-    free: Range<InitCSpaceSlot>,
+    free: Range<usize>,
 }
 
 #[derive(Debug)]
@@ -18,15 +18,18 @@ pub enum CSlotAllocatorError {
 }
 
 impl CSlotAllocator {
-    pub(crate) fn new(free: Range<InitCSpaceSlot>) -> Self {
+    pub(crate) fn new(free: Range<usize>) -> Self {
         Self { free }
     }
 
-    pub(crate) fn alloc(&mut self) -> Result<InitCSpaceSlot, CSlotAllocatorError> {
-        self.free.next().ok_or(CSlotAllocatorError::OutOfSlots)
+    pub(crate) fn alloc(&mut self) -> Result<Slot, CSlotAllocatorError> {
+        self.free
+            .next()
+            .map(Slot::from_index)
+            .ok_or(CSlotAllocatorError::OutOfSlots)
     }
 
-    pub(crate) fn alloc_or_panic(&mut self) -> InitCSpaceSlot {
+    pub(crate) fn alloc_or_panic(&mut self) -> Slot {
         self.alloc().unwrap()
     }
 }

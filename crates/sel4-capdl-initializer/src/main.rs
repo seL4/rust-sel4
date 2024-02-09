@@ -14,7 +14,6 @@ use core::ops::Range;
 use core::ptr;
 use core::slice;
 
-use sel4::BootInfo;
 use sel4_capdl_initializer_core::{Initializer, InitializerBuffers, PerObjectBuffer};
 use sel4_capdl_initializer_types::{
     IndirectDeflatedBytesContent, IndirectEmbeddedFrame, IndirectObjectName, SpecWithIndirection,
@@ -36,7 +35,7 @@ static LOGGER: Logger = LoggerBuilder::const_default()
     .build();
 
 #[root_task(stack_size = 0x10000)]
-fn main(bootinfo: &BootInfo) -> ! {
+fn main(bootinfo: &sel4::BootInfoPtr) -> ! {
     LOGGER.set().unwrap();
     let spec_with_sources = get_spec_with_sources();
     let mut buffers = InitializerBuffers::new(vec![

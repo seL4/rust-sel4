@@ -6,7 +6,7 @@
 
 use core::borrow::{Borrow, BorrowMut};
 
-use sel4::InitCSpaceSlot;
+use sel4::init_thread::Slot;
 
 pub struct InitializerBuffers<T> {
     pub(crate) per_obj: T,
@@ -14,7 +14,7 @@ pub struct InitializerBuffers<T> {
 
 #[derive(Copy, Clone)]
 pub struct PerObjectBuffer {
-    pub(crate) orig_slot: Option<InitCSpaceSlot>,
+    pub(crate) orig_slot: Option<Slot>,
 }
 
 #[allow(clippy::derivable_impls)] // until #![feature(derive_const)]

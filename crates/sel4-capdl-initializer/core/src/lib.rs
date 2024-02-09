@@ -17,8 +17,10 @@ use core::sync::atomic::{self, Ordering};
 use log::{debug, info, trace};
 
 use sel4::{
-    cap_type, AbsoluteCPtr, BootInfo, CNodeCapData, CPtr, CapRights, CapType, InitCSpaceSlot,
-    LocalCPtr, ObjectBlueprint, SizedFrameType, Untyped, UserContext,
+    cap_type,
+    init_thread::{self, Slot},
+    AbsoluteCPtr, BootInfoPtr, CNodeCapData, CPtr, CapRights, CapType, LocalCPtr, ObjectBlueprint,
+    SizedFrameType, Untyped, UserContext,
 };
 use sel4_capdl_initializer_types::*;
 
@@ -45,7 +47,7 @@ compile_error!("unsupported configuration");
 type Result<T> = result::Result<T, CapDLInitializerError>;
 
 pub struct Initializer<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B> {
-    bootinfo: &'a BootInfo,
+    bootinfo: &'a BootInfoPtr,
     user_image_bounds: Range<usize>,
     small_frame_copy_addr: usize,
     large_frame_copy_addr: usize,
@@ -58,7 +60,7 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
     Initializer<'a, N, D, M, B>
 {
     pub fn initialize(
-        bootinfo: &BootInfo,
+        bootinfo: &BootInfoPtr,
         user_image_bounds: Range<usize>,
         spec_with_sources: &SpecWithSources<N, D, M>,
         buffers: &mut InitializerBuffers<B>,
@@ -68,7 +70,7 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
         let (small_frame_copy_addr, large_frame_copy_addr) =
             init_copy_addrs(bootinfo, &user_image_bounds).unwrap();
 
-        let mut cslot_allocator = CSlotAllocator::new(bootinfo.empty());
+        let mut cslot_allocator = CSlotAllocator::new(bootinfo.empty().range());
 
         Initializer {
             bootinfo,
@@ -84,9 +86,7 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
 
         info!("CapDL initializer done, suspending");
 
-        BootInfo::init_thread_tcb().tcb_suspend().unwrap();
-
-        unreachable!()
+        init_thread::suspend_self()
     }
 
     fn spec(&self) -> &'a Spec<'a, N, D, M> {
@@ -168,7 +168,7 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
         // least one reference to an object allocated from an untyped, or else
         // its watermark will reset. This juggling approach is an easy way to
         // ensure that we are always holding such a reference.
-        let mut hold_slots = HoldSlots::new(self.cslot_allocator, cslot_relative_cptr)?;
+        let mut hold_slots = HoldSlots::new(self.cslot_allocator, cslot_to_relative_cptr)?;
 
         // Create root objects
 
@@ -232,7 +232,7 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
                                 self.ut_local_cptr(*i_ut).untyped_retype(
                                     &blueprint,
                                     &init_thread_cnode_relative_cptr(),
-                                    self.alloc_orig_cslot(*obj_id),
+                                    self.alloc_orig_cslot(*obj_id).index(),
                                     1,
                                 )?;
                                 cur_paddr += 1 << size_bits;
@@ -255,7 +255,7 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
                                     size_bits: max_size_bits,
                                 },
                                 &init_thread_cnode_relative_cptr(),
-                                hold_slot,
+                                hold_slot.index(),
                                 1,
                             )?;
                             hold_slots.report_used();
@@ -278,7 +278,7 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
                     self.ut_local_cptr(*i_ut).untyped_retype(
                         &blueprint,
                         &init_thread_cnode_relative_cptr(),
-                        self.alloc_orig_cslot(obj_id),
+                        self.alloc_orig_cslot(obj_id).index(),
                         1,
                     )?;
                     cur_paddr += 1 << blueprint.physical_size_bits();
@@ -310,7 +310,7 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
                 parent_cptr.untyped_retype(
                     &child.object.blueprint().unwrap(),
                     &init_thread_cnode_relative_cptr(),
-                    self.alloc_orig_cslot(child_obj_id),
+                    self.alloc_orig_cslot(child_obj_id).index(),
                     1,
                 )?;
             }
@@ -323,7 +323,9 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
             for obj_id in self.spec().asid_slots.iter() {
                 let ut = self.orig_local_cptr(*obj_id);
                 let slot = self.cslot_alloc_or_panic();
-                BootInfo::asid_control().asid_control_make_pool(ut, &cslot_relative_cptr(slot))?;
+                init_thread::slots::ASID_CONTROL
+                    .local_cptr()
+                    .asid_control_make_pool(ut, &cslot_to_relative_cptr(slot))?;
                 self.set_orig_cslot(*obj_id, slot);
             }
         }
@@ -335,24 +337,24 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
                 sel4::sel4_cfg_wrap_match! {
                     match self.spec().object(*handler) {
                         Object::IRQ(_) => {
-                            BootInfo::irq_control()
-                                .irq_control_get(*irq, &cslot_relative_cptr(slot))?;
+                            init_thread::slots::IRQ_CONTROL.local_cptr()
+                                .irq_control_get(*irq, &cslot_to_relative_cptr(slot))?;
                         }
                         #[sel4_cfg(any(ARCH_AARCH32, ARCH_AARCH64))]
                         Object::ArmIRQ(obj) => {
                             sel4::sel4_cfg_if! {
                                 if #[cfg(MAX_NUM_NODES = "1")] {
-                                    BootInfo::irq_control().irq_control_get_trigger(
+                                    init_thread::slots::IRQ_CONTROL.local_cptr().irq_control_get_trigger(
                                         *irq,
                                         obj.extra.trigger,
-                                        &cslot_relative_cptr(slot),
+                                        &cslot_to_relative_cptr(slot),
                                     )?;
                                 } else {
-                                    BootInfo::irq_control().irq_control_get_trigger_core(
+                                    init_thread::slots::IRQ_CONTROL.local_cptr().irq_control_get_trigger_core(
                                         *irq,
                                         obj.extra.trigger,
                                         obj.extra.target,
-                                        &cslot_relative_cptr(slot),
+                                        &cslot_to_relative_cptr(slot),
                                     )?;
                                 }
                             }
@@ -377,7 +379,7 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
         frame.check(frame_types::FrameType0::FRAME_SIZE.bytes());
         let addr = frame.ptr() as usize;
         let slot = get_user_image_frame_slot(self.bootinfo, &self.user_image_bounds, addr);
-        self.set_orig_cslot(obj_id, slot);
+        self.set_orig_cslot(obj_id, slot.upcast());
         Ok(())
     }
 
@@ -401,9 +403,9 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
                     badge => {
                         let orig_cptr = self.orig_relative_cptr(logical_nfn_cap.object);
                         let slot = self.cslot_alloc_or_panic();
-                        let cptr = cslot_relative_cptr(slot);
+                        let cptr = cslot_to_relative_cptr(slot);
                         cptr.mint(&orig_cptr, CapRights::all(), badge)?;
-                        cslot_local_cptr(slot)
+                        slot.local_cptr().downcast()
                     }
                 };
                 irq_handler.irq_handler_set_notification(nfn)?;
@@ -419,7 +421,9 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
             .filter_objects_with::<&object::PageTable>(|obj| obj.is_root)
         {
             let pgd = self.orig_local_cptr::<cap_type::VSpace>(obj_id);
-            BootInfo::init_thread_asid_pool().asid_pool_assign(pgd)?;
+            init_thread::slots::ASID_POOL
+                .local_cptr()
+                .asid_pool_assign(pgd)?;
         }
         Ok(())
     }
@@ -456,7 +460,7 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
         fill: &[FillEntry<D>],
     ) -> Result<()> {
         frame.frame_map(
-            BootInfo::init_thread_vspace(),
+            init_thread::slots::VSPACE.local_cptr(),
             self.copy_addr::<U>(),
             CapRights::read_write(),
             arch::vm_attributes_from_whether_cached(false),
@@ -601,7 +605,7 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
                 let ipc_buffer_addr = obj.extra.ipc_buffer_addr;
                 let ipc_buffer_frame = self.orig_local_cptr(obj.ipc_buffer().object);
 
-                let authority = BootInfo::init_thread_tcb();
+                let authority = init_thread::slots::TCB.local_cptr();
                 let max_prio = obj.extra.max_prio.into();
                 let prio = obj.extra.prio.into();
 
@@ -623,12 +627,12 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
                         )?;
 
                         let sc = match obj.sc() {
-                            None => BootInfo::null().cast::<cap_type::SchedContext>(),
+                            None => init_thread::slots::NULL.local_cptr().cast::<cap_type::SchedContext>(),
                             Some(cap) => self.orig_local_cptr::<cap_type::SchedContext>(cap.object),
                         };
 
                         let fault_ep = match obj.temp_fault_ep() {
-                            None => BootInfo::null().cast::<cap_type::Endpoint>(),
+                            None => init_thread::slots::NULL.local_cptr().cast::<cap_type::Endpoint>(),
                             Some(cap) => {
                                 let orig = self.orig_local_cptr::<cap_type::Endpoint>(cap.object);
                                 let badge = cap.badge;
@@ -636,9 +640,9 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
                                 if badge == 0 || rights == CapRights::all() {
                                     orig
                                 } else {
-                                    let src = BootInfo::init_thread_cnode().relative(orig);
-                                    let new = BootInfo::init_cspace_local_cptr::<cap_type::Endpoint>(self.cslot_alloc_or_panic());
-                                    let dst = BootInfo::init_thread_cnode().relative(new);
+                                    let src = init_thread::slots::CNODE.local_cptr().relative(orig);
+                                    let new = self.cslot_alloc_or_panic().local_cptr();
+                                    let dst = init_thread::slots::CNODE.local_cptr().relative(new);
                                     dst.mint(&src, rights, badge)?;
                                     new
                                 }
@@ -646,7 +650,7 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
                         };
 
                         let temp_fault_ep = match obj.temp_fault_ep() {
-                            None => BootInfo::null().cast::<cap_type::Endpoint>(),
+                            None => init_thread::slots::NULL.local_cptr().cast::<cap_type::Endpoint>(),
                             Some(cap) => {
                                 assert_eq!(cap.badge, 0); // HACK
                                 self.orig_local_cptr::<cap_type::Endpoint>(cap.object)
@@ -710,7 +714,8 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
             for (i, cap) in obj.slots() {
                 let badge = cap.badge();
                 let rights = cap.rights().map(From::from).unwrap_or(CapRights::all());
-                let src = BootInfo::init_thread_cnode()
+                let src = init_thread::slots::CNODE
+                    .local_cptr()
                     .relative(self.orig_local_cptr::<cap_type::Unspecified>(cap.obj()));
                 let dst = cnode.relative_bits_with_depth((*i).try_into().unwrap(), obj.size_bits);
                 match badge {
@@ -747,56 +752,48 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
 
     fn copy<U: CapType>(&mut self, cap: LocalCPtr<U>) -> Result<LocalCPtr<U>> {
         let slot = self.cslot_alloc_or_panic();
-        let src = BootInfo::init_thread_cnode().relative(cap);
-        cslot_relative_cptr(slot).copy(&src, CapRights::all())?;
-        Ok(cslot_local_cptr(slot))
+        let src = init_thread::slots::CNODE.local_cptr().relative(cap);
+        cslot_to_relative_cptr(slot).copy(&src, CapRights::all())?;
+        Ok(slot.local_cptr().downcast())
     }
 
     //
 
-    fn cslot_alloc_or_panic(&mut self) -> InitCSpaceSlot {
+    fn cslot_alloc_or_panic(&mut self) -> Slot {
         self.cslot_allocator.alloc_or_panic()
     }
 
-    fn set_orig_cslot(&mut self, obj_id: ObjectId, slot: InitCSpaceSlot) {
+    fn set_orig_cslot(&mut self, obj_id: ObjectId, slot: Slot) {
         self.buffers.per_obj_mut()[obj_id].orig_slot = Some(slot);
     }
 
-    fn orig_cslot(&self, obj_id: ObjectId) -> InitCSpaceSlot {
+    fn orig_cslot(&self, obj_id: ObjectId) -> Slot {
         self.buffers.per_obj()[obj_id].orig_slot.unwrap()
     }
 
-    fn alloc_orig_cslot(&mut self, obj_id: ObjectId) -> InitCSpaceSlot {
+    fn alloc_orig_cslot(&mut self, obj_id: ObjectId) -> Slot {
         let slot = self.cslot_alloc_or_panic();
         self.set_orig_cslot(obj_id, slot);
         slot
     }
 
     fn orig_local_cptr<U: CapType>(&self, obj_id: ObjectId) -> LocalCPtr<U> {
-        cslot_local_cptr(self.orig_cslot(obj_id))
+        self.orig_cslot(obj_id).local_cptr().downcast()
     }
 
     fn orig_relative_cptr(&self, obj_id: ObjectId) -> AbsoluteCPtr {
-        cslot_relative_cptr(self.orig_cslot(obj_id))
+        cslot_to_relative_cptr(self.orig_cslot(obj_id))
     }
 
     fn ut_local_cptr(&self, ut_index: usize) -> Untyped {
-        BootInfo::init_cspace_local_cptr(self.bootinfo.untyped().start + ut_index)
+        self.bootinfo.untyped().index(ut_index).local_cptr()
     }
 }
 
-fn cslot_local_cptr<T: CapType>(slot: InitCSpaceSlot) -> LocalCPtr<T> {
-    BootInfo::init_cspace_local_cptr(slot)
-}
-
-fn cslot_cptr(slot: InitCSpaceSlot) -> CPtr {
-    BootInfo::init_cspace_cptr(slot)
-}
-
-fn cslot_relative_cptr(slot: InitCSpaceSlot) -> AbsoluteCPtr {
-    BootInfo::init_thread_cnode().relative(cslot_cptr(slot))
+fn cslot_to_relative_cptr(slot: Slot) -> AbsoluteCPtr {
+    init_thread::slots::CNODE.local_cptr().relative(slot.cptr())
 }
 
 fn init_thread_cnode_relative_cptr() -> AbsoluteCPtr {
-    BootInfo::init_thread_cnode().relative(BootInfo::init_thread_cnode())
+    init_thread::slots::CNODE.local_cptr().relative_self()
 }
