@@ -14,51 +14,51 @@ use core::arch::global_asm;
 fn main(bootinfo: &sel4::BootInfo) -> sel4::Result<Never> {
     sel4::debug_println!("Hello, World!");
 
-    let mut ipc_buffer = unsafe { bootinfo.ipc_buffer() };
+    let mut ipc_buffer = unsafe { bootinfo.ipc_buffer().as_mut().unwrap() };
 
     let blueprint = sel4::ObjectBlueprint::Notification;
 
-    let untyped = {
-        let slot = bootinfo.untyped().start
-            + bootinfo
-                .untyped_list()
-                .iter()
-                .position(|desc| {
-                    !desc.is_device() && desc.size_bits() >= blueprint.physical_size_bits()
-                })
-                .unwrap();
-        sel4::BootInfo::init_cspace_local_cptr::<sel4::cap_type::Untyped>(slot)
-    };
+    let chosen_untyped_ix = bootinfo
+        .untyped_list()
+        .iter()
+        .position(|desc| !desc.is_device() && desc.size_bits() >= blueprint.physical_size_bits())
+        .unwrap();
 
-    let mut empty_slots = bootinfo.empty();
+    let untyped = bootinfo.untyped().index(chosen_untyped_ix).local_cptr();
+
+    let mut empty_slots = bootinfo
+        .empty()
+        .range()
+        .map(sel4::init_thread::Slot::from_index);
     let unbadged_notification_slot = empty_slots.next().unwrap();
     let badged_notification_slot = empty_slots.next().unwrap();
-    let unbadged_notification = sel4::BootInfo::init_cspace_local_cptr::<
-        sel4::cap_type::Notification,
-    >(unbadged_notification_slot);
-    let badged_notification = sel4::BootInfo::init_cspace_local_cptr::<sel4::cap_type::Notification>(
-        badged_notification_slot,
-    );
 
-    let cnode = sel4::BootInfo::init_thread_cnode();
+    let cnode = sel4::init_thread::slots::CNODE.local_cptr();
 
     untyped.with(&mut ipc_buffer).untyped_retype(
         &blueprint,
         &cnode.relative_self(),
-        unbadged_notification_slot,
+        unbadged_notification_slot.index(),
         1,
     )?;
 
     let badge = 0x1337;
 
     cnode
-        .relative(badged_notification)
         .with(&mut ipc_buffer)
+        .relative(badged_notification_slot.cptr())
         .mint(
-            &cnode.relative(unbadged_notification),
+            &cnode.relative(unbadged_notification_slot.cptr()),
             sel4::CapRights::write_only(),
             badge,
         )?;
+
+    let unbadged_notification = unbadged_notification_slot
+        .downcast::<sel4::cap_type::Notification>()
+        .local_cptr();
+    let badged_notification = badged_notification_slot
+        .downcast::<sel4::cap_type::Notification>()
+        .local_cptr();
 
     badged_notification.with(&mut ipc_buffer).signal();
 
@@ -69,9 +69,12 @@ fn main(bootinfo: &sel4::BootInfo) -> sel4::Result<Never> {
 
     sel4::debug_println!("TEST_PASS");
 
-    sel4::BootInfo::init_thread_tcb()
+    sel4::init_thread::slots::TCB
+        .local_cptr()
         .with(&mut ipc_buffer)
-        .tcb_suspend()?;
+        .tcb_suspend()
+        .unwrap();
+
     unreachable!()
 }
 
@@ -219,8 +222,8 @@ cfg_if::cfg_if! {
 }
 
 #[no_mangle]
-unsafe extern "C" fn __rust_entry(bootinfo: *const sel4::sys::seL4_BootInfo) -> ! {
-    let bootinfo = sel4::BootInfo::from_ptr(bootinfo);
+unsafe extern "C" fn __rust_entry(bootinfo: *const sel4::BootInfo) -> ! {
+    let bootinfo = sel4::BootInfoPtr::new(bootinfo);
     match main(&bootinfo) {
         Ok(absurdity) => match absurdity {},
         Err(err) => panic!("Error: {}", err),
