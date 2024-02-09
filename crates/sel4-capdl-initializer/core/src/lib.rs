@@ -323,7 +323,7 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
             for obj_id in self.spec().asid_slots.iter() {
                 let ut = self.orig_local_cptr(*obj_id);
                 let slot = self.cslot_alloc_or_panic();
-                init_thread::slots::ASID_CONTROL
+                init_thread::slot::ASID_CONTROL
                     .local_cptr()
                     .asid_control_make_pool(ut, &cslot_to_relative_cptr(slot))?;
                 self.set_orig_cslot(*obj_id, slot);
@@ -337,20 +337,20 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
                 sel4::sel4_cfg_wrap_match! {
                     match self.spec().object(*handler) {
                         Object::IRQ(_) => {
-                            init_thread::slots::IRQ_CONTROL.local_cptr()
+                            init_thread::slot::IRQ_CONTROL.local_cptr()
                                 .irq_control_get(*irq, &cslot_to_relative_cptr(slot))?;
                         }
                         #[sel4_cfg(any(ARCH_AARCH32, ARCH_AARCH64))]
                         Object::ArmIRQ(obj) => {
                             sel4::sel4_cfg_if! {
                                 if #[cfg(MAX_NUM_NODES = "1")] {
-                                    init_thread::slots::IRQ_CONTROL.local_cptr().irq_control_get_trigger(
+                                    init_thread::slot::IRQ_CONTROL.local_cptr().irq_control_get_trigger(
                                         *irq,
                                         obj.extra.trigger,
                                         &cslot_to_relative_cptr(slot),
                                     )?;
                                 } else {
-                                    init_thread::slots::IRQ_CONTROL.local_cptr().irq_control_get_trigger_core(
+                                    init_thread::slot::IRQ_CONTROL.local_cptr().irq_control_get_trigger_core(
                                         *irq,
                                         obj.extra.trigger,
                                         obj.extra.target,
@@ -421,7 +421,7 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
             .filter_objects_with::<&object::PageTable>(|obj| obj.is_root)
         {
             let pgd = self.orig_local_cptr::<cap_type::VSpace>(obj_id);
-            init_thread::slots::ASID_POOL
+            init_thread::slot::ASID_POOL
                 .local_cptr()
                 .asid_pool_assign(pgd)?;
         }
@@ -460,7 +460,7 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
         fill: &[FillEntry<D>],
     ) -> Result<()> {
         frame.frame_map(
-            init_thread::slots::VSPACE.local_cptr(),
+            init_thread::slot::VSPACE.local_cptr(),
             self.copy_addr::<U>(),
             CapRights::read_write(),
             arch::vm_attributes_from_whether_cached(false),
@@ -605,7 +605,7 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
                 let ipc_buffer_addr = obj.extra.ipc_buffer_addr;
                 let ipc_buffer_frame = self.orig_local_cptr(obj.ipc_buffer().object);
 
-                let authority = init_thread::slots::TCB.local_cptr();
+                let authority = init_thread::slot::TCB.local_cptr();
                 let max_prio = obj.extra.max_prio.into();
                 let prio = obj.extra.prio.into();
 
@@ -627,12 +627,12 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
                         )?;
 
                         let sc = match obj.sc() {
-                            None => init_thread::slots::NULL.local_cptr().cast::<cap_type::SchedContext>(),
+                            None => init_thread::slot::NULL.local_cptr().cast::<cap_type::SchedContext>(),
                             Some(cap) => self.orig_local_cptr::<cap_type::SchedContext>(cap.object),
                         };
 
                         let fault_ep = match obj.temp_fault_ep() {
-                            None => init_thread::slots::NULL.local_cptr().cast::<cap_type::Endpoint>(),
+                            None => init_thread::slot::NULL.local_cptr().cast::<cap_type::Endpoint>(),
                             Some(cap) => {
                                 let orig = self.orig_local_cptr::<cap_type::Endpoint>(cap.object);
                                 let badge = cap.badge;
@@ -640,9 +640,9 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
                                 if badge == 0 || rights == CapRights::all() {
                                     orig
                                 } else {
-                                    let src = init_thread::slots::CNODE.local_cptr().relative(orig);
+                                    let src = init_thread::slot::CNODE.local_cptr().relative(orig);
                                     let new = self.cslot_alloc_or_panic().local_cptr();
-                                    let dst = init_thread::slots::CNODE.local_cptr().relative(new);
+                                    let dst = init_thread::slot::CNODE.local_cptr().relative(new);
                                     dst.mint(&src, rights, badge)?;
                                     new
                                 }
@@ -650,7 +650,7 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
                         };
 
                         let temp_fault_ep = match obj.temp_fault_ep() {
-                            None => init_thread::slots::NULL.local_cptr().cast::<cap_type::Endpoint>(),
+                            None => init_thread::slot::NULL.local_cptr().cast::<cap_type::Endpoint>(),
                             Some(cap) => {
                                 assert_eq!(cap.badge, 0); // HACK
                                 self.orig_local_cptr::<cap_type::Endpoint>(cap.object)
@@ -714,7 +714,7 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
             for (i, cap) in obj.slots() {
                 let badge = cap.badge();
                 let rights = cap.rights().map(From::from).unwrap_or(CapRights::all());
-                let src = init_thread::slots::CNODE
+                let src = init_thread::slot::CNODE
                     .local_cptr()
                     .relative(self.orig_local_cptr::<cap_type::Unspecified>(cap.obj()));
                 let dst = cnode.relative_bits_with_depth((*i).try_into().unwrap(), obj.size_bits);
@@ -752,7 +752,7 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
 
     fn copy<U: CapType>(&mut self, cap: LocalCPtr<U>) -> Result<LocalCPtr<U>> {
         let slot = self.cslot_alloc_or_panic();
-        let src = init_thread::slots::CNODE.local_cptr().relative(cap);
+        let src = init_thread::slot::CNODE.local_cptr().relative(cap);
         cslot_to_relative_cptr(slot).copy(&src, CapRights::all())?;
         Ok(slot.local_cptr().downcast())
     }
@@ -791,9 +791,9 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
 }
 
 fn cslot_to_relative_cptr(slot: Slot) -> AbsoluteCPtr {
-    init_thread::slots::CNODE.local_cptr().relative(slot.cptr())
+    init_thread::slot::CNODE.local_cptr().relative(slot.cptr())
 }
 
 fn init_thread_cnode_relative_cptr() -> AbsoluteCPtr {
-    init_thread::slots::CNODE.local_cptr().relative_self()
+    init_thread::slot::CNODE.local_cptr().relative_self()
 }
