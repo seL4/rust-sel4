@@ -30,7 +30,7 @@ fn main(bootinfo: &sel4::BootInfoPtr) -> sel4::Result<Never> {
     let unbadged_notification_slot = empty_slots.next().unwrap();
     let badged_notification_slot = empty_slots.next().unwrap();
 
-    let cnode = sel4::init_thread::slots::CNODE.local_cptr();
+    let cnode = sel4::init_thread::slot::CNODE.local_cptr();
 
     untyped.untyped_retype(
         &blueprint,

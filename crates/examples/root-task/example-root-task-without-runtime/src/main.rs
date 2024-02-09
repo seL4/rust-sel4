@@ -33,7 +33,7 @@ fn main(bootinfo: &sel4::BootInfoPtr) -> sel4::Result<Never> {
     let unbadged_notification_slot = empty_slots.next().unwrap();
     let badged_notification_slot = empty_slots.next().unwrap();
 
-    let cnode = sel4::init_thread::slots::CNODE.local_cptr();
+    let cnode = sel4::init_thread::slot::CNODE.local_cptr();
 
     untyped.with(&mut ipc_buffer).untyped_retype(
         &blueprint,
@@ -69,7 +69,7 @@ fn main(bootinfo: &sel4::BootInfoPtr) -> sel4::Result<Never> {
 
     sel4::debug_println!("TEST_PASS");
 
-    sel4::init_thread::slots::TCB
+    sel4::init_thread::slot::TCB
         .local_cptr()
         .with(&mut ipc_buffer)
         .tcb_suspend()
