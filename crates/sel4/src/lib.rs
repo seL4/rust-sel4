@@ -80,9 +80,7 @@ pub use cptr::{
     LocalCPtr,
 };
 pub use error::{Error, Result};
-pub use invocation_context::{
-    ExplicitInvocationContext, InvocationContext, NoExplicitInvocationContext, NoInvocationContext,
-};
+pub use invocation_context::{InvocationContext, NoExplicitInvocationContext, NoInvocationContext};
 pub use ipc_buffer::IPCBuffer;
 pub use message_info::{MessageInfo, MessageInfoBuilder};
 pub use object::{ObjectBlueprint, ObjectType};

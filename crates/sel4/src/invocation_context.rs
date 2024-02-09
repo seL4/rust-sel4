@@ -10,7 +10,7 @@ use crate::IPCBuffer;
 
 /// A strategy for discovering the current thread's IPC buffer.
 pub trait InvocationContext {
-    fn invoke<T>(self, f: impl FnOnce(&mut IPCBuffer) -> T) -> T;
+    fn invoke<T>(&mut self, f: impl FnOnce(&mut IPCBuffer) -> T) -> T;
 }
 
 /// The absence of a strategy for discovering the current thread's IPC buffer.
@@ -23,18 +23,21 @@ impl NoInvocationContext {
     }
 }
 
-/// The trivial of a strategy for discovering the current thread's IPC buffer.
-pub type ExplicitInvocationContext<'a> = &'a mut IPCBuffer;
-
-impl<'a> InvocationContext for ExplicitInvocationContext<'a> {
-    fn invoke<T>(self, f: impl FnOnce(&mut IPCBuffer) -> T) -> T {
+impl InvocationContext for &mut IPCBuffer {
+    fn invoke<T>(&mut self, f: impl FnOnce(&mut IPCBuffer) -> T) -> T {
         f(self)
     }
 }
 
-impl InvocationContext for &RefCell<IPCBuffer> {
-    fn invoke<T>(self, f: impl FnOnce(&mut IPCBuffer) -> T) -> T {
-        f(&mut self.borrow_mut())
+impl<U: InvocationContext> InvocationContext for &mut U {
+    fn invoke<T>(&mut self, f: impl FnOnce(&mut IPCBuffer) -> T) -> T {
+        U::invoke(self, f)
+    }
+}
+
+impl<U: InvocationContext> InvocationContext for &RefCell<U> {
+    fn invoke<T>(&mut self, f: impl FnOnce(&mut IPCBuffer) -> T) -> T {
+        U::invoke(&mut self.borrow_mut(), f)
     }
 }
 
