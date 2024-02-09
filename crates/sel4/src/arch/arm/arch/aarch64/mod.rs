@@ -27,5 +27,5 @@ pub(crate) mod top_level {
     };
 
     #[sel4_config::sel4_cfg(ARM_HYPERVISOR_SUPPORT)]
-    pub use super::vcpu_reg::VCPUReg;
+    pub use super::vcpu_reg::VCpuReg;
 }

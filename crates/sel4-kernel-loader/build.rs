@@ -45,13 +45,13 @@ sel4_cfg_if! {
     } else if #[cfg(SEL4_ARCH = "riscv64")] {
         sel4_cfg_if! {
             if #[cfg(PT_LEVELS = "3")] {
-                type SchemeImpl = schemes::Riscv64Sv39;
+                type SchemeImpl = schemes::RiscV64Sv39;
             }
         }
     } else if #[cfg(SEL4_ARCH = "riscv32")] {
         sel4_cfg_if! {
             if #[cfg(PT_LEVELS = "2")] {
-                type SchemeImpl = schemes::Riscv32Sv32;
+                type SchemeImpl = schemes::RiscV32Sv32;
             }
         }
     }
@@ -260,7 +260,7 @@ impl SchemeExt for schemes::AArch32 {
     }
 }
 
-impl SchemeExt for schemes::Riscv64Sv39 {
+impl SchemeExt for schemes::RiscV64Sv39 {
     fn mk_identity_leaf_for_kernel_map(loc: LeafLocation) -> Self::LeafDescriptor {
         loc.map_identity::<Self>()
     }
@@ -273,7 +273,7 @@ impl SchemeExt for schemes::Riscv64Sv39 {
     }
 }
 
-impl SchemeExt for schemes::Riscv32Sv32 {
+impl SchemeExt for schemes::RiscV32Sv32 {
     fn mk_identity_leaf_for_kernel_map(loc: LeafLocation) -> Self::LeafDescriptor {
         loc.map_identity::<Self>()
     }

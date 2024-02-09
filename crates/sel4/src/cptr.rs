@@ -10,7 +10,7 @@ use core::marker::PhantomData;
 
 use sel4_config::sel4_cfg;
 
-use crate::{sys, IPCBuffer, InvocationContext, NoExplicitInvocationContext, WORD_SIZE};
+use crate::{sys, InvocationContext, IpcBuffer, NoExplicitInvocationContext, WORD_SIZE};
 
 #[sel4_cfg(not(KERNEL_MCS))]
 use crate::Result;
@@ -79,7 +79,7 @@ impl From<CPtr> for CPtrWithDepth {
 /// - The `T` parameter is a [`CapType`] marking the type of the pointed-to capability.
 /// - The `C` parameter is a strategy for discovering the current thread's IPC buffer. When the
 ///   `"state"` feature is enabled, [`NoExplicitInvocationContext`] is an alias for
-///   [`ImplicitInvocationContext`](crate::ImplicitInvocationContext), which uses the [`IPCBuffer`]
+///   [`ImplicitInvocationContext`](crate::ImplicitInvocationContext), which uses the [`IpcBuffer`]
 ///   set by [`set_ipc_buffer`](crate::set_ipc_buffer). Otherwise, it is an alias for
 ///   [`NoInvocationContext`](crate::NoInvocationContext), which does not implement
 ///   [`InvocationContext`]. In such cases, the [`with`](LocalCPtr::with) method is used to specify
@@ -143,7 +143,7 @@ impl<T: CapType, C: InvocationContext> LocalCPtr<T, C> {
     // TODO
     // Consider the tradeoffs of taking &mut self here, and switching all object invocations to take
     // &mut self too.
-    pub(crate) fn invoke<R>(self, f: impl FnOnce(CPtr, &mut IPCBuffer) -> R) -> R {
+    pub(crate) fn invoke<R>(self, f: impl FnOnce(CPtr, &mut IpcBuffer) -> R) -> R {
         let cptr = self.cptr();
         self.into_invocation_context()
             .with_context(|ipc_buffer| f(cptr, ipc_buffer))
@@ -189,7 +189,7 @@ pub mod cap_type {
 
     declare_cap_type! {
         /// Corresponds to `seL4_TCB`.
-        TCB
+        Tcb
     }
 
     declare_cap_type! {
@@ -199,22 +199,22 @@ pub mod cap_type {
 
     declare_cap_type! {
         /// Corresponds to `seL4_IRQControl`.
-        IRQControl
+        IrqControl
     }
 
     declare_cap_type! {
         /// Corresponds to `seL4_IRQHandler`.
-        IRQHandler
+        IrqHandler
     }
 
     declare_cap_type! {
         /// Corresponds to `seL4_ASIDControl`.
-        ASIDControl
+        AsidControl
     }
 
     declare_cap_type! {
         /// Corresponds to `seL4_ASIDPool`.
-        ASIDPool
+        AsidPool
     }
 
     declare_cap_type! {
@@ -268,12 +268,12 @@ pub mod local_cptr {
     declare_local_cptr_alias!(Untyped);
     declare_local_cptr_alias!(Endpoint);
     declare_local_cptr_alias!(Notification);
-    declare_local_cptr_alias!(TCB);
+    declare_local_cptr_alias!(Tcb);
     declare_local_cptr_alias!(CNode);
-    declare_local_cptr_alias!(IRQControl);
-    declare_local_cptr_alias!(IRQHandler);
-    declare_local_cptr_alias!(ASIDControl);
-    declare_local_cptr_alias!(ASIDPool);
+    declare_local_cptr_alias!(IrqControl);
+    declare_local_cptr_alias!(IrqHandler);
+    declare_local_cptr_alias!(AsidControl);
+    declare_local_cptr_alias!(AsidPool);
 
     declare_local_cptr_alias!(Null);
     declare_local_cptr_alias!(Unspecified);
@@ -335,7 +335,7 @@ impl<C> AbsoluteCPtr<C> {
 }
 
 impl<C: InvocationContext> AbsoluteCPtr<C> {
-    pub(crate) fn invoke<R>(self, f: impl FnOnce(CPtr, CPtrWithDepth, &mut IPCBuffer) -> R) -> R {
+    pub(crate) fn invoke<R>(self, f: impl FnOnce(CPtr, CPtrWithDepth, &mut IpcBuffer) -> R) -> R {
         let path = *self.path();
         self.into_root()
             .invoke(|cptr, ipc_buffer| f(cptr, path, ipc_buffer))

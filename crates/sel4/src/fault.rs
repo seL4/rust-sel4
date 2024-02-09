@@ -6,12 +6,12 @@
 
 //! Fault types.
 
-use crate::{sys, IPCBuffer, MessageInfo};
+use crate::{sys, IpcBuffer, MessageInfo};
 
 pub use crate::arch::fault::*;
 
 impl Fault {
-    pub fn new(ipc_buffer: &IPCBuffer, info: &MessageInfo) -> Self {
+    pub fn new(ipc_buffer: &IpcBuffer, info: &MessageInfo) -> Self {
         Self::from_sys(sys::seL4_Fault::get_from_ipc_buffer(
             info.inner(),
             ipc_buffer.inner(),

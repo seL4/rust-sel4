@@ -16,7 +16,7 @@ pub(crate) mod top_level {
     pub use super::{
         arch::top_level::*,
         object::{ObjectBlueprintArch, ObjectBlueprintX86, ObjectTypeArch, ObjectTypeX86},
-        vm_attributes::VMAttributes,
+        vm_attributes::VmAttributes,
         NUM_FAST_MESSAGE_REGISTERS,
     };
 }

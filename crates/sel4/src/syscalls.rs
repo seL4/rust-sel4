@@ -14,7 +14,7 @@ use crate::{
 };
 
 #[sel4_cfg(not(KERNEL_MCS))]
-use crate::IPCBuffer;
+use crate::IpcBuffer;
 
 /// Number of message registers in the IPC buffer.
 pub const NUM_MESSAGE_REGISTERS: usize = u32_into_usize(sys::seL4_MsgLimits::seL4_MsgMaxLength);
@@ -22,14 +22,14 @@ pub const NUM_MESSAGE_REGISTERS: usize = u32_into_usize(sys::seL4_MsgLimits::seL
 /// A capability badge.
 pub type Badge = Word;
 
-pub trait IPCCapType: CapType {}
+pub trait IpcCapType: CapType {}
 
-impl IPCCapType for cap_type::Notification {}
+impl IpcCapType for cap_type::Notification {}
 
-impl IPCCapType for cap_type::Endpoint {}
+impl IpcCapType for cap_type::Endpoint {}
 
 // HACK
-impl IPCCapType for cap_type::Unspecified {}
+impl IpcCapType for cap_type::Unspecified {}
 
 sel4_cfg_if! {
     if #[cfg(KERNEL_MCS)] {
@@ -189,10 +189,10 @@ impl<C: InvocationContext> Notification<C> {
     }
 }
 
-impl<T: IPCCapType, C: InvocationContext> LocalCPtr<T, C> {
+impl<T: IpcCapType, C: InvocationContext> LocalCPtr<T, C> {
     /// Corresponds to `seL4_NBSendRecv`.
     #[sel4_cfg(KERNEL_MCS)]
-    pub fn nb_send_recv<U: IPCCapType>(
+    pub fn nb_send_recv<U: IpcCapType>(
         self,
         info: MessageInfo,
         src: LocalCPtr<U>,
@@ -214,7 +214,7 @@ impl<T: IPCCapType, C: InvocationContext> LocalCPtr<T, C> {
 
 /// Corresponds to `seL4_Reply`.
 #[sel4_cfg(not(KERNEL_MCS))]
-pub fn reply(ipc_buffer: &mut IPCBuffer, info: MessageInfo) {
+pub fn reply(ipc_buffer: &mut IpcBuffer, info: MessageInfo) {
     ipc_buffer.inner_mut().seL4_Reply(info.into_inner())
 }
 

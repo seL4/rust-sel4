@@ -8,16 +8,16 @@ use sel4_config::sel4_cfg;
 
 use crate::{
     local_cptr::*, AbsoluteCPtr, CapRights, Error, FrameType, InvocationContext, LocalCPtr, Result,
-    VMAttributes, Word,
+    VmAttributes, Word,
 };
 
 #[sel4_cfg(ARM_HYPERVISOR_SUPPORT)]
-use crate::VCPUReg;
+use crate::VCpuReg;
 
 #[sel4_cfg(ARM_HYPERVISOR_SUPPORT)]
-impl<C: InvocationContext> VCPU<C> {
+impl<C: InvocationContext> VCpu<C> {
     /// Corresponds to `seL4_ARM_VCPU_SetTCB`.
-    pub fn vcpu_set_tcb(self, tcb: TCB) -> Result<()> {
+    pub fn vcpu_set_tcb(self, tcb: Tcb) -> Result<()> {
         Error::wrap(self.invoke(|cptr, ipc_buffer| {
             ipc_buffer
                 .inner_mut()
@@ -26,7 +26,7 @@ impl<C: InvocationContext> VCPU<C> {
     }
 
     /// Corresponds to `seL4_ARM_VCPU_ReadRegs`.
-    pub fn vcpu_read_regs(self, field: VCPUReg) -> Result<Word> {
+    pub fn vcpu_read_regs(self, field: VCpuReg) -> Result<Word> {
         let res = self.invoke(|cptr, ipc_buffer| {
             ipc_buffer
                 .inner_mut()
@@ -36,7 +36,7 @@ impl<C: InvocationContext> VCPU<C> {
     }
 
     /// Corresponds to `seL4_ARM_VCPU_WriteRegs`.
-    pub fn vcpu_write_regs(self, field: VCPUReg, value: Word) -> Result<()> {
+    pub fn vcpu_write_regs(self, field: VCpuReg, value: Word) -> Result<()> {
         Error::wrap(self.invoke(|cptr, ipc_buffer| {
             ipc_buffer.inner_mut().seL4_ARM_VCPU_WriteRegs(
                 cptr.bits(),
@@ -76,7 +76,7 @@ impl<T: FrameType, C: InvocationContext> LocalCPtr<T, C> {
         vspace: VSpace,
         vaddr: usize,
         rights: CapRights,
-        attrs: VMAttributes,
+        attrs: VmAttributes,
     ) -> Result<()> {
         Error::wrap(self.invoke(|cptr, ipc_buffer| {
             ipc_buffer.inner_mut().seL4_ARM_Page_Map(
@@ -109,7 +109,7 @@ impl<T: FrameType, C: InvocationContext> LocalCPtr<T, C> {
 }
 
 impl<C: InvocationContext> PT<C> {
-    pub fn pt_map(self, vspace: VSpace, vaddr: usize, attr: VMAttributes) -> Result<()> {
+    pub fn pt_map(self, vspace: VSpace, vaddr: usize, attr: VmAttributes) -> Result<()> {
         Error::wrap(self.invoke(|cptr, ipc_buffer| {
             ipc_buffer.inner_mut().seL4_ARM_PageTable_Map(
                 cptr.bits(),
@@ -122,7 +122,7 @@ impl<C: InvocationContext> PT<C> {
 }
 
 // TODO structured trigger type
-impl<C: InvocationContext> IRQControl<C> {
+impl<C: InvocationContext> IrqControl<C> {
     /// Corresponds to `seL4_IRQControl_GetTriggerCore`.
     #[sel4_cfg(not(MAX_NUM_NODES = "1"))]
     pub fn irq_control_get_trigger_core(
@@ -165,7 +165,7 @@ impl<C: InvocationContext> IRQControl<C> {
     }
 }
 
-impl<C: InvocationContext> ASIDControl<C> {
+impl<C: InvocationContext> AsidControl<C> {
     /// Corresponds to `seL4_ARM_ASIDControl_MakePool`.
     pub fn asid_control_make_pool(self, untyped: Untyped, dst: &AbsoluteCPtr) -> Result<()> {
         Error::wrap(self.invoke(|cptr, ipc_buffer| {
@@ -180,7 +180,7 @@ impl<C: InvocationContext> ASIDControl<C> {
     }
 }
 
-impl<C: InvocationContext> ASIDPool<C> {
+impl<C: InvocationContext> AsidPool<C> {
     /// Corresponds to `seL4_ARM_ASIDPool_Assign`.
     pub fn asid_pool_assign(self, vspace: VSpace) -> Result<()> {
         Error::wrap(self.invoke(|cptr, ipc_buffer| {

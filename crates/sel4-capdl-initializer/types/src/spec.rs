@@ -33,20 +33,20 @@ pub type CapTableEntry = (CapSlot, Cap);
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Spec<'a, N, D, M> {
     pub objects: Indirect<'a, [NamedObject<'a, N, D, M>]>,
-    pub irqs: Indirect<'a, [IRQEntry]>,
-    pub asid_slots: Indirect<'a, [ASIDSlotEntry]>,
+    pub irqs: Indirect<'a, [IrqEntry]>,
+    pub asid_slots: Indirect<'a, [AsidSlotEntry]>,
     pub root_objects: Range<ObjectId>,
     pub untyped_covers: Indirect<'a, [UntypedCover]>,
 }
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub struct IRQEntry {
+pub struct IrqEntry {
     pub irq: Word,
     pub handler: ObjectId,
 }
 
-pub type ASIDSlotEntry = ObjectId;
+pub type AsidSlotEntry = ObjectId;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
@@ -69,13 +69,13 @@ pub enum Object<'a, D, M> {
     Endpoint,
     Notification,
     CNode(object::CNode<'a>),
-    TCB(object::TCB<'a>),
-    IRQ(object::IRQ<'a>),
-    VCPU,
+    Tcb(object::Tcb<'a>),
+    Irq(object::Irq<'a>),
+    VCpu,
     Frame(object::Frame<'a, D, M>),
     PageTable(object::PageTable<'a>),
-    ASIDPool(object::ASIDPool),
-    ArmIRQ(object::ArmIRQ<'a>),
+    AsidPool(object::AsidPool),
+    ArmIrq(object::ArmIrq<'a>),
     SchedContext(object::SchedContext),
     Reply,
 }
@@ -97,13 +97,13 @@ pub enum Cap {
     Endpoint(cap::Endpoint),
     Notification(cap::Notification),
     CNode(cap::CNode),
-    TCB(cap::TCB),
-    IRQHandler(cap::IRQHandler),
-    VCPU(cap::VCPU),
+    Tcb(cap::Tcb),
+    IrqHandler(cap::IrqHandler),
+    VCpu(cap::VCpu),
     Frame(cap::Frame),
     PageTable(cap::PageTable),
-    ASIDPool(cap::ASIDPool),
-    ArmIRQHandler(cap::ArmIRQHandler),
+    AsidPool(cap::AsidPool),
+    ArmIrqHandler(cap::ArmIrqHandler),
     SchedContext(cap::SchedContext),
     Reply(cap::Reply),
 }
@@ -116,12 +116,12 @@ impl Cap {
             Cap::Notification(cap) => cap.object,
             Cap::CNode(cap) => cap.object,
             Cap::Frame(cap) => cap.object,
-            Cap::TCB(cap) => cap.object,
-            Cap::IRQHandler(cap) => cap.object,
-            Cap::VCPU(cap) => cap.object,
+            Cap::Tcb(cap) => cap.object,
+            Cap::IrqHandler(cap) => cap.object,
+            Cap::VCpu(cap) => cap.object,
             Cap::PageTable(cap) => cap.object,
-            Cap::ASIDPool(cap) => cap.object,
-            Cap::ArmIRQHandler(cap) => cap.object,
+            Cap::AsidPool(cap) => cap.object,
+            Cap::ArmIrqHandler(cap) => cap.object,
             Cap::SchedContext(cap) => cap.object,
             Cap::Reply(cap) => cap.object,
         }
@@ -157,14 +157,14 @@ pub mod object {
 
     #[derive(Debug, Clone, Eq, PartialEq, IsObject, IsObjectWithCapTable)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-    pub struct TCB<'a> {
+    pub struct Tcb<'a> {
         pub slots: Indirect<'a, [CapTableEntry]>,
-        pub extra: Indirect<'a, TCBExtraInfo<'a>>,
+        pub extra: Indirect<'a, TcbExtraInfo<'a>>,
     }
 
     #[derive(Debug, Clone, Eq, PartialEq)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-    pub struct TCBExtraInfo<'a> {
+    pub struct TcbExtraInfo<'a> {
         pub ipc_buffer_addr: Word,
 
         pub affinity: Word,
@@ -182,7 +182,7 @@ pub mod object {
 
     #[derive(Debug, Clone, Eq, PartialEq, IsObject, IsObjectWithCapTable)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-    pub struct IRQ<'a> {
+    pub struct Irq<'a> {
         pub slots: Indirect<'a, [CapTableEntry]>,
     }
 
@@ -204,20 +204,20 @@ pub mod object {
 
     #[derive(Debug, Clone, Eq, PartialEq, IsObject)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-    pub struct ASIDPool {
+    pub struct AsidPool {
         pub high: Word,
     }
 
     #[derive(Debug, Clone, Eq, PartialEq, IsObject, IsObjectWithCapTable)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-    pub struct ArmIRQ<'a> {
+    pub struct ArmIrq<'a> {
         pub slots: Indirect<'a, [CapTableEntry]>,
-        pub extra: Indirect<'a, ArmIRQExtraInfo>,
+        pub extra: Indirect<'a, ArmIrqExtraInfo>,
     }
 
     #[derive(Debug, Clone, Eq, PartialEq)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-    pub struct ArmIRQExtraInfo {
+    pub struct ArmIrqExtraInfo {
         pub trigger: Word,
         pub target: Word,
     }
@@ -255,7 +255,7 @@ pub mod cap {
         //   parse-capDL uses badge=0 to mean no badge. Is that good
         //   enough, or do we ever need to actually use the badge value '0'?
         // TODO
-        //   Is it correct that these are ignored in the case of TCB::SLOT_TEMP_FAULT_EP?
+        //   Is it correct that these are ignored in the case of Tcb::SLOT_TEMP_FAULT_EP?
         pub badge: Badge,
         pub rights: Rights,
     }
@@ -278,19 +278,19 @@ pub mod cap {
 
     #[derive(Debug, Clone, Eq, PartialEq, IsCap)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-    pub struct TCB {
+    pub struct Tcb {
         pub object: ObjectId,
     }
 
     #[derive(Debug, Clone, Eq, PartialEq, IsCap)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-    pub struct IRQHandler {
+    pub struct IrqHandler {
         pub object: ObjectId,
     }
 
     #[derive(Debug, Clone, Eq, PartialEq, IsCap)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-    pub struct VCPU {
+    pub struct VCpu {
         pub object: ObjectId,
     }
 
@@ -310,13 +310,13 @@ pub mod cap {
 
     #[derive(Debug, Clone, Eq, PartialEq, IsCap)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-    pub struct ASIDPool {
+    pub struct AsidPool {
         pub object: ObjectId,
     }
 
     #[derive(Debug, Clone, Eq, PartialEq, IsCap)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-    pub struct ArmIRQHandler {
+    pub struct ArmIrqHandler {
         pub object: ObjectId,
     }
 

@@ -72,7 +72,7 @@ pub unsafe extern "C" fn cont_fn(cont_arg: *mut sel4_runtime_common::ContArg) ->
     THREAD_INDEX.set(thread_index).unwrap();
 
     sel4::set_ipc_buffer(
-        (usize::try_from(thread_config.ipc_buffer_addr()).unwrap() as *mut sel4::IPCBuffer)
+        (usize::try_from(thread_config.ipc_buffer_addr()).unwrap() as *mut sel4::IpcBuffer)
             .as_mut()
             .unwrap(),
     );

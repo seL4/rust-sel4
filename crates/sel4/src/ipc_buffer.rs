@@ -12,9 +12,9 @@ use crate::{newtype_methods, sys, AbsoluteCPtr, CNode, Word};
 
 /// Corresponds to `seL4_IPCBuffer`.
 #[repr(transparent)]
-pub struct IPCBuffer(sys::seL4_IPCBuffer);
+pub struct IpcBuffer(sys::seL4_IPCBuffer);
 
-impl IPCBuffer {
+impl IpcBuffer {
     newtype_methods!(sys::seL4_IPCBuffer);
 
     pub fn msg_regs(&self) -> &[Word] {

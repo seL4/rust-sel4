@@ -17,7 +17,7 @@
 //!
 //! ### Features
 //!
-//! The `"state"` feature enables a thread-local `Option<RefCell<IPCBuffer>>` which, once set, in
+//! The `"state"` feature enables a thread-local `Option<RefCell<IpcBuffer>>` which, once set, in
 //! turn enables threads to make seL4 API calls without having to explicitly specify an IPC buffer.
 //! Specifically, it causes [`NoExplicitInvocationContext`] to be an alias for
 //! [`ImplicitInvocationContext`], which implements [`InvocationContext`] by accessing the
@@ -81,12 +81,12 @@ pub use cptr::{
 };
 pub use error::{Error, Result};
 pub use invocation_context::{InvocationContext, NoExplicitInvocationContext, NoInvocationContext};
-pub use ipc_buffer::IPCBuffer;
+pub use ipc_buffer::IpcBuffer;
 pub use message_info::{MessageInfo, MessageInfoBuilder};
 pub use object::{ObjectBlueprint, ObjectType};
 pub use reply_authority::{ConveysReplyAuthority, ReplyAuthority};
 pub use syscalls::{
-    r#yield, Badge, CallWithMRs, FastMessages, IPCCapType, RecvWithMRs, NUM_MESSAGE_REGISTERS,
+    r#yield, Badge, CallWithMRs, FastMessages, IpcCapType, RecvWithMRs, NUM_MESSAGE_REGISTERS,
 };
 pub use vspace::{FrameType, SizedFrameType, GRANULE_SIZE};
 

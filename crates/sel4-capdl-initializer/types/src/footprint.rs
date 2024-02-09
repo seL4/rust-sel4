@@ -24,8 +24,8 @@ pub trait Footprint {
     }
 }
 
-impl Footprint for IRQEntry {}
-impl Footprint for ASIDSlotEntry {}
+impl Footprint for IrqEntry {}
+impl Footprint for AsidSlotEntry {}
 impl Footprint for Cap {}
 impl Footprint for CapTableEntry {}
 impl Footprint for Word {}
@@ -75,11 +75,11 @@ impl<'a, D: Footprint, M: Footprint> Footprint for Object<'a, D, M> {
     fn external_footprint(&self) -> usize {
         match self {
             Self::CNode(obj) => obj.slots.external_footprint(),
-            Self::TCB(obj) => obj.slots.external_footprint() + obj.extra.gprs.external_footprint(),
-            Self::IRQ(obj) => obj.slots.external_footprint(),
+            Self::Tcb(obj) => obj.slots.external_footprint() + obj.extra.gprs.external_footprint(),
+            Self::Irq(obj) => obj.slots.external_footprint(),
             Self::Frame(obj) => obj.init.external_footprint(),
             Self::PageTable(obj) => obj.slots.external_footprint(),
-            Self::ArmIRQ(obj) => obj.slots.external_footprint(),
+            Self::ArmIrq(obj) => obj.slots.external_footprint(),
             _ => 0,
         }
     }

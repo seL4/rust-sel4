@@ -9,11 +9,11 @@ use sel4_microkit_message::MessageInfoExt as _;
 
 use microkit_http_server_example_pl031_driver_interface_types::*;
 
-pub struct RTCClient {
+pub struct RtcClient {
     channel: sel4_microkit::Channel,
 }
 
-impl RTCClient {
+impl RtcClient {
     pub fn new(channel: sel4_microkit::Channel) -> Self {
         Self { channel }
     }

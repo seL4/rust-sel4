@@ -13,16 +13,16 @@ declare_fault_newtype!(NullFault, sys::seL4_Fault_NullFault);
 declare_fault_newtype!(CapFault, sys::seL4_Fault_CapFault);
 declare_fault_newtype!(UnknownSyscall, sys::seL4_Fault_UnknownSyscall);
 declare_fault_newtype!(UserException, sys::seL4_Fault_UserException);
-declare_fault_newtype!(VMFault, sys::seL4_Fault_VMFault);
+declare_fault_newtype!(VmFault, sys::seL4_Fault_VMFault);
 
 #[sel4_cfg(KERNEL_MCS)]
 declare_fault_newtype!(Timeout, sys::seL4_Fault_Timeout);
 
 sel4_cfg_if! {
     if #[cfg(ARM_HYPERVISOR_SUPPORT)] {
-        declare_fault_newtype!(VGICMaintenance, sys::seL4_Fault_VGICMaintenance);
-        declare_fault_newtype!(VCPUFault, sys::seL4_Fault_VCPUFault);
-        declare_fault_newtype!(VPPIEvent, sys::seL4_Fault_VPPIEvent);
+        declare_fault_newtype!(VGicMaintenance, sys::seL4_Fault_VGICMaintenance);
+        declare_fault_newtype!(VCpuFault, sys::seL4_Fault_VCPUFault);
+        declare_fault_newtype!(VPpiEvent, sys::seL4_Fault_VPPIEvent);
     }
 }
 
@@ -33,15 +33,15 @@ pub enum Fault {
     CapFault(CapFault),
     UnknownSyscall(UnknownSyscall),
     UserException(UserException),
-    VMFault(VMFault),
+    VmFault(VmFault),
     #[sel4_cfg(KERNEL_MCS)]
     Timeout(Timeout),
     #[sel4_cfg(ARM_HYPERVISOR_SUPPORT)]
-    VGICMaintenance(VGICMaintenance),
+    VGicMaintenance(VGicMaintenance),
     #[sel4_cfg(ARM_HYPERVISOR_SUPPORT)]
-    VCPUFault(VCPUFault),
+    VCpuFault(VCpuFault),
     #[sel4_cfg(ARM_HYPERVISOR_SUPPORT)]
-    VPPIEvent(VPPIEvent),
+    VPpiEvent(VPpiEvent),
 }
 
 impl Fault {
@@ -58,20 +58,20 @@ impl Fault {
                 sys::seL4_Fault_Splayed::UserException(inner) => {
                     Self::UserException(UserException::from_inner(inner))
                 }
-                sys::seL4_Fault_Splayed::VMFault(inner) => Self::VMFault(VMFault::from_inner(inner)),
+                sys::seL4_Fault_Splayed::VMFault(inner) => Self::VmFault(VmFault::from_inner(inner)),
                 #[sel4_cfg(KERNEL_MCS)]
                 sys::seL4_Fault_Splayed::Timeout(inner) => Self::Timeout(Timeout::from_inner(inner)),
                 #[sel4_cfg(ARM_HYPERVISOR_SUPPORT)]
                 sys::seL4_Fault_Splayed::VGICMaintenance(inner) => {
-                    Self::VGICMaintenance(VGICMaintenance::from_inner(inner))
+                    Self::VGicMaintenance(VGicMaintenance::from_inner(inner))
                 }
                 #[sel4_cfg(ARM_HYPERVISOR_SUPPORT)]
                 sys::seL4_Fault_Splayed::VCPUFault(inner) => {
-                    Self::VCPUFault(VCPUFault::from_inner(inner))
+                    Self::VCpuFault(VCpuFault::from_inner(inner))
                 }
                 #[sel4_cfg(ARM_HYPERVISOR_SUPPORT)]
                 sys::seL4_Fault_Splayed::VPPIEvent(inner) => {
-                    Self::VPPIEvent(VPPIEvent::from_inner(inner))
+                    Self::VPpiEvent(VPpiEvent::from_inner(inner))
                 }
             }
         }
@@ -104,7 +104,7 @@ impl UserException {
     // TODO
 }
 
-impl VMFault {
+impl VmFault {
     pub fn ip(&self) -> Word {
         self.inner().get_IP()
     }
@@ -123,7 +123,7 @@ impl VMFault {
 }
 
 #[sel4_cfg(ARM_HYPERVISOR_SUPPORT)]
-impl VGICMaintenance {
+impl VGicMaintenance {
     pub fn idx(&self) -> Option<Word> {
         match self.inner().get_IDX() {
             Word::MAX => None,
@@ -133,14 +133,14 @@ impl VGICMaintenance {
 }
 
 #[sel4_cfg(ARM_HYPERVISOR_SUPPORT)]
-impl VCPUFault {
+impl VCpuFault {
     pub fn hsr(&self) -> Word {
         self.inner().get_HSR()
     }
 }
 
 #[sel4_cfg(ARM_HYPERVISOR_SUPPORT)]
-impl VPPIEvent {
+impl VPpiEvent {
     pub fn irq(&self) -> Word {
         self.inner().get_irq()
     }

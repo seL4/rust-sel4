@@ -43,7 +43,7 @@ use block_client::BlockClient;
 use config::channels;
 use handler::HandlerImpl;
 use net_client::NetClient;
-use rtc_client::RTCClient;
+use rtc_client::RtcClient;
 use timer_client::TimerClient;
 
 const BLOCK_CACHE_SIZE_IN_BLOCKS: usize = 128;
@@ -72,7 +72,7 @@ static LOGGER: Logger = LoggerBuilder::const_default()
 fn init() -> impl Handler {
     LOGGER.set().unwrap();
 
-    let rtc_client = RTCClient::new(channels::RTC_DRIVER);
+    let rtc_client = RtcClient::new(channels::RTC_DRIVER);
     let timer_client = Arc::new(TimerClient::new(channels::TIMER_DRIVER));
     let net_client = NetClient::new(channels::NET_DRIVER);
     let block_client = BlockClient::new(channels::BLOCK_DRIVER);

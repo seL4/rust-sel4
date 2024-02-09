@@ -50,14 +50,14 @@ pub fn get_embedding<'a>() -> (Embedding<'a>, Footprint) {
     let object_names_level = env::var(CAPDL_OBJECT_NAMES_LEVEL_ENV)
         .map(|val| match val.parse::<usize>().unwrap() {
             0 => ObjectNamesLevel::None,
-            1 => ObjectNamesLevel::JustTCBs,
+            1 => ObjectNamesLevel::JustTcbs,
             2 => ObjectNamesLevel::All,
             n => panic!(
                 "unexpected value for {}: {}",
                 CAPDL_OBJECT_NAMES_LEVEL_ENV, n
             ),
         })
-        .unwrap_or(ObjectNamesLevel::JustTCBs);
+        .unwrap_or(ObjectNamesLevel::JustTcbs);
 
     footprint
         .env_vars

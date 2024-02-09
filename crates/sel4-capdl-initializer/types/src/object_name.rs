@@ -89,7 +89,7 @@ impl<T: ObjectName> ObjectName for Option<T> {
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum ObjectNamesLevel {
     All,
-    JustTCBs,
+    JustTcbs,
     None,
 }
 
@@ -97,8 +97,8 @@ impl ObjectNamesLevel {
     pub fn apply<'a, N, D, M>(&self, named_obj: &'a NamedObject<N, D, M>) -> Option<&'a N> {
         match self {
             Self::All => Some(&named_obj.name),
-            Self::JustTCBs => match &named_obj.object {
-                Object::TCB(_) => Some(&named_obj.name),
+            Self::JustTcbs => match &named_obj.object {
+                Object::Tcb(_) => Some(&named_obj.name),
                 _ => None,
             },
             Self::None => None,

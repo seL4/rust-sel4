@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use sel4::{ObjectBlueprint, VMAttributes};
+use sel4::{ObjectBlueprint, VmAttributes};
 
 use crate::{cap, Badge, Cap, FillEntryContentBootInfoId, Object, Rights};
 
@@ -20,9 +20,9 @@ impl<'a, D, M> Object<'a, D, M> {
                 Object::CNode(obj) => ObjectBlueprint::CNode {
                     size_bits: obj.size_bits,
                 },
-                Object::TCB(_) => ObjectBlueprint::TCB,
+                Object::Tcb(_) => ObjectBlueprint::Tcb,
                 #[sel4_cfg(all(ARCH_AARCH64, ARM_HYPERVISOR_SUPPORT))]
-                Object::VCPU => sel4::ObjectBlueprintArch::VCPU.into(),
+                Object::VCpu => sel4::ObjectBlueprintArch::VCpu.into(),
                 #[sel4_cfg(ARCH_AARCH64)]
                 Object::Frame(obj) => match obj.size_bits {
                     sel4::FrameSize::SMALL_BITS => sel4::ObjectBlueprintArch::SmallPage.into(),
@@ -68,7 +68,7 @@ impl<'a, D, M> Object<'a, D, M> {
                         _ => panic!(),
                     }
                 }
-                Object::ASIDPool(_) => ObjectBlueprint::asid_pool(),
+                Object::AsidPool(_) => ObjectBlueprint::asid_pool(),
                 #[sel4_cfg(KERNEL_MCS)]
                 Object::SchedContext(obj) => ObjectBlueprint::SchedContext {
                     size_bits: obj.size_bits,
@@ -117,36 +117,36 @@ impl From<&FillEntryContentBootInfoId> for sel4::BootInfoExtraId {
     }
 }
 
-pub trait HasVMAttributes {
-    fn vm_attributes(&self) -> VMAttributes;
+pub trait HasVmAttributes {
+    fn vm_attributes(&self) -> VmAttributes;
 }
 
-impl HasVMAttributes for cap::Frame {
-    fn vm_attributes(&self) -> VMAttributes {
+impl HasVmAttributes for cap::Frame {
+    fn vm_attributes(&self) -> VmAttributes {
         vm_attributes_from_whether_cached(self.cached)
     }
 }
 
-impl HasVMAttributes for cap::PageTable {
-    fn vm_attributes(&self) -> VMAttributes {
+impl HasVmAttributes for cap::PageTable {
+    fn vm_attributes(&self) -> VmAttributes {
         default_vm_attributes_for_page_table()
     }
 }
 
 sel4::sel4_cfg_if! {
     if #[cfg(ARCH_AARCH64)] {
-        const CACHED: VMAttributes = VMAttributes::PAGE_CACHEABLE;
-        const UNCACHED: VMAttributes = VMAttributes::DEFAULT;
+        const CACHED: VmAttributes = VmAttributes::PAGE_CACHEABLE;
+        const UNCACHED: VmAttributes = VmAttributes::DEFAULT;
     } else if #[cfg(any(ARCH_RISCV64, ARCH_RISCV32))] {
-        const CACHED: VMAttributes = VMAttributes::DEFAULT;
-        const UNCACHED: VMAttributes = VMAttributes::NONE;
+        const CACHED: VmAttributes = VmAttributes::DEFAULT;
+        const UNCACHED: VmAttributes = VmAttributes::NONE;
     } else if #[cfg(ARCH_X86_64)] {
-        const CACHED: VMAttributes = VMAttributes::DEFAULT;
-        const UNCACHED: VMAttributes = VMAttributes::CACHE_DISABLED;
+        const CACHED: VmAttributes = VmAttributes::DEFAULT;
+        const UNCACHED: VmAttributes = VmAttributes::CACHE_DISABLED;
     }
 }
 
-fn vm_attributes_from_whether_cached(cached: bool) -> VMAttributes {
+fn vm_attributes_from_whether_cached(cached: bool) -> VmAttributes {
     if cached {
         CACHED
     } else {
@@ -154,6 +154,6 @@ fn vm_attributes_from_whether_cached(cached: bool) -> VMAttributes {
     }
 }
 
-fn default_vm_attributes_for_page_table() -> VMAttributes {
-    VMAttributes::default()
+fn default_vm_attributes_for_page_table() -> VmAttributes {
+    VmAttributes::default()
 }

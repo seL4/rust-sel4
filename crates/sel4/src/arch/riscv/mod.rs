@@ -16,7 +16,7 @@ pub(crate) mod top_level {
     pub use super::{
         object::{ObjectBlueprintArch, ObjectBlueprintRISCV, ObjectTypeArch, ObjectTypeRISCV},
         user_context::UserContext,
-        vm_attributes::VMAttributes,
+        vm_attributes::VmAttributes,
         vspace::FrameSize,
         NUM_FAST_MESSAGE_REGISTERS,
     };

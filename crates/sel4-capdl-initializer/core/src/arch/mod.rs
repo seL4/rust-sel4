@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use sel4::{sel4_cfg, VMAttributes};
+use sel4::{sel4_cfg, VmAttributes};
 
 #[sel4_cfg(any(ARCH_AARCH32, ARCH_AARCH64))]
 mod imp {
@@ -24,7 +24,7 @@ mod imp {
         _level: usize,
         vaddr: usize,
         cap: sel4::Unspecified,
-        vm_attributes: sel4::VMAttributes,
+        vm_attributes: sel4::VmAttributes,
     ) -> sel4::Result<()> {
         cap.downcast::<PageTableType>()
             .pt_map(vspace, vaddr, vm_attributes)
@@ -32,7 +32,7 @@ mod imp {
 
     pub(crate) fn init_user_context(
         regs: &mut sel4::UserContext,
-        extra: &sel4_capdl_initializer_types::object::TCBExtraInfo,
+        extra: &sel4_capdl_initializer_types::object::TcbExtraInfo,
     ) {
         *regs.pc_mut() = extra.ip;
         *regs.sp_mut() = extra.sp;
@@ -59,7 +59,7 @@ mod imp {
         level: usize,
         vaddr: usize,
         cap: sel4::Unspecified,
-        vm_attributes: sel4::VMAttributes,
+        vm_attributes: sel4::VmAttributes,
     ) -> sel4::Result<()> {
         match level {
             1 => cap
@@ -79,7 +79,7 @@ mod imp {
 
     pub(crate) fn init_user_context(
         regs: &mut sel4::UserContext,
-        extra: &sel4_capdl_initializer_types::object::TCBExtraInfo,
+        extra: &sel4_capdl_initializer_types::object::TcbExtraInfo,
     ) {
         *regs.pc_mut() = extra.ip;
         *regs.sp_mut() = extra.sp;
@@ -103,7 +103,7 @@ mod imp {
         _level: usize,
         vaddr: usize,
         cap: sel4::Unspecified,
-        vm_attributes: sel4::VMAttributes,
+        vm_attributes: sel4::VmAttributes,
     ) -> sel4::Result<()> {
         cap.downcast::<PageTableType>()
             .page_table_map(vspace, vaddr, vm_attributes)
@@ -111,7 +111,7 @@ mod imp {
 
     pub(crate) fn init_user_context(
         regs: &mut sel4::UserContext,
-        extra: &sel4_capdl_initializer_types::object::TCBExtraInfo,
+        extra: &sel4_capdl_initializer_types::object::TcbExtraInfo,
     ) {
         *regs.pc_mut() = extra.ip;
         *regs.sp_mut() = extra.sp;
@@ -136,18 +136,18 @@ pub(crate) mod frame_types {
 
 sel4::sel4_cfg_if! {
     if #[cfg(ARCH_AARCH64)] {
-        const CACHED: VMAttributes = VMAttributes::PAGE_CACHEABLE;
-        const UNCACHED: VMAttributes = VMAttributes::DEFAULT;
+        const CACHED: VmAttributes = VmAttributes::PAGE_CACHEABLE;
+        const UNCACHED: VmAttributes = VmAttributes::DEFAULT;
     } else if #[cfg(ARCH_RISCV64)] {
-        const CACHED: VMAttributes = VMAttributes::DEFAULT;
-        const UNCACHED: VMAttributes = VMAttributes::NONE;
+        const CACHED: VmAttributes = VmAttributes::DEFAULT;
+        const UNCACHED: VmAttributes = VmAttributes::NONE;
     } else if #[cfg(ARCH_X86_64)] {
-        const CACHED: VMAttributes = VMAttributes::DEFAULT;
-        const UNCACHED: VMAttributes = VMAttributes::CACHE_DISABLED;
+        const CACHED: VmAttributes = VmAttributes::DEFAULT;
+        const UNCACHED: VmAttributes = VmAttributes::CACHE_DISABLED;
     }
 }
 
-pub(crate) fn vm_attributes_from_whether_cached(cached: bool) -> VMAttributes {
+pub(crate) fn vm_attributes_from_whether_cached(cached: bool) -> VmAttributes {
     if cached {
         CACHED
     } else {

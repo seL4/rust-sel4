@@ -13,7 +13,7 @@ use core::slice;
 
 use sel4_config::sel4_cfg;
 
-use crate::{cap_type, init_thread::SlotRegion, newtype_methods, sys, IPCBuffer, GRANULE_SIZE};
+use crate::{cap_type, init_thread::SlotRegion, newtype_methods, sys, IpcBuffer, GRANULE_SIZE};
 
 #[repr(transparent)]
 #[derive(Debug)]
@@ -73,7 +73,7 @@ impl BootInfo {
         self.inner().extraLen.try_into().unwrap()
     }
 
-    pub fn ipc_buffer(&self) -> *mut IPCBuffer {
+    pub fn ipc_buffer(&self) -> *mut IpcBuffer {
         self.inner().ipcBuffer.cast()
     }
 

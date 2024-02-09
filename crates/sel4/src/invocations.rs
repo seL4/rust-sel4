@@ -51,7 +51,7 @@ impl<C: InvocationContext> Untyped<C> {
 const USER_CONTEXT_MAX_REG_COUNT: usize =
     mem::size_of::<sys::seL4_UserContext>() / mem::size_of::<Word>();
 
-impl<C: InvocationContext> TCB<C> {
+impl<C: InvocationContext> Tcb<C> {
     /// Corresponds to `seL4_TCB_ReadRegisters`.
     pub fn tcb_read_registers(self, suspend: bool, count: Word) -> Result<UserContext> {
         let mut regs: UserContext = Default::default();
@@ -163,7 +163,7 @@ impl<C: InvocationContext> TCB<C> {
             /// Corresponds to `seL4_TCB_SetSchedParams`.
             pub fn tcb_set_sched_params(
                 self,
-                authority: TCB,
+                authority: Tcb,
                 mcp: Word,
                 priority: Word,
                 sched_context: SchedContext,
@@ -182,7 +182,7 @@ impl<C: InvocationContext> TCB<C> {
             }
         } else {
             /// Corresponds to `seL4_TCB_SetSchedParams`.
-            pub fn tcb_set_sched_params(self, authority: TCB, mcp: Word, priority: Word) -> Result<()> {
+            pub fn tcb_set_sched_params(self, authority: Tcb, mcp: Word, priority: Word) -> Result<()> {
                 Error::wrap(self.invoke(|cptr, ipc_buffer| {
                     ipc_buffer.inner_mut().seL4_TCB_SetSchedParams(
                         cptr.bits(),
@@ -259,7 +259,7 @@ impl<C: InvocationContext> SchedControl<C> {
     }
 }
 
-impl<C: InvocationContext> IRQControl<C> {
+impl<C: InvocationContext> IrqControl<C> {
     /// Corresponds to `seL4_IRQControl_Get`.
     pub fn irq_control_get(self, irq: Word, dst: &AbsoluteCPtr) -> Result<()> {
         Error::wrap(self.invoke(|cptr, ipc_buffer| {
@@ -274,7 +274,7 @@ impl<C: InvocationContext> IRQControl<C> {
     }
 }
 
-impl<C: InvocationContext> IRQHandler<C> {
+impl<C: InvocationContext> IrqHandler<C> {
     /// Corresponds to `seL4_IRQHandler_Ack`.
     pub fn irq_handler_ack(self) -> Result<()> {
         Error::wrap(

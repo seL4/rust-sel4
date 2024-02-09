@@ -26,7 +26,7 @@ pub enum ObjectType {
     Endpoint,
     Notification,
     CNode,
-    TCB,
+    Tcb,
     #[sel4_cfg(KERNEL_MCS)]
     SchedContext,
     #[sel4_cfg(KERNEL_MCS)]
@@ -42,7 +42,7 @@ impl ObjectType {
                 Self::Endpoint => sys::api_object::seL4_EndpointObject,
                 Self::Notification => sys::api_object::seL4_NotificationObject,
                 Self::CNode => sys::api_object::seL4_CapTableObject,
-                Self::TCB => sys::api_object::seL4_TCBObject,
+                Self::Tcb => sys::api_object::seL4_TCBObject,
                 #[sel4_cfg(KERNEL_MCS)]
                 Self::SchedContext => sys::api_object::seL4_SchedContextObject,
                 #[sel4_cfg(KERNEL_MCS)]
@@ -71,7 +71,7 @@ pub enum ObjectBlueprint {
     CNode {
         size_bits: usize,
     },
-    TCB,
+    Tcb,
     #[sel4_cfg(KERNEL_MCS)]
     SchedContext {
         size_bits: usize,
@@ -89,7 +89,7 @@ impl ObjectBlueprint {
                 Self::Endpoint => ObjectType::Endpoint,
                 Self::Notification => ObjectType::Notification,
                 Self::CNode { .. } => ObjectType::CNode,
-                Self::TCB => ObjectType::TCB,
+                Self::Tcb => ObjectType::Tcb,
                 #[sel4_cfg(KERNEL_MCS)]
                 Self::SchedContext { .. } => ObjectType::SchedContext,
                 #[sel4_cfg(KERNEL_MCS)]
@@ -118,7 +118,7 @@ impl ObjectBlueprint {
                 Self::Endpoint => u32_into_usize(sys::seL4_EndpointBits),
                 Self::Notification => u32_into_usize(sys::seL4_NotificationBits),
                 Self::CNode { size_bits } => u32_into_usize(sys::seL4_SlotBits) + size_bits,
-                Self::TCB => u32_into_usize(sys::seL4_TCBBits),
+                Self::Tcb => u32_into_usize(sys::seL4_TCBBits),
                 #[sel4_cfg(KERNEL_MCS)]
                 Self::SchedContext { size_bits } => usize_max(MIN_SCHED_CONTEXT_BITS, size_bits),
                 #[sel4_cfg(KERNEL_MCS)]
