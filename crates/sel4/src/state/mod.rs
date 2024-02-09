@@ -28,7 +28,7 @@ impl ImplicitInvocationContext {
 }
 
 impl InvocationContext for ImplicitInvocationContext {
-    fn invoke<T>(&mut self, f: impl FnOnce(&mut IPCBuffer) -> T) -> T {
+    fn with_context<T>(&mut self, f: impl FnOnce(&mut IPCBuffer) -> T) -> T {
         with_ipc_buffer_mut(f)
     }
 }
