@@ -140,6 +140,9 @@ impl<T: CapType> LocalCPtr<T> {
 }
 
 impl<T: CapType, C: InvocationContext> LocalCPtr<T, C> {
+    // TODO
+    // Consider the tradeoffs of taking &mut self here, and switching all object invocations to take
+    // &mut self too.
     pub(crate) fn invoke<R>(self, f: impl FnOnce(CPtr, &mut IPCBuffer) -> R) -> R {
         let cptr = self.cptr();
         self.into_invocation_context()
