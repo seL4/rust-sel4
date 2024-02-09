@@ -330,18 +330,18 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
             }
         }
 
-        // Create IRQHandler caps
+        // Create IrqHandler caps
         {
-            for IRQEntry { irq, handler } in self.spec().irqs.iter() {
+            for IrqEntry { irq, handler } in self.spec().irqs.iter() {
                 let slot = self.cslot_alloc_or_panic();
                 sel4::sel4_cfg_wrap_match! {
                     match self.spec().object(*handler) {
-                        Object::IRQ(_) => {
+                        Object::Irq(_) => {
                             init_thread::slot::IRQ_CONTROL.local_cptr()
                                 .irq_control_get(*irq, &cslot_to_relative_cptr(slot))?;
                         }
                         #[sel4_cfg(any(ARCH_AARCH32, ARCH_AARCH64))]
-                        Object::ArmIRQ(obj) => {
+                        Object::ArmIrq(obj) => {
                             sel4::sel4_cfg_if! {
                                 if #[cfg(MAX_NUM_NODES = "1")] {
                                     init_thread::slot::IRQ_CONTROL.local_cptr().irq_control_get_trigger(
@@ -388,15 +388,15 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
 
         let irq_notifications = self
             .spec()
-            .filter_objects::<&object::IRQ>()
+            .filter_objects::<&object::Irq>()
             .map(|(obj_id, obj)| (obj_id, obj.notification()));
         let arm_irq_notifications = self
             .spec()
-            .filter_objects::<&object::ArmIRQ>()
+            .filter_objects::<&object::ArmIrq>()
             .map(|(obj_id, obj)| (obj_id, obj.notification()));
 
         for (obj_id, notification) in irq_notifications.chain(arm_irq_notifications) {
-            let irq_handler = self.orig_local_cptr::<cap_type::IRQHandler>(obj_id);
+            let irq_handler = self.orig_local_cptr::<cap_type::IrqHandler>(obj_id);
             if let Some(logical_nfn_cap) = notification {
                 let nfn = match logical_nfn_cap.badge {
                     0 => self.orig_local_cptr(logical_nfn_cap.object),
@@ -577,8 +577,8 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
     fn init_tcbs(&mut self) -> Result<()> {
         debug!("Initializing TCBs");
 
-        for (obj_id, obj) in self.spec().filter_objects::<&object::TCB>() {
-            let tcb = self.orig_local_cptr::<cap_type::TCB>(obj_id);
+        for (obj_id, obj) in self.spec().filter_objects::<&object::Tcb>() {
+            let tcb = self.orig_local_cptr::<cap_type::Tcb>(obj_id);
 
             if let Some(bound_notification) = obj.bound_notification() {
                 let bound_notification =
@@ -589,7 +589,7 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
             sel4::sel4_cfg_if! {
                 if #[cfg(all(ARCH_AARCH64, ARM_HYPERVISOR_SUPPORT))] {
                     if let Some(vcpu) = obj.vcpu() {
-                        let vcpu = self.orig_local_cptr::<cap_type::VCPU>(vcpu.object);
+                        let vcpu = self.orig_local_cptr::<cap_type::VCpu>(vcpu.object);
                         vcpu.vcpu_set_tcb(tcb)?;
                     }
                 }
@@ -729,8 +729,8 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
 
     fn start_threads(&self) -> Result<()> {
         debug!("Starting threads");
-        for (obj_id, obj) in self.spec().filter_objects::<&object::TCB>() {
-            let tcb = self.orig_local_cptr::<cap_type::TCB>(obj_id);
+        for (obj_id, obj) in self.spec().filter_objects::<&object::Tcb>() {
+            let tcb = self.orig_local_cptr::<cap_type::Tcb>(obj_id);
             if obj.extra.resume {
                 tcb.tcb_resume()?;
             }

@@ -12,7 +12,7 @@ declare_fault_newtype!(NullFault, sys::seL4_Fault_NullFault);
 declare_fault_newtype!(CapFault, sys::seL4_Fault_CapFault);
 declare_fault_newtype!(UnknownSyscall, sys::seL4_Fault_UnknownSyscall);
 declare_fault_newtype!(UserException, sys::seL4_Fault_UserException);
-declare_fault_newtype!(VMFault, sys::seL4_Fault_VMFault);
+declare_fault_newtype!(VmFault, sys::seL4_Fault_VMFault);
 
 #[sel4_cfg(KERNEL_MCS)]
 declare_fault_newtype!(Timeout, sys::seL4_Fault_Timeout);
@@ -24,7 +24,7 @@ pub enum Fault {
     CapFault(CapFault),
     UnknownSyscall(UnknownSyscall),
     UserException(UserException),
-    VMFault(VMFault),
+    VmFault(VmFault),
     #[sel4_cfg(KERNEL_MCS)]
     Timeout(Timeout),
 }
@@ -43,7 +43,7 @@ impl Fault {
                 sys::seL4_Fault_Splayed::UserException(inner) => {
                     Self::UserException(UserException::from_inner(inner))
                 }
-                sys::seL4_Fault_Splayed::VMFault(inner) => Self::VMFault(VMFault::from_inner(inner)),
+                sys::seL4_Fault_Splayed::VMFault(inner) => Self::VmFault(VmFault::from_inner(inner)),
                 #[sel4_cfg(KERNEL_MCS)]
                 sys::seL4_Fault_Splayed::Timeout(inner) => Self::Timeout(Timeout::from_inner(inner)),
             }

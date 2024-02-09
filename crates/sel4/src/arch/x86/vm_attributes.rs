@@ -10,9 +10,9 @@ use crate::{newtype_methods, sys};
 
 /// Corresponds to `seL4_X86_VMAttributes`.
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
-pub struct VMAttributes(sys::seL4_X86_VMAttributes::Type);
+pub struct VmAttributes(sys::seL4_X86_VMAttributes::Type);
 
-impl VMAttributes {
+impl VmAttributes {
     pub const NONE: Self = Self::from_inner(0);
     pub const DEFAULT: Self =
         Self::from_inner(sys::seL4_X86_VMAttributes::seL4_X86_Default_VMAttributes);
@@ -26,40 +26,40 @@ impl VMAttributes {
     }
 }
 
-impl Default for VMAttributes {
+impl Default for VmAttributes {
     fn default() -> Self {
         Self::DEFAULT
     }
 }
 
-impl Not for VMAttributes {
+impl Not for VmAttributes {
     type Output = Self;
     fn not(self) -> Self {
         Self::from_inner(self.into_inner().not())
     }
 }
 
-impl BitOr for VMAttributes {
+impl BitOr for VmAttributes {
     type Output = Self;
     fn bitor(self, rhs: Self) -> Self {
         Self::from_inner(self.into_inner().bitor(rhs.into_inner()))
     }
 }
 
-impl BitOrAssign for VMAttributes {
+impl BitOrAssign for VmAttributes {
     fn bitor_assign(&mut self, rhs: Self) {
         self.inner_mut().bitor_assign(rhs.into_inner());
     }
 }
 
-impl BitAnd for VMAttributes {
+impl BitAnd for VmAttributes {
     type Output = Self;
     fn bitand(self, rhs: Self) -> Self {
         Self::from_inner(self.into_inner().bitand(rhs.into_inner()))
     }
 }
 
-impl BitAndAssign for VMAttributes {
+impl BitAndAssign for VmAttributes {
     fn bitand_assign(&mut self, rhs: Self) {
         self.inner_mut().bitand_assign(rhs.into_inner());
     }

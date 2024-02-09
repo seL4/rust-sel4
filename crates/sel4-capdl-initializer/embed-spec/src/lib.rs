@@ -144,7 +144,7 @@ impl<'a> Embedding<'a> {
                 let toks = self.embed_object_with_cap_table(obj);
                 quote!(Object::CNode(object::#toks))
             }
-            Object::TCB(obj) => {
+            Object::Tcb(obj) => {
                 let mut expr_struct =
                     syn::parse2::<syn::ExprStruct>(to_tokens_via_debug(obj)).unwrap();
                 self.patch_field(
@@ -170,7 +170,7 @@ impl<'a> Embedding<'a> {
                         );
                         quote! {
                             {
-                                const EXTRA: &TCBExtraInfo<'static> = &#inner_expr_struct;
+                                const EXTRA: &TcbExtraInfo<'static> = &#inner_expr_struct;
                                 Indirect::from_borrowed(EXTRA)
                             }
                         }
@@ -180,14 +180,14 @@ impl<'a> Embedding<'a> {
                 let toks = expr_struct.to_token_stream();
                 quote! {
                     {
-                        use object::{TCB, TCBExtraInfo};
-                        Object::TCB(#toks)
+                        use object::{Tcb, TcbExtraInfo};
+                        Object::Tcb(#toks)
                     }
                 }
             }
-            Object::IRQ(obj) => {
+            Object::Irq(obj) => {
                 let toks = self.embed_object_with_cap_table(obj);
-                quote!(Object::IRQ(object::#toks))
+                quote!(Object::Irq(object::#toks))
             }
             Object::Frame(obj) => {
                 let mut expr_struct =
@@ -204,7 +204,7 @@ impl<'a> Embedding<'a> {
                 let toks = self.embed_object_with_cap_table(obj);
                 quote!(Object::PageTable(object::#toks))
             }
-            Object::ArmIRQ(obj) => {
+            Object::ArmIrq(obj) => {
                 let mut expr_struct =
                     syn::parse2::<syn::ExprStruct>(to_tokens_via_debug(obj)).unwrap();
                 self.patch_field(
@@ -224,8 +224,8 @@ impl<'a> Embedding<'a> {
                 let toks = expr_struct.to_token_stream();
                 quote! {
                     {
-                        use object::{ArmIRQ, ArmIRQExtraInfo};
-                        Object::ArmIRQ(#toks)
+                        use object::{ArmIrq, ArmIrqExtraInfo};
+                        Object::ArmIrq(#toks)
                     }
                 }
             }
@@ -254,7 +254,7 @@ impl<'a> Embedding<'a> {
         let prefix = self.qualification_prefix(qualify);
         let inner = match self.object_names_level() {
             ObjectNamesLevel::All => quote!(&str),
-            ObjectNamesLevel::JustTCBs => quote!(Option<&str>),
+            ObjectNamesLevel::JustTcbs => quote!(Option<&str>),
             ObjectNamesLevel::None => quote!(#prefix Unnamed),
         };
         quote!(#prefix SelfContained<#inner>)
@@ -263,8 +263,8 @@ impl<'a> Embedding<'a> {
     fn name_value<D, M>(&self, obj: &Object<'a, D, M>, name: &str) -> TokenStream {
         let inner = match self.object_names_level() {
             ObjectNamesLevel::All => quote!(#name),
-            ObjectNamesLevel::JustTCBs => match obj {
-                Object::TCB(_) => quote!(Some(#name)),
+            ObjectNamesLevel::JustTcbs => match obj {
+                Object::Tcb(_) => quote!(Some(#name)),
                 _ => quote!(None),
             },
             ObjectNamesLevel::None => quote!(Unnamed),

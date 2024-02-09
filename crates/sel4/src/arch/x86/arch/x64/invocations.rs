@@ -6,7 +6,7 @@
 
 use crate::{
     local_cptr::*, AbsoluteCPtr, CapRights, Error, FrameType, InvocationContext, LocalCPtr, Result,
-    VMAttributes,
+    VmAttributes,
 };
 
 impl<T: FrameType, C: InvocationContext> LocalCPtr<T, C> {
@@ -16,7 +16,7 @@ impl<T: FrameType, C: InvocationContext> LocalCPtr<T, C> {
         vspace: VSpace,
         vaddr: usize,
         rights: CapRights,
-        attrs: VMAttributes,
+        attrs: VmAttributes,
     ) -> Result<()> {
         Error::wrap(self.invoke(|cptr, ipc_buffer| {
             ipc_buffer.inner_mut().seL4_X86_Page_Map(
@@ -49,7 +49,7 @@ impl<T: FrameType, C: InvocationContext> LocalCPtr<T, C> {
 }
 
 impl<C: InvocationContext> PDPT<C> {
-    pub fn pdpt_map(self, vspace: VSpace, vaddr: usize, attr: VMAttributes) -> Result<()> {
+    pub fn pdpt_map(self, vspace: VSpace, vaddr: usize, attr: VmAttributes) -> Result<()> {
         Error::wrap(self.invoke(|cptr, ipc_buffer| {
             ipc_buffer.inner_mut().seL4_X86_PDPT_Map(
                 cptr.bits(),
@@ -66,7 +66,7 @@ impl<C: InvocationContext> PageDirectory<C> {
         self,
         vspace: VSpace,
         vaddr: usize,
-        attr: VMAttributes,
+        attr: VmAttributes,
     ) -> Result<()> {
         Error::wrap(self.invoke(|cptr, ipc_buffer| {
             ipc_buffer.inner_mut().seL4_X86_PageDirectory_Map(
@@ -80,7 +80,7 @@ impl<C: InvocationContext> PageDirectory<C> {
 }
 
 impl<C: InvocationContext> PageTable<C> {
-    pub fn page_table_map(self, vspace: VSpace, vaddr: usize, attr: VMAttributes) -> Result<()> {
+    pub fn page_table_map(self, vspace: VSpace, vaddr: usize, attr: VmAttributes) -> Result<()> {
         Error::wrap(self.invoke(|cptr, ipc_buffer| {
             ipc_buffer.inner_mut().seL4_X86_PageTable_Map(
                 cptr.bits(),
@@ -93,9 +93,9 @@ impl<C: InvocationContext> PageTable<C> {
 }
 
 // TODO
-impl<C: InvocationContext> IRQControl<C> {}
+impl<C: InvocationContext> IrqControl<C> {}
 
-impl<C: InvocationContext> ASIDControl<C> {
+impl<C: InvocationContext> AsidControl<C> {
     /// Corresponds to `seL4_X86_ASIDControl_MakePool`.
     pub fn asid_control_make_pool(self, untyped: Untyped, dst: &AbsoluteCPtr) -> Result<()> {
         Error::wrap(self.invoke(|cptr, ipc_buffer| {
@@ -110,7 +110,7 @@ impl<C: InvocationContext> ASIDControl<C> {
     }
 }
 
-impl<C: InvocationContext> ASIDPool<C> {
+impl<C: InvocationContext> AsidPool<C> {
     /// Corresponds to `seL4_X86_ASIDPool_Assign`.
     pub fn asid_pool_assign(self, vspace: VSpace) -> Result<()> {
         Error::wrap(self.invoke(|cptr, ipc_buffer| {

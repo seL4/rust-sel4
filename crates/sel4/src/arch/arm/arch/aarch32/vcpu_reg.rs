@@ -12,11 +12,11 @@ use crate::sys;
 #[repr(u32)]
 #[allow(non_camel_case_types)]
 #[sel4_cfg_enum]
-pub enum VCPUReg {
+pub enum VCpuReg {
     // TODO
 }
 
-impl VCPUReg {
+impl VCpuReg {
     pub const fn into_sys(self) -> sys::seL4_VCPUReg::Type {
         self as sys::seL4_VCPUReg::Type
     }

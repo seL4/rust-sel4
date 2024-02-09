@@ -48,8 +48,8 @@ impl Channel {
         self.local_cptr::<sel4::cap_type::Notification>(BASE_OUTPUT_NOTIFICATION_CAP)
     }
 
-    fn irq_handler(&self) -> sel4::IRQHandler {
-        self.local_cptr::<sel4::cap_type::IRQHandler>(BASE_IRQ_CAP)
+    fn irq_handler(&self) -> sel4::IrqHandler {
+        self.local_cptr::<sel4::cap_type::IrqHandler>(BASE_IRQ_CAP)
     }
 
     fn endpoint(&self) -> sel4::Endpoint {

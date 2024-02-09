@@ -13,7 +13,7 @@ use crate::sys;
 #[repr(u32)]
 #[allow(non_camel_case_types)]
 #[sel4_cfg_enum]
-pub enum VCPUReg {
+pub enum VCpuReg {
     SCTLR = sys::seL4_VCPUReg::seL4_VCPUReg_SCTLR,
     TTBR0 = sys::seL4_VCPUReg::seL4_VCPUReg_TTBR0,
     TTBR1 = sys::seL4_VCPUReg::seL4_VCPUReg_TTBR1,
@@ -40,7 +40,7 @@ pub enum VCPUReg {
     CNTVOFF = sys::seL4_VCPUReg::seL4_VCPUReg_CNTVOFF,
 }
 
-impl VCPUReg {
+impl VCpuReg {
     pub const fn into_sys(self) -> sys::seL4_VCPUReg::Type {
         self as sys::seL4_VCPUReg::Type
     }

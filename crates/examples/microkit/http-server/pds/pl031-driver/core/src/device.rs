@@ -14,7 +14,7 @@ use tock_registers::{register_bitfields, register_structs};
 
 register_structs! {
     #[allow(non_snake_case)]
-    pub RTCRegisterBlock {
+    pub RtcRegisterBlock {
         (0x000 => Data: ReadOnly<u32>),
         (0x004 => Match: ReadWrite<u32>),
         (0x008 => Load: ReadWrite<u32>),
@@ -53,17 +53,17 @@ register_bitfields! {
 }
 
 pub struct Device {
-    ptr: *const RTCRegisterBlock,
+    ptr: *const RtcRegisterBlock,
 }
 
 #[allow(dead_code)]
 impl Device {
     pub unsafe fn new(ptr: *const ()) -> Self {
-        let ptr = ptr.cast::<RTCRegisterBlock>();
+        let ptr = ptr.cast::<RtcRegisterBlock>();
         Self { ptr }
     }
 
-    fn ptr(&self) -> *const RTCRegisterBlock {
+    fn ptr(&self) -> *const RtcRegisterBlock {
         self.ptr
     }
 
@@ -73,7 +73,7 @@ impl Device {
 }
 
 impl Deref for Device {
-    type Target = RTCRegisterBlock;
+    type Target = RtcRegisterBlock;
 
     fn deref(&self) -> &Self::Target {
         unsafe { &*self.ptr() }

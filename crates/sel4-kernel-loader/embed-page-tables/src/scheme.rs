@@ -233,9 +233,9 @@ const fn riscv64_encode_for_linking(word: u64) -> u64 {
 }
 
 #[derive(Debug)]
-pub enum Riscv64Sv39 {}
+pub enum RiscV64Sv39 {}
 
-impl Scheme for Riscv64Sv39 {
+impl Scheme for RiscV64Sv39 {
     type WordPrimitive = u64;
 
     const PAGE_BITS: usize = 12;
@@ -247,7 +247,7 @@ impl Scheme for Riscv64Sv39 {
 
     const MIN_LEVEL_FOR_LEAF: usize = 0;
 
-    type LeafDescriptor = Riscv64Sv39LeafDescriptor;
+    type LeafDescriptor = RiscV64Sv39LeafDescriptor;
 
     const EMPTY_DESCRIPTOR: Self::WordPrimitive = riscv64_encode_for_linking(0b0);
     const SYMBOLIC_BRANCH_DESCRIPTOR_OFFSET: Self::WordPrimitive = riscv64_encode_for_linking(0b1);
@@ -256,9 +256,9 @@ impl Scheme for Riscv64Sv39 {
 }
 
 #[derive(Debug)]
-pub struct Riscv64Sv39LeafDescriptor(u64);
+pub struct RiscV64Sv39LeafDescriptor(u64);
 
-impl SchemeLeafDescriptor<u64> for Riscv64Sv39LeafDescriptor {
+impl SchemeLeafDescriptor<u64> for RiscV64Sv39LeafDescriptor {
     fn from_paddr(paddr: u64, _level: usize) -> Self {
         let mut desc = 0u64;
         desc.set_bit_range(53, 10, BitRange::<u64>::bit_range(&paddr, 55, 12));
@@ -274,7 +274,7 @@ impl SchemeLeafDescriptor<u64> for Riscv64Sv39LeafDescriptor {
     }
 }
 
-impl Riscv64Sv39LeafDescriptor {
+impl RiscV64Sv39LeafDescriptor {
     pub fn set_valid(mut self, value: bool) -> Self {
         self.0.set_bit(0, value);
         self
@@ -297,9 +297,9 @@ impl Riscv64Sv39LeafDescriptor {
 }
 
 #[derive(Debug)]
-pub enum Riscv32Sv32 {}
+pub enum RiscV32Sv32 {}
 
-impl Scheme for Riscv32Sv32 {
+impl Scheme for RiscV32Sv32 {
     type WordPrimitive = u32;
 
     const PAGE_BITS: usize = 12;
@@ -311,7 +311,7 @@ impl Scheme for Riscv32Sv32 {
 
     const MIN_LEVEL_FOR_LEAF: usize = 0;
 
-    type LeafDescriptor = Riscv32Sv32LeafDescriptor;
+    type LeafDescriptor = RiscV32Sv32LeafDescriptor;
 
     const EMPTY_DESCRIPTOR: Self::WordPrimitive = riscv32_encode_for_linking(0b0);
     const SYMBOLIC_BRANCH_DESCRIPTOR_OFFSET: Self::WordPrimitive = riscv32_encode_for_linking(0b1);
@@ -320,9 +320,9 @@ impl Scheme for Riscv32Sv32 {
 }
 
 #[derive(Debug)]
-pub struct Riscv32Sv32LeafDescriptor(u32);
+pub struct RiscV32Sv32LeafDescriptor(u32);
 
-impl SchemeLeafDescriptor<u32> for Riscv32Sv32LeafDescriptor {
+impl SchemeLeafDescriptor<u32> for RiscV32Sv32LeafDescriptor {
     fn from_paddr(paddr: u64, _level: usize) -> Self {
         let mut desc = 0u32;
         desc.set_bit_range(29, 10, BitRange::<u32>::bit_range(&paddr, 31, 12));
@@ -338,7 +338,7 @@ impl SchemeLeafDescriptor<u32> for Riscv32Sv32LeafDescriptor {
     }
 }
 
-impl Riscv32Sv32LeafDescriptor {
+impl RiscV32Sv32LeafDescriptor {
     pub fn set_valid(mut self, value: bool) -> Self {
         self.0.set_bit(0, value);
         self

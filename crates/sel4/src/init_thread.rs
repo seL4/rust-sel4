@@ -126,12 +126,12 @@ pub mod slot {
 
     mk![
         (NULL, Null, seL4_CapNull),
-        (TCB, TCB, seL4_CapInitThreadTCB),
+        (TCB, Tcb, seL4_CapInitThreadTCB),
         (CNODE, CNode, seL4_CapInitThreadCNode),
         (VSPACE, VSpace, seL4_CapInitThreadVSpace),
-        (IRQ_CONTROL, IRQControl, seL4_CapIRQControl),
-        (ASID_CONTROL, ASIDControl, seL4_CapASIDControl),
-        (ASID_POOL, ASIDPool, seL4_CapInitThreadASIDPool),
+        (IRQ_CONTROL, IrqControl, seL4_CapIRQControl),
+        (ASID_CONTROL, AsidControl, seL4_CapASIDControl),
+        (ASID_POOL, AsidPool, seL4_CapInitThreadASIDPool),
         #[cfg(any())] // TODO
         (IO_PORT_CONTROL, Null, seL4_CapIOPortControl),
         #[cfg(any())] // TODO

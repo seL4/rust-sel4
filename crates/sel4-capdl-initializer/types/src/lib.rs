@@ -42,7 +42,7 @@ pub use object_name::{
     IndirectObjectName, ObjectName, ObjectNamesLevel, SelfContainedObjectName, Unnamed,
 };
 pub use spec::{
-    cap, object, ASIDSlotEntry, Badge, CPtr, Cap, CapSlot, CapTableEntry, IRQEntry, NamedObject,
+    cap, object, AsidSlotEntry, Badge, CPtr, Cap, CapSlot, CapTableEntry, IrqEntry, NamedObject,
     Object, ObjectId, Rights, Spec, TryFromCapError, TryFromObjectError, UntypedCover, Word,
 };
 

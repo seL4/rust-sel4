@@ -5,7 +5,7 @@
 // SPDX-License-Identifier: MIT
 //
 
-use crate::{sys, InvocationContext, CapType, TCB, LocalCPtr};
+use crate::{sys, InvocationContext, CapType, Tcb, LocalCPtr};
 
 /// Corresponds to `seL4_DebugPutChar`.
 pub fn debug_put_char(c: u8) {
@@ -17,7 +17,7 @@ pub fn debug_snapshot() {
     sys::seL4_DebugSnapshot()
 }
 
-impl<C: InvocationContext> TCB<C> {
+impl<C: InvocationContext> Tcb<C> {
     /// Corresponds to `seL4_DebugNameThread`.
     pub fn debug_name(self, name: &[u8]) {
         self.invoke(|cptr, ipc_buffer| {

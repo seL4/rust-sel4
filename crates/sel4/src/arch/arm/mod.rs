@@ -18,7 +18,7 @@ pub(crate) mod top_level {
     pub use super::{
         arch::top_level::*,
         object::{ObjectBlueprintArch, ObjectBlueprintArm, ObjectTypeArch, ObjectTypeArm},
-        vm_attributes::VMAttributes,
+        vm_attributes::VmAttributes,
         vspace::FrameSize,
         NUM_FAST_MESSAGE_REGISTERS,
     };
@@ -33,7 +33,7 @@ pub(crate) mod cap_type_arch {
     #[sel4_cfg(ARM_HYPERVISOR_SUPPORT)]
     declare_cap_type! {
         /// Corresponds to `seL4_ARM_VCPU`.
-        VCPU
+        VCpu
     }
 
     declare_cap_type! {
@@ -81,7 +81,7 @@ pub(crate) mod local_cptr_arch {
     use crate::{declare_local_cptr_alias, sel4_cfg};
 
     #[sel4_cfg(ARM_HYPERVISOR_SUPPORT)]
-    declare_local_cptr_alias!(VCPU);
+    declare_local_cptr_alias!(VCpu);
 
     declare_local_cptr_alias!(SmallPage);
     declare_local_cptr_alias!(LargePage);

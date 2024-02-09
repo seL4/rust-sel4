@@ -10,7 +10,7 @@ use core::mem;
 
 use serde::{Deserialize, Serialize};
 
-use sel4::{Badge, Endpoint, IPCBuffer, MessageInfo, MessageInfoBuilder, Word};
+use sel4::{Badge, Endpoint, IpcBuffer, MessageInfo, MessageInfoBuilder, Word};
 
 const BYTES_PER_WORD: usize = mem::size_of::<Word>() / mem::size_of::<u8>();
 
@@ -71,11 +71,11 @@ pub mod server {
 pub struct Reception<'a> {
     info: MessageInfo,
     badge: Badge,
-    ipc_buffer: &'a IPCBuffer,
+    ipc_buffer: &'a IpcBuffer,
 }
 
 impl<'a> Reception<'a> {
-    fn new(info: MessageInfo, badge: Badge, ipc_buffer: &'a IPCBuffer) -> Self {
+    fn new(info: MessageInfo, badge: Badge, ipc_buffer: &'a IpcBuffer) -> Self {
         Self {
             info,
             badge,
@@ -91,7 +91,7 @@ impl<'a> Reception<'a> {
         self.badge
     }
 
-    pub fn ipc_buffer(&self) -> &IPCBuffer {
+    pub fn ipc_buffer(&self) -> &IpcBuffer {
         self.ipc_buffer
     }
 
@@ -126,12 +126,12 @@ fn recv_data<T: for<'a> Deserialize<'a>>(info: &MessageInfo) -> Result<T, Error>
 
 fn recv_data_with_ipc_buffer<T: for<'a> Deserialize<'a>>(
     info: &MessageInfo,
-    ipc_buffer: &IPCBuffer,
+    ipc_buffer: &IpcBuffer,
 ) -> Result<T, Error> {
     postcard::from_bytes(recv_bytes_with_ipc_buffer(ipc_buffer, info)).map_err(Into::into)
 }
 
-fn recv_bytes_with_ipc_buffer<'a>(ipc_buffer: &'a IPCBuffer, info: &MessageInfo) -> &'a [u8] {
+fn recv_bytes_with_ipc_buffer<'a>(ipc_buffer: &'a IpcBuffer, info: &MessageInfo) -> &'a [u8] {
     &ipc_buffer.msg_bytes()[..BYTES_PER_WORD * usize::try_from(info.length()).unwrap()]
 }
 

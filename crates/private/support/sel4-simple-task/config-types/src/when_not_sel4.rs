@@ -21,20 +21,20 @@ dummies! {
     Untyped
     Endpoint
     Notification
-    TCB
-    VCPU
+    Tcb
+    VCpu
     CNode
     SmallPage
     LargePage
     HugePage
-    PGD
-    PUD
-    PD
-    PT
-    IRQControl
-    IRQHandler
-    ASIDControl
-    ASIDPool
+    PageGlobalDirectory
+    PageUpperDirectory
+    PageDirectory
+    PageTable
+    IrqControl
+    IrqHandler
+    AsidControl
+    AsidPool
     Unspecified
     Null
 

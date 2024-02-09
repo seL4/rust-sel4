@@ -11,10 +11,10 @@ use sel4_immutable_cell::ImmutableCell;
 use crate::abort;
 
 extern "C" {
-    static mut __sel4_ipc_buffer_obj: sel4::IPCBuffer;
+    static mut __sel4_ipc_buffer_obj: sel4::IpcBuffer;
 }
 
-pub(crate) unsafe fn get_ipc_buffer() -> &'static mut sel4::IPCBuffer {
+pub(crate) unsafe fn get_ipc_buffer() -> &'static mut sel4::IpcBuffer {
     &mut __sel4_ipc_buffer_obj
 }
 

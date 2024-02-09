@@ -6,11 +6,11 @@
 
 use core::cell::RefCell;
 
-use crate::IPCBuffer;
+use crate::IpcBuffer;
 
 /// A strategy for discovering the current thread's IPC buffer.
 pub trait InvocationContext {
-    fn with_context<T>(&mut self, f: impl FnOnce(&mut IPCBuffer) -> T) -> T;
+    fn with_context<T>(&mut self, f: impl FnOnce(&mut IpcBuffer) -> T) -> T;
 }
 
 /// The absence of a strategy for discovering the current thread's IPC buffer.
@@ -23,20 +23,20 @@ impl NoInvocationContext {
     }
 }
 
-impl InvocationContext for &mut IPCBuffer {
-    fn with_context<T>(&mut self, f: impl FnOnce(&mut IPCBuffer) -> T) -> T {
+impl InvocationContext for &mut IpcBuffer {
+    fn with_context<T>(&mut self, f: impl FnOnce(&mut IpcBuffer) -> T) -> T {
         f(self)
     }
 }
 
 impl<U: InvocationContext> InvocationContext for &mut U {
-    fn with_context<T>(&mut self, f: impl FnOnce(&mut IPCBuffer) -> T) -> T {
+    fn with_context<T>(&mut self, f: impl FnOnce(&mut IpcBuffer) -> T) -> T {
         U::with_context(self, f)
     }
 }
 
 impl<U: InvocationContext> InvocationContext for &RefCell<U> {
-    fn with_context<T>(&mut self, f: impl FnOnce(&mut IPCBuffer) -> T) -> T {
+    fn with_context<T>(&mut self, f: impl FnOnce(&mut IpcBuffer) -> T) -> T {
         U::with_context(&mut self.borrow_mut(), f)
     }
 }
@@ -52,7 +52,7 @@ cfg_if::cfg_if! {
 /// The default strategy for discovering the current thread's IPC buffer.
 ///
 /// When the `"state"` feature is enabled, [`NoExplicitInvocationContext`] is an alias for
-/// [`ImplicitInvocationContext`](crate::ImplicitInvocationContext), which uses the [`IPCBuffer`]
+/// [`ImplicitInvocationContext`](crate::ImplicitInvocationContext), which uses the [`IpcBuffer`]
 /// set by [`set_ipc_buffer`](crate::set_ipc_buffer). Otherwise, it is an alias for
 /// [`NoInvocationContext`](crate::NoInvocationContext), which does not implement
 /// [`InvocationContext`].

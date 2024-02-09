@@ -75,11 +75,11 @@ impl Args {
             .get_one::<u32>("object_names_level")
             .map(|val| match val {
                 0 => ObjectNamesLevel::None,
-                1 => ObjectNamesLevel::JustTCBs,
+                1 => ObjectNamesLevel::JustTcbs,
                 2 => ObjectNamesLevel::All,
                 _ => panic!(),
             })
-            .unwrap_or(ObjectNamesLevel::JustTCBs);
+            .unwrap_or(ObjectNamesLevel::JustTcbs);
 
         let embed_frames = *matches.get_one::<bool>("embed_frames").unwrap();
 

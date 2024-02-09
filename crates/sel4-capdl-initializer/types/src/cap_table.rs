@@ -50,7 +50,7 @@ pub trait HasCapTable {
     }
 }
 
-impl<'a> object::TCB<'a> {
+impl<'a> object::Tcb<'a> {
     pub const SLOT_CSPACE: CapSlot = 0;
     pub const SLOT_VSPACE: CapSlot = 1;
     pub const SLOT_IPC_BUFFER: CapSlot = 4;
@@ -83,12 +83,12 @@ impl<'a> object::TCB<'a> {
         self.maybe_slot_as(Self::SLOT_BOUND_NOTIFICATION)
     }
 
-    pub fn vcpu(&self) -> Option<&cap::VCPU> {
+    pub fn vcpu(&self) -> Option<&cap::VCpu> {
         self.maybe_slot_as(Self::SLOT_VCPU)
     }
 }
 
-impl<'a> object::IRQ<'a> {
+impl<'a> object::Irq<'a> {
     pub const SLOT_NOTIFICATION: CapSlot = 0;
 
     pub fn notification(&self) -> Option<&cap::Notification> {
@@ -96,7 +96,7 @@ impl<'a> object::IRQ<'a> {
     }
 }
 
-impl<'a> object::ArmIRQ<'a> {
+impl<'a> object::ArmIrq<'a> {
     pub const SLOT_NOTIFICATION: CapSlot = 0;
 
     pub fn notification(&self) -> Option<&cap::Notification> {
