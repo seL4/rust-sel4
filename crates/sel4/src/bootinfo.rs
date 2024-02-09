@@ -94,12 +94,8 @@ impl BootInfo {
         SlotRegion::from_sys(self.inner().untyped)
     }
 
-    pub fn num_untyped(&self) -> usize {
-        self.untyped().len()
-    }
-
     fn untyped_list_inner(&self) -> &[sys::seL4_UntypedDesc] {
-        &self.inner().untypedList[..self.num_untyped()]
+        &self.inner().untypedList[..self.untyped().len()]
     }
 
     pub fn untyped_list(&self) -> &[UntypedDesc] {

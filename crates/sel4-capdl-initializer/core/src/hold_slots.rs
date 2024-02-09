@@ -4,14 +4,14 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use sel4::{AbsoluteCPtr, InitCSpaceSlot};
+use sel4::{init_thread::Slot, AbsoluteCPtr};
 
 use crate::{CSlotAllocator, CapDLInitializerError};
 
 const NUM_SLOTS: usize = 2;
 
 pub(crate) struct HoldSlots<T> {
-    slots: [InitCSpaceSlot; NUM_SLOTS],
+    slots: [Slot; NUM_SLOTS],
     slots_occupied: [bool; NUM_SLOTS],
     which_slot: usize,
     relative_cptr_of: T,
@@ -35,8 +35,8 @@ impl<T> HoldSlots<T> {
     }
 }
 
-impl<T: FnMut(InitCSpaceSlot) -> AbsoluteCPtr> HoldSlots<T> {
-    pub(crate) fn get_slot(&mut self) -> Result<InitCSpaceSlot, CapDLInitializerError> {
+impl<T: FnMut(Slot) -> AbsoluteCPtr> HoldSlots<T> {
+    pub(crate) fn get_slot(&mut self) -> Result<Slot, CapDLInitializerError> {
         if self.slots_occupied[self.which_slot] {
             (self.relative_cptr_of)(self.slots[self.which_slot]).delete()?;
             self.slots_occupied[self.which_slot] = false;

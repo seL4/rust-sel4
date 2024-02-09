@@ -9,7 +9,6 @@
 
 use core::ops::Range;
 
-use sel4::BootInfo;
 use sel4_capdl_initializer_core::{Initializer, InitializerBuffers, PerObjectBuffer};
 use sel4_capdl_initializer_types::SpecWithSources;
 use sel4_capdl_initializer_with_embedded_spec_embedded_spec::SPEC;
@@ -30,7 +29,7 @@ static mut BUFFERS: InitializerBuffers<[PerObjectBuffer; SPEC.objects.const_inne
 
 #[sel4_root_task::root_task]
 #[allow(clippy::let_unit_value)]
-fn main(bootinfo: &BootInfo) -> ! {
+fn main(bootinfo: &sel4::BootInfoPtr) -> ! {
     LOGGER.set().unwrap();
     let trivial_source = ();
     let spec_with_sources = SpecWithSources {

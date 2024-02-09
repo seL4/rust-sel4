@@ -17,7 +17,7 @@ use crate::{
 
 /// The index of a slot in the initial thread's root CNode.
 #[derive(Debug, Copy, Clone, Ord, PartialOrd, Eq, PartialEq, Hash)]
-pub struct Slot<T: CapType> {
+pub struct Slot<T: CapType = cap_type::Unspecified> {
     index: usize,
     _phantom: PhantomData<T>,
 }
@@ -49,6 +49,20 @@ impl<T: CapType> Slot<T> {
     pub const fn local_cptr(&self) -> LocalCPtr<T> {
         self.cptr().cast()
     }
+
+    pub const fn cast<T1: CapType>(&self) -> Slot<T1> {
+        Slot::from_index(self.index)
+    }
+
+    pub const fn upcast(&self) -> Slot {
+        self.cast()
+    }
+}
+
+impl Slot {
+    pub const fn downcast<T: CapType>(&self) -> Slot<T> {
+        self.cast()
+    }
 }
 
 /// Corresponds to `seL4_SlotRegion`.
@@ -76,6 +90,10 @@ impl<T: CapType> SlotRegion<T> {
 
     pub const fn end(&self) -> usize {
         self.range.end
+    }
+
+    pub const fn range(&self) -> Range<usize> {
+        self.start()..self.end()
     }
 
     pub fn len(&self) -> usize {
