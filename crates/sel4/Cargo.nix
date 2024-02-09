@@ -22,6 +22,11 @@ mk rec {
   features = {
     default = [ "state" ];
     state = [];
+    exposed-state = [];
+    extern-state = [];
+    thread-local-state = [];
+    non-thread-local-state = [];
+    tls = [];
     single-threaded = [];
   };
 }

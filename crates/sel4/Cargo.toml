@@ -18,8 +18,13 @@ license = "MIT"
 
 [features]
 default = ["state"]
+exposed-state = []
+extern-state = []
+non-thread-local-state = []
 single-threaded = []
 state = []
+thread-local-state = []
+tls = []
 
 [dependencies]
 cfg-if = "1.0.0"
