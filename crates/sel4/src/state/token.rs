@@ -19,9 +19,9 @@ pub(crate) trait Token {
     where
         Self: 'a;
 
-    fn try_borrow<'a>(&'a self) -> Result<Self::Borrow<'a>, BorrowError>;
+    fn try_borrow(&self) -> Result<Self::Borrow<'_>, BorrowError>;
 
-    fn try_borrow_mut<'a>(&'a self) -> Result<Self::BorrowMut<'a>, BorrowMutError>;
+    fn try_borrow_mut(&self) -> Result<Self::BorrowMut<'_>, BorrowMutError>;
 }
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Ord, PartialOrd, Hash)]
@@ -58,16 +58,17 @@ impl fmt::Display for BorrowMutError {
 pub(crate) struct UnsyncToken(RefCell<()>);
 
 impl Token for UnsyncToken {
+    #[allow(clippy::declare_interior_mutable_const)]
     const INIT: Self = Self(RefCell::new(()));
 
     type Borrow<'a> = Ref<'a, ()>;
     type BorrowMut<'a> = RefMut<'a, ()>;
 
-    fn try_borrow<'a>(&'a self) -> Result<Self::Borrow<'a>, BorrowError> {
+    fn try_borrow(&self) -> Result<Self::Borrow<'_>, BorrowError> {
         self.0.try_borrow().map_err(|_| BorrowError::new())
     }
 
-    fn try_borrow_mut<'a>(&'a self) -> Result<Self::BorrowMut<'a>, BorrowMutError> {
+    fn try_borrow_mut(&self) -> Result<Self::BorrowMut<'_>, BorrowMutError> {
         self.0.try_borrow_mut().map_err(|_| BorrowMutError::new())
     }
 }
@@ -94,15 +95,16 @@ impl<'a> Drop for SyncTokenBorrowMut<'a> {
 }
 
 impl Token for SyncToken {
+    #[allow(clippy::declare_interior_mutable_const)]
     const INIT: Self = Self(AtomicIsize::new(0));
 
     type Borrow<'a> = SyncTokenBorrow<'a>;
     type BorrowMut<'a> = SyncTokenBorrowMut<'a>;
 
-    fn try_borrow<'a>(&'a self) -> Result<Self::Borrow<'a>, BorrowError> {
+    fn try_borrow(&self) -> Result<Self::Borrow<'_>, BorrowError> {
         let mut current = self.0.load(Ordering::SeqCst);
         loop {
-            if 0 <= current && current < isize::MAX {
+            if (0..isize::MAX).contains(&current) {
                 match self.0.compare_exchange(
                     current,
                     current + 1,
@@ -120,7 +122,7 @@ impl Token for SyncToken {
         }
     }
 
-    fn try_borrow_mut<'a>(&'a self) -> Result<Self::BorrowMut<'a>, BorrowMutError> {
+    fn try_borrow_mut(&self) -> Result<Self::BorrowMut<'_>, BorrowMutError> {
         let mut current = self.0.load(Ordering::SeqCst);
         loop {
             if current == 0 {

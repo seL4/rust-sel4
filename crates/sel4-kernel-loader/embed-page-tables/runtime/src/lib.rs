@@ -80,6 +80,7 @@ impl<'a> TablePtrs<'a> {
         }
     }
 
+    #[allow(clippy::missing_safety_doc)]
     pub unsafe fn finish_for_riscv(&self) {
         self.rotate_each_entry_right(RISCV_ROTATE_RIGHT_FOR_FINISH);
     }

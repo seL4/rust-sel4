@@ -204,6 +204,7 @@ impl<'a> InvocationGenerator<'a> {
         });
 
         self.ipc_buffer_method_toks.extend(quote! {
+            #[allow(clippy::field_reassign_with_default)]
             pub fn #fn_ident(&mut self, service: #interface_ident, #(#param_list_for_type_sig,)*) -> #ret_type_path {
                 #trace_toks
                 #marshalling_toks

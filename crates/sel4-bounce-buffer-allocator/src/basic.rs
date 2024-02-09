@@ -86,8 +86,7 @@ impl AbstractBounceBufferAllocator for Basic {
         let holes = self
             .holes
             .range(..&offset)
-            .rev()
-            .next()
+            .next_back()
             .map(copy_typle_fields)
             .map(|prev_hole| {
                 (

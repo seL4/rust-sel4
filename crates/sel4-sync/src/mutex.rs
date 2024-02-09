@@ -17,6 +17,7 @@ pub struct PanickingRawMutex {
 unsafe impl lock_api::RawMutex for PanickingRawMutex {
     type GuardMarker = lock_api::GuardNoSend; // TODO
 
+    #[allow(clippy::declare_interior_mutable_const)]
     const INIT: Self = Self {
         locked: AtomicBool::new(false),
     };

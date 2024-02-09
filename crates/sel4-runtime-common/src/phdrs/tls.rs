@@ -15,6 +15,7 @@ pub use sel4_initialize_tls_on_stack::{ContArg, ContFn};
 
 use crate::phdrs::{elf::PT_TLS, locate_phdrs};
 
+#[allow(clippy::missing_safety_doc)]
 pub unsafe fn initialize_tls_on_stack_and_continue(cont_fn: ContFn, cont_arg: *mut ContArg) -> ! {
     let phdr = locate_phdrs()
         .iter()

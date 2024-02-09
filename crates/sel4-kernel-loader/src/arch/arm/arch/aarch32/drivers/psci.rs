@@ -15,6 +15,8 @@ extern "C" {
     fn hvc_psci_func(id: usize, param1: usize, param2: usize, param3: usize) -> i32;
 }
 
+// TODO
+#[allow(clippy::if_same_then_else)]
 static CHOSEN_PSCI_FUNC: PsciFunc = if sel4_cfg_bool!(ARM_HYPERVISOR_SUPPORT) {
     smc_psci_func as PsciFunc
 } else {
@@ -32,11 +34,7 @@ unsafe fn psci_cpu_on(target_cpu: usize, entry_point: usize, context_id: usize) 
 pub(crate) fn start_secondary_core(core_id: usize, sp: usize) {
     let start = psci_secondary_entry as *const PsciSecondaryEntryFn as usize;
     unsafe {
-        psci_cpu_on(
-            core_id.try_into().unwrap(),
-            start.try_into().unwrap(),
-            sp.try_into().unwrap(),
-        );
+        psci_cpu_on(core_id, start, sp);
     }
 }
 

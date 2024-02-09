@@ -17,6 +17,7 @@ extern "C" {
     static __init_array_end: Ctor;
 }
 
+#[allow(clippy::missing_safety_doc)]
 pub unsafe fn run_ctors() {
     let start = ptr::addr_of!(__init_array_start);
     let end = ptr::addr_of!(__init_array_end);
