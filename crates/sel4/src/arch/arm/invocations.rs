@@ -7,7 +7,7 @@
 use sel4_config::sel4_cfg;
 
 use crate::{
-    local_cptr::*, AbsoluteCPtr, CapRights, Error, FrameType, InvocationContext, LocalCPtr, Result,
+    cap::*, AbsoluteCPtr, CapRights, Error, FrameType, InvocationContext, Cap, Result,
     VmAttributes, Word,
 };
 
@@ -69,7 +69,7 @@ impl<C: InvocationContext> VCpu<C> {
     }
 }
 
-impl<T: FrameType, C: InvocationContext> LocalCPtr<T, C> {
+impl<T: FrameType, C: InvocationContext> Cap<T, C> {
     /// Corresponds to `seL4_ARM_Page_Map`.
     pub fn frame_map(
         self,

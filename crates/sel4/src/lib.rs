@@ -9,7 +9,7 @@
 //!
 //! Most items in this crate correspond to types, constants, and functions in
 //! [libsel4](https://docs.sel4.systems/projects/sel4/api-doc.html). Notably, when applicable,
-//! `seL4_CPtr` is agumented in [`LocalCPtr`] with a marker specifying the type of capability it
+//! `seL4_CPtr` is agumented in [`Cap`] with a marker specifying the type of capability it
 //! points to.
 //!
 //! This crate's implementation is based on the lower-level [`sel4-sys`](::sel4_sys) crate, which is
@@ -76,8 +76,8 @@ pub use bootinfo::{BootInfo, BootInfoExtra, BootInfoExtraId, BootInfoPtr, Untype
 pub use cap_rights::{CapRights, CapRightsBuilder};
 pub use cnode_cap_data::CNodeCapData;
 pub use cptr::{
-    cap_type, local_cptr, AbsoluteCPtr, CPtr, CPtrBits, CPtrWithDepth, CapType, HasCPtrWithDepth,
-    LocalCPtr,
+    cap_type, cap, AbsoluteCPtr, CPtr, CPtrBits, CPtrWithDepth, CapType, HasCPtrWithDepth,
+    Cap,
 };
 pub use error::{Error, Result};
 pub use invocation_context::{InvocationContext, NoExplicitInvocationContext, NoInvocationContext};
@@ -105,13 +105,13 @@ pub use syscalls::set_tls_base;
 pub use arch::top_level::*;
 
 #[doc(no_inline)]
-pub use local_cptr::*;
+pub use cap::*;
 
 #[doc(no_inline)]
 pub use fault::*;
 
 pub(crate) use helper_macros::{
-    declare_cap_type, declare_fault_newtype, declare_local_cptr_alias, newtype_methods,
+    declare_cap_type, declare_fault_newtype, declare_cap_alias, newtype_methods,
 };
 
 sel4_cfg_if! {

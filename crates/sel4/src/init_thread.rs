@@ -12,7 +12,7 @@ use sel4_config::sel4_cfg;
 use crate::{
     cap_type,
     const_helpers::{u32_into_usize, usize_into_word, word_into_usize},
-    sys, CPtr, CPtrBits, CapType, LocalCPtr,
+    sys, CPtr, CPtrBits, CapType, Cap,
 };
 
 /// The index of a slot in the initial thread's root CNode.
@@ -46,7 +46,7 @@ impl<T: CapType> Slot<T> {
         CPtr::from_bits(self.cptr_bits())
     }
 
-    pub const fn local_cptr(&self) -> LocalCPtr<T> {
+    pub const fn cap(&self) -> Cap<T> {
         self.cptr().cast()
     }
 
@@ -154,7 +154,7 @@ pub mod slot {
 // NOTE(rustc_wishlist) use ! once #![never_type] is stabilized
 #[cfg(feature = "state")]
 pub fn suspend_self<T>() -> T {
-    slot::TCB.local_cptr().tcb_suspend().unwrap();
+    slot::TCB.cap().tcb_suspend().unwrap();
 
     unreachable!()
 }

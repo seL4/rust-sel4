@@ -11,7 +11,7 @@ use core::mem;
 use sel4_config::{sel4_cfg, sel4_cfg_if};
 
 use crate::{
-    local_cptr::*, sys, AbsoluteCPtr, CNodeCapData, CapRights, Error, InvocationContext,
+    cap::*, sys, AbsoluteCPtr, CNodeCapData, CapRights, Error, InvocationContext,
     ObjectBlueprint, Result, UserContext, Word,
 };
 

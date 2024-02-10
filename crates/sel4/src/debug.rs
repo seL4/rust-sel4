@@ -5,7 +5,7 @@
 // SPDX-License-Identifier: MIT
 //
 
-use crate::{sys, InvocationContext, CapType, Tcb, LocalCPtr};
+use crate::{sys, InvocationContext, CapType, Tcb, Cap};
 
 /// Corresponds to `seL4_DebugPutChar`.
 pub fn debug_put_char(c: u8) {
@@ -26,7 +26,7 @@ impl<C: InvocationContext> Tcb<C> {
     }
 }
 
-impl<T: CapType> LocalCPtr<T> {
+impl<T: CapType> Cap<T> {
     /// Corresponds to `seL4_DebugCapIdentify`.
     pub fn debug_identify(self) -> u32 {
         sys::seL4_DebugCapIdentify(self.bits())

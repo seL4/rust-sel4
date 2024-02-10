@@ -4,10 +4,10 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-pub use sel4::{local_cptr::*, CPtr};
+pub use sel4::{cap::*, CPtr};
 pub use sel4_simple_task_threading::StaticThread;
 
-use sel4::{Badge, CPtrBits, CapType, LocalCPtr};
+use sel4::{Badge, CPtrBits, CapType, Cap};
 
 use crate::{ConfigBadge, ConfigCPtr, ConfigCPtrBits};
 
@@ -21,7 +21,7 @@ impl WrappedCPtr for CPtr {
     }
 }
 
-impl<T: CapType> WrappedCPtr for LocalCPtr<T> {
+impl<T: CapType> WrappedCPtr for Cap<T> {
     fn wrap(bits: CPtrBits) -> Self {
         Self::from_bits(bits)
     }

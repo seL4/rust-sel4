@@ -39,14 +39,14 @@ pub(crate) mod cap_type_arch {
     pub type Granule = _4KPage;
 }
 
-pub(crate) mod local_cptr_arch {
-    use crate::declare_local_cptr_alias;
+pub(crate) mod cap_arch {
+    use crate::declare_cap_alias;
 
-    declare_local_cptr_alias!(_4KPage);
-    declare_local_cptr_alias!(MegaPage);
+    declare_cap_alias!(_4KPage);
+    declare_cap_alias!(MegaPage);
 
     #[sel4_config::sel4_cfg(any(PT_LEVELS = "3", PT_LEVELS = "4"))]
-    declare_local_cptr_alias!(GigaPage);
+    declare_cap_alias!(GigaPage);
 
-    declare_local_cptr_alias!(PageTable);
+    declare_cap_alias!(PageTable);
 }

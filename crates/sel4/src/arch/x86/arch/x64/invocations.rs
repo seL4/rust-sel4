@@ -5,11 +5,11 @@
 //
 
 use crate::{
-    local_cptr::*, AbsoluteCPtr, CapRights, Error, FrameType, InvocationContext, LocalCPtr, Result,
+    cap::*, AbsoluteCPtr, CapRights, Error, FrameType, InvocationContext, Cap, Result,
     VmAttributes,
 };
 
-impl<T: FrameType, C: InvocationContext> LocalCPtr<T, C> {
+impl<T: FrameType, C: InvocationContext> Cap<T, C> {
     /// Corresponds to `seL4_X86_Page_Map`.
     pub fn frame_map(
         self,
