@@ -7,7 +7,7 @@
 use sel4_config::sel4_cfg;
 
 use crate::{
-    cap::*, AbsoluteCPtr, CapRights, Error, FrameType, InvocationContext, Cap, Result,
+    cap::*, AbsoluteCPtr, Cap, CapRights, Error, FrameType, InvocationContext, Result,
     VmAttributes, Word,
 };
 

@@ -5,8 +5,7 @@
 //
 
 use crate::{
-    cap::*, AbsoluteCPtr, CapRights, Error, FrameType, InvocationContext, Cap, Result,
-    VmAttributes,
+    cap::*, AbsoluteCPtr, Cap, CapRights, Error, FrameType, InvocationContext, Result, VmAttributes,
 };
 
 impl<T: FrameType, C: InvocationContext> Cap<T, C> {

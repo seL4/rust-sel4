@@ -12,7 +12,7 @@ use sel4_config::sel4_cfg;
 use crate::{
     cap_type,
     const_helpers::{u32_into_usize, usize_into_word, word_into_usize},
-    sys, CPtr, CPtrBits, CapType, Cap,
+    sys, CPtr, CPtrBits, Cap, CapType,
 };
 
 /// The index of a slot in the initial thread's root CNode.

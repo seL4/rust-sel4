@@ -9,8 +9,8 @@ use core::array;
 use sel4_config::{sel4_cfg, sel4_cfg_if};
 
 use crate::{
-    cap_type, const_helpers::u32_into_usize, sys, CapType, ConveysReplyAuthority, Endpoint,
-    InvocationContext, Cap, MessageInfo, Notification, Word, NUM_FAST_MESSAGE_REGISTERS,
+    cap_type, const_helpers::u32_into_usize, sys, Cap, CapType, ConveysReplyAuthority, Endpoint,
+    InvocationContext, MessageInfo, Notification, Word, NUM_FAST_MESSAGE_REGISTERS,
 };
 
 #[sel4_cfg(not(KERNEL_MCS))]

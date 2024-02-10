@@ -11,8 +11,8 @@ use core::mem;
 use sel4_config::{sel4_cfg, sel4_cfg_if};
 
 use crate::{
-    cap::*, sys, AbsoluteCPtr, CNodeCapData, CapRights, Error, InvocationContext,
-    ObjectBlueprint, Result, UserContext, Word,
+    cap::*, sys, AbsoluteCPtr, CNodeCapData, CapRights, Error, InvocationContext, ObjectBlueprint,
+    Result, UserContext, Word,
 };
 
 #[sel4_cfg(KERNEL_MCS)]
