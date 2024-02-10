@@ -12,7 +12,7 @@ use crate::{newtype_methods, sys, Word};
 pub struct UserContext(sys::seL4_UserContext);
 
 impl UserContext {
-    newtype_methods!(sys::seL4_UserContext);
+    newtype_methods!(pub sys::seL4_UserContext);
 
     pub fn pc(&self) -> &Word {
         &self.0.pc

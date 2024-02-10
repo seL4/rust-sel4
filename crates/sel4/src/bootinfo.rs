@@ -67,7 +67,7 @@ impl Deref for BootInfoPtr {
 pub struct BootInfo(sys::seL4_BootInfo);
 
 impl BootInfo {
-    newtype_methods!(sys::seL4_BootInfo);
+    newtype_methods!(pub sys::seL4_BootInfo);
 
     fn extra_len(&self) -> usize {
         self.inner().extraLen.try_into().unwrap()
@@ -123,7 +123,7 @@ impl BootInfo {
 pub struct UntypedDesc(sys::seL4_UntypedDesc);
 
 impl UntypedDesc {
-    newtype_methods!(sys::seL4_UntypedDesc);
+    newtype_methods!(pub sys::seL4_UntypedDesc);
 
     pub fn paddr(&self) -> usize {
         self.inner().paddr.try_into().unwrap()

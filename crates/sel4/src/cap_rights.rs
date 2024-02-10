@@ -11,7 +11,7 @@ use crate::{newtype_methods, sys};
 pub struct CapRights(sys::seL4_CapRights);
 
 impl CapRights {
-    newtype_methods!(sys::seL4_CapRights);
+    newtype_methods!(pub sys::seL4_CapRights);
 
     pub fn new(grant_reply: bool, grant: bool, read: bool, write: bool) -> Self {
         Self::from_inner(sys::seL4_CapRights::new(
