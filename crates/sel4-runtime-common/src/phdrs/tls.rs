@@ -38,7 +38,7 @@ sel4::sel4_cfg_if! {
         const CHOSEN_SET_THREAD_POINTER_FN: SetThreadPointerFn = set_thread_pointer_via_syscall;
 
         unsafe extern "C" fn set_thread_pointer_via_syscall(val: usize) {
-            sel4::sys::seL4_SetTLSBase(val.try_into().unwrap());
+            sel4::set_tls_base(val);
         }
     } else {
         const CHOSEN_SET_THREAD_POINTER_FN: SetThreadPointerFn = DEFAULT_SET_THREAD_POINTER_FN;

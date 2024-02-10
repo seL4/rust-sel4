@@ -99,6 +99,9 @@ sel4_cfg_if! {
     }
 }
 
+#[sel4_cfg(SET_TLS_BASE_SELF)]
+pub use syscalls::set_tls_base;
+
 pub use arch::top_level::*;
 
 #[doc(no_inline)]
