@@ -223,6 +223,12 @@ pub fn r#yield() {
     sys::seL4_Yield()
 }
 
+/// Corresponds to `seL4_SetTLSBase`.
+#[sel4_cfg(SET_TLS_BASE_SELF)]
+pub fn set_tls_base(addr: usize) {
+    sys::seL4_SetTLSBase(addr.try_into().unwrap())
+}
+
 //
 
 const UNUSED_FOR_IN: Word = 0;

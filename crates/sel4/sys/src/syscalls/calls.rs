@@ -734,11 +734,8 @@ sel4_cfg_if! {
     }
 }
 
-sel4_cfg_if! {
-    if #[cfg(SET_TLS_BASE_SELF)] {
-        pub fn seL4_SetTLSBase(tls_base: seL4_Word) {
-            let msg_info = seL4_MessageInfo::new(0, 0, 0, 0);
-            sys_send_null(syscall_id::SetTLSBase, tls_base, msg_info)
-        }
-    }
+#[sel4_cfg(SET_TLS_BASE_SELF)]
+pub fn seL4_SetTLSBase(tls_base: seL4_Word) {
+    let msg_info = seL4_MessageInfo::new(0, 0, 0, 0);
+    sys_send_null(syscall_id::SetTLSBase, tls_base, msg_info)
 }
