@@ -75,7 +75,7 @@ mod imp {
     }
 }
 
-#[sel4_cfg(any(ARCH_IA32, ARCH_X86_64))]
+#[sel4_cfg(ARCH_X86_64)]
 mod imp {
     pub(crate) type FrameType1 = sel4::cap_type::LargePage;
     pub(crate) type FrameType2 = sel4::cap_type::HugePage;
