@@ -15,7 +15,7 @@ use crate::{newtype_methods, sys, AbsoluteCPtr, CNode, Word};
 pub struct IpcBuffer(sys::seL4_IPCBuffer);
 
 impl IpcBuffer {
-    newtype_methods!(sys::seL4_IPCBuffer);
+    newtype_methods!(pub sys::seL4_IPCBuffer);
 
     pub fn msg_regs(&self) -> &[Word] {
         &self.inner().msg[..]

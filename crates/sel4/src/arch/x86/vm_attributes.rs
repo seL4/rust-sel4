@@ -19,7 +19,7 @@ impl VmAttributes {
     pub const CACHE_DISABLED: Self =
         Self::from_inner(sys::seL4_X86_VMAttributes::seL4_X86_CacheDisabled);
 
-    newtype_methods!(sys::seL4_X86_VMAttributes::Type);
+    newtype_methods!(pub sys::seL4_X86_VMAttributes::Type);
 
     pub const fn has(self, rhs: Self) -> bool {
         self.into_inner() & rhs.into_inner() != 0

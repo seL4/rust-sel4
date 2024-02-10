@@ -11,7 +11,7 @@ use crate::{newtype_methods, sys, Word};
 pub struct MessageInfo(sys::seL4_MessageInfo);
 
 impl MessageInfo {
-    newtype_methods!(sys::seL4_MessageInfo);
+    newtype_methods!(pub sys::seL4_MessageInfo);
 
     pub fn new(label: Word, caps_unwrapped: usize, extra_caps: usize, length: usize) -> Self {
         Self::from_inner(sys::seL4_MessageInfo::new(

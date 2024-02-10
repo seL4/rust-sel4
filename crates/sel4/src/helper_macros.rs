@@ -5,20 +5,20 @@
 //
 
 macro_rules! newtype_methods {
-    ($inner:path) => {
-        pub const fn from_inner(inner: $inner) -> Self {
+    ($inner_vis:vis $inner:path) => {
+        $inner_vis const fn from_inner(inner: $inner) -> Self {
             Self(inner)
         }
 
-        pub const fn into_inner(self) -> $inner {
+        $inner_vis const fn into_inner(self) -> $inner {
             self.0
         }
 
-        pub const fn inner(&self) -> &$inner {
+        $inner_vis const fn inner(&self) -> &$inner {
             &self.0
         }
 
-        pub fn inner_mut(&mut self) -> &mut $inner {
+        $inner_vis fn inner_mut(&mut self) -> &mut $inner {
             &mut self.0
         }
     };
@@ -56,7 +56,7 @@ macro_rules! declare_fault_newtype {
         pub struct $t($sys);
 
         impl $t {
-            $crate::newtype_methods!($sys);
+            $crate::newtype_methods!(pub $sys);
         }
     };
 }

@@ -11,7 +11,7 @@ use crate::{newtype_methods, sys, Word, WORD_SIZE};
 pub struct CNodeCapData(sys::seL4_CNode_CapData);
 
 impl CNodeCapData {
-    newtype_methods!(sys::seL4_CNode_CapData);
+    newtype_methods!(pub sys::seL4_CNode_CapData);
 
     pub fn new(guard: Word, guard_size: usize) -> Self {
         Self::from_inner(sys::seL4_CNode_CapData::new(

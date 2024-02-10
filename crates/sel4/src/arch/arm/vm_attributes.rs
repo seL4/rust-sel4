@@ -23,7 +23,7 @@ impl VmAttributes {
     pub const EXECUTE_NEVER: Self =
         Self::from_inner(sys::seL4_ARM_VMAttributes::seL4_ARM_ExecuteNever);
 
-    newtype_methods!(sys::seL4_ARM_VMAttributes::Type);
+    newtype_methods!(pub sys::seL4_ARM_VMAttributes::Type);
 
     pub const fn has(self, rhs: Self) -> bool {
         self.into_inner() & rhs.into_inner() != 0
