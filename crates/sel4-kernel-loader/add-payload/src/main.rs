@@ -33,11 +33,18 @@ fn main() -> Result<()> {
 
     let sel4_config: Configuration =
         serde_json::from_reader(File::open(&args.sel4_config_path).unwrap()).unwrap();
-    let word_size = sel4_config.get("WORD_SIZE").unwrap().as_string().unwrap();
+
+    let word_size = sel4_config
+        .get("WORD_SIZE")
+        .unwrap()
+        .as_str()
+        .unwrap()
+        .parse::<usize>()
+        .unwrap();
 
     match word_size {
-        "32" => continue_with_word_size::<FileHeader32<Endianness>>(&args),
-        "64" => continue_with_word_size::<FileHeader64<Endianness>>(&args),
+        32 => continue_with_word_size::<FileHeader32<Endianness>>(&args),
+        64 => continue_with_word_size::<FileHeader64<Endianness>>(&args),
         _ => {
             panic!()
         }
