@@ -19,7 +19,7 @@ sel4_cfg_if! {
     } else if #[cfg(any(ARCH_RISCV32, ARCH_RISCV64))] {
         #[path = "riscv/mod.rs"]
         mod imp;
-    } else if #[cfg(any(ARCH_IA32, ARCH_X86_64))] {
+    } else if #[cfg(ARCH_X86_64)] {
         #[path = "x86/mod.rs"]
         mod imp;
     }

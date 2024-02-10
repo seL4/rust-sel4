@@ -23,6 +23,8 @@ mod xml;
 const OUT_DIR_ENV: &str = "OUT_DIR";
 
 fn main() {
+    check_configuration();
+
     let out_dir = OutDir::new();
 
     let mut blocklist_for_bindgen = vec![];
@@ -71,6 +73,11 @@ fn main() {
         let out_path = out_dir.path.join("bindings.rs");
         bindings.write_to_file(out_path).unwrap();
     }
+}
+
+#[allow(clippy::assertions_on_constants)]
+fn check_configuration() {
+    assert!(!sel4_config::sel4_cfg_bool!(ARCH_IA32));
 }
 
 struct OutDir {
