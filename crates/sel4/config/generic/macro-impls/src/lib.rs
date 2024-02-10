@@ -27,7 +27,7 @@ impl<'a> Impls<'a> {
         }
     }
 
-    fn config(&self) -> &'a Configuration {
+    pub const fn config(&self) -> &'a Configuration {
         self.config
     }
 

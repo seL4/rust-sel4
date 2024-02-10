@@ -70,3 +70,22 @@ pub fn sel4_cfg_usize(key_toks: TokenStream) -> TokenStream {
         .cfg_from_str_impl::<usize>(PhantomData, key_toks.into())
         .into()
 }
+
+#[proc_macro]
+pub fn sel4_cfg_word(key_toks: TokenStream) -> TokenStream {
+    let impls = get_impls();
+    let word_size = impls
+        .config()
+        .get("WORD_SIZE")
+        .unwrap()
+        .as_str()
+        .unwrap()
+        .parse::<usize>()
+        .unwrap();
+    let toks = match word_size {
+        32 => impls.cfg_from_str_impl::<u32>(PhantomData, key_toks.into()),
+        64 => impls.cfg_from_str_impl::<u64>(PhantomData, key_toks.into()),
+        _ => panic!(),
+    };
+    toks.into()
+}
