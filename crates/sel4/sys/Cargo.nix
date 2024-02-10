@@ -29,4 +29,7 @@ mk {
       sel4-config-data
     ;
   };
+  features = {
+    wrappers = [];
+  };
 }
