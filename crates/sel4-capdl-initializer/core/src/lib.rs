@@ -19,7 +19,7 @@ use log::{debug, info, trace};
 use sel4::{
     cap_type,
     init_thread::{self, Slot},
-    AbsoluteCPtr, BootInfoPtr, CNodeCapData, CPtr, CapRights, CapType, Cap, ObjectBlueprint,
+    AbsoluteCPtr, BootInfoPtr, CNodeCapData, CPtr, Cap, CapRights, CapType, ObjectBlueprint,
     SizedFrameType, Untyped, UserContext,
 };
 use sel4_capdl_initializer_types::*;
@@ -421,9 +421,7 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
             .filter_objects_with::<&object::PageTable>(|obj| obj.is_root)
         {
             let pgd = self.orig_cap::<cap_type::VSpace>(obj_id);
-            init_thread::slot::ASID_POOL
-                .cap()
-                .asid_pool_assign(pgd)?;
+            init_thread::slot::ASID_POOL.cap().asid_pool_assign(pgd)?;
         }
         Ok(())
     }
@@ -454,11 +452,7 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
         Ok(())
     }
 
-    fn fill_frame<U: SizedFrameType>(
-        &self,
-        frame: Cap<U>,
-        fill: &[FillEntry<D>],
-    ) -> Result<()> {
+    fn fill_frame<U: SizedFrameType>(&self, frame: Cap<U>, fill: &[FillEntry<D>]) -> Result<()> {
         frame.frame_map(
             init_thread::slot::VSPACE.cap(),
             self.copy_addr::<U>(),

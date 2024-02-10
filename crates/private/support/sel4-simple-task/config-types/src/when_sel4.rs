@@ -7,7 +7,7 @@
 pub use sel4::{cap::*, CPtr};
 pub use sel4_simple_task_threading::StaticThread;
 
-use sel4::{Badge, CPtrBits, CapType, Cap};
+use sel4::{Badge, CPtrBits, Cap, CapType};
 
 use crate::{ConfigBadge, ConfigCPtr, ConfigCPtrBits};
 

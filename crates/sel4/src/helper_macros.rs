@@ -61,7 +61,7 @@ macro_rules! declare_fault_newtype {
     };
 }
 
+pub(crate) use declare_cap_alias;
 pub(crate) use declare_cap_type;
 pub(crate) use declare_fault_newtype;
-pub(crate) use declare_cap_alias;
 pub(crate) use newtype_methods;

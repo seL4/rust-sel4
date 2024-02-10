@@ -76,8 +76,7 @@ pub use bootinfo::{BootInfo, BootInfoExtra, BootInfoExtraId, BootInfoPtr, Untype
 pub use cap_rights::{CapRights, CapRightsBuilder};
 pub use cnode_cap_data::CNodeCapData;
 pub use cptr::{
-    cap_type, cap, AbsoluteCPtr, CPtr, CPtrBits, CPtrWithDepth, CapType, HasCPtrWithDepth,
-    Cap,
+    cap, cap_type, AbsoluteCPtr, CPtr, CPtrBits, CPtrWithDepth, Cap, CapType, HasCPtrWithDepth,
 };
 pub use error::{Error, Result};
 pub use invocation_context::{InvocationContext, NoExplicitInvocationContext, NoInvocationContext};
@@ -111,7 +110,7 @@ pub use cap::*;
 pub use fault::*;
 
 pub(crate) use helper_macros::{
-    declare_cap_type, declare_fault_newtype, declare_cap_alias, newtype_methods,
+    declare_cap_alias, declare_cap_type, declare_fault_newtype, newtype_methods,
 };
 
 sel4_cfg_if! {
