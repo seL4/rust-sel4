@@ -33,8 +33,8 @@ impl CPtr {
         Self { bits }
     }
 
-    pub const fn cast<T: CapType>(self) -> LocalCPtr<T> {
-        LocalCPtr::from_cptr(self)
+    pub const fn cast<T: CapType>(self) -> Cap<T> {
+        Cap::from_cptr(self)
     }
 }
 
@@ -82,16 +82,16 @@ impl From<CPtr> for CPtrWithDepth {
 ///   [`ImplicitInvocationContext`](crate::ImplicitInvocationContext), which uses the [`IpcBuffer`]
 ///   set by [`set_ipc_buffer`](crate::set_ipc_buffer). Otherwise, it is an alias for
 ///   [`NoInvocationContext`](crate::NoInvocationContext), which does not implement
-///   [`InvocationContext`]. In such cases, the [`with`](LocalCPtr::with) method is used to specify
+///   [`InvocationContext`]. In such cases, the [`with`](Cap::with) method is used to specify
 ///   an invocation context before the capability is invoked.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
-pub struct LocalCPtr<T: CapType, C = NoExplicitInvocationContext> {
+pub struct Cap<T: CapType, C = NoExplicitInvocationContext> {
     cptr: CPtr,
     invocation_context: C,
     _phantom: PhantomData<T>,
 }
 
-impl<T: CapType, C> LocalCPtr<T, C> {
+impl<T: CapType, C> Cap<T, C> {
     pub const fn cptr(&self) -> CPtr {
         self.cptr
     }
@@ -100,23 +100,23 @@ impl<T: CapType, C> LocalCPtr<T, C> {
         self.cptr().bits()
     }
 
-    pub fn cast<T1: CapType>(self) -> LocalCPtr<T1, C> {
-        LocalCPtr {
+    pub fn cast<T1: CapType>(self) -> Cap<T1, C> {
+        Cap {
             cptr: self.cptr,
             invocation_context: self.invocation_context,
             _phantom: PhantomData,
         }
     }
 
-    pub fn with<C1>(self, context: C1) -> LocalCPtr<T, C1> {
-        LocalCPtr {
+    pub fn with<C1>(self, context: C1) -> Cap<T, C1> {
+        Cap {
             cptr: self.cptr,
             invocation_context: context,
             _phantom: PhantomData,
         }
     }
 
-    pub fn without_context(self) -> LocalCPtr<T> {
+    pub fn without_context(self) -> Cap<T> {
         self.with(NoExplicitInvocationContext::new())
     }
 
@@ -125,7 +125,7 @@ impl<T: CapType, C> LocalCPtr<T, C> {
     }
 }
 
-impl<T: CapType> LocalCPtr<T> {
+impl<T: CapType> Cap<T> {
     pub const fn from_cptr(cptr: CPtr) -> Self {
         Self {
             cptr,
@@ -139,7 +139,7 @@ impl<T: CapType> LocalCPtr<T> {
     }
 }
 
-impl<T: CapType, C: InvocationContext> LocalCPtr<T, C> {
+impl<T: CapType, C: InvocationContext> Cap<T, C> {
     // TODO
     // Consider the tradeoffs of taking &mut self here, and switching all object invocations to take
     // &mut self too.
@@ -150,7 +150,7 @@ impl<T: CapType, C: InvocationContext> LocalCPtr<T, C> {
     }
 }
 
-impl<T: CapType, C> fmt::Debug for LocalCPtr<T, C> {
+impl<T: CapType, C> fmt::Debug for Cap<T, C> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_tuple(T::NAME).field(&self.cptr().bits()).finish()
     }
@@ -164,7 +164,7 @@ pub trait CapType: Copy {
 pub mod cap_type {
     //! Markers corresponding to capability types and classes of capability types.
     //!
-    //! These types are used for marking [`LocalCPtr`](crate::LocalCPtr).
+    //! These types are used for marking [`Cap`](crate::Cap).
 
     use sel4_config::sel4_cfg_if;
 
@@ -252,52 +252,52 @@ pub mod cap_type {
     }
 }
 
-use local_cptr::*;
+use cap::*;
 
-pub mod local_cptr {
-    //! Marked aliases of [`LocalCPtr`](crate::LocalCPtr).
+pub mod cap {
+    //! Marked aliases of [`Cap`](crate::Cap).
     //!
-    //! Each type `$t<C = NoExplicitInvocationContext>` in this module is an alias for `LocalCPtr<$t, C>`.
+    //! Each type `$t<C = NoExplicitInvocationContext>` in this module is an alias for `Cap<$t, C>`.
 
     use sel4_config::sel4_cfg_if;
 
-    use crate::declare_local_cptr_alias;
+    use crate::declare_cap_alias;
 
-    pub use crate::arch::local_cptr_arch::*;
+    pub use crate::arch::cap_arch::*;
 
-    declare_local_cptr_alias!(Untyped);
-    declare_local_cptr_alias!(Endpoint);
-    declare_local_cptr_alias!(Notification);
-    declare_local_cptr_alias!(Tcb);
-    declare_local_cptr_alias!(CNode);
-    declare_local_cptr_alias!(IrqControl);
-    declare_local_cptr_alias!(IrqHandler);
-    declare_local_cptr_alias!(AsidControl);
-    declare_local_cptr_alias!(AsidPool);
+    declare_cap_alias!(Untyped);
+    declare_cap_alias!(Endpoint);
+    declare_cap_alias!(Notification);
+    declare_cap_alias!(Tcb);
+    declare_cap_alias!(CNode);
+    declare_cap_alias!(IrqControl);
+    declare_cap_alias!(IrqHandler);
+    declare_cap_alias!(AsidControl);
+    declare_cap_alias!(AsidPool);
 
-    declare_local_cptr_alias!(Null);
-    declare_local_cptr_alias!(Unspecified);
+    declare_cap_alias!(Null);
+    declare_cap_alias!(Unspecified);
 
-    declare_local_cptr_alias!(VSpace);
-    declare_local_cptr_alias!(Granule);
+    declare_cap_alias!(VSpace);
+    declare_cap_alias!(Granule);
 
     sel4_cfg_if! {
         if #[cfg(KERNEL_MCS)] {
-            declare_local_cptr_alias!(Reply);
-            declare_local_cptr_alias!(SchedContext);
-            declare_local_cptr_alias!(SchedControl);
+            declare_cap_alias!(Reply);
+            declare_cap_alias!(SchedContext);
+            declare_cap_alias!(SchedControl);
         }
     }
 }
 
-impl<T: CapType, C> LocalCPtr<T, C> {
+impl<T: CapType, C> Cap<T, C> {
     pub fn upcast(self) -> Unspecified<C> {
         self.cast()
     }
 }
 
 impl<C> Unspecified<C> {
-    pub fn downcast<T: CapType>(self) -> LocalCPtr<T, C> {
+    pub fn downcast<T: CapType>(self) -> Cap<T, C> {
         self.cast()
     }
 }
@@ -353,7 +353,7 @@ impl HasCPtrWithDepth for CPtr {
     }
 }
 
-impl<T: CapType, C> HasCPtrWithDepth for LocalCPtr<T, C> {
+impl<T: CapType, C> HasCPtrWithDepth for Cap<T, C> {
     fn cptr_with_depth(self) -> CPtrWithDepth {
         self.cptr().into()
     }

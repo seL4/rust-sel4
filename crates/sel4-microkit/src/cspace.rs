@@ -14,9 +14,9 @@ use crate::Handler;
 
 pub(crate) type Slot = usize;
 
-pub(crate) const INPUT_CAP: sel4::Endpoint = slot_to_local_cptr(1);
-pub(crate) const REPLY_CAP: sel4::Reply = slot_to_local_cptr(4);
-pub(crate) const MONITOR_EP_CAP: sel4::Endpoint = slot_to_local_cptr(5);
+pub(crate) const INPUT_CAP: sel4::Endpoint = slot_to_cap(1);
+pub(crate) const REPLY_CAP: sel4::Reply = slot_to_cap(4);
+pub(crate) const MONITOR_EP_CAP: sel4::Endpoint = slot_to_cap(5);
 
 const BASE_OUTPUT_NOTIFICATION_CAP: Slot = 10;
 const BASE_ENDPOINT_CAP: Slot = BASE_OUTPUT_NOTIFICATION_CAP + 64;
@@ -24,8 +24,8 @@ const BASE_IRQ_CAP: Slot = BASE_ENDPOINT_CAP + 64;
 
 const MAX_CHANNELS: Slot = 63;
 
-const fn slot_to_local_cptr<T: sel4::CapType>(slot: Slot) -> sel4::LocalCPtr<T> {
-    sel4::LocalCPtr::from_bits(slot as sel4::CPtrBits)
+const fn slot_to_cap<T: sel4::CapType>(slot: Slot) -> sel4::Cap<T> {
+    sel4::Cap::from_bits(slot as sel4::CPtrBits)
 }
 
 /// A channel between this protection domain and another, identified by a channel index.
@@ -40,20 +40,20 @@ impl Channel {
         Self { index }
     }
 
-    fn local_cptr<T: sel4::CapType>(&self, offset: Slot) -> sel4::LocalCPtr<T> {
-        slot_to_local_cptr(offset + self.index)
+    fn cap<T: sel4::CapType>(&self, offset: Slot) -> sel4::Cap<T> {
+        slot_to_cap(offset + self.index)
     }
 
     fn notification(&self) -> sel4::Notification {
-        self.local_cptr::<sel4::cap_type::Notification>(BASE_OUTPUT_NOTIFICATION_CAP)
+        self.cap::<sel4::cap_type::Notification>(BASE_OUTPUT_NOTIFICATION_CAP)
     }
 
     fn irq_handler(&self) -> sel4::IrqHandler {
-        self.local_cptr::<sel4::cap_type::IrqHandler>(BASE_IRQ_CAP)
+        self.cap::<sel4::cap_type::IrqHandler>(BASE_IRQ_CAP)
     }
 
     fn endpoint(&self) -> sel4::Endpoint {
-        self.local_cptr::<sel4::cap_type::Endpoint>(BASE_ENDPOINT_CAP)
+        self.cap::<sel4::cap_type::Endpoint>(BASE_ENDPOINT_CAP)
     }
 
     pub fn notify(&self) {

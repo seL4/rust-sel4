@@ -10,7 +10,7 @@ use sel4_config::{sel4_cfg, sel4_cfg_if};
 
 use crate::{
     cap_type, const_helpers::u32_into_usize, sys, CapType, ConveysReplyAuthority, Endpoint,
-    InvocationContext, LocalCPtr, MessageInfo, Notification, Word, NUM_FAST_MESSAGE_REGISTERS,
+    InvocationContext, Cap, MessageInfo, Notification, Word, NUM_FAST_MESSAGE_REGISTERS,
 };
 
 #[sel4_cfg(not(KERNEL_MCS))]
@@ -189,13 +189,13 @@ impl<C: InvocationContext> Notification<C> {
     }
 }
 
-impl<T: IpcCapType, C: InvocationContext> LocalCPtr<T, C> {
+impl<T: IpcCapType, C: InvocationContext> Cap<T, C> {
     /// Corresponds to `seL4_NBSendRecv`.
     #[sel4_cfg(KERNEL_MCS)]
     pub fn nb_send_recv<U: IpcCapType>(
         self,
         info: MessageInfo,
-        src: LocalCPtr<U>,
+        src: Cap<U>,
         reply_authority: impl ConveysReplyAuthority,
     ) -> (MessageInfo, Badge) {
         let (raw_msg_info, badge) = self.invoke(|cptr, ipc_buffer| {

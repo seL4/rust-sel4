@@ -39,15 +39,15 @@ pub(crate) mod cap_type_arch {
     pub type Granule = _4K;
 }
 
-pub(crate) mod local_cptr_arch {
-    use crate::declare_local_cptr_alias;
+pub(crate) mod cap_arch {
+    use crate::declare_cap_alias;
 
-    declare_local_cptr_alias!(_4K);
-    declare_local_cptr_alias!(LargePage);
-    declare_local_cptr_alias!(HugePage);
+    declare_cap_alias!(_4K);
+    declare_cap_alias!(LargePage);
+    declare_cap_alias!(HugePage);
 
-    declare_local_cptr_alias!(PML4);
-    declare_local_cptr_alias!(PDPT);
-    declare_local_cptr_alias!(PageDirectory);
-    declare_local_cptr_alias!(PageTable);
+    declare_cap_alias!(PML4);
+    declare_cap_alias!(PDPT);
+    declare_cap_alias!(PageDirectory);
+    declare_cap_alias!(PageTable);
 }

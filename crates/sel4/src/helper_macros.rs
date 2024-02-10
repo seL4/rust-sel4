@@ -39,14 +39,14 @@ macro_rules! declare_cap_type {
     };
 }
 
-macro_rules! declare_local_cptr_alias {
+macro_rules! declare_cap_alias {
     (
         $(#[$outer:meta])*
         $t:ident
     ) => {
         $(#[$outer])*
         pub type $t<C = $crate::NoExplicitInvocationContext> =
-            $crate::LocalCPtr<$crate::cap_type::$t, C>;
+            $crate::Cap<$crate::cap_type::$t, C>;
     };
 }
 
@@ -63,5 +63,5 @@ macro_rules! declare_fault_newtype {
 
 pub(crate) use declare_cap_type;
 pub(crate) use declare_fault_newtype;
-pub(crate) use declare_local_cptr_alias;
+pub(crate) use declare_cap_alias;
 pub(crate) use newtype_methods;

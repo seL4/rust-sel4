@@ -42,7 +42,7 @@ pub(crate) fn init_copy_addrs(
     let small_frame_copy_addr = {
         let addr = addr_of_ref(&SMALL_PAGE_PLACEHOLDER);
         let slot = get_user_image_frame_slot(bootinfo, user_image_bounds, addr);
-        let cap = slot.local_cptr();
+        let cap = slot.cap();
         cap.frame_unmap()?;
         addr
     };

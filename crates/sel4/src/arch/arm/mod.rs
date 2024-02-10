@@ -77,20 +77,20 @@ pub(crate) mod cap_type_arch {
     pub type VSpace = PD;
 }
 
-pub(crate) mod local_cptr_arch {
-    use crate::{declare_local_cptr_alias, sel4_cfg};
+pub(crate) mod cap_arch {
+    use crate::{declare_cap_alias, sel4_cfg};
 
     #[sel4_cfg(ARM_HYPERVISOR_SUPPORT)]
-    declare_local_cptr_alias!(VCpu);
+    declare_cap_alias!(VCpu);
 
-    declare_local_cptr_alias!(SmallPage);
-    declare_local_cptr_alias!(LargePage);
+    declare_cap_alias!(SmallPage);
+    declare_cap_alias!(LargePage);
 
     #[sel4_cfg(ARCH_AARCH64)]
-    declare_local_cptr_alias!(HugePage);
+    declare_cap_alias!(HugePage);
 
     #[sel4_cfg(ARCH_AARCH32)]
-    declare_local_cptr_alias!(PD);
+    declare_cap_alias!(PD);
 
-    declare_local_cptr_alias!(PT);
+    declare_cap_alias!(PT);
 }
