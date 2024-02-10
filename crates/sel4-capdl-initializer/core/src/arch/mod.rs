@@ -43,6 +43,38 @@ mod imp {
     }
 }
 
+#[sel4_cfg(any(ARCH_RISCV32, ARCH_RISCV64))]
+mod imp {
+    pub(crate) type FrameType1 = sel4::cap_type::MegaPage;
+    pub(crate) type FrameType2 = sel4::cap_type::GigaPage;
+
+    pub(crate) type PageTableType = sel4::cap_type::PageTable;
+
+    pub(crate) const VSPACE_LEVELS: usize = sel4::sel4_cfg_usize!(PT_LEVELS);
+
+    pub(crate) fn map_page_table(
+        vspace: sel4::VSpace,
+        _level: usize,
+        vaddr: usize,
+        cap: sel4::Unspecified,
+        vm_attributes: sel4::VmAttributes,
+    ) -> sel4::Result<()> {
+        cap.downcast::<PageTableType>()
+            .page_table_map(vspace, vaddr, vm_attributes)
+    }
+
+    pub(crate) fn init_user_context(
+        regs: &mut sel4::UserContext,
+        extra: &sel4_capdl_initializer_types::object::TcbExtraInfo,
+    ) {
+        *regs.pc_mut() = extra.ip;
+        *regs.sp_mut() = extra.sp;
+        for (i, value) in extra.gprs.iter().enumerate() {
+            *regs.gpr_a_mut(i.try_into().unwrap()) = *value;
+        }
+    }
+}
+
 #[sel4_cfg(any(ARCH_IA32, ARCH_X86_64))]
 mod imp {
     pub(crate) type FrameType1 = sel4::cap_type::LargePage;
@@ -85,38 +117,6 @@ mod imp {
         *regs.sp_mut() = extra.sp;
         for (i, value) in extra.gprs.iter().enumerate() {
             *regs.gpr_mut(i.try_into().unwrap()) = *value;
-        }
-    }
-}
-
-#[sel4_cfg(any(ARCH_RISCV32, ARCH_RISCV64))]
-mod imp {
-    pub(crate) type FrameType1 = sel4::cap_type::MegaPage;
-    pub(crate) type FrameType2 = sel4::cap_type::GigaPage;
-
-    pub(crate) type PageTableType = sel4::cap_type::PageTable;
-
-    pub(crate) const VSPACE_LEVELS: usize = sel4::sel4_cfg_usize!(PT_LEVELS);
-
-    pub(crate) fn map_page_table(
-        vspace: sel4::VSpace,
-        _level: usize,
-        vaddr: usize,
-        cap: sel4::Unspecified,
-        vm_attributes: sel4::VmAttributes,
-    ) -> sel4::Result<()> {
-        cap.downcast::<PageTableType>()
-            .page_table_map(vspace, vaddr, vm_attributes)
-    }
-
-    pub(crate) fn init_user_context(
-        regs: &mut sel4::UserContext,
-        extra: &sel4_capdl_initializer_types::object::TcbExtraInfo,
-    ) {
-        *regs.pc_mut() = extra.ip;
-        *regs.sp_mut() = extra.sp;
-        for (i, value) in extra.gprs.iter().enumerate() {
-            *regs.gpr_a_mut(i.try_into().unwrap()) = *value;
         }
     }
 }

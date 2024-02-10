@@ -16,11 +16,11 @@ sel4_cfg_if! {
     if #[cfg(any(ARCH_AARCH32, ARCH_AARCH64))] {
         #[path = "arm/mod.rs"]
         mod imp;
-    } else if #[cfg(any(ARCH_IA32, ARCH_X86_64))] {
-        #[path = "x86/mod.rs"]
-        mod imp;
     } else if #[cfg(any(ARCH_RISCV32, ARCH_RISCV64))] {
         #[path = "riscv/mod.rs"]
+        mod imp;
+    } else if #[cfg(any(ARCH_IA32, ARCH_X86_64))] {
+        #[path = "x86/mod.rs"]
         mod imp;
     }
 }
