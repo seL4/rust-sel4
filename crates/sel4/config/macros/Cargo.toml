@@ -21,4 +21,4 @@ proc-macro = true
 
 [dependencies]
 sel4-config-data = { path = "../data" }
-sel4-config-generic-macro-impls = { path = "../generic/macro-impls" }
+sel4-config-generic = { path = "../generic" }

@@ -10,7 +10,7 @@
 #
 
 [package]
-name = "sel4-config-generic-macro-impls"
+name = "sel4-config-generic"
 version = "0.1.0"
 authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
 edition = "2021"
@@ -20,5 +20,5 @@ license = "BSD-2-Clause"
 fallible-iterator = "0.2.0"
 proc-macro2 = "1.0.50"
 quote = "1.0.23"
-sel4-config-generic-types = { path = "../types" }
+sel4-config-generic-types = { path = "types" }
 syn = { version = "1.0.107", features = ["full"] }
