@@ -10,12 +10,14 @@
 #
 
 [package]
-name = "sel4-config"
+name = "sel4-config-consts"
 version = "0.1.0"
 authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
 edition = "2021"
 license = "BSD-2-Clause"
 
-[dependencies]
-sel4-config-consts = { path = "consts" }
-sel4-config-macros = { path = "macros" }
+[build-dependencies]
+quote = "1.0.23"
+sel4-config-data = { path = "../data" }
+sel4-config-generic-types = { path = "../generic/types" }
+sel4-rustfmt-helper = { path = "../../../sel4-rustfmt-helper" }

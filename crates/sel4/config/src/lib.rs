@@ -7,3 +7,5 @@
 #![no_std]
 
 pub use sel4_config_macros::*;
+
+pub use sel4_config_consts as consts;
