@@ -11,7 +11,7 @@ use syn::spanned::Spanned;
 
 use sel4_config_generic_types::Value;
 
-use crate::Impls;
+use crate::ConfigurationOps;
 
 pub(crate) struct EvalError {
     pub(crate) span: Span,
@@ -35,7 +35,7 @@ fn err<T, U: ToString>(node: impl Spanned, message: U) -> Result<T, EvalError> {
     Err(EvalError::new(node.span(), message.to_string()))
 }
 
-impl<'a> Impls<'a> {
+impl<'a> ConfigurationOps<'a> {
     pub(crate) fn eval_nested_meta(&self, node: &syn::NestedMeta) -> Result<bool, EvalError> {
         Ok(match node {
             syn::NestedMeta::Meta(node) => self.eval_meta(node)?,

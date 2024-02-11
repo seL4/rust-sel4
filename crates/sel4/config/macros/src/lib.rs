@@ -9,10 +9,10 @@ use std::marker::PhantomData;
 use proc_macro::TokenStream;
 
 use sel4_config_data::get_kernel_config;
-use sel4_config_generic::Impls;
+use sel4_config_generic::ConfigurationOps;
 
-fn get_impls() -> Impls<'static> {
-    Impls::new(get_kernel_config(), "sel4_cfg")
+fn get_impls() -> ConfigurationOps<'static> {
+    ConfigurationOps::new(get_kernel_config(), "sel4_cfg")
 }
 
 #[proc_macro_attribute]
