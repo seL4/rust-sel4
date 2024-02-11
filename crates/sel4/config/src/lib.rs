@@ -8,4 +8,6 @@
 
 pub use sel4_config_macros::*;
 
-pub use sel4_config_consts as consts;
+pub mod consts {
+    include!(concat!(env!("OUT_DIR"), "/consts_gen.rs"));
+}

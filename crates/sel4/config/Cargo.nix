@@ -11,7 +11,13 @@ mk {
   dependencies = {
     inherit (localCrates)
       sel4-config-macros
-      sel4-config-consts
+    ;
+  };
+  build-dependencies = {
+    inherit (localCrates)
+      sel4-config-data
+      sel4-config-generic
+      sel4-rustfmt-helper
     ;
   };
 }
