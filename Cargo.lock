@@ -2146,17 +2146,9 @@ dependencies = [
 name = "sel4-config"
 version = "0.1.0"
 dependencies = [
- "sel4-config-consts",
- "sel4-config-macros",
-]
-
-[[package]]
-name = "sel4-config-consts"
-version = "0.1.0"
-dependencies = [
- "quote",
  "sel4-config-data",
- "sel4-config-generic-types",
+ "sel4-config-generic",
+ "sel4-config-macros",
  "sel4-rustfmt-helper",
 ]
 

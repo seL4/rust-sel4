@@ -17,5 +17,9 @@ edition = "2021"
 license = "BSD-2-Clause"
 
 [dependencies]
-sel4-config-consts = { path = "consts" }
 sel4-config-macros = { path = "macros" }
+
+[build-dependencies]
+sel4-config-data = { path = "data" }
+sel4-config-generic = { path = "generic" }
+sel4-rustfmt-helper = { path = "../../sel4-rustfmt-helper" }

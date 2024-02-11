@@ -4,15 +4,18 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
+use sel4_config_generic_types::Configuration;
+
 mod attr_macros;
 mod cfg_if;
 mod common_helpers;
 mod eval;
 mod expr_macros;
-
-use sel4_config_generic_types::Configuration;
+mod generate_consts;
 
 use common_helpers::parse_or_return;
+
+pub use generate_consts::generate_consts;
 
 pub struct ConfigurationOps<'a> {
     config: &'a Configuration,
