@@ -9,5 +9,7 @@
 pub use sel4_config_macros::*;
 
 pub mod consts {
+    #![doc = concat!("```rust\n", include_str!(concat!(env!("OUT_DIR"), "/consts_gen.rs")), "```\n")]
+
     include!(concat!(env!("OUT_DIR"), "/consts_gen.rs"));
 }
