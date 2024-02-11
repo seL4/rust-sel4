@@ -24,7 +24,7 @@ pub fn benchmark_set_log_buffer(frame: LargePage) -> Result<()> {
 }
 
 sel4_cfg_if! {
-    if #[cfg(BENCHMARK_TRACK_UTILISATION)] {
+    if #[sel4_cfg(BENCHMARK_TRACK_UTILISATION)] {
         pub fn benchmark_get_thread_utilisation(tcb: Tcb) {
             sys::seL4_BenchmarkGetThreadUtilisation(tcb.bits())
         }
@@ -34,7 +34,7 @@ sel4_cfg_if! {
         }
 
         sel4_cfg_if! {
-            if #[cfg(DEBUG_BUILD)] {
+            if #[sel4_cfg(DEBUG_BUILD)] {
                 pub fn benchmark_dump_all_thread_utilisation() {
                     sys::seL4_BenchmarkDumpAllThreadsUtilisation()
                 }

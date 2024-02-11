@@ -19,7 +19,7 @@ declare_fault_newtype!(VmFault, sys::seL4_Fault_VMFault);
 declare_fault_newtype!(Timeout, sys::seL4_Fault_Timeout);
 
 sel4_cfg_if! {
-    if #[cfg(ARM_HYPERVISOR_SUPPORT)] {
+    if #[sel4_cfg(ARM_HYPERVISOR_SUPPORT)] {
         declare_fault_newtype!(VGicMaintenance, sys::seL4_Fault_VGICMaintenance);
         declare_fault_newtype!(VCpuFault, sys::seL4_Fault_VCPUFault);
         declare_fault_newtype!(VPpiEvent, sys::seL4_Fault_VPPIEvent);

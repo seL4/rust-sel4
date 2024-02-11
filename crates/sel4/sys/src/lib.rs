@@ -25,7 +25,7 @@ pub use invocations::*;
 pub use syscalls::*;
 
 pub type ReplyAuthority = sel4_config::sel4_cfg_if! {
-    if #[cfg(KERNEL_MCS)] {
+    if #[sel4_cfg(KERNEL_MCS)] {
         seL4_CPtr
     } else {
         ()
@@ -33,7 +33,7 @@ pub type ReplyAuthority = sel4_config::sel4_cfg_if! {
 };
 
 pub type WaitMessageInfo = sel4_config::sel4_cfg_if! {
-    if #[cfg(KERNEL_MCS)] {
+    if #[sel4_cfg(KERNEL_MCS)] {
         seL4_MessageInfo
     } else {
         ()

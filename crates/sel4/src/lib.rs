@@ -131,7 +131,7 @@ pub use syscalls::{
 pub use vspace::{FrameType, SizedFrameType, GRANULE_SIZE};
 
 sel4_cfg_if! {
-    if #[cfg(KERNEL_MCS)] {
+    if #[sel4_cfg(KERNEL_MCS)] {
         pub use invocations::Time;
     } else {
         pub use syscalls::reply;
@@ -155,7 +155,7 @@ pub(crate) use helper_macros::{
 };
 
 sel4_cfg_if! {
-    if #[cfg(DEBUG_BUILD)] {
+    if #[sel4_cfg(DEBUG_BUILD)] {
         mod debug;
         mod fmt;
 
@@ -165,7 +165,7 @@ sel4_cfg_if! {
 }
 
 sel4_cfg_if! {
-    if #[cfg(ENABLE_BENCHMARKS)] {
+    if #[sel4_cfg(ENABLE_BENCHMARKS)] {
         mod benchmark;
 
         pub use benchmark::{
@@ -175,7 +175,7 @@ sel4_cfg_if! {
         };
 
         sel4_cfg_if! {
-            if #[cfg(BENCHMARK_TRACK_UTILISATION)] {
+            if #[sel4_cfg(BENCHMARK_TRACK_UTILISATION)] {
                 pub use benchmark::{
                     benchmark_get_thread_utilisation,
                     benchmark_reset_thread_utilisation,

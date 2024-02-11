@@ -77,7 +77,7 @@ impl Arch for ArchImpl {
         switch_page_tables();
 
         sel4_cfg_if! {
-            if #[cfg(MAX_NUM_NODES = "1")] {
+            if #[sel4_cfg(MAX_NUM_NODES = "1")] {
                 (kernel_entry)(
                     ui_p_reg_start,
                     ui_p_reg_end,
@@ -103,7 +103,7 @@ impl Arch for ArchImpl {
 }
 
 sel4_cfg_if! {
-    if #[cfg(MAX_NUM_NODES = "1")] {
+    if #[sel4_cfg(MAX_NUM_NODES = "1")] {
         type KernelEntry = extern "C" fn(
             ui_p_reg_start: usize,
             ui_p_reg_end: usize,

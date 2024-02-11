@@ -135,13 +135,13 @@ pub(crate) mod frame_types {
 }
 
 sel4::sel4_cfg_if! {
-    if #[cfg(ARCH_AARCH64)] {
+    if #[sel4_cfg(ARCH_AARCH64)] {
         const CACHED: VmAttributes = VmAttributes::PAGE_CACHEABLE;
         const UNCACHED: VmAttributes = VmAttributes::DEFAULT;
-    } else if #[cfg(ARCH_RISCV64)] {
+    } else if #[sel4_cfg(ARCH_RISCV64)] {
         const CACHED: VmAttributes = VmAttributes::DEFAULT;
         const UNCACHED: VmAttributes = VmAttributes::NONE;
-    } else if #[cfg(ARCH_X86_64)] {
+    } else if #[sel4_cfg(ARCH_X86_64)] {
         const CACHED: VmAttributes = VmAttributes::DEFAULT;
         const UNCACHED: VmAttributes = VmAttributes::CACHE_DISABLED;
     }

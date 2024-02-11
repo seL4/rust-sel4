@@ -7,10 +7,10 @@
 use sel4_config::sel4_cfg_if;
 
 sel4_cfg_if! {
-    if #[cfg(ARCH_AARCH64)] {
+    if #[sel4_cfg(ARCH_AARCH64)] {
         #[path = "aarch64/mod.rs"]
         mod imp;
-    } else if #[cfg(ARCH_AARCH32)] {
+    } else if #[sel4_cfg(ARCH_AARCH32)] {
         #[path = "aarch32/mod.rs"]
         mod imp;
     }

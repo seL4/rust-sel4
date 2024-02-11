@@ -9,7 +9,7 @@ mod object;
 mod user_context;
 
 sel4_config::sel4_cfg_if! {
-    if #[cfg(ARM_HYPERVISOR_SUPPORT)] {
+    if #[sel4_cfg(ARM_HYPERVISOR_SUPPORT)] {
         mod vcpu_reg;
     }
 }

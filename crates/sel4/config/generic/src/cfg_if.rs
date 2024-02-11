@@ -6,13 +6,25 @@
 
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
-use syn::{parse2, spanned::Spanned, Token};
+use syn::{
+    parse::{ParseStream, Parser},
+    spanned::Spanned,
+    Token,
+};
 
-use crate::{parse_or_return, MacroImpls};
+use crate::MacroImpls;
 
 impl<'a> MacroImpls<'a> {
     pub fn cfg_if_impl(&self, toks: TokenStream) -> TokenStream {
-        let input = parse_or_return!(toks as CfgIfInput);
+        let parser = move |parse_stream: ParseStream| {
+            parse_cfg_if_input(self.synthetic_attr(), parse_stream)
+        };
+        let input = match parser.parse2(toks) {
+            Ok(parsed) => parsed,
+            Err(err) => {
+                return err.to_compile_error();
+            }
+        };
         for branch_with_condition in input.branches_with_conditions.iter() {
             match self.eval_nested_meta(&branch_with_condition.condition) {
                 Ok(pass) => {
@@ -37,27 +49,28 @@ struct CfgIfInput {
     trailing_branch_without_condition: Option<TokenStream>,
 }
 
-impl syn::parse::Parse for CfgIfInput {
-    fn parse(input: syn::parse::ParseStream) -> syn::Result<Self> {
-        let mut branches_with_conditions = vec![input.parse()?];
-        while input.peek(Token![else]) {
-            input.parse::<Token![else]>()?;
-            if input.peek(Token![if]) {
-                branches_with_conditions.push(input.parse()?);
-            } else {
-                break;
-            }
-        }
-        let trailing_branch_without_condition = if input.is_empty() {
-            None
+fn parse_cfg_if_input(
+    synthetic_attr: &str,
+    input: syn::parse::ParseStream,
+) -> syn::Result<CfgIfInput> {
+    let mut branches_with_conditions = vec![parse_branch_with_condition(synthetic_attr, input)?];
+    while input.peek(Token![else]) {
+        input.parse::<Token![else]>()?;
+        if input.peek(Token![if]) {
+            branches_with_conditions.push(parse_branch_with_condition(synthetic_attr, input)?);
         } else {
-            Some(input.call(parse_branch)?)
-        };
-        Ok(Self {
-            branches_with_conditions,
-            trailing_branch_without_condition,
-        })
+            break;
+        }
     }
+    let trailing_branch_without_condition = if input.is_empty() {
+        None
+    } else {
+        Some(input.call(parse_branch)?)
+    };
+    Ok(CfgIfInput {
+        branches_with_conditions,
+        trailing_branch_without_condition,
+    })
 }
 
 struct BranchWithCondition {
@@ -65,19 +78,18 @@ struct BranchWithCondition {
     branch: TokenStream,
 }
 
-impl syn::parse::Parse for BranchWithCondition {
-    fn parse(input: syn::parse::ParseStream) -> syn::Result<Self> {
-        let condition = input.call(parse_condition)?;
-        let branch = input.call(parse_branch)?;
-        Ok(Self { condition, branch })
-    }
+fn parse_branch_with_condition(
+    synthetic_attr: &str,
+    input: syn::parse::ParseStream,
+) -> syn::Result<BranchWithCondition> {
+    let condition = parse_condition(synthetic_attr, input)?;
+    let branch = parse_branch(input)?;
+    Ok(BranchWithCondition { condition, branch })
 }
 
 type Condition = syn::NestedMeta;
 
-const CFG: &str = "cfg";
-
-fn parse_condition(input: syn::parse::ParseStream) -> syn::Result<Condition> {
+fn parse_condition(synthetic_attr: &str, input: syn::parse::ParseStream) -> syn::Result<Condition> {
     input.parse::<Token![if]>()?;
     let attrs = syn::Attribute::parse_outer(input)?;
     let attr = match attrs.len() {
@@ -90,8 +102,11 @@ fn parse_condition(input: syn::parse::ParseStream) -> syn::Result<Condition> {
             ))
         }
     };
-    if !attr.path.is_ident(&format_ident!("{}", CFG)) {
-        return Err(syn::Error::new(attr.span(), format!("expected '{CFG}'")));
+    if !attr.path.is_ident(&format_ident!("{}", synthetic_attr)) {
+        return Err(syn::Error::new(
+            attr.span(),
+            format!("expected '{synthetic_attr}'"),
+        ));
     }
     attr.parse_args()
 }

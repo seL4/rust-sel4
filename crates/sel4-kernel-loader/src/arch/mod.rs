@@ -8,10 +8,10 @@ use sel4_config::sel4_cfg_if;
 use sel4_kernel_loader_payload_types::PayloadInfo;
 
 sel4_cfg_if! {
-    if #[cfg(any(ARCH_AARCH64, ARCH_AARCH32))] {
+    if #[sel4_cfg(any(ARCH_AARCH64, ARCH_AARCH32))] {
         #[path = "arm/mod.rs"]
         mod imp;
-    } else if #[cfg(any(ARCH_RISCV64, ARCH_RISCV32))] {
+    } else if #[sel4_cfg(any(ARCH_RISCV64, ARCH_RISCV32))] {
         #[path = "riscv/mod.rs"]
         mod imp;
     }

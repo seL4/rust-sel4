@@ -109,7 +109,7 @@ impl<C: InvocationContext> Tcb<C> {
     }
 
     sel4_cfg_if! {
-        if #[cfg(KERNEL_MCS)] {
+        if #[sel4_cfg(KERNEL_MCS)] {
             /// Corresponds to `seL4_TCB_Configure`.
             pub fn tcb_configure(
                 self,
@@ -159,7 +159,7 @@ impl<C: InvocationContext> Tcb<C> {
     }
 
     sel4_cfg_if! {
-        if #[cfg(KERNEL_MCS)] {
+        if #[sel4_cfg(KERNEL_MCS)] {
             /// Corresponds to `seL4_TCB_SetSchedParams`.
             pub fn tcb_set_sched_params(
                 self,
