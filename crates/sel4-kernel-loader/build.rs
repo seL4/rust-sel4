@@ -30,27 +30,27 @@ use sel4_rustfmt_helper::Rustfmt;
 pub const SEL4_KERNEL_ENV: &str = "SEL4_KERNEL";
 
 sel4_cfg_if! {
-    if #[cfg(WORD_SIZE = "64")] {
+    if #[sel4_cfg(WORD_SIZE = "64")] {
         type FileHeader = object::elf::FileHeader64<Endianness>;
-    } else if #[cfg(WORD_SIZE = "32")] {
+    } else if #[sel4_cfg(WORD_SIZE = "32")] {
         type FileHeader = object::elf::FileHeader32<Endianness>;
     }
 }
 
 sel4_cfg_if! {
-    if #[cfg(SEL4_ARCH = "aarch64")] {
+    if #[sel4_cfg(SEL4_ARCH = "aarch64")] {
         type SchemeImpl = schemes::AArch64;
-    } else if #[cfg(SEL4_ARCH = "aarch32")] {
+    } else if #[sel4_cfg(SEL4_ARCH = "aarch32")] {
         type SchemeImpl = schemes::AArch32;
-    } else if #[cfg(SEL4_ARCH = "riscv64")] {
+    } else if #[sel4_cfg(SEL4_ARCH = "riscv64")] {
         sel4_cfg_if! {
-            if #[cfg(PT_LEVELS = "3")] {
+            if #[sel4_cfg(PT_LEVELS = "3")] {
                 type SchemeImpl = schemes::RiscV64Sv39;
             }
         }
-    } else if #[cfg(SEL4_ARCH = "riscv32")] {
+    } else if #[sel4_cfg(SEL4_ARCH = "riscv32")] {
         sel4_cfg_if! {
-            if #[cfg(PT_LEVELS = "2")] {
+            if #[sel4_cfg(PT_LEVELS = "2")] {
                 type SchemeImpl = schemes::RiscV32Sv32;
             }
         }

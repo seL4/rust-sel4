@@ -23,7 +23,7 @@ const UNUSED_REPLY_ARG: seL4_Word = 0;
 
 fn reply_authority_to_sys_arg(#[allow(unused_variables)] authority: ReplyAuthority) -> seL4_Word {
     sel4_cfg_if! {
-        if #[cfg(KERNEL_MCS)] {
+        if #[sel4_cfg(KERNEL_MCS)] {
             authority
         } else {
             UNUSED_REPLY_ARG
@@ -347,7 +347,7 @@ impl seL4_IPCBuffer {
     }
 
     sel4_cfg_if! {
-        if #[cfg(KERNEL_MCS)] {
+        if #[sel4_cfg(KERNEL_MCS)] {
             pub fn seL4_NBSendRecv(
                 &mut self,
                 dest: seL4_CPtr,
@@ -474,7 +474,7 @@ impl seL4_IPCBuffer {
 
     pub fn seL4_Poll(&mut self, src: seL4_CPtr) -> (seL4_MessageInfo, seL4_Word) {
         sel4_cfg_if! {
-            if #[cfg(KERNEL_MCS)] {
+            if #[sel4_cfg(KERNEL_MCS)] {
                 self.seL4_NBWait(src)
             } else {
                 self.seL4_NBRecv(src, ())
@@ -630,7 +630,7 @@ pub fn seL4_Yield() {
 }
 
 sel4_cfg_if! {
-    if #[cfg(DEBUG_BUILD)] {
+    if #[sel4_cfg(DEBUG_BUILD)] {
         pub fn seL4_DebugPutChar(c: u8) {
             sys_send_recv_simple(syscall_id::DebugPutChar, c as seL4_Word);
         }
@@ -674,7 +674,7 @@ sel4_cfg_if! {
 }
 
 sel4_cfg_if! {
-    if #[cfg(ENABLE_BENCHMARKS)] {
+    if #[sel4_cfg(ENABLE_BENCHMARKS)] {
         pub fn seL4_BenchmarkResetLog() -> seL4_Error::Type {
             sys_send_recv_simple(
                 syscall_id::BenchmarkResetLog,
@@ -697,7 +697,7 @@ sel4_cfg_if! {
         }
 
         sel4_cfg_if! {
-            if #[cfg(BENCHMARK_TRACK_UTILISATION)] {
+            if #[sel4_cfg(BENCHMARK_TRACK_UTILISATION)] {
                 pub fn seL4_BenchmarkGetThreadUtilisation(tcb: seL4_CPtr) {
                     sys_send_recv_simple(
                         syscall_id::BenchmarkGetThreadUtilisation,
@@ -713,7 +713,7 @@ sel4_cfg_if! {
                 }
 
                 sel4_cfg_if! {
-                    if #[cfg(DEBUG_BUILD)] {
+                    if #[sel4_cfg(DEBUG_BUILD)] {
                         pub fn seL4_BenchmarkDumpAllThreadsUtilisation() {
                             sys_send_recv_simple(
                                 syscall_id::BenchmarkDumpAllThreadsUtilisation,

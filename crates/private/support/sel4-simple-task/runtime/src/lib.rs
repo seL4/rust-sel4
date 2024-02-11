@@ -87,7 +87,7 @@ pub unsafe extern "C" fn cont_fn(cont_arg: *mut sel4_runtime_common::ContArg) ->
         let endpoint = Endpoint::from_bits(thread_config.endpoint().unwrap());
         let reply_authority = {
             sel4::sel4_cfg_if! {
-                if #[cfg(KERNEL_MCS)] {
+                if #[sel4_cfg(KERNEL_MCS)] {
                     sel4::Reply::from_bits(thread_config.reply_authority().unwrap())
                 } else {
                     assert!(thread_config.reply_authority().is_none());

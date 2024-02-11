@@ -12,7 +12,7 @@ use crate::sys;
 use crate::Reply;
 
 sel4_cfg_if! {
-    if #[cfg(KERNEL_MCS)] {
+    if #[sel4_cfg(KERNEL_MCS)] {
         pub type ReplyAuthority = Reply;
 
         impl ReplyAuthority {

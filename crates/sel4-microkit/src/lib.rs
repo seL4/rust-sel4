@@ -111,7 +111,7 @@ pub mod _private {
 }
 
 sel4::config::sel4_cfg_if! {
-    if #[cfg(PRINTING)] {
+    if #[sel4_cfg(PRINTING)] {
         pub use sel4_panicking_env::{debug_print, debug_println};
     } else {
         /// No-op for this configuration.

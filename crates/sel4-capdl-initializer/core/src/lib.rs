@@ -108,7 +108,7 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
         self.init_vspaces()?;
 
         sel4::sel4_cfg_if! {
-            if #[cfg(KERNEL_MCS)] {
+            if #[sel4_cfg(KERNEL_MCS)] {
                 self.init_sched_contexts()?;
             }
         }
@@ -343,7 +343,7 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
                         #[sel4_cfg(any(ARCH_AARCH32, ARCH_AARCH64))]
                         Object::ArmIrq(obj) => {
                             sel4::sel4_cfg_if! {
-                                if #[cfg(MAX_NUM_NODES = "1")] {
+                                if #[sel4_cfg(MAX_NUM_NODES = "1")] {
                                     init_thread::slot::IRQ_CONTROL.cap().irq_control_get_trigger(
                                         *irq,
                                         obj.extra.trigger,
@@ -581,7 +581,7 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
             }
 
             sel4::sel4_cfg_if! {
-                if #[cfg(all(ARCH_AARCH64, ARM_HYPERVISOR_SUPPORT))] {
+                if #[sel4_cfg(all(ARCH_AARCH64, ARM_HYPERVISOR_SUPPORT))] {
                     if let Some(vcpu) = obj.vcpu() {
                         let vcpu = self.orig_cap::<cap_type::VCpu>(vcpu.object);
                         vcpu.vcpu_set_tcb(tcb)?;
@@ -607,7 +607,7 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
                 let affinity: usize = obj.extra.affinity.try_into()?;
 
                 sel4::sel4_cfg_if! {
-                    if #[cfg(KERNEL_MCS)] {
+                    if #[sel4_cfg(KERNEL_MCS)] {
                         if let Some(sched_context_cap) = obj.sc() {
                             self.init_sched_context(sched_context_cap.object, affinity)?;
                         }
@@ -679,7 +679,7 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
                         )?;
 
                         sel4::sel4_cfg_if! {
-                            if #[cfg(not(MAX_NUM_NODES = "1"))] {
+                            if #[sel4_cfg(not(MAX_NUM_NODES = "1"))] {
                                 tcb.tcb_set_affinity(affinity.try_into().unwrap())?;
                             }
                         }

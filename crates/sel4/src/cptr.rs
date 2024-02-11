@@ -233,7 +233,7 @@ pub mod cap_type {
     }
 
     sel4_cfg_if! {
-        if #[cfg(KERNEL_MCS)] {
+        if #[sel4_cfg(KERNEL_MCS)] {
             declare_cap_type! {
                 /// Corresponds to the reply capability type (MCS only).
                 Reply
@@ -282,7 +282,7 @@ pub mod cap {
     declare_cap_alias!(Granule);
 
     sel4_cfg_if! {
-        if #[cfg(KERNEL_MCS)] {
+        if #[sel4_cfg(KERNEL_MCS)] {
             declare_cap_alias!(Reply);
             declare_cap_alias!(SchedContext);
             declare_cap_alias!(SchedControl);

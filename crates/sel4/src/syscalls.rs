@@ -32,7 +32,7 @@ impl IpcCapType for cap_type::Endpoint {}
 impl IpcCapType for cap_type::Unspecified {}
 
 sel4_cfg_if! {
-    if #[cfg(KERNEL_MCS)] {
+    if #[sel4_cfg(KERNEL_MCS)] {
         pub type WaitMessageInfo = MessageInfo;
 
         fn wait_message_info_from_sys(info: sys::WaitMessageInfo) -> WaitMessageInfo {

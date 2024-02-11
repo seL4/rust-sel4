@@ -34,7 +34,7 @@ pub unsafe fn initialize_tls_on_stack_and_continue(cont_fn: ContFn, cont_arg: *m
 }
 
 sel4::sel4_cfg_if! {
-    if #[cfg(all(ARCH_X86_64, SET_TLS_BASE_SELF))] {
+    if #[sel4_cfg(all(ARCH_X86_64, SET_TLS_BASE_SELF))] {
         const CHOSEN_SET_THREAD_POINTER_FN: SetThreadPointerFn = set_thread_pointer_via_syscall;
 
         unsafe extern "C" fn set_thread_pointer_via_syscall(val: usize) {

@@ -134,13 +134,13 @@ impl HasVmAttributes for cap::PageTable {
 }
 
 sel4::sel4_cfg_if! {
-    if #[cfg(ARCH_AARCH64)] {
+    if #[sel4_cfg(ARCH_AARCH64)] {
         const CACHED: VmAttributes = VmAttributes::PAGE_CACHEABLE;
         const UNCACHED: VmAttributes = VmAttributes::DEFAULT;
-    } else if #[cfg(any(ARCH_RISCV64, ARCH_RISCV32))] {
+    } else if #[sel4_cfg(any(ARCH_RISCV64, ARCH_RISCV32))] {
         const CACHED: VmAttributes = VmAttributes::DEFAULT;
         const UNCACHED: VmAttributes = VmAttributes::NONE;
-    } else if #[cfg(ARCH_X86_64)] {
+    } else if #[sel4_cfg(ARCH_X86_64)] {
         const CACHED: VmAttributes = VmAttributes::DEFAULT;
         const UNCACHED: VmAttributes = VmAttributes::CACHE_DISABLED;
     }
