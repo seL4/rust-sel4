@@ -11,6 +11,7 @@ mk {
   dependencies = {
     inherit (localCrates)
       sel4-config-macros
+      sel4-config-consts
     ;
   };
 }
