@@ -1,3 +1,9 @@
+//
+// Copyright 2024, Colias Group, LLC
+//
+// SPDX-License-Identifier: BSD-2-Clause
+//
+
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
 
