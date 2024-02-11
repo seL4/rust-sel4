@@ -14,12 +14,12 @@ use sel4_config_generic_types::Configuration;
 
 use common_helpers::parse_or_return;
 
-pub struct Impls<'a> {
+pub struct ConfigurationOps<'a> {
     config: &'a Configuration,
     synthetic_attr: &'a str,
 }
 
-impl<'a> Impls<'a> {
+impl<'a> ConfigurationOps<'a> {
     pub fn new(config: &'a Configuration, synthetic_attr: &'a str) -> Self {
         Self {
             config,

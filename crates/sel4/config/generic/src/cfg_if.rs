@@ -8,9 +8,9 @@ use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
 use syn::{parse2, spanned::Spanned, Token};
 
-use crate::{parse_or_return, Impls};
+use crate::{parse_or_return, ConfigurationOps};
 
-impl<'a> Impls<'a> {
+impl<'a> ConfigurationOps<'a> {
     pub fn cfg_if_impl(&self, toks: TokenStream) -> TokenStream {
         let input = parse_or_return!(toks as CfgIfInput);
         for branch_with_condition in input.branches_with_conditions.iter() {
