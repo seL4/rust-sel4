@@ -8,7 +8,7 @@ use proc_macro2::TokenStream;
 use quote::{format_ident, quote, quote_spanned, ToTokens};
 use syn::{parse2, spanned::Spanned, Token};
 
-use crate::{parse_or_return, ConfigurationOps};
+use crate::{parse_or_return, MacroImpls};
 
 macro_rules! ensure_empty {
     ($tokenstream:ident) => {
@@ -20,7 +20,7 @@ macro_rules! ensure_empty {
     };
 }
 
-impl<'a> ConfigurationOps<'a> {
+impl<'a> MacroImpls<'a> {
     pub fn cfg_impl(&self, input: TokenStream, item: TokenStream) -> TokenStream {
         let attr = parse_or_return!(input as syn::NestedMeta);
         let r = self.eval_nested_meta(&attr);
@@ -117,12 +117,12 @@ impl syn::parse::Parse for CfgAttrInput {
 }
 
 struct Helper<'a> {
-    impls: &'a ConfigurationOps<'a>,
+    impls: &'a MacroImpls<'a>,
     first_err: Option<TokenStream>,
 }
 
 impl<'a> Helper<'a> {
-    fn new(impls: &'a ConfigurationOps<'a>) -> Self {
+    fn new(impls: &'a MacroImpls<'a>) -> Self {
         Self {
             impls,
             first_err: None,
