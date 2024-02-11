@@ -2171,7 +2171,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "sel4-config-generic-macro-impls"
+name = "sel4-config-generic"
 version = "0.1.0"
 dependencies = [
  "fallible-iterator 0.2.0",
@@ -2193,7 +2193,7 @@ name = "sel4-config-macros"
 version = "0.1.0"
 dependencies = [
  "sel4-config-data",
- "sel4-config-generic-macro-impls",
+ "sel4-config-generic",
 ]
 
 [[package]]

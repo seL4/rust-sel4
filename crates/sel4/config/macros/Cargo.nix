@@ -11,7 +11,7 @@ mk {
   lib.proc-macro = true;
   dependencies = {
     inherit (localCrates)
-      sel4-config-generic-macro-impls
+      sel4-config-generic
       sel4-config-data
     ;
   };

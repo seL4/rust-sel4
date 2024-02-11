@@ -7,7 +7,7 @@
 { mk, localCrates, versions }:
 
 mk {
-  package.name = "sel4-config-generic-macro-impls";
+  package.name = "sel4-config-generic";
   dependencies = {
     inherit (versions)
       fallible-iterator
