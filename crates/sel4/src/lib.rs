@@ -9,28 +9,69 @@
 //!
 //! Most items in this crate correspond to types, constants, and functions in
 //! [libsel4](https://docs.sel4.systems/projects/sel4/api-doc.html). Notably, when applicable,
-//! `seL4_CPtr` is agumented in [`Cap`] with a marker specifying the type of capability it
-//! points to.
+//! `seL4_CPtr` is agumented in [`Cap`] with a marker specifying the type of capability it points
+//! to.
 //!
 //! This crate's implementation is based on the lower-level [`sel4-sys`](::sel4_sys) crate, which is
 //! generated from the libsel4 headers and interface definition files.
 //!
 //! ### Features
 //!
-//! The `"state"` feature enables a thread-local `Option<RefCell<IpcBuffer>>` which, once set, in
-//! turn enables threads to make seL4 API calls without having to explicitly specify an IPC buffer.
-//! Specifically, it causes [`NoExplicitInvocationContext`] to be an alias for
-//! [`ImplicitInvocationContext`], which implements [`InvocationContext`] by accessing the
-//! thread-local pointer to an IPC buffer. When `"state"` is not set,
+//! #### `"state"`
+//!
+//! Functions in the C libsel4 use the thread-local variable `__sel4_ipc_buffer` to obtain a pointer
+//! to the current thread's IPC buffer:
+//!
+//! ```C
+//! extern __thread seL4_IPCBuffer *__sel4_ipc_buffer;
+//! ```
+//!
+//! [libmicrokit](https://github.com/seL4/microkit/tree/main/libmicrokit), which does not support
+//! thread-local storage uses the following snippet to force `__sel4_ipc_buffer` to global rather
+//! than thread-local:
+//!
+//! ```C
+//! #define __thread
+//! #include <sel4/sel4.h>
+//! ```
+//!
+//! For the sake of flexibility and applicability, this crate can be configured to use no state at
+//! all. Users can opt out of state and explicitly pass around references to the active IPC buffer
+//! instead of relying on the implementation to obtain such a reference using thread-local or global
+//! state. Such a paradigm is useful in certain uncommon circumstances, but most users will benefit
+//! from the convenience of an implicit IPC buffer. The `"state"` feature, enabled by default, uses
+//! state to allow one to make seL4 API calls without having to explicitly specify an IPC buffer.
+//!
+//! For the sake of interoperability with C, the state looks something like: `static mut
+//! __sel4_ipc_buffer: *mut IpcBuffer`. If the `"state-exposed"` feature is enabled, it is exposed
+//! with `#![no_mangle]`. If the `"state-extern"` feature is enabled, it is wrapped in an `extern
+//! "C"` block. Whether it is thread-local is determined by the following pseudocode:
+//!
+//! ```rust
+//! cfg_if! {
+//!     if #[cfg(all(any(target_thread_local, feature = "tls"), not(feature = "non-thread-local-state")))] {
+//!         // thread-local
+//!     } else if #[cfg(not(feature = "thread-local-state"))] {
+//!         // not thread-local
+//!     } else {
+//!         compile_error!(r#"invalid configuration"#);
+//!     }
+//! }
+//! ```
+//!
+//! The non-thread-local configuration should only be used in cases where the language runtime does
+//! not support thread-local storage. In those cases without thread-local storage where this crate
+//! will only ever run in a single thread, use the `"single-threaded"` feature to enable a more
+//! efficient implementation. Note that enabling the `"single-threaded"` feature in a case where
+//! this crate runs in more than one thread is unsafe.
+//!
+//! At the API level, the `"state"` feature causes [`NoExplicitInvocationContext`] to be an alias
+//! for [`ImplicitInvocationContext`], which implements [`InvocationContext`] by accessing the
+//! thread-local pointer to an IPC buffer. When the `"state"` feature is not enabled,
 //! [`NoExplicitInvocationContext`] is an alias for [`NoInvocationContext`], which does not
 //! implement [`InvocationContext`]. The thread-local IPC buffer pointer is modified and accessed by
-//! the [`with_ipc_buffer`] family of functions.
-//!
-//! By default, `"state"` is implemented using `#[thread_local]`, and thus depends on ELF TLS. When
-//! the feature `"single-threaded"` is enabled, this crate assumes that it will only be running in a
-//! single thread, and instead implements `"state"` using a global `static`. This feature is useful
-//! for runtimes where ELF TLS is not supported, but is only safe to use when this crate will only
-//! be running in a single thread.
+//! [`set_ipc_buffer`], [`with_ipc_buffer`], and [`with_ipc_buffer_mut`]. The lower-level
+//! [`try_with_ipc_buffer_slot`] and [`try_with_ipc_buffer_slot_mut`] are provided as well.
 //!
 //! ### Building
 //!
