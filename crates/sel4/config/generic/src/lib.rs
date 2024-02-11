@@ -17,12 +17,12 @@ use common_helpers::parse_or_return;
 
 pub use generate_consts::generate_consts;
 
-pub struct ConfigurationOps<'a> {
+pub struct MacroImpls<'a> {
     config: &'a Configuration,
     synthetic_attr: &'a str,
 }
 
-impl<'a> ConfigurationOps<'a> {
+impl<'a> MacroImpls<'a> {
     pub fn new(config: &'a Configuration, synthetic_attr: &'a str) -> Self {
         Self {
             config,

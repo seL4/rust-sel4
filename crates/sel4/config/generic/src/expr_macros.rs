@@ -15,9 +15,9 @@ use syn::{parse2, spanned::Spanned};
 
 use sel4_config_generic_types::{Key, Value};
 
-use crate::{parse_or_return, ConfigurationOps};
+use crate::{parse_or_return, MacroImpls};
 
-impl<'a> ConfigurationOps<'a> {
+impl<'a> MacroImpls<'a> {
     pub fn cfg_generic_impl<T>(
         &self,
         key_toks: TokenStream,
