@@ -82,7 +82,7 @@ in rec {
   };
 
   copyrightLines = {
-    coliasgroup = "Copyright 2023, Colias Group, LLC";
+    coliasgroup = "Copyright 2024, Colias Group, LLC";
   };
 
   versions = {
