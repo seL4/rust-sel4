@@ -59,6 +59,16 @@ pub struct Socket<T> {
     _phantom: PhantomData<T>,
 }
 
+impl<T> Drop for Socket<T> {
+    fn drop(&mut self) {
+        self.shared
+            .inner
+            .borrow_mut()
+            .socket_set
+            .remove(self.handle);
+    }
+}
+
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum TcpSocketError {
     InvalidState(tcp::State), // TODO just use InvalidState variants of below errors?
@@ -331,16 +341,6 @@ impl Write for Socket<tcp::Socket<'static>> {
                 Poll::Ready(Ok(()))
             }
         })
-    }
-}
-
-impl<T> Drop for Socket<T> {
-    fn drop(&mut self) {
-        self.shared
-            .inner
-            .borrow_mut()
-            .socket_set
-            .remove(self.handle);
     }
 }
 
