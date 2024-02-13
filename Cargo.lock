@@ -988,7 +988,6 @@ dependencies = [
  "log",
  "sel4",
  "sel4-async-block-io",
- "sel4-async-block-io-cpiofs",
  "sel4-async-block-io-fat",
  "sel4-async-network",
  "sel4-async-single-threaded-executor",
@@ -1830,18 +1829,6 @@ dependencies = [
  "log",
  "lru",
  "num_enum",
-]
-
-[[package]]
-name = "sel4-async-block-io-cpiofs"
-version = "0.1.0"
-dependencies = [
- "futures",
- "hex",
- "log",
- "lru",
- "sel4-async-block-io",
- "zerocopy 0.7.32",
 ]
 
 [[package]]

@@ -81,7 +81,6 @@ pub mod absent {}
 definitely! {
     sel4
     sel4_async_block_io
-    sel4_async_block_io_cpiofs
     sel4_async_block_io_fat
     sel4_async_network
     sel4_async_single_threaded_executor
