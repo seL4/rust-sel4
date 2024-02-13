@@ -7,7 +7,7 @@
 { mk, versions }:
 
 mk {
-  package.name = "sel4-async-network-traits";
+  package.name = "sel4-async-io";
   dependencies = {
     futures = {
       version = versions.futures;

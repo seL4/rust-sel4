@@ -12,7 +12,7 @@ use core::task::{self, Poll};
 
 use rustls::unbuffered::InsufficientSizeError;
 
-use sel4_async_network_traits::AsyncIO;
+use sel4_async_io::AsyncIO;
 
 use crate::Error;
 

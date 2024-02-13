@@ -9,7 +9,7 @@
 mk {
   package.name = "sel4-async-network";
   dependencies = {
-    inherit (localCrates) sel4-async-network-traits;
+    inherit (localCrates) sel4-async-io;
     inherit (versions) log;
     futures = {
       version = versions.futures;
