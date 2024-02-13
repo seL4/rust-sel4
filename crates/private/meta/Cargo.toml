@@ -26,10 +26,12 @@ log = "0.4.17"
 sel4 = { path = "../../sel4" }
 sel4-async-block-io = { path = "../../sel4-async/block-io" }
 sel4-async-block-io-fat = { path = "../../sel4-async/block-io/fat" }
+sel4-async-io = { path = "../../sel4-async/io" }
 sel4-async-network = { path = "../../sel4-async/network" }
 sel4-async-single-threaded-executor = { path = "../../sel4-async/single-threaded-executor" }
 sel4-async-time = { path = "../../sel4-async/time" }
 sel4-async-unsync = { path = "../../sel4-async/unsync" }
+sel4-atomic-ptr = { path = "../../sel4-atomic-ptr" }
 sel4-bounce-buffer-allocator = { path = "../../sel4-bounce-buffer-allocator" }
 sel4-config = { path = "../../sel4/config" }
 sel4-externally-shared = { path = "../../sel4-externally-shared", features = ["unstable"] }
