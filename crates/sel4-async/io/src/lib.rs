@@ -1,7 +1,8 @@
 //
-// Copyright 2023, Colias Group, LLC
+// Copyright 2024, Colias Group, LLC
+// Copyright 2024, Embedded devices Working Group
 //
-// SPDX-License-Identifier: BSD-2-Clause
+// SPDX-License-Identifier: MIT OR Apache-2.0
 //
 
 // TODO use Pin
@@ -42,20 +43,22 @@ pub trait AsyncIO {
     }
 
     #[allow(async_fn_in_trait)]
-    async fn read_exact(&mut self, buf: &mut [u8]) -> Result<(), ClosedError<Self::Error>>
+    async fn read_exact(&mut self, mut buf: &mut [u8]) -> Result<(), ReadExactError<Self::Error>>
     where
         Self: Unpin,
     {
-        let mut pos = 0;
-        while pos < buf.len() {
-            let n = self.read(&mut buf[pos..]).await?;
-            if n == 0 {
-                return Err(ClosedError::Closed);
+        while !buf.is_empty() {
+            match self.read(buf).await {
+                Ok(0) => break,
+                Ok(n) => buf = &mut buf[n..],
+                Err(e) => return Err(ReadExactError::Other(e)),
             }
-            pos += n;
         }
-        assert_eq!(pos, buf.len());
-        Ok(())
+        if buf.is_empty() {
+            Ok(())
+        } else {
+            Err(ReadExactError::UnexpectedEof)
+        }
     }
 
     #[allow(async_fn_in_trait)]
@@ -68,19 +71,18 @@ pub trait AsyncIO {
     }
 
     #[allow(async_fn_in_trait)]
-    async fn write_all(&mut self, buf: &[u8]) -> Result<(), ClosedError<Self::Error>>
+    async fn write_all(&mut self, buf: &[u8]) -> Result<(), Self::Error>
     where
         Self: Unpin,
     {
-        let mut pos = 0;
-        while pos < buf.len() {
-            let n = self.write(&buf[pos..]).await?;
-            if n == 0 {
-                return Err(ClosedError::Closed);
+        let mut buf = buf;
+        while !buf.is_empty() {
+            match self.write(buf).await {
+                Ok(0) => panic!("write() returned Ok(0)"),
+                Ok(n) => buf = &buf[n..],
+                Err(e) => return Err(e),
             }
-            pos += n;
         }
-        assert_eq!(pos, buf.len());
         Ok(())
     }
 
@@ -94,13 +96,16 @@ pub trait AsyncIO {
     }
 }
 
-#[derive(Copy, Clone, Debug)]
-pub enum ClosedError<E> {
+/// Error returned by [`AsyncIO::read_exact`]
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub enum ReadExactError<E> {
+    /// An EOF error was encountered before reading the exact amount of requested bytes.
+    UnexpectedEof,
+    /// Error returned by the inner Read.
     Other(E),
-    Closed,
 }
 
-impl<E> From<E> for ClosedError<E> {
+impl<E> From<E> for ReadExactError<E> {
     fn from(err: E) -> Self {
         Self::Other(err)
     }
