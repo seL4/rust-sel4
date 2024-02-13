@@ -60,7 +60,6 @@ members = [
     "crates/private/tests/root-task/tls",
     "crates/sel4",
     "crates/sel4-async/block-io",
-    "crates/sel4-async/block-io/cpiofs",
     "crates/sel4-async/block-io/fat",
     "crates/sel4-async/network",
     "crates/sel4-async/network/rustls",
