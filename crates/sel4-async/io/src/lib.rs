@@ -10,10 +10,9 @@
 #![no_std]
 
 use core::fmt;
+use core::future::poll_fn;
 use core::pin::Pin;
 use core::task::{Context, Poll};
-
-use futures::future;
 
 pub trait ErrorType {
     type Error: fmt::Debug;
@@ -34,7 +33,7 @@ pub trait Read: ErrorType {
         Self: Unpin,
     {
         let mut pin = Pin::new(self);
-        future::poll_fn(move |cx| pin.as_mut().poll_read(cx, buf)).await
+        poll_fn(move |cx| pin.as_mut().poll_read(cx, buf)).await
     }
 
     #[allow(async_fn_in_trait)]
@@ -74,7 +73,7 @@ pub trait Write: ErrorType {
         Self: Unpin,
     {
         let mut pin = Pin::new(self);
-        future::poll_fn(|cx| pin.as_mut().poll_write(cx, buf)).await
+        poll_fn(|cx| pin.as_mut().poll_write(cx, buf)).await
     }
 
     #[allow(async_fn_in_trait)]
@@ -99,7 +98,7 @@ pub trait Write: ErrorType {
         Self: Unpin,
     {
         let mut pin = Pin::new(self);
-        future::poll_fn(|cx| pin.as_mut().poll_flush(cx)).await
+        poll_fn(|cx| pin.as_mut().poll_flush(cx)).await
     }
 }
 

@@ -12,11 +12,11 @@ use alloc::rc::Rc;
 use alloc::vec;
 use alloc::vec::Vec;
 use core::cell::RefCell;
+use core::future::poll_fn;
 use core::marker::PhantomData;
 use core::pin::Pin;
 use core::task::{self, Poll};
 
-use futures::prelude::*;
 use log::info;
 use smoltcp::{
     iface::{Config, Context, Interface, SocketHandle, SocketSet},
@@ -157,7 +157,7 @@ impl ManagedInterface {
                 .start_query(inner.iface.context(), name, query_type)
                 .map_err(DnsError::StartQueryError)?
         };
-        future::poll_fn(|cx| {
+        poll_fn(|cx| {
             let inner = &mut *self.inner().borrow_mut();
             let socket = inner
                 .socket_set
@@ -211,7 +211,7 @@ impl Socket<tcp::Socket<'static>> {
         self.with_context_mut(|cx, socket| socket.connect(cx, remote_endpoint, local_endpoint))
             .map_err(TcpSocketError::ConnectError)?;
 
-        future::poll_fn(|cx| {
+        poll_fn(|cx| {
             self.with_mut(|socket| {
                 let state = socket.state();
                 match state {
@@ -241,7 +241,7 @@ impl Socket<tcp::Socket<'static>> {
                 .map_err(TcpSocketError::ListenError)
         })?;
 
-        future::poll_fn(|cx| {
+        poll_fn(|cx| {
             self.with_mut(|socket| match socket.state() {
                 tcp::State::Listen | tcp::State::SynSent | tcp::State::SynReceived => {
                     socket.register_recv_waker(cx.waker());

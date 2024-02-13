@@ -6,6 +6,7 @@
 
 // Derived from https://github.com/rustls/rustls/pull/1648 by https://github.com/japaric
 
+use core::future::Future;
 use core::marker::PhantomData;
 use core::mem;
 use core::ops::DerefMut;
@@ -14,7 +15,6 @@ use core::task::{self, Poll};
 
 use alloc::sync::Arc;
 
-use futures::Future;
 use rustls::client::{ClientConnectionData, UnbufferedClientConnection};
 use rustls::pki_types::ServerName;
 use rustls::server::{ServerConnectionData, UnbufferedServerConnection};
