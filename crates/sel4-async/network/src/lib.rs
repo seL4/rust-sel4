@@ -268,55 +268,6 @@ impl Socket<tcp::Socket<'static>> {
         .await
     }
 
-    #[allow(clippy::needless_pass_by_ref_mut)]
-    pub fn poll_recv(
-        &mut self,
-        cx: &mut task::Context<'_>,
-        buffer: &mut [u8],
-    ) -> Poll<Result<usize, TcpSocketError>> {
-        self.with_mut(|socket| match socket.recv_slice(buffer) {
-            Ok(0) if buffer.is_empty() => Poll::Ready(Ok(0)),
-            Ok(0) => {
-                socket.register_recv_waker(cx.waker());
-                Poll::Pending
-            }
-            Ok(n) => Poll::Ready(Ok(n)),
-            Err(tcp::RecvError::Finished) => Poll::Ready(Ok(0)),
-            Err(err) => Poll::Ready(Err(TcpSocketError::RecvError(err))),
-        })
-    }
-
-    #[allow(clippy::needless_pass_by_ref_mut)]
-    pub fn poll_send(
-        &mut self,
-        cx: &mut task::Context<'_>,
-        buffer: &[u8],
-    ) -> Poll<Result<usize, TcpSocketError>> {
-        self.with_mut(|socket| match socket.send_slice(buffer) {
-            Ok(0) if buffer.is_empty() => Poll::Ready(Ok(0)),
-            Ok(0) => {
-                socket.register_send_waker(cx.waker());
-                Poll::Pending
-            }
-            Ok(n) => Poll::Ready(Ok(n)),
-            Err(err) => Poll::Ready(Err(TcpSocketError::SendError(err))),
-        })
-    }
-
-    #[allow(clippy::needless_pass_by_ref_mut)]
-    pub fn poll_flush(&mut self, cx: &mut task::Context<'_>) -> Poll<Result<(), TcpSocketError>> {
-        self.with_mut(|socket| {
-            let waiting_close =
-                socket.state() == tcp::State::Closed && socket.remote_endpoint().is_some();
-            if socket.send_queue() > 0 || waiting_close {
-                socket.register_send_waker(cx.waker());
-                Poll::Pending
-            } else {
-                Poll::Ready(Ok(()))
-            }
-        })
-    }
-
     pub fn close(&mut self) {
         self.with_mut(|socket| socket.close())
     }
@@ -336,7 +287,16 @@ impl Read for Socket<tcp::Socket<'static>> {
         cx: &mut task::Context<'_>,
         buf: &mut [u8],
     ) -> Poll<Result<usize, Self::Error>> {
-        self.poll_recv(cx, buf)
+        self.with_mut(|socket| match socket.recv_slice(buf) {
+            Ok(0) if buf.is_empty() => Poll::Ready(Ok(0)),
+            Ok(0) => {
+                socket.register_recv_waker(cx.waker());
+                Poll::Pending
+            }
+            Ok(n) => Poll::Ready(Ok(n)),
+            Err(tcp::RecvError::Finished) => Poll::Ready(Ok(0)),
+            Err(err) => Poll::Ready(Err(TcpSocketError::RecvError(err))),
+        })
     }
 }
 
@@ -346,14 +306,31 @@ impl Write for Socket<tcp::Socket<'static>> {
         cx: &mut task::Context<'_>,
         buf: &[u8],
     ) -> Poll<Result<usize, Self::Error>> {
-        self.poll_send(cx, buf)
+        self.with_mut(|socket| match socket.send_slice(buf) {
+            Ok(0) if buf.is_empty() => Poll::Ready(Ok(0)),
+            Ok(0) => {
+                socket.register_send_waker(cx.waker());
+                Poll::Pending
+            }
+            Ok(n) => Poll::Ready(Ok(n)),
+            Err(err) => Poll::Ready(Err(TcpSocketError::SendError(err))),
+        })
     }
 
     fn poll_flush(
-        self: Pin<&mut Self>,
+        mut self: Pin<&mut Self>,
         cx: &mut task::Context<'_>,
     ) -> Poll<Result<(), Self::Error>> {
-        Self::poll_flush(Pin::into_inner(self), cx)
+        self.with_mut(|socket| {
+            let waiting_close =
+                socket.state() == tcp::State::Closed && socket.remote_endpoint().is_some();
+            if socket.send_queue() > 0 || waiting_close {
+                socket.register_send_waker(cx.waker());
+                Poll::Pending
+            } else {
+                Poll::Ready(Ok(()))
+            }
+        })
     }
 }
 
