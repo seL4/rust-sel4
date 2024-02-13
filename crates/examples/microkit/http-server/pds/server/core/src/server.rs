@@ -11,7 +11,7 @@ use alloc::string::{String, ToString};
 use alloc::vec;
 
 use sel4_async_block_io_fat as fat;
-use sel4_async_io::{AsyncIO, ClosedError};
+use sel4_async_io::{AsyncIO, ReadExactError};
 use sel4_async_unsync::Mutex;
 
 use crate::mime::content_type_from_name;
@@ -32,14 +32,14 @@ impl<D: fat::BlockDevice + 'static, T: fat::TimeSource + 'static> Server<D, T> {
     pub(crate) async fn handle_connection<U: AsyncIO + Unpin>(
         &self,
         conn: &mut U,
-    ) -> Result<(), ClosedError<U::Error>> {
+    ) -> Result<(), ReadExactError<U::Error>> {
         loop {
             let mut buf = vec![0; 1024 * 16];
             let mut i = 0;
             loop {
                 let n = conn.read(&mut buf[i..]).await?;
                 if n == 0 {
-                    return Err(ClosedError::Closed);
+                    return Err(ReadExactError::UnexpectedEof);
                 }
                 i += n;
                 if is_request_complete(&buf[..i]).unwrap_or(false) {
@@ -72,7 +72,7 @@ impl<D: fat::BlockDevice + 'static, T: fat::TimeSource + 'static> Server<D, T> {
         &self,
         conn: &mut U,
         request_path: &str,
-    ) -> Result<(), ClosedError<U::Error>> {
+    ) -> Result<(), ReadExactError<U::Error>> {
         match self.lookup_request_path(request_path).await {
             RequestPathStatus::Ok { file_name, file } => {
                 let content_type = content_type_from_name(&file_name);
@@ -93,7 +93,7 @@ impl<D: fat::BlockDevice + 'static, T: fat::TimeSource + 'static> Server<D, T> {
         conn: &mut U,
         content_type: &str,
         file: fat::File,
-    ) -> Result<(), ClosedError<U::Error>> {
+    ) -> Result<(), ReadExactError<U::Error>> {
         let file_len: usize = self
             .volume_manager
             .lock()
@@ -137,7 +137,7 @@ impl<D: fat::BlockDevice + 'static, T: fat::TimeSource + 'static> Server<D, T> {
         &self,
         conn: &mut U,
         location: &str,
-    ) -> Result<(), ClosedError<U::Error>> {
+    ) -> Result<(), ReadExactError<U::Error>> {
         let phrase = "Moved Permanently";
         self.start_response_headers(conn, 301, phrase).await?;
         self.send_response_header(conn, "Content-Type", b"text/plain")
@@ -154,7 +154,7 @@ impl<D: fat::BlockDevice + 'static, T: fat::TimeSource + 'static> Server<D, T> {
     async fn serve_not_found<U: AsyncIO + Unpin>(
         &self,
         conn: &mut U,
-    ) -> Result<(), ClosedError<U::Error>> {
+    ) -> Result<(), ReadExactError<U::Error>> {
         let phrase = "Not Found";
         self.start_response_headers(conn, 404, phrase).await?;
         self.send_response_header(conn, "Content-Type", b"text/plain")
@@ -171,7 +171,7 @@ impl<D: fat::BlockDevice + 'static, T: fat::TimeSource + 'static> Server<D, T> {
         conn: &mut U,
         status_code: usize,
         reason_phrase: &str,
-    ) -> Result<(), ClosedError<U::Error>> {
+    ) -> Result<(), ReadExactError<U::Error>> {
         conn.write_all(b"HTTP/1.1 ").await?;
         conn.write_all(status_code.to_string().as_bytes()).await?;
         conn.write_all(b" ").await?;
@@ -185,7 +185,7 @@ impl<D: fat::BlockDevice + 'static, T: fat::TimeSource + 'static> Server<D, T> {
         conn: &mut U,
         name: &str,
         value: &[u8],
-    ) -> Result<(), ClosedError<U::Error>> {
+    ) -> Result<(), ReadExactError<U::Error>> {
         conn.write_all(name.as_bytes()).await?;
         conn.write_all(b": ").await?;
         conn.write_all(value).await?;
@@ -196,7 +196,7 @@ impl<D: fat::BlockDevice + 'static, T: fat::TimeSource + 'static> Server<D, T> {
     async fn finish_response_headers<U: AsyncIO + Unpin>(
         &self,
         conn: &mut U,
-    ) -> Result<(), ClosedError<U::Error>> {
+    ) -> Result<(), ReadExactError<U::Error>> {
         conn.write_all(b"\r\n").await?;
         Ok(())
     }

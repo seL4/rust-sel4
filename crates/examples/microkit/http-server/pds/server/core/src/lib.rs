@@ -23,7 +23,7 @@ use rustls::ServerConfig;
 
 use sel4_async_block_io::{access::ReadOnly, constant_block_sizes, BlockIO};
 use sel4_async_block_io_fat as fat;
-use sel4_async_io::ClosedError;
+use sel4_async_io::ReadExactError;
 use sel4_async_network::{ManagedInterface, TcpSocket, TcpSocketError};
 use sel4_async_network_rustls::{Error as AsyncRustlsError, ServerConnector};
 use sel4_async_network_rustls_utils::GetCurrentTimeImpl;
@@ -117,7 +117,7 @@ type SocketUser<T> = Box<
 async fn use_socket_for_http<D: fat::BlockDevice + 'static, T: fat::TimeSource + 'static>(
     server: Server<D, T>,
     mut socket: TcpSocket,
-) -> Result<(), ClosedError<TcpSocketError>> {
+) -> Result<(), ReadExactError<TcpSocketError>> {
     socket.accept(HTTP_PORT).await?;
     server.handle_connection(&mut socket).await?;
     socket.close();
@@ -128,7 +128,7 @@ async fn use_socket_for_https<D: fat::BlockDevice + 'static, T: fat::TimeSource 
     server: Server<D, T>,
     tls_config: Arc<ServerConfig>,
     mut socket: TcpSocket,
-) -> Result<(), ClosedError<AsyncRustlsError<TcpSocketError>>> {
+) -> Result<(), ReadExactError<AsyncRustlsError<TcpSocketError>>> {
     socket
         .accept(HTTPS_PORT)
         .await

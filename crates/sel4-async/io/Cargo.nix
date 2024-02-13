@@ -4,10 +4,14 @@
 # SPDX-License-Identifier: BSD-2-Clause
 #
 
-{ mk, versions }:
+{ mk, mkDefaultFrontmatterWithReuseArgs, defaultReuseFrontmatterArgs, versions }:
 
 mk {
+  nix.frontmatter = mkDefaultFrontmatterWithReuseArgs (defaultReuseFrontmatterArgs // {
+    licenseID = package.license;
+  });
   package.name = "sel4-async-io";
+  package.license = "MIT OR Apache-2.0";
   dependencies = {
     futures = {
       version = versions.futures;
