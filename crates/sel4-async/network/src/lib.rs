@@ -269,11 +269,6 @@ impl Socket<tcp::Socket<'static>> {
     }
 
     #[allow(clippy::needless_pass_by_ref_mut)]
-    pub async fn recv(&mut self, buffer: &mut [u8]) -> Result<usize, TcpSocketError> {
-        future::poll_fn(|cx| self.poll_recv(cx, buffer)).await
-    }
-
-    #[allow(clippy::needless_pass_by_ref_mut)]
     pub fn poll_recv(
         &mut self,
         cx: &mut task::Context<'_>,
@@ -289,21 +284,6 @@ impl Socket<tcp::Socket<'static>> {
             Err(tcp::RecvError::Finished) => Poll::Ready(Ok(0)),
             Err(err) => Poll::Ready(Err(TcpSocketError::RecvError(err))),
         })
-    }
-
-    pub async fn send_all(&mut self, buffer: &[u8]) -> Result<(), TcpSocketError> {
-        let mut pos = 0;
-        while pos < buffer.len() {
-            let n = self.send(&buffer[pos..]).await?;
-            assert!(n > 0);
-            pos += n;
-        }
-        assert_eq!(pos, buffer.len());
-        Ok(())
-    }
-
-    pub async fn send(&mut self, buffer: &[u8]) -> Result<usize, TcpSocketError> {
-        future::poll_fn(|cx| self.poll_send(cx, buffer)).await
     }
 
     #[allow(clippy::needless_pass_by_ref_mut)]
