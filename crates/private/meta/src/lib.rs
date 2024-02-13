@@ -82,10 +82,12 @@ definitely! {
     sel4
     sel4_async_block_io
     sel4_async_block_io_fat
+    sel4_async_io
     sel4_async_network
     sel4_async_single_threaded_executor
     sel4_async_time
     sel4_async_unsync
+    sel4_atomic_ptr
     sel4_bounce_buffer_allocator
     sel4_config
     sel4_externally_shared
