@@ -14,7 +14,7 @@ mk rec {
   package.license = "Apache-2.0 OR ISC OR MIT";
   dependencies = {
     inherit (localCrates)
-      sel4-async-network-traits
+      sel4-async-io
     ;
     inherit (versions) log;
     rustls = rustlsWith [] // (localCrates.rustls or {});

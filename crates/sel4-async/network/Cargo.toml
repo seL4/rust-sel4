@@ -19,7 +19,7 @@ license = "BSD-2-Clause"
 [dependencies]
 futures = { version = "0.3.28", default-features = false, features = ["alloc"] }
 log = "0.4.17"
-sel4-async-network-traits = { path = "traits" }
+sel4-async-io = { path = "../io" }
 
 [dependencies.smoltcp]
 version = "0.10.0"

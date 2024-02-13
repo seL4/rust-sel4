@@ -11,7 +11,7 @@ use alloc::string::{String, ToString};
 use alloc::vec;
 
 use sel4_async_block_io_fat as fat;
-use sel4_async_network_traits::{AsyncIO, ClosedError};
+use sel4_async_io::{AsyncIO, ClosedError};
 use sel4_async_unsync::Mutex;
 
 use crate::mime::content_type_from_name;

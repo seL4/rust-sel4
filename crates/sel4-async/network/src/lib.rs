@@ -26,7 +26,7 @@ use smoltcp::{
     wire::{DnsQueryType, IpAddress, IpCidr, IpEndpoint, IpListenEndpoint, Ipv4Address, Ipv4Cidr},
 };
 
-use sel4_async_network_traits::AsyncIO;
+use sel4_async_io::AsyncIO;
 
 pub(crate) const DEFAULT_KEEP_ALIVE_INTERVAL: u64 = 75000;
 pub(crate) const DEFAULT_TCP_SOCKET_BUFFER_SIZE: usize = 65535;

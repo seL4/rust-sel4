@@ -23,7 +23,7 @@ use rustls::unbuffered::{
 };
 use rustls::{ClientConfig, ServerConfig, SideData, UnbufferedConnectionCommon};
 
-use sel4_async_network_traits::AsyncIO;
+use sel4_async_io::AsyncIO;
 
 use crate::{
     utils::{poll_read, poll_write, try_or_resize_and_retry, Buffer, WriteCursor},
