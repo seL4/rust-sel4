@@ -29,21 +29,9 @@ pub trait AsyncIO {
     ) -> Poll<Result<usize, Self::Error>>;
 
     fn poll_flush(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>>;
-}
 
-#[derive(Copy, Clone, Debug)]
-pub enum ClosedError<E> {
-    Other(E),
-    Closed,
-}
+    // // //
 
-impl<E> From<E> for ClosedError<E> {
-    fn from(err: E) -> Self {
-        Self::Other(err)
-    }
-}
-
-pub trait AsyncIOExt: AsyncIO {
     #[allow(async_fn_in_trait)]
     async fn read(&mut self, buf: &mut [u8]) -> Result<usize, Self::Error>
     where
@@ -106,4 +94,14 @@ pub trait AsyncIOExt: AsyncIO {
     }
 }
 
-impl<T: AsyncIO + ?Sized> AsyncIOExt for T {}
+#[derive(Copy, Clone, Debug)]
+pub enum ClosedError<E> {
+    Other(E),
+    Closed,
+}
+
+impl<E> From<E> for ClosedError<E> {
+    fn from(err: E) -> Self {
+        Self::Other(err)
+    }
+}
