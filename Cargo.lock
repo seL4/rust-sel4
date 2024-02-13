@@ -1847,15 +1847,11 @@ dependencies = [
 [[package]]
 name = "sel4-async-io"
 version = "0.1.0"
-dependencies = [
- "futures",
-]
 
 [[package]]
 name = "sel4-async-network"
 version = "0.1.0"
 dependencies = [
- "futures",
  "log",
  "sel4-async-io",
  "smoltcp",
@@ -1865,7 +1861,6 @@ dependencies = [
 name = "sel4-async-network-rustls"
 version = "0.1.0"
 dependencies = [
- "futures",
  "log",
  "rustls",
  "sel4-async-io",

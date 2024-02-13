@@ -18,12 +18,5 @@ mk rec {
     ;
     inherit (versions) log;
     rustls = rustlsWith [] // (localCrates.rustls or {});
-    futures = {
-      version = versions.futures;
-      default-features = false;
-      features = [
-        "alloc"
-      ];
-    };
   };
 }

@@ -6,19 +6,10 @@
 
 { mk, mkDefaultFrontmatterWithReuseArgs, defaultReuseFrontmatterArgs, versions }:
 
-mk {
+mk rec {
   nix.frontmatter = mkDefaultFrontmatterWithReuseArgs (defaultReuseFrontmatterArgs // {
     licenseID = package.license;
   });
   package.name = "sel4-async-io";
   package.license = "MIT OR Apache-2.0";
-  dependencies = {
-    futures = {
-      version = versions.futures;
-      default-features = false;
-      features = [
-        "alloc"
-      ];
-    };
-  };
 }
