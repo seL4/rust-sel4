@@ -26,7 +26,7 @@ use smoltcp::{
     wire::{DnsQueryType, IpAddress, IpCidr, IpEndpoint, IpListenEndpoint, Ipv4Address, Ipv4Cidr},
 };
 
-use sel4_async_io::AsyncIO;
+use sel4_async_io::{Read, Write};
 
 pub(crate) const DEFAULT_KEEP_ALIVE_INTERVAL: u64 = 75000;
 pub(crate) const DEFAULT_TCP_SOCKET_BUFFER_SIZE: usize = 65535;
@@ -326,9 +326,11 @@ impl Socket<tcp::Socket<'static>> {
     }
 }
 
-impl AsyncIO for Socket<tcp::Socket<'static>> {
+impl sel4_async_io::ErrorType for Socket<tcp::Socket<'static>> {
     type Error = TcpSocketError;
+}
 
+impl Read for Socket<tcp::Socket<'static>> {
     fn poll_read(
         mut self: Pin<&mut Self>,
         cx: &mut task::Context<'_>,
@@ -336,7 +338,9 @@ impl AsyncIO for Socket<tcp::Socket<'static>> {
     ) -> Poll<Result<usize, Self::Error>> {
         self.poll_recv(cx, buf)
     }
+}
 
+impl Write for Socket<tcp::Socket<'static>> {
     fn poll_write(
         mut self: Pin<&mut Self>,
         cx: &mut task::Context<'_>,

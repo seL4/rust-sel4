@@ -12,7 +12,7 @@ use core::task::{self, Poll};
 
 use rustls::unbuffered::InsufficientSizeError;
 
-use sel4_async_io::AsyncIO;
+use sel4_async_io::{Read, Write};
 
 use crate::Error;
 
@@ -143,7 +143,7 @@ pub(crate) fn poll_read<IO>(
     cx: &mut task::Context,
 ) -> Result<bool, Error<IO::Error>>
 where
-    IO: AsyncIO + Unpin,
+    IO: Read + Unpin,
 {
     if incoming.unfilled().is_empty() {
         // XXX should this be user configurable?
@@ -170,7 +170,7 @@ pub(crate) fn poll_write<IO>(
     cx: &mut task::Context,
 ) -> Result<bool, Error<IO::Error>>
 where
-    IO: AsyncIO + Unpin,
+    IO: Write + Unpin,
 {
     let would_block = match Pin::new(io).poll_write(cx, outgoing.filled()) {
         Poll::Ready(res) => {

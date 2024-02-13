@@ -23,7 +23,7 @@ use rustls::unbuffered::{
 };
 use rustls::{ClientConfig, ServerConfig, SideData, UnbufferedConnectionCommon};
 
-use sel4_async_io::AsyncIO;
+use sel4_async_io::{Read, Write};
 
 use crate::{
     utils::{poll_read, poll_write, try_or_resize_and_retry, Buffer, WriteCursor},
@@ -42,7 +42,7 @@ impl ClientConnector {
         // FIXME should not return an error but instead hoist it into a `Connect` variant
     ) -> Result<Connect<UnbufferedClientConnection, ClientConnectionData, IO>, Error<IO::Error>>
     where
-        IO: AsyncIO,
+        IO: Read + Write,
     {
         let conn = UnbufferedClientConnection::new(self.config.clone(), domain)?;
 
@@ -67,7 +67,7 @@ impl ServerConnector {
         // FIXME should not return an error but instead hoist it into a `Connect` variant
     ) -> Result<Connect<UnbufferedServerConnection, ServerConnectionData, IO>, Error<IO::Error>>
     where
-        IO: AsyncIO,
+        IO: Read + Write,
     {
         let conn = UnbufferedServerConnection::new(self.config.clone())?;
 
@@ -117,7 +117,7 @@ impl<T, D, IO> Future for Connect<T, D, IO>
 where
     D: Unpin + SideDataAugmented,
     T: Unpin + DerefMut<Target = UnbufferedConnectionCommon<D>>,
-    IO: Unpin + AsyncIO,
+    IO: Unpin + Read + Write,
 {
     type Output = Result<TlsStream<T, D, IO>, Error<IO::Error>>;
 
@@ -215,7 +215,7 @@ impl SideDataAugmented for ServerConnectionData {
 impl<T, D, IO> ConnectInner<T, D, IO>
 where
     T: DerefMut<Target = UnbufferedConnectionCommon<D>>,
-    IO: AsyncIO,
+    IO: Read + Write,
     D: SideDataAugmented,
 {
     fn advance(&mut self, updates: &mut Updates) -> Result<Action, Error<IO::Error>> {
@@ -288,58 +288,19 @@ impl<T, D, IO> TlsStream<T, D, IO> {
     }
 }
 
-impl<T, D, IO> AsyncIO for TlsStream<T, D, IO>
+impl<T, D, IO> sel4_async_io::ErrorType for TlsStream<T, D, IO>
 where
-    T: DerefMut<Target = UnbufferedConnectionCommon<D>> + Unpin,
-    IO: AsyncIO + Unpin,
-    D: SideDataAugmented + Unpin,
+    IO: sel4_async_io::ErrorType,
 {
     type Error = Error<IO::Error>;
+}
 
-    fn poll_write(
-        mut self: Pin<&mut Self>,
-        cx: &mut task::Context<'_>,
-        buf: &[u8],
-    ) -> Poll<Result<usize, Self::Error>> {
-        let mut outgoing = mem::take(&mut self.outgoing);
-
-        // no IO here; just in-memory writes
-        match SideDataAugmented::process_tls_records_generic(&mut self.conn, &mut []).state? {
-            ConnectionState::WriteTraffic(mut state) => {
-                try_or_resize_and_retry(
-                    |out_buffer| state.encrypt(buf, out_buffer),
-                    |e| {
-                        if let EncryptError::InsufficientSize(is) = &e {
-                            Ok(*is)
-                        } else {
-                            Err(e.into())
-                        }
-                    },
-                    &mut outgoing,
-                )?;
-            }
-
-            ConnectionState::Closed => {
-                return Poll::Ready(Err(Error::ConnectionAborted));
-            }
-
-            state => unreachable!("{state:?}"),
-        }
-
-        // opportunistically try to write data into the socket
-        // XXX should this be a loop?
-        while !outgoing.is_empty() {
-            let would_block = poll_write(&mut self.io, &mut outgoing, cx)?;
-            if would_block {
-                break;
-            }
-        }
-
-        self.outgoing = outgoing;
-
-        Poll::Ready(Ok(buf.len()))
-    }
-
+impl<T, D, IO> Read for TlsStream<T, D, IO>
+where
+    T: DerefMut<Target = UnbufferedConnectionCommon<D>> + Unpin,
+    IO: Read + Unpin,
+    D: SideDataAugmented + Unpin,
+{
     fn poll_read(
         mut self: Pin<&mut Self>,
         cx: &mut task::Context<'_>,
@@ -397,6 +358,57 @@ where
         }
 
         Poll::Ready(Ok(cursor.into_used()))
+    }
+}
+
+impl<T, D, IO> Write for TlsStream<T, D, IO>
+where
+    T: DerefMut<Target = UnbufferedConnectionCommon<D>> + Unpin,
+    IO: Write + Unpin,
+    D: SideDataAugmented + Unpin,
+{
+    fn poll_write(
+        mut self: Pin<&mut Self>,
+        cx: &mut task::Context<'_>,
+        buf: &[u8],
+    ) -> Poll<Result<usize, Self::Error>> {
+        let mut outgoing = mem::take(&mut self.outgoing);
+
+        // no IO here; just in-memory writes
+        match SideDataAugmented::process_tls_records_generic(&mut self.conn, &mut []).state? {
+            ConnectionState::WriteTraffic(mut state) => {
+                try_or_resize_and_retry(
+                    |out_buffer| state.encrypt(buf, out_buffer),
+                    |e| {
+                        if let EncryptError::InsufficientSize(is) = &e {
+                            Ok(*is)
+                        } else {
+                            Err(e.into())
+                        }
+                    },
+                    &mut outgoing,
+                )?;
+            }
+
+            ConnectionState::Closed => {
+                return Poll::Ready(Err(Error::ConnectionAborted));
+            }
+
+            state => unreachable!("{state:?}"),
+        }
+
+        // opportunistically try to write data into the socket
+        // XXX should this be a loop?
+        while !outgoing.is_empty() {
+            let would_block = poll_write(&mut self.io, &mut outgoing, cx)?;
+            if would_block {
+                break;
+            }
+        }
+
+        self.outgoing = outgoing;
+
+        Poll::Ready(Ok(buf.len()))
     }
 
     fn poll_flush(
