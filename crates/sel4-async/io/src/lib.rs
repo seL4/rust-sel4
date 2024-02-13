@@ -9,27 +9,22 @@
 
 #![no_std]
 
+use core::fmt;
 use core::pin::Pin;
 use core::task::{Context, Poll};
 
 use futures::future;
 
-pub trait AsyncIO {
-    type Error;
+pub trait ErrorType {
+    type Error: fmt::Debug;
+}
 
+pub trait Read: ErrorType {
     fn poll_read(
         self: Pin<&mut Self>,
         cx: &mut Context<'_>,
         buf: &mut [u8],
     ) -> Poll<Result<usize, Self::Error>>;
-
-    fn poll_write(
-        self: Pin<&mut Self>,
-        cx: &mut Context<'_>,
-        buf: &[u8],
-    ) -> Poll<Result<usize, Self::Error>>;
-
-    fn poll_flush(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>>;
 
     // // //
 
@@ -60,6 +55,18 @@ pub trait AsyncIO {
             Err(ReadExactError::UnexpectedEof)
         }
     }
+}
+
+pub trait Write: ErrorType {
+    fn poll_write(
+        self: Pin<&mut Self>,
+        cx: &mut Context<'_>,
+        buf: &[u8],
+    ) -> Poll<Result<usize, Self::Error>>;
+
+    fn poll_flush(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>>;
+
+    // // //
 
     #[allow(async_fn_in_trait)]
     async fn write(&mut self, buf: &[u8]) -> Result<usize, Self::Error>
@@ -96,7 +103,7 @@ pub trait AsyncIO {
     }
 }
 
-/// Error returned by [`AsyncIO::read_exact`]
+/// Error returned by [`Read::read_exact`]
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum ReadExactError<E> {
     /// An EOF error was encountered before reading the exact amount of requested bytes.

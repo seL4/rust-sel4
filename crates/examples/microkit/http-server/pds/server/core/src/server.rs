@@ -11,7 +11,7 @@ use alloc::string::{String, ToString};
 use alloc::vec;
 
 use sel4_async_block_io_fat as fat;
-use sel4_async_io::{AsyncIO, ReadExactError};
+use sel4_async_io::{Read, ReadExactError, Write};
 use sel4_async_unsync::Mutex;
 
 use crate::mime::content_type_from_name;
@@ -29,7 +29,7 @@ impl<D: fat::BlockDevice + 'static, T: fat::TimeSource + 'static> Server<D, T> {
         }
     }
 
-    pub(crate) async fn handle_connection<U: AsyncIO + Unpin>(
+    pub(crate) async fn handle_connection<U: Read + Write + Unpin>(
         &self,
         conn: &mut U,
     ) -> Result<(), ReadExactError<U::Error>> {
@@ -68,7 +68,7 @@ impl<D: fat::BlockDevice + 'static, T: fat::TimeSource + 'static> Server<D, T> {
         Ok(())
     }
 
-    async fn handle_request<U: AsyncIO + Unpin>(
+    async fn handle_request<U: Read + Write + Unpin>(
         &self,
         conn: &mut U,
         request_path: &str,
@@ -88,7 +88,7 @@ impl<D: fat::BlockDevice + 'static, T: fat::TimeSource + 'static> Server<D, T> {
         Ok(())
     }
 
-    async fn serve_file<U: AsyncIO + Unpin>(
+    async fn serve_file<U: Write + Unpin>(
         &self,
         conn: &mut U,
         content_type: &str,
@@ -133,7 +133,7 @@ impl<D: fat::BlockDevice + 'static, T: fat::TimeSource + 'static> Server<D, T> {
         Ok(())
     }
 
-    async fn serve_moved_permanently<U: AsyncIO + Unpin>(
+    async fn serve_moved_permanently<U: Write + Unpin>(
         &self,
         conn: &mut U,
         location: &str,
@@ -151,7 +151,7 @@ impl<D: fat::BlockDevice + 'static, T: fat::TimeSource + 'static> Server<D, T> {
         Ok(())
     }
 
-    async fn serve_not_found<U: AsyncIO + Unpin>(
+    async fn serve_not_found<U: Write + Unpin>(
         &self,
         conn: &mut U,
     ) -> Result<(), ReadExactError<U::Error>> {
@@ -166,7 +166,7 @@ impl<D: fat::BlockDevice + 'static, T: fat::TimeSource + 'static> Server<D, T> {
         Ok(())
     }
 
-    async fn start_response_headers<U: AsyncIO + Unpin>(
+    async fn start_response_headers<U: Write + Unpin>(
         &self,
         conn: &mut U,
         status_code: usize,
@@ -180,7 +180,7 @@ impl<D: fat::BlockDevice + 'static, T: fat::TimeSource + 'static> Server<D, T> {
         Ok(())
     }
 
-    async fn send_response_header<U: AsyncIO + Unpin>(
+    async fn send_response_header<U: Write + Unpin>(
         &self,
         conn: &mut U,
         name: &str,
@@ -193,7 +193,7 @@ impl<D: fat::BlockDevice + 'static, T: fat::TimeSource + 'static> Server<D, T> {
         Ok(())
     }
 
-    async fn finish_response_headers<U: AsyncIO + Unpin>(
+    async fn finish_response_headers<U: Write + Unpin>(
         &self,
         conn: &mut U,
     ) -> Result<(), ReadExactError<U::Error>> {
