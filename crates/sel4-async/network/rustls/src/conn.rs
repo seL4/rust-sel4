@@ -421,15 +421,4 @@ where
             .poll_flush(cx)
             .map_err(Error::TransitError)
     }
-
-    #[allow(unused_mut)]
-    fn poll_close(
-        mut self: Pin<&mut Self>,
-        cx: &mut task::Context<'_>,
-    ) -> Poll<Result<(), Error<IO::Error>>> {
-        // XXX write out close_notify here?
-        Pin::new(&mut self.io)
-            .poll_close(cx)
-            .map_err(Error::TransitError)
-    }
 }

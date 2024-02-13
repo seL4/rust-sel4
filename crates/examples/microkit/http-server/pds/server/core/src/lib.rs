@@ -138,7 +138,6 @@ async fn use_socket_for_https<D: fat::BlockDevice + 'static, T: fat::TimeSource 
 
     server.handle_connection(&mut conn).await?;
 
-    // TODO TcpSocket doesn't support stateless .poll_close() yet, so we close the socket directly
     conn.into_io().close();
 
     Ok(())
