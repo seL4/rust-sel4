@@ -4,6 +4,9 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
+// Ideas for implementing operations on TCP sockets taken from:
+// https://github.com/embassy-rs/embassy/blob/main/embassy-net/src/tcp.rs
+
 #![no_std]
 
 extern crate alloc;
