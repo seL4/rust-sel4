@@ -29,8 +29,6 @@ pub trait AsyncIO {
     ) -> Poll<Result<usize, Self::Error>>;
 
     fn poll_flush(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>>;
-
-    fn poll_close(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>>;
 }
 
 #[derive(Copy, Clone, Debug)]

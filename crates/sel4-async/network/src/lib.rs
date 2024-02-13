@@ -367,18 +367,9 @@ impl AsyncIO for Socket<tcp::Socket<'static>> {
 
     fn poll_flush(
         self: Pin<&mut Self>,
-        _cx: &mut task::Context<'_>,
+        cx: &mut task::Context<'_>,
     ) -> Poll<Result<(), Self::Error>> {
-        // TODO
-        Poll::Ready(Ok(()))
-    }
-
-    fn poll_close(
-        self: Pin<&mut Self>,
-        _cx: &mut task::Context<'_>,
-    ) -> Poll<Result<(), Self::Error>> {
-        // TODO
-        Poll::Ready(Ok(()))
+        Self::poll_flush(Pin::into_inner(self), cx)
     }
 }
 
