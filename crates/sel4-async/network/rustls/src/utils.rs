@@ -157,7 +157,6 @@ where
             incoming.advance(read);
             false
         }
-
         Poll::Pending => true,
     };
 
@@ -173,7 +172,7 @@ pub(crate) fn poll_write<IO>(
 where
     IO: AsyncIO + Unpin,
 {
-    let pending = match Pin::new(io).poll_write(cx, outgoing.filled()) {
+    let would_block = match Pin::new(io).poll_write(cx, outgoing.filled()) {
         Poll::Ready(res) => {
             let written = res.map_err(Error::TransitError)?;
             log::trace!("wrote {written}B into socket");
@@ -181,8 +180,8 @@ where
             log::trace!("{}B remain in the outgoing buffer", outgoing.len());
             false
         }
-
         Poll::Pending => true,
     };
-    Ok(pending)
+
+    Ok(would_block)
 }
