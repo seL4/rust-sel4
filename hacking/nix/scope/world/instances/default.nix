@@ -78,8 +78,9 @@ in rec {
     tests.root-task.panicking.byConfig.abort.withoutAlloc
     tests.root-task.panicking.byConfig.unwind.withAlloc
     tests.root-task.panicking.byConfig.unwind.withoutAlloc
-    tests.root-task.default-test-harness
     tests.root-task.c
+    tests.root-task.default-test-harness
+    # tests.root-task.ring
     tests.capdl.threads
     tests.capdl.utcover
     microkit.examples.hello
@@ -212,7 +213,7 @@ in rec {
         };
       });
 
-      ring = maybe (haveFullRuntime && haveUnwindingSupport) (
+      ring = maybe (haveFullRuntime && haveUnwindingSupport && !hostPlatform.isRiscV32) (
         let
           rootTask = lib.makeOverridable mkTask {
             rootCrate = crates.ring;
@@ -256,7 +257,7 @@ in rec {
         in {
           inherit byElf;
 
-          all = mkRunTests "run-all-ring-test" (lib.flip lib.mapAttrsToList byElf (k: v: lib.nameValuePair k v.automate));
+          automate = mkRunTests "run-all-ring-test" (lib.flip lib.mapAttrsToList byElf (k: v: lib.nameValuePair k v.automate));
         }
       );
 
