@@ -18,12 +18,11 @@
 //! - [`sel4_config`]: Macros and constants corresponding to the seL4 kernel configuration. Can be
 //!   used by all targets (i.e. in all of: application code, build scripts, and build-time tools).
 //! - [`sel4_platform_info`]: Constants corresponding to the contents of `platform_info.h`. Can be
-//!   used by all targets.
+//!   used by all targets, on configurations where this file exists.
 //! - [`sel4_sync`]: Synchronization constructs using seL4 IPC. Currently only supports
 //!   notification-based mutexes.
-//! - [`sel4_logging`]: Log implementation for the [`log`] crate.
-//! - [`sel4_externally_shared`]: Abstractions for interacting with data structures in shared
-//!   memory.
+//! - [`sel4_logging`]: [`Log`](log::Log) implementation for the [`log`] crate.
+//! - [`sel4_externally_shared`]: Abstractions for interacting with data in shared memory.
 //! - [`sel4_shared_ring_buffer`]: Implementation of shared data structures used in the [seL4 Device
 //!   Driver Framework](https://github.com/lucypa/sDDF).
 //! - `sel4_async_*`: Crates for leveraging async Rust in seL4 userspace.
