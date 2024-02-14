@@ -115,9 +115,6 @@ the crates which use them:
   contain the path of the `platform_gen.yaml` file from the seL4 kernel build system.
 - `sel4-kernel-loader` uses `$SEL4_KERNEL` (defaulting to `$SEL4_PREFIX/bin/kernel.elf` if
   `$SEL4_PREFIX` is set) which must contain the path of the seL4 kernel (as an ELF executable).
-  Furthermore, if `$SEL4_KERNEL_LOADER_CONFIG` is set, then `sel4-kernel-loader` overrides the
-  default configuration with the one in the provided JSON file. Note that no configuration options
-  are actually implemented yet.
 
 ### Quick start for running the tests in this repository
 
