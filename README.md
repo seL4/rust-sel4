@@ -30,8 +30,9 @@ This work is funded by the [seL4 Foundation](https://sel4.systems/Foundation/hom
 
 ### Compatible versions of related seL4 Foundation projects
 
-This project builds upon [seL4](https://github.com/seL4/seL4) and the [seL4 Microkit](https://github.com/seL4/microkit).
-In particular, this project works with the following versions of those related projects:
+This project builds upon [seL4](https://github.com/seL4/seL4) and the [seL4
+Microkit](https://github.com/seL4/microkit). In particular, this project works with at least the
+following versions of those related projects:
 
 - seL4, when used without Microkit: `9bac64c6ceb1ece54fe00eae44065a836bd224f3`
   ([github.com/coliasgroup/seL4:rust](https://github.com/coliasgroup/seL4/tree/rust), an ancestor of
@@ -64,13 +65,13 @@ In particular, this project works with the following versions of those related p
   configuration. Can be used by all targets (i.e. in all of: application code, build scripts, and
   build-time tools).
 - [`sel4-platform-info`](./crates/sel4-platform-info): Constants corresponding to the contents of
-  `platform_info.h`. Can be used by all targets.
+  `platform_info.h`. Can be used by all targets, on configurations where this file exists..
 - [`sel4-sync`](./crates/sel4-sync): Synchronization constructs using seL4 IPC. Currently only
   supports notification-based mutexes.
-- [`sel4-logging`](./crates/sel4-logging): Log implementation for the
-  [`log`](https://crates.io/crates/log) crate.
+- [`sel4-logging`](./crates/sel4-logging): [`Log`](https://docs.rs/log/latest/log/trait.Log.html)
+  implementation for the [`log`](https://crates.io/crates/log) crate.
 - [`sel4-externally-shared`](./crates/sel4-externally-shared): Abstractions for interacting with
-  data structures in shared memory.
+  data in shared memory.
 - [`sel4-shared-ring-buffer`](./crates/sel4-shared-ring-buffer): Implementation of shared data
   structures used in the [seL4 Device Driver Framework](https://github.com/lucypa/sDDF).
 - [`sel4-async-*`](./crates/sel4-async): Crates for leveraging async Rust in seL4 userspace.
@@ -85,7 +86,7 @@ In particular, this project works with the following versions of those related p
     Microkit](https://github.com/seL4/microkit) protection domains, including an implementation of
     libmicrokit and abstractions for IPC.
 
-##### Programs
+##### Complete programs
 
 - [`sel4-capdl-initializer`](./crates/sel4-capdl-initializer): A
   [CapDL](https://docs.sel4.systems/projects/capdl/)-based system initializer.
@@ -94,7 +95,7 @@ In particular, this project works with the following versions of those related p
 
 ### Integrating these crates into your project
 
-The best way to learn how to integrate these crates into your project is to check out these concrete
+The best way to learn how to integrate these crates into your project is to check out the concrete
 examples of their use [listed above](#demos).
 
 These crates are not yet hosted on [crates.io](https://crates.io). Use them either as Git or path
@@ -102,7 +103,7 @@ Cargo dependencies.
 
 Some of these crates depend, at build time, on external components and configuration. In all cases,
 information for locating these dependencies is passed to the dependant crates via environment
-variables which are interpreted by `build.rs` scripts. Here is a list of environment variables that
+variables which are interpreted by `build.rs` scripts. Here is a list of environment variables and
 the crates which use them:
 
 - `sel4-config` and `sel4-sys`, whose dependants include `sel4`, `sel4-root-task`, `sel4-microkit`,
@@ -115,8 +116,8 @@ the crates which use them:
 - `sel4-kernel-loader` uses `$SEL4_KERNEL` (defaulting to `$SEL4_PREFIX/bin/kernel.elf` if
   `$SEL4_PREFIX` is set) which must contain the path of the seL4 kernel (as an ELF executable).
   Furthermore, if `$SEL4_KERNEL_LOADER_CONFIG` is set, then `sel4-kernel-loader` overrides the
-  default configuration with one in the provided JSON file. Note that no configuration options are
-  actually implemented yet.
+  default configuration with the one in the provided JSON file. Note that no configuration options
+  are actually implemented yet.
 
 ### Quick start for running the tests in this repository
 
