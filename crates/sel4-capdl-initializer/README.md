@@ -38,8 +38,8 @@ SEL4_PREFIX=$my_sel4_prefix \
 ```
 
 Later, prepare the initializer by adding the CapDL spec. `sel4-capdl-initializer-add-spec` takes a
-CapDL spec in JSON format. [This branch](https://github.com/coliasgroup/capdl/tree/coliasgroup) of
-the parse-capDL tool is capable of translating a `.cdl` file to JSON.
+CapDL spec in JSON format. [This branch](https://github.com/coliasgroup/capdl/tree/rust) of the
+parse-capDL tool is capable of translating a `.cdl` file to JSON.
 
 ```bash
 parse-capDL --object-sizes=$my_object_sizes --json=spec.json $my_capdl_spec
