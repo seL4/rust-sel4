@@ -25,9 +25,6 @@ range's end address is no greater than that of the kernel provided at boot.
 they are for the `sel4-config` crate and its dependants (i.e. via `SEL4_PREFIX` or
 `SEL4_INCLUDE_DIRS`).
 
-Future versions of `sel4-kernel-loader` will be configurable with a JSON file provided at compile
-time via `SEL4_KERNEL_LOADER_CONFIG`. If no configuration is provided, defaults will be used.
-
 Here is an example of how to build and use this crate. First, independantly of the application,
 build the loader and accompanying CLI tool:
 
