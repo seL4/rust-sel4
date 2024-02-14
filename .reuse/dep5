@@ -9,8 +9,8 @@ Files:
   hacking/cargo-manifest-management/tool/Cargo.lock
   hacking/unstable-feature-monitoring/wishlist/Cargo.lock
   hacking/nix/scope/capdl-tool/capDL-tool.nix
-  hacking/nix/scope/capdl-tool/base-compat-0-11-2.nix
-  hacking/nix/scope/capdl-tool/base-compat-batteries-0-11-2.nix
+  hacking/nix/scope/capdl-tool/base-compat-0-12-2.nix
+  hacking/nix/scope/capdl-tool/base-compat-batteries-0-12-2.nix
 Copyright: 2023, Colias Group, LLC
 License: BSD-2-Clause
 

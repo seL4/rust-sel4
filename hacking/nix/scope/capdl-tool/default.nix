@@ -10,10 +10,10 @@
 }:
 
 let
-  haskellPackages = haskell.packages.ghc902.override {
+  haskellPackages = haskell.packages.ghc928.override {
     overrides = self: super: {
-      base-compat = self.callPackage ./base-compat-0-11-2.nix {};
-      base-compat-batteries = self.callPackage ./base-compat-batteries-0-11-2.nix {};
+      base-compat = self.callPackage ./base-compat-0-12-2.nix {};
+      base-compat-batteries = self.callPackage ./base-compat-batteries-0-12-2.nix {};
       capDL-tool = self.callPackage ./capDL-tool.nix {
         inherit sources;
       };
