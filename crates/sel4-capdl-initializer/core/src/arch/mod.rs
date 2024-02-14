@@ -36,7 +36,6 @@ mod imp {
     ) {
         *regs.pc_mut() = extra.ip;
         *regs.sp_mut() = extra.sp;
-        *regs.spsr_mut() = extra.spsr;
         for (i, value) in extra.gprs.iter().enumerate() {
             *regs.gpr_mut(i.try_into().unwrap()) = *value;
         }

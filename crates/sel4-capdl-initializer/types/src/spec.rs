@@ -174,7 +174,6 @@ pub mod object {
 
         pub ip: Word,
         pub sp: Word,
-        pub spsr: Word,
         pub gprs: Indirect<'a, [Word]>,
 
         pub master_fault_ep: Option<CPtr>,
