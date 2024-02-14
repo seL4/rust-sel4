@@ -11,9 +11,12 @@ use crate::sys;
 #[sel4_cfg(KERNEL_MCS)]
 use crate::Reply;
 
+/// Configuration-dependant alias for conveying reply authority to syscalls.
+pub type ReplyAuthority = ReplyAuthorityImpl;
+
 sel4_cfg_if! {
     if #[sel4_cfg(KERNEL_MCS)] {
-        pub type ReplyAuthority = Reply;
+        pub type ReplyAuthorityImpl = Reply;
 
         impl ReplyAuthority {
             pub(crate) fn into_sys_reply_authority(self) -> sys::ReplyAuthority {
@@ -21,13 +24,14 @@ sel4_cfg_if! {
             }
         }
     } else {
-        pub type ReplyAuthority = ImplicitReplyAuthority;
+        pub type ReplyAuthorityImpl = ImplicitReplyAuthority;
 
         impl ReplyAuthority {
             pub(crate) fn into_sys_reply_authority(self) -> sys::ReplyAuthority {
             }
         }
 
+        /// Under this configuration, no reply authority is required.
         pub struct ImplicitReplyAuthority;
 
         impl ConveysReplyAuthority for () {
@@ -38,6 +42,7 @@ sel4_cfg_if! {
     }
 }
 
+/// Trait for types from which [`ReplyAuthority`] can be derived.
 pub trait ConveysReplyAuthority {
     fn into_reply_authority(self) -> ReplyAuthority;
 }

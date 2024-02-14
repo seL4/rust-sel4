@@ -4,6 +4,8 @@
 // SPDX-License-Identifier: MIT
 //
 
+//! Items that are applicable within the context of the root task's initial thread.
+
 use core::marker::PhantomData;
 use core::ops::Range;
 

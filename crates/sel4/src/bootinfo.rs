@@ -15,6 +15,9 @@ use sel4_config::sel4_cfg;
 
 use crate::{cap_type, init_thread::SlotRegion, newtype_methods, sys, IpcBuffer, GRANULE_SIZE};
 
+/// A wrapped pointer to a [`BootInfo`] block.
+///
+/// Access [`BootInfo`] via `Deref`, and [`BootInfoExtraIter`] via [`extra`](BootInfoPtr::extra).
 #[repr(transparent)]
 #[derive(Debug)]
 pub struct BootInfoPtr {
@@ -173,6 +176,7 @@ impl BootInfoExtraId {
     }
 }
 
+/// An iterator for accessing the [`BootInfoExtra`] entires associated with a [`BootInfoPtr`].
 pub struct BootInfoExtraIter<'a> {
     bootinfo: &'a BootInfoPtr,
     cursor: usize,
