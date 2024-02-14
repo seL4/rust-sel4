@@ -186,7 +186,7 @@ in rec {
   };
 
   ringWith = features: {
-    version = "0.17.7";
+    version = "=0.17.7";
     features = [ "less-safe-getrandom-custom-or-rdrand" ] ++ features;
   };
 
