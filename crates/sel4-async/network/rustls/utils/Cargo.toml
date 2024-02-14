@@ -19,7 +19,7 @@ license = "BSD-2-Clause"
 [dependencies]
 getrandom = { version = "0.2.10", features = ["custom"] }
 rand = { version = "0.8.5", default-features = false, features = ["small_rng"] }
-ring = { version = "0.17.7", features = ["less-safe-getrandom-custom-or-rdrand"] }
+ring = { version = "=0.17.7", features = ["less-safe-getrandom-custom-or-rdrand"] }
 sel4-async-time = { path = "../../../time" }
 
 [dependencies.rustls]
