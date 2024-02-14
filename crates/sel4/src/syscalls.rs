@@ -22,6 +22,7 @@ pub const NUM_MESSAGE_REGISTERS: usize = u32_into_usize(sys::seL4_MsgLimits::seL
 /// A capability badge.
 pub type Badge = Word;
 
+/// Trait for [`CapType`]s which are used as targets of IPC syscalls.
 pub trait IpcCapType: CapType {}
 
 impl IpcCapType for cap_type::Notification {}
@@ -250,6 +251,7 @@ type ConcreteFastMessagesForIn = [Option<Word>; NUM_FAST_MESSAGE_REGISTERS];
 
 type ConcreteFastMessagesForInOut = [Word; NUM_FAST_MESSAGE_REGISTERS];
 
+/// Trait for types which can hold the contents of a set of inline message registers.
 pub trait FastMessages: fast_messages_sealing::FastMessagesSealed {
     fn prepare_in(self) -> ConcreteFastMessagesForIn;
 

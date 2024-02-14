@@ -21,6 +21,7 @@ use crate::Badge;
 #[sel4_cfg(not(KERNEL_MCS))]
 use crate::CPtr;
 
+/// Corresponds to `seL4_Time`.
 #[sel4_cfg(KERNEL_MCS)]
 pub type Time = u64;
 

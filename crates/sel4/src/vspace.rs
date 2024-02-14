@@ -20,10 +20,12 @@ impl FrameSize {
     }
 }
 
+/// Trait for [`CapType`]s which correspond to frame objects.
 pub trait FrameType: CapType {}
 
 impl FrameType for cap_type::UnspecifiedFrame {}
 
+/// Trait for [`FrameType`]s which correspond to frame objects of fixed size.
 pub trait SizedFrameType: FrameType {
     const FRAME_SIZE: FrameSize;
 }

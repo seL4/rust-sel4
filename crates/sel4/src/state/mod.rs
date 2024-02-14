@@ -64,6 +64,11 @@ where
     try_with_ipc_buffer_slot_mut(|buf| f(buf.unwrap().as_mut().unwrap()))
 }
 
+/// Provides low-level access to this thread's IPC buffer.
+///
+/// This function does not modify kernel state. It only affects this crate's thread-local state.
+///
+/// Requires the `"state"` feature to be enabled.
 pub fn try_with_ipc_buffer_slot<F, T>(f: F) -> T
 where
     F: FnOnce(Result<&Option<&'static mut IpcBuffer>, BorrowError>) -> T,
@@ -72,6 +77,11 @@ where
     f(r.map(|_| unsafe { __sel4_ipc_buffer.0.get().as_ref().unwrap() }))
 }
 
+/// Provides low-level mutable access to this thread's IPC buffer.
+///
+/// This function does not modify kernel state. It only affects this crate's thread-local state.
+///
+/// Requires the `"state"` feature to be enabled.
 pub fn try_with_ipc_buffer_slot_mut<F, T>(f: F) -> T
 where
     F: FnOnce(Result<&mut Option<&'static mut IpcBuffer>, BorrowMutError>) -> T,
@@ -87,6 +97,9 @@ fn take_ok<T, E>(r: Result<T, E>) -> (Option<T>, Result<(), E>) {
     }
 }
 
+/// Returns whether this crate's IPC buffer slot is thread-local.
+///
+/// Requires the `"state"` feature to be enabled.
 pub const fn ipc_buffer_is_thread_local() -> bool {
     IPC_BUFFER_IS_THREAD_LOCAL
 }
