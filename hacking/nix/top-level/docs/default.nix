@@ -38,6 +38,11 @@ let
         runtime = "sel4-microkit";
         minimal = true;
       }
+      { id = "aarch32-microkit";
+        world = pkgs.host.aarch32.none.this.worlds.default;
+        runtime = "sel4-root-task";
+        minimal = false;
+      }
       { id = "riscv64-root-task";
         world = pkgs.host.riscv64.default.none.this.worlds.default;
         runtime = "sel4-root-task";
