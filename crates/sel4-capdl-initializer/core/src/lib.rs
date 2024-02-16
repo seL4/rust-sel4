@@ -19,7 +19,7 @@ use log::{debug, info, trace};
 use sel4::{
     cap_type,
     init_thread::{self, Slot},
-    AbsoluteCPtr, BootInfoPtr, CNodeCapData, CPtr, Cap, CapRights, CapType, ObjectBlueprint,
+    AbsoluteCPtr, BootInfoPtr, CNodeCapData, Cap, CapRights, CapType, ObjectBlueprint,
     SizedFrameType, Untyped, UserContext,
 };
 use sel4_capdl_initializer_types::*;
@@ -556,7 +556,9 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
         let obj = self.spec().lookup_object::<&object::SchedContext>(obj_id)?;
         let sched_context = self.orig_cap::<cap_type::SchedContext>(obj_id);
         self.bootinfo
-            .sched_control(affinity)
+            .sched_control()
+            .index(affinity)
+            .cap()
             .sched_control_configure_flags(
                 sched_context,
                 obj.extra.budget,
@@ -638,7 +640,7 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
                                     let new = self.cslot_alloc_or_panic().cap();
                                     let dst = init_thread::slot::CNODE.cap().relative(new);
                                     dst.mint(&src, rights, badge)?;
-                                    new
+                                    new.cast()
                                 }
                             },
                         };
@@ -661,7 +663,7 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
 
                         tcb.tcb_set_timeout_endpoint(temp_fault_ep)?;
                     } else {
-                        let fault_ep = CPtr::from_bits(obj.extra.master_fault_ep.unwrap());
+                        let fault_ep = sel4::CPtr::from_bits(obj.extra.master_fault_ep.unwrap());
 
                         tcb.tcb_configure(
                             fault_ep,
