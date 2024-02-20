@@ -20,7 +20,7 @@ use object::{
 use quote::format_ident;
 
 use sel4_build_env::{get_libsel4_include_dirs, get_with_sel4_prefix_relative_fallback};
-use sel4_config::{sel4_cfg_if, sel4_cfg_str, sel4_cfg_usize};
+use sel4_config::{sel4_cfg, sel4_cfg_if, sel4_cfg_str, sel4_cfg_usize};
 use sel4_kernel_loader_embed_page_tables::{
     schemes, LeafLocation, Region, RegionsBuilder, Scheme, SchemeHelpers,
 };
@@ -29,13 +29,11 @@ use sel4_rustfmt_helper::Rustfmt;
 
 pub const SEL4_KERNEL_ENV: &str = "SEL4_KERNEL";
 
-sel4_cfg_if! {
-    if #[sel4_cfg(WORD_SIZE = "64")] {
-        type FileHeader = object::elf::FileHeader64<Endianness>;
-    } else if #[sel4_cfg(WORD_SIZE = "32")] {
-        type FileHeader = object::elf::FileHeader32<Endianness>;
-    }
-}
+#[sel4_cfg(WORD_SIZE = "64")]
+type FileHeader = object::elf::FileHeader64<Endianness>;
+
+#[sel4_cfg(WORD_SIZE = "32")]
+type FileHeader = object::elf::FileHeader32<Endianness>;
 
 sel4_cfg_if! {
     if #[sel4_cfg(SEL4_ARCH = "aarch64")] {
