@@ -5,7 +5,8 @@
 //
 
 use crate::{
-    cap::*, AbsoluteCPtr, Cap, CapRights, Error, FrameType, InvocationContext, Result, VmAttributes,
+    cap::*, AbsoluteCPtr, Cap, CapRights, Error, FrameType, InvocationContext, Result,
+    VmAttributes, Word,
 };
 
 impl<T: FrameType, C: InvocationContext> Cap<T, C> {
@@ -91,8 +92,57 @@ impl<C: InvocationContext> PageTable<C> {
     }
 }
 
-// TODO
-impl<C: InvocationContext> IrqControl<C> {}
+impl<C: InvocationContext> IrqControl<C> {
+    /// Corresponds to `seL4_IRQControl_GetIOAPIC`.
+    pub fn irq_control_get_ioapic(
+        self,
+        ioapic: Word,
+        pin: Word,
+        level: Word,
+        polarity: Word,
+        vector: Word,
+        dst: &AbsoluteCPtr,
+    ) -> Result<()> {
+        Error::wrap(self.invoke(|cptr, ipc_buffer| {
+            ipc_buffer.inner_mut().seL4_IRQControl_GetIOAPIC(
+                cptr.bits(),
+                dst.root().bits(),
+                dst.path().bits(),
+                dst.path().depth_for_kernel(),
+                ioapic,
+                pin,
+                level,
+                polarity,
+                vector,
+            )
+        }))
+    }
+
+    /// Corresponds to `seL4_IRQControl_GetMSI`.
+    pub fn irq_control_get_msi(
+        self,
+        pci_bus: Word,
+        pci_dev: Word,
+        pci_func: Word,
+        handle: Word,
+        vector: Word,
+        dst: &AbsoluteCPtr,
+    ) -> Result<()> {
+        Error::wrap(self.invoke(|cptr, ipc_buffer| {
+            ipc_buffer.inner_mut().seL4_IRQControl_GetMSI(
+                cptr.bits(),
+                dst.root().bits(),
+                dst.path().bits(),
+                dst.path().depth_for_kernel(),
+                pci_bus,
+                pci_dev,
+                pci_func,
+                handle,
+                vector,
+            )
+        }))
+    }
+}
 
 impl<C: InvocationContext> AsidControl<C> {
     /// Corresponds to `seL4_X86_ASIDControl_MakePool`.

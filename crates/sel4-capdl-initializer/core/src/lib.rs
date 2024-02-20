@@ -359,6 +359,28 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
                                 }
                             }
                         }
+                        #[sel4_cfg(ARCH_X86_64)]
+                        Object::IrqMsi(obj) => {
+                            init_thread::slot::IRQ_CONTROL.cap().irq_control_get_msi(
+                                obj.extra.pci_bus,
+                                obj.extra.pci_dev,
+                                obj.extra.pci_func,
+                                obj.extra.handle,
+                                *irq,
+                                &cslot_to_relative_cptr(slot),
+                            )?;
+                        }
+                        #[sel4_cfg(ARCH_X86_64)]
+                        Object::IrqIOApic(obj) => {
+                            init_thread::slot::IRQ_CONTROL.cap().irq_control_get_ioapic(
+                                obj.extra.ioapic,
+                                obj.extra.pin,
+                                obj.extra.level,
+                                obj.extra.polarity,
+                                *irq,
+                                &cslot_to_relative_cptr(slot),
+                            )?;
+                        }
                         _ => {
                             panic!();
                         }

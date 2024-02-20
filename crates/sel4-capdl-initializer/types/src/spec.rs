@@ -76,6 +76,8 @@ pub enum Object<'a, D, M> {
     PageTable(object::PageTable<'a>),
     AsidPool(object::AsidPool),
     ArmIrq(object::ArmIrq<'a>),
+    IrqMsi(object::IrqMsi<'a>),
+    IrqIOApic(object::IrqIOApic<'a>),
     SchedContext(object::SchedContext),
     Reply,
 }
@@ -104,6 +106,8 @@ pub enum Cap {
     PageTable(cap::PageTable),
     AsidPool(cap::AsidPool),
     ArmIrqHandler(cap::ArmIrqHandler),
+    IrqMsiHandler(cap::IrqMsiHandler),
+    IrqIOApicHandler(cap::IrqIOApicHandler),
     SchedContext(cap::SchedContext),
     Reply(cap::Reply),
 }
@@ -122,6 +126,8 @@ impl Cap {
             Cap::PageTable(cap) => cap.object,
             Cap::AsidPool(cap) => cap.object,
             Cap::ArmIrqHandler(cap) => cap.object,
+            Cap::IrqMsiHandler(cap) => cap.object,
+            Cap::IrqIOApicHandler(cap) => cap.object,
             Cap::SchedContext(cap) => cap.object,
             Cap::Reply(cap) => cap.object,
         }
@@ -221,6 +227,38 @@ pub mod object {
         pub target: Word,
     }
 
+    #[derive(Debug, Clone, Eq, PartialEq, IsObject, IsObjectWithCapTable)]
+    #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+    pub struct IrqMsi<'a> {
+        pub slots: Indirect<'a, [CapTableEntry]>,
+        pub extra: Indirect<'a, IrqMsiExtraInfo>,
+    }
+
+    #[derive(Debug, Clone, Eq, PartialEq)]
+    #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+    pub struct IrqMsiExtraInfo {
+        pub handle: Word,
+        pub pci_bus: Word,
+        pub pci_dev: Word,
+        pub pci_func: Word,
+    }
+
+    #[derive(Debug, Clone, Eq, PartialEq, IsObject, IsObjectWithCapTable)]
+    #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+    pub struct IrqIOApic<'a> {
+        pub slots: Indirect<'a, [CapTableEntry]>,
+        pub extra: Indirect<'a, IrqIOApicExtraInfo>,
+    }
+
+    #[derive(Debug, Clone, Eq, PartialEq)]
+    #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+    pub struct IrqIOApicExtraInfo {
+        pub ioapic: Word,
+        pub pin: Word,
+        pub level: Word,
+        pub polarity: Word,
+    }
+
     #[derive(Debug, Clone, Eq, PartialEq, IsObject)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
     pub struct SchedContext {
@@ -316,6 +354,18 @@ pub mod cap {
     #[derive(Debug, Clone, Eq, PartialEq, IsCap)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
     pub struct ArmIrqHandler {
+        pub object: ObjectId,
+    }
+
+    #[derive(Debug, Clone, Eq, PartialEq, IsCap)]
+    #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+    pub struct IrqMsiHandler {
+        pub object: ObjectId,
+    }
+
+    #[derive(Debug, Clone, Eq, PartialEq, IsCap)]
+    #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+    pub struct IrqIOApicHandler {
         pub object: ObjectId,
     }
 
