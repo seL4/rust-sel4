@@ -5,7 +5,7 @@
 //
 
 #![no_std]
-
+#![feature(const_mut_refs)]
 use core::fmt::{self, Write};
 
 use log::{Log, Metadata, Record, SetLoggerError};

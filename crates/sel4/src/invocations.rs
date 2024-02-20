@@ -107,7 +107,7 @@ impl<C: InvocationContext> TCB<C> {
             self.invoke(|cptr, ipc_buffer| ipc_buffer.inner_mut().seL4_TCB_Suspend(cptr.bits())),
         )
     }
-
+    
     sel4_cfg_if! {
         if #[cfg(KERNEL_MCS)] {
             /// Corresponds to `seL4_TCB_Configure`.
