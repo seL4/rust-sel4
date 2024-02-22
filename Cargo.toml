@@ -38,6 +38,7 @@ members = [
     "crates/examples/root-task/example-root-task",
     "crates/examples/root-task/example-root-task-without-runtime",
     "crates/examples/root-task/hello",
+    "crates/examples/root-task/spawn-thread",
     "crates/private/meta",
     "crates/private/support/sel4-simple-task/config-types",
     "crates/private/support/sel4-simple-task/rpc",
