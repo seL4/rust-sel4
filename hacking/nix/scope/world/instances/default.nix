@@ -90,6 +90,7 @@ in rec {
     examples.root-task.hello
     examples.root-task.example-root-task
     examples.root-task.example-root-task-without-runtime
+    examples.root-task.spawn-thread
   ];
 
   allAutomationScripts = map
@@ -321,9 +322,7 @@ in rec {
           release = false;
         };
       });
-    };
 
-    root-task = {
       example-root-task = maybe haveFullRuntime (mkInstance {
         rootTask = mkTask {
           rootCrate = crates.example-root-task;
@@ -339,6 +338,16 @@ in rec {
           rootCrate = crates.example-root-task-without-runtime;
           release = false;
           rustTargetInfo = seL4RustTargetInfoWithConfig { minimal = true; };
+        };
+        extraPlatformArgs = lib.optionalAttrs canSimulate {
+          canAutomateSimply = true;
+        };
+      });
+
+      spawn-thread = maybe haveFullRuntime (mkInstance {
+        rootTask = mkTask {
+          rootCrate = crates.spawn-thread;
+          release = false;
         };
         extraPlatformArgs = lib.optionalAttrs canSimulate {
           canAutomateSimply = true;
