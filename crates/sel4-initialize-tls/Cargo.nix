@@ -7,8 +7,11 @@
 { mk, localCrates, versions }:
 
 mk {
-  package.name = "sel4-initialize-tls-on-stack";
+  package.name = "sel4-initialize-tls";
   dependencies = {
     inherit (versions) cfg-if;
+  };
+  features = {
+    on-stack = [];
   };
 }

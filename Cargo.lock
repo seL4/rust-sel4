@@ -2225,7 +2225,7 @@ name = "sel4-immutable-cell"
 version = "0.1.0"
 
 [[package]]
-name = "sel4-initialize-tls-on-stack"
+name = "sel4-initialize-tls"
 version = "0.1.0"
 dependencies = [
  "cfg-if",
@@ -2457,7 +2457,7 @@ dependencies = [
  "cfg-if",
  "sel4",
  "sel4-elf-header",
- "sel4-initialize-tls-on-stack",
+ "sel4-initialize-tls",
  "sel4-panicking-env",
  "unwinding",
 ]
@@ -2550,7 +2550,6 @@ dependencies = [
  "sel4-backtrace-simple",
  "sel4-dlmalloc",
  "sel4-immediate-sync-once-cell",
- "sel4-initialize-tls-on-stack",
  "sel4-panicking",
  "sel4-panicking-env",
  "sel4-runtime-common",

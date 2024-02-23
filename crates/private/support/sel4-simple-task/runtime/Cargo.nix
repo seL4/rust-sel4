@@ -20,7 +20,6 @@ mk {
       sel4-immediate-sync-once-cell
       sel4-panicking
       sel4-panicking-env
-      sel4-initialize-tls-on-stack
       sel4-simple-task-runtime-config-types
       sel4-simple-task-runtime-macros
       sel4-simple-task-threading

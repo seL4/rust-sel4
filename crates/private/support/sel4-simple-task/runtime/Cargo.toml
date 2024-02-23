@@ -33,7 +33,6 @@ sel4-backtrace = { path = "../../../../sel4-backtrace", features = ["unwinding",
 sel4-backtrace-simple = { path = "../../../../sel4-backtrace/simple" }
 sel4-dlmalloc = { path = "../../../../sel4-dlmalloc" }
 sel4-immediate-sync-once-cell = { path = "../../../../sel4-immediate-sync-once-cell" }
-sel4-initialize-tls-on-stack = { path = "../../../../sel4-initialize-tls-on-stack" }
 sel4-panicking = { path = "../../../../sel4-panicking" }
 sel4-panicking-env = { path = "../../../../sel4-panicking/env" }
 sel4-runtime-common = { path = "../../../../sel4-runtime-common", features = ["tls", "unwinding"] }
