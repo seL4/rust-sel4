@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
+use sel4_elf_header::PT_TLS;
 use sel4_panicking_env::abort;
 
 #[allow(unused_imports)]
@@ -13,7 +14,7 @@ use sel4_initialize_tls_on_stack::{
 
 pub use sel4_initialize_tls_on_stack::{ContArg, ContFn};
 
-use crate::phdrs::{elf::PT_TLS, locate_phdrs};
+use crate::phdrs::locate_phdrs;
 
 #[allow(clippy::missing_safety_doc)]
 pub unsafe fn initialize_tls_on_stack_and_continue(cont_fn: ContFn, cont_arg: *mut ContArg) -> ! {
@@ -22,10 +23,10 @@ pub unsafe fn initialize_tls_on_stack_and_continue(cont_fn: ContFn, cont_arg: *m
         .find(|phdr| phdr.p_type == PT_TLS)
         .unwrap_or_else(|| abort!("no PT_TLS segment"));
     let unchecked = UncheckedTlsImage {
-        vaddr: phdr.p_vaddr.try_into().unwrap(),
-        filesz: phdr.p_filesz.try_into().unwrap(),
-        memsz: phdr.p_memsz.try_into().unwrap(),
-        align: phdr.p_align.try_into().unwrap(),
+        vaddr: phdr.p_vaddr,
+        filesz: phdr.p_filesz,
+        memsz: phdr.p_memsz,
+        align: phdr.p_align,
     };
     unchecked
         .check()

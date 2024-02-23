@@ -1,21 +1,15 @@
 //
-// Copyright 2023, Colias Group, LLC
+// Copyright 2024, Colias Group, LLC
 //
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
+#![no_std]
 #![allow(dead_code)]
 
 use core::ops::Range;
+use core::ptr;
 use core::slice;
-
-use sel4_panicking_env::abort;
-
-#[cfg(target_pointer_width = "32")]
-pub type Word = u32;
-
-#[cfg(target_pointer_width = "64")]
-pub type Word = u64;
 
 #[repr(C)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -24,9 +18,9 @@ pub struct ElfHeader {
     pub e_type: u16,
     pub e_machine: u16,
     pub e_version: u32,
-    pub e_entry: Word,
-    pub e_phoff: Word,
-    pub e_shoff: Word,
+    pub e_entry: usize,
+    pub e_phoff: usize,
+    pub e_shoff: usize,
     pub e_flags: u32,
     pub e_ehsize: u16,
     pub e_phentsize: u16,
@@ -55,11 +49,11 @@ impl ElfHeader {
         self.e_ident.magic == ELFMAG
     }
 
-    pub fn locate_phdrs(&self) -> &'static [ProgramHeader] {
+    pub fn locate_phdrs(&'static self) -> &'static [ProgramHeader] {
         unsafe {
-            let ptr = (self as *const Self)
+            let ptr = ptr::from_ref(self)
                 .cast::<u8>()
-                .offset(self.e_phoff.try_into().unwrap_or_else(|_| abort!()))
+                .wrapping_byte_offset(self.e_phoff as isize)
                 .cast::<ProgramHeader>();
             slice::from_raw_parts(ptr, self.e_phnum.into())
         }
@@ -72,14 +66,14 @@ pub struct ProgramHeader {
     pub p_type: u32,
     #[cfg(target_pointer_width = "64")]
     pub p_flags: u32,
-    pub p_offset: Word,
-    pub p_vaddr: Word,
-    pub p_paddr: Word,
-    pub p_filesz: Word,
-    pub p_memsz: Word,
+    pub p_offset: usize,
+    pub p_vaddr: usize,
+    pub p_paddr: usize,
+    pub p_filesz: usize,
+    pub p_memsz: usize,
     #[cfg(target_pointer_width = "32")]
     pub p_flags: u32,
-    pub p_align: Word,
+    pub p_align: usize,
 }
 
 pub const PT_NULL: u32 = 0;
@@ -91,6 +85,6 @@ impl ProgramHeader {
     pub fn vaddr_range(&self) -> Range<usize> {
         let start = self.p_vaddr;
         let end = start + self.p_memsz;
-        start.try_into().unwrap_or_else(|_| abort!())..end.try_into().unwrap_or_else(|_| abort!())
+        start..end
     }
 }

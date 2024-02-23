@@ -2181,6 +2181,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "sel4-elf-header"
+version = "0.1.0"
+
+[[package]]
 name = "sel4-externally-shared"
 version = "0.1.0"
 dependencies = [
@@ -2452,6 +2456,7 @@ version = "0.1.0"
 dependencies = [
  "cfg-if",
  "sel4",
+ "sel4-elf-header",
  "sel4-initialize-tls-on-stack",
  "sel4-panicking-env",
  "unwinding",
