@@ -12,13 +12,13 @@ mk {
     inherit (versions) cfg-if;
     inherit (localCrates) sel4-panicking-env sel4-elf-header;
     sel4 = localCrates.sel4 // { default-features = false; optional = true; };
-    sel4-initialize-tls-on-stack = localCrates.sel4-initialize-tls-on-stack // { optional = true; };
+    sel4-initialize-tls = localCrates.sel4-initialize-tls // { features = [ "on-stack" ]; optional = true; };
   };
   target."cfg(not(target_arch = \"arm\"))".dependencies = {
     unwinding = unwindingWith [] // { optional = true; };
   };
   features = {
-    tls = [ "dep:sel4-initialize-tls-on-stack" "dep:sel4" ];
+    tls = [ "dep:sel4-initialize-tls" "dep:sel4" ];
     start = [];
   };
 }
