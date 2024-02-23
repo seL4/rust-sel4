@@ -11,7 +11,7 @@ use unwinding::custom_eh_frame_finder::{
 
 use sel4_elf_header::{PT_GNU_EH_FRAME, PT_LOAD};
 
-use crate::phdrs::locate_phdrs;
+use crate::locate_phdrs;
 
 struct EhFrameFinderImpl;
 
