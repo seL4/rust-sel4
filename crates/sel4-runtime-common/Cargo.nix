@@ -10,7 +10,7 @@ mk {
   package.name = "sel4-runtime-common";
   dependencies = {
     inherit (versions) cfg-if;
-    inherit (localCrates) sel4-panicking-env;
+    inherit (localCrates) sel4-panicking-env sel4-elf-header;
     sel4 = localCrates.sel4 // { default-features = false; optional = true; };
     sel4-initialize-tls-on-stack = localCrates.sel4-initialize-tls-on-stack // { optional = true; };
   };

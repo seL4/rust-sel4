@@ -4,11 +4,8 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
+use sel4_elf_header::{ElfHeader, ProgramHeader};
 use sel4_panicking_env::abort;
-
-mod elf;
-
-use elf::{ElfHeader, ProgramHeader};
 
 #[cfg(all(feature = "tls", target_thread_local))]
 mod tls;

@@ -9,10 +9,9 @@ use unwinding::custom_eh_frame_finder::{
     SetCustomEhFrameFinderError,
 };
 
-use crate::phdrs::{
-    elf::{PT_GNU_EH_FRAME, PT_LOAD},
-    locate_phdrs,
-};
+use sel4_elf_header::{PT_GNU_EH_FRAME, PT_LOAD};
+
+use crate::phdrs::locate_phdrs;
 
 struct EhFrameFinderImpl;
 
