@@ -17,7 +17,18 @@
 
 #![no_std]
 
+use core::alloc::Layout;
+use core::mem;
 use core::slice;
+
+#[cfg(not(any(
+    target_arch = "aarch64",
+    target_arch = "arm",
+    target_arch = "riscv32",
+    target_arch = "riscv64",
+    target_arch = "x86_64",
+)))]
+compile_error!("unsupported architecture");
 
 #[cfg(feature = "on-stack")]
 mod on_stack;
@@ -58,11 +69,88 @@ pub struct TlsImage {
 }
 
 impl TlsImage {
-    unsafe fn initialize(&self, tls_base_addr: usize) {
+    pub fn reservation_layout(&self) -> TlsReservationLayout {
+        TlsReservationLayout::from_segment_layout(self.segment_layout())
+    }
+
+    fn segment_layout(&self) -> Layout {
+        Layout::from_size_align(self.memsz, self.align).unwrap()
+    }
+
+    pub unsafe fn initialize_tls_reservation(&self, tls_reservation_start: *mut u8) {
+        let reservation_layout = self.reservation_layout();
+
         let image_data_window = slice::from_raw_parts(self.vaddr as *mut u8, self.filesz);
-        let tls_window = slice::from_raw_parts_mut(tls_base_addr as *mut u8, self.memsz);
-        let (tdata, tbss) = tls_window.split_at_mut(self.filesz);
+
+        let segment_start =
+            tls_reservation_start.wrapping_byte_add(reservation_layout.segment_offset());
+        let segment_window = slice::from_raw_parts_mut(segment_start as *mut u8, self.memsz);
+        let (tdata, tbss) = segment_window.split_at_mut(self.filesz);
+
         tdata.copy_from_slice(image_data_window);
         tbss.fill(0);
+
+        if cfg!(target_arch = "x86_64") {
+            let thread_pointer =
+                tls_reservation_start.wrapping_byte_add(reservation_layout.thread_pointer_offset());
+            (thread_pointer.cast::<*mut u8>()).write(thread_pointer);
+        }
+    }
+}
+
+#[derive(Copy, Clone, Debug)]
+pub struct TlsReservationLayout {
+    footprint: Layout,
+    segment_offset: usize,
+    thread_pointer_offset: usize,
+}
+
+impl TlsReservationLayout {
+    fn from_segment_layout(segment_layout: Layout) -> Self {
+        if cfg!(any(target_arch = "arm", target_arch = "aarch64")) {
+            let tcb_size = 2 * mem::size_of::<usize>();
+            let segment_offset = tcb_size.next_multiple_of(segment_layout.align());
+            Self {
+                footprint: Layout::from_size_align(
+                    segment_offset + segment_layout.size(),
+                    segment_layout.align().max(tcb_size),
+                )
+                .unwrap(),
+                segment_offset,
+                thread_pointer_offset: 0,
+            }
+        } else if cfg!(any(target_arch = "riscv32", target_arch = "riscv64")) {
+            Self {
+                footprint: Layout::from_size_align(segment_layout.size(), segment_layout.align())
+                    .unwrap(),
+                segment_offset: 0,
+                thread_pointer_offset: 0,
+            }
+        } else if cfg!(target_arch = "x86_64") {
+            let tcb_size = 2 * mem::size_of::<usize>(); // could probably get away with just 1x word size
+            Self {
+                footprint: Layout::from_size_align(
+                    segment_layout.size() + tcb_size,
+                    segment_layout.align(),
+                )
+                .unwrap(),
+                segment_offset: 0,
+                thread_pointer_offset: segment_layout.size(),
+            }
+        } else {
+            unreachable!();
+        }
+    }
+
+    pub fn footprint(&self) -> Layout {
+        self.footprint
+    }
+
+    pub fn segment_offset(&self) -> usize {
+        self.segment_offset
+    }
+
+    pub fn thread_pointer_offset(&self) -> usize {
+        self.thread_pointer_offset
     }
 }

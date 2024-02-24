@@ -49,6 +49,7 @@ core::arch::global_asm! {
         .section .text
 
         __aeabi_read_tp:
+            // TODO which register to use must match with LLVM -mtp, I think
             mrc p15, 0, r0, c13, c0, 2
             bx lr
     "#
