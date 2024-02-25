@@ -11,6 +11,7 @@ use core::slice;
 use crate::{newtype_methods, sys, AbsoluteCPtr, CNode, Word};
 
 /// Corresponds to `seL4_IPCBuffer`.
+#[derive(Default)]
 #[repr(transparent)]
 pub struct IpcBuffer(sys::seL4_IPCBuffer);
 
