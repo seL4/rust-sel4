@@ -104,6 +104,7 @@ members = [
     "crates/sel4-kernel-loader/payload-types",
     "crates/sel4-logging",
     "crates/sel4-microkit",
+    "crates/sel4-microkit/base",
     "crates/sel4-microkit/macros",
     "crates/sel4-microkit/message",
     "crates/sel4-microkit/message/types",

@@ -6,12 +6,14 @@
 
 use core::panic::UnwindSafe;
 
-pub use sel4_panicking::catch_unwind;
-pub use sel4_panicking_env::abort;
+use sel4_microkit_base::ipc_buffer_ptr;
+use sel4_panicking::catch_unwind;
+use sel4_panicking_env::abort;
 
-use crate::env::get_ipc_buffer;
-use crate::handler::{run_handler, Handler};
-use crate::panicking::init_panicking;
+use crate::{
+    handler::{run_handler, Handler},
+    panicking::init_panicking,
+};
 
 #[cfg(target_thread_local)]
 #[no_mangle]
@@ -29,6 +31,7 @@ unsafe extern "C" fn sel4_runtime_rust_entry() -> ! {
     inner_entry()
 }
 
+#[allow(unreachable_code)]
 fn inner_entry() -> ! {
     #[cfg(all(feature = "unwinding", panic = "unwind"))]
     {
@@ -38,7 +41,7 @@ fn inner_entry() -> ! {
     init_panicking();
 
     unsafe {
-        sel4::set_ipc_buffer(get_ipc_buffer().as_mut().unwrap());
+        sel4::set_ipc_buffer(ipc_buffer_ptr().as_mut().unwrap());
         sel4_runtime_common::run_ctors();
         __sel4_microkit__main();
     }
@@ -47,7 +50,7 @@ fn inner_entry() -> ! {
 }
 
 extern "C" {
-    fn __sel4_microkit__main();
+    fn __sel4_microkit__main() -> !;
 }
 
 #[doc(hidden)]
@@ -55,14 +58,15 @@ extern "C" {
 macro_rules! declare_init {
     ($init:expr) => {
         #[no_mangle]
-        fn __sel4_microkit__main() {
+        fn __sel4_microkit__main() -> ! {
             $crate::_private::run_main($init);
         }
     };
 }
 
+#[doc(hidden)]
 #[allow(clippy::missing_safety_doc)]
-pub fn run_main<T: Handler>(init: impl FnOnce() -> T + UnwindSafe) {
+pub fn run_main<T: Handler>(init: impl FnOnce() -> T + UnwindSafe) -> ! {
     let result = catch_unwind(|| match run_handler(init()) {
         Ok(absurdity) => match absurdity {},
         Err(err) => err,

@@ -26,9 +26,8 @@ unwinding = ["sel4-panicking/unwinding"]
 cfg-if = "1.0.0"
 sel4 = { path = "../sel4", features = ["single-threaded"] }
 sel4-dlmalloc = { path = "../sel4-dlmalloc" }
-sel4-externally-shared = { path = "../sel4-externally-shared" }
 sel4-immediate-sync-once-cell = { path = "../sel4-immediate-sync-once-cell" }
-sel4-immutable-cell = { path = "../sel4-immutable-cell" }
+sel4-microkit-base = { path = "base" }
 sel4-microkit-macros = { path = "macros" }
 sel4-panicking = { path = "../sel4-panicking" }
 sel4-panicking-env = { path = "../sel4-panicking/env" }

@@ -13,7 +13,7 @@ mk {
       optional = true;
     };
     inherit (localCrates)
-      sel4-microkit
+      sel4-microkit-base
       sel4-microkit-message-types
     ;
   };

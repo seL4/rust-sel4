@@ -4,8 +4,6 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-//! Utilities for handling IPC messages for protected procedure calls.
-
 pub type MessageLabel = sel4::Word;
 pub type MessageRegisterValue = sel4::Word;
 
@@ -15,16 +13,18 @@ pub struct MessageInfo {
 }
 
 impl MessageInfo {
-    pub(crate) fn from_sel4(inner: sel4::MessageInfo) -> Self {
+    #[doc(hidden)]
+    pub fn from_inner(inner: sel4::MessageInfo) -> Self {
         Self { inner }
     }
 
-    pub(crate) fn into_sel4(self) -> sel4::MessageInfo {
+    #[doc(hidden)]
+    pub fn into_inner(self) -> sel4::MessageInfo {
         self.inner
     }
 
     pub fn new(label: MessageLabel, count: usize) -> Self {
-        Self::from_sel4(sel4::MessageInfo::new(label, 0, 0, count))
+        Self::from_inner(sel4::MessageInfo::new(label, 0, 0, count))
     }
 
     pub fn label(&self) -> MessageLabel {

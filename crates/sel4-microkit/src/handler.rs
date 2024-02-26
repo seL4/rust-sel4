@@ -6,13 +6,18 @@
 
 use core::fmt;
 
+use sel4_microkit_base::MessageInfo;
+
+use crate::{
+    defer::{DeferredAction, PreparedDeferredAction},
+    pd_is_passive, Channel,
+};
+
 pub use core::convert::Infallible;
 
-use crate::cspace::{
-    Channel, DeferredAction, PreparedDeferredAction, INPUT_CAP, MONITOR_EP_CAP, REPLY_CAP,
-};
-use crate::message::MessageInfo;
-use crate::pd_is_passive;
+const INPUT_CAP: sel4::Endpoint = sel4::Cap::from_bits(1);
+const REPLY_CAP: sel4::Reply = sel4::Cap::from_bits(4);
+const MONITOR_EP_CAP: sel4::Endpoint = sel4::Cap::from_bits(5);
 
 const EVENT_TYPE_MASK: sel4::Word = 1 << (sel4::WORD_SIZE - 1);
 
@@ -66,7 +71,7 @@ pub(crate) fn run_handler<T: Handler>(mut handler: T) -> Result<Never, T::Error>
 
     loop {
         let (tag, badge) = match (reply_tag.take(), prepared_deferred_action.take()) {
-            (Some(tag), None) => INPUT_CAP.reply_recv(tag.into_sel4(), REPLY_CAP),
+            (Some(tag), None) => INPUT_CAP.reply_recv(tag.into_inner(), REPLY_CAP),
             (None, Some(action)) => action.cptr().nb_send_recv(
                 action.msg_info(),
                 INPUT_CAP.cast::<sel4::cap_type::Unspecified>(),
@@ -76,7 +81,7 @@ pub(crate) fn run_handler<T: Handler>(mut handler: T) -> Result<Never, T::Error>
             _ => unreachable!(),
         };
 
-        let tag = MessageInfo::from_sel4(tag);
+        let tag = MessageInfo::from_inner(tag);
 
         let is_endpoint = badge & EVENT_TYPE_MASK != 0;
 

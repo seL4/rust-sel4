@@ -11,14 +11,13 @@ mk {
   dependencies = {
     inherit (versions) cfg-if;
     inherit (localCrates)
-      sel4-panicking
-      sel4-panicking-env
       sel4-immediate-sync-once-cell
-      sel4-immutable-cell
+      sel4-panicking-env
+      sel4-panicking
       sel4-dlmalloc
       sel4-sync
+      sel4-microkit-base
       sel4-microkit-macros
-      sel4-externally-shared
     ;
     sel4-runtime-common = localCrates.sel4-runtime-common // { features = [ "tls" "unwinding" "start" ]; };
     sel4 = localCrates.sel4 // { features = [ "single-threaded" ]; };

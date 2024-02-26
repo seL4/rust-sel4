@@ -2326,14 +2326,21 @@ dependencies = [
  "cfg-if",
  "sel4",
  "sel4-dlmalloc",
- "sel4-externally-shared",
  "sel4-immediate-sync-once-cell",
- "sel4-immutable-cell",
+ "sel4-microkit-base",
  "sel4-microkit-macros",
  "sel4-panicking",
  "sel4-panicking-env",
  "sel4-runtime-common",
  "sel4-sync",
+]
+
+[[package]]
+name = "sel4-microkit-base"
+version = "0.1.0"
+dependencies = [
+ "sel4",
+ "sel4-immutable-cell",
 ]
 
 [[package]]
@@ -2349,7 +2356,7 @@ dependencies = [
 name = "sel4-microkit-message"
 version = "0.1.0"
 dependencies = [
- "sel4-microkit",
+ "sel4-microkit-base",
  "sel4-microkit-message-types",
  "serde",
 ]
