@@ -28,7 +28,7 @@ impl Handler for HandlerImpl {
     type Error = Infallible;
 
     fn notified(&mut self, _channel: Channel) -> Result<(), Self::Error> {
-        self.deferred_action.defer(CLIENT.defer_notify()).unwrap();
+        self.deferred_action.defer_notify(CLIENT).unwrap();
         Ok(())
     }
 

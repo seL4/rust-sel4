@@ -1,3 +1,9 @@
+//
+// Copyright 2024, Colias Group, LLC
+//
+// SPDX-License-Identifier: BSD-2-Clause
+//
+
 use sel4::config::sel4_cfg_if;
 
 sel4_cfg_if! {

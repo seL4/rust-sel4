@@ -12,7 +12,7 @@ use core::mem;
 #[cfg(feature = "postcard")]
 use serde::{Deserialize, Serialize};
 
-use sel4_microkit::{with_msg_bytes, with_msg_bytes_mut, MessageInfo, MessageRegisterValue};
+use sel4_microkit_base::{with_msg_bytes, with_msg_bytes_mut, MessageInfo, MessageRegisterValue};
 
 use sel4_microkit_message_types::{
     EmptyMessage, MessageLabel, MessageRecv, MessageSend, MessageValueRecv, MessageValueSend,

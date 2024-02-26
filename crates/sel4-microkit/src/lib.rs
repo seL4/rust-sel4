@@ -6,7 +6,6 @@
 
 #![no_std]
 #![feature(cfg_target_thread_local)]
-#![feature(used_with_arg)]
 
 //! A foundation for pure-Rust [seL4 Microkit](https://github.com/seL4/microkit) protection domains.
 //!
@@ -36,31 +35,19 @@
 #[cfg(feature = "alloc")]
 extern crate alloc;
 
-use sel4_panicking_env::abort;
-
+pub use sel4_microkit_base::*;
 pub use sel4_microkit_macros::protection_domain;
 
-mod cspace;
+mod defer;
 mod entry;
-mod env;
 mod handler;
 mod heap;
-mod memory_region;
-mod message;
 mod printing;
 
 pub mod panicking;
 
-pub use cspace::{
-    Channel, DeferredAction, DeferredActionInterface, DeferredActionSlot, IrqAckError,
-};
-pub use env::{pd_is_passive, pd_name};
+pub use defer::{DeferredAction, DeferredActionInterface, DeferredActionSlot};
 pub use handler::{Handler, Infallible, NullHandler};
-pub use memory_region::{cast_memory_region_checked, cast_memory_region_to_slice_checked};
-pub use message::{
-    get_mr, set_mr, with_msg_bytes, with_msg_bytes_mut, with_msg_regs, with_msg_regs_mut,
-    MessageInfo, MessageLabel, MessageRegisterValue,
-};
 pub use printing::{debug_print, debug_println};
 
 /// Declares the initialization function, stack size, and, optionally, heap and heap size.
@@ -102,7 +89,6 @@ pub const DEFAULT_STACK_SIZE: usize = 0x10000;
 // For macros
 #[doc(hidden)]
 pub mod _private {
-    pub use sel4_immutable_cell::ImmutableCell;
     pub use sel4_runtime_common::declare_stack;
 
     pub use crate::heap::_private as heap;

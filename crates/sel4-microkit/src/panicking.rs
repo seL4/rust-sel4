@@ -26,7 +26,7 @@ fn get_hook() -> &'static PanicHook {
 }
 
 fn default_hook(info: &ExternalPanicInfo) {
-    debug_println!("{}: {}", pd_name(), info);
+    debug_println!("{}: {}", pd_name().unwrap_or("?"), info);
 }
 
 fn outer_hook(info: &ExternalPanicInfo) {
