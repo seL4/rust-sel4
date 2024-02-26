@@ -47,6 +47,7 @@ mod handler;
 mod heap;
 mod memory_region;
 mod message;
+mod printing;
 
 pub mod panicking;
 
@@ -60,6 +61,7 @@ pub use message::{
     get_mr, set_mr, with_msg_bytes, with_msg_bytes_mut, with_msg_regs, with_msg_regs_mut,
     MessageInfo, MessageLabel, MessageRegisterValue,
 };
+pub use printing::{debug_print, debug_println};
 
 /// Declares the initialization function, stack size, and, optionally, heap and heap size.
 ///
@@ -108,22 +110,4 @@ pub mod _private {
     pub use crate::{
         declare_heap, declare_init, declare_protection_domain, entry::run_main, DEFAULT_STACK_SIZE,
     };
-}
-
-sel4::config::sel4_cfg_if! {
-    if #[sel4_cfg(PRINTING)] {
-        pub use sel4_panicking_env::{debug_print, debug_println};
-    } else {
-        /// No-op for this configuration.
-        #[macro_export]
-        macro_rules! debug_print {
-            ($($arg:tt)*) => {};
-        }
-
-        /// No-op for this configuration.
-        #[macro_export]
-        macro_rules! debug_println {
-            ($($arg:tt)*) => {};
-        }
-    }
 }
