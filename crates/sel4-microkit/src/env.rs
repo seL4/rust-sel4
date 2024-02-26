@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
+use core::ptr;
 use core::str;
 
 use sel4_immutable_cell::ImmutableCell;
@@ -14,8 +15,8 @@ extern "C" {
     static mut __sel4_ipc_buffer_obj: sel4::IpcBuffer;
 }
 
-pub(crate) unsafe fn get_ipc_buffer() -> &'static mut sel4::IpcBuffer {
-    &mut __sel4_ipc_buffer_obj
+pub(crate) unsafe fn get_ipc_buffer() -> *mut sel4::IpcBuffer {
+    ptr::addr_of_mut!(__sel4_ipc_buffer_obj)
 }
 
 #[no_mangle]
