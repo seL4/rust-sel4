@@ -21,6 +21,8 @@ use core::mem::ManuallyDrop;
 use core::panic::Location;
 use core::panic::{PanicInfo, UnwindSafe};
 
+use cfg_if::cfg_if;
+
 use sel4_panicking_env::abort;
 
 mod count;
@@ -108,6 +110,14 @@ fn do_panic(info: ExternalPanicInfo) -> ! {
     }
 }
 
+cfg_if! {
+    if #[cfg(catch_unwind_intrinsic_still_named_try)] {
+        use core::intrinsics::r#try as catch_unwind_intrinsic;
+    } else {
+        use core::intrinsics::catch_unwind as catch_unwind_intrinsic;
+    }
+}
+
 pub fn catch_unwind<R, F: FnOnce() -> R + UnwindSafe>(f: F) -> Result<R, Payload> {
     union Data<F, R> {
         f: ManuallyDrop<F>,
@@ -121,7 +131,7 @@ pub fn catch_unwind<R, F: FnOnce() -> R + UnwindSafe>(f: F) -> Result<R, Payload
 
     let data_ptr = &mut data as *mut _ as *mut u8;
     unsafe {
-        return if core::intrinsics::r#try(do_call::<F, R>, data_ptr, do_catch::<F, R>) == 0 {
+        return if catch_unwind_intrinsic(do_call::<F, R>, data_ptr, do_catch::<F, R>) == 0 {
             Ok(ManuallyDrop::into_inner(data.r))
         } else {
             Err(ManuallyDrop::into_inner(data.p))

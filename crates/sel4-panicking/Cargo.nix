@@ -15,6 +15,9 @@ mk {
       sel4-immediate-sync-once-cell
     ;
   };
+  build-dependencies = {
+    inherit (versions) rustc_version;
+  };
   target."cfg(not(target_arch = \"arm\"))".dependencies = {
     unwinding = unwindingWith [ "personality" ] // { optional = true; };
   };
