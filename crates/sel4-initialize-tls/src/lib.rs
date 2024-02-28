@@ -77,6 +77,7 @@ impl TlsImage {
         Layout::from_size_align(self.memsz, self.align).unwrap()
     }
 
+    #[allow(clippy::missing_safety_doc)]
     pub unsafe fn initialize_tls_reservation(&self, tls_reservation_start: *mut u8) {
         let reservation_layout = self.reservation_layout();
 
@@ -84,7 +85,7 @@ impl TlsImage {
 
         let segment_start =
             tls_reservation_start.wrapping_byte_add(reservation_layout.segment_offset());
-        let segment_window = slice::from_raw_parts_mut(segment_start as *mut u8, self.memsz);
+        let segment_window = slice::from_raw_parts_mut(segment_start, self.memsz);
         let (tdata, tbss) = segment_window.split_at_mut(self.filesz);
 
         tdata.copy_from_slice(image_data_window);
