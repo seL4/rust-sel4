@@ -4,12 +4,11 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use sel4_dlmalloc::StaticDlmallocGlobalAlloc;
 use sel4_immediate_sync_once_cell::ImmediateSyncOnceCell;
 use sel4_panicking_env::abort;
-use sel4_sync::{GenericRawMutex, IndirectNotificationMutexSyncOps};
 
-pub use sel4_dlmalloc::StaticHeap;
+static GLOBAL_ALLOCATOR_MUTEX_NOTIFICATION: ImmediateSyncOnceCell<sel4::Notification> =
+    ImmediateSyncOnceCell::new();
 
 pub fn set_global_allocator_mutex_notification(nfn: sel4::Notification) {
     GLOBAL_ALLOCATOR_MUTEX_NOTIFICATION
@@ -17,29 +16,13 @@ pub fn set_global_allocator_mutex_notification(nfn: sel4::Notification) {
         .unwrap_or_else(|_| abort!("global allocator mutex notification already initialized"))
 }
 
-static GLOBAL_ALLOCATOR_MUTEX_NOTIFICATION: ImmediateSyncOnceCell<sel4::Notification> =
-    ImmediateSyncOnceCell::new();
-
 #[doc(hidden)]
-pub type GlobalAllocator<const N: usize> = StaticDlmallocGlobalAlloc<
-    GenericRawMutex<IndirectNotificationMutexSyncOps<fn() -> sel4::Notification>>,
-    &'static StaticHeap<N>,
->;
-
-#[doc(hidden)]
-pub const fn new_global_allocator<const N: usize>(
-    bounds: &'static StaticHeap<N>,
-) -> GlobalAllocator<N> {
-    StaticDlmallocGlobalAlloc::new(
-        GenericRawMutex::new(IndirectNotificationMutexSyncOps::new(|| {
-            *GLOBAL_ALLOCATOR_MUTEX_NOTIFICATION
-                .get()
-                .unwrap_or_else(|| {
-                    abort!("global allocator contention before mutex notification initialization")
-                })
-        })),
-        bounds,
-    )
+pub fn get_global_allocator_mutex_notification() -> sel4::Notification {
+    *GLOBAL_ALLOCATOR_MUTEX_NOTIFICATION
+        .get()
+        .unwrap_or_else(|| {
+            abort!("global allocator contention before mutex notification initialization")
+        })
 }
 
 #[doc(hidden)]
@@ -47,16 +30,39 @@ pub const fn new_global_allocator<const N: usize>(
 macro_rules! declare_heap {
     ($size:expr) => {
         const _: () = {
-            #[global_allocator]
-            static GLOBAL_ALLOCATOR: $crate::_private::heap::GlobalAllocator<{ $size }> = {
-                static STATIC_HEAP: $crate::_private::heap::StaticHeap<{ $size }> =
-                    $crate::_private::heap::StaticHeap::new();
-                $crate::_private::heap::new_global_allocator(&STATIC_HEAP)
-            };
+            mod outer_scope {
+                use super::*;
+
+                const _SIZE: usize = $size;
+
+                mod inner_scope {
+                    use $crate::_private::heap::*;
+
+                    use super::_SIZE as SIZE;
+
+                    static STATIC_HEAP: StaticHeap<{ SIZE }> = StaticHeap::new();
+
+                    #[global_allocator]
+                    static GLOBAL_ALLOCATOR: StaticDlmallocGlobalAlloc<
+                        GenericRawMutex<
+                            IndirectNotificationMutexSyncOps<fn() -> sel4::Notification>,
+                        >,
+                        &'static StaticHeap<{ SIZE }>,
+                    > = StaticDlmallocGlobalAlloc::new(
+                        GenericRawMutex::new(IndirectNotificationMutexSyncOps::new(
+                            get_global_allocator_mutex_notification,
+                        )),
+                        &STATIC_HEAP,
+                    );
+                }
+            }
         };
     };
 }
 
 pub mod _private {
-    pub use super::{new_global_allocator, GlobalAllocator, StaticHeap};
+    pub use sel4_dlmalloc::{StaticDlmallocGlobalAlloc, StaticHeap};
+    pub use sel4_sync::{GenericRawMutex, IndirectNotificationMutexSyncOps};
+
+    pub use super::get_global_allocator_mutex_notification;
 }

@@ -46,7 +46,7 @@ fn inner_entry() -> ! {
         __sel4_microkit__main();
     }
 
-    abort!("main thread returned")
+    abort!("__sel4_microkit__main returned")
 }
 
 extern "C" {
