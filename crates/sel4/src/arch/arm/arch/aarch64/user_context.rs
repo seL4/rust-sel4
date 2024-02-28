@@ -38,7 +38,7 @@ impl UserContext {
         &mut self.0.spsr
     }
 
-    pub fn gpr(&self, ix: Word) -> &Word {
+    pub fn gpr(&self, ix: usize) -> &Word {
         match ix {
             0 => &self.inner().x0,
             1 => &self.inner().x1,
@@ -75,7 +75,7 @@ impl UserContext {
         }
     }
 
-    pub fn gpr_mut(&mut self, ix: Word) -> &mut Word {
+    pub fn gpr_mut(&mut self, ix: usize) -> &mut Word {
         match ix {
             0 => &mut self.inner_mut().x0,
             1 => &mut self.inner_mut().x1,

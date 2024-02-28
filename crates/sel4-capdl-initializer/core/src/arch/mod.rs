@@ -37,7 +37,7 @@ mod imp {
         *regs.pc_mut() = extra.ip;
         *regs.sp_mut() = extra.sp;
         for (i, value) in extra.gprs.iter().enumerate() {
-            *regs.gpr_mut(i.try_into().unwrap()) = *value;
+            *regs.gpr_mut(i) = *value;
         }
     }
 }
@@ -69,7 +69,7 @@ mod imp {
         *regs.pc_mut() = extra.ip;
         *regs.sp_mut() = extra.sp;
         for (i, value) in extra.gprs.iter().enumerate() {
-            *regs.gpr_a_mut(i.try_into().unwrap()) = *value;
+            *regs.gpr_a_mut(i) = *value;
         }
     }
 }
@@ -115,7 +115,7 @@ mod imp {
         *regs.pc_mut() = extra.ip;
         *regs.sp_mut() = extra.sp;
         for (i, value) in extra.gprs.iter().enumerate() {
-            *regs.gpr_mut(i.try_into().unwrap()) = *value;
+            *regs.gpr_mut(i) = *value;
         }
     }
 }

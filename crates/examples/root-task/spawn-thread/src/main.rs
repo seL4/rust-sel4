@@ -119,7 +119,7 @@ fn create_user_context(f: SecondaryThreadFn) -> sel4::UserContext {
     ctx
 }
 
-fn user_context_arg_mut(ctx: &mut sel4::UserContext, i: sel4::Word) -> &mut sel4::Word {
+fn user_context_arg_mut(ctx: &mut sel4::UserContext, i: usize) -> &mut sel4::Word {
     cfg_if! {
         if #[cfg(any(target_arch = "riscv32", target_arch = "riscv64"))] {
             ctx.gpr_a_mut(i)
