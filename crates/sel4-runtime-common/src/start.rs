@@ -20,7 +20,7 @@ use core::cell::UnsafeCell;
     ),
     repr(align(16))
 )]
-#[cfg_attr(target_arch = "arm", repr(align(8)))]
+#[cfg_attr(target_arch = "arm", repr(align(4)))]
 pub struct Stack<const N: usize>(UnsafeCell<[u8; N]>);
 
 unsafe impl<const N: usize> Sync for Stack<N> {}
