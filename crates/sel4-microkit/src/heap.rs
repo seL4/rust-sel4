@@ -9,21 +9,27 @@
 macro_rules! declare_heap {
     ($size:expr) => {
         const _: () = {
-            mod _x {
-                use $crate::_private::heap::*;
+            mod outer_scope {
+                use super::*;
 
-                static STATIC_HEAP: StaticHeap<{ $size }> = StaticHeap::new();
+                const _SIZE: usize = $size;
 
-                #[global_allocator]
-                static GLOBAL_ALLOCATOR: StaticDlmallocGlobalAlloc<
-                    GenericRawMutex<PanickingMutexSyncOps>,
-                    &'static StaticHeap<{ $size }>,
-                > = {
-                    StaticDlmallocGlobalAlloc::new(
+                mod inner_scope {
+                    use $crate::_private::heap::*;
+
+                    use super::_SIZE as SIZE;
+
+                    static STATIC_HEAP: StaticHeap<{ $size }> = StaticHeap::new();
+
+                    #[global_allocator]
+                    static GLOBAL_ALLOCATOR: StaticDlmallocGlobalAlloc<
+                        GenericRawMutex<PanickingMutexSyncOps>,
+                        &'static StaticHeap<{ $size }>,
+                    > = StaticDlmallocGlobalAlloc::new(
                         GenericRawMutex::new(PanickingMutexSyncOps::new()),
                         &STATIC_HEAP,
-                    )
-                };
+                    );
+                }
             }
         };
     };

@@ -8,85 +8,20 @@
 #![feature(cfg_target_thread_local)]
 #![feature(never_type)]
 
-use core::fmt;
-use core::panic::UnwindSafe;
-
-pub use sel4_panicking_env::{abort, debug_print, debug_println};
+pub use sel4_panicking_env::abort;
 pub use sel4_root_task_macros::root_task;
 
 #[doc(inline)]
 pub use sel4_panicking as panicking;
 
+mod entry;
 mod heap;
+mod printing;
 mod termination;
 
 pub use heap::set_global_allocator_mutex_notification;
+pub use printing::{debug_print, debug_println};
 pub use termination::{Never, Termination};
-
-#[cfg(target_thread_local)]
-#[no_mangle]
-unsafe extern "C" fn sel4_runtime_rust_entry(bootinfo: *const sel4::BootInfo) -> ! {
-    unsafe extern "C" fn cont_fn(cont_arg: *mut sel4_runtime_common::ContArg) -> ! {
-        inner_entry(cont_arg.cast_const().cast())
-    }
-
-    sel4_runtime_common::initialize_tls_on_stack_and_continue(cont_fn, bootinfo.cast_mut().cast())
-}
-
-#[cfg(not(target_thread_local))]
-#[no_mangle]
-unsafe extern "C" fn sel4_runtime_rust_entry(bootinfo: *const sel4::BootInfo) -> ! {
-    inner_entry(bootinfo)
-}
-
-fn inner_entry(bootinfo: *const sel4::BootInfo) -> ! {
-    #[cfg(all(feature = "unwinding", panic = "unwind"))]
-    {
-        sel4_runtime_common::set_eh_frame_finder().unwrap();
-    }
-
-    unsafe {
-        let bootinfo = sel4::BootInfoPtr::new(bootinfo);
-        sel4::set_ipc_buffer(&mut *bootinfo.ipc_buffer());
-        sel4_runtime_common::run_ctors();
-        __sel4_root_task__main(&bootinfo);
-    }
-
-    abort!("__sel4_root_task__main returned")
-}
-
-extern "Rust" {
-    fn __sel4_root_task__main(bootinfo: &sel4::BootInfoPtr);
-}
-
-#[doc(hidden)]
-#[macro_export]
-macro_rules! declare_main {
-    ($main:expr) => {
-        #[no_mangle]
-        fn __sel4_root_task__main(bootinfo: &$crate::_private::BootInfoPtr) {
-            $crate::_private::run_main($main, bootinfo);
-        }
-    };
-}
-
-#[doc(hidden)]
-#[allow(clippy::missing_safety_doc)]
-pub fn run_main<T>(
-    f: impl FnOnce(&sel4::BootInfoPtr) -> T + UnwindSafe,
-    bootinfo: &sel4::BootInfoPtr,
-) where
-    T: Termination,
-    T::Error: fmt::Debug,
-{
-    let result = panicking::catch_unwind(move || f(bootinfo).report());
-    match result {
-        Ok(err) => abort!("main thread terminated with error: {err:?}"),
-        Err(_) => abort!("uncaught panic in main thread"),
-    }
-}
-
-sel4_panicking_env::register_debug_put_char!(sel4::debug_put_char);
 
 #[macro_export]
 macro_rules! declare_root_task {
@@ -129,5 +64,7 @@ pub mod _private {
 
     pub use crate::heap::_private as heap;
 
-    pub use crate::{declare_heap, declare_main, declare_root_task, run_main, DEFAULT_STACK_SIZE};
+    pub use crate::{
+        declare_heap, declare_main, declare_root_task, entry::run_main, DEFAULT_STACK_SIZE,
+    };
 }
