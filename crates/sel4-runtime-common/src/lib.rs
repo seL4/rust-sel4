@@ -29,6 +29,7 @@ mod unwinding;
 #[cfg(all(feature = "unwinding", panic = "unwind"))]
 pub use self::unwinding::set_eh_frame_finder;
 
+#[allow(dead_code)]
 pub(crate) fn locate_phdrs() -> &'static [ProgramHeader] {
     extern "C" {
         static __ehdr_start: ElfHeader;
