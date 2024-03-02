@@ -104,6 +104,22 @@ impl<'a> object::ArmIrq<'a> {
     }
 }
 
+impl<'a> object::IrqMsi<'a> {
+    pub const SLOT_NOTIFICATION: CapSlot = 0;
+
+    pub fn notification(&self) -> Option<&cap::Notification> {
+        self.maybe_slot_as(Self::SLOT_NOTIFICATION)
+    }
+}
+
+impl<'a> object::IrqIOApic<'a> {
+    pub const SLOT_NOTIFICATION: CapSlot = 0;
+
+    pub fn notification(&self) -> Option<&cap::Notification> {
+        self.maybe_slot_as(Self::SLOT_NOTIFICATION)
+    }
+}
+
 // // //
 
 impl<'a> object::PageTable<'a> {
