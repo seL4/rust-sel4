@@ -416,8 +416,20 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
             .spec()
             .filter_objects::<&object::ArmIrq>()
             .map(|(obj_id, obj)| (obj_id, obj.notification()));
+        let msi_irq_notifications = self
+            .spec()
+            .filter_objects::<&object::IrqMsi>()
+            .map(|(obj_id, obj)| (obj_id, obj.notification()));
+        let ioapic_irq_notifications = self
+            .spec()
+            .filter_objects::<&object::IrqIOApic>()
+            .map(|(obj_id, obj)| (obj_id, obj.notification()));
 
-        for (obj_id, notification) in irq_notifications.chain(arm_irq_notifications) {
+        let all_irq_notifications = irq_notifications
+            .chain(arm_irq_notifications)
+            .chain(msi_irq_notifications)
+            .chain(ioapic_irq_notifications);
+        for (obj_id, notification) in all_irq_notifications {
             let irq_handler = self.orig_cap::<cap_type::IrqHandler>(obj_id);
             if let Some(logical_nfn_cap) = notification {
                 let nfn = match logical_nfn_cap.badge {
