@@ -11,6 +11,9 @@ use crate::{cap_type, sys, FrameType, ObjectBlueprint, ObjectBlueprintArm, Sized
 #[sel4_cfg(ARCH_AARCH64)]
 use crate::ObjectBlueprintAArch64;
 
+#[sel4_cfg(ARCH_AARCH32)]
+use crate::ObjectBlueprintAArch32;
+
 /// Frame sizes for AArch64.
 #[sel4_cfg_enum]
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
@@ -19,6 +22,8 @@ pub enum FrameSize {
     Large,
     #[sel4_cfg(ARCH_AARCH64)]
     Huge,
+    #[sel4_cfg(ARCH_AARCH32)]
+    Section,
 }
 
 impl FrameSize {
@@ -31,8 +36,26 @@ impl FrameSize {
                 Self::Huge => ObjectBlueprint::Arch(ObjectBlueprintArm::SeL4Arch(
                     ObjectBlueprintAArch64::HugePage,
                 )),
+                #[sel4_cfg(ARCH_AARCH32)]
+                Self::Section => ObjectBlueprint::Arch(ObjectBlueprintArm::SeL4Arch(
+                    ObjectBlueprintAArch32::Section,
+                )),
             }
         }
+    }
+
+    pub const fn from_bits(bits: usize) -> Option<Self> {
+        Some(sel4_cfg_wrap_match! {
+            match bits {
+                Self::SMALL_BITS => Self::Small,
+                Self::LARGE_BITS => Self::Large,
+                #[sel4_cfg(ARCH_AARCH64)]
+                Self::HUGE_BITS => Self::Huge,
+                #[sel4_cfg(ARCH_AARCH32)]
+                Self::SECTION_BITS => Self::Section,
+                _ => return None,
+            }
+        })
     }
 
     // For match arm LHS's, as we can't call const fn's
@@ -41,6 +64,9 @@ impl FrameSize {
 
     #[sel4_cfg(ARCH_AARCH64)]
     pub const HUGE_BITS: usize = Self::Huge.bits();
+
+    #[sel4_cfg(ARCH_AARCH32)]
+    pub const SECTION_BITS: usize = Self::Section.bits();
 }
 
 impl FrameType for cap_type::SmallPage {}
@@ -61,6 +87,14 @@ impl FrameType for cap_type::HugePage {}
 #[sel4_cfg(ARCH_AARCH64)]
 impl SizedFrameType for cap_type::HugePage {
     const FRAME_SIZE: FrameSize = FrameSize::Huge;
+}
+
+#[sel4_cfg(ARCH_AARCH32)]
+impl FrameType for cap_type::Section {}
+
+#[sel4_cfg(ARCH_AARCH32)]
+impl SizedFrameType for cap_type::Section {
+    const FRAME_SIZE: FrameSize = FrameSize::Section;
 }
 
 //

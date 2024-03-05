@@ -280,6 +280,7 @@ pub mod cap {
 
     declare_cap_alias!(Null);
     declare_cap_alias!(Unspecified);
+    declare_cap_alias!(UnspecifiedFrame);
 
     declare_cap_alias!(VSpace);
     declare_cap_alias!(Granule);

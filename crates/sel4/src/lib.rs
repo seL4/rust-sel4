@@ -87,8 +87,8 @@
 #![allow(clippy::unit_arg)]
 
 pub use sel4_config::{
-    self as config, sel4_cfg, sel4_cfg_bool, sel4_cfg_enum, sel4_cfg_if, sel4_cfg_match,
-    sel4_cfg_str, sel4_cfg_usize, sel4_cfg_word, sel4_cfg_wrap_match,
+    self as config, sel4_cfg, sel4_cfg_attr, sel4_cfg_bool, sel4_cfg_enum, sel4_cfg_if,
+    sel4_cfg_match, sel4_cfg_str, sel4_cfg_usize, sel4_cfg_word, sel4_cfg_wrap_match,
 };
 
 pub use sel4_sys as sys;

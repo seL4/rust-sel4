@@ -5,11 +5,9 @@
 // SPDX-License-Identifier: MIT
 //
 
-use sel4_config::{
-    sel4_cfg_if
-};
+use sel4_config::sel4_cfg_if;
 
-use crate::{sys, Error, LargePage, Result, Word, Tcb};
+use crate::{sys, Error, Result, Tcb, Word, UnspecifiedFrame};
 
 pub fn benchmark_reset_log() -> Result<()> {
     Error::wrap(sys::seL4_BenchmarkResetLog())
@@ -19,7 +17,7 @@ pub fn benchmark_finalize_log() -> Word {
     sys::seL4_BenchmarkFinalizeLog()
 }
 
-pub fn benchmark_set_log_buffer(frame: LargePage) -> Result<()> {
+pub fn benchmark_set_log_buffer(frame: UnspecifiedFrame) -> Result<()> {
     Error::wrap(sys::seL4_BenchmarkSetLogBuffer(frame.bits()))
 }
 

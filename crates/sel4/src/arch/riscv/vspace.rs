@@ -30,6 +30,18 @@ impl FrameSize {
         }
     }
 
+    pub const fn from_bits(bits: usize) -> Option<Self> {
+        Some(sel4_cfg_wrap_match! {
+            match bits {
+                Self::_4K_BITS => Self::_4K,
+                Self::MEGA_BITS => Self::Mega,
+                #[sel4_cfg(any(PT_LEVELS = "3", PT_LEVELS = "4"))]
+                Self::GIGA_BITS => Self::Giga,
+                _ => return None,
+            }
+        })
+    }
+
     // For match arm LHS's, as we can't call const fn's
 
     pub const _4K_BITS: usize = Self::_4K.bits();
