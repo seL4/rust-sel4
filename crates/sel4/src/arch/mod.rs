@@ -13,10 +13,10 @@ use sel4_config::sel4_cfg_if;
 //   - ARCH_X86
 
 sel4_cfg_if! {
-    if #[sel4_cfg(any(ARCH_AARCH32, ARCH_AARCH64))] {
+    if #[sel4_cfg(any(ARCH_AARCH64, ARCH_AARCH32))] {
         #[path = "arm/mod.rs"]
         mod imp;
-    } else if #[sel4_cfg(any(ARCH_RISCV32, ARCH_RISCV64))] {
+    } else if #[sel4_cfg(any(ARCH_RISCV64, ARCH_RISCV32))] {
         #[path = "riscv/mod.rs"]
         mod imp;
     } else if #[sel4_cfg(ARCH_X86_64)] {

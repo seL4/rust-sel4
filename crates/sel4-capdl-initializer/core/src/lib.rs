@@ -336,7 +336,7 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
                             init_thread::slot::IRQ_CONTROL.cap()
                                 .irq_control_get(*irq, &cslot_to_relative_cptr(slot))?;
                         }
-                        #[sel4_cfg(any(ARCH_AARCH32, ARCH_AARCH64))]
+                        #[sel4_cfg(any(ARCH_AARCH64, ARCH_AARCH32))]
                         Object::ArmIrq(obj) => {
                             sel4::sel4_cfg_if! {
                                 if #[sel4_cfg(MAX_NUM_NODES = "1")] {
