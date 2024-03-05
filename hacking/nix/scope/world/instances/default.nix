@@ -36,11 +36,11 @@
 let
   inherit (worldConfig) isMicrokit canSimulate;
 
-  haveFullRuntime = !isMicrokit && (hostPlatform.isAarch || hostPlatform.isRiscV || hostPlatform.isx86_64);
-  haveMinimalRuntime = haveFullRuntime;
+  haveFullRuntime = !isMicrokit;
+  haveMinimalRuntime = !isMicrokit;
   haveUnwindingSupport = !hostPlatform.isAarch32;
   haveKernelLoader = hostPlatform.isAarch || hostPlatform.isRiscV;
-  haveCapDLInitializer = hostPlatform.isAarch64 || hostPlatform.isRiscV64 || hostPlatform.isx86_64;
+  haveCapDLInitializer = true;
 
   maybe = condition: v: if condition then v else null;
 
