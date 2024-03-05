@@ -54,6 +54,7 @@ impl<'a> object::Tcb<'a> {
     pub const SLOT_CSPACE: CapSlot = 0;
     pub const SLOT_VSPACE: CapSlot = 1;
     pub const SLOT_IPC_BUFFER: CapSlot = 4;
+    pub const SLOT_FAULT_EP: CapSlot = 5;
     pub const SLOT_SC: CapSlot = 6;
     pub const SLOT_TEMP_FAULT_EP: CapSlot = 7;
     pub const SLOT_BOUND_NOTIFICATION: CapSlot = 8;
@@ -69,6 +70,10 @@ impl<'a> object::Tcb<'a> {
 
     pub fn ipc_buffer(&self) -> &cap::Frame {
         self.slot_as(Self::SLOT_IPC_BUFFER)
+    }
+
+    pub fn mcs_fault_ep(&self) -> Option<&cap::Endpoint> {
+        self.maybe_slot_as(Self::SLOT_FAULT_EP)
     }
 
     pub fn sc(&self) -> Option<&cap::SchedContext> {

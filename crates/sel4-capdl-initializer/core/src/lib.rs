@@ -652,7 +652,7 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
                             Some(cap) => self.orig_cap::<cap_type::SchedContext>(cap.object),
                         };
 
-                        let fault_ep = match obj.temp_fault_ep() {
+                        let fault_ep = match obj.mcs_fault_ep() {
                             None => init_thread::slot::NULL.cap().cast::<cap_type::Endpoint>(),
                             Some(cap) => {
                                 let orig = self.orig_cap::<cap_type::Endpoint>(cap.object);
