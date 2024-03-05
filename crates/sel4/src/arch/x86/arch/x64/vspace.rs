@@ -27,6 +27,15 @@ impl FrameSize {
         }
     }
 
+    pub const fn from_bits(bits: usize) -> Option<Self> {
+        Some(match bits {
+            Self::_4K_BITS => Self::_4K,
+            Self::LARGE_BITS => Self::Large,
+            Self::HUGE_BITS => Self::Huge,
+            _ => return None,
+        })
+    }
+
     // For match arm LHS's, as we can't call const fn's
     pub const _4K_BITS: usize = Self::_4K.bits();
     pub const LARGE_BITS: usize = Self::Large.bits();
@@ -52,6 +61,10 @@ impl SizedFrameType for cap_type::HugePage {
 }
 
 //
+
+impl cap_type::PML4 {
+    pub const INDEX_BITS: usize = sys::seL4_PML4IndexBits as usize;
+}
 
 impl cap_type::PDPT {
     pub const INDEX_BITS: usize = sys::seL4_PDPTIndexBits as usize;

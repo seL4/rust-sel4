@@ -52,6 +52,12 @@ pub(crate) mod cap_type_arch {
         HugePage
     }
 
+    #[sel4_cfg(ARCH_AARCH32)]
+    declare_cap_type! {
+        /// Corresponds to `seL4_ARM_Page` with `size_bits = 16`.
+        Section
+    }
+
     #[sel4_cfg(ARCH_AARCH64)]
     declare_cap_type! {
         /// Corresponds to `seL4_ARM_VSpace`.
