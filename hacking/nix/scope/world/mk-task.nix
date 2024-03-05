@@ -30,7 +30,7 @@ in
 , rustTargetInfo ? defaultRustTargetInfo
 
 , test ? false
-, release ? true
+, release ? false
 , profile ? if release then "release" else (if test then "test" else "dev")
 , ...
 } @ args:
