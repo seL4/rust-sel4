@@ -6,7 +6,7 @@
 
 use sel4::{sel4_cfg, SizedFrameType};
 
-#[sel4_cfg(any(ARCH_AARCH32, ARCH_AARCH64))]
+#[sel4_cfg(any(ARCH_AARCH64, ARCH_AARCH32))]
 mod imp {
     use sel4::{cap_type, sel4_cfg};
 
@@ -53,7 +53,7 @@ mod imp {
     }
 }
 
-#[sel4_cfg(any(ARCH_RISCV32, ARCH_RISCV64))]
+#[sel4_cfg(any(ARCH_RISCV64, ARCH_RISCV32))]
 mod imp {
     use sel4::cap_type;
 
