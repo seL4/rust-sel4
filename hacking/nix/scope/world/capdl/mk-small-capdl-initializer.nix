@@ -27,7 +27,7 @@ in mkTask {
 
   rustTargetInfo = seL4RustTargetInfoWithConfig { minimal = true; };
 
-  # release = false;
+  release = true;
 
   # extraProfile = {
   #   opt-level = 1; # bug on 2
