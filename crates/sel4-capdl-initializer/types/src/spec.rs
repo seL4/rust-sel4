@@ -7,6 +7,8 @@
 use core::fmt;
 use core::ops::Range;
 
+use cfg_if::cfg_if;
+
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
@@ -14,13 +16,14 @@ use sel4_capdl_initializer_types_derive::{IsCap, IsObject, IsObjectWithCapTable}
 
 use crate::{FrameInit, HasCapTable, Indirect};
 
-// TODO
-// Prepare for broader platform support:
-// - Eliminate use of `usize`.
-// - Parameterize with token `Arch` type?
-// - Use generic `Frame` object variant with `size_bits` field.
+cfg_if! {
+    if #[cfg(feature = "sel4")] {
+        pub use sel4::Word;
+    } else {
+        pub type Word = u64;
+    }
+}
 
-pub type Word = u64;
 pub type Badge = Word;
 pub type CPtr = Word;
 

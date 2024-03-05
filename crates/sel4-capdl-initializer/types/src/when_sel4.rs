@@ -23,18 +23,25 @@ impl<'a, D, M> Object<'a, D, M> {
                 Object::Tcb(_) => ObjectBlueprint::Tcb,
                 #[sel4_cfg(all(ARCH_AARCH64, ARM_HYPERVISOR_SUPPORT))]
                 Object::VCpu => sel4::ObjectBlueprintArch::VCpu.into(),
-                #[sel4_cfg(ARCH_AARCH64)]
-                Object::Frame(obj) => match obj.size_bits {
-                    sel4::FrameSize::SMALL_BITS => sel4::ObjectBlueprintArch::SmallPage.into(),
-                    sel4::FrameSize::LARGE_BITS => sel4::ObjectBlueprintArch::LargePage.into(),
-                    _ => panic!(),
+                #[sel4_cfg(any(ARCH_AARCH64, ARCH_AARCH32))]
+                Object::Frame(obj) => sel4::sel4_cfg_wrap_match! {
+                    match obj.size_bits {
+                        sel4::FrameSize::SMALL_BITS => sel4::ObjectBlueprintArch::SmallPage.into(),
+                        sel4::FrameSize::LARGE_BITS => sel4::ObjectBlueprintArch::LargePage.into(),
+                        #[sel4_cfg(ARCH_AARCH32)]
+                        sel4::FrameSize::SECTION_BITS => sel4::ObjectBlueprintSeL4Arch::Section.into(),
+                        _ => panic!(),
+                    }
                 },
-                #[sel4_cfg(ARCH_RISCV64)]
-                Object::Frame(obj) => match obj.size_bits {
-                    sel4::FrameSize::_4K_BITS => sel4::ObjectBlueprintArch::_4KPage.into(),
-                    sel4::FrameSize::MEGA_BITS => sel4::ObjectBlueprintArch::MegaPage.into(),
-                    sel4::FrameSize::GIGA_BITS => sel4::ObjectBlueprintArch::GigaPage.into(),
-                    _ => panic!(),
+                #[sel4_cfg(any(ARCH_RISCV64, ARCH_RISCV32))]
+                Object::Frame(obj) => sel4::sel4_cfg_wrap_match! {
+                    match obj.size_bits {
+                        sel4::FrameSize::_4K_BITS => sel4::ObjectBlueprintArch::_4KPage.into(),
+                        sel4::FrameSize::MEGA_BITS => sel4::ObjectBlueprintArch::MegaPage.into(),
+                        #[sel4_cfg(ARCH_RISCV64)]
+                        sel4::FrameSize::GIGA_BITS => sel4::ObjectBlueprintArch::GigaPage.into(),
+                        _ => panic!(),
+                    }
                 },
                 #[sel4_cfg(ARCH_X86_64)]
                 Object::Frame(obj) => match obj.size_bits {
@@ -51,7 +58,16 @@ impl<'a, D, M> Object<'a, D, M> {
                         sel4::ObjectBlueprintArch::PT.into()
                     }
                 }
-                #[sel4_cfg(ARCH_RISCV64)]
+                #[sel4_cfg(ARCH_AARCH32)]
+                Object::PageTable(obj) => {
+                    // assert!(obj.level.is_none()); // sanity check // TODO
+                    if obj.is_root {
+                        sel4::ObjectBlueprintSeL4Arch::PD.into()
+                    } else {
+                        sel4::ObjectBlueprintArch::PT.into()
+                    }
+                }
+                #[sel4_cfg(any(ARCH_RISCV64, ARCH_RISCV32))]
                 Object::PageTable(obj) => {
                     assert!(obj.level.is_none()); // sanity check
                     sel4::ObjectBlueprintArch::PageTable.into()
@@ -134,7 +150,7 @@ impl HasVmAttributes for cap::PageTable {
 }
 
 sel4::sel4_cfg_if! {
-    if #[sel4_cfg(ARCH_AARCH64)] {
+    if #[sel4_cfg(any(ARCH_AARCH64, ARCH_AARCH32))] {
         const CACHED: VmAttributes = VmAttributes::PAGE_CACHEABLE;
         const UNCACHED: VmAttributes = VmAttributes::DEFAULT;
     } else if #[sel4_cfg(any(ARCH_RISCV64, ARCH_RISCV32))] {
@@ -146,7 +162,7 @@ sel4::sel4_cfg_if! {
     }
 }
 
-fn vm_attributes_from_whether_cached(cached: bool) -> VmAttributes {
+pub fn vm_attributes_from_whether_cached(cached: bool) -> VmAttributes {
     if cached {
         CACHED
     } else {

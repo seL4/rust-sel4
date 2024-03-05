@@ -5,69 +5,90 @@
 //
 
 use core::ops::Range;
+use core::ptr;
 
-use sel4::SizedFrameType;
+use sel4::{cap_type, init_thread, sel4_cfg_attr, sel4_cfg_bool, SizedFrameType};
 
-use super::frame_types;
+use crate::arch;
 
-#[repr(align(4096))]
-struct SmallPagePlaceHolder(#[allow(dead_code)] [u8; frame_types::FrameType0::FRAME_SIZE.bytes()]);
+const SMALL_PAGE_PLACEHOLDER_SIZE: usize = if sel4_cfg_bool!(ARCH_AARCH32) {
+    65536
+} else {
+    4096
+};
+
+#[sel4_cfg_attr(ARCH_AARCH32, repr(align(65536)))]
+#[sel4_cfg_attr(not(ARCH_AARCH32), repr(align(4096)))]
+struct SmallPagePlaceHolder(#[allow(dead_code)] [u8; SMALL_PAGE_PLACEHOLDER_SIZE]);
 
 static SMALL_PAGE_PLACEHOLDER: SmallPagePlaceHolder =
-    SmallPagePlaceHolder([0; frame_types::FrameType0::FRAME_SIZE.bytes()]);
+    SmallPagePlaceHolder([0; SMALL_PAGE_PLACEHOLDER_SIZE]);
+
+pub(crate) struct CopyAddrs {
+    smaller_frame_copy_addr: usize,
+    larger_frame_copy_addr: usize,
+}
+
+impl CopyAddrs {
+    pub(crate) fn init(
+        bootinfo: &sel4::BootInfoPtr,
+        user_image_bounds: &Range<usize>,
+    ) -> Result<Self, sel4::Error> {
+        let smaller_frame_copy_addr = {
+            let addr = ptr::addr_of!(SMALL_PAGE_PLACEHOLDER) as usize;
+            let start_slot_index =
+                get_user_image_frame_slot(bootinfo, user_image_bounds, addr).index();
+            for i in 0..(SMALL_PAGE_PLACEHOLDER_SIZE / cap_type::Granule::FRAME_SIZE.bytes()) {
+                let slot = init_thread::Slot::<cap_type::Granule>::from_index(start_slot_index + i);
+                let cap = slot.cap();
+                cap.frame_unmap()?;
+            }
+            addr
+        };
+        let larger_frame_copy_addr = {
+            let outer_span = 1u64 << arch::span_bits(arch::NUM_LEVELS - 2);
+            let inner_span = 1usize << arch::span_bits(arch::NUM_LEVELS - 1);
+            let addr_space_footprint = coarsen_footprint(
+                &(user_image_bounds.start..(user_image_bounds.start + bootinfo.footprint_size())),
+                inner_span,
+            );
+            match (
+                u64::try_from(addr_space_footprint.start).unwrap() % outer_span,
+                u64::try_from(addr_space_footprint.end).unwrap() % outer_span,
+            ) {
+                (0, 0) => panic!(), // absurd
+                (_, 0) => round_down(addr_space_footprint.start, inner_span) - inner_span,
+                (_, _) => addr_space_footprint.end.next_multiple_of(inner_span),
+            }
+        };
+        Ok(Self {
+            smaller_frame_copy_addr,
+            larger_frame_copy_addr,
+        })
+    }
+
+    pub(crate) fn select(&self, frame_size: sel4::FrameSize) -> usize {
+        if frame_size.bytes() <= SMALL_PAGE_PLACEHOLDER_SIZE {
+            self.smaller_frame_copy_addr
+        } else {
+            assert_eq!(frame_size.bits(), arch::span_bits(arch::NUM_LEVELS - 1));
+            self.larger_frame_copy_addr
+        }
+    }
+}
 
 pub(crate) fn get_user_image_frame_slot(
     bootinfo: &sel4::BootInfoPtr,
     user_image_bounds: &Range<usize>,
     addr: usize,
-) -> sel4::init_thread::Slot<frame_types::FrameType0> {
-    assert_eq!(addr % frame_types::FrameType0::FRAME_SIZE.bytes(), 0);
+) -> init_thread::Slot<cap_type::Granule> {
+    let granule_size = cap_type::Granule::FRAME_SIZE.bytes();
+    assert_eq!(addr % granule_size, 0);
     let num_user_frames = bootinfo.user_image_frames().len();
-    let user_image_footprint = coarsen_footprint(
-        user_image_bounds,
-        frame_types::FrameType0::FRAME_SIZE.bytes(),
-    );
-    assert_eq!(
-        user_image_footprint.len(),
-        num_user_frames * frame_types::FrameType0::FRAME_SIZE.bytes()
-    );
-    let ix = (addr - user_image_footprint.start) / frame_types::FrameType0::FRAME_SIZE.bytes();
+    let user_image_footprint = coarsen_footprint(user_image_bounds, granule_size);
+    assert_eq!(user_image_footprint.len(), num_user_frames * granule_size);
+    let ix = (addr - user_image_footprint.start) / granule_size;
     bootinfo.user_image_frames().index(ix)
-}
-
-pub(crate) fn init_copy_addrs(
-    bootinfo: &sel4::BootInfoPtr,
-    user_image_bounds: &Range<usize>,
-) -> Result<(usize, usize), sel4::Error> {
-    let small_frame_copy_addr = {
-        let addr = addr_of_ref(&SMALL_PAGE_PLACEHOLDER);
-        let slot = get_user_image_frame_slot(bootinfo, user_image_bounds, addr);
-        let cap = slot.cap();
-        cap.frame_unmap()?;
-        addr
-    };
-    let large_frame_copy_addr = {
-        let addr_space_footprint = coarsen_footprint(
-            &(user_image_bounds.start..(user_image_bounds.start + bootinfo.footprint_size())),
-            frame_types::FrameType1::FRAME_SIZE.bytes(),
-        );
-        match (
-            addr_space_footprint.start % frame_types::FrameType2::FRAME_SIZE.bytes(),
-            addr_space_footprint.end % frame_types::FrameType2::FRAME_SIZE.bytes(),
-        ) {
-            (0, 0) => panic!(), // absurd
-            (_, 0) => {
-                round_down(
-                    addr_space_footprint.start,
-                    frame_types::FrameType1::FRAME_SIZE.bytes(),
-                ) - frame_types::FrameType1::FRAME_SIZE.bytes()
-            }
-            (_, _) => addr_space_footprint
-                .end
-                .next_multiple_of(frame_types::FrameType1::FRAME_SIZE.bytes()),
-        }
-    };
-    Ok((small_frame_copy_addr, large_frame_copy_addr))
 }
 
 fn coarsen_footprint(footprint: &Range<usize>, granularity: usize) -> Range<usize> {
@@ -76,8 +97,4 @@ fn coarsen_footprint(footprint: &Range<usize>, granularity: usize) -> Range<usiz
 
 const fn round_down(n: usize, b: usize) -> usize {
     n - n % b
-}
-
-fn addr_of_ref<T>(x: &T) -> usize {
-    x as *const T as usize
 }

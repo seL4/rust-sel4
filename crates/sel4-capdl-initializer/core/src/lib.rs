@@ -34,12 +34,11 @@ mod error;
 mod hold_slots;
 mod memory;
 
-use arch::frame_types;
 pub use buffers::{InitializerBuffers, PerObjectBuffer};
 use cslot_allocator::{CSlotAllocator, CSlotAllocatorError};
 pub use error::CapDLInitializerError;
 use hold_slots::HoldSlots;
-use memory::{get_user_image_frame_slot, init_copy_addrs};
+use memory::{get_user_image_frame_slot, CopyAddrs};
 
 #[sel4::sel4_cfg(all(ARCH_RISCV64, not(PT_LEVELS = "3")))]
 compile_error!("unsupported configuration");
@@ -49,8 +48,7 @@ type Result<T> = result::Result<T, CapDLInitializerError>;
 pub struct Initializer<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B> {
     bootinfo: &'a BootInfoPtr,
     user_image_bounds: Range<usize>,
-    small_frame_copy_addr: usize,
-    large_frame_copy_addr: usize,
+    copy_addrs: CopyAddrs,
     spec_with_sources: &'a SpecWithSources<'a, N, D, M>,
     cslot_allocator: &'a mut CSlotAllocator,
     buffers: &'a mut InitializerBuffers<B>,
@@ -67,16 +65,14 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
     ) -> ! {
         info!("Starting CapDL initializer");
 
-        let (small_frame_copy_addr, large_frame_copy_addr) =
-            init_copy_addrs(bootinfo, &user_image_bounds).unwrap();
+        let copy_addrs = CopyAddrs::init(bootinfo, &user_image_bounds).unwrap();
 
         let mut cslot_allocator = CSlotAllocator::new(bootinfo.empty().range());
 
         Initializer {
             bootinfo,
             user_image_bounds,
-            small_frame_copy_addr,
-            large_frame_copy_addr,
+            copy_addrs,
             spec_with_sources,
             cslot_allocator: &mut cslot_allocator,
             buffers,
@@ -398,7 +394,7 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
         obj_id: ObjectId,
         frame: &EmbeddedFrame,
     ) -> Result<()> {
-        frame.check(frame_types::FrameType0::FRAME_SIZE.bytes());
+        frame.check(cap_type::Granule::FRAME_SIZE.bytes());
         let addr = frame.ptr() as usize;
         let slot = get_user_image_frame_slot(self.bootinfo, &self.user_image_bounds, addr);
         self.set_orig_cslot(obj_id, slot.upcast());
@@ -467,38 +463,33 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
             if let Some(fill) = obj.init.as_fill() {
                 let entries = &fill.entries;
                 if !entries.is_empty() {
-                    match obj.size_bits {
-                        frame_types::FRAME_SIZE_0_BITS => {
-                            let frame = self.orig_cap::<frame_types::FrameType0>(obj_id);
-                            self.fill_frame(frame, entries)?;
-                        }
-                        frame_types::FRAME_SIZE_1_BITS => {
-                            let frame = self.orig_cap::<frame_types::FrameType1>(obj_id);
-                            self.fill_frame(frame, entries)?;
-                        }
-                        _ => {
-                            panic!()
-                        }
-                    }
+                    let frame_size = sel4::FrameSize::from_bits(obj.size_bits).unwrap();
+                    let frame = self.orig_cap::<cap_type::UnspecifiedFrame>(obj_id);
+                    self.fill_frame(frame, frame_size, entries)?;
                 }
             }
         }
         Ok(())
     }
 
-    fn fill_frame<U: SizedFrameType>(&self, frame: Cap<U>, fill: &[FillEntry<D>]) -> Result<()> {
+    fn fill_frame(
+        &self,
+        frame: Cap<cap_type::UnspecifiedFrame>,
+        frame_size: sel4::FrameSize,
+        fill: &[FillEntry<D>],
+    ) -> Result<()> {
         frame.frame_map(
             init_thread::slot::VSPACE.cap(),
-            self.copy_addr::<U>(),
+            self.copy_addrs.select(frame_size),
             CapRights::read_write(),
-            arch::vm_attributes_from_whether_cached(false),
+            vm_attributes_from_whether_cached(false),
         )?;
         atomic::fence(Ordering::SeqCst); // lazy
         for entry in fill.iter() {
             let offset = entry.range.start;
             let length = entry.range.end - entry.range.start;
-            assert!(entry.range.end <= U::FRAME_SIZE.bytes());
-            let dst_frame = self.copy_addr::<U>() as *mut u8;
+            assert!(entry.range.end <= frame_size.bytes());
+            let dst_frame = self.copy_addrs.select(frame_size) as *mut u8;
             let dst = unsafe { slice::from_raw_parts_mut(dst_frame.add(offset), length) };
             match &entry.content {
                 FillEntryContent::Data(content_data) => {
@@ -549,7 +540,7 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
         obj: &object::PageTable,
     ) -> Result<()> {
         for (i, entry) in obj.entries() {
-            let vaddr = vaddr + (i << ((arch::VSPACE_LEVELS - level - 1) * 9 + 12));
+            let vaddr = vaddr + (i << arch::step_bits(level));
             match entry {
                 PageTableEntry::Frame(cap) => {
                     let frame = self.orig_cap::<cap_type::UnspecifiedFrame>(cap.object);
@@ -766,16 +757,6 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
             }
         }
         Ok(())
-    }
-
-    //
-
-    fn copy_addr<U: SizedFrameType>(&self) -> usize {
-        match U::FRAME_SIZE {
-            frame_types::FrameType0::FRAME_SIZE => self.small_frame_copy_addr,
-            frame_types::FrameType1::FRAME_SIZE => self.large_frame_copy_addr,
-            _ => unimplemented!(),
-        }
     }
 
     //

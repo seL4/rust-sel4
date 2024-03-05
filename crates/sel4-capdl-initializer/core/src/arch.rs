@@ -4,20 +4,31 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use sel4::{sel4_cfg, VmAttributes};
+use sel4::{sel4_cfg, SizedFrameType};
 
 #[sel4_cfg(any(ARCH_AARCH32, ARCH_AARCH64))]
 mod imp {
-    pub(crate) type FrameType1 = sel4::cap_type::LargePage;
-    pub(crate) type FrameType2 = sel4::cap_type::HugePage;
+    use sel4::{cap_type, sel4_cfg};
 
-    pub(crate) type PageTableType = sel4::cap_type::PT;
-
-    pub(crate) const VSPACE_LEVELS: usize = if sel4::sel4_cfg_bool!(ARCH_AARCH64) {
+    pub(crate) const NUM_LEVELS: usize = if sel4::sel4_cfg_bool!(ARCH_AARCH64) {
         4
     } else {
         2
     };
+
+    #[sel4_cfg(ARCH_AARCH64)]
+    pub(crate) fn level_bits(_level: usize) -> usize {
+        cap_type::PT::INDEX_BITS
+    }
+
+    #[sel4_cfg(ARCH_AARCH32)]
+    pub(crate) fn level_bits(level: usize) -> usize {
+        match level {
+            0 => cap_type::PD::INDEX_BITS,
+            1 => cap_type::PT::INDEX_BITS,
+            _ => unreachable!(),
+        }
+    }
 
     pub(crate) fn map_page_table(
         vspace: sel4::VSpace,
@@ -26,7 +37,7 @@ mod imp {
         cap: sel4::Unspecified,
         vm_attributes: sel4::VmAttributes,
     ) -> sel4::Result<()> {
-        cap.downcast::<PageTableType>()
+        cap.downcast::<sel4::cap_type::PT>()
             .pt_map(vspace, vaddr, vm_attributes)
     }
 
@@ -44,12 +55,13 @@ mod imp {
 
 #[sel4_cfg(any(ARCH_RISCV32, ARCH_RISCV64))]
 mod imp {
-    pub(crate) type FrameType1 = sel4::cap_type::MegaPage;
-    pub(crate) type FrameType2 = sel4::cap_type::GigaPage;
+    use sel4::cap_type;
 
-    pub(crate) type PageTableType = sel4::cap_type::PageTable;
+    pub(crate) const NUM_LEVELS: usize = sel4::sel4_cfg_usize!(PT_LEVELS);
 
-    pub(crate) const VSPACE_LEVELS: usize = sel4::sel4_cfg_usize!(PT_LEVELS);
+    pub(crate) fn level_bits(_level: usize) -> usize {
+        cap_type::PageTable::INDEX_BITS
+    }
 
     pub(crate) fn map_page_table(
         vspace: sel4::VSpace,
@@ -58,7 +70,7 @@ mod imp {
         cap: sel4::Unspecified,
         vm_attributes: sel4::VmAttributes,
     ) -> sel4::Result<()> {
-        cap.downcast::<PageTableType>()
+        cap.downcast::<sel4::cap_type::PageTable>()
             .page_table_map(vspace, vaddr, vm_attributes)
     }
 
@@ -76,14 +88,11 @@ mod imp {
 
 #[sel4_cfg(ARCH_X86_64)]
 mod imp {
-    pub(crate) type FrameType1 = sel4::cap_type::LargePage;
-    pub(crate) type FrameType2 = sel4::cap_type::HugePage;
+    pub(crate) const NUM_LEVELS: usize = 4;
 
-    pub(crate) const VSPACE_LEVELS: usize = if sel4::sel4_cfg_bool!(ARCH_X86_64) {
-        4
-    } else {
-        2
-    };
+    pub(crate) fn level_bits(_level: usize) -> usize {
+        9
+    }
 
     pub(crate) fn map_page_table(
         vspace: sel4::VSpace,
@@ -122,34 +131,11 @@ mod imp {
 
 pub(crate) use imp::*;
 
-pub(crate) mod frame_types {
-    use sel4::SizedFrameType;
-
-    pub(crate) use super::{FrameType1, FrameType2};
-
-    pub(crate) type FrameType0 = sel4::cap_type::Granule;
-
-    pub(crate) const FRAME_SIZE_0_BITS: usize = FrameType0::FRAME_SIZE.bits();
-    pub(crate) const FRAME_SIZE_1_BITS: usize = FrameType1::FRAME_SIZE.bits();
+pub(crate) fn step_bits(level: usize) -> usize {
+    ((level + 1)..NUM_LEVELS).map(level_bits).sum::<usize>()
+        + sel4::cap_type::Granule::FRAME_SIZE.bits()
 }
 
-sel4::sel4_cfg_if! {
-    if #[sel4_cfg(ARCH_AARCH64)] {
-        const CACHED: VmAttributes = VmAttributes::PAGE_CACHEABLE;
-        const UNCACHED: VmAttributes = VmAttributes::DEFAULT;
-    } else if #[sel4_cfg(ARCH_RISCV64)] {
-        const CACHED: VmAttributes = VmAttributes::DEFAULT;
-        const UNCACHED: VmAttributes = VmAttributes::NONE;
-    } else if #[sel4_cfg(ARCH_X86_64)] {
-        const CACHED: VmAttributes = VmAttributes::DEFAULT;
-        const UNCACHED: VmAttributes = VmAttributes::CACHE_DISABLED;
-    }
-}
-
-pub(crate) fn vm_attributes_from_whether_cached(cached: bool) -> VmAttributes {
-    if cached {
-        CACHED
-    } else {
-        UNCACHED
-    }
+pub(crate) fn span_bits(level: usize) -> usize {
+    step_bits(level) + level_bits(level)
 }
