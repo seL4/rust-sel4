@@ -29,8 +29,6 @@ serde_json = ["dep:serde_json"]
 [dependencies]
 postcard = { version = "1.0.2", default-features = false }
 sel4 = { path = "../../../../sel4" }
-sel4-backtrace = { path = "../../../../sel4-backtrace", features = ["unwinding", "postcard"] }
-sel4-backtrace-simple = { path = "../../../../sel4-backtrace/simple" }
 sel4-dlmalloc = { path = "../../../../sel4-dlmalloc" }
 sel4-immediate-sync-once-cell = { path = "../../../../sel4-immediate-sync-once-cell" }
 sel4-panicking = { path = "../../../../sel4-panicking" }
@@ -42,3 +40,7 @@ sel4-simple-task-threading = { path = "../threading" }
 sel4-sync = { path = "../../../../sel4-sync" }
 serde = { version = "1.0.147", default-features = false }
 serde_json = { version = "1.0.87", default-features = false, optional = true }
+
+[target."cfg(not(target_arch = \"arm\"))".dependencies]
+sel4-backtrace = { path = "../../../../sel4-backtrace", features = ["unwinding", "postcard"] }
+sel4-backtrace-simple = { path = "../../../../sel4-backtrace/simple" }

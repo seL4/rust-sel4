@@ -16,13 +16,15 @@ use core::ptr;
 use core::slice;
 
 use sel4::Endpoint;
-use sel4_backtrace_simple::SimpleBacktracing;
 use sel4_dlmalloc::StaticHeapBounds;
 use sel4_immediate_sync_once_cell::ImmediateSyncOnceCell;
 use sel4_panicking::ExternalPanicInfo;
 use sel4_panicking_env::{abort, AbortInfo};
 use sel4_simple_task_runtime_config_types::RuntimeConfig;
 use sel4_simple_task_threading::StaticThread;
+
+#[cfg(not(target_arch = "arm"))]
+use sel4_backtrace_simple::SimpleBacktracing;
 
 mod declare_main;
 mod termination;
@@ -79,12 +81,17 @@ pub unsafe extern "C" fn cont_fn(cont_arg: *mut sel4_runtime_common::ContArg) ->
 
     if thread_index == 0 {
         CONFIG.set(config.clone()).unwrap();
-        sel4_runtime_common::set_eh_frame_finder().unwrap();
+
+        #[cfg(not(target_arch = "arm"))]
+        {
+            sel4_runtime_common::set_eh_frame_finder().unwrap();
+        }
+
         sel4_panicking::set_hook(&panic_hook);
         sel4_runtime_common::run_ctors();
         __sel4_simple_task_main(config.arg());
     } else {
-        let endpoint = Endpoint::from_bits(thread_config.endpoint().unwrap());
+        let endpoint = Endpoint::from_bits(thread_config.endpoint().unwrap().try_into().unwrap());
         let reply_authority = {
             sel4::sel4_cfg_if! {
                 if #[sel4_cfg(KERNEL_MCS)] {
@@ -105,6 +112,8 @@ pub fn try_idle() {
     CONFIG
         .get()
         .and_then(RuntimeConfig::idle_notification)
+        .map(sel4::CPtrBits::try_from)
+        .map(Result::unwrap)
         .map(sel4::Notification::from_bits)
         .map(sel4::Notification::wait);
 }
@@ -128,7 +137,11 @@ sel4_panicking_env::register_debug_put_char!(sel4::debug_put_char);
 
 fn panic_hook(info: &ExternalPanicInfo<'_>) {
     debug_println!("{}", info);
-    get_backtracing().collect_and_send();
+
+    #[cfg(not(target_arch = "arm"))]
+    {
+        get_backtracing().collect_and_send();
+    }
 }
 
 fn get_static_heap_bounds() -> StaticHeapBounds {
@@ -144,14 +157,18 @@ fn get_static_heap_mutex_notification() -> sel4::Notification {
         .get()
         .unwrap()
         .static_heap_mutex_notification()
+        .map(sel4::CPtrBits::try_from)
+        .map(Result::unwrap)
         .map(sel4::Notification::from_bits)
         .unwrap()
 }
 
+#[cfg(not(target_arch = "arm"))]
 pub fn get_backtracing() -> SimpleBacktracing {
     SimpleBacktracing::new(get_backtrace_image_identifier())
 }
 
+#[allow(dead_code)]
 fn get_backtrace_image_identifier() -> Option<&'static str> {
     CONFIG.get().unwrap().image_identifier()
 }

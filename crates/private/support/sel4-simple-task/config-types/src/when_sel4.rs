@@ -11,6 +11,8 @@ use sel4::{Badge, CPtrBits, Cap, CapType};
 
 use crate::{ConfigBadge, ConfigCPtr, ConfigCPtrBits};
 
+pub type RawConfigWord = sel4::Word;
+
 pub trait WrappedCPtr {
     fn wrap(bits: CPtrBits) -> Self;
 }
