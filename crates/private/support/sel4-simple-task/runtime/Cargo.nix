@@ -15,7 +15,6 @@ mk {
 
     inherit (localCrates)
       sel4
-      sel4-backtrace-simple
       sel4-dlmalloc
       sel4-immediate-sync-once-cell
       sel4-panicking
@@ -25,9 +24,11 @@ mk {
       sel4-simple-task-threading
       sel4-sync
     ;
-
-    sel4-backtrace = localCrates.sel4-backtrace // { features = [ "unwinding" "postcard" ]; };
     sel4-runtime-common = localCrates.sel4-runtime-common // { features = [ "tls" "unwinding" ]; };
+  };
+  target."cfg(not(target_arch = \"arm\"))".dependencies = {
+    sel4-backtrace = localCrates.sel4-backtrace // { features = [ "unwinding" "postcard" ]; };
+    inherit (localCrates) sel4-backtrace-simple;
   };
   features = {
     serde_json = [

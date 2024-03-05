@@ -20,8 +20,6 @@ cfg_if::cfg_if! {
     }
 }
 
-pub type RawConfigWord = u64;
-
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 #[serde(transparent)]
 pub struct ConfigBadge(RawConfigWord);
@@ -34,7 +32,7 @@ impl ConfigBadge {
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 #[serde(transparent)]
-pub struct ConfigCPtrBits(u64);
+pub struct ConfigCPtrBits(RawConfigWord);
 
 impl ConfigCPtrBits {
     pub fn new(word: RawConfigWord) -> Self {

@@ -4,6 +4,8 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
+pub type RawConfigWord = u64;
+
 macro_rules! dummies {
     {
         $($i:ident)*

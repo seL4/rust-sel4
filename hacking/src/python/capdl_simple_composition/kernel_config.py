@@ -37,11 +37,16 @@ class KernelConfig:
 
     # TODO
     def page_sizes_in_bits(self):
-        if self.arch() == 'arm':
+        sel4_arch = self.sel4_arch()
+        if sel4_arch == 'aarch64':
             return [12, 21]
-        elif self.sel4_arch() == 'riscv64':
+        elif sel4_arch == 'aarch32':
+            return [12, 20]
+        elif sel4_arch == 'riscv64':
             return [12, 21]
-        elif self.arch() == 'x86':
+        elif sel4_arch == 'riscv32':
+            return [12, 22]
+        elif sel4_arch == 'x86_64':
             return [12, 21]
         else:
             raise NotImplementedError
