@@ -657,8 +657,8 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
                             Some(cap) => {
                                 let orig = self.orig_cap::<cap_type::Endpoint>(cap.object);
                                 let badge = cap.badge;
-                                let rights = (&cap.rights).into();
-                                if badge == 0 || rights == CapRights::all() {
+                                let rights = cap.rights.into();
+                                if badge == 0 && rights == CapRights::all() {
                                     orig
                                 } else {
                                     let src = init_thread::slot::CNODE.cap().relative(orig);
