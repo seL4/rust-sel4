@@ -24,16 +24,37 @@ pub(crate) mod top_level {
 pub const NUM_FAST_MESSAGE_REGISTERS: usize = sys::seL4_FastMessageRegisters as usize; // no other const way to convert
 
 pub(crate) mod cap_type_arch {
-    use crate::declare_cap_type;
+    use crate::{declare_cap_type, declare_cap_type_for_object_of_fixed_size};
 
-    declare_cap_type!(_4K);
-    declare_cap_type!(LargePage);
-    declare_cap_type!(HugePage);
+    declare_cap_type_for_object_of_fixed_size!(_4K {
+        ObjectTypeArch,
+        ObjectBlueprintArch
+    });
+    declare_cap_type_for_object_of_fixed_size!(LargePage {
+        ObjectTypeArch,
+        ObjectBlueprintArch
+    });
+    declare_cap_type_for_object_of_fixed_size!(HugePage {
+        ObjectTypeSeL4Arch,
+        ObjectBlueprintSeL4Arch
+    });
 
-    declare_cap_type!(PML4);
-    declare_cap_type!(PDPT);
-    declare_cap_type!(PageDirectory);
-    declare_cap_type!(PageTable);
+    declare_cap_type_for_object_of_fixed_size!(PML4 {
+        ObjectTypeSeL4Arch,
+        ObjectBlueprintSeL4Arch
+    });
+    declare_cap_type_for_object_of_fixed_size!(PDPT {
+        ObjectTypeSeL4Arch,
+        ObjectBlueprintSeL4Arch
+    });
+    declare_cap_type_for_object_of_fixed_size!(PageDirectory {
+        ObjectTypeArch,
+        ObjectBlueprintArch
+    });
+    declare_cap_type_for_object_of_fixed_size!(PageTable {
+        ObjectTypeArch,
+        ObjectBlueprintArch
+    });
 
     pub type VSpace = PML4;
     pub type Granule = _4K;

@@ -8,7 +8,7 @@
 use core::ffi::c_uint;
 
 use crate::{
-    const_helpers::u32_into_usize, sel4_cfg, sel4_cfg_enum, sel4_cfg_wrap_match, sys,
+    const_helpers::u32_into_usize, sel4_cfg, sel4_cfg_enum, sel4_cfg_wrap_match, sys, CapType,
     ObjectBlueprintArch, ObjectTypeArch,
 };
 
@@ -93,7 +93,7 @@ impl ObjectBlueprint {
                 #[sel4_cfg(KERNEL_MCS)]
                 Self::SchedContext { .. } => ObjectType::SchedContext,
                 #[sel4_cfg(KERNEL_MCS)]
-                Self::Reply { .. } => ObjectType::Reply,
+                Self::Reply => ObjectType::Reply,
                 Self::Arch(arch) => ObjectType::Arch(arch.ty()),
             }
         }
@@ -139,4 +139,16 @@ impl From<ObjectBlueprintArch> for ObjectBlueprint {
     fn from(blueprint: ObjectBlueprintArch) -> Self {
         Self::Arch(blueprint)
     }
+}
+
+pub trait CapTypeForObject: CapType {
+    fn ty() -> ObjectType;
+}
+
+pub trait CapTypeForObjectOfFixedSize: CapTypeForObject {
+    fn blueprint() -> ObjectBlueprint;
+}
+
+pub trait CapTypeForObjectOfVariableSize: CapTypeForObject {
+    fn blueprint(size_bits: usize) -> ObjectBlueprint;
 }
