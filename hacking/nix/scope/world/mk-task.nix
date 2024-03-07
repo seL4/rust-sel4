@@ -5,7 +5,7 @@
 #
 
 { lib, buildPackages
-, runCommand
+, runCommand, runCommandCC
 , buildCrateInLayersHere, buildSysroot, crateUtils
 , crates
 , defaultRustTargetInfo
@@ -85,10 +85,11 @@ let
     modifyDerivation = drv: drv.overrideAttrs (self: super: seL4RustEnvVars // {
       passthru = (super.passthru or {}) // {
         elf = getELF self.finalPackage;
-        # HACK
         split = {
-          min = self.finalPackage.elf;
           full = self.finalPackage.elf;
+          min = runCommandCC "stripped.elf" {} ''
+            $STRIP -s ${self.finalPackage.elf} -o $out
+          '';
         };
       };
     });
