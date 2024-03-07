@@ -5,8 +5,8 @@
 //
 
 use crate::{
-    cap::*, AbsoluteCPtr, Cap, CapRights, CapTypeForFrameObject, Error, InvocationContext, Result,
-    VmAttributes,
+    cap::*, cap_type, AbsoluteCPtr, Cap, CapRights, CapTypeForFrameObject, Error,
+    InvocationContext, Result, VmAttributes,
 };
 
 impl<T: CapTypeForFrameObject, C: InvocationContext> Cap<T, C> {
@@ -62,6 +62,19 @@ impl<C: InvocationContext> PageTable<C> {
                 attr.into_inner(),
             )
         }))
+    }
+}
+
+impl<C: InvocationContext> UnspecifiedIntermediateTranslationStructure<C> {
+    pub fn generic_intermediate_translation_structure_map(
+        self,
+        vspace: VSpace,
+        _level: usize,
+        vaddr: usize,
+        attr: VmAttributes,
+    ) -> Result<()> {
+        self.cast::<cap_type::PageTable>()
+            .page_table_map(vspace, vaddr, attr)
     }
 }
 

@@ -238,6 +238,11 @@ pub mod cap_type {
         UnspecifiedFrame
     }
 
+    declare_cap_type! {
+        /// Any intermediate translation structure capability.
+        UnspecifiedIntermediateTranslationStructure
+    }
+
     sel4_cfg_if! {
         if #[sel4_cfg(KERNEL_MCS)] {
             declare_cap_type! {
@@ -284,6 +289,7 @@ pub mod cap {
     declare_cap_alias!(Null);
     declare_cap_alias!(Unspecified);
     declare_cap_alias!(UnspecifiedFrame);
+    declare_cap_alias!(UnspecifiedIntermediateTranslationStructure);
 
     declare_cap_alias!(VSpace);
     declare_cap_alias!(Granule);

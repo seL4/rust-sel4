@@ -9,8 +9,6 @@ use core::ptr;
 
 use sel4::{cap_type, init_thread, sel4_cfg_attr, sel4_cfg_bool, CapTypeForFrameObjectOfFixedSize};
 
-use crate::arch;
-
 const SMALL_PAGE_PLACEHOLDER_SIZE: usize = if sel4_cfg_bool!(ARCH_AARCH32) {
     65536
 } else {
@@ -46,8 +44,14 @@ impl CopyAddrs {
             addr
         };
         let larger_frame_copy_addr = {
-            let outer_span = 1u64 << arch::span_bits(arch::NUM_LEVELS - 2);
-            let inner_span = 1usize << arch::span_bits(arch::NUM_LEVELS - 1);
+            let outer_span = 1u64
+                << sel4::TranslationStructureType::span_bits(
+                    sel4::TranslationStructureType::NUM_LEVELS - 2,
+                );
+            let inner_span = 1usize
+                << sel4::TranslationStructureType::span_bits(
+                    sel4::TranslationStructureType::NUM_LEVELS - 1,
+                );
             let addr_space_footprint = coarsen_footprint(
                 &(user_image_bounds.start..(user_image_bounds.start + bootinfo.footprint_size())),
                 inner_span,
@@ -71,7 +75,12 @@ impl CopyAddrs {
         if frame_size.bytes() <= SMALL_PAGE_PLACEHOLDER_SIZE {
             self.smaller_frame_copy_addr
         } else {
-            assert_eq!(frame_size.bits(), arch::span_bits(arch::NUM_LEVELS - 1));
+            assert_eq!(
+                frame_size.bits(),
+                sel4::TranslationStructureType::span_bits(
+                    sel4::TranslationStructureType::NUM_LEVELS - 1
+                )
+            );
             self.larger_frame_copy_addr
         }
     }
