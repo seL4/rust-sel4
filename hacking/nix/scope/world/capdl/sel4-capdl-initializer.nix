@@ -17,15 +17,13 @@ mkTask {
 
   rootCrate = crates.sel4-capdl-initializer;
 
-  release = true;
-
   rustTargetInfo = seL4RustTargetInfoWithConfig { minimal = true; };
 
-  # release = false;
+  release = true;
 
-  # extraProfile = {
-  #   opt-level = 1; # bug on 2
-  # };
+  extraProfile = {
+    opt-level = 1; # TODO bug on 2
+  };
 
   # layers = [
   #   crateUtils.defaultIntermediateLayer
