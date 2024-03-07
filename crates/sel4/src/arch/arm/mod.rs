@@ -28,51 +28,51 @@ pub(crate) mod top_level {
 pub const NUM_FAST_MESSAGE_REGISTERS: usize = sys::seL4_FastMessageRegisters as usize; // no other const way to convert
 
 pub(crate) mod cap_type_arch {
-    use crate::{declare_cap_type, sel4_cfg};
+    use crate::{declare_cap_type_for_object_of_fixed_size, sel4_cfg};
 
     #[sel4_cfg(ARM_HYPERVISOR_SUPPORT)]
-    declare_cap_type! {
+    declare_cap_type_for_object_of_fixed_size! {
         /// Corresponds to `seL4_ARM_VCPU`.
-        VCpu
+        VCpu { ObjectTypeArch, ObjectBlueprintArch }
     }
 
-    declare_cap_type! {
+    declare_cap_type_for_object_of_fixed_size! {
         /// Corresponds to `seL4_ARM_Page` with `size_bits = 12`.
-        SmallPage
+        SmallPage { ObjectTypeArch, ObjectBlueprintArch }
     }
 
-    declare_cap_type! {
+    declare_cap_type_for_object_of_fixed_size! {
         /// Corresponds to `seL4_ARM_Page` with `size_bits = 21`.
-        LargePage
+        LargePage { ObjectTypeArch, ObjectBlueprintArch }
     }
 
     #[sel4_cfg(ARCH_AARCH64)]
-    declare_cap_type! {
+    declare_cap_type_for_object_of_fixed_size! {
         /// Corresponds to `seL4_ARM_Page` with `size_bits = 30`.
-        HugePage
+        HugePage { ObjectTypeSeL4Arch, ObjectBlueprintSeL4Arch }
     }
 
     #[sel4_cfg(ARCH_AARCH32)]
-    declare_cap_type! {
+    declare_cap_type_for_object_of_fixed_size! {
         /// Corresponds to `seL4_ARM_Page` with `size_bits = 16`.
-        Section
+        Section { ObjectTypeSeL4Arch, ObjectBlueprintSeL4Arch }
     }
 
     #[sel4_cfg(ARCH_AARCH64)]
-    declare_cap_type! {
+    declare_cap_type_for_object_of_fixed_size! {
         /// Corresponds to `seL4_ARM_VSpace`.
-        VSpace
+        VSpace { ObjectTypeSeL4Arch, ObjectBlueprintSeL4Arch }
     }
 
     #[sel4_cfg(ARCH_AARCH32)]
-    declare_cap_type! {
+    declare_cap_type_for_object_of_fixed_size! {
         /// Corresponds to `seL4_ARM_PD`.
-        PD
+        PD { ObjectTypeSeL4Arch, ObjectBlueprintSeL4Arch }
     }
 
-    declare_cap_type! {
+    declare_cap_type_for_object_of_fixed_size! {
         /// Corresponds to `seL4_ARM_PageTable`.
-        PT
+        PT { ObjectTypeArch, ObjectBlueprintArch }
     }
 
     /// Alias for [`cap_type::SmallPage`](SmallPage).

@@ -125,7 +125,10 @@ pub use error::{Error, Result};
 pub use invocation_context::{InvocationContext, NoExplicitInvocationContext, NoInvocationContext};
 pub use ipc_buffer::IpcBuffer;
 pub use message_info::{MessageInfo, MessageInfoBuilder};
-pub use object::{ObjectBlueprint, ObjectType};
+pub use object::{
+    CapTypeForObject, CapTypeForObjectOfFixedSize, CapTypeForObjectOfVariableSize, ObjectBlueprint,
+    ObjectType,
+};
 pub use reply_authority::{ConveysReplyAuthority, ReplyAuthority};
 pub use syscalls::{
     r#yield, Badge, CallWithMRs, FastMessages, IpcCapType, RecvWithMRs, NUM_MESSAGE_REGISTERS,
@@ -153,7 +156,9 @@ pub use cap::*;
 pub use fault::*;
 
 pub(crate) use helper_macros::{
-    declare_cap_alias, declare_cap_type, declare_fault_newtype, newtype_methods,
+    declare_cap_alias, declare_cap_type, declare_cap_type_for_object,
+    declare_cap_type_for_object_of_fixed_size, declare_cap_type_for_object_of_variable_size,
+    declare_fault_newtype, newtype_methods,
 };
 
 sel4_cfg_if! {

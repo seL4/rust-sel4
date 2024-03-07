@@ -39,6 +39,60 @@ macro_rules! declare_cap_type {
     };
 }
 
+macro_rules! declare_cap_type_for_object {
+    (
+        $(#[$outer:meta])*
+        $t:ident { $object_type:ident }
+    ) => {
+        $crate::declare_cap_type! {
+            $(#[$outer])*
+            $t
+        }
+
+        impl $crate::CapTypeForObject for $t {
+            fn ty() -> $crate::ObjectType {
+                $crate::$object_type::$t.into()
+            }
+        }
+    };
+}
+
+macro_rules! declare_cap_type_for_object_of_fixed_size {
+    (
+        $(#[$outer:meta])*
+        $t:ident { $object_type:ident, $object_blueprint:ident }
+    ) => {
+        $crate::declare_cap_type_for_object! {
+            $(#[$outer])*
+            $t { $object_type }
+        }
+
+        impl $crate::CapTypeForObjectOfFixedSize for $t {
+            fn blueprint() -> $crate::ObjectBlueprint {
+                $crate::$object_blueprint::$t.into()
+            }
+        }
+    };
+}
+
+macro_rules! declare_cap_type_for_object_of_variable_size {
+    (
+        $(#[$outer:meta])*
+        $t:ident { $object_type:ident, $object_blueprint:ident }
+    ) => {
+        $crate::declare_cap_type_for_object! {
+            $(#[$outer])*
+            $t { $object_type }
+        }
+
+        impl $crate::CapTypeForObjectOfVariableSize for $t {
+            fn blueprint(size_bits: usize) -> $crate::ObjectBlueprint {
+                ($crate::$object_blueprint::$t { size_bits }).into()
+            }
+        }
+    };
+}
+
 macro_rules! declare_cap_alias {
     (
         $(#[$outer:meta])*
@@ -63,5 +117,8 @@ macro_rules! declare_fault_newtype {
 
 pub(crate) use declare_cap_alias;
 pub(crate) use declare_cap_type;
+pub(crate) use declare_cap_type_for_object;
+pub(crate) use declare_cap_type_for_object_of_fixed_size;
+pub(crate) use declare_cap_type_for_object_of_variable_size;
 pub(crate) use declare_fault_newtype;
 pub(crate) use newtype_methods;

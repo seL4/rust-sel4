@@ -171,33 +171,36 @@ pub mod cap_type {
 
     use sel4_config::sel4_cfg_if;
 
-    use crate::declare_cap_type;
+    use crate::{
+        declare_cap_type, declare_cap_type_for_object_of_fixed_size,
+        declare_cap_type_for_object_of_variable_size,
+    };
 
     pub use crate::arch::cap_type_arch::*;
 
-    declare_cap_type! {
+    declare_cap_type_for_object_of_variable_size! {
         /// Corresponds to `seL4_Untyped`.
-        Untyped
+        Untyped { ObjectType, ObjectBlueprint }
     }
 
-    declare_cap_type! {
+    declare_cap_type_for_object_of_fixed_size! {
         /// Corresponds to the endpoint capability type.
-        Endpoint
+        Endpoint { ObjectType, ObjectBlueprint }
     }
 
-    declare_cap_type! {
+    declare_cap_type_for_object_of_fixed_size! {
         /// Corresponds to the notification capability type.
-        Notification
+        Notification { ObjectType, ObjectBlueprint }
     }
 
-    declare_cap_type! {
+    declare_cap_type_for_object_of_fixed_size! {
         /// Corresponds to `seL4_TCB`.
-        Tcb
+        Tcb { ObjectType, ObjectBlueprint }
     }
 
-    declare_cap_type! {
+    declare_cap_type_for_object_of_variable_size! {
         /// Corresponds to `seL4_CNode`.
-        CNode
+        CNode { ObjectType, ObjectBlueprint }
     }
 
     declare_cap_type! {
@@ -242,9 +245,9 @@ pub mod cap_type {
                 Reply
             }
 
-            declare_cap_type! {
+            declare_cap_type_for_object_of_variable_size! {
                 /// Corresponds to the scheduling context capability type (MCS only).
-                SchedContext
+                SchedContext { ObjectType, ObjectBlueprint }
             }
 
             declare_cap_type! {
