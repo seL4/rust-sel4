@@ -29,9 +29,9 @@ in mkTask {
 
   release = true;
 
-  # extraProfile = {
-  #   opt-level = 1; # bug on 2
-  # };
+  extraProfile = {
+    opt-level = 1; # TODO bug on 2
+  };
 
   features = [ "deflate" ];
 
