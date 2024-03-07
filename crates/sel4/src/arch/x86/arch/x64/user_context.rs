@@ -28,20 +28,19 @@ impl UserContext {
         &mut self.0.rsp
     }
 
-    pub fn gpr(&self, ix: usize) -> &Word {
-        // TODO
+    pub fn c_param(&self, ix: usize) -> &Word {
         match ix {
             0 => &self.inner().rdi,
             1 => &self.inner().rsi,
             2 => &self.inner().rdx,
             3 => &self.inner().rcx,
-            5 => &self.inner().r8,
-            6 => &self.inner().r9,
+            4 => &self.inner().r8,
+            5 => &self.inner().r9,
             _ => panic!(),
         }
     }
 
-    pub fn gpr_mut(&mut self, ix: usize) -> &mut Word {
+    pub fn c_param_mut(&mut self, ix: usize) -> &mut Word {
         match ix {
             0 => &mut self.inner_mut().rdi,
             1 => &mut self.inner_mut().rsi,

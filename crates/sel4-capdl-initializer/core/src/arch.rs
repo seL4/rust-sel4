@@ -40,17 +40,6 @@ mod imp {
         cap.downcast::<sel4::cap_type::PT>()
             .pt_map(vspace, vaddr, vm_attributes)
     }
-
-    pub(crate) fn init_user_context(
-        regs: &mut sel4::UserContext,
-        extra: &sel4_capdl_initializer_types::object::TcbExtraInfo,
-    ) {
-        *regs.pc_mut() = extra.ip;
-        *regs.sp_mut() = extra.sp;
-        for (i, value) in extra.gprs.iter().enumerate() {
-            *regs.gpr_mut(i) = *value;
-        }
-    }
 }
 
 #[sel4_cfg(any(ARCH_RISCV64, ARCH_RISCV32))]
@@ -72,17 +61,6 @@ mod imp {
     ) -> sel4::Result<()> {
         cap.downcast::<sel4::cap_type::PageTable>()
             .page_table_map(vspace, vaddr, vm_attributes)
-    }
-
-    pub(crate) fn init_user_context(
-        regs: &mut sel4::UserContext,
-        extra: &sel4_capdl_initializer_types::object::TcbExtraInfo,
-    ) {
-        *regs.pc_mut() = extra.ip;
-        *regs.sp_mut() = extra.sp;
-        for (i, value) in extra.gprs.iter().enumerate() {
-            *regs.gpr_a_mut(i) = *value;
-        }
     }
 }
 
@@ -114,17 +92,6 @@ mod imp {
                 vm_attributes,
             ),
             _ => panic!(),
-        }
-    }
-
-    pub(crate) fn init_user_context(
-        regs: &mut sel4::UserContext,
-        extra: &sel4_capdl_initializer_types::object::TcbExtraInfo,
-    ) {
-        *regs.pc_mut() = extra.ip;
-        *regs.sp_mut() = extra.sp;
-        for (i, value) in extra.gprs.iter().enumerate() {
-            *regs.gpr_mut(i) = *value;
         }
     }
 }

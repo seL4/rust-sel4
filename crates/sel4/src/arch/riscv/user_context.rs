@@ -56,4 +56,12 @@ impl UserContext {
             _ => panic!(),
         }
     }
+
+    pub fn c_param(&self, ix: usize) -> &Word {
+        self.gpr_a(ix)
+    }
+
+    pub fn c_param_mut(&mut self, ix: usize) -> &mut Word {
+        self.gpr_a_mut(ix)
+    }
 }
