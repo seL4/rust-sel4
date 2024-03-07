@@ -19,7 +19,7 @@ use core::ptr;
 
 use cfg_if::cfg_if;
 
-use sel4::SizedFrameType;
+use sel4::CapTypeForFrameObjectOfFixedSize;
 use sel4_elf_header::{ElfHeader, PT_TLS};
 use sel4_initialize_tls::{TlsImage, TlsReservationLayout, UncheckedTlsImage};
 use sel4_root_task::{

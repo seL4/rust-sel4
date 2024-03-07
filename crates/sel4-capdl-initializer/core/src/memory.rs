@@ -7,7 +7,7 @@
 use core::ops::Range;
 use core::ptr;
 
-use sel4::{cap_type, init_thread, sel4_cfg_attr, sel4_cfg_bool, SizedFrameType};
+use sel4::{cap_type, init_thread, sel4_cfg_attr, sel4_cfg_bool, CapTypeForFrameObjectOfFixedSize};
 
 use crate::arch;
 

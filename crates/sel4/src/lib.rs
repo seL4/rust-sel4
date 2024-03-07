@@ -130,7 +130,7 @@ pub use reply_authority::{ConveysReplyAuthority, ReplyAuthority};
 pub use syscalls::{
     r#yield, Badge, CallWithMRs, FastMessages, IpcCapType, RecvWithMRs, NUM_MESSAGE_REGISTERS,
 };
-pub use vspace::{FrameType, SizedFrameType, GRANULE_SIZE};
+pub use vspace::{CapTypeForFrameObject, CapTypeForFrameObjectOfFixedSize, GRANULE_SIZE};
 
 sel4_cfg_if! {
     if #[sel4_cfg(KERNEL_MCS)] {

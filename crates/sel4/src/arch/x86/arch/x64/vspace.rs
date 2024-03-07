@@ -5,8 +5,8 @@
 //
 
 use crate::{
-    cap_type, sys, FrameType, ObjectBlueprint, ObjectBlueprintX64, ObjectBlueprintX86,
-    SizedFrameType,
+    cap_type, sys, CapTypeForFrameObject, CapTypeForFrameObjectOfFixedSize, ObjectBlueprint,
+    ObjectBlueprintX64, ObjectBlueprintX86,
 };
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
@@ -42,21 +42,21 @@ impl FrameSize {
     pub const HUGE_BITS: usize = Self::Huge.bits();
 }
 
-impl FrameType for cap_type::_4K {}
+impl CapTypeForFrameObject for cap_type::_4K {}
 
-impl SizedFrameType for cap_type::_4K {
+impl CapTypeForFrameObjectOfFixedSize for cap_type::_4K {
     const FRAME_SIZE: FrameSize = FrameSize::_4K;
 }
 
-impl FrameType for cap_type::LargePage {}
+impl CapTypeForFrameObject for cap_type::LargePage {}
 
-impl SizedFrameType for cap_type::LargePage {
+impl CapTypeForFrameObjectOfFixedSize for cap_type::LargePage {
     const FRAME_SIZE: FrameSize = FrameSize::Large;
 }
 
-impl FrameType for cap_type::HugePage {}
+impl CapTypeForFrameObject for cap_type::HugePage {}
 
-impl SizedFrameType for cap_type::HugePage {
+impl CapTypeForFrameObjectOfFixedSize for cap_type::HugePage {
     const FRAME_SIZE: FrameSize = FrameSize::Huge;
 }
 
