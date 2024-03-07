@@ -736,7 +736,11 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
 
             {
                 let mut regs = UserContext::default();
-                arch::init_user_context(&mut regs, &obj.extra);
+                *regs.pc_mut() = obj.extra.ip;
+                *regs.sp_mut() = obj.extra.sp;
+                for (i, value) in obj.extra.gprs.iter().enumerate() {
+                    *regs.c_param_mut(i) = *value;
+                }
                 tcb.tcb_write_all_registers(false, &mut regs)?;
             }
 

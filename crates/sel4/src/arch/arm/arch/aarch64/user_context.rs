@@ -111,4 +111,14 @@ impl UserContext {
             _ => panic!(),
         }
     }
+
+    pub fn c_param(&self, ix: usize) -> &Word {
+        assert!(ix < 8);
+        self.gpr(ix)
+    }
+
+    pub fn c_param_mut(&mut self, ix: usize) -> &mut Word {
+        assert!(ix < 8);
+        self.gpr_mut(ix)
+    }
 }
