@@ -19,13 +19,13 @@ use log::{debug, info, trace};
 use sel4::{
     cap_type,
     init_thread::{self, Slot},
-    AbsoluteCPtr, BootInfoPtr, CNodeCapData, Cap, CapRights, CapType, ObjectBlueprint,
-    SizedFrameType, Untyped, UserContext,
+    AbsoluteCPtr, BootInfoPtr, CNodeCapData, Cap, CapRights, CapType,
+    CapTypeForFrameObjectOfFixedSize, ObjectBlueprint, Untyped, UserContext,
 };
 use sel4_capdl_initializer_types::*;
 
 #[allow(unused_imports)]
-use sel4::{FrameSize, FrameType, VSpace};
+use sel4::{CapTypeForFrameObject, FrameSize, VSpace};
 
 mod arch;
 mod buffers;

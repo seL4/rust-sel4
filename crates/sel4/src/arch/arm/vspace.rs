@@ -6,7 +6,10 @@
 
 use sel4_config::{sel4_cfg, sel4_cfg_enum, sel4_cfg_wrap_match};
 
-use crate::{cap_type, sys, FrameType, ObjectBlueprint, ObjectBlueprintArm, SizedFrameType};
+use crate::{
+    cap_type, sys, CapTypeForFrameObject, CapTypeForFrameObjectOfFixedSize, ObjectBlueprint,
+    ObjectBlueprintArm,
+};
 
 #[sel4_cfg(ARCH_AARCH64)]
 use crate::ObjectBlueprintAArch64;
@@ -69,31 +72,31 @@ impl FrameSize {
     pub const SECTION_BITS: usize = Self::Section.bits();
 }
 
-impl FrameType for cap_type::SmallPage {}
+impl CapTypeForFrameObject for cap_type::SmallPage {}
 
-impl SizedFrameType for cap_type::SmallPage {
+impl CapTypeForFrameObjectOfFixedSize for cap_type::SmallPage {
     const FRAME_SIZE: FrameSize = FrameSize::Small;
 }
 
-impl FrameType for cap_type::LargePage {}
+impl CapTypeForFrameObject for cap_type::LargePage {}
 
-impl SizedFrameType for cap_type::LargePage {
+impl CapTypeForFrameObjectOfFixedSize for cap_type::LargePage {
     const FRAME_SIZE: FrameSize = FrameSize::Large;
 }
 
 #[sel4_cfg(ARCH_AARCH64)]
-impl FrameType for cap_type::HugePage {}
+impl CapTypeForFrameObject for cap_type::HugePage {}
 
 #[sel4_cfg(ARCH_AARCH64)]
-impl SizedFrameType for cap_type::HugePage {
+impl CapTypeForFrameObjectOfFixedSize for cap_type::HugePage {
     const FRAME_SIZE: FrameSize = FrameSize::Huge;
 }
 
 #[sel4_cfg(ARCH_AARCH32)]
-impl FrameType for cap_type::Section {}
+impl CapTypeForFrameObject for cap_type::Section {}
 
 #[sel4_cfg(ARCH_AARCH32)]
-impl SizedFrameType for cap_type::Section {
+impl CapTypeForFrameObjectOfFixedSize for cap_type::Section {
     const FRAME_SIZE: FrameSize = FrameSize::Section;
 }
 

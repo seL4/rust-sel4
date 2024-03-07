@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use sel4::{sel4_cfg, SizedFrameType};
+use sel4::{sel4_cfg, CapTypeForFrameObjectOfFixedSize};
 
 #[sel4_cfg(any(ARCH_AARCH64, ARCH_AARCH32))]
 mod imp {

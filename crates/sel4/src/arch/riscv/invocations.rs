@@ -5,10 +5,11 @@
 //
 
 use crate::{
-    cap::*, AbsoluteCPtr, Cap, CapRights, Error, FrameType, InvocationContext, Result, VmAttributes,
+    cap::*, AbsoluteCPtr, Cap, CapRights, CapTypeForFrameObject, Error, InvocationContext, Result,
+    VmAttributes,
 };
 
-impl<T: FrameType, C: InvocationContext> Cap<T, C> {
+impl<T: CapTypeForFrameObject, C: InvocationContext> Cap<T, C> {
     /// Corresponds to `seL4_RISCV_Page_Map`.
     pub fn frame_map(
         self,
