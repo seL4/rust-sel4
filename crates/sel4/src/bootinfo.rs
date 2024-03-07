@@ -13,7 +13,7 @@ use core::slice;
 
 use sel4_config::sel4_cfg;
 
-use crate::{cap_type, init_thread::SlotRegion, newtype_methods, sys, IpcBuffer, GRANULE_SIZE};
+use crate::{cap_type, init_thread::SlotRegion, newtype_methods, sys, FrameSize, IpcBuffer};
 
 /// A wrapped pointer to a [`BootInfo`] block.
 ///
@@ -27,7 +27,7 @@ pub struct BootInfoPtr {
 impl BootInfoPtr {
     #[allow(clippy::missing_safety_doc)]
     pub unsafe fn new(ptr: *const BootInfo) -> Self {
-        assert_eq!(ptr.cast::<()>().align_offset(GRANULE_SIZE.bytes()), 0); // sanity check
+        assert_eq!(ptr.cast::<()>().align_offset(FrameSize::GRANULE.bytes()), 0); // sanity check
         Self { ptr }
     }
 
@@ -53,7 +53,7 @@ impl BootInfoPtr {
         Self::EXTRA_OFFSET + self.extra_len()
     }
 
-    const EXTRA_OFFSET: usize = GRANULE_SIZE.bytes();
+    const EXTRA_OFFSET: usize = FrameSize::GRANULE.bytes();
 }
 
 impl Deref for BootInfoPtr {

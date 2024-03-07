@@ -5,10 +5,7 @@
 // SPDX-License-Identifier: MIT
 //
 
-use crate::{cap_type, CapType, FrameSize};
-
-/// The smallest [`FrameSize`].
-pub const GRANULE_SIZE: FrameSize = cap_type::Granule::FRAME_SIZE;
+use crate::{cap_type, CapType, CapTypeForObjectOfFixedSize, FrameSize, TranslationStructureType};
 
 impl FrameSize {
     pub const fn bits(self) -> usize {
@@ -20,12 +17,31 @@ impl FrameSize {
     }
 }
 
+impl TranslationStructureType {
+    pub fn span_bits(level: usize) -> usize {
+        (level..Self::NUM_LEVELS)
+            .map(|level| {
+                TranslationStructureType::from_level(level)
+                    .unwrap()
+                    .index_bits()
+            })
+            .sum::<usize>()
+            + FrameSize::GRANULE.bits()
+    }
+}
+
 /// Trait for [`CapType`]s which correspond to frame objects.
 pub trait CapTypeForFrameObject: CapType {}
 
 impl CapTypeForFrameObject for cap_type::UnspecifiedFrame {}
 
 /// Trait for [`CapTypeForFrameObject`]s which correspond to frame objects of fixed size.
-pub trait CapTypeForFrameObjectOfFixedSize: CapTypeForFrameObject {
+pub trait CapTypeForFrameObjectOfFixedSize:
+    CapTypeForObjectOfFixedSize + CapTypeForFrameObject
+{
     const FRAME_SIZE: FrameSize;
+}
+
+pub trait CapTypeForTranslationStructureObject: CapTypeForObjectOfFixedSize {
+    const TRANSLATION_STRUCTURE_TYPE: TranslationStructureType;
 }

@@ -5,7 +5,8 @@
 //
 
 use crate::{
-    cap_type, sys, CapTypeForFrameObject, CapTypeForFrameObjectOfFixedSize, ObjectBlueprint,
+    cap_type, const_helpers::u32_into_usize, sys, CapTypeForFrameObject,
+    CapTypeForFrameObjectOfFixedSize, CapTypeForTranslationStructureObject, ObjectBlueprint,
     ObjectBlueprintX64, ObjectBlueprintX86,
 };
 
@@ -17,6 +18,8 @@ pub enum FrameSize {
 }
 
 impl FrameSize {
+    pub const GRANULE: Self = Self::_4K;
+
     pub const fn blueprint(self) -> ObjectBlueprint {
         match self {
             Self::_4K => ObjectBlueprint::Arch(ObjectBlueprintX86::_4K),
@@ -62,18 +65,64 @@ impl CapTypeForFrameObjectOfFixedSize for cap_type::HugePage {
 
 //
 
-impl cap_type::PML4 {
-    pub const INDEX_BITS: usize = sys::seL4_PML4IndexBits as usize;
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub enum TranslationStructureType {
+    PML4,
+    PDPT,
+    PageDirectory,
+    PageTable,
 }
 
-impl cap_type::PDPT {
-    pub const INDEX_BITS: usize = sys::seL4_PDPTIndexBits as usize;
+impl TranslationStructureType {
+    pub const NUM_LEVELS: usize = 4;
+
+    pub const fn blueprint(&self) -> ObjectBlueprint {
+        match self {
+            Self::PML4 => {
+                ObjectBlueprint::Arch(ObjectBlueprintX86::SeL4Arch(ObjectBlueprintX64::PML4))
+            }
+            Self::PDPT => {
+                ObjectBlueprint::Arch(ObjectBlueprintX86::SeL4Arch(ObjectBlueprintX64::PDPT))
+            }
+            Self::PageDirectory => ObjectBlueprint::Arch(ObjectBlueprintX86::PageDirectory),
+            Self::PageTable => ObjectBlueprint::Arch(ObjectBlueprintX86::PageTable),
+        }
+    }
+
+    pub const fn index_bits(&self) -> usize {
+        match self {
+            Self::PML4 => u32_into_usize(sys::seL4_PML4IndexBits),
+            Self::PDPT => u32_into_usize(sys::seL4_PDPTIndexBits),
+            Self::PageDirectory => u32_into_usize(sys::seL4_PageDirIndexBits),
+            Self::PageTable => u32_into_usize(sys::seL4_PageTableIndexBits),
+        }
+    }
+
+    pub const fn from_level(level: usize) -> Option<Self> {
+        Some(match level {
+            0 => Self::PML4,
+            1 => Self::PDPT,
+            2 => Self::PageDirectory,
+            3 => Self::PageTable,
+            _ => return None,
+        })
+    }
 }
 
-impl cap_type::PageDirectory {
-    pub const INDEX_BITS: usize = sys::seL4_PageDirIndexBits as usize;
+impl CapTypeForTranslationStructureObject for cap_type::PML4 {
+    const TRANSLATION_STRUCTURE_TYPE: TranslationStructureType = TranslationStructureType::PML4;
 }
 
-impl cap_type::PageTable {
-    pub const INDEX_BITS: usize = sys::seL4_PageTableIndexBits as usize;
+impl CapTypeForTranslationStructureObject for cap_type::PDPT {
+    const TRANSLATION_STRUCTURE_TYPE: TranslationStructureType = TranslationStructureType::PDPT;
+}
+
+impl CapTypeForTranslationStructureObject for cap_type::PageDirectory {
+    const TRANSLATION_STRUCTURE_TYPE: TranslationStructureType =
+        TranslationStructureType::PageDirectory;
+}
+
+impl CapTypeForTranslationStructureObject for cap_type::PageTable {
+    const TRANSLATION_STRUCTURE_TYPE: TranslationStructureType =
+        TranslationStructureType::PageTable;
 }

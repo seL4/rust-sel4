@@ -27,7 +27,6 @@ use sel4_capdl_initializer_types::*;
 #[allow(unused_imports)]
 use sel4::{CapTypeForFrameObject, FrameSize, VSpace};
 
-mod arch;
 mod buffers;
 mod cslot_allocator;
 mod error;
@@ -560,7 +559,7 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
         obj: &object::PageTable,
     ) -> Result<()> {
         for (i, entry) in obj.entries() {
-            let vaddr = vaddr + (i << arch::step_bits(level));
+            let vaddr = vaddr + (i << sel4::TranslationStructureType::span_bits(level + 1));
             match entry {
                 PageTableEntry::Frame(cap) => {
                     let frame = self.orig_cap::<cap_type::UnspecifiedFrame>(cap.object);
@@ -569,12 +568,13 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
                         .frame_map(vspace, vaddr, rights, cap.vm_attributes())?;
                 }
                 PageTableEntry::PageTable(cap) => {
-                    let page_table = self.orig_cap::<cap_type::Unspecified>(cap.object);
-                    arch::map_page_table(
+                    self.orig_cap::<cap_type::UnspecifiedIntermediateTranslationStructure>(
+                        cap.object,
+                    )
+                    .generic_intermediate_translation_structure_map(
                         vspace,
                         level + 1,
                         vaddr,
-                        page_table,
                         cap.vm_attributes(),
                     )?;
                     let obj = self

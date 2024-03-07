@@ -7,8 +7,8 @@
 use sel4_config::sel4_cfg;
 
 use crate::{
-    cap::*, AbsoluteCPtr, Cap, CapRights, CapTypeForFrameObject, Error, InvocationContext, Result,
-    VmAttributes, Word,
+    cap::*, cap_type, AbsoluteCPtr, Cap, CapRights, CapTypeForFrameObject, Error,
+    InvocationContext, Result, VmAttributes, Word,
 };
 
 #[sel4_cfg(ARM_HYPERVISOR_SUPPORT)]
@@ -118,6 +118,18 @@ impl<C: InvocationContext> PT<C> {
                 attr.into_inner(),
             )
         }))
+    }
+}
+
+impl<C: InvocationContext> UnspecifiedIntermediateTranslationStructure<C> {
+    pub fn generic_intermediate_translation_structure_map(
+        self,
+        vspace: VSpace,
+        _level: usize,
+        vaddr: usize,
+        attr: VmAttributes,
+    ) -> Result<()> {
+        self.cast::<cap_type::PT>().pt_map(vspace, vaddr, attr)
     }
 }
 
