@@ -393,6 +393,11 @@ sel4_cfg_if! {
         }
 
         #[no_mangle]
+        pub unsafe extern "C" fn seL4_GetClock() -> seL4_Word {
+            crate::seL4_GetClock()
+        }
+
+        #[no_mangle]
         pub unsafe extern "C" fn seL4_DebugHalt(
         ) {
             crate::seL4_DebugHalt()

@@ -12,6 +12,10 @@ pub fn debug_put_char(c: u8) {
     sys::seL4_DebugPutChar(c)
 }
 
+pub fn get_clock() -> u64 {
+    sys::seL4_GetClock() as u64
+}
+
 /// Corresponds to `seL4_DebugSnapshot`.
 pub fn debug_snapshot() {
     sys::seL4_DebugSnapshot()

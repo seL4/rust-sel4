@@ -635,6 +635,10 @@ sel4_cfg_if! {
             sys_send_recv_simple(syscall_id::DebugPutChar, c as seL4_Word);
         }
 
+        pub fn seL4_GetClock() -> seL4_Word {
+            sys_send_recv_simple(syscall_id::GetClock, 0)
+        }
+
         pub fn seL4_DebugHalt() {
             sys_null(syscall_id::DebugHalt);
             fence!();

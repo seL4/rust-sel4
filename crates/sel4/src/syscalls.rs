@@ -7,11 +7,8 @@
 use core::array;
 
 use sel4_config::{sel4_cfg, sel4_cfg_if};
-
-use crate::{
-    cap_type, const_helpers::u32_into_usize, sys, CapType, ConveysReplyAuthority, Endpoint,
-    InvocationContext, LocalCPtr, MessageInfo, Notification, Word, NUM_FAST_MESSAGE_REGISTERS,
-};
+use crate::error::Result;
+use crate::{cap_type, const_helpers::u32_into_usize, sys, CapType, ConveysReplyAuthority, Endpoint, InvocationContext, LocalCPtr, MessageInfo, Notification, Word, NUM_FAST_MESSAGE_REGISTERS, CPtr, Error};
 
 #[sel4_cfg(not(KERNEL_MCS))]
 use crate::IPCBuffer;
@@ -192,6 +189,18 @@ impl<C: InvocationContext> Notification<C> {
         let (info, badge) =
             self.invoke(|cptr, ipc_buffer| ipc_buffer.inner_mut().seL4_Wait(cptr.bits()));
         (wait_message_info_from_sys(info), badge)
+    }
+
+    pub fn register_receiver(self, tcb: CPtr) -> Result<()> {
+        Error::wrap(self.invoke(|cptr, ipc_buffer| ipc_buffer.inner_mut().seL4_Uint_Notification_register_receiver(cptr.bits(), tcb.bits())))
+    }
+
+    pub fn register_sender(self) -> Result<()> {
+        Error::wrap(self.invoke(|cptr, ipc_buffer| ipc_buffer.inner_mut().seL4_Uint_Notification_register_sender(cptr.bits())))
+    }
+
+    pub fn register_async_syscall(self, new_buffer: CPtr) -> Result<()> {
+        Error::wrap(self.invoke(|cptr, ipc_buffer| ipc_buffer.inner_mut().seL4_Uint_Notification_register_async_syscall(cptr.bits(), new_buffer.bits())))
     }
 }
 
