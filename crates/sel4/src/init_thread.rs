@@ -134,8 +134,10 @@ pub mod slot {
         (IRQ_CONTROL, IrqControl, seL4_CapIRQControl),
         (ASID_CONTROL, AsidControl, seL4_CapASIDControl),
         (ASID_POOL, AsidPool, seL4_CapInitThreadASIDPool),
-        #[cfg(any())] // TODO
+        #[sel4_cfg(not(ARCH_X86_64))]
         (IO_PORT_CONTROL, Null, seL4_CapIOPortControl),
+        #[sel4_cfg(ARCH_X86_64)]
+        (IO_PORT_CONTROL, IOPortControl, seL4_CapIOPortControl),
         #[cfg(any())] // TODO
         (IO_SPACE, Null, seL4_CapIOSpace),
         (BOOT_INFO_FRAME, Granule, seL4_CapBootInfoFrame),

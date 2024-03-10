@@ -144,6 +144,27 @@ impl<C: InvocationContext> IrqControl<C> {
     }
 }
 
+impl<C: InvocationContext> IOPortControl<C> {
+    /// Corresponds to `seL4_X86_IOPortControl_Issue`.
+    pub fn ioport_control_issue(
+        self,
+        first_port: Word,
+        last_port: Word,
+        dst: &AbsoluteCPtr,
+    ) -> Result<()> {
+        Error::wrap(self.invoke(|cptr, ipc_buffer| {
+            ipc_buffer.inner_mut().seL4_X86_IOPortControl_Issue(
+                cptr.bits(),
+                first_port,
+                last_port,
+                dst.root().bits(),
+                dst.path().bits(),
+                dst.path().depth_for_kernel(),
+            )
+        }))
+    }
+}
+
 impl<C: InvocationContext> AsidControl<C> {
     /// Corresponds to `seL4_X86_ASIDControl_MakePool`.
     pub fn asid_control_make_pool(self, untyped: Untyped, dst: &AbsoluteCPtr) -> Result<()> {
