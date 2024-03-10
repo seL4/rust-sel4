@@ -386,6 +386,26 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
             }
         }
 
+        // Create IOPort caps
+        sel4::sel4_cfg_if! {
+            if #[sel4_cfg(ARCH_X86_64)] {
+                {
+                    let ioports = self
+                        .spec()
+                        .filter_objects::<&object::IOPorts>()
+                        .map(|(obj_id, obj)| (obj_id, obj.start_port, obj.end_port));
+
+                    for (obj_id, start_port, end_port) in ioports {
+                        let slot = self.cslot_alloc_or_panic();
+                        init_thread::slot::IO_PORT_CONTROL
+                            .cap()
+                            .ioport_control_issue(start_port, end_port, &cslot_to_relative_cptr(slot))?;
+                        self.set_orig_cslot(obj_id, slot);
+                    }
+                }
+            }
+        }
+
         Ok(())
     }
 

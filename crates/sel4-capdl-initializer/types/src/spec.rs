@@ -81,6 +81,7 @@ pub enum Object<'a, D, M> {
     ArmIrq(object::ArmIrq<'a>),
     IrqMsi(object::IrqMsi<'a>),
     IrqIOApic(object::IrqIOApic<'a>),
+    IOPorts(object::IOPorts),
     SchedContext(object::SchedContext),
     Reply,
 }
@@ -111,6 +112,7 @@ pub enum Cap {
     ArmIrqHandler(cap::ArmIrqHandler),
     IrqMsiHandler(cap::IrqMsiHandler),
     IrqIOApicHandler(cap::IrqIOApicHandler),
+    IOPorts(cap::IOPorts),
     SchedContext(cap::SchedContext),
     Reply(cap::Reply),
 }
@@ -131,6 +133,7 @@ impl Cap {
             Cap::ArmIrqHandler(cap) => cap.object,
             Cap::IrqMsiHandler(cap) => cap.object,
             Cap::IrqIOApicHandler(cap) => cap.object,
+            Cap::IOPorts(cap) => cap.object,
             Cap::SchedContext(cap) => cap.object,
             Cap::Reply(cap) => cap.object,
         }
@@ -264,6 +267,13 @@ pub mod object {
 
     #[derive(Debug, Clone, Eq, PartialEq, IsObject)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+    pub struct IOPorts {
+        pub start_port: Word,
+        pub end_port: Word,
+    }
+
+    #[derive(Debug, Clone, Eq, PartialEq, IsObject)]
+    #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
     pub struct SchedContext {
         pub size_bits: usize,
         pub extra: SchedContextExtraInfo,
@@ -369,6 +379,12 @@ pub mod cap {
     #[derive(Debug, Clone, Eq, PartialEq, IsCap)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
     pub struct IrqIOApicHandler {
+        pub object: ObjectId,
+    }
+
+    #[derive(Debug, Clone, Eq, PartialEq, IsCap)]
+    #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+    pub struct IOPorts {
         pub object: ObjectId,
     }
 

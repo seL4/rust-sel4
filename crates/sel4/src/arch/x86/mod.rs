@@ -37,6 +37,8 @@ pub(crate) mod cap_type_arch {
 
     pub type VSpace = PML4;
     pub type Granule = _4K;
+
+    declare_cap_type!(IOPortControl);
 }
 
 pub(crate) mod cap_arch {
@@ -50,4 +52,6 @@ pub(crate) mod cap_arch {
     declare_cap_alias!(PDPT);
     declare_cap_alias!(PageDirectory);
     declare_cap_alias!(PageTable);
+
+    declare_cap_alias!(IOPortControl);
 }
