@@ -13,8 +13,8 @@ use crate::{
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum FrameObjectType {
     _4K,
-    Large,
-    Huge,
+    LargePage,
+    HugePage,
 }
 
 impl FrameObjectType {
@@ -23,8 +23,8 @@ impl FrameObjectType {
     pub const fn blueprint(self) -> ObjectBlueprint {
         match self {
             Self::_4K => ObjectBlueprint::Arch(ObjectBlueprintX86::_4K),
-            Self::Large => ObjectBlueprint::Arch(ObjectBlueprintX86::LargePage),
-            Self::Huge => {
+            Self::LargePage => ObjectBlueprint::Arch(ObjectBlueprintX86::LargePage),
+            Self::HugePage => {
                 ObjectBlueprint::Arch(ObjectBlueprintX86::SeL4Arch(ObjectBlueprintX64::HugePage))
             }
         }
@@ -33,16 +33,16 @@ impl FrameObjectType {
     pub const fn from_bits(bits: usize) -> Option<Self> {
         Some(match bits {
             Self::_4K_BITS => Self::_4K,
-            Self::LARGE_BITS => Self::Large,
-            Self::HUGE_BITS => Self::Huge,
+            Self::LARGE_PAGE_BITS => Self::LargePage,
+            Self::HUGE_PAGE_BITS => Self::HugePage,
             _ => return None,
         })
     }
 
     // For match arm LHS's, as we can't call const fn's
     pub const _4K_BITS: usize = Self::_4K.bits();
-    pub const LARGE_BITS: usize = Self::Large.bits();
-    pub const HUGE_BITS: usize = Self::Huge.bits();
+    pub const LARGE_PAGE_BITS: usize = Self::LargePage.bits();
+    pub const HUGE_PAGE_BITS: usize = Self::HugePage.bits();
 }
 
 impl CapTypeForFrameObject for cap_type::_4K {}
@@ -54,13 +54,13 @@ impl CapTypeForFrameObjectOfFixedSize for cap_type::_4K {
 impl CapTypeForFrameObject for cap_type::LargePage {}
 
 impl CapTypeForFrameObjectOfFixedSize for cap_type::LargePage {
-    const FRAME_OBJECT_TYPE: FrameObjectType = FrameObjectType::Large;
+    const FRAME_OBJECT_TYPE: FrameObjectType = FrameObjectType::LargePage;
 }
 
 impl CapTypeForFrameObject for cap_type::HugePage {}
 
 impl CapTypeForFrameObjectOfFixedSize for cap_type::HugePage {
-    const FRAME_OBJECT_TYPE: FrameObjectType = FrameObjectType::Huge;
+    const FRAME_OBJECT_TYPE: FrameObjectType = FrameObjectType::HugePage;
 }
 
 //

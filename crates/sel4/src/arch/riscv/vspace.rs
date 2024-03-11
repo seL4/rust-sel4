@@ -16,22 +16,22 @@ use crate::{
 #[sel4_config::sel4_cfg_enum]
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum FrameObjectType {
-    _4K,
-    Mega,
+    _4KPage,
+    MegaPage,
     #[sel4_cfg(any(PT_LEVELS = "3", PT_LEVELS = "4"))]
-    Giga,
+    GigaPage,
 }
 
 impl FrameObjectType {
-    pub const GRANULE: Self = Self::_4K;
+    pub const GRANULE: Self = Self::_4KPage;
 
     pub const fn blueprint(self) -> ObjectBlueprint {
         sel4_cfg_wrap_match! {
             match self {
-                FrameObjectType::_4K => ObjectBlueprint::Arch(ObjectBlueprintRISCV::_4KPage),
-                FrameObjectType::Mega => ObjectBlueprint::Arch(ObjectBlueprintRISCV::MegaPage),
+                FrameObjectType::_4KPage => ObjectBlueprint::Arch(ObjectBlueprintRISCV::_4KPage),
+                FrameObjectType::MegaPage => ObjectBlueprint::Arch(ObjectBlueprintRISCV::MegaPage),
                 #[sel4_cfg(any(PT_LEVELS = "3", PT_LEVELS = "4"))]
-                FrameObjectType::Giga => ObjectBlueprint::Arch(ObjectBlueprintRISCV::GigaPage),
+                FrameObjectType::GigaPage => ObjectBlueprint::Arch(ObjectBlueprintRISCV::GigaPage),
             }
         }
     }
@@ -39,10 +39,10 @@ impl FrameObjectType {
     pub const fn from_bits(bits: usize) -> Option<Self> {
         Some(sel4_cfg_wrap_match! {
             match bits {
-                Self::_4K_BITS => Self::_4K,
-                Self::MEGA_BITS => Self::Mega,
+                Self::_4K_PAGE_BITS => Self::_4KPage,
+                Self::MEGA_PAGE_BITS => Self::MegaPage,
                 #[sel4_cfg(any(PT_LEVELS = "3", PT_LEVELS = "4"))]
-                Self::GIGA_BITS => Self::Giga,
+                Self::GIGA_PAGE_BITS => Self::GigaPage,
                 _ => return None,
             }
         })
@@ -50,23 +50,23 @@ impl FrameObjectType {
 
     // For match arm LHS's, as we can't call const fn's
 
-    pub const _4K_BITS: usize = Self::_4K.bits();
-    pub const MEGA_BITS: usize = Self::Mega.bits();
+    pub const _4K_PAGE_BITS: usize = Self::_4KPage.bits();
+    pub const MEGA_PAGE_BITS: usize = Self::MegaPage.bits();
 
     #[sel4_config::sel4_cfg(any(PT_LEVELS = "3", PT_LEVELS = "4"))]
-    pub const GIGA_BITS: usize = Self::Giga.bits();
+    pub const GIGA_PAGE_BITS: usize = Self::GigaPage.bits();
 }
 
 impl CapTypeForFrameObject for cap_type::_4KPage {}
 
 impl CapTypeForFrameObjectOfFixedSize for cap_type::_4KPage {
-    const FRAME_OBJECT_TYPE: FrameObjectType = FrameObjectType::_4K;
+    const FRAME_OBJECT_TYPE: FrameObjectType = FrameObjectType::_4KPage;
 }
 
 impl CapTypeForFrameObject for cap_type::MegaPage {}
 
 impl CapTypeForFrameObjectOfFixedSize for cap_type::MegaPage {
-    const FRAME_OBJECT_TYPE: FrameObjectType = FrameObjectType::Mega;
+    const FRAME_OBJECT_TYPE: FrameObjectType = FrameObjectType::MegaPage;
 }
 
 #[sel4_config::sel4_cfg(any(PT_LEVELS = "3", PT_LEVELS = "4"))]
@@ -74,7 +74,7 @@ impl CapTypeForFrameObject for cap_type::GigaPage {}
 
 #[sel4_config::sel4_cfg(any(PT_LEVELS = "3", PT_LEVELS = "4"))]
 impl CapTypeForFrameObjectOfFixedSize for cap_type::GigaPage {
-    const FRAME_OBJECT_TYPE: FrameObjectType = FrameObjectType::Giga;
+    const FRAME_OBJECT_TYPE: FrameObjectType = FrameObjectType::GigaPage;
 }
 
 //
