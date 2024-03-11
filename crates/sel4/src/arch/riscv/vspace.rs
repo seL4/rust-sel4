@@ -80,11 +80,11 @@ impl CapTypeForFrameObjectOfFixedSize for cap_type::GigaPage {
 //
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
-pub enum TranslationStructureType {
+pub enum TranslationStructureObjectType {
     PageTable,
 }
 
-impl TranslationStructureType {
+impl TranslationStructureObjectType {
     pub const NUM_LEVELS: usize = sel4_cfg_usize!(PT_LEVELS);
 
     pub const fn blueprint(&self) -> ObjectBlueprint {
@@ -105,6 +105,6 @@ impl TranslationStructureType {
 }
 
 impl CapTypeForTranslationStructureObject for cap_type::PageTable {
-    const TRANSLATION_STRUCTURE_TYPE: TranslationStructureType =
-        TranslationStructureType::PageTable;
+    const TRANSLATION_STRUCTURE_OBJECT_TYPE: TranslationStructureObjectType =
+        TranslationStructureObjectType::PageTable;
 }

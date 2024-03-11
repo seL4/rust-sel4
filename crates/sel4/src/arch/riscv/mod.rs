@@ -17,7 +17,7 @@ pub(crate) mod top_level {
         object::{ObjectBlueprintArch, ObjectBlueprintRISCV, ObjectTypeArch, ObjectTypeRISCV},
         user_context::UserContext,
         vm_attributes::VmAttributes,
-        vspace::{FrameObjectType, TranslationStructureType},
+        vspace::{FrameObjectType, TranslationStructureObjectType},
         NUM_FAST_MESSAGE_REGISTERS,
     };
 }
