@@ -12,7 +12,7 @@ use crate::{const_helpers::u32_into_usize, sys};
 
 pub type ObjectTypeArch = ObjectTypeRISCV;
 
-pub type ObjectBlueprintArch = ObjectBlueprintRISCV;
+pub type ObjectBlueprintArch = ObjectBlueprintRiscV;
 
 #[sel4_cfg_enum]
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -40,7 +40,7 @@ impl ObjectTypeRISCV {
 
 #[sel4_cfg_enum]
 #[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
-pub enum ObjectBlueprintRISCV {
+pub enum ObjectBlueprintRiscV {
     _4KPage,
     MegaPage,
     #[sel4_cfg(any(PT_LEVELS = "3", PT_LEVELS = "4"))]
@@ -48,7 +48,7 @@ pub enum ObjectBlueprintRISCV {
     PageTable,
 }
 
-impl ObjectBlueprintRISCV {
+impl ObjectBlueprintRiscV {
     pub(crate) const fn ty(self) -> ObjectTypeRISCV {
         sel4_cfg_wrap_match! {
             match self {

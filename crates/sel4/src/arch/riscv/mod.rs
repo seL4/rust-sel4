@@ -14,7 +14,7 @@ pub(crate) mod fault;
 
 pub(crate) mod top_level {
     pub use super::{
-        object::{ObjectBlueprintArch, ObjectBlueprintRISCV, ObjectTypeArch, ObjectTypeRISCV},
+        object::{ObjectBlueprintArch, ObjectBlueprintRiscV, ObjectTypeArch, ObjectTypeRISCV},
         user_context::UserContext,
         vm_attributes::VmAttributes,
         vspace::{FrameObjectType, TranslationStructureObjectType},

@@ -10,7 +10,7 @@ use sel4_config::{sel4_cfg_usize, sel4_cfg_wrap_match};
 use crate::{
     cap_type, const_helpers::u32_into_usize, sys, CapTypeForFrameObject,
     CapTypeForFrameObjectOfFixedSize, CapTypeForTranslationStructureObject, ObjectBlueprint,
-    ObjectBlueprintRISCV,
+    ObjectBlueprintRiscV,
 };
 
 #[sel4_config::sel4_cfg_enum]
@@ -28,10 +28,10 @@ impl FrameObjectType {
     pub const fn blueprint(self) -> ObjectBlueprint {
         sel4_cfg_wrap_match! {
             match self {
-                FrameObjectType::_4KPage => ObjectBlueprint::Arch(ObjectBlueprintRISCV::_4KPage),
-                FrameObjectType::MegaPage => ObjectBlueprint::Arch(ObjectBlueprintRISCV::MegaPage),
+                FrameObjectType::_4KPage => ObjectBlueprint::Arch(ObjectBlueprintRiscV::_4KPage),
+                FrameObjectType::MegaPage => ObjectBlueprint::Arch(ObjectBlueprintRiscV::MegaPage),
                 #[sel4_cfg(any(PT_LEVELS = "3", PT_LEVELS = "4"))]
-                FrameObjectType::GigaPage => ObjectBlueprint::Arch(ObjectBlueprintRISCV::GigaPage),
+                FrameObjectType::GigaPage => ObjectBlueprint::Arch(ObjectBlueprintRiscV::GigaPage),
             }
         }
     }
@@ -88,7 +88,7 @@ impl TranslationStructureObjectType {
     pub const NUM_LEVELS: usize = sel4_cfg_usize!(PT_LEVELS);
 
     pub const fn blueprint(&self) -> ObjectBlueprint {
-        ObjectBlueprint::Arch(ObjectBlueprintRISCV::PageTable)
+        ObjectBlueprint::Arch(ObjectBlueprintRiscV::PageTable)
     }
 
     pub const fn index_bits(&self) -> usize {
