@@ -22,24 +22,24 @@ use crate::ObjectBlueprintAArch32;
 #[sel4_cfg_enum]
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum FrameObjectType {
-    Small,
-    Large,
+    SmallPage,
+    LargePage,
     #[sel4_cfg(ARCH_AARCH64)]
-    Huge,
+    HugePage,
     #[sel4_cfg(ARCH_AARCH32)]
     Section,
 }
 
 impl FrameObjectType {
-    pub const GRANULE: Self = Self::Small;
+    pub const GRANULE: Self = Self::SmallPage;
 
     pub const fn blueprint(self) -> ObjectBlueprint {
         sel4_cfg_wrap_match! {
             match self {
-                Self::Small => ObjectBlueprint::Arch(ObjectBlueprintArm::SmallPage),
-                Self::Large => ObjectBlueprint::Arch(ObjectBlueprintArm::LargePage),
+                Self::SmallPage => ObjectBlueprint::Arch(ObjectBlueprintArm::SmallPage),
+                Self::LargePage => ObjectBlueprint::Arch(ObjectBlueprintArm::LargePage),
                 #[sel4_cfg(ARCH_AARCH64)]
-                Self::Huge => ObjectBlueprint::Arch(ObjectBlueprintArm::SeL4Arch(
+                Self::HugePage => ObjectBlueprint::Arch(ObjectBlueprintArm::SeL4Arch(
                     ObjectBlueprintAArch64::HugePage,
                 )),
                 #[sel4_cfg(ARCH_AARCH32)]
@@ -53,10 +53,10 @@ impl FrameObjectType {
     pub const fn from_bits(bits: usize) -> Option<Self> {
         Some(sel4_cfg_wrap_match! {
             match bits {
-                Self::SMALL_BITS => Self::Small,
-                Self::LARGE_BITS => Self::Large,
+                Self::SMALL_PAGE_BITS => Self::SmallPage,
+                Self::LARGE_PAGE_BITS => Self::LargePage,
                 #[sel4_cfg(ARCH_AARCH64)]
-                Self::HUGE_BITS => Self::Huge,
+                Self::HUGE_PAGE_BITS => Self::HugePage,
                 #[sel4_cfg(ARCH_AARCH32)]
                 Self::SECTION_BITS => Self::Section,
                 _ => return None,
@@ -65,11 +65,11 @@ impl FrameObjectType {
     }
 
     // For match arm LHS's, as we can't call const fn's
-    pub const SMALL_BITS: usize = Self::Small.bits();
-    pub const LARGE_BITS: usize = Self::Large.bits();
+    pub const SMALL_PAGE_BITS: usize = Self::SmallPage.bits();
+    pub const LARGE_PAGE_BITS: usize = Self::LargePage.bits();
 
     #[sel4_cfg(ARCH_AARCH64)]
-    pub const HUGE_BITS: usize = Self::Huge.bits();
+    pub const HUGE_PAGE_BITS: usize = Self::HugePage.bits();
 
     #[sel4_cfg(ARCH_AARCH32)]
     pub const SECTION_BITS: usize = Self::Section.bits();
@@ -78,13 +78,13 @@ impl FrameObjectType {
 impl CapTypeForFrameObject for cap_type::SmallPage {}
 
 impl CapTypeForFrameObjectOfFixedSize for cap_type::SmallPage {
-    const FRAME_OBJECT_TYPE: FrameObjectType = FrameObjectType::Small;
+    const FRAME_OBJECT_TYPE: FrameObjectType = FrameObjectType::SmallPage;
 }
 
 impl CapTypeForFrameObject for cap_type::LargePage {}
 
 impl CapTypeForFrameObjectOfFixedSize for cap_type::LargePage {
-    const FRAME_OBJECT_TYPE: FrameObjectType = FrameObjectType::Large;
+    const FRAME_OBJECT_TYPE: FrameObjectType = FrameObjectType::LargePage;
 }
 
 #[sel4_cfg(ARCH_AARCH64)]
@@ -92,7 +92,7 @@ impl CapTypeForFrameObject for cap_type::HugePage {}
 
 #[sel4_cfg(ARCH_AARCH64)]
 impl CapTypeForFrameObjectOfFixedSize for cap_type::HugePage {
-    const FRAME_OBJECT_TYPE: FrameObjectType = FrameObjectType::Huge;
+    const FRAME_OBJECT_TYPE: FrameObjectType = FrameObjectType::HugePage;
 }
 
 #[sel4_cfg(ARCH_AARCH32)]
