@@ -36,7 +36,7 @@ impl<'a, D, M> Object<'a, D, M> {
                 #[sel4_cfg(any(ARCH_RISCV64, ARCH_RISCV32))]
                 Object::Frame(obj) => sel4::sel4_cfg_wrap_match! {
                     match obj.size_bits {
-                        sel4::FrameObjectType::_4K_PAGE_BITS => sel4::ObjectBlueprintArch::_4KPage.into(),
+                        sel4::FrameObjectType::_4K_PAGE_BITS => sel4::ObjectBlueprintArch::_4kPage.into(),
                         sel4::FrameObjectType::MEGA_PAGE_BITS => sel4::ObjectBlueprintArch::MegaPage.into(),
                         #[sel4_cfg(ARCH_RISCV64)]
                         sel4::FrameObjectType::GIGA_PAGE_BITS => sel4::ObjectBlueprintArch::GigaPage.into(),
@@ -45,7 +45,7 @@ impl<'a, D, M> Object<'a, D, M> {
                 },
                 #[sel4_cfg(ARCH_X86_64)]
                 Object::Frame(obj) => match obj.size_bits {
-                    sel4::FrameObjectType::_4K_BITS => sel4::ObjectBlueprintArch::_4K.into(),
+                    sel4::FrameObjectType::_4K_BITS => sel4::ObjectBlueprintArch::_4k.into(),
                     sel4::FrameObjectType::LARGE_PAGE_BITS => sel4::ObjectBlueprintArch::LargePage.into(),
                     _ => panic!(),
                 },

@@ -26,7 +26,7 @@ pub const NUM_FAST_MESSAGE_REGISTERS: usize = sys::seL4_FastMessageRegisters as 
 pub(crate) mod cap_type_arch {
     use crate::{declare_cap_type, declare_cap_type_for_object_of_fixed_size};
 
-    declare_cap_type_for_object_of_fixed_size!(_4K {
+    declare_cap_type_for_object_of_fixed_size!(_4k {
         ObjectTypeArch,
         ObjectBlueprintArch
     });
@@ -57,7 +57,7 @@ pub(crate) mod cap_type_arch {
     });
 
     pub type VSpace = PML4;
-    pub type Granule = _4K;
+    pub type Granule = _4k;
 
     declare_cap_type!(IOPortControl);
 }
@@ -65,7 +65,7 @@ pub(crate) mod cap_type_arch {
 pub(crate) mod cap_arch {
     use crate::declare_cap_alias;
 
-    declare_cap_alias!(_4K);
+    declare_cap_alias!(_4k);
     declare_cap_alias!(LargePage);
     declare_cap_alias!(HugePage);
 

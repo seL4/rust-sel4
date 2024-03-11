@@ -12,17 +12,17 @@ use crate::{
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum FrameObjectType {
-    _4K,
+    _4k,
     LargePage,
     HugePage,
 }
 
 impl FrameObjectType {
-    pub const GRANULE: Self = Self::_4K;
+    pub const GRANULE: Self = Self::_4k;
 
     pub const fn blueprint(self) -> ObjectBlueprint {
         match self {
-            Self::_4K => ObjectBlueprint::Arch(ObjectBlueprintX86::_4K),
+            Self::_4k => ObjectBlueprint::Arch(ObjectBlueprintX86::_4k),
             Self::LargePage => ObjectBlueprint::Arch(ObjectBlueprintX86::LargePage),
             Self::HugePage => {
                 ObjectBlueprint::Arch(ObjectBlueprintX86::SeL4Arch(ObjectBlueprintX64::HugePage))
@@ -32,7 +32,7 @@ impl FrameObjectType {
 
     pub const fn from_bits(bits: usize) -> Option<Self> {
         Some(match bits {
-            Self::_4K_BITS => Self::_4K,
+            Self::_4K_BITS => Self::_4k,
             Self::LARGE_PAGE_BITS => Self::LargePage,
             Self::HUGE_PAGE_BITS => Self::HugePage,
             _ => return None,
@@ -40,15 +40,15 @@ impl FrameObjectType {
     }
 
     // For match arm LHS's, as we can't call const fn's
-    pub const _4K_BITS: usize = Self::_4K.bits();
+    pub const _4K_BITS: usize = Self::_4k.bits();
     pub const LARGE_PAGE_BITS: usize = Self::LargePage.bits();
     pub const HUGE_PAGE_BITS: usize = Self::HugePage.bits();
 }
 
-impl CapTypeForFrameObject for cap_type::_4K {}
+impl CapTypeForFrameObject for cap_type::_4k {}
 
-impl CapTypeForFrameObjectOfFixedSize for cap_type::_4K {
-    const FRAME_OBJECT_TYPE: FrameObjectType = FrameObjectType::_4K;
+impl CapTypeForFrameObjectOfFixedSize for cap_type::_4k {
+    const FRAME_OBJECT_TYPE: FrameObjectType = FrameObjectType::_4k;
 }
 
 impl CapTypeForFrameObject for cap_type::LargePage {}

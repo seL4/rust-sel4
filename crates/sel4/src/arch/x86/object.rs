@@ -17,7 +17,7 @@ pub type ObjectBlueprintArch = ObjectBlueprintX86;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum ObjectTypeX86 {
-    _4K,
+    _4k,
     LargePage,
     PageTable,
     PageDirectory,
@@ -27,7 +27,7 @@ pub enum ObjectTypeX86 {
 impl ObjectTypeX86 {
     pub(crate) const fn into_sys(self) -> c_uint {
         match self {
-            Self::_4K => sys::_object::seL4_X86_4K,
+            Self::_4k => sys::_object::seL4_X86_4K,
             Self::LargePage => sys::_object::seL4_X86_LargePageObject,
             Self::PageTable => sys::_object::seL4_X86_PageTableObject,
             Self::PageDirectory => sys::_object::seL4_X86_PageDirectoryObject,
@@ -50,7 +50,7 @@ impl From<ObjectTypeSeL4Arch> for ObjectType {
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub enum ObjectBlueprintX86 {
-    _4K,
+    _4k,
     LargePage,
     PageTable,
     PageDirectory,
@@ -60,7 +60,7 @@ pub enum ObjectBlueprintX86 {
 impl ObjectBlueprintX86 {
     pub(crate) const fn ty(self) -> ObjectTypeX86 {
         match self {
-            Self::_4K => ObjectTypeX86::_4K,
+            Self::_4k => ObjectTypeX86::_4k,
             Self::LargePage => ObjectTypeX86::LargePage,
             Self::PageTable => ObjectTypeX86::PageTable,
             Self::PageDirectory => ObjectTypeX86::PageDirectory,
@@ -70,7 +70,7 @@ impl ObjectBlueprintX86 {
 
     pub(crate) const fn physical_size_bits(self) -> usize {
         match self {
-            Self::_4K => u32_into_usize(sys::seL4_PageBits),
+            Self::_4k => u32_into_usize(sys::seL4_PageBits),
             Self::LargePage => u32_into_usize(sys::seL4_LargePageBits),
             Self::PageTable => u32_into_usize(sys::seL4_PageTableBits),
             Self::PageDirectory => u32_into_usize(sys::seL4_PageDirBits),

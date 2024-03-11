@@ -16,19 +16,19 @@ use crate::{
 #[sel4_config::sel4_cfg_enum]
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum FrameObjectType {
-    _4KPage,
+    _4kPage,
     MegaPage,
     #[sel4_cfg(any(PT_LEVELS = "3", PT_LEVELS = "4"))]
     GigaPage,
 }
 
 impl FrameObjectType {
-    pub const GRANULE: Self = Self::_4KPage;
+    pub const GRANULE: Self = Self::_4kPage;
 
     pub const fn blueprint(self) -> ObjectBlueprint {
         sel4_cfg_wrap_match! {
             match self {
-                FrameObjectType::_4KPage => ObjectBlueprint::Arch(ObjectBlueprintRiscV::_4KPage),
+                FrameObjectType::_4kPage => ObjectBlueprint::Arch(ObjectBlueprintRiscV::_4kPage),
                 FrameObjectType::MegaPage => ObjectBlueprint::Arch(ObjectBlueprintRiscV::MegaPage),
                 #[sel4_cfg(any(PT_LEVELS = "3", PT_LEVELS = "4"))]
                 FrameObjectType::GigaPage => ObjectBlueprint::Arch(ObjectBlueprintRiscV::GigaPage),
@@ -39,7 +39,7 @@ impl FrameObjectType {
     pub const fn from_bits(bits: usize) -> Option<Self> {
         Some(sel4_cfg_wrap_match! {
             match bits {
-                Self::_4K_PAGE_BITS => Self::_4KPage,
+                Self::_4K_PAGE_BITS => Self::_4kPage,
                 Self::MEGA_PAGE_BITS => Self::MegaPage,
                 #[sel4_cfg(any(PT_LEVELS = "3", PT_LEVELS = "4"))]
                 Self::GIGA_PAGE_BITS => Self::GigaPage,
@@ -50,17 +50,17 @@ impl FrameObjectType {
 
     // For match arm LHS's, as we can't call const fn's
 
-    pub const _4K_PAGE_BITS: usize = Self::_4KPage.bits();
+    pub const _4K_PAGE_BITS: usize = Self::_4kPage.bits();
     pub const MEGA_PAGE_BITS: usize = Self::MegaPage.bits();
 
     #[sel4_config::sel4_cfg(any(PT_LEVELS = "3", PT_LEVELS = "4"))]
     pub const GIGA_PAGE_BITS: usize = Self::GigaPage.bits();
 }
 
-impl CapTypeForFrameObject for cap_type::_4KPage {}
+impl CapTypeForFrameObject for cap_type::_4kPage {}
 
-impl CapTypeForFrameObjectOfFixedSize for cap_type::_4KPage {
-    const FRAME_OBJECT_TYPE: FrameObjectType = FrameObjectType::_4KPage;
+impl CapTypeForFrameObjectOfFixedSize for cap_type::_4kPage {
+    const FRAME_OBJECT_TYPE: FrameObjectType = FrameObjectType::_4kPage;
 }
 
 impl CapTypeForFrameObject for cap_type::MegaPage {}
