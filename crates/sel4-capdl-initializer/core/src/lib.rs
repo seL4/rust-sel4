@@ -573,8 +573,8 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
                         cap.object,
                     )
                     .generic_intermediate_translation_structure_map(
+                        sel4::TranslationStructureObjectType::from_level(level + 1).unwrap(),
                         vspace,
-                        level + 1,
                         vaddr,
                         cap.vm_attributes(),
                     )?;

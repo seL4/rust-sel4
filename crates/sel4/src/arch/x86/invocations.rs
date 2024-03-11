@@ -5,8 +5,8 @@
 //
 
 use crate::{
-    cap::*, cap_type, AbsoluteCPtr, Cap, CapRights, CapTypeForFrameObject, Error,
-    InvocationContext, Result, VmAttributes, Word,
+    cap::*, cap_type, sel4_cfg_wrap_match, AbsoluteCPtr, Cap, CapRights, CapTypeForFrameObject,
+    Error, InvocationContext, Result, TranslationStructureObjectType, VmAttributes, Word,
 };
 
 impl<T: CapTypeForFrameObject, C: InvocationContext> Cap<T, C> {
@@ -95,20 +95,23 @@ impl<C: InvocationContext> PageTable<C> {
 impl<C: InvocationContext> UnspecifiedIntermediateTranslationStructure<C> {
     pub fn generic_intermediate_translation_structure_map(
         self,
+        ty: TranslationStructureObjectType,
         vspace: VSpace,
-        level: usize,
         vaddr: usize,
         attr: VmAttributes,
     ) -> Result<()> {
-        match level {
-            1 => self.cast::<cap_type::PDPT>().pdpt_map(vspace, vaddr, attr),
-            2 => self
-                .cast::<cap_type::PageDirectory>()
-                .page_directory_map(vspace, vaddr, attr),
-            3 => self
-                .cast::<cap_type::PageTable>()
-                .page_table_map(vspace, vaddr, attr),
-            _ => panic!(),
+        sel4_cfg_wrap_match! {
+            match ty {
+                #[sel4_cfg(ARCH_X86_64)]
+                TranslationStructureObjectType::PDPT => self.cast::<cap_type::PDPT>().pdpt_map(vspace, vaddr, attr),
+                TranslationStructureObjectType::PageDirectory => self
+                    .cast::<cap_type::PageDirectory>()
+                    .page_directory_map(vspace, vaddr, attr),
+                TranslationStructureObjectType::PageTable => self
+                    .cast::<cap_type::PageTable>()
+                    .page_table_map(vspace, vaddr, attr),
+                _ => panic!(),
+            }
         }
     }
 }
