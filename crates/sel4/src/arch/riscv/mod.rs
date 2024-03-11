@@ -27,7 +27,7 @@ pub const NUM_FAST_MESSAGE_REGISTERS: usize = 4;
 pub(crate) mod cap_type_arch {
     use crate::declare_cap_type_for_object_of_fixed_size;
 
-    declare_cap_type_for_object_of_fixed_size!(_4KPage {
+    declare_cap_type_for_object_of_fixed_size!(_4kPage {
         ObjectTypeArch,
         ObjectBlueprintArch
     });
@@ -48,13 +48,13 @@ pub(crate) mod cap_type_arch {
     });
 
     pub type VSpace = PageTable;
-    pub type Granule = _4KPage;
+    pub type Granule = _4kPage;
 }
 
 pub(crate) mod cap_arch {
     use crate::declare_cap_alias;
 
-    declare_cap_alias!(_4KPage);
+    declare_cap_alias!(_4kPage);
     declare_cap_alias!(MegaPage);
 
     #[sel4_config::sel4_cfg(any(PT_LEVELS = "3", PT_LEVELS = "4"))]
