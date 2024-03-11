@@ -21,7 +21,7 @@ use crate::ObjectBlueprintAArch32;
 /// Frame sizes for AArch64.
 #[sel4_cfg_enum]
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
-pub enum FrameSize {
+pub enum FrameObjectType {
     Small,
     Large,
     #[sel4_cfg(ARCH_AARCH64)]
@@ -30,7 +30,7 @@ pub enum FrameSize {
     Section,
 }
 
-impl FrameSize {
+impl FrameObjectType {
     pub const GRANULE: Self = Self::Small;
 
     pub const fn blueprint(self) -> ObjectBlueprint {
@@ -78,13 +78,13 @@ impl FrameSize {
 impl CapTypeForFrameObject for cap_type::SmallPage {}
 
 impl CapTypeForFrameObjectOfFixedSize for cap_type::SmallPage {
-    const FRAME_SIZE: FrameSize = FrameSize::Small;
+    const FRAME_OBJECT_TYPE: FrameObjectType = FrameObjectType::Small;
 }
 
 impl CapTypeForFrameObject for cap_type::LargePage {}
 
 impl CapTypeForFrameObjectOfFixedSize for cap_type::LargePage {
-    const FRAME_SIZE: FrameSize = FrameSize::Large;
+    const FRAME_OBJECT_TYPE: FrameObjectType = FrameObjectType::Large;
 }
 
 #[sel4_cfg(ARCH_AARCH64)]
@@ -92,7 +92,7 @@ impl CapTypeForFrameObject for cap_type::HugePage {}
 
 #[sel4_cfg(ARCH_AARCH64)]
 impl CapTypeForFrameObjectOfFixedSize for cap_type::HugePage {
-    const FRAME_SIZE: FrameSize = FrameSize::Huge;
+    const FRAME_OBJECT_TYPE: FrameObjectType = FrameObjectType::Huge;
 }
 
 #[sel4_cfg(ARCH_AARCH32)]
@@ -100,7 +100,7 @@ impl CapTypeForFrameObject for cap_type::Section {}
 
 #[sel4_cfg(ARCH_AARCH32)]
 impl CapTypeForFrameObjectOfFixedSize for cap_type::Section {
-    const FRAME_SIZE: FrameSize = FrameSize::Section;
+    const FRAME_OBJECT_TYPE: FrameObjectType = FrameObjectType::Section;
 }
 
 //
