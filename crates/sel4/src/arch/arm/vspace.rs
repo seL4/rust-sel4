@@ -107,7 +107,7 @@ impl CapTypeForFrameObjectOfFixedSize for cap_type::Section {
 
 #[sel4_cfg_enum]
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
-pub enum TranslationStructureType {
+pub enum TranslationStructureObjectType {
     PT,
     #[sel4_cfg(ARCH_AARCH64)]
     VSpace,
@@ -115,7 +115,7 @@ pub enum TranslationStructureType {
     PD,
 }
 
-impl TranslationStructureType {
+impl TranslationStructureObjectType {
     pub const NUM_LEVELS: usize = if sel4_cfg_bool!(ARCH_AARCH64) { 4 } else { 2 };
 
     pub const fn blueprint(&self) -> ObjectBlueprint {
@@ -164,15 +164,18 @@ impl TranslationStructureType {
 }
 
 impl CapTypeForTranslationStructureObject for cap_type::PT {
-    const TRANSLATION_STRUCTURE_TYPE: TranslationStructureType = TranslationStructureType::PT;
+    const TRANSLATION_STRUCTURE_OBJECT_TYPE: TranslationStructureObjectType =
+        TranslationStructureObjectType::PT;
 }
 
 #[sel4_cfg(ARCH_AARCH64)]
 impl CapTypeForTranslationStructureObject for cap_type::VSpace {
-    const TRANSLATION_STRUCTURE_TYPE: TranslationStructureType = TranslationStructureType::VSpace;
+    const TRANSLATION_STRUCTURE_OBJECT_TYPE: TranslationStructureObjectType =
+        TranslationStructureObjectType::VSpace;
 }
 
 #[sel4_cfg(ARCH_AARCH32)]
 impl CapTypeForTranslationStructureObject for cap_type::PD {
-    const TRANSLATION_STRUCTURE_TYPE: TranslationStructureType = TranslationStructureType::PD;
+    const TRANSLATION_STRUCTURE_OBJECT_TYPE: TranslationStructureObjectType =
+        TranslationStructureObjectType::PD;
 }

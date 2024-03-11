@@ -560,7 +560,7 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
         obj: &object::PageTable,
     ) -> Result<()> {
         for (i, entry) in obj.entries() {
-            let vaddr = vaddr + (i << sel4::TranslationStructureType::span_bits(level + 1));
+            let vaddr = vaddr + (i << sel4::TranslationStructureObjectType::span_bits(level + 1));
             match entry {
                 PageTableEntry::Frame(cap) => {
                     let frame = self.orig_cap::<cap_type::UnspecifiedFrame>(cap.object);

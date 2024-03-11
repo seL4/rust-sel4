@@ -66,14 +66,14 @@ impl CapTypeForFrameObjectOfFixedSize for cap_type::HugePage {
 //
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
-pub enum TranslationStructureType {
+pub enum TranslationStructureObjectType {
     PML4,
     PDPT,
     PageDirectory,
     PageTable,
 }
 
-impl TranslationStructureType {
+impl TranslationStructureObjectType {
     pub const NUM_LEVELS: usize = 4;
 
     pub const fn blueprint(&self) -> ObjectBlueprint {
@@ -110,19 +110,21 @@ impl TranslationStructureType {
 }
 
 impl CapTypeForTranslationStructureObject for cap_type::PML4 {
-    const TRANSLATION_STRUCTURE_TYPE: TranslationStructureType = TranslationStructureType::PML4;
+    const TRANSLATION_STRUCTURE_OBJECT_TYPE: TranslationStructureObjectType =
+        TranslationStructureObjectType::PML4;
 }
 
 impl CapTypeForTranslationStructureObject for cap_type::PDPT {
-    const TRANSLATION_STRUCTURE_TYPE: TranslationStructureType = TranslationStructureType::PDPT;
+    const TRANSLATION_STRUCTURE_OBJECT_TYPE: TranslationStructureObjectType =
+        TranslationStructureObjectType::PDPT;
 }
 
 impl CapTypeForTranslationStructureObject for cap_type::PageDirectory {
-    const TRANSLATION_STRUCTURE_TYPE: TranslationStructureType =
-        TranslationStructureType::PageDirectory;
+    const TRANSLATION_STRUCTURE_OBJECT_TYPE: TranslationStructureObjectType =
+        TranslationStructureObjectType::PageDirectory;
 }
 
 impl CapTypeForTranslationStructureObject for cap_type::PageTable {
-    const TRANSLATION_STRUCTURE_TYPE: TranslationStructureType =
-        TranslationStructureType::PageTable;
+    const TRANSLATION_STRUCTURE_OBJECT_TYPE: TranslationStructureObjectType =
+        TranslationStructureObjectType::PageTable;
 }

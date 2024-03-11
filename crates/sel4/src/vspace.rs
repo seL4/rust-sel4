@@ -6,7 +6,7 @@
 //
 
 use crate::{
-    cap_type, CapType, CapTypeForObjectOfFixedSize, FrameObjectType, TranslationStructureType,
+    cap_type, CapType, CapTypeForObjectOfFixedSize, FrameObjectType, TranslationStructureObjectType,
 };
 
 impl FrameObjectType {
@@ -19,11 +19,11 @@ impl FrameObjectType {
     }
 }
 
-impl TranslationStructureType {
+impl TranslationStructureObjectType {
     pub fn span_bits(level: usize) -> usize {
         (level..Self::NUM_LEVELS)
             .map(|level| {
-                TranslationStructureType::from_level(level)
+                TranslationStructureObjectType::from_level(level)
                     .unwrap()
                     .index_bits()
             })
@@ -45,5 +45,5 @@ pub trait CapTypeForFrameObjectOfFixedSize:
 }
 
 pub trait CapTypeForTranslationStructureObject: CapTypeForObjectOfFixedSize {
-    const TRANSLATION_STRUCTURE_TYPE: TranslationStructureType;
+    const TRANSLATION_STRUCTURE_OBJECT_TYPE: TranslationStructureObjectType;
 }
