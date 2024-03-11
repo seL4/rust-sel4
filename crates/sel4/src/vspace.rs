@@ -5,9 +5,11 @@
 // SPDX-License-Identifier: MIT
 //
 
-use crate::{cap_type, CapType, CapTypeForObjectOfFixedSize, FrameSize, TranslationStructureType};
+use crate::{
+    cap_type, CapType, CapTypeForObjectOfFixedSize, FrameObjectType, TranslationStructureType,
+};
 
-impl FrameSize {
+impl FrameObjectType {
     pub const fn bits(self) -> usize {
         self.blueprint().physical_size_bits()
     }
@@ -26,7 +28,7 @@ impl TranslationStructureType {
                     .index_bits()
             })
             .sum::<usize>()
-            + FrameSize::GRANULE.bits()
+            + FrameObjectType::GRANULE.bits()
     }
 }
 
@@ -39,7 +41,7 @@ impl CapTypeForFrameObject for cap_type::UnspecifiedFrame {}
 pub trait CapTypeForFrameObjectOfFixedSize:
     CapTypeForObjectOfFixedSize + CapTypeForFrameObject
 {
-    const FRAME_SIZE: FrameSize;
+    const FRAME_OBJECT_TYPE: FrameObjectType;
 }
 
 pub trait CapTypeForTranslationStructureObject: CapTypeForObjectOfFixedSize {

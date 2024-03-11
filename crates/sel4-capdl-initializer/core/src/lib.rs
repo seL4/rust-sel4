@@ -25,7 +25,7 @@ use sel4::{
 use sel4_capdl_initializer_types::*;
 
 #[allow(unused_imports)]
-use sel4::{CapTypeForFrameObject, FrameSize, VSpace};
+use sel4::{CapTypeForFrameObject, FrameObjectType, VSpace};
 
 mod buffers;
 mod cslot_allocator;
@@ -413,7 +413,7 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
         obj_id: ObjectId,
         frame: &EmbeddedFrame,
     ) -> Result<()> {
-        frame.check(cap_type::Granule::FRAME_SIZE.bytes());
+        frame.check(cap_type::Granule::FRAME_OBJECT_TYPE.bytes());
         let addr = frame.ptr() as usize;
         let slot = get_user_image_frame_slot(self.bootinfo, &self.user_image_bounds, addr);
         self.set_orig_cslot(obj_id, slot.upcast());
@@ -482,9 +482,10 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
             if let Some(fill) = obj.init.as_fill() {
                 let entries = &fill.entries;
                 if !entries.is_empty() {
-                    let frame_size = sel4::FrameSize::from_bits(obj.size_bits).unwrap();
+                    let frame_object_type =
+                        sel4::FrameObjectType::from_bits(obj.size_bits).unwrap();
                     let frame = self.orig_cap::<cap_type::UnspecifiedFrame>(obj_id);
-                    self.fill_frame(frame, frame_size, entries)?;
+                    self.fill_frame(frame, frame_object_type, entries)?;
                 }
             }
         }
@@ -494,12 +495,12 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
     fn fill_frame(
         &self,
         frame: Cap<cap_type::UnspecifiedFrame>,
-        frame_size: sel4::FrameSize,
+        frame_object_type: sel4::FrameObjectType,
         fill: &[FillEntry<D>],
     ) -> Result<()> {
         frame.frame_map(
             init_thread::slot::VSPACE.cap(),
-            self.copy_addrs.select(frame_size),
+            self.copy_addrs.select(frame_object_type),
             CapRights::read_write(),
             vm_attributes_from_whether_cached(false),
         )?;
@@ -507,8 +508,8 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
         for entry in fill.iter() {
             let offset = entry.range.start;
             let length = entry.range.end - entry.range.start;
-            assert!(entry.range.end <= frame_size.bytes());
-            let dst_frame = self.copy_addrs.select(frame_size) as *mut u8;
+            assert!(entry.range.end <= frame_object_type.bytes());
+            let dst_frame = self.copy_addrs.select(frame_object_type) as *mut u8;
             let dst = unsafe { slice::from_raw_parts_mut(dst_frame.add(offset), length) };
             match &entry.content {
                 FillEntryContent::Data(content_data) => {

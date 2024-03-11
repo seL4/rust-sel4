@@ -15,23 +15,23 @@ use crate::{
 
 #[sel4_config::sel4_cfg_enum]
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
-pub enum FrameSize {
+pub enum FrameObjectType {
     _4K,
     Mega,
     #[sel4_cfg(any(PT_LEVELS = "3", PT_LEVELS = "4"))]
     Giga,
 }
 
-impl FrameSize {
+impl FrameObjectType {
     pub const GRANULE: Self = Self::_4K;
 
     pub const fn blueprint(self) -> ObjectBlueprint {
         sel4_cfg_wrap_match! {
             match self {
-                FrameSize::_4K => ObjectBlueprint::Arch(ObjectBlueprintRISCV::_4KPage),
-                FrameSize::Mega => ObjectBlueprint::Arch(ObjectBlueprintRISCV::MegaPage),
+                FrameObjectType::_4K => ObjectBlueprint::Arch(ObjectBlueprintRISCV::_4KPage),
+                FrameObjectType::Mega => ObjectBlueprint::Arch(ObjectBlueprintRISCV::MegaPage),
                 #[sel4_cfg(any(PT_LEVELS = "3", PT_LEVELS = "4"))]
-                FrameSize::Giga => ObjectBlueprint::Arch(ObjectBlueprintRISCV::GigaPage),
+                FrameObjectType::Giga => ObjectBlueprint::Arch(ObjectBlueprintRISCV::GigaPage),
             }
         }
     }
@@ -60,13 +60,13 @@ impl FrameSize {
 impl CapTypeForFrameObject for cap_type::_4KPage {}
 
 impl CapTypeForFrameObjectOfFixedSize for cap_type::_4KPage {
-    const FRAME_SIZE: FrameSize = FrameSize::_4K;
+    const FRAME_OBJECT_TYPE: FrameObjectType = FrameObjectType::_4K;
 }
 
 impl CapTypeForFrameObject for cap_type::MegaPage {}
 
 impl CapTypeForFrameObjectOfFixedSize for cap_type::MegaPage {
-    const FRAME_SIZE: FrameSize = FrameSize::Mega;
+    const FRAME_OBJECT_TYPE: FrameObjectType = FrameObjectType::Mega;
 }
 
 #[sel4_config::sel4_cfg(any(PT_LEVELS = "3", PT_LEVELS = "4"))]
@@ -74,7 +74,7 @@ impl CapTypeForFrameObject for cap_type::GigaPage {}
 
 #[sel4_config::sel4_cfg(any(PT_LEVELS = "3", PT_LEVELS = "4"))]
 impl CapTypeForFrameObjectOfFixedSize for cap_type::GigaPage {
-    const FRAME_SIZE: FrameSize = FrameSize::Giga;
+    const FRAME_OBJECT_TYPE: FrameObjectType = FrameObjectType::Giga;
 }
 
 //

@@ -36,7 +36,8 @@ impl CopyAddrs {
             let addr = ptr::addr_of!(SMALL_PAGE_PLACEHOLDER) as usize;
             let start_slot_index =
                 get_user_image_frame_slot(bootinfo, user_image_bounds, addr).index();
-            for i in 0..(SMALL_PAGE_PLACEHOLDER_SIZE / cap_type::Granule::FRAME_SIZE.bytes()) {
+            for i in 0..(SMALL_PAGE_PLACEHOLDER_SIZE / cap_type::Granule::FRAME_OBJECT_TYPE.bytes())
+            {
                 let slot = init_thread::Slot::<cap_type::Granule>::from_index(start_slot_index + i);
                 let cap = slot.cap();
                 cap.frame_unmap()?;
@@ -71,12 +72,12 @@ impl CopyAddrs {
         })
     }
 
-    pub(crate) fn select(&self, frame_size: sel4::FrameSize) -> usize {
-        if frame_size.bytes() <= SMALL_PAGE_PLACEHOLDER_SIZE {
+    pub(crate) fn select(&self, frame_object_type: sel4::FrameObjectType) -> usize {
+        if frame_object_type.bytes() <= SMALL_PAGE_PLACEHOLDER_SIZE {
             self.smaller_frame_copy_addr
         } else {
             assert_eq!(
-                frame_size.bits(),
+                frame_object_type.bits(),
                 sel4::TranslationStructureType::span_bits(
                     sel4::TranslationStructureType::NUM_LEVELS - 1
                 )
@@ -91,7 +92,7 @@ pub(crate) fn get_user_image_frame_slot(
     user_image_bounds: &Range<usize>,
     addr: usize,
 ) -> init_thread::Slot<cap_type::Granule> {
-    let granule_size = cap_type::Granule::FRAME_SIZE.bytes();
+    let granule_size = cap_type::Granule::FRAME_OBJECT_TYPE.bytes();
     assert_eq!(addr % granule_size, 0);
     let num_user_frames = bootinfo.user_image_frames().len();
     let user_image_footprint = coarsen_footprint(user_image_bounds, granule_size);

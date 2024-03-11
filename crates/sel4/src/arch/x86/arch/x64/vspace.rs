@@ -11,13 +11,13 @@ use crate::{
 };
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
-pub enum FrameSize {
+pub enum FrameObjectType {
     _4K,
     Large,
     Huge,
 }
 
-impl FrameSize {
+impl FrameObjectType {
     pub const GRANULE: Self = Self::_4K;
 
     pub const fn blueprint(self) -> ObjectBlueprint {
@@ -48,19 +48,19 @@ impl FrameSize {
 impl CapTypeForFrameObject for cap_type::_4K {}
 
 impl CapTypeForFrameObjectOfFixedSize for cap_type::_4K {
-    const FRAME_SIZE: FrameSize = FrameSize::_4K;
+    const FRAME_OBJECT_TYPE: FrameObjectType = FrameObjectType::_4K;
 }
 
 impl CapTypeForFrameObject for cap_type::LargePage {}
 
 impl CapTypeForFrameObjectOfFixedSize for cap_type::LargePage {
-    const FRAME_SIZE: FrameSize = FrameSize::Large;
+    const FRAME_OBJECT_TYPE: FrameObjectType = FrameObjectType::Large;
 }
 
 impl CapTypeForFrameObject for cap_type::HugePage {}
 
 impl CapTypeForFrameObjectOfFixedSize for cap_type::HugePage {
-    const FRAME_SIZE: FrameSize = FrameSize::Huge;
+    const FRAME_OBJECT_TYPE: FrameObjectType = FrameObjectType::Huge;
 }
 
 //
