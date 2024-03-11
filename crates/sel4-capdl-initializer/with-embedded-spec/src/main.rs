@@ -44,8 +44,8 @@ fn main(bootinfo: &sel4::BootInfoPtr) -> ! {
 }
 
 extern "C" {
-    static __executable_start: u64;
-    static _end: u64;
+    static __executable_start: usize;
+    static _end: usize;
 }
 
 fn user_image_bounds() -> Range<usize> {
