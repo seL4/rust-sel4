@@ -281,8 +281,8 @@ fn get_user_image_frame_slot(
 
 fn get_user_image_footprint() -> Range<usize> {
     extern "C" {
-        static __executable_start: u64;
-        static _end: u64;
+        static __executable_start: usize;
+        static _end: usize;
     }
     unsafe {
         let start = round_down(ptr::addr_of!(__executable_start) as usize, GRANULE_SIZE);
