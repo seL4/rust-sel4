@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: MIT
 //
 
-use crate::sys;
+use crate::{const_helpers::u32_into_usize, sys};
 
 mod arch;
 mod invocations;
@@ -25,7 +25,7 @@ pub(crate) mod top_level {
 }
 
 /// The number of message registers which are passed in architectural registers.
-pub const NUM_FAST_MESSAGE_REGISTERS: usize = sys::seL4_FastMessageRegisters as usize; // no other const way to convert
+pub const NUM_FAST_MESSAGE_REGISTERS: usize = u32_into_usize(sys::seL4_FastMessageRegisters);
 
 pub(crate) mod cap_type_arch {
     use crate::{declare_cap_type_for_object_of_fixed_size, sel4_cfg};

@@ -4,11 +4,13 @@
 // SPDX-License-Identifier: MIT
 //
 
-use crate::sys;
+use crate::{const_helpers::u32_into_usize, sys};
 
 mod arch;
+mod invocations;
 mod object;
 mod vm_attributes;
+mod vspace;
 
 pub(crate) mod fault;
 
@@ -17,11 +19,12 @@ pub(crate) mod top_level {
         arch::top_level::*,
         object::{ObjectBlueprintArch, ObjectBlueprintX86, ObjectTypeArch, ObjectTypeX86},
         vm_attributes::VmAttributes,
+        vspace::{FrameObjectType, TranslationStructureObjectType},
         NUM_FAST_MESSAGE_REGISTERS,
     };
 }
 
-pub const NUM_FAST_MESSAGE_REGISTERS: usize = sys::seL4_FastMessageRegisters as usize; // no other const way to convert
+pub const NUM_FAST_MESSAGE_REGISTERS: usize = u32_into_usize(sys::seL4_FastMessageRegisters);
 
 pub(crate) mod cap_type_arch {
     use crate::{declare_cap_type, declare_cap_type_for_object_of_fixed_size};
