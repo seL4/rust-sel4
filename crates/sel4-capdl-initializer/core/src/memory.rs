@@ -15,6 +15,7 @@ const SMALL_PAGE_PLACEHOLDER_SIZE: usize = if sel4_cfg_bool!(ARCH_AARCH32) {
     4096
 };
 
+#[repr(C)]
 #[sel4_cfg_attr(ARCH_AARCH32, repr(align(65536)))]
 #[sel4_cfg_attr(not(ARCH_AARCH32), repr(align(4096)))]
 struct SmallPagePlaceHolder(#[allow(dead_code)] [u8; SMALL_PAGE_PLACEHOLDER_SIZE]);
