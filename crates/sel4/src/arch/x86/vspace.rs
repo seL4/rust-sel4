@@ -74,10 +74,6 @@ pub enum TranslationStructureObjectType {
 }
 
 impl TranslationStructureObjectType {
-    pub const NUM_LEVELS: usize = 4;
-
-    pub const FIRST_LEVEL_WITH_FRAME_ENTRIES: usize = Self::NUM_LEVELS - 3;
-
     pub const fn blueprint(&self) -> ObjectBlueprint {
         match self {
             Self::PML4 => {
@@ -129,4 +125,10 @@ impl CapTypeForTranslationStructureObject for cap_type::PageDirectory {
 impl CapTypeForTranslationStructureObject for cap_type::PageTable {
     const TRANSLATION_STRUCTURE_OBJECT_TYPE: TranslationStructureObjectType =
         TranslationStructureObjectType::PageTable;
+}
+
+pub mod vspace_levels {
+    pub const NUM_LEVELS: usize = 4;
+
+    pub const FIRST_LEVEL_WITH_FRAME_ENTRIES: usize = NUM_LEVELS - 3;
 }

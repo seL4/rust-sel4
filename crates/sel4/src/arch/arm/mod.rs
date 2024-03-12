@@ -24,6 +24,8 @@ pub(crate) mod top_level {
     };
 }
 
+pub(crate) use vspace::vspace_levels;
+
 /// The number of message registers which are passed in architectural registers.
 pub const NUM_FAST_MESSAGE_REGISTERS: usize = u32_into_usize(sys::seL4_FastMessageRegisters);
 

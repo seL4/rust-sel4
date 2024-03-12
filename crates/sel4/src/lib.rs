@@ -134,7 +134,8 @@ pub use syscalls::{
     r#yield, Badge, CallWithMRs, FastMessages, IpcCapType, RecvWithMRs, NUM_MESSAGE_REGISTERS,
 };
 pub use vspace::{
-    CapTypeForFrameObject, CapTypeForFrameObjectOfFixedSize, CapTypeForTranslationStructureObject,
+    vspace_levels, CapTypeForFrameObject, CapTypeForFrameObjectOfFixedSize,
+    CapTypeForTranslationStructureObject,
 };
 
 sel4_cfg_if! {

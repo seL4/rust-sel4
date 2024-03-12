@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: MIT
 //
 
-use sel4_config::{sel4_cfg_usize, sel4_cfg_wrap_match};
+use sel4_config::sel4_cfg_wrap_match;
 
 #[allow(unused_imports)]
 use crate::{
@@ -85,15 +85,6 @@ pub enum TranslationStructureObjectType {
 }
 
 impl TranslationStructureObjectType {
-    pub const NUM_LEVELS: usize = sel4_cfg_usize!(PT_LEVELS);
-
-    pub const FIRST_LEVEL_WITH_FRAME_ENTRIES: usize = Self::NUM_LEVELS
-        - if sel4_cfg_usize!(PT_LEVELS) == 3 || sel4_cfg_usize!(PT_LEVELS) == 4 {
-            3
-        } else {
-            2
-        };
-
     pub const fn blueprint(&self) -> ObjectBlueprint {
         ObjectBlueprint::Arch(ObjectBlueprintRiscV::PageTable)
     }
@@ -103,7 +94,7 @@ impl TranslationStructureObjectType {
     }
 
     pub const fn from_level(level: usize) -> Option<Self> {
-        if level < Self::NUM_LEVELS {
+        if level < vspace_levels::NUM_LEVELS {
             Some(Self::PageTable)
         } else {
             None
@@ -114,4 +105,17 @@ impl TranslationStructureObjectType {
 impl CapTypeForTranslationStructureObject for cap_type::PageTable {
     const TRANSLATION_STRUCTURE_OBJECT_TYPE: TranslationStructureObjectType =
         TranslationStructureObjectType::PageTable;
+}
+
+pub mod vspace_levels {
+    use sel4_config::sel4_cfg_usize;
+
+    pub const NUM_LEVELS: usize = sel4_cfg_usize!(PT_LEVELS);
+
+    pub const FIRST_LEVEL_WITH_FRAME_ENTRIES: usize = NUM_LEVELS
+        - if sel4_cfg_usize!(PT_LEVELS) == 3 || sel4_cfg_usize!(PT_LEVELS) == 4 {
+            3
+        } else {
+            2
+        };
 }

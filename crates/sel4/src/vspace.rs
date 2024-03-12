@@ -19,29 +19,6 @@ impl FrameObjectType {
     }
 }
 
-impl TranslationStructureObjectType {
-    fn span_bits_unchecked(level: usize) -> usize {
-        (level..Self::NUM_LEVELS)
-            .map(|level| {
-                TranslationStructureObjectType::from_level(level)
-                    .unwrap()
-                    .index_bits()
-            })
-            .sum::<usize>()
-            + FrameObjectType::GRANULE.bits()
-    }
-
-    pub fn span_bits(level: usize) -> usize {
-        assert!(level < Self::NUM_LEVELS);
-        Self::span_bits_unchecked(level)
-    }
-
-    pub fn step_bits(level: usize) -> usize {
-        assert!(level < Self::NUM_LEVELS);
-        Self::span_bits_unchecked(level + 1)
-    }
-}
-
 /// Trait for [`CapType`]s which correspond to frame objects.
 pub trait CapTypeForFrameObject: CapType {}
 
@@ -56,4 +33,31 @@ pub trait CapTypeForFrameObjectOfFixedSize:
 
 pub trait CapTypeForTranslationStructureObject: CapTypeForObjectOfFixedSize {
     const TRANSLATION_STRUCTURE_OBJECT_TYPE: TranslationStructureObjectType;
+}
+
+pub mod vspace_levels {
+    use crate::{FrameObjectType, TranslationStructureObjectType};
+
+    pub use crate::arch::vspace_levels::*;
+
+    fn span_bits_unchecked(level: usize) -> usize {
+        (level..NUM_LEVELS)
+            .map(|level| {
+                TranslationStructureObjectType::from_level(level)
+                    .unwrap()
+                    .index_bits()
+            })
+            .sum::<usize>()
+            + FrameObjectType::GRANULE.bits()
+    }
+
+    pub fn span_bits(level: usize) -> usize {
+        assert!(level < NUM_LEVELS);
+        span_bits_unchecked(level)
+    }
+
+    pub fn step_bits(level: usize) -> usize {
+        assert!(level < NUM_LEVELS);
+        span_bits_unchecked(level + 1)
+    }
 }

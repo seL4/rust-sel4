@@ -46,14 +46,9 @@ impl CopyAddrs {
             addr
         };
         let larger_frame_copy_addr = {
-            let outer_span = 1u64
-                << sel4::TranslationStructureObjectType::span_bits(
-                    sel4::TranslationStructureObjectType::NUM_LEVELS - 2,
-                );
-            let inner_span = 1usize
-                << sel4::TranslationStructureObjectType::span_bits(
-                    sel4::TranslationStructureObjectType::NUM_LEVELS - 1,
-                );
+            let level = sel4::vspace_levels::NUM_LEVELS - 2;
+            let outer_span = 1u64 << sel4::vspace_levels::span_bits(level);
+            let inner_span = 1usize << sel4::vspace_levels::step_bits(level);
             let addr_space_footprint = coarsen_footprint(
                 &(user_image_bounds.start..(user_image_bounds.start + bootinfo.footprint_size())),
                 inner_span,
@@ -79,9 +74,7 @@ impl CopyAddrs {
         } else {
             assert_eq!(
                 frame_object_type.bits(),
-                sel4::TranslationStructureObjectType::span_bits(
-                    sel4::TranslationStructureObjectType::NUM_LEVELS - 1
-                )
+                sel4::vspace_levels::span_bits(sel4::vspace_levels::NUM_LEVELS - 1)
             );
             self.larger_frame_copy_addr
         }
