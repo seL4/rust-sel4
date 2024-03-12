@@ -30,7 +30,7 @@ macro_rules! declare_cap_type {
         $t:ident
     ) => {
         $(#[$outer])*
-        #[derive(Copy, Clone, Eq, PartialEq)]
+        #[derive(Debug, Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
         pub struct $t;
 
         impl $crate::CapType for $t {

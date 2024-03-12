@@ -6,6 +6,7 @@
 //
 
 use core::fmt;
+use core::hash::Hash;
 use core::marker::PhantomData;
 
 use sel4_config::sel4_cfg;
@@ -159,8 +160,9 @@ impl<T: CapType, C> fmt::Debug for Cap<T, C> {
 /// Trait for marker types corresponding to capability types in the seL4 API.
 ///
 /// Implementors are used to mark instantiations of [`Cap`].
-// NOTE require 'Copy' for convenience to make up for limitations of automatic trait derivation
-pub trait CapType: Copy {
+// NOTE require derivable traits for convenience to make up for limitations of automatic trait
+// derivation
+pub trait CapType: Copy + Clone + Eq + PartialEq + Ord + PartialOrd + Hash {
     const NAME: &'static str;
 }
 
