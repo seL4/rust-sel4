@@ -40,7 +40,8 @@ pub mod vspace_levels {
 
     pub use crate::arch::vspace_levels::*;
 
-    fn span_bits_unchecked(level: usize) -> usize {
+    pub fn span_bits(level: usize) -> usize {
+        assert!(level < NUM_LEVELS);
         (level..NUM_LEVELS)
             .map(|level| {
                 TranslationTableObjectType::from_level(level)
@@ -51,13 +52,10 @@ pub mod vspace_levels {
             + FrameObjectType::GRANULE.bits()
     }
 
-    pub fn span_bits(level: usize) -> usize {
-        assert!(level < NUM_LEVELS);
-        span_bits_unchecked(level)
-    }
-
     pub fn step_bits(level: usize) -> usize {
-        assert!(level < NUM_LEVELS);
-        span_bits_unchecked(level + 1)
+        span_bits(level)
+            - TranslationTableObjectType::from_level(level)
+                .unwrap()
+                .index_bits()
     }
 }
