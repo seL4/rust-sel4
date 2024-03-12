@@ -142,13 +142,13 @@ impl From<ObjectBlueprintArch> for ObjectBlueprint {
 }
 
 pub trait CapTypeForObject: CapType {
-    fn ty() -> ObjectType;
+    fn object_type() -> ObjectType;
 }
 
 pub trait CapTypeForObjectOfFixedSize: CapTypeForObject {
-    fn blueprint() -> ObjectBlueprint;
+    fn object_blueprint() -> ObjectBlueprint;
 }
 
 pub trait CapTypeForObjectOfVariableSize: CapTypeForObject {
-    fn blueprint(size_bits: usize) -> ObjectBlueprint;
+    fn object_blueprint(size_bits: usize) -> ObjectBlueprint;
 }

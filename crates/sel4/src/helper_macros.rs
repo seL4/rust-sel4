@@ -50,7 +50,7 @@ macro_rules! declare_cap_type_for_object {
         }
 
         impl $crate::CapTypeForObject for $t {
-            fn ty() -> $crate::ObjectType {
+            fn object_type() -> $crate::ObjectType {
                 $crate::$object_type::$t.into()
             }
         }
@@ -68,7 +68,7 @@ macro_rules! declare_cap_type_for_object_of_fixed_size {
         }
 
         impl $crate::CapTypeForObjectOfFixedSize for $t {
-            fn blueprint() -> $crate::ObjectBlueprint {
+            fn object_blueprint() -> $crate::ObjectBlueprint {
                 $crate::$object_blueprint::$t.into()
             }
         }
@@ -86,7 +86,7 @@ macro_rules! declare_cap_type_for_object_of_variable_size {
         }
 
         impl $crate::CapTypeForObjectOfVariableSize for $t {
-            fn blueprint(size_bits: usize) -> $crate::ObjectBlueprint {
+            fn object_blueprint(size_bits: usize) -> $crate::ObjectBlueprint {
                 ($crate::$object_blueprint::$t { size_bits }).into()
             }
         }
