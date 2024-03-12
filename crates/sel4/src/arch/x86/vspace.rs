@@ -6,7 +6,7 @@
 
 use crate::{
     cap_type, const_helpers::u32_into_usize, sys, CapTypeForFrameObject,
-    CapTypeForFrameObjectOfFixedSize, CapTypeForTranslationStructureObject, ObjectBlueprint,
+    CapTypeForFrameObjectOfFixedSize, CapTypeForTranslationTableObject, ObjectBlueprint,
     ObjectBlueprintX64, ObjectBlueprintX86,
 };
 
@@ -66,14 +66,14 @@ impl CapTypeForFrameObjectOfFixedSize for cap_type::HugePage {
 //
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
-pub enum TranslationStructureObjectType {
+pub enum TranslationTableObjectType {
     PML4,
     PDPT,
     PageDirectory,
     PageTable,
 }
 
-impl TranslationStructureObjectType {
+impl TranslationTableObjectType {
     pub const fn blueprint(&self) -> ObjectBlueprint {
         match self {
             Self::PML4 => {
@@ -107,24 +107,24 @@ impl TranslationStructureObjectType {
     }
 }
 
-impl CapTypeForTranslationStructureObject for cap_type::PML4 {
-    const TRANSLATION_STRUCTURE_OBJECT_TYPE: TranslationStructureObjectType =
-        TranslationStructureObjectType::PML4;
+impl CapTypeForTranslationTableObject for cap_type::PML4 {
+    const TRANSLATION_TABLE_OBJECT_TYPE: TranslationTableObjectType =
+        TranslationTableObjectType::PML4;
 }
 
-impl CapTypeForTranslationStructureObject for cap_type::PDPT {
-    const TRANSLATION_STRUCTURE_OBJECT_TYPE: TranslationStructureObjectType =
-        TranslationStructureObjectType::PDPT;
+impl CapTypeForTranslationTableObject for cap_type::PDPT {
+    const TRANSLATION_TABLE_OBJECT_TYPE: TranslationTableObjectType =
+        TranslationTableObjectType::PDPT;
 }
 
-impl CapTypeForTranslationStructureObject for cap_type::PageDirectory {
-    const TRANSLATION_STRUCTURE_OBJECT_TYPE: TranslationStructureObjectType =
-        TranslationStructureObjectType::PageDirectory;
+impl CapTypeForTranslationTableObject for cap_type::PageDirectory {
+    const TRANSLATION_TABLE_OBJECT_TYPE: TranslationTableObjectType =
+        TranslationTableObjectType::PageDirectory;
 }
 
-impl CapTypeForTranslationStructureObject for cap_type::PageTable {
-    const TRANSLATION_STRUCTURE_OBJECT_TYPE: TranslationStructureObjectType =
-        TranslationStructureObjectType::PageTable;
+impl CapTypeForTranslationTableObject for cap_type::PageTable {
+    const TRANSLATION_TABLE_OBJECT_TYPE: TranslationTableObjectType =
+        TranslationTableObjectType::PageTable;
 }
 
 pub mod vspace_levels {

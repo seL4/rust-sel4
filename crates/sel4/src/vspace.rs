@@ -6,7 +6,7 @@
 //
 
 use crate::{
-    cap_type, CapType, CapTypeForObjectOfFixedSize, FrameObjectType, TranslationStructureObjectType,
+    cap_type, CapType, CapTypeForObjectOfFixedSize, FrameObjectType, TranslationTableObjectType,
 };
 
 impl FrameObjectType {
@@ -31,19 +31,19 @@ pub trait CapTypeForFrameObjectOfFixedSize:
     const FRAME_OBJECT_TYPE: FrameObjectType;
 }
 
-pub trait CapTypeForTranslationStructureObject: CapTypeForObjectOfFixedSize {
-    const TRANSLATION_STRUCTURE_OBJECT_TYPE: TranslationStructureObjectType;
+pub trait CapTypeForTranslationTableObject: CapTypeForObjectOfFixedSize {
+    const TRANSLATION_TABLE_OBJECT_TYPE: TranslationTableObjectType;
 }
 
 pub mod vspace_levels {
-    use crate::{FrameObjectType, TranslationStructureObjectType};
+    use crate::{FrameObjectType, TranslationTableObjectType};
 
     pub use crate::arch::vspace_levels::*;
 
     fn span_bits_unchecked(level: usize) -> usize {
         (level..NUM_LEVELS)
             .map(|level| {
-                TranslationStructureObjectType::from_level(level)
+                TranslationTableObjectType::from_level(level)
                     .unwrap()
                     .index_bits()
             })

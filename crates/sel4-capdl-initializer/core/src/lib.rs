@@ -569,15 +569,13 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
                         .frame_map(vspace, vaddr, rights, cap.vm_attributes())?;
                 }
                 PageTableEntry::PageTable(cap) => {
-                    self.orig_cap::<cap_type::UnspecifiedIntermediateTranslationStructure>(
-                        cap.object,
-                    )
-                    .generic_intermediate_translation_structure_map(
-                        sel4::TranslationStructureObjectType::from_level(level + 1).unwrap(),
-                        vspace,
-                        vaddr,
-                        cap.vm_attributes(),
-                    )?;
+                    self.orig_cap::<cap_type::UnspecifiedIntermediateTranslationTable>(cap.object)
+                        .generic_intermediate_translation_table_map(
+                            sel4::TranslationTableObjectType::from_level(level + 1).unwrap(),
+                            vspace,
+                            vaddr,
+                            cap.vm_attributes(),
+                        )?;
                     let obj = self
                         .spec()
                         .lookup_object::<&object::PageTable>(cap.object)?;

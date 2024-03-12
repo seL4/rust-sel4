@@ -8,7 +8,7 @@ use sel4_config::{sel4_cfg, sel4_cfg_enum, sel4_cfg_wrap_match};
 
 use crate::{
     cap_type, const_helpers::u32_into_usize, sys, CapTypeForFrameObject,
-    CapTypeForFrameObjectOfFixedSize, CapTypeForTranslationStructureObject, ObjectBlueprint,
+    CapTypeForFrameObjectOfFixedSize, CapTypeForTranslationTableObject, ObjectBlueprint,
     ObjectBlueprintArm,
 };
 
@@ -107,7 +107,7 @@ impl CapTypeForFrameObjectOfFixedSize for cap_type::Section {
 
 #[sel4_cfg_enum]
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
-pub enum TranslationStructureObjectType {
+pub enum TranslationTableObjectType {
     PT,
     #[sel4_cfg(ARCH_AARCH64)]
     VSpace,
@@ -115,7 +115,7 @@ pub enum TranslationStructureObjectType {
     PD,
 }
 
-impl TranslationStructureObjectType {
+impl TranslationTableObjectType {
     pub const fn blueprint(&self) -> ObjectBlueprint {
         sel4_cfg_wrap_match! {
             match self {
@@ -161,21 +161,21 @@ impl TranslationStructureObjectType {
     }
 }
 
-impl CapTypeForTranslationStructureObject for cap_type::PT {
-    const TRANSLATION_STRUCTURE_OBJECT_TYPE: TranslationStructureObjectType =
-        TranslationStructureObjectType::PT;
+impl CapTypeForTranslationTableObject for cap_type::PT {
+    const TRANSLATION_TABLE_OBJECT_TYPE: TranslationTableObjectType =
+        TranslationTableObjectType::PT;
 }
 
 #[sel4_cfg(ARCH_AARCH64)]
-impl CapTypeForTranslationStructureObject for cap_type::VSpace {
-    const TRANSLATION_STRUCTURE_OBJECT_TYPE: TranslationStructureObjectType =
-        TranslationStructureObjectType::VSpace;
+impl CapTypeForTranslationTableObject for cap_type::VSpace {
+    const TRANSLATION_TABLE_OBJECT_TYPE: TranslationTableObjectType =
+        TranslationTableObjectType::VSpace;
 }
 
 #[sel4_cfg(ARCH_AARCH32)]
-impl CapTypeForTranslationStructureObject for cap_type::PD {
-    const TRANSLATION_STRUCTURE_OBJECT_TYPE: TranslationStructureObjectType =
-        TranslationStructureObjectType::PD;
+impl CapTypeForTranslationTableObject for cap_type::PD {
+    const TRANSLATION_TABLE_OBJECT_TYPE: TranslationTableObjectType =
+        TranslationTableObjectType::PD;
 }
 
 pub mod vspace_levels {

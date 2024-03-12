@@ -19,7 +19,7 @@ pub(crate) mod top_level {
         arch::top_level::*,
         object::{ObjectBlueprintArch, ObjectBlueprintArm, ObjectTypeArch, ObjectTypeArm},
         vm_attributes::VmAttributes,
-        vspace::{FrameObjectType, TranslationStructureObjectType},
+        vspace::{FrameObjectType, TranslationTableObjectType},
         NUM_FAST_MESSAGE_REGISTERS,
     };
 }

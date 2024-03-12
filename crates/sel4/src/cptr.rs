@@ -240,7 +240,7 @@ pub mod cap_type {
 
     declare_cap_type! {
         /// Any intermediate translation structure capability.
-        UnspecifiedIntermediateTranslationStructure
+        UnspecifiedIntermediateTranslationTable
     }
 
     sel4_cfg_if! {
@@ -289,7 +289,7 @@ pub mod cap {
     declare_cap_alias!(Null);
     declare_cap_alias!(Unspecified);
     declare_cap_alias!(UnspecifiedFrame);
-    declare_cap_alias!(UnspecifiedIntermediateTranslationStructure);
+    declare_cap_alias!(UnspecifiedIntermediateTranslationTable);
 
     declare_cap_alias!(VSpace);
     declare_cap_alias!(Granule);
