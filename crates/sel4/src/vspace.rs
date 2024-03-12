@@ -20,7 +20,7 @@ impl FrameObjectType {
 }
 
 impl TranslationStructureObjectType {
-    pub fn span_bits(level: usize) -> usize {
+    fn span_bits_unchecked(level: usize) -> usize {
         (level..Self::NUM_LEVELS)
             .map(|level| {
                 TranslationStructureObjectType::from_level(level)
@@ -29,6 +29,16 @@ impl TranslationStructureObjectType {
             })
             .sum::<usize>()
             + FrameObjectType::GRANULE.bits()
+    }
+
+    pub fn span_bits(level: usize) -> usize {
+        assert!(level < Self::NUM_LEVELS);
+        Self::span_bits_unchecked(level)
+    }
+
+    pub fn step_bits(level: usize) -> usize {
+        assert!(level < Self::NUM_LEVELS);
+        Self::span_bits_unchecked(level + 1)
     }
 }
 
