@@ -76,6 +76,8 @@ pub enum TranslationStructureObjectType {
 impl TranslationStructureObjectType {
     pub const NUM_LEVELS: usize = 4;
 
+    pub const FIRST_LEVEL_WITH_FRAME_ENTRIES: usize = Self::NUM_LEVELS - 3;
+
     pub const fn blueprint(&self) -> ObjectBlueprint {
         match self {
             Self::PML4 => {

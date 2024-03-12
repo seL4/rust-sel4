@@ -87,6 +87,13 @@ pub enum TranslationStructureObjectType {
 impl TranslationStructureObjectType {
     pub const NUM_LEVELS: usize = sel4_cfg_usize!(PT_LEVELS);
 
+    pub const FIRST_LEVEL_WITH_FRAME_ENTRIES: usize = Self::NUM_LEVELS
+        - if sel4_cfg_usize!(PT_LEVELS) == 3 || sel4_cfg_usize!(PT_LEVELS) == 4 {
+            3
+        } else {
+            2
+        };
+
     pub const fn blueprint(&self) -> ObjectBlueprint {
         ObjectBlueprint::Arch(ObjectBlueprintRiscV::PageTable)
     }
