@@ -24,6 +24,8 @@ pub(crate) mod top_level {
     };
 }
 
+pub(crate) use vspace::vspace_levels;
+
 pub const NUM_FAST_MESSAGE_REGISTERS: usize = u32_into_usize(sys::seL4_FastMessageRegisters);
 
 pub(crate) mod cap_type_arch {
