@@ -9,7 +9,7 @@ use sel4_config::sel4_cfg_wrap_match;
 #[allow(unused_imports)]
 use crate::{
     cap_type, const_helpers::u32_into_usize, sys, CapTypeForFrameObject,
-    CapTypeForFrameObjectOfFixedSize, CapTypeForTranslationStructureObject, ObjectBlueprint,
+    CapTypeForFrameObjectOfFixedSize, CapTypeForTranslationTableObject, ObjectBlueprint,
     ObjectBlueprintRiscV,
 };
 
@@ -80,11 +80,11 @@ impl CapTypeForFrameObjectOfFixedSize for cap_type::GigaPage {
 //
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
-pub enum TranslationStructureObjectType {
+pub enum TranslationTableObjectType {
     PageTable,
 }
 
-impl TranslationStructureObjectType {
+impl TranslationTableObjectType {
     pub const fn blueprint(&self) -> ObjectBlueprint {
         ObjectBlueprint::Arch(ObjectBlueprintRiscV::PageTable)
     }
@@ -102,9 +102,9 @@ impl TranslationStructureObjectType {
     }
 }
 
-impl CapTypeForTranslationStructureObject for cap_type::PageTable {
-    const TRANSLATION_STRUCTURE_OBJECT_TYPE: TranslationStructureObjectType =
-        TranslationStructureObjectType::PageTable;
+impl CapTypeForTranslationTableObject for cap_type::PageTable {
+    const TRANSLATION_TABLE_OBJECT_TYPE: TranslationTableObjectType =
+        TranslationTableObjectType::PageTable;
 }
 
 pub mod vspace_levels {

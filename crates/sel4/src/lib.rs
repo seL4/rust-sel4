@@ -135,7 +135,7 @@ pub use syscalls::{
 };
 pub use vspace::{
     vspace_levels, CapTypeForFrameObject, CapTypeForFrameObjectOfFixedSize,
-    CapTypeForTranslationStructureObject,
+    CapTypeForTranslationTableObject,
 };
 
 sel4_cfg_if! {
