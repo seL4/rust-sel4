@@ -73,16 +73,16 @@ impl DeferredAction {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub(crate) struct PreparedDeferredAction {
-    cptr: sel4::Unspecified,
+    cptr: sel4::cap::Unspecified,
     msg_info: sel4::MessageInfo,
 }
 
 impl PreparedDeferredAction {
-    pub(crate) fn new(cptr: sel4::Unspecified, msg_info: sel4::MessageInfo) -> Self {
+    pub(crate) fn new(cptr: sel4::cap::Unspecified, msg_info: sel4::MessageInfo) -> Self {
         Self { cptr, msg_info }
     }
 
-    pub(crate) fn cptr(&self) -> sel4::Unspecified {
+    pub(crate) fn cptr(&self) -> sel4::cap::Unspecified {
         self.cptr
     }
 

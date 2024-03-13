@@ -15,7 +15,6 @@ extern crate alloc;
 use core::ptr;
 use core::slice;
 
-use sel4::Endpoint;
 use sel4_dlmalloc::StaticHeapBounds;
 use sel4_immediate_sync_once_cell::ImmediateSyncOnceCell;
 use sel4_panicking::ExternalPanicInfo;
@@ -91,11 +90,12 @@ pub unsafe extern "C" fn cont_fn(cont_arg: *mut sel4_runtime_common::ContArg) ->
         sel4_runtime_common::run_ctors();
         __sel4_simple_task_main(config.arg());
     } else {
-        let endpoint = Endpoint::from_bits(thread_config.endpoint().unwrap().try_into().unwrap());
+        let endpoint =
+            sel4::cap::Endpoint::from_bits(thread_config.endpoint().unwrap().try_into().unwrap());
         let reply_authority = {
             sel4::sel4_cfg_if! {
                 if #[sel4_cfg(KERNEL_MCS)] {
-                    sel4::Reply::from_bits(thread_config.reply_authority().unwrap())
+                    sel4::cap::Reply::from_bits(thread_config.reply_authority().unwrap())
                 } else {
                     assert!(thread_config.reply_authority().is_none());
                     sel4::ImplicitReplyAuthority
@@ -114,8 +114,8 @@ pub fn try_idle() {
         .and_then(RuntimeConfig::idle_notification)
         .map(sel4::CPtrBits::try_from)
         .map(Result::unwrap)
-        .map(sel4::Notification::from_bits)
-        .map(sel4::Notification::wait);
+        .map(sel4::cap::Notification::from_bits)
+        .map(sel4::cap::Notification::wait);
 }
 
 pub fn idle() -> ! {
@@ -152,14 +152,14 @@ fn get_static_heap_bounds() -> StaticHeapBounds {
     )
 }
 
-fn get_static_heap_mutex_notification() -> sel4::Notification {
+fn get_static_heap_mutex_notification() -> sel4::cap::Notification {
     CONFIG
         .get()
         .unwrap()
         .static_heap_mutex_notification()
         .map(sel4::CPtrBits::try_from)
         .map(Result::unwrap)
-        .map(sel4::Notification::from_bits)
+        .map(sel4::cap::Notification::from_bits)
         .unwrap()
 }
 

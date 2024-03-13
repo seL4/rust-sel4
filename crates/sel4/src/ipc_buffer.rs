@@ -8,7 +8,7 @@
 use core::mem;
 use core::slice;
 
-use crate::{newtype_methods, sys, AbsoluteCPtr, CNode, Word};
+use crate::{cap, newtype_methods, sys, AbsoluteCPtr, Word};
 
 /// Corresponds to `seL4_IPCBuffer`.
 #[derive(Default)]
@@ -58,7 +58,7 @@ impl IpcBuffer {
 
     pub fn recv_slot(&self) -> AbsoluteCPtr {
         let inner = self.inner();
-        CNode::from_bits(inner.receiveCNode)
+        cap::CNode::from_bits(inner.receiveCNode)
             .relative_bits_with_depth(inner.receiveIndex, inner.receiveCNode.try_into().unwrap())
     }
 

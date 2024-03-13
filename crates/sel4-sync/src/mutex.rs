@@ -7,7 +7,6 @@
 
 use core::sync::atomic::{fence, AtomicBool, AtomicIsize, Ordering};
 
-use sel4::Notification;
 use sel4_immediate_sync_once_cell::ImmediateSyncOnceCell;
 
 pub struct PanickingRawMutex {
@@ -96,7 +95,7 @@ pub trait MutexSyncOpsWithInteriorMutability {
 }
 
 pub trait MutexSyncOpsWithNotification {
-    fn notification(&self) -> Notification;
+    fn notification(&self) -> sel4::cap::Notification;
 }
 
 impl<O: MutexSyncOpsWithNotification> MutexSyncOps for O {
@@ -109,14 +108,14 @@ impl<O: MutexSyncOpsWithNotification> MutexSyncOps for O {
     }
 }
 
-impl MutexSyncOpsWithNotification for Notification {
-    fn notification(&self) -> Notification {
+impl MutexSyncOpsWithNotification for sel4::cap::Notification {
+    fn notification(&self) -> sel4::cap::Notification {
         *self
     }
 }
 
 pub struct DeferredNotificationMutexSyncOps {
-    inner: ImmediateSyncOnceCell<Notification>,
+    inner: ImmediateSyncOnceCell<sel4::cap::Notification>,
 }
 
 impl DeferredNotificationMutexSyncOps {
@@ -128,13 +127,13 @@ impl DeferredNotificationMutexSyncOps {
 }
 
 impl MutexSyncOpsWithNotification for DeferredNotificationMutexSyncOps {
-    fn notification(&self) -> Notification {
+    fn notification(&self) -> sel4::cap::Notification {
         *self.inner.get().unwrap()
     }
 }
 
 impl MutexSyncOpsWithInteriorMutability for DeferredNotificationMutexSyncOps {
-    type ModifyInput = Notification;
+    type ModifyInput = sel4::cap::Notification;
     type ModifyOutput = ();
 
     fn modify(&self, input: Self::ModifyInput) -> Self::ModifyOutput {
@@ -146,14 +145,16 @@ pub struct IndirectNotificationMutexSyncOps<T> {
     get_notification: T,
 }
 
-impl<T: Fn() -> Notification> IndirectNotificationMutexSyncOps<T> {
+impl<T: Fn() -> sel4::cap::Notification> IndirectNotificationMutexSyncOps<T> {
     pub const fn new(get_notification: T) -> Self {
         Self { get_notification }
     }
 }
 
-impl<T: Fn() -> Notification> MutexSyncOpsWithNotification for IndirectNotificationMutexSyncOps<T> {
-    fn notification(&self) -> Notification {
+impl<T: Fn() -> sel4::cap::Notification> MutexSyncOpsWithNotification
+    for IndirectNotificationMutexSyncOps<T>
+{
+    fn notification(&self) -> sel4::cap::Notification {
         (self.get_notification)()
     }
 }

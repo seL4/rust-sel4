@@ -154,9 +154,6 @@ pub use syscalls::set_tls_base;
 
 pub use arch::top_level::*;
 
-#[doc(no_inline)]
-pub use cap::*;
-
 pub(crate) use helper_macros::{
     declare_cap_alias, declare_cap_type, declare_cap_type_for_object,
     declare_cap_type_for_object_of_fixed_size, declare_cap_type_for_object_of_variable_size,

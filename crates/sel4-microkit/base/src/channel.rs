@@ -31,17 +31,17 @@ impl Channel {
     }
 
     #[doc(hidden)]
-    pub fn notification(&self) -> sel4::Notification {
+    pub fn notification(&self) -> sel4::cap::Notification {
         self.cap::<sel4::cap_type::Notification>(BASE_OUTPUT_NOTIFICATION_SLOT)
     }
 
     #[doc(hidden)]
-    pub fn irq_handler(&self) -> sel4::IrqHandler {
+    pub fn irq_handler(&self) -> sel4::cap::IrqHandler {
         self.cap::<sel4::cap_type::IrqHandler>(BASE_IRQ_SLOT)
     }
 
     #[doc(hidden)]
-    pub fn endpoint(&self) -> sel4::Endpoint {
+    pub fn endpoint(&self) -> sel4::cap::Endpoint {
         self.cap::<sel4::cap_type::Endpoint>(BASE_ENDPOINT_SLOT)
     }
 

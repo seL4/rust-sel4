@@ -19,10 +19,10 @@ const GRANULE_SIZE: usize = sel4::FrameObjectType::GRANULE.bytes();
 pub(crate) fn create_child_vspace<'a>(
     allocator: &mut ObjectAllocator,
     image: &'a impl Object<'a, 'a>,
-    caller_vspace: sel4::VSpace,
+    caller_vspace: sel4::cap::VSpace,
     free_page_addr: usize,
-    asid_pool: sel4::AsidPool,
-) -> (sel4::VSpace, usize, sel4::Granule) {
+    asid_pool: sel4::cap::AsidPool,
+) -> (sel4::cap::VSpace, usize, sel4::cap::Granule) {
     let child_vspace = allocator.allocate_fixed_sized::<sel4::cap_type::VSpace>();
     asid_pool.asid_pool_assign(child_vspace).unwrap();
 
@@ -77,7 +77,7 @@ fn footprint<'a>(image: &'a impl Object<'a, 'a>) -> Range<usize> {
 
 fn map_intermediate_translation_tables(
     allocator: &mut ObjectAllocator,
-    vspace: sel4::VSpace,
+    vspace: sel4::cap::VSpace,
     footprint: Range<usize>,
 ) {
     for level in 1..sel4::vspace_levels::NUM_LEVELS {
@@ -102,10 +102,10 @@ fn map_intermediate_translation_tables(
 
 fn map_image<'a>(
     allocator: &mut ObjectAllocator,
-    vspace: sel4::VSpace,
+    vspace: sel4::cap::VSpace,
     footprint: Range<usize>,
     image: &'a impl Object<'a, 'a>,
-    caller_vspace: sel4::VSpace,
+    caller_vspace: sel4::cap::VSpace,
     free_page_addr: usize,
 ) {
     let num_pages = footprint.len() / GRANULE_SIZE;
@@ -116,7 +116,7 @@ fn map_image<'a>(
                 sel4::CapRightsBuilder::none(),
             )
         })
-        .collect::<Vec<(sel4::Granule, sel4::CapRightsBuilder)>>();
+        .collect::<Vec<(sel4::cap::Granule, sel4::CapRightsBuilder)>>();
 
     for seg in image.segments() {
         let segment_addr = usize::try_from(seg.address()).unwrap();
