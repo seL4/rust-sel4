@@ -100,6 +100,7 @@ mod cnode_cap_data;
 mod const_helpers;
 mod cptr;
 mod error;
+mod fault;
 mod helper_macros;
 mod invocation_context;
 mod invocations;
@@ -110,7 +111,6 @@ mod reply_authority;
 mod syscalls;
 mod vspace;
 
-pub mod fault;
 pub mod init_thread;
 
 pub use bootinfo::{
@@ -122,6 +122,7 @@ pub use cptr::{
     cap, cap_type, AbsoluteCPtr, CPtr, CPtrBits, CPtrWithDepth, Cap, CapType, HasCPtrWithDepth,
 };
 pub use error::{Error, Result};
+pub use fault::*;
 pub use invocation_context::{InvocationContext, NoExplicitInvocationContext, NoInvocationContext};
 pub use ipc_buffer::IpcBuffer;
 pub use message_info::{MessageInfo, MessageInfoBuilder};
@@ -154,9 +155,6 @@ pub use arch::top_level::*;
 
 #[doc(no_inline)]
 pub use cap::*;
-
-#[doc(no_inline)]
-pub use fault::*;
 
 pub(crate) use helper_macros::{
     declare_cap_alias, declare_cap_type, declare_cap_type_for_object,
