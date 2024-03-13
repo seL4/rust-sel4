@@ -50,7 +50,7 @@ impl From<CapRightsBuilder> for CapRights {
 }
 
 /// Helper for constructing [`CapRights`].
-#[derive(Debug, Clone, PartialEq, Eq, Default)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Default)]
 pub struct CapRightsBuilder {
     grant_reply: bool,
     grant: bool,
@@ -76,21 +76,25 @@ impl CapRightsBuilder {
         CapRights::new(self.grant_reply, self.grant, self.read, self.write)
     }
 
+    #[must_use]
     pub fn grant_reply(mut self, can: bool) -> Self {
         self.grant_reply = can;
         self
     }
 
+    #[must_use]
     pub fn grant(mut self, can: bool) -> Self {
         self.grant = can;
         self
     }
 
+    #[must_use]
     pub fn read(mut self, can: bool) -> Self {
         self.read = can;
         self
     }
 
+    #[must_use]
     pub fn write(mut self, can: bool) -> Self {
         self.write = can;
         self
