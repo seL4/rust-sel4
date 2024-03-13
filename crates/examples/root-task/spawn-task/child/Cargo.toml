@@ -1,0 +1,29 @@
+#
+# Copyright 2023, Colias Group, LLC
+#
+# SPDX-License-Identifier: BSD-2-Clause
+#
+#
+# This file is generated from './Cargo.nix'. You can edit this file directly
+# if you are not using this project's Cargo manifest management tools.
+# See 'hacking/cargo-manifest-management/README.md' for more information.
+#
+
+[package]
+name = "spawn-task-child"
+version = "0.1.0"
+authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
+edition = "2021"
+license = "BSD-2-Clause"
+
+[dependencies]
+cfg-if = "1.0.0"
+sel4 = { path = "../../../../sel4" }
+sel4-dlmalloc = { path = "../../../../sel4-dlmalloc" }
+sel4-panicking = { path = "../../../../sel4-panicking", features = ["unwinding", "alloc"] }
+sel4-panicking-env = { path = "../../../../sel4-panicking/env" }
+sel4-sync = { path = "../../../../sel4-sync" }
+
+[dependencies.sel4-runtime-common]
+path = "../../../../sel4-runtime-common"
+features = ["start", "tls", "unwinding"]
