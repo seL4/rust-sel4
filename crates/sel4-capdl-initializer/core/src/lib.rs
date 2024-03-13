@@ -19,13 +19,9 @@ use log::{debug, info, trace};
 use sel4::{
     cap_type,
     init_thread::{self, Slot},
-    AbsoluteCPtr, BootInfoPtr, CNodeCapData, Cap, CapRights, CapType,
-    CapTypeForFrameObjectOfFixedSize, ObjectBlueprint, Untyped, UserContext,
+    CapRights, CapTypeForFrameObjectOfFixedSize,
 };
 use sel4_capdl_initializer_types::*;
-
-#[allow(unused_imports)]
-use sel4::{CapTypeForFrameObject, FrameObjectType, VSpace};
 
 mod buffers;
 mod cslot_allocator;
@@ -45,7 +41,7 @@ compile_error!("unsupported configuration");
 type Result<T> = result::Result<T, CapDLInitializerError>;
 
 pub struct Initializer<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B> {
-    bootinfo: &'a BootInfoPtr,
+    bootinfo: &'a sel4::BootInfoPtr,
     user_image_bounds: Range<usize>,
     copy_addrs: CopyAddrs,
     spec_with_sources: &'a SpecWithSources<'a, N, D, M>,
@@ -57,7 +53,7 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
     Initializer<'a, N, D, M, B>
 {
     pub fn initialize(
-        bootinfo: &BootInfoPtr,
+        bootinfo: &sel4::BootInfoPtr,
         user_image_bounds: Range<usize>,
         spec_with_sources: &SpecWithSources<N, D, M>,
         buffers: &mut InitializerBuffers<B>,
@@ -246,7 +242,7 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
                                 max_size_bits
                             );
                             self.ut_cap(*i_ut).untyped_retype(
-                                &ObjectBlueprint::Untyped {
+                                &sel4::ObjectBlueprint::Untyped {
                                     size_bits: max_size_bits,
                                 },
                                 &init_thread_cnode_relative_cptr(),
@@ -494,7 +490,7 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
 
     fn fill_frame(
         &self,
-        frame: Cap<cap_type::UnspecifiedFrame>,
+        frame: sel4::Cap<cap_type::UnspecifiedFrame>,
         frame_object_type: sel4::FrameObjectType,
         fill: &[FillEntry<D>],
     ) -> Result<()> {
@@ -554,7 +550,7 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
 
     fn init_vspace(
         &mut self,
-        vspace: VSpace,
+        vspace: sel4::cap::VSpace,
         level: usize,
         vaddr: usize,
         obj: &object::PageTable,
@@ -637,7 +633,7 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
 
             {
                 let cspace = self.orig_cap(obj.cspace().object);
-                let cspace_root_data = CNodeCapData::new(
+                let cspace_root_data = sel4::CNodeCapData::new(
                     obj.cspace().guard,
                     obj.cspace().guard_size.try_into().unwrap(),
                 );
@@ -734,7 +730,7 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
             }
 
             {
-                let mut regs = UserContext::default();
+                let mut regs = sel4::UserContext::default();
                 *regs.pc_mut() = obj.extra.ip;
                 *regs.sp_mut() = obj.extra.sp;
                 for (i, value) in obj.extra.gprs.iter().enumerate() {
@@ -784,7 +780,7 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
 
     //
 
-    fn copy<U: CapType>(&mut self, cap: Cap<U>) -> Result<Cap<U>> {
+    fn copy<U: sel4::CapType>(&mut self, cap: sel4::Cap<U>) -> Result<sel4::Cap<U>> {
         let slot = self.cslot_alloc_or_panic();
         let src = init_thread::slot::CNODE.cap().relative(cap);
         cslot_to_relative_cptr(slot).copy(&src, CapRights::all())?;
@@ -811,23 +807,23 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
         slot
     }
 
-    fn orig_cap<U: CapType>(&self, obj_id: ObjectId) -> Cap<U> {
+    fn orig_cap<U: sel4::CapType>(&self, obj_id: ObjectId) -> sel4::Cap<U> {
         self.orig_cslot(obj_id).cap().downcast()
     }
 
-    fn orig_relative_cptr(&self, obj_id: ObjectId) -> AbsoluteCPtr {
+    fn orig_relative_cptr(&self, obj_id: ObjectId) -> sel4::AbsoluteCPtr {
         cslot_to_relative_cptr(self.orig_cslot(obj_id))
     }
 
-    fn ut_cap(&self, ut_index: usize) -> Untyped {
+    fn ut_cap(&self, ut_index: usize) -> sel4::cap::Untyped {
         self.bootinfo.untyped().index(ut_index).cap()
     }
 }
 
-fn cslot_to_relative_cptr(slot: Slot) -> AbsoluteCPtr {
+fn cslot_to_relative_cptr(slot: Slot) -> sel4::AbsoluteCPtr {
     init_thread::slot::CNODE.cap().relative(slot.cptr())
 }
 
-fn init_thread_cnode_relative_cptr() -> AbsoluteCPtr {
+fn init_thread_cnode_relative_cptr() -> sel4::AbsoluteCPtr {
     init_thread::slot::CNODE.cap().relative_self()
 }

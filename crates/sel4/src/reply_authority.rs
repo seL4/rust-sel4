@@ -9,14 +9,14 @@ use sel4_config::{sel4_cfg, sel4_cfg_if};
 use crate::sys;
 
 #[sel4_cfg(KERNEL_MCS)]
-use crate::Reply;
+use crate::cap;
 
 /// Configuration-dependant alias for conveying reply authority to syscalls.
 pub type ReplyAuthority = ReplyAuthorityImpl;
 
 sel4_cfg_if! {
     if #[sel4_cfg(KERNEL_MCS)] {
-        pub type ReplyAuthorityImpl = Reply;
+        pub type ReplyAuthorityImpl = cap::Reply;
 
         impl ReplyAuthority {
             pub(crate) fn into_sys_reply_authority(self) -> sys::ReplyAuthority {

@@ -9,8 +9,8 @@ use core::array;
 use sel4_config::{sel4_cfg, sel4_cfg_if};
 
 use crate::{
-    cap_type, const_helpers::u32_into_usize, sys, Cap, CapType, ConveysReplyAuthority, Endpoint,
-    InvocationContext, MessageInfo, Notification, Word, NUM_FAST_MESSAGE_REGISTERS,
+    cap, cap_type, const_helpers::u32_into_usize, sys, Cap, CapType, ConveysReplyAuthority,
+    InvocationContext, MessageInfo, Word, NUM_FAST_MESSAGE_REGISTERS,
 };
 
 #[sel4_cfg(not(KERNEL_MCS))]
@@ -48,7 +48,7 @@ sel4_cfg_if! {
     }
 }
 
-impl<C: InvocationContext> Endpoint<C> {
+impl<C: InvocationContext> cap::Endpoint<C> {
     /// Corresponds to `seL4_Send`.
     pub fn send(self, info: MessageInfo) {
         self.invoke(|cptr, ipc_buffer| {
@@ -176,7 +176,7 @@ impl<C: InvocationContext> Endpoint<C> {
     }
 }
 
-impl<C: InvocationContext> Notification<C> {
+impl<C: InvocationContext> cap::Notification<C> {
     /// Corresponds to `seL4_Signal`.
     pub fn signal(self) {
         self.invoke(|cptr, ipc_buffer| ipc_buffer.inner_mut().seL4_Signal(cptr.bits()))

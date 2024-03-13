@@ -8,7 +8,7 @@ use core::ops::Range;
 
 pub(crate) struct ObjectAllocator {
     empty_slots: Range<usize>,
-    ut: sel4::Untyped,
+    ut: sel4::cap::Untyped,
 }
 
 impl ObjectAllocator {
@@ -19,7 +19,7 @@ impl ObjectAllocator {
         }
     }
 
-    pub(crate) fn allocate(&mut self, blueprint: sel4::ObjectBlueprint) -> sel4::Unspecified {
+    pub(crate) fn allocate(&mut self, blueprint: sel4::ObjectBlueprint) -> sel4::cap::Unspecified {
         let slot_index = self.empty_slots.next().unwrap();
         self.ut
             .untyped_retype(
@@ -46,7 +46,7 @@ impl ObjectAllocator {
     }
 }
 
-fn find_largest_untyped(bootinfo: &sel4::BootInfo) -> sel4::Untyped {
+fn find_largest_untyped(bootinfo: &sel4::BootInfo) -> sel4::cap::Untyped {
     let (ut_ix, _desc) = bootinfo
         .untyped_list()
         .iter()

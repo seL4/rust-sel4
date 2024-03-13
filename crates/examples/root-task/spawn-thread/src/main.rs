@@ -74,7 +74,7 @@ fn main(bootinfo: &sel4::BootInfoPtr) -> sel4::Result<Never> {
 
 struct ObjectAllocator {
     empty_slots: Range<usize>,
-    ut: sel4::Untyped,
+    ut: sel4::cap::Untyped,
 }
 
 impl ObjectAllocator {
@@ -116,7 +116,7 @@ impl ObjectAllocator {
     }
 }
 
-fn find_largest_untyped(bootinfo: &sel4::BootInfo) -> sel4::Untyped {
+fn find_largest_untyped(bootinfo: &sel4::BootInfo) -> sel4::cap::Untyped {
     let (ut_ix, _desc) = bootinfo
         .untyped_list()
         .iter()
@@ -284,7 +284,7 @@ impl IpcBufferFrame {
         self.0.get().cast()
     }
 
-    fn cap(&self, bootinfo: &sel4::BootInfo) -> sel4::Granule {
+    fn cap(&self, bootinfo: &sel4::BootInfo) -> sel4::cap::Granule {
         get_user_image_frame_slot(bootinfo, self.ptr() as usize).cap()
     }
 }

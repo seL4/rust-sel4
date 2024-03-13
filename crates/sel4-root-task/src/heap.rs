@@ -7,17 +7,17 @@
 use sel4_immediate_sync_once_cell::ImmediateSyncOnceCell;
 use sel4_panicking_env::abort;
 
-static GLOBAL_ALLOCATOR_MUTEX_NOTIFICATION: ImmediateSyncOnceCell<sel4::Notification> =
+static GLOBAL_ALLOCATOR_MUTEX_NOTIFICATION: ImmediateSyncOnceCell<sel4::cap::Notification> =
     ImmediateSyncOnceCell::new();
 
-pub fn set_global_allocator_mutex_notification(nfn: sel4::Notification) {
+pub fn set_global_allocator_mutex_notification(nfn: sel4::cap::Notification) {
     GLOBAL_ALLOCATOR_MUTEX_NOTIFICATION
         .set(nfn)
         .unwrap_or_else(|_| abort!("global allocator mutex notification already initialized"))
 }
 
 #[doc(hidden)]
-pub fn get_global_allocator_mutex_notification() -> sel4::Notification {
+pub fn get_global_allocator_mutex_notification() -> sel4::cap::Notification {
     *GLOBAL_ALLOCATOR_MUTEX_NOTIFICATION
         .get()
         .unwrap_or_else(|| {
@@ -45,7 +45,7 @@ macro_rules! declare_heap {
                     #[global_allocator]
                     static GLOBAL_ALLOCATOR: StaticDlmallocGlobalAlloc<
                         GenericRawMutex<
-                            IndirectNotificationMutexSyncOps<fn() -> sel4::Notification>,
+                            IndirectNotificationMutexSyncOps<fn() -> sel4::cap::Notification>,
                         >,
                         &'static StaticHeap<{ SIZE }>,
                     > = StaticDlmallocGlobalAlloc::new(

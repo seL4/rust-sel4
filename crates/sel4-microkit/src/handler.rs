@@ -15,9 +15,9 @@ use crate::{
 
 pub use core::convert::Infallible;
 
-const INPUT_CAP: sel4::Endpoint = sel4::Cap::from_bits(1);
-const REPLY_CAP: sel4::Reply = sel4::Cap::from_bits(4);
-const MONITOR_EP_CAP: sel4::Endpoint = sel4::Cap::from_bits(5);
+const INPUT_CAP: sel4::cap::Endpoint = sel4::Cap::from_bits(1);
+const REPLY_CAP: sel4::cap::Reply = sel4::Cap::from_bits(4);
+const MONITOR_EP_CAP: sel4::cap::Endpoint = sel4::Cap::from_bits(5);
 
 const EVENT_TYPE_MASK: sel4::Word = 1 << (sel4::WORD_SIZE - 1);
 
