@@ -92,8 +92,7 @@ unsafe extern "C" fn default_set_thread_pointer(thread_pointer: usize) {
         if #[cfg(target_arch = "aarch64")] {
             asm!("msr tpidr_el0, {val}", val = in(reg) val);
         } else if #[cfg(target_arch = "arm")] {
-            // TODO which register to use must match with LLVM -mtp, I think
-            asm!("mcr p15, 0, {val}, c13, c0, 2", val = in(reg) val);
+            asm!("mcr p15, 0, {val}, c13, c0, 2", val = in(reg) val); // tpidrurw
         } else if #[cfg(any(target_arch = "riscv32", target_arch = "riscv64"))] {
             asm!("mv tp, {val}", val = in(reg) val);
         } else if #[cfg(target_arch = "x86_64")] {
