@@ -47,8 +47,13 @@ let
       name = "BINDGEN_EXTRA_CLANG_ARGS_${target.name}";
       value = [ "-I${libcDir}/include" ];
     }));
+
+  miscEnvVars = {
+    CHILD_ELF = emptyFile;
+  };
+
 in
-mkShell (seL4RustEnvVars // kernelLoaderConfigEnvVars // capdlEnvVars // bindgenEnvVars // {
+mkShell (seL4RustEnvVars // kernelLoaderConfigEnvVars // capdlEnvVars // bindgenEnvVars // miscEnvVars // {
   # TODO
   RUST_SEL4_TARGET = defaultRustTargetInfo.name;
 

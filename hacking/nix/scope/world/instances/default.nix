@@ -353,6 +353,32 @@ in rec {
           canAutomateSimply = true;
         };
       });
+
+      spawn-task = maybe haveFullRuntime (
+        let
+          child = mkTask {
+            rootCrate = crates.spawn-task-child;
+            release = false;
+          };
+        in
+          mkInstance {
+            rootTask = mkTask {
+              rootCrate = crates.spawn-task;
+              release = false;
+              lastLayerModifications.modifyDerivation = drv: drv.overrideAttrs (attrs: {
+                # CHILD_ELF = writeText "x" "foo";
+                # CHILD_ELF = child.split.min;
+                CHILD_ELF = child.split.full;
+                passthru = (attrs.passthru or {}) // {
+                  inherit child;
+                };
+              });
+            };
+            extraPlatformArgs = lib.optionalAttrs canSimulate {
+              canAutomateSimply = true;
+            };
+          }
+      );
     };
   };
 }
