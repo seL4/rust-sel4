@@ -50,7 +50,7 @@ impl From<MessageInfoBuilder> for MessageInfo {
 }
 
 /// Helper for constructing [`MessageInfo`].
-#[derive(Debug, Clone, PartialEq, Eq, Default)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Default)]
 pub struct MessageInfoBuilder {
     label: Word,
     caps_unwrapped: usize,
@@ -68,21 +68,25 @@ impl MessageInfoBuilder {
         )
     }
 
+    #[must_use]
     pub fn label(mut self, label: Word) -> Self {
         self.label = label;
         self
     }
 
+    #[must_use]
     pub fn caps_unwrapped(mut self, caps_unwrapped: usize) -> Self {
         self.caps_unwrapped = caps_unwrapped;
         self
     }
 
+    #[must_use]
     pub fn extra_caps(mut self, extra_caps: usize) -> Self {
         self.extra_caps = extra_caps;
         self
     }
 
+    #[must_use]
     pub fn length(mut self, length: usize) -> Self {
         self.length = length;
         self
