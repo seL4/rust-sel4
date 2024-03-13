@@ -33,42 +33,15 @@ static SECONDARY_THREAD_IPC_BUFFER_FRAME: IpcBufferFrame = IpcBufferFrame::new()
 fn main(bootinfo: &sel4::BootInfoPtr) -> sel4::Result<Never> {
     sel4::debug_println!("In primary thread");
 
-    let (ut_ix, _desc) = bootinfo
-        .untyped_list()
-        .iter()
-        .enumerate()
-        .filter(|(_i, desc)| !desc.is_device())
-        .max_by_key(|(_i, desc)| desc.size_bits())
-        .unwrap();
-
-    let ut = bootinfo.untyped().index(ut_ix).cap();
-
-    let mut empty_slots = bootinfo
-        .empty()
-        .range()
-        .map(sel4::init_thread::Slot::from_index);
-
-    let mut create_object = |blueprint| {
-        let slot = empty_slots.next().unwrap();
-        ut.untyped_retype(
-            &blueprint,
-            &sel4::init_thread::slot::CNODE.cap().relative_self(),
-            slot.index(),
-            1,
-        )?;
-        Ok(slot.cap())
-    };
+    let mut object_allocator = ObjectAllocator::new(bootinfo);
 
     set_global_allocator_mutex_notification(
-        create_object(sel4::ObjectBlueprint::Notification)?
-            .downcast::<sel4::cap_type::Notification>(),
+        object_allocator.allocate_fixed_sized::<sel4::cap_type::Notification>(),
     );
 
-    let inter_thread_nfn = create_object(sel4::ObjectBlueprint::Notification)?
-        .downcast::<sel4::cap_type::Notification>();
+    let inter_thread_nfn = object_allocator.allocate_fixed_sized::<sel4::cap_type::Notification>();
 
-    let secondary_thread_tcb =
-        create_object(sel4::ObjectBlueprint::Tcb)?.downcast::<sel4::cap_type::Tcb>();
+    let secondary_thread_tcb = object_allocator.allocate_fixed_sized::<sel4::cap_type::Tcb>();
 
     secondary_thread_tcb.tcb_configure(
         sel4::init_thread::slot::NULL.cptr(),
@@ -97,13 +70,72 @@ fn main(bootinfo: &sel4::BootInfoPtr) -> sel4::Result<Never> {
     sel4::init_thread::suspend_self()
 }
 
+// // //
+
+struct ObjectAllocator {
+    empty_slots: Range<usize>,
+    ut: sel4::Untyped,
+}
+
+impl ObjectAllocator {
+    fn new(bootinfo: &sel4::BootInfo) -> Self {
+        Self {
+            empty_slots: bootinfo.empty().range(),
+            ut: find_largest_untyped(bootinfo),
+        }
+    }
+
+    fn allocate_fixed_sized<T: sel4::CapTypeForObjectOfFixedSize>(&mut self) -> sel4::Cap<T> {
+        let slot_index = self.empty_slots.next().unwrap();
+        self.ut
+            .untyped_retype(
+                &T::object_blueprint(),
+                &sel4::init_thread::slot::CNODE.cap().relative_self(),
+                slot_index,
+                1,
+            )
+            .unwrap();
+        sel4::init_thread::Slot::from_index(slot_index).cap()
+    }
+
+    #[allow(dead_code)]
+    fn allocate_variable_sized<T: sel4::CapTypeForObjectOfVariableSize>(
+        &mut self,
+        size_bits: usize,
+    ) -> sel4::Cap<T> {
+        let slot_index = self.empty_slots.next().unwrap();
+        self.ut
+            .untyped_retype(
+                &T::object_blueprint(size_bits),
+                &sel4::init_thread::slot::CNODE.cap().relative_self(),
+                slot_index,
+                1,
+            )
+            .unwrap();
+        sel4::init_thread::Slot::from_index(slot_index).cap()
+    }
+}
+
+fn find_largest_untyped(bootinfo: &sel4::BootInfo) -> sel4::Untyped {
+    let (ut_ix, _desc) = bootinfo
+        .untyped_list()
+        .iter()
+        .enumerate()
+        .filter(|(_i, desc)| !desc.is_device())
+        .max_by_key(|(_i, desc)| desc.size_bits())
+        .unwrap();
+
+    bootinfo.untyped().index(ut_ix).cap()
+}
+
+// // //
+
 fn create_user_context(f: SecondaryThreadFn) -> sel4::UserContext {
     let mut ctx = sel4::UserContext::default();
 
     *ctx.sp_mut() = SECONDARY_THREAD_STACK.top().try_into().unwrap();
     *ctx.pc_mut() = secondary_thread_entrypoint as sel4::Word;
-
-    *user_context_arg_mut(&mut ctx, 0) = f.into_arg();
+    *ctx.c_param_mut(0) = f.into_arg();
 
     let tls_reservation = TlsReservation::new(&get_tls_image());
     *user_context_thread_pointer_mut(&mut ctx) = tls_reservation.thread_pointer() as sel4::Word;
@@ -116,16 +148,6 @@ fn create_user_context(f: SecondaryThreadFn) -> sel4::UserContext {
     }
 
     ctx
-}
-
-fn user_context_arg_mut(ctx: &mut sel4::UserContext, i: usize) -> &mut sel4::Word {
-    cfg_if! {
-        if #[cfg(any(target_arch = "riscv32", target_arch = "riscv64"))] {
-            ctx.gpr_a_mut(i)
-        } else {
-            ctx.gpr_mut(i)
-        }
-    }
 }
 
 fn user_context_thread_pointer_mut(ctx: &mut sel4::UserContext) -> &mut sel4::Word {
