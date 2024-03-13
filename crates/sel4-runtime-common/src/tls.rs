@@ -43,3 +43,13 @@ sel4::sel4_cfg_if! {
         const CHOSEN_SET_THREAD_POINTER_FN: SetThreadPointerFn = DEFAULT_SET_THREAD_POINTER_FN;
     }
 }
+
+#[cfg(target_arch = "arm")]
+#[no_mangle]
+extern "C" fn __aeabi_read_tp() -> usize {
+    let mut val: usize;
+    unsafe {
+        core::arch::asm!("mrc p15, 0, {val}, c13, c0, 2", val = out(reg) val); // tpidrurw
+    }
+    val
+}

@@ -42,20 +42,6 @@ pub(crate) fn locate_phdrs() -> &'static [ProgramHeader] {
     }
 }
 
-#[cfg(target_arch = "arm")]
-core::arch::global_asm! {
-    r#"
-        .global __aeabi_read_tp
-
-        .section .text
-
-        __aeabi_read_tp:
-            // TODO which register to use must match with LLVM -mtp, I think
-            mrc p15, 0, r0, c13, c0, 2
-            bx lr
-    "#
-}
-
 #[doc(hidden)]
 pub mod _private {
     #[cfg(feature = "start")]
