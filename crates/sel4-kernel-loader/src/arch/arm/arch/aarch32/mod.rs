@@ -32,9 +32,7 @@ pub(crate) enum ArchImpl {}
 impl Arch for ArchImpl {
     type PerCore = ();
 
-    fn init() {
-        crate::fmt::debug_println_without_synchronization!("is_hyp_mode() -> {:?}", is_hyp_mode());
-    }
+    fn init() {}
 
     fn idle() -> ! {
         loop {
