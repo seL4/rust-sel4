@@ -11,7 +11,6 @@ use core::borrow::BorrowMut;
 use core::ops::Range;
 use core::result;
 use core::slice;
-use core::sync::atomic::{self, Ordering};
 
 #[allow(unused_imports)]
 use log::{debug, info, trace};
@@ -500,7 +499,6 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
             CapRights::read_write(),
             vm_attributes_from_whether_cached(false),
         )?;
-        atomic::fence(Ordering::SeqCst); // lazy
         for entry in fill.iter() {
             let offset = entry.range.start;
             let length = entry.range.end - entry.range.start;
@@ -531,7 +529,6 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
                 }
             }
         }
-        atomic::fence(Ordering::SeqCst); // lazy
         frame.frame_unmap()?;
         Ok(())
     }
