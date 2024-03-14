@@ -43,8 +43,12 @@ unsafe extern "C" fn sel4_runtime_rust_entry() -> ! {
 }
 
 fn inner_entry() -> ! {
-    unsafe {
+    #[cfg(panic = "unwind")]
+    {
         sel4_runtime_common::set_eh_frame_finder().unwrap();
+    }
+
+    unsafe {
         sel4::set_ipc_buffer(get_ipc_buffer().as_mut().unwrap());
         sel4_runtime_common::run_ctors();
     }
