@@ -23,32 +23,7 @@ impl<'a, D, M> Object<'a, D, M> {
                 Object::Tcb(_) => ObjectBlueprint::Tcb,
                 #[sel4_cfg(all(ARCH_AARCH64, ARM_HYPERVISOR_SUPPORT))]
                 Object::VCpu => sel4::ObjectBlueprintArch::VCpu.into(),
-                #[sel4_cfg(any(ARCH_AARCH64, ARCH_AARCH32))]
-                Object::Frame(obj) => sel4::sel4_cfg_wrap_match! {
-                    match obj.size_bits {
-                        sel4::FrameObjectType::SMALL_PAGE_BITS => sel4::ObjectBlueprintArch::SmallPage.into(),
-                        sel4::FrameObjectType::LARGE_PAGE_BITS => sel4::ObjectBlueprintArch::LargePage.into(),
-                        #[sel4_cfg(ARCH_AARCH32)]
-                        sel4::FrameObjectType::SECTION_BITS => sel4::ObjectBlueprintSeL4Arch::Section.into(),
-                        _ => panic!(),
-                    }
-                },
-                #[sel4_cfg(any(ARCH_RISCV64, ARCH_RISCV32))]
-                Object::Frame(obj) => sel4::sel4_cfg_wrap_match! {
-                    match obj.size_bits {
-                        sel4::FrameObjectType::_4K_PAGE_BITS => sel4::ObjectBlueprintArch::_4kPage.into(),
-                        sel4::FrameObjectType::MEGA_PAGE_BITS => sel4::ObjectBlueprintArch::MegaPage.into(),
-                        #[sel4_cfg(ARCH_RISCV64)]
-                        sel4::FrameObjectType::GIGA_PAGE_BITS => sel4::ObjectBlueprintArch::GigaPage.into(),
-                        _ => panic!(),
-                    }
-                },
-                #[sel4_cfg(ARCH_X86_64)]
-                Object::Frame(obj) => match obj.size_bits {
-                    sel4::FrameObjectType::_4K_BITS => sel4::ObjectBlueprintArch::_4k.into(),
-                    sel4::FrameObjectType::LARGE_PAGE_BITS => sel4::ObjectBlueprintArch::LargePage.into(),
-                    _ => panic!(),
-                },
+                Object::Frame(obj) => sel4::FrameObjectType::from_bits(obj.size_bits).unwrap().blueprint(),
                 #[sel4_cfg(ARCH_AARCH64)]
                 Object::PageTable(obj) => {
                     // assert!(obj.level.is_none()); // sanity check // TODO
@@ -76,13 +51,7 @@ impl<'a, D, M> Object<'a, D, M> {
                 Object::PageTable(obj) => {
                     let level = obj.level.unwrap();
                     assert_eq!(obj.is_root, level == 0); // sanity check
-                    match level {
-                        0 => sel4::ObjectBlueprintSeL4Arch::PML4.into(),
-                        1 => sel4::ObjectBlueprintSeL4Arch::PDPT.into(),
-                        2 => sel4::ObjectBlueprintArch::PageDirectory.into(),
-                        3 => sel4::ObjectBlueprintArch::PageTable.into(),
-                        _ => panic!(),
-                    }
+                    sel4::TranslationTableObjectType::from_level(level.into()).unwrap().blueprint()
                 }
                 Object::AsidPool(_) => ObjectBlueprint::asid_pool(),
                 #[sel4_cfg(KERNEL_MCS)]
