@@ -21,10 +21,6 @@ mkTask {
 
   release = true;
 
-  extraProfile = {
-    opt-level = 1; # TODO bug on 2
-  };
-
   # layers = [
   #   crateUtils.defaultIntermediateLayer
   #   {

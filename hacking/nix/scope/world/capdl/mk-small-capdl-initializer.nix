@@ -29,11 +29,11 @@ in mkTask {
 
   release = true;
 
-  extraProfile = {
-    opt-level = 1; # TODO bug on 2
-  };
-
   features = [ "deflate" ];
+
+  extraProfile = {
+    opt-level = 1; # TODO bug on 2 and 3
+  };
 
   layers = [
     crateUtils.defaultIntermediateLayer
