@@ -91,6 +91,7 @@ in rec {
     examples.root-task.example-root-task
     examples.root-task.example-root-task-without-runtime
     examples.root-task.spawn-thread
+    examples.root-task.spawn-task
   ];
 
   allAutomationScripts = map
