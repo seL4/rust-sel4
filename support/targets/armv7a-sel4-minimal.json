@@ -4,6 +4,7 @@
   "c-enum-min-bits": 8,
   "crt-objects-fallback": "false",
   "data-layout": "e-m:e-p:32:32-Fi8-i64:64-v128:64:128-a:0:32-n32-S64",
+  "description": null,
   "disable-redzone": true,
   "eh-frame-header": false,
   "emit-debug-gdb-scripts": false,
