@@ -99,8 +99,8 @@ cfg_if! {
             common_asm!(),
             r#"
                 mov r10, rsp
-                sub r10, rdi          // rdi: segment_size
-                and r10, rsi          // rsi: segment_align_down_mask
+                sub r10, rdi          // rdi: reservation_size
+                and r10, rsi          // rsi: reservation_align_down_mask
                 mov rax, r10          // save reservation_start for later
                 and r10, ~(16 - 1)    // align stack
                 mov rsp, r10
