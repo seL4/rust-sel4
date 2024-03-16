@@ -129,14 +129,17 @@ impl TlsReservationLayout {
             }
         } else if cfg!(target_arch = "x86_64") {
             let tcb_size = 2 * mem::size_of::<usize>(); // could probably get away with just 1x word size
+            let thread_pointer_offset = segment_layout
+                .size()
+                .next_multiple_of(segment_layout.align());
             Self {
                 footprint: Layout::from_size_align(
-                    segment_layout.size() + tcb_size,
+                    thread_pointer_offset + tcb_size,
                     segment_layout.align(),
                 )
                 .unwrap(),
                 segment_offset: 0,
-                thread_pointer_offset: segment_layout.size(),
+                thread_pointer_offset,
             }
         } else {
             unreachable!();
