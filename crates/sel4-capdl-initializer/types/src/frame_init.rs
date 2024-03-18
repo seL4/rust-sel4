@@ -10,7 +10,7 @@ use core::ops::Range;
 #[cfg(feature = "deflate")]
 use core::iter;
 
-#[cfg(feature = "alloc")]
+#[cfg(all(feature = "alloc", not(feature = "std")))]
 use alloc::{string::String, vec::Vec};
 
 #[cfg(feature = "serde")]

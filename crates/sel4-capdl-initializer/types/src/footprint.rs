@@ -6,7 +6,7 @@
 
 use core::mem::size_of_val;
 
-#[cfg(feature = "alloc")]
+#[cfg(all(feature = "alloc", not(feature = "std")))]
 use alloc::string::String;
 
 use crate::frame_init::*;

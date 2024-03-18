@@ -11,7 +11,7 @@ use core::ops::Deref;
 #[cfg(feature = "alloc")]
 use core::marker::PhantomData;
 
-#[cfg(feature = "alloc")]
+#[cfg(all(feature = "alloc", not(feature = "std")))]
 use alloc::boxed::Box;
 
 #[cfg(feature = "serde")]
