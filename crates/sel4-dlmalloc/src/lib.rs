@@ -197,6 +197,12 @@ impl<const N: usize> StaticHeap<N> {
     }
 }
 
+impl<const N: usize> Default for StaticHeap<N> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl<const N: usize> GetStaticHeapBounds for &StaticHeap<N> {
     fn bounds(self) -> StaticHeapBounds {
         StaticHeapBounds::new(self.0.get().cast(), N)

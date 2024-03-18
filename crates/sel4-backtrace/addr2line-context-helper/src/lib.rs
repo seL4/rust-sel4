@@ -11,7 +11,6 @@ extern crate alloc;
 use alloc::borrow::Cow;
 use alloc::rc::Rc;
 
-use addr2line::gimli;
 use addr2line::object::{Object, ObjectSection};
 use addr2line::Context as AbstractContext;
 

@@ -120,3 +120,9 @@ impl DeferredActionSlot {
         self.defer(DeferredAction::new_irq_ack(channel))
     }
 }
+
+impl Default for DeferredActionSlot {
+    fn default() -> Self {
+        Self::new()
+    }
+}

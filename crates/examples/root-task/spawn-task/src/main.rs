@@ -6,6 +6,7 @@
 
 #![no_std]
 #![no_main]
+#![allow(clippy::useless_conversion)]
 
 extern crate alloc;
 

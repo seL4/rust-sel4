@@ -8,6 +8,7 @@
 #![feature(never_type)]
 #![feature(thread_local)]
 #![allow(internal_features)]
+#![allow(clippy::useless_conversion)]
 
 #[cfg(feature = "alloc")]
 extern crate alloc;
@@ -95,7 +96,7 @@ pub unsafe extern "C" fn cont_fn(cont_arg: *mut sel4_runtime_common::ContArg) ->
         let reply_authority = {
             sel4::sel4_cfg_if! {
                 if #[sel4_cfg(KERNEL_MCS)] {
-                    sel4::cap::Reply::from_bits(thread_config.reply_authority().unwrap())
+                    sel4::cap::Reply::from_bits(thread_config.reply_authority().unwrap().try_into().unwrap())
                 } else {
                     assert!(thread_config.reply_authority().is_none());
                     sel4::ImplicitReplyAuthority

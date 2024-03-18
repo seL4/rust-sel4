@@ -8,6 +8,7 @@
 #![no_main]
 
 use core::ops::Range;
+use core::ptr;
 
 use sel4_capdl_initializer_core::{Initializer, InitializerBuffers, PerObjectBuffer};
 use sel4_capdl_initializer_types::SpecWithSources;
@@ -39,7 +40,7 @@ fn main(bootinfo: &sel4::BootInfoPtr) -> ! {
         embedded_frame_source: &trivial_source,
     };
     Initializer::initialize(bootinfo, user_image_bounds(), &spec_with_sources, unsafe {
-        &mut BUFFERS
+        ptr::addr_of_mut!(BUFFERS).as_mut().unwrap()
     })
 }
 

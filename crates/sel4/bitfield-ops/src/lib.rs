@@ -200,26 +200,28 @@ fn checked_cast<T: TryInto<U>, U>(val: T) -> U {
     val.try_into().map_err(|_| unreachable!()).unwrap()
 }
 
-pub fn set_bits_from_slice<T: UnsignedPrimInt, U: UnsignedPrimInt>(
+pub fn set_bits_from_slice<T, U>(
     dst: &mut [T],
     dst_range: Range<usize>,
     src: &[U],
     src_start: usize,
 ) where
-    T: TryFrom<usize>,
+    T: UnsignedPrimInt + TryFrom<usize>,
+    U: UnsignedPrimInt,
     usize: TryFrom<U>,
 {
     set_bits_from_slice_via::<_, _, usize>(dst, dst_range, src, src_start)
 }
 
-fn set_bits_from_slice_via<T: UnsignedPrimInt, U: UnsignedPrimInt, V: UnsignedPrimInt>(
+fn set_bits_from_slice_via<T, U, V>(
     dst: &mut [T],
     dst_range: Range<usize>,
     src: &[U],
     src_start: usize,
 ) where
-    T: TryFrom<V>,
-    V: TryFrom<U>,
+    T: UnsignedPrimInt + TryFrom<V>,
+    U: UnsignedPrimInt,
+    V: UnsignedPrimInt + TryFrom<U>,
 {
     let num_bits = dst_range.len();
 
@@ -302,13 +304,9 @@ impl<T: AsRef<[U]>, U: UnsignedPrimInt> Bitfield<T, U> {
         get_bits(self.bits(), range)
     }
 
-    pub fn get_bits_into_slice<V: UnsignedPrimInt>(
-        &self,
-        range: Range<usize>,
-        dst: &mut [V],
-        dst_start: usize,
-    ) where
-        V: TryFrom<usize>,
+    pub fn get_bits_into_slice<V>(&self, range: Range<usize>, dst: &mut [V], dst_start: usize)
+    where
+        V: UnsignedPrimInt + TryFrom<usize>,
         usize: TryFrom<U>,
     {
         let dst_range = dst_start..(dst_start + range.len());
@@ -355,8 +353,8 @@ impl<T: AsMut<[U]>, U: UnsignedPrimInt> Bitfield<T, U> {
 // // //
 
 #[cfg(test)]
+#[allow(unused_imports)]
 mod test {
-    #![allow(unused_imports)]
 
     extern crate std;
 

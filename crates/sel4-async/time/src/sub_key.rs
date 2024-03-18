@@ -7,6 +7,7 @@
 pub trait SubKey: Sized + Ord {
     fn min() -> Self;
 
+    #[allow(dead_code)]
     fn max() -> Self;
 
     fn succ(&self) -> Option<Self>;
