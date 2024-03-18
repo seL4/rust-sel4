@@ -4,6 +4,8 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
+#![allow(clippy::empty_docs)] // for #[derive(Parser)]
+
 use pest::{iterators::Pair, Parser};
 use pest_derive::Parser;
 use regex::Regex;

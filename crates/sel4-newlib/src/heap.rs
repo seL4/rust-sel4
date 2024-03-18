@@ -4,13 +4,13 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use super::*;
-
 use core::cell::UnsafeCell;
 use core::ffi::{c_int, c_void};
 use core::sync::atomic::{AtomicIsize, Ordering};
 
 use sel4_panicking_env::abort;
+
+use crate::errno;
 
 // NOTE(rustc_wishlist) use SyncUnsafeCell once #![feature(sync_unsafe_cell)] stabilizes
 #[repr(align(4096))] // no real reason for this
@@ -66,6 +66,12 @@ impl<const N: usize> StaticHeap<N> {
             return usize::MAX as *mut c_void;
         }
         self.memory.start().wrapping_offset(old).cast::<c_void>()
+    }
+}
+
+impl<const N: usize> Default for StaticHeap<N> {
+    fn default() -> Self {
+        Self::new()
     }
 }
 

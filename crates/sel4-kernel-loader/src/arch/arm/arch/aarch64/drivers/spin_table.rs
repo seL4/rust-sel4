@@ -5,6 +5,7 @@
 //
 
 use core::arch::{asm, global_asm};
+use core::ptr;
 use core::sync::atomic::{AtomicUsize, Ordering};
 
 #[used]
@@ -23,7 +24,7 @@ pub(crate) fn start_secondary_core(spin_table: &[usize], core_id: usize, sp: usi
         AtomicUsize::from_ptr(start_ptr).store(start, Ordering::Release);
 
         dc_cvac(start_ptr as usize);
-        dc_cvac(&spin_table_secondary_stack_bottom as *const _ as usize);
+        dc_cvac(ptr::addr_of!(spin_table_secondary_stack_bottom) as usize);
 
         // Barrier ensure both strl and dc cvac happen before sev
         asm!("dsb sy");

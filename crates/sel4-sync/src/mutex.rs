@@ -126,6 +126,12 @@ impl DeferredNotificationMutexSyncOps {
     }
 }
 
+impl Default for DeferredNotificationMutexSyncOps {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl MutexSyncOpsWithNotification for DeferredNotificationMutexSyncOps {
     fn notification(&self) -> sel4::cap::Notification {
         *self.inner.get().unwrap()
@@ -185,6 +191,12 @@ pub struct PanickingMutexSyncOps(());
 impl PanickingMutexSyncOps {
     pub const fn new() -> Self {
         Self(())
+    }
+}
+
+impl Default for PanickingMutexSyncOps {
+    fn default() -> Self {
+        Self::new()
     }
 }
 

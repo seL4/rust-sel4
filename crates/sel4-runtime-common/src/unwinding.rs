@@ -31,8 +31,7 @@ unsafe impl EhFrameFinder for EhFrameFinderImpl {
 
         let eh_frame_hdr = phdrs.iter().find_map(|phdr| {
             if phdr.p_type == PT_GNU_EH_FRAME {
-                let eh_frame_hdr = phdr.p_vaddr.try_into().unwrap();
-                return Some(eh_frame_hdr);
+                return Some(phdr.p_vaddr);
             }
             None
         })?;

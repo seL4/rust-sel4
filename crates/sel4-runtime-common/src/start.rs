@@ -35,6 +35,12 @@ impl<const N: usize> Stack<N> {
     }
 }
 
+impl<const N: usize> Default for Stack<N> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 #[repr(transparent)]
 pub struct StackTop(#[allow(dead_code)] *mut u8);
 

@@ -35,10 +35,7 @@ pub fn run(tell_cargo: bool) {
     let input = &embedding.spec;
     let adapted_input: SpecCommon = input
         .traverse_names_with_context(|named_obj| {
-            embedding
-                .object_names_level
-                .apply(named_obj)
-                .map(Clone::clone)
+            embedding.object_names_level.apply(named_obj).cloned()
         })
         .traverse_data(|key| embedding.fill_map.get(key).to_vec())
         .traverse_embedded_frames(|fill| {

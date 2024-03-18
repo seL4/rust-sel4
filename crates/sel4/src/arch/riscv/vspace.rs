@@ -4,6 +4,8 @@
 // SPDX-License-Identifier: MIT
 //
 
+#![allow(clippy::eq_op)]
+
 use sel4_config::sel4_cfg_wrap_match;
 
 #[allow(unused_imports)]

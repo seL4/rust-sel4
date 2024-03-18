@@ -259,8 +259,6 @@ impl SlotSemaphore for Rc<DummySlotSemaphore> {
 
 #[cfg(feature = "async-unsync")]
 mod async_unsync_impl {
-    use alloc::rc::Rc;
-
     use async_unsync::semaphore::{Semaphore, TryAcquireError};
 
     use super::*;
