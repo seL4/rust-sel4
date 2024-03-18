@@ -19,7 +19,7 @@ mk {
     sel4 = localCrates.sel4 // { optional = true; default-features = false; };
   };
   features = {
-    std = [ "alloc" "serde_json" ];
+    std = [ "alloc" "serde" "serde_json" ];
     alloc = [ "miniz_oxide?/with-alloc" ];
     serde = [ "alloc" "dep:serde" ];
     deflate = [ "dep:miniz_oxide" ];

@@ -21,7 +21,7 @@ alloc = ["miniz_oxide?/with-alloc"]
 borrowed-indirect = []
 deflate = ["dep:miniz_oxide"]
 serde = ["alloc", "dep:serde"]
-std = ["alloc", "serde_json"]
+std = ["alloc", "serde", "serde_json"]
 
 [dependencies]
 cfg-if = "1.0.0"
