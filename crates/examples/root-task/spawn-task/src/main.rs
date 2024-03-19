@@ -96,10 +96,9 @@ fn main(bootinfo: &sel4::BootInfoPtr) -> sel4::Result<Never> {
 // // //
 
 #[repr(C, align(4096))]
-struct FreePagePlaceHolder(#[allow(dead_code)] [u8; sel4::FrameObjectType::GRANULE.bytes()]);
+struct FreePagePlaceHolder(#[allow(dead_code)] [u8; GRANULE_SIZE]);
 
-static FREE_PAGE_PLACEHOLDER: FreePagePlaceHolder =
-    FreePagePlaceHolder([0; sel4::FrameObjectType::GRANULE.bytes()]);
+static FREE_PAGE_PLACEHOLDER: FreePagePlaceHolder = FreePagePlaceHolder([0; GRANULE_SIZE]);
 
 fn init_free_page_addr(bootinfo: &sel4::BootInfo) -> usize {
     let addr = ptr::addr_of!(FREE_PAGE_PLACEHOLDER) as usize;
@@ -114,14 +113,11 @@ fn get_user_image_frame_slot(
     bootinfo: &sel4::BootInfo,
     addr: usize,
 ) -> sel4::init_thread::Slot<sel4::cap_type::Granule> {
-    assert_eq!(addr % sel4::FrameObjectType::GRANULE.bytes(), 0);
+    assert_eq!(addr % GRANULE_SIZE, 0);
     let user_image_footprint = get_user_image_footprint();
     let num_user_frames = bootinfo.user_image_frames().len();
-    assert_eq!(
-        user_image_footprint.len(),
-        num_user_frames * sel4::FrameObjectType::GRANULE.bytes()
-    );
-    let ix = (addr - user_image_footprint.start) / sel4::FrameObjectType::GRANULE.bytes();
+    assert_eq!(user_image_footprint.len(), num_user_frames * GRANULE_SIZE);
+    let ix = (addr - user_image_footprint.start) / GRANULE_SIZE;
     bootinfo.user_image_frames().index(ix)
 }
 
@@ -132,7 +128,7 @@ fn get_user_image_footprint() -> Range<usize> {
     }
     let precise_footprint =
         unsafe { (ptr::addr_of!(__executable_start) as usize)..(ptr::addr_of!(_end) as usize) };
-    coarsen_footprint(&precise_footprint, sel4::FrameObjectType::GRANULE.bytes())
+    coarsen_footprint(&precise_footprint, GRANULE_SIZE)
 }
 
 fn coarsen_footprint(footprint: &Range<usize>, granularity: usize) -> Range<usize> {
@@ -142,3 +138,5 @@ fn coarsen_footprint(footprint: &Range<usize>, granularity: usize) -> Range<usiz
 const fn round_down(n: usize, b: usize) -> usize {
     n - n % b
 }
+
+const GRANULE_SIZE: usize = sel4::FrameObjectType::GRANULE.bytes();
