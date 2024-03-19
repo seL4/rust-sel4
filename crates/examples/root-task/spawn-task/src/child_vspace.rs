@@ -12,7 +12,7 @@ use object::{
     Object, ObjectSegment, SegmentFlags,
 };
 
-use crate::{coarsen_footprint, ObjectAllocator};
+use crate::ObjectAllocator;
 
 const GRANULE_SIZE: usize = sel4::FrameObjectType::GRANULE.bytes();
 
@@ -185,4 +185,12 @@ fn add_rights(rights: &mut sel4::CapRightsBuilder, flags: SegmentFlags) {
         }
         _ => unimplemented!(),
     }
+}
+
+fn coarsen_footprint(footprint: &Range<usize>, granularity: usize) -> Range<usize> {
+    round_down(footprint.start, granularity)..footprint.end.next_multiple_of(granularity)
+}
+
+const fn round_down(n: usize, b: usize) -> usize {
+    n - n % b
 }
