@@ -97,10 +97,10 @@ fn main(bootinfo: &sel4::BootInfoPtr) -> sel4::Result<Never> {
 #[repr(C, align(4096))]
 struct FreePagePlaceHolder(#[allow(dead_code)] [u8; GRANULE_SIZE]);
 
-static FREE_PAGE_PLACEHOLDER: FreePagePlaceHolder = FreePagePlaceHolder([0; GRANULE_SIZE]);
+static mut FREE_PAGE_PLACEHOLDER: FreePagePlaceHolder = FreePagePlaceHolder([0; GRANULE_SIZE]);
 
 fn init_free_page_addr(bootinfo: &sel4::BootInfo) -> usize {
-    let addr = ptr::addr_of!(FREE_PAGE_PLACEHOLDER) as usize;
+    let addr = unsafe { ptr::addr_of!(FREE_PAGE_PLACEHOLDER) as usize };
     get_user_image_frame_slot(bootinfo, addr)
         .cap()
         .frame_unmap()
