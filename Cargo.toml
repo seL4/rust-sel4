@@ -38,6 +38,7 @@ members = [
     "crates/examples/root-task/example-root-task",
     "crates/examples/root-task/example-root-task-without-runtime",
     "crates/examples/root-task/hello",
+    "crates/examples/root-task/serial-device",
     "crates/examples/root-task/spawn-task",
     "crates/examples/root-task/spawn-task/child",
     "crates/examples/root-task/spawn-thread",
