@@ -92,6 +92,7 @@ in rec {
     examples.root-task.example-root-task-without-runtime
     examples.root-task.spawn-thread
     examples.root-task.spawn-task
+    examples.root-task.serial-device
   ];
 
   allAutomationScripts = map
@@ -339,6 +340,16 @@ in rec {
           rootCrate = crates.example-root-task-without-runtime;
           release = false;
           rustTargetInfo = seL4RustTargetInfoWithConfig { minimal = true; };
+        };
+        extraPlatformArgs = lib.optionalAttrs canSimulate {
+          canAutomateSimply = true;
+        };
+      });
+
+      serial-device = maybe (haveFullRuntime && hostPlatform.isAarch) (mkInstance {
+        rootTask = mkTask {
+          rootCrate = crates.serial-device;
+          release = false;
         };
         extraPlatformArgs = lib.optionalAttrs canSimulate {
           canAutomateSimply = true;
