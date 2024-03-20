@@ -390,9 +390,7 @@ in rec {
               rootCrate = crates.spawn-task;
               release = false;
               lastLayerModifications.modifyDerivation = drv: drv.overrideAttrs (attrs: {
-                # CHILD_ELF = writeText "x" "foo";
-                # CHILD_ELF = child.split.min;
-                CHILD_ELF = child.split.full;
+                CHILD_ELF = child.split.min;
                 passthru = (attrs.passthru or {}) // {
                   inherit child;
                 };
