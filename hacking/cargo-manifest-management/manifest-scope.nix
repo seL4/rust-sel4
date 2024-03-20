@@ -92,6 +92,7 @@ in rec {
     cfg-if = "1.0.0";
     clap = "4.4.6";
     fallible-iterator = "0.2.0";
+    fdt = "0.1.4";
     futures = "0.3.28";
     getrandom = "0.2.10";
     gimli = "0.28.0";
