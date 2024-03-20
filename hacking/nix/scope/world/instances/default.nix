@@ -346,7 +346,7 @@ in rec {
         };
       });
 
-      serial-device = maybe (haveFullRuntime && hostPlatform.isAarch) (mkInstance {
+      serial-device = maybe (haveFullRuntime && hostPlatform.isAarch) (lib.fix (self: mkInstance {
         rootTask = mkTask {
           rootCrate = crates.serial-device;
           release = false;
@@ -354,7 +354,19 @@ in rec {
         extraPlatformArgs = lib.optionalAttrs canSimulate {
           canAutomateSimply = true;
         };
-      });
+      } // lib.optionalAttrs canSimulate rec {
+        automate =
+          let
+            py = buildPackages.python3.withPackages (pkgs: [
+              pkgs.pexpect
+            ]);
+          in
+            writeScript "automate" ''
+              #!${buildPackages.runtimeShell}
+              set -eu
+              ${py}/bin/python3 ${./test-automation-scripts/serial-device.py} ${self.simulate}
+            '';
+      }));
 
       spawn-thread = maybe haveFullRuntime (mkInstance {
         rootTask = mkTask {
