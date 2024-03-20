@@ -356,6 +356,20 @@ impl<C: InvocationContext> AbsoluteCPtr<C> {
         }))
     }
 
+    /// Corresponds to `seL4_CNode_Move`.
+    pub fn move_(self, src: &AbsoluteCPtr) -> Result<()> {
+        Error::wrap(self.invoke(|cptr, path, ipc_buffer| {
+            ipc_buffer.inner_mut().seL4_CNode_Move(
+                cptr.bits(),
+                path.bits(),
+                path.depth_for_kernel(),
+                src.root().bits(),
+                src.path().bits(),
+                src.path().depth_for_kernel(),
+            )
+        }))
+    }
+
     /// Corresponds to `seL4_CNode_Mutate`.
     pub fn mutate(self, src: &AbsoluteCPtr, badge: Word) -> Result<()> {
         Error::wrap(self.invoke(|cptr, path, ipc_buffer| {
