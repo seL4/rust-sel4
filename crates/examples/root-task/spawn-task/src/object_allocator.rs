@@ -15,7 +15,7 @@ impl ObjectAllocator {
     pub(crate) fn new(bootinfo: &sel4::BootInfo) -> Self {
         Self {
             empty_slots: bootinfo.empty().range(),
-            ut: find_largest_untyped(bootinfo),
+            ut: find_largest_kernel_untyped(bootinfo),
         }
     }
 
@@ -46,7 +46,7 @@ impl ObjectAllocator {
     }
 }
 
-fn find_largest_untyped(bootinfo: &sel4::BootInfo) -> sel4::cap::Untyped {
+fn find_largest_kernel_untyped(bootinfo: &sel4::BootInfo) -> sel4::cap::Untyped {
     let (ut_ix, _desc) = bootinfo
         .untyped_list()
         .iter()
