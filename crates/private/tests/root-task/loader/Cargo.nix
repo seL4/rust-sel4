@@ -4,12 +4,12 @@
 # SPDX-License-Identifier: BSD-2-Clause
 #
 
-{ mk, localCrates }:
+{ mk, localCrates, versions }:
 
 mk {
   package.name = "tests-root-task-loader";
   dependencies = {
-    fdt = "0.1.4";
+    inherit (versions) fdt;
     inherit (localCrates)
       sel4
       sel4-root-task
