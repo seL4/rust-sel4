@@ -144,4 +144,4 @@ members = [
 
 [patch.crates-io.ring]
 git = "https://github.com/coliasgroup/ring.git"
-rev = "10a2b3cbe68da77f9f20ebb3776ab4c605f2b40e"
+rev = "5a6085b525d2f2651c30fc6e9133ed32f92bc622"
