@@ -1758,10 +1758,11 @@ dependencies = [
 
 [[package]]
 name = "rustls"
-version = "0.23.0-alpha.0"
-source = "git+https://github.com/coliasgroup/rustls.git?rev=c315801aa0c1e9c765b27106b3969dd458995cc7#c315801aa0c1e9c765b27106b3969dd458995cc7"
+version = "0.23.4"
+source = "git+https://github.com/coliasgroup/rustls.git?rev=c16f1e9c72a92b00259929aaf4768eb36061d83f#c16f1e9c72a92b00259929aaf4768eb36061d83f"
 dependencies = [
  "log",
+ "once_cell",
  "ring 0.17.7",
  "rustls-pki-types",
  "rustls-webpki",

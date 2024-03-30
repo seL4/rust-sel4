@@ -21,7 +21,7 @@ use rustls::server::{ServerConnectionData, UnbufferedServerConnection};
 use rustls::unbuffered::{
     AppDataRecord, ConnectionState, EncodeError, EncryptError, UnbufferedStatus,
 };
-use rustls::{ClientConfig, ServerConfig, SideData, UnbufferedConnectionCommon};
+use rustls::{unbuffered::UnbufferedConnectionCommon, ClientConfig, ServerConfig, SideData};
 
 use sel4_async_io::{Read, Write};
 

@@ -24,7 +24,7 @@ mk {
 
     smoltcp = smoltcpWith [];
 
-    rustls = rustlsWith [];
+    rustls = rustlsWith [] // (localCrates.rustls or {});
 
     rustls-pemfile = { version = "2.0.0"; default-features = false; };
 
