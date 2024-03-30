@@ -216,7 +216,7 @@ in rec {
         };
       });
 
-      ring = maybe (haveFullRuntime && haveUnwindingSupport && !hostPlatform.isRiscV32) (
+      ring = maybe (haveFullRuntime && haveUnwindingSupport && !hostPlatform.isRiscV32 && !hostPlatform.isx86) (
         let
           rootTask = lib.makeOverridable mkTask {
             rootCrate = crates.ring;
