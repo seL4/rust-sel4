@@ -194,7 +194,7 @@ in rec {
 
   rustlsSource = {
     git = "https://github.com/coliasgroup/rustls.git";
-    rev = "c315801aa0c1e9c765b27106b3969dd458995cc7";
+    rev = "c16f1e9c72a92b00259929aaf4768eb36061d83f";
   };
 
   rustlsWith = features: rustlsSource // {

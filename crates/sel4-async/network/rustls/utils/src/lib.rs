@@ -12,9 +12,9 @@ extern crate alloc;
 
 mod compiler_builtins_supplement;
 mod dummy_custom_getrandom;
-mod get_current_time_impl;
 mod no_server_cert_verifier;
+mod time_provider_impl;
 
 pub use dummy_custom_getrandom::seed_dummy_custom_getrandom;
-pub use get_current_time_impl::GetCurrentTimeImpl;
 pub use no_server_cert_verifier::NoServerCertVerifier;
+pub use time_provider_impl::TimeProviderImpl;
