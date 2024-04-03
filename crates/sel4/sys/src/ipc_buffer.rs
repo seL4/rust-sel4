@@ -45,6 +45,7 @@ impl seL4_IPCBuffer {
         set_bits_from_slice(&mut self.msg, range, value, 0)
     }
 
+    #[allow(dead_code)]
     pub(crate) fn msg_bytes_mut(&mut self) -> &'static mut [u8] {
         let msg = &mut self.msg;
         unsafe {

@@ -20,8 +20,13 @@ mod printing;
 mod termination;
 
 pub use heap::set_global_allocator_mutex_notification;
-pub use printing::{debug_print, debug_println};
 pub use termination::{Never, Termination};
+
+sel4::config::sel4_cfg_if! {
+    if #[sel4_cfg(PRINTING)] {
+        pub use printing::{debug_print, debug_println};
+    }
+}
 
 #[macro_export]
 macro_rules! declare_root_task {
