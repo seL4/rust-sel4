@@ -26,7 +26,7 @@
   patch.crates-io = {
     ring = {
       git = "https://github.com/coliasgroup/ring.git";
-      rev = "5a6085b525d2f2651c30fc6e9133ed32f92bc622";
+      rev = "0e644b7837cffcd53a3ff67d7f478801b4e9e0ed";
     };
   };
 }
