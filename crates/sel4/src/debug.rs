@@ -7,11 +7,6 @@
 
 use crate::{sys, InvocationContext, CapType, cap, Cap};
 
-/// Corresponds to `seL4_DebugPutChar`.
-pub fn debug_put_char(c: u8) {
-    sys::seL4_DebugPutChar(c)
-}
-
 /// Corresponds to `seL4_DebugSnapshot`.
 pub fn debug_snapshot() {
     sys::seL4_DebugSnapshot()

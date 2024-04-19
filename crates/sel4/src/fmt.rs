@@ -7,11 +7,11 @@
 
 use core::fmt;
 
-use crate::debug_put_char;
+use crate::sys;
 
-#[doc(hidden)]
-pub mod _private {
-    pub use super::debug_print_helper;
+/// Corresponds to `seL4_DebugPutChar`.
+pub fn debug_put_char(c: u8) {
+    sys::seL4_DebugPutChar(c)
 }
 
 /// Implements `core::fmt::Write` using [`debug_put_char`].
@@ -44,4 +44,9 @@ macro_rules! debug_print {
 macro_rules! debug_println {
     () => ($crate::debug_println!(""));
     ($($arg:tt)*) => ($crate::debug_print!("{}\n", format_args!($($arg)*)));
+}
+
+#[doc(hidden)]
+pub mod _private {
+    pub use super::debug_print_helper;
 }
