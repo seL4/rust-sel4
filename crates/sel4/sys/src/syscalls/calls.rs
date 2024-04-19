@@ -9,6 +9,7 @@ use core::sync::atomic::{compiler_fence, Ordering};
 
 use sel4_config::{sel4_cfg, sel4_cfg_if};
 
+#[allow(unused_imports)]
 use crate::{
     seL4_CPtr, seL4_IPCBuffer, seL4_MessageInfo, seL4_Uint32, seL4_Word, syscall_id,
     ReplyAuthority, WaitMessageInfo,
@@ -122,6 +123,7 @@ macro_rules! fence {
     };
 }
 
+#[allow(dead_code)]
 fn sys_send_recv_simple(sys_id: c_int, arg: seL4_Word) -> seL4_Word {
     let mut mr0 = 0;
     let mut mr1 = 0;
@@ -629,12 +631,13 @@ pub fn seL4_Yield() {
     fence!();
 }
 
+#[sel4_cfg(PRINTING)]
+pub fn seL4_DebugPutChar(c: u8) {
+    sys_send_recv_simple(syscall_id::DebugPutChar, c as seL4_Word);
+}
+
 sel4_cfg_if! {
     if #[sel4_cfg(DEBUG_BUILD)] {
-        pub fn seL4_DebugPutChar(c: u8) {
-            sys_send_recv_simple(syscall_id::DebugPutChar, c as seL4_Word);
-        }
-
         pub fn seL4_DebugHalt() {
             sys_null(syscall_id::DebugHalt);
             fence!();

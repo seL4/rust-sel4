@@ -161,12 +161,18 @@ pub(crate) use helper_macros::{
 };
 
 sel4_cfg_if! {
-    if #[sel4_cfg(DEBUG_BUILD)] {
-        mod debug;
+    if #[sel4_cfg(PRINTING)] {
         mod fmt;
 
-        pub use debug::{debug_put_char, debug_snapshot};
-        pub use fmt::DebugWrite;
+        pub use fmt::{DebugWrite, debug_put_char};
+    }
+}
+
+sel4_cfg_if! {
+    if #[sel4_cfg(DEBUG_BUILD)] {
+        mod debug;
+
+        pub use debug::debug_snapshot;
     }
 }
 
@@ -214,6 +220,6 @@ pub const WORD_SIZE: usize = sel4_cfg_usize!(WORD_SIZE);
 
 #[doc(hidden)]
 pub mod _private {
-    #[sel4_config::sel4_cfg(DEBUG_BUILD)]
+    #[sel4_config::sel4_cfg(PRINTING)]
     pub use super::fmt::_private as fmt;
 }
