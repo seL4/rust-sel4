@@ -23,6 +23,12 @@ in {
     pkgs.host.x86_64.none.this.worlds.default
   ];
 
+  someConfigurationBuildTests =
+    let
+      worlds = pkgs.host.aarch64.none.this.worlds.qemu-arm-virt.forBuildTests;
+    in
+      map (world: world.sel4-capdl-initializer) (lib.attrValues worlds);
+
   sel4testInstances = (lib.mapAttrs (k: v: v.this.sel4test.automate) {
     aarch64 = pkgs.host.aarch64.none;
     aarch32 = pkgs.host.aarch32.none;
@@ -49,6 +55,8 @@ in {
     (lib.forEach worldsForEverythingInstances (world:
       map (instance: instance.links) world.instances.all
     ))
+
+    someConfigurationBuildTests
 
     sel4testInstancesList
 
