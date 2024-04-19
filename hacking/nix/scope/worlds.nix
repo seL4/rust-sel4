@@ -32,7 +32,12 @@ in rec {
       qemu-arm-virt =
         let
           mk =
-            { smp ? false
+            { verificationBuild ? null
+            , debugBuild ? null
+            , printing ? null
+            , benchmarks ? null
+
+            , smp ? false
             , mcs ? false
             , el2 ? true
             , hypervisor ? false
@@ -53,16 +58,22 @@ in rec {
                   KernelPlatform = mkString "qemu-arm-virt";
                   KernelMaxNumNodes = mkString numCores;
                   KernelIsMCS = fromBool mcs;
-
+                } // lib.optionalAttrs hypervisor {
+                  KernelArmHypervisorSupport = on;
+                } // lib.optionalAttrs (verificationBuild != null) {
+                  KernelVerificationBuild = fromBool verificationBuild;
+                } // lib.optionalAttrs (debugBuild != null) {
+                  KernelDebugBuild = fromBool debugBuild;
+                } // lib.optionalAttrs (printing != null) {
+                  KernelPrinting = fromBool printing;
+                } // lib.optionalAttrs (benchmarks != null) {
+                  KernelBenchmarks = mkString benchmarks;
+                };
                   # benchmarking config
                   # KernelDebugBuild = off;
                   # KernelBenchmarks = mkString "track_utilisation";
                   # KernelArmExportPMUUser = on;
                   # KernelSignalFastpath = on;
-
-                } // lib.optionalAttrs hypervisor {
-                  KernelArmHypervisorSupport = on;
-                };
                 canSimulate = true;
                 mkInstanceForPlatform = platUtils.qemu.mkMkInstanceForPlatform {
                   mkQemuCmd = loader: [
@@ -87,6 +98,28 @@ in rec {
             isMicrokit = true;
             cpu = "cortex-a53";
             mkSeL4KernelLoaderWithPayloadArgs = loader: [ "-device" "loader,file=${loader},addr=0x70000000,cpu-num=0" ];
+          };
+
+          forBuildTests = {
+            noPrinting = mk {
+              debugBuild = true;
+              printing = false;
+            };
+            noDebug = mk {
+              debugBuild = false;
+              printing = true;
+            };
+            verification = mk {
+              verificationBuild = true;
+            };
+            bench = mk {
+              verificationBuild = true;
+              benchmarks = "track_utilisation";
+            };
+            debugBench = mk {
+              debugBuild = true;
+              benchmarks = "track_utilisation";
+            };
           };
         };
 
