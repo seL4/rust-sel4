@@ -21,7 +21,7 @@ use sel4_capdl_initializer_types::{
 };
 use sel4_dlmalloc::StaticHeapBounds;
 use sel4_logging::{LevelFilter, Logger, LoggerBuilder};
-use sel4_root_task::root_task;
+use sel4_root_task::{debug_print, root_task};
 
 const LOG_LEVEL: LevelFilter = {
     // LevelFilter::Trace
@@ -32,7 +32,7 @@ const LOG_LEVEL: LevelFilter = {
 static LOGGER: Logger = LoggerBuilder::const_default()
     .level_filter(LOG_LEVEL)
     .filter(|meta| meta.target() == "sel4_capdl_initializer_core")
-    .write(|s| sel4::debug_print!("{}", s))
+    .write(|s| debug_print!("{}", s))
     .build();
 
 #[root_task(stack_size = 0x10000)]
