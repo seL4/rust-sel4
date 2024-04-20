@@ -85,7 +85,7 @@ let
     })
   ];
 
-  exampleSource = microkitSource + "/example/qemu_arm_virt/hello";
+  exampleSource = microkitSource + "/example/qemu_virt_aarch64/hello";
 
   examplePDs = stdenv.mkDerivation {
     name = "example";
@@ -100,7 +100,7 @@ let
     ];
 
     MICROKIT_SDK = sdk;
-    MICROKIT_BOARD = "qemu_arm_virt";
+    MICROKIT_BOARD = "qemu_virt_aarch64";
     MICROKIT_CONFIG = "debug";
 
     MICROKIT_TOOL = "python3 -m microkit";
@@ -120,7 +120,7 @@ let
   mkSystem = { searchPath, systemXML }:
     lib.fix (self: runCommand "system" {
       MICROKIT_SDK = sdk;
-      MICROKIT_BOARD = "qemu_arm_virt";
+      MICROKIT_BOARD = "qemu_virt_aarch64";
       MICROKIT_CONFIG = "debug";
 
       nativeBuildInputs = [
@@ -133,8 +133,8 @@ let
           { name = "pds"; path = searchPath; }
           { name = "loader.elf"; path = loader; }
           { name = "report.txt"; path = "${self}/report.txt"; }
-          { name = "sdk/monitor.elf"; path = "${sdk}/board/qemu_arm_virt/debug/elf/monitor.elf"; }
-          { name = "sdk/loader.elf"; path = "${sdk}/board/qemu_arm_virt/debug/elf/loader.elf"; }
+          { name = "sdk/monitor.elf"; path = "${sdk}/board/qemu_virt_aarch64/debug/elf/monitor.elf"; }
+          { name = "sdk/loader.elf"; path = "${sdk}/board/qemu_virt_aarch64/debug/elf/loader.elf"; }
         ];
       };
     } ''

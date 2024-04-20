@@ -43,7 +43,8 @@ in rec {
             , hypervisor ? false
             , cpu ? "cortex-a57"
             , isMicrokit ? false
-            , mkSeL4KernelLoaderWithPayloadArgs ? loader: [ "-kernel" loader ]
+            , mkSeL4KernelLoaderWithPayloadQEMUArgs ? loader: [ "-kernel" loader ]
+            , extraQEMUArgs ? []
             }:
             let
               numCores = if smp then "2" else "1";
@@ -84,7 +85,7 @@ in rec {
                       "-cpu" cpu "-smp" numCores "-m" "1024"
                       "-nographic"
                       "-serial" "mon:stdio"
-                  ] ++ mkSeL4KernelLoaderWithPayloadArgs loader;
+                  ] ++ mkSeL4KernelLoaderWithPayloadQEMUArgs loader ++ extraQEMUArgs;
                 };
               };
         in rec {
@@ -97,7 +98,8 @@ in rec {
             mcs = true;
             isMicrokit = true;
             cpu = "cortex-a53";
-            mkSeL4KernelLoaderWithPayloadArgs = loader: [ "-device" "loader,file=${loader},addr=0x70000000,cpu-num=0" ];
+            mkSeL4KernelLoaderWithPayloadQEMUArgs = loader: [ "-device" "loader,file=${loader},addr=0x70000000,cpu-num=0" ];
+            extraQEMUArgs = [ "-m" "size=2G" ];
           };
 
           forBuildTests = {

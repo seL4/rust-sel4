@@ -65,7 +65,7 @@ self: with self;
     if worldConfig.isMicrokit
     then
       let
-        d = "${microkitForUserspace.sdk}/board/qemu_arm_virt/debug";
+        d = "${microkitForUserspace.sdk}/board/qemu_virt_aarch64/debug";
       in
         "${d}/include"
     else
@@ -75,7 +75,7 @@ self: with self;
     if worldConfig.isMicrokit
     then
       let
-        d = "${microkitForUserspace.sdk}/board/qemu_arm_virt/debug";
+        d = "${microkitForUserspace.sdk}/board/qemu_virt_aarch64/debug";
       in {
           SEL4_INCLUDE_DIRS = "${d}/include";
       }
