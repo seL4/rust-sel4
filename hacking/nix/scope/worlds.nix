@@ -120,6 +120,9 @@ in rec {
               debugBuild = true;
               benchmarks = "track_utilisation";
             };
+            mcs = mk {
+              mcs = true;
+            };
           };
         };
 
