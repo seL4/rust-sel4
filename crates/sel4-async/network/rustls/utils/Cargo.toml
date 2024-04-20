@@ -20,10 +20,5 @@ license = "BSD-2-Clause"
 getrandom = { version = "0.2.10", features = ["custom"] }
 rand = { version = "0.8.5", default-features = false, features = ["small_rng"] }
 ring = { version = "=0.17.8", features = ["less-safe-getrandom-custom-or-rdrand"] }
+rustls = { version = "0.23.5", default-features = false, features = ["logging", "ring", "tls12"] }
 sel4-async-time = { path = "../../../time" }
-
-[dependencies.rustls]
-git = "https://github.com/coliasgroup/rustls.git"
-rev = "c16f1e9c72a92b00259929aaf4768eb36061d83f"
-default-features = false
-features = ["logging", "ring", "tls12"]

@@ -109,6 +109,7 @@ in rec {
     quote = "1.0.23";
     rand = "0.8.5";
     rustc_version = "0.4.0";
+    rustls = "0.23.5";
     serde = "1.0.147";
     serde_json = "1.0.87";
     serde_yaml = "0.9.14";
@@ -192,12 +193,8 @@ in rec {
     features = [ "less-safe-getrandom-custom-or-rdrand" ] ++ features;
   };
 
-  rustlsSource = {
-    git = "https://github.com/coliasgroup/rustls.git";
-    rev = "c16f1e9c72a92b00259929aaf4768eb36061d83f";
-  };
-
-  rustlsWith = features: rustlsSource // {
+  rustlsWith = features: {
+    version = versions.rustls;
     default-features = false;
     features = [
       "logging"

@@ -18,10 +18,5 @@ license = "Apache-2.0 OR ISC OR MIT"
 
 [dependencies]
 log = "0.4.17"
+rustls = { version = "0.23.5", default-features = false, features = ["logging", "ring", "tls12"] }
 sel4-async-io = { path = "../../io" }
-
-[dependencies.rustls]
-git = "https://github.com/coliasgroup/rustls.git"
-rev = "c16f1e9c72a92b00259929aaf4768eb36061d83f"
-default-features = false
-features = ["logging", "ring", "tls12"]

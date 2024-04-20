@@ -20,6 +20,7 @@ license = "BSD-2-Clause"
 futures = { version = "0.3.28", default-features = false, features = ["async-await", "alloc"] }
 httparse = { version = "1.8.0", default-features = false }
 log = "0.4.17"
+rustls = { version = "0.23.5", default-features = false, features = ["logging", "ring", "tls12"] }
 rustls-pemfile = { version = "2.0.0", default-features = false }
 sel4-async-block-io = { path = "../../../../../../sel4-async/block-io" }
 sel4-async-block-io-fat = { path = "../../../../../../sel4-async/block-io/fat" }
@@ -31,12 +32,6 @@ sel4-async-time = { path = "../../../../../../sel4-async/time" }
 sel4-async-unsync = { path = "../../../../../../sel4-async/unsync" }
 sel4-panicking-env = { path = "../../../../../../sel4-panicking/env" }
 webpki-roots = "0.26"
-
-[dependencies.rustls]
-git = "https://github.com/coliasgroup/rustls.git"
-rev = "c16f1e9c72a92b00259929aaf4768eb36061d83f"
-default-features = false
-features = ["logging", "ring", "tls12"]
 
 [dependencies.sel4-async-single-threaded-executor]
 path = "../../../../../../sel4-async/single-threaded-executor"
