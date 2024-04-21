@@ -746,3 +746,15 @@ sel4_cfg_if! {
         }
     }
 }
+
+sel4_cfg_if! {
+    if #[cfg(UINTR)] {
+        pub fn seL4_WakeSyscallHandler() {
+            sys_send_recv_simple(syscall_id::WakeSyscallHandler, 0);
+        }
+    }
+}
+
+
+
+

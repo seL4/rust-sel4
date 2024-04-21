@@ -123,6 +123,12 @@ sel4_cfg_if! {
 }
 
 sel4_cfg_if! {
+    if #[cfg(UINTR)] {
+        pub use syscalls::wake_syscall_handler;
+    }
+}
+
+sel4_cfg_if! {
     if #[cfg(ENABLE_BENCHMARKS)] {
         mod benchmark;
 

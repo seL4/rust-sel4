@@ -5,8 +5,9 @@
 //
 
 use core::array;
-
 use sel4_config::{sel4_cfg, sel4_cfg_if};
+// use sel4_root_task::debug_println;
+// use crate::debug_println;
 use crate::error::Result;
 use crate::{cap_type, const_helpers::u32_into_usize, sys, CapType, ConveysReplyAuthority, Endpoint, InvocationContext, LocalCPtr, MessageInfo, Notification, Word, NUM_FAST_MESSAGE_REGISTERS, CPtr, Error};
 
@@ -325,4 +326,20 @@ mod __assertions {
     const __assert_num_fast_message_registers: () = {
         assert!(NUM_FAST_MESSAGE_REGISTERS == 4);
     };
+}
+
+
+
+sel4_cfg_if! {
+    if #[cfg(UINTR)] {
+        pub fn wake_syscall_handler() {
+            // debug_println!("wake_syscall_handler: sys::seL4_WakeSyscallHandler()");
+            sys::seL4_WakeSyscallHandler();
+        }       
+    } else {
+        pub fn wake_syscall_handler() {
+            // debug_println!("wake_syscall_handler: None");
+            // sys::seL4_WakeSyscallHandler();
+        }
+    }
 }
