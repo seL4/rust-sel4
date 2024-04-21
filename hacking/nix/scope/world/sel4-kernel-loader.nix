@@ -41,6 +41,7 @@ let
   sysroot = buildSysroot {
     inherit profile rustTargetInfo;
     extraManifest = profiles;
+    alloc = false;
   };
 
 in

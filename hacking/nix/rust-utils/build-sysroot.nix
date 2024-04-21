@@ -25,7 +25,8 @@ in
 , extraManifest ? {}
 , extraConfig ? {}
 , rustTargetInfo ? defaultRustTargetInfo
-, compilerBuiltinsWeakIntrinsics ? false
+, alloc ? true
+, compilerBuiltinsMem ? true
 }:
 
 let
@@ -70,10 +71,15 @@ let
     extraConfig
   ]);
 
-  features = lib.concatStringsSep "," ([
+  crates = lib.concatStringsSep "," ([
+    "core"
+    "compiler_builtins"
+  ] ++ lib.optionals alloc [
+    "alloc"
+  ]);
+
+  features = lib.concatStringsSep "," (lib.optionals compilerBuiltinsMem [
     "compiler-builtins-mem"
-  ] ++ lib.optionals compilerBuiltinsWeakIntrinsics [
-    "compiler-builtins-weak-intrinsics"
   ]);
 
 in
@@ -90,7 +96,7 @@ runCommand "sysroot" {
     --config ${config} \
     ${lib.optionalString (profile != null) "--profile ${profile}"} \
     --target ${rustTargetInfo.name} \
-    -Z build-std=core,alloc,compiler_builtins \
+    -Z build-std=${crates} \
     -Z build-std-features=${features} \
     --manifest-path ${workspace}/Cargo.toml \
     --target-dir $(pwd)/target
