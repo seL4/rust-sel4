@@ -34,18 +34,17 @@ This project builds upon [seL4](https://github.com/seL4/seL4) and the [seL4
 Microkit](https://github.com/seL4/microkit). In particular, this project works with at least the
 following versions of those related projects:
 
-- seL4, when used without Microkit: `9bac64c6ceb1ece54fe00eae44065a836bd224f3`
-  ([github.com/coliasgroup/seL4:rust](https://github.com/coliasgroup/seL4/tree/rust), an ancestor of
-  [github.com/seL4/seL4:master](https://github.com/seL4/seL4/tree/master)).
-- seL4, when used with Microkit: `b9fb3fec722e65fedc2a3038726f5183c4c7a6b9`
+- seL4, when used without Microkit:
+  [`a58480425c5b4c7a3d5000c797f083bc7d5fd532`](https://github.com/seL4/seL4/tree/a58480425c5b4c7a3d5000c797f083bc7d5fd532)
+- seL4, when used with Microkit:
+  [`1daabe63fd34ae3d348b8e4a4057bd1a36d48ef6`](https://github.com/coliasgroup/seL4/tree/1daabe63fd34ae3d348b8e4a4057bd1a36d48ef6)
   ([github.com/coliasgroup/seL4:rust-microkit](https://github.com/coliasgroup/seL4/tree/rust-microkit),
   not an ancestor of [github.com/seL4/seL4:master](https://github.com/seL4/seL4/tree/master)). For
-  now, Microkit (both upstream trunk and the branch used by this project) requires [a
-  patch](https://github.com/coliasgroup/seL4/commit/5f71dc4a5cd90b823876bec10265da92eae486ab) on top
-  of upstream seL4 trunk.
-- seL4 Microkit: `e04afe55ac7f3d4242145fd7466b583fe1b1fce3`
-  ([github.com/coliasgroup/microkit:rust](https://github.com/coliasgroup/microkit/tree/rust), an
-  ancestor of [github.com/seL4/microkit:main](https://github.com/seL4/microkit/tree/main)).
+  now, Microkit requires [a
+  patch](https://github.com/seL4/seL4/commit/1daabe63fd34ae3d348b8e4a4057bd1a36d48ef6) on top of
+  upstream seL4 trunk.
+- seL4 Microkit:
+  [`35978315953532d3d2aca3faa82eda54d2a9172f`](https://github.com/seL4/microkit/tree/35978315953532d3d2aca3faa82eda54d2a9172f)
 
 ### Demos
 
