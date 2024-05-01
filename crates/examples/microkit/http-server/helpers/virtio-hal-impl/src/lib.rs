@@ -104,7 +104,7 @@ unsafe impl Hal for HalImpl {
 
     unsafe fn share(buffer: NonNull<[u8]>, _direction: BufferDirection) -> PhysAddr {
         let mut state = GLOBAL_STATE.get().unwrap().lock();
-        assert!(buffer.len() > 0);
+        assert!(!buffer.is_empty());
         let layout = Layout::from_size_align(buffer.len(), 1).unwrap();
         let bounce_buffer_range = state.bounce_buffer_allocator.allocate(layout).unwrap();
         state
