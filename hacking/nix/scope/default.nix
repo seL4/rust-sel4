@@ -37,8 +37,8 @@ let
 
   rustToolchainParams = {
     channel = "nightly";
-    date = "2024-03-09";
-    sha256 = "sha256-0npjLjvxhiQcBh+W9URwg0BQN7CuItPEtsRAgOb6/1o=";
+    date = "2024-05-01";
+    sha256 = "sha256-6lRcCTSUmWOh0GheLMTZkY7JC273pWLp2s98Bb2REJQ=";
   };
 
   mkRustToolchain = target: fenix.targets.${target}.toolchainOf rustToolchainParams;
