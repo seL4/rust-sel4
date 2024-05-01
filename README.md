@@ -72,7 +72,7 @@ following versions of those related projects:
 - [`sel4-externally-shared`](./crates/sel4-externally-shared): Abstractions for interacting with
   data in shared memory.
 - [`sel4-shared-ring-buffer`](./crates/sel4-shared-ring-buffer): Implementation of shared data
-  structures used in the [seL4 Device Driver Framework](https://github.com/lucypa/sDDF).
+  structures used in the [seL4 Device Driver Framework](https://github.com/au-ts/sddf).
 - [`sel4-async-*`](./crates/sel4-async): Crates for leveraging async Rust in seL4 userspace.
 
 ##### Runtime crates

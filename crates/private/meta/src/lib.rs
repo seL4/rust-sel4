@@ -24,7 +24,7 @@
 //! - [`sel4_logging`]: [`Log`](log::Log) implementation for the [`log`] crate.
 //! - [`sel4_externally_shared`]: Abstractions for interacting with data in shared memory.
 //! - [`sel4_shared_ring_buffer`]: Implementation of shared data structures used in the [seL4 Device
-//!   Driver Framework](https://github.com/lucypa/sDDF).
+//!   Driver Framework](https://github.com/au-ts/sddf).
 //! - `sel4_async_*`: Crates for leveraging async Rust in seL4 userspace.
 //!
 //! ### Runtime crates
