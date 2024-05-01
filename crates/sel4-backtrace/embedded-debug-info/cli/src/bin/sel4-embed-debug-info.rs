@@ -61,12 +61,10 @@ fn main() -> Result<(), io::Error> {
     fs::write(out_elf_path, out_elf)
 }
 
-fn with_bit_width<T>(image_elf: &[u8], content: &[u8]) -> Vec<u8>
-where
-    T: FileHeaderExt,
-    T::Word: PrimInt,
-    T::Sword: PrimInt,
-{
+fn with_bit_width<T: FileHeaderExt<Word: PrimInt, Sword: PrimInt>>(
+    image_elf: &[u8],
+    content: &[u8],
+) -> Vec<u8> {
     let content_len = NumCast::from(content.len()).unwrap();
     let mut input = Input::<T>::default();
     input.symbolic_injections.push(SymbolicInjection {

@@ -213,10 +213,7 @@ impl<T> NextBlockSizeAdapter<T> {
     wrapper_methods!(T);
 }
 
-impl<T: BlockIOLayout> BlockIOLayout for NextBlockSizeAdapter<T>
-where
-    T::BlockSize: HasNextBlockSize,
-{
+impl<T: BlockIOLayout<BlockSize: HasNextBlockSize>> BlockIOLayout for NextBlockSizeAdapter<T> {
     type Error = T::Error;
 
     type BlockSize = <T::BlockSize as HasNextBlockSize>::NextBlockSize;
@@ -232,10 +229,7 @@ where
     }
 }
 
-impl<T: BlockIO<A>, A: Access> BlockIO<A> for NextBlockSizeAdapter<T>
-where
-    T::BlockSize: HasNextBlockSize,
-{
+impl<T: BlockIO<A, BlockSize: HasNextBlockSize>, A: Access> BlockIO<A> for NextBlockSizeAdapter<T> {
     async fn read_or_write_blocks(
         &self,
         start_block_idx: u64,
@@ -261,10 +255,7 @@ impl<T> PrevBlockSizeAdapter<T> {
     wrapper_methods!(T);
 }
 
-impl<T: BlockIOLayout> BlockIOLayout for PrevBlockSizeAdapter<T>
-where
-    T::BlockSize: HasPrevBlockSize,
-{
+impl<T: BlockIOLayout<BlockSize: HasPrevBlockSize>> BlockIOLayout for PrevBlockSizeAdapter<T> {
     type Error = T::Error;
 
     type BlockSize = <T::BlockSize as HasPrevBlockSize>::PrevBlockSize;
@@ -278,9 +269,8 @@ where
     }
 }
 
-impl<T: BlockIO<A>, A: ReadAccess> BlockIO<A> for PrevBlockSizeAdapter<T>
-where
-    T::BlockSize: HasPrevBlockSize,
+impl<T: BlockIO<A, BlockSize: HasPrevBlockSize>, A: ReadAccess> BlockIO<A>
+    for PrevBlockSizeAdapter<T>
 {
     async fn read_or_write_blocks(
         &self,
