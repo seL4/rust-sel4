@@ -33,46 +33,29 @@ impl ElfBitWidth {
 pub type ConcreteFileHeader32 = FileHeader32<Endianness>;
 pub type ConcreteFileHeader64 = FileHeader64<Endianness>;
 
-// NOTE(rustc_wishlist)
-//
-// This is much simpler with #![feature(associated_type_bounds)]:
-// ```
-// pub trait FileHeaderExt:
-//   FileHeader<Word: PrimInt, Sword: PrimInt, Endian = Endianness>
-// ```
-//
 pub trait FileHeaderExt:
-    FileHeader<Word = Self::ExtWord, Sword = Self::ExtSword, Endian = Endianness>
+    FileHeader + FileHeader<Word: PrimInt, Sword: PrimInt, Endian = Endianness>
 {
-    type ExtWord: PrimInt + Into<u64>;
-    type ExtSword: PrimInt + Into<i64>;
-
-    fn checked_add_signed(x: Self::ExtWord, y: Self::ExtSword) -> Option<Self::ExtWord>;
-    fn write_word_bytes(endian: impl Endian, n: Self::ExtWord) -> Vec<u8>;
+    fn checked_add_signed(x: Self::Word, y: Self::Sword) -> Option<Self::Word>;
+    fn write_word_bytes(endian: impl Endian, n: Self::Word) -> Vec<u8>;
 }
 
 impl FileHeaderExt for ConcreteFileHeader32 {
-    type ExtWord = u32;
-    type ExtSword = i32;
-
-    fn checked_add_signed(x: Self::ExtWord, y: Self::ExtSword) -> Option<Self::ExtWord> {
+    fn checked_add_signed(x: Self::Word, y: Self::Sword) -> Option<Self::Word> {
         x.checked_add_signed(y)
     }
 
-    fn write_word_bytes(endian: impl Endian, n: Self::ExtWord) -> Vec<u8> {
+    fn write_word_bytes(endian: impl Endian, n: Self::Word) -> Vec<u8> {
         endian.write_u32_bytes(n).to_vec()
     }
 }
 
 impl FileHeaderExt for ConcreteFileHeader64 {
-    type ExtWord = u64;
-    type ExtSword = i64;
-
-    fn checked_add_signed(x: Self::ExtWord, y: Self::ExtSword) -> Option<Self::ExtWord> {
+    fn checked_add_signed(x: Self::Word, y: Self::Sword) -> Option<Self::Word> {
         x.checked_add_signed(y)
     }
 
-    fn write_word_bytes(endian: impl Endian, n: Self::ExtWord) -> Vec<u8> {
+    fn write_word_bytes(endian: impl Endian, n: Self::Word) -> Vec<u8> {
         endian.write_u64_bytes(n).to_vec()
     }
 }
@@ -101,31 +84,31 @@ impl<'a, T: FileHeaderExt> Default for Input<'a, T> {
 
 type Symbol = String;
 
-type ConcreteValue<T> = <T as FileHeaderExt>::ExtWord;
+type ConcreteValue<T> = <T as FileHeader>::Word;
 
 pub struct SymbolicInjection<'a, T: FileHeaderExt> {
-    pub align_modulus: T::ExtWord,
-    pub align_residue: T::ExtWord,
+    pub align_modulus: T::Word,
+    pub align_residue: T::Word,
     pub content: &'a [u8],
-    pub memsz: T::ExtWord,
+    pub memsz: T::Word,
     pub patches: Vec<(Symbol, SymbolicValue<T>)>,
 }
 
 #[derive(Debug)]
 pub struct SymbolicValue<T: FileHeaderExt> {
-    pub addend: T::ExtSword,
+    pub addend: T::Sword,
 }
 
 impl<'a, T: FileHeaderExt> SymbolicInjection<'a, T> {
-    fn filesz(&self) -> T::ExtWord {
+    fn filesz(&self) -> T::Word {
         NumCast::from(self.content.len()).unwrap()
     }
 
-    fn align_from(&self, addr: T::ExtWord) -> T::ExtWord {
+    fn align_from(&self, addr: T::Word) -> T::Word {
         align_from::<T>(addr, self.align_modulus, self.align_residue)
     }
 
-    fn locate(&self, vaddr: T::ExtWord) -> Result<Injection<'a, T>> {
+    fn locate(&self, vaddr: T::Word) -> Result<Injection<'a, T>> {
         Ok(Injection {
             vaddr,
             content: self.content,
@@ -145,22 +128,22 @@ impl<'a, T: FileHeaderExt> SymbolicInjection<'a, T> {
 }
 
 pub struct Injection<'a, T: FileHeaderExt> {
-    pub vaddr: T::ExtWord,
+    pub vaddr: T::Word,
     pub content: &'a [u8],
-    pub memsz: T::ExtWord,
+    pub memsz: T::Word,
     pub patches: Vec<(Symbol, ConcreteValue<T>)>,
 }
 
 impl<'a, T: FileHeaderExt> Injection<'a, T> {
-    fn vaddr(&self) -> T::ExtWord {
+    fn vaddr(&self) -> T::Word {
         self.vaddr
     }
 
-    fn filesz(&self) -> T::ExtWord {
+    fn filesz(&self) -> T::Word {
         NumCast::from(self.content.len()).unwrap()
     }
 
-    fn memsz(&self) -> T::ExtWord {
+    fn memsz(&self) -> T::Word {
         self.memsz
     }
 
@@ -173,10 +156,6 @@ impl<'a, T: FileHeaderExt> Injection<'a, T> {
     }
 }
 
-fn align_from<T: FileHeaderExt>(
-    addr: T::ExtWord,
-    modulus: T::ExtWord,
-    residue: T::ExtWord,
-) -> T::ExtWord {
+fn align_from<T: FileHeaderExt>(addr: T::Word, modulus: T::Word, residue: T::Word) -> T::Word {
     addr + (modulus + residue - addr % modulus) % modulus
 }

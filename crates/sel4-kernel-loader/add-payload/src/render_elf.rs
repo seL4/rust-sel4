@@ -4,13 +4,14 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use num::{NumCast, One, Zero};
+use num::{NumCast, One, PrimInt, Zero};
+use object::{read::elf::FileHeader, Endianness};
 
 use sel4_render_elf_with_data::{FileHeaderExt, Input, SymbolicInjection, SymbolicValue};
 
 pub fn render_elf<T>(orig_elf: &[u8], serialized_payload: &[u8]) -> Vec<u8>
 where
-    T: FileHeaderExt,
+    T: FileHeaderExt + FileHeader<Word: PrimInt, Sword: PrimInt, Endian = Endianness>,
 {
     let align_modulus = T::Word::one();
     let align_residue = T::Word::one();

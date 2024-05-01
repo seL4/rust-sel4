@@ -53,9 +53,12 @@ fn main() -> Result<()> {
 
 fn continue_with_word_size<T>(args: &Args) -> Result<()>
 where
-    T: FileHeaderExt + FileHeader<Endian = Endianness>,
-    T::Word: PrimInt + WrappingSub + Integer + Serialize,
-    T::Sword: PrimInt,
+    T: FileHeaderExt
+        + FileHeader<
+            Word: PrimInt + WrappingSub + Integer + Serialize,
+            Sword: PrimInt,
+            Endian = Endianness,
+        >,
 {
     let loader_bytes = fs::read(&args.loader_path)?;
 
