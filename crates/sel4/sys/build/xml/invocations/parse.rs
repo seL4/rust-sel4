@@ -10,6 +10,7 @@ use crate::xml::Condition;
 
 #[derive(Debug)]
 pub struct Api {
+    #[allow(dead_code)]
     pub name: Option<String>,
     pub structs: Vec<Struct>,
     pub interfaces: Vec<Interface>,
