@@ -3,7 +3,6 @@
   "cpu": "generic-rv32",
   "crt-objects-fallback": "false",
   "data-layout": "e-m:e-p:32:32-i64:64-n32-S128",
-  "description": null,
   "emit-debug-gdb-scripts": false,
   "env": "sel4",
   "exe-suffix": ".elf",
@@ -13,6 +12,12 @@
   "linker-flavor": "gnu-lld",
   "llvm-target": "riscv32",
   "max-atomic-width": 32,
+  "metadata": {
+    "description": null,
+    "host_tools": null,
+    "std": null,
+    "tier": null
+  },
   "relocation-model": "static",
   "target-pointer-width": "32"
 }

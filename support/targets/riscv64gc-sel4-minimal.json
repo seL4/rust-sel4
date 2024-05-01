@@ -4,7 +4,6 @@
   "cpu": "generic-rv64",
   "crt-objects-fallback": "false",
   "data-layout": "e-m:e-p:64:64-i64:64-i128:128-n32:64-S128",
-  "description": null,
   "eh-frame-header": false,
   "emit-debug-gdb-scripts": false,
   "env": "sel4",
@@ -15,6 +14,12 @@
   "llvm-abiname": "lp64d",
   "llvm-target": "riscv64",
   "max-atomic-width": 64,
+  "metadata": {
+    "description": null,
+    "host_tools": null,
+    "std": null,
+    "tier": null
+  },
   "panic-strategy": "abort",
   "relocation-model": "static",
   "supported-sanitizers": [
