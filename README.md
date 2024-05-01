@@ -35,16 +35,14 @@ Microkit](https://github.com/seL4/microkit). In particular, this project works w
 following versions of those related projects:
 
 - seL4, when used without Microkit:
-  [`a58480425c5b4c7a3d5000c797f083bc7d5fd532`](https://github.com/seL4/seL4/tree/a58480425c5b4c7a3d5000c797f083bc7d5fd532)
+  [`0260fba168b74dd2504c9447f2fa8da1161ead87`](https://github.com/seL4/seL4/tree/0260fba168b74dd2504c9447f2fa8da1161ead87)
+  (on [github.com/seL4/seL4:master](https://github.com/seL4/seL4/tree/master))
 - seL4, when used with Microkit:
-  [`1daabe63fd34ae3d348b8e4a4057bd1a36d48ef6`](https://github.com/coliasgroup/seL4/tree/1daabe63fd34ae3d348b8e4a4057bd1a36d48ef6)
-  ([github.com/coliasgroup/seL4:rust-microkit](https://github.com/coliasgroup/seL4/tree/rust-microkit),
-  not an ancestor of [github.com/seL4/seL4:master](https://github.com/seL4/seL4/tree/master)). For
-  now, Microkit requires [a
-  patch](https://github.com/seL4/seL4/commit/1daabe63fd34ae3d348b8e4a4057bd1a36d48ef6) on top of
-  upstream seL4 trunk.
+  [`57975d485397ce1744f7163644dd530560d0b7ec`](https://github.com/coliasgroup/seL4/tree/57975d485397ce1744f7163644dd530560d0b7ec)
+  (on [github.com/seL4/seL4:microkit](https://github.com/seL4/seL4/tree/microkit))
 - seL4 Microkit:
-  [`35978315953532d3d2aca3faa82eda54d2a9172f`](https://github.com/seL4/microkit/tree/35978315953532d3d2aca3faa82eda54d2a9172f)
+  [`f0939852c62c629346cd3eddbe7d8922eca8530a`](https://github.com/seL4/microkit/tree/f0939852c62c629346cd3eddbe7d8922eca8530a)
+  (on [github.com/seL4/microkit:main](https://github.com/seL4/microkit/tree/main))
 
 ### Demos
 
