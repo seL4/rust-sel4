@@ -30,16 +30,14 @@ struct PlatformInfoForBuildSystem {
     devices: Ranges,
 }
 
-pub fn serialize_payload<T>(
+pub fn serialize_payload<
+    T: FileHeader<Endian = Endianness, Word: PrimInt + WrappingSub + Integer + Serialize>,
+>(
     kernel_path: impl AsRef<Path>,
     app_path: impl AsRef<Path>,
     dtb_path: impl AsRef<Path>,
     platform_info_path: impl AsRef<Path>,
-) -> Vec<u8>
-where
-    T: FileHeader<Endian = Endianness>,
-    T::Word: PrimInt + WrappingSub + Integer + Serialize,
-{
+) -> Vec<u8> {
     let platform_info: PlatformInfoForBuildSystem =
         serde_yaml::from_reader(fs::File::open(&platform_info_path).unwrap()).unwrap();
 
@@ -92,11 +90,7 @@ struct Builder<T: FileHeader> {
     actual_content: Vec<u8>,
 }
 
-impl<T> Builder<T>
-where
-    T: FileHeader<Endian = Endianness>,
-    T::Word: PrimInt + WrappingSub + Integer,
-{
+impl<T: FileHeader<Endian = Endianness, Word: PrimInt + WrappingSub + Integer>> Builder<T> {
     fn new() -> Self {
         Self {
             regions: HeaplessVec::new(),
@@ -191,12 +185,9 @@ where
     f(&elf)
 }
 
-fn elf_virt_addr_range<'a, T, R>(elf: &ElfFile<'a, T, R>) -> Range<T::Word>
-where
-    T: FileHeader<Endian = Endianness>,
-    T::Word: PrimInt,
-    R: ReadRef<'a>,
-{
+fn elf_virt_addr_range<'a, T: FileHeader<Endian = Endianness, Word: PrimInt>, R: ReadRef<'a>>(
+    elf: &ElfFile<'a, T, R>,
+) -> Range<T::Word> {
     let endian = elf.endian();
     let virt_min = elf
         .raw_segments()
@@ -219,12 +210,9 @@ where
     virt_min..virt_max
 }
 
-fn elf_phys_to_vaddr_offset<'a, T, R>(elf: &ElfFile<'a, T, R>) -> T::Word
-where
-    T: FileHeader,
-    T::Word: PrimInt + WrappingSub,
-    R: ReadRef<'a>,
-{
+fn elf_phys_to_vaddr_offset<'a, T: FileHeader<Word: PrimInt + WrappingSub>, R: ReadRef<'a>>(
+    elf: &ElfFile<'a, T, R>,
+) -> T::Word {
     let endian = elf.endian();
     unified(
         elf.raw_segments()
