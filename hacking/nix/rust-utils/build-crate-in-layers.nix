@@ -18,6 +18,12 @@ let
 
   superVendoredLockfile = vendorLockfile { lockfile = superLockfile; };
 
+  # TODO not actually resulting in errors
+  denyWarningsDefault =
+    # true
+    false
+  ;
+
   runClippyDefault =
     # true
     false
@@ -44,6 +50,7 @@ in
 
 , stdenv ? outerArgs.stdenv
 
+, denyWarnings ? denyWarningsDefault
 , runClippy ? runClippyDefault
 }:
 
@@ -105,7 +112,7 @@ let
     workspace.members = [ "src/${rootCrate.name}" ];
   };
 
-  baseConfig = crateUtils.clobber [
+  baseConfig = denyWarnings: crateUtils.clobber [
     (crateUtils.baseConfig {
       inherit rustToolchain;
       rustTargetName = rustTargetInfo.name;
@@ -114,6 +121,11 @@ let
       unstable.unstable-options = true;
     }
     (vendorLockfile { inherit lockfileContents; }).configFragment
+    (lib.optionalAttrs denyWarnings {
+      target."cfg(all())" = {
+        rustflags = [ "-D" "warnings" ];
+      };
+    })
   ];
 
   baseFlags = [
@@ -168,8 +180,11 @@ let
 
         modifications = composeModifications (elaborateModifications layer.modifications) elaboratedCommonModifications;
 
+        # HACK don't deny warnings if this layer has no local crates
+        denyWarningsThisLayer = denyWarnings && layer.reals != {};
+
         manifest = crateUtils.toTOMLFile "Cargo.toml" (modifications.modifyManifest baseManifest);
-        config = crateUtils.toTOMLFile "config" (modifications.modifyConfig baseConfig);
+        config = crateUtils.toTOMLFile "config" (modifications.modifyConfig (baseConfig denyWarningsThisLayer));
         flags = baseFlags ++ modifications.extraCargoFlags;
 
         workspace = linkFarm "workspace-with-dummies" [
@@ -217,7 +232,7 @@ in let
   modifications = composeModifications (elaborateModifications lastLayerModifications) elaboratedCommonModifications;
 
   manifest = crateUtils.toTOMLFile "Cargo.toml" (modifications.modifyManifest baseManifest);
-  config = crateUtils.toTOMLFile "config" (modifications.modifyConfig baseConfig);
+  config = crateUtils.toTOMLFile "config" (modifications.modifyConfig (baseConfig denyWarnings));
   flags = baseFlags ++ modifications.extraCargoFlags;
 
   workspace = linkFarm "workspace" [
