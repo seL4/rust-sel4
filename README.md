@@ -138,7 +138,7 @@ At this repository's top-level directory, build and simulate a simple seL4-based
 task](./crates/examples/root-task/example-root-task) written in Rust (this will take a few minutes):
 
 ```
-make example
+make example # use 'ctrl-a x' to exit the simulation
 ```
 
 Build and run all of this repository's automated tests:
