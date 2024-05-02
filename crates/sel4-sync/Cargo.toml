@@ -17,6 +17,6 @@ edition = "2021"
 license = "MIT"
 
 [dependencies]
-lock_api = "0.4.11"
+lock_api = "0.4.12"
 sel4 = { path = "../sel4" }
 sel4-immediate-sync-once-cell = { path = "../sel4-immediate-sync-once-cell" }

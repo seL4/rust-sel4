@@ -56,7 +56,7 @@ impl HalImpl {
             BounceBufferAllocator::new(Basic::new(dma_region_size), max_alignment);
 
         GLOBAL_STATE
-            .set(Mutex::const_new(
+            .set(Mutex::from_raw(
                 GenericRawMutex::new(PanickingMutexSyncOps::new()),
                 State {
                     dma_region,

@@ -19,7 +19,7 @@ pub type StaticDlmallocGlobalAlloc<R, T> = DlmallocGlobalAlloc<R, StaticDlmalloc
 impl<R, T> StaticDlmallocGlobalAlloc<R, T> {
     pub const fn new(raw_mutex: R, get_bounds: T) -> Self {
         Self {
-            dlmalloc: Mutex::const_new(
+            dlmalloc: Mutex::from_raw(
                 raw_mutex,
                 Dlmalloc::new_with_allocator(StaticDlmallocAllocator::new(get_bounds)),
             ),
