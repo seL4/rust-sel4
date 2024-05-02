@@ -32,7 +32,7 @@ const INITIAL_VALUE: i32 = 0;
 fn main(config: Config) {
     debug_println!("{:#?}", config);
 
-    let lock = Arc::new(Mutex::const_new(
+    let lock = Arc::new(Mutex::from_raw(
         GenericRawMutex::new(config.lock_nfn.get()),
         INITIAL_VALUE,
     ));
