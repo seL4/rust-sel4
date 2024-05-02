@@ -38,7 +38,7 @@ following versions of those related projects:
   [`0260fba168b74dd2504c9447f2fa8da1161ead87`](https://github.com/seL4/seL4/tree/0260fba168b74dd2504c9447f2fa8da1161ead87)
   (on [github.com/seL4/seL4:master](https://github.com/seL4/seL4/tree/master))
 - seL4, when used with Microkit:
-  [`57975d485397ce1744f7163644dd530560d0b7ec`](https://github.com/coliasgroup/seL4/tree/57975d485397ce1744f7163644dd530560d0b7ec)
+  [`57975d485397ce1744f7163644dd530560d0b7ec`](https://github.com/seL4/seL4/tree/57975d485397ce1744f7163644dd530560d0b7ec)
   (on [github.com/seL4/seL4:microkit](https://github.com/seL4/seL4/tree/microkit))
 - seL4 Microkit:
   [`f0939852c62c629346cd3eddbe7d8922eca8530a`](https://github.com/seL4/microkit/tree/f0939852c62c629346cd3eddbe7d8922eca8530a)
