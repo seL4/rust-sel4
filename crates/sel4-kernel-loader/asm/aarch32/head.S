@@ -5,6 +5,8 @@
  * SPDX-License-Identifier: GPL-2.0-only
  */
 
+#include <kernel/gen_config.h>
+
 #include "macros.h"
 #include "registers.h"
 #include "mm.h"

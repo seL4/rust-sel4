@@ -5,6 +5,8 @@
  * SPDX-License-Identifier: GPL-2.0-only
  */
 
+#include <kernel/gen_config.h>
+
 #include "registers.h"
 
 #ifdef CONFIG_ARM_PA_SIZE_BITS_40
