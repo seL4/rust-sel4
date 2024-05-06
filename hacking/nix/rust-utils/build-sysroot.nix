@@ -5,7 +5,8 @@
 #
 
 { lib, stdenv, buildPlatform, hostPlatform, buildPackages
-, runCommand, linkFarm
+, runCommand, runCommandCC, linkFarm
+, fetchurl
 , vendorLockfile, crateUtils, symlinkToRegularFile
 , defaultRustToolchain, defaultRustTargetInfo
 , rustToolchain ? defaultRustToolchain
@@ -27,6 +28,7 @@ in
 , rustTargetInfo ? defaultRustTargetInfo
 , alloc ? true
 , compilerBuiltinsMem ? true
+, compilerBuiltinsC ? true
 }:
 
 let
@@ -80,15 +82,33 @@ let
 
   features = lib.concatStringsSep "," (lib.optionals compilerBuiltinsMem [
     "compiler-builtins-mem"
+  ] ++ lib.optionals compilerBuiltinsC [
+    "compiler-builtins-c"
   ]);
 
+  compilerRTSource = let
+    v = "18.0-2024-02-13";
+    name = "compiler-rt";
+    llvmSourceTarball = fetchurl {
+      name = "llvm-project.tar.gz";
+      url = "https://github.com/rust-lang/llvm-project/archive/rustc/${v}.tar.gz";
+      sha256 = "sha256-fMc84lCWfNy0Xiq1X7nrT53MQPlfRqGEb4qBAmqehAA=";
+    };
+  in
+    runCommand name {} ''
+      tar xzf ${llvmSourceTarball} --strip-components 1 llvm-project-rustc-${v}/${name}
+      mv ${name} $out
+    '';
+
 in
-runCommand "sysroot" {
+(if compilerBuiltinsC then runCommandCC else runCommand) "sysroot" ({
   depsBuildBuild = [ buildPackages.stdenv.cc ];
   nativeBuildInputs = [ rustToolchain ];
-
   RUST_TARGET_PATH = rustTargetInfo.path;
-} ''
+} // lib.optionalAttrs compilerBuiltinsC {
+  "CC_${rustTargetInfo.name}" = "${stdenv.cc.targetPrefix}gcc";
+  RUST_COMPILER_RT_ROOT = compilerRTSource;
+}) ''
   cargo build \
     -Z unstable-options \
     --offline \
