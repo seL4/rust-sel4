@@ -11,15 +11,12 @@ use core::mem;
 use sel4_config::{sel4_cfg, sel4_cfg_if};
 
 use crate::{
-    cap::*, sys, AbsoluteCPtr, CNodeCapData, CapRights, Error, InvocationContext, ObjectBlueprint,
-    Result, UserContext, Word,
+    cap::*, ipc_buffer, sys, AbsoluteCPtr, CNodeCapData, CPtr, CapRights, Error, InvocationContext,
+    ObjectBlueprint, Result, UserContext, Word,
 };
 
 #[sel4_cfg(KERNEL_MCS)]
 use crate::Badge;
-
-#[sel4_cfg(not(KERNEL_MCS))]
-use crate::CPtr;
 
 /// Corresponds to `seL4_Time`.
 #[sel4_cfg(KERNEL_MCS)]
@@ -157,6 +154,26 @@ impl<C: InvocationContext> Tcb<C> {
                 }))
             }
         }
+    }
+
+    /// Corresponds to `seL4_TCB_SetSpace`.
+    pub fn tcb_set_space(
+        self,
+        fault_ep: CPtr,
+        cspace_root: CNode,
+        cspace_root_data: CNodeCapData,
+        vspace_root: VSpace,
+    ) -> Result<()> {
+        Error::wrap(self.invoke(|cptr, ipc_buffer| {
+            ipc_buffer.inner_mut().seL4_TCB_SetSpace(
+                cptr.bits(),
+                fault_ep.bits(),
+                cspace_root.bits(),
+                cspace_root_data.into_word(),
+                vspace_root.bits(),
+                0, /* HACK */
+            )
+        }))
     }
 
     sel4_cfg_if! {
