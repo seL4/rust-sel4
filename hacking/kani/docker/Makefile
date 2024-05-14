@@ -5,14 +5,10 @@
 #
 
 work_root := ../../..
-here_relative := hacking/kani
 
 id := rust-sel4-kani
 image_tag := $(id)
 container_name := $(id)
-
-uid := $(shell id -u)
-gid := $(shell id -g)
 
 mount_params := type=bind,src=$(abspath $(work_root)),dst=/work
 
@@ -22,7 +18,9 @@ none:
 .PHONY: build
 build:
 	docker build \
-		--build-arg UID=$(uid) --build-arg GID=$(gid) \
+		--build-arg UID=$$(id -u) \
+		--build-arg GID=$$(id -g) \
+		--build-arg TOOLCHAIN=$$(sed -rn 's,channel = "(.*)",\1,p' $(work_root)/rust-toolchain.toml) \
 		-t $(image_tag) .
 
 .PHONY: runi
@@ -44,16 +42,18 @@ exec:
 
 .PHONY: rm-container
 rm-container:
+	set -e; \
 	for id in $$(docker ps -aq -f "name=^$(container_name)$$"); do \
 		docker rm -f $$id; \
 	done
 
 .PHONY: check
 check: build
+	set -e; \
 	if [ -t 0 ]; then \
 		tty_args="-it"; \
-	fi && \
+	fi; \
 	docker run --rm $$tty_args \
 		--mount $(mount_params),readonly \
 		$(image_tag) \
-		make -C $(here_relative) check BUILD=/tmp/build
+		make check BUILD=/tmp/build

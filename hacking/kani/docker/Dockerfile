@@ -10,45 +10,39 @@ RUN apt-get update && apt-get install -y \
     build-essential \
     curl \
     python3-pip \
-    sudo \
-    man \
-    procps \
-    vim \
     bash-completion \
+    man \
+    sudo \
     && rm -rf /var/lib/apt/lists/*
-
-RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
 ARG UID
 ARG GID
 
 RUN set -eux; \
-    if ! [ $UID = 0 -a $GID = 0 ]; then \
+    if [ $UID -eq 0 ]; then \
+        [ $GID -eq 0 ]; \
+    else \
         ! getent passwd $UID; \
         if ! getent group $GID; then \
-            groupadd -g $GID x; \
+            groupadd --gid $GID x; \
         fi; \
-        useradd -u $UID -g $GID -G sudo -m -p x x; \
-    fi
+        useradd --uid $UID --gid $GID --groups sudo --create-home x; \
+    fi;
 
-ENV RUSTUP_HOME=/opt/rustup
-ENV CARGO_HOME=/opt/cargo
-
-RUN set -eux; \
-    dirs="$RUSTUP_HOME $CARGO_HOME"; \
-    mkdir -p -m 0755 $dirs; \
-    chown $UID:$GID $dirs
+RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
 USER $UID
 
-# Optimize by matching rust-toolchain.toml
-ENV DEFAULT_TOOLCHAIN=nightly-2024-05-01
+ARG TOOLCHAIN
 
-RUN curl -sSf -L https://sh.rustup.rs | \
-        bash -s -- -y --no-modify-path --default-toolchain $DEFAULT_TOOLCHAIN
+RUN set -eux; \
+    if [ $UID -ne 0 ]; then \
+        curl -sSf https://sh.rustup.rs | \
+            bash -s -- -y --no-modify-path --default-toolchain $TOOLCHAIN; \
+    fi;
 
-ENV PATH=$CARGO_HOME/bin:$PATH
+ENV PATH=/home/x/.cargo/bin:/root/.cargo/bin:$PATH
 
-RUN cargo install --locked kani-verifier && cargo kani setup
+RUN cargo install --locked kani-verifier@0.51.0 && cargo kani setup
 
-WORKDIR /work
+WORKDIR /work/hacking/kani
