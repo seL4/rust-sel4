@@ -202,7 +202,7 @@ in rec {
           inherit byConfig automate simulate;
         };
 
-      c = maybe (haveFullRuntime && hostPlatform.isAarch64) (callPackage ./c.nix {
+      c = maybe haveFullRuntime (callPackage ./c.nix {
         inherit canSimulate;
       });
 
