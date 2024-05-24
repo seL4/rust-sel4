@@ -74,6 +74,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "allocator-api2"
+version = "0.2.18"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5c6cb57a04249c6480766f7f7cef5467412af1490f8d1e243141daddada3264f"
+
+[[package]]
 name = "anstream"
 version = "0.6.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -126,6 +132,12 @@ name = "anyhow"
 version = "1.0.81"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0952808a6c2afd1aa8947271f3a60f1a6763c7b912d210184c5149b5cf147247"
+
+[[package]]
+name = "as-any"
+version = "0.3.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5b8a30a44e99a1c83ccb2a6298c563c888952a1c9134953db26876528f84c93a"
 
 [[package]]
 name = "async-unsync"
@@ -455,6 +467,19 @@ checksum = "1bfb12502f3fc46cca1bb51ac28df9d618d813cdc3d2f25b9fe775a34af26bb3"
 dependencies = [
  "generic-array",
  "typenum",
+]
+
+[[package]]
+name = "dafny_runtime"
+version = "0.1.0"
+source = "git+https://github.com/coliasgroup/dafny.git?tag=keep/02d0a578fdf594a38c7c72d7ad56e1a6#02d0a578fdf594a38c7c72d7ad56e1a62e464f44"
+dependencies = [
+ "as-any",
+ "hashbrown 0.14.5",
+ "itertools",
+ "num",
+ "once_cell",
+ "paste",
 ]
 
 [[package]]
@@ -795,11 +820,12 @@ dependencies = [
 
 [[package]]
 name = "hashbrown"
-version = "0.14.3"
+version = "0.14.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "290f1a1d9242c78d09ce40a5e87e7554ee637af1351968159f4952f028f75604"
+checksum = "e5274423e17b7c9fc20b6e7e208532f9b19825d82dfd615708b70edd83df41f1"
 dependencies = [
  "ahash",
+ "allocator-api2",
 ]
 
 [[package]]
@@ -864,7 +890,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7b0b929d511467233429c45a44ac1dcaa21ba0f5ba11e4879e6ed28ddb4f9df4"
 dependencies = [
  "equivalent",
- "hashbrown 0.14.3",
+ "hashbrown 0.14.5",
 ]
 
 [[package]]
@@ -876,6 +902,15 @@ dependencies = [
  "hermit-abi",
  "libc",
  "windows-sys",
+]
+
+[[package]]
+name = "itertools"
+version = "0.11.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b1c173a5686ce8bfa551b3563d0c2170bf24ca44da99c7ca4bfdab5418c3fe57"
+dependencies = [
+ "either",
 ]
 
 [[package]]
@@ -1371,7 +1406,7 @@ checksum = "a6a622008b6e321afc04970976f62ee297fdbaa6f95318ca343e3eebb9648441"
 dependencies = [
  "crc32fast",
  "flate2",
- "hashbrown 0.14.3",
+ "hashbrown 0.14.5",
  "indexmap",
  "memchr",
  "ruzstd",
@@ -1392,6 +1427,12 @@ checksum = "d4586edfe4c648c71797a74c84bacb32b52b212eff5dfe2bb9f2c599844023e7"
 dependencies = [
  "ttf-parser",
 ]
+
+[[package]]
+name = "paste"
+version = "1.0.15"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "57c0d7b74b563b49d38dae00a0c37d4d6de9b432382b2892f0574ddcae73fd0a"
 
 [[package]]
 name = "peeking_take_while"
@@ -2388,6 +2429,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "sel4-mod-in-out-dir"
+version = "0.1.0"
+dependencies = [
+ "quote",
+ "syn 1.0.109",
+]
+
+[[package]]
 name = "sel4-newlib"
 version = "0.1.0"
 dependencies = [
@@ -2958,6 +3007,24 @@ version = "0.1.0"
 dependencies = [
  "sel4",
  "sel4-root-task",
+]
+
+[[package]]
+name = "tests-root-task-dafny-core"
+version = "0.1.0"
+dependencies = [
+ "dafny_runtime",
+ "num",
+ "sel4-mod-in-out-dir",
+]
+
+[[package]]
+name = "tests-root-task-dafny-task"
+version = "0.1.0"
+dependencies = [
+ "sel4",
+ "sel4-root-task",
+ "tests-root-task-dafny-core",
 ]
 
 [[package]]

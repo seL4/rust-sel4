@@ -206,6 +206,10 @@ in rec {
         inherit canSimulate;
       });
 
+      dafny = maybe haveFullRuntime (callPackage ./dafny.nix {
+        inherit canSimulate;
+      });
+
       default-test-harness = maybe (haveFullRuntime && haveUnwindingSupport) (mkInstance {
         rootTask = mkTask {
           rootCrate = crates.tests-root-task-default-test-harness;
