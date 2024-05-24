@@ -15,6 +15,11 @@ Copyright: 2023, Colias Group, LLC
 License: BSD-2-Clause
 
 Files:
+  hacking/nix/scope/dafny/deps.nix
+Copyright: 2024, Colias Group, LLC
+License: BSD-2-Clause
+
+Files:
   crates/examples/microkit/banscii/pds/assistant/core/assets/fonts/rock-salt/*.ttf
 Copyright: 2010 by Font Diner, Inc DBA Sideshow. All rights reserved.
 License: Apache-2.0

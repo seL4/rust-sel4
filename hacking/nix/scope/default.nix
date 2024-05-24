@@ -145,6 +145,8 @@ superCallPackage ../rust-utils {} self //
 
   capdl-tool = callBuildBuildPackage ./capdl-tool {};
 
+  dafny = callBuildBuildPackage ./dafny {};
+
   ### local tools
 
   mkTool = rootCrate: buildCrateInLayersHere {

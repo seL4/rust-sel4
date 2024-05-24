@@ -213,4 +213,9 @@ in rec {
     default-features = false;
     inherit features;
   };
+
+  dafnySource = {
+    git = "https://github.com/coliasgroup/dafny.git";
+    tag = "keep/02d0a578fdf594a38c7c72d7ad56e1a6"; # branch dev
+  };
 }
