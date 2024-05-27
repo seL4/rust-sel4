@@ -31,26 +31,9 @@ let
 in
 
 let
-  fenixRev = "260b00254fc152885283b0d2aec78547a1f77efd";
+  fenixRev = "9af557bccdfa8fb6a425661c33dbae46afef0afa";
   fenixSource = fetchTarball "https://github.com/nix-community/fenix/archive/${fenixRev}.tar.gz";
   fenix = import fenixSource {};
-
-  rustToolchainParams = {
-    channel = "nightly";
-    date = "2024-05-01";
-    sha256 = "sha256-6lRcCTSUmWOh0GheLMTZkY7JC273pWLp2s98Bb2REJQ=";
-  };
-
-  mkRustToolchain = target: fenix.targets.${target}.toolchainOf rustToolchainParams;
-
-  # TODO
-  # rustToolchain = fenix.combine ([
-  #   (mkRustToolchain hostPlatform.config).completeToolchain
-  # ] ++ lib.optionals (hostPlatform.config != targetPlatform.config && !targetPlatform.isNone) [
-  #   (mkRustToolchain targetPlatform.config).rust-std
-  # ]);
-
-  rustToolchain = (mkRustToolchain buildPlatform.config).completeToolchain;
 
 in
 
@@ -71,7 +54,12 @@ superCallPackage ../rust-utils {} self //
 
   ### rust
 
-  defaultRustToolchain = rustToolchain;
+  inherit fenix;
+
+  defaultRustToolchain = fenix.fromToolchainFile {
+    dir = ../../..;
+    sha256 = "sha256-6lRcCTSUmWOh0GheLMTZkY7JC273pWLp2s98Bb2REJQ=";
+  };
 
   rustTargetArchName = {
     aarch64 = "aarch64";
