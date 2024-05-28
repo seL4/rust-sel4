@@ -22,7 +22,7 @@ let
       url = "https://github.com/coliasgroup/dafny.git";
       rev = "02d0a578fdf594a38c7c72d7ad56e1a62e464f44";
       local = sources.localRoot + "/dafny";
-      inherit useLocal;
+      # inherit useLocal;
     };
 
     postPatch = ''
