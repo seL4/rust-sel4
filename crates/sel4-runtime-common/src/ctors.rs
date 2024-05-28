@@ -25,7 +25,9 @@ pub unsafe fn run_ctors() {
     // Cast to usize for comparison, otherwise rustc seems to apply an erroneous optimization
     // assuming __init_array_start != __init_array_end.
     if start as usize != end as usize {
-        if !start.is_aligned() || !end.is_aligned() {
+        if start.cast::<()>().align_offset(mem::size_of::<Ctor>()) != 0
+            || end.cast::<()>().align_offset(mem::size_of::<Ctor>()) != 0
+        {
             abort!("'.init_array' section is not properly aligned");
         }
 
