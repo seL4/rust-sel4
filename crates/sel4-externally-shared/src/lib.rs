@@ -52,7 +52,7 @@ impl<'a, T: ?Sized> ExternallySharedPtrExt<'a, T> for ExternallySharedPtr<'a, T,
         T: Atomic,
     {
         let p = self.as_raw_ptr();
-        assert_eq!(p.as_ptr().align_offset(T::ALIGNMENT), 0);
+        assert_eq!(p.as_ptr().cast::<()>().align_offset(T::ALIGNMENT), 0);
         unsafe { AtomicPtr::new(p) }
     }
 }
