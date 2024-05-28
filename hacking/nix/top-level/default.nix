@@ -44,7 +44,7 @@ in {
   prerequisites = aggregate "prerequisites" [
     pkgs.build.this.qemuForSeL4
     pkgs.build.this.capdl-tool
-    pkgs.build.this.vendoredTopLevelLockfile.vendoredSourcesDirectory
+    (builtins.toJSON (pkgs.build.this.vendoredTopLevelLockfile.configFragment))
 
     (lib.forEach (with pkgs.host; [ aarch64 aarch32 ]) (arch:
       arch.none.this.platUtils.rpi4.defaultBootLinks

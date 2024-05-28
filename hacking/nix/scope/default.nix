@@ -124,6 +124,9 @@ superCallPackage ../rust-utils {} self //
     superLockfile = topLevelLockfile;
     superLockfileVendoringConfig = vendoredTopLevelLockfile.configFragment;
     rootCrates = lib.attrValues publicCrates;
+    extraManifest = {
+      patch = globalPatchSection;
+    };
   };
 
   # HACK: reduce closure size, llvm now depends on targetPackage
