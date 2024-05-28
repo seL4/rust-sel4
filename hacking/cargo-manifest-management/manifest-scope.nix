@@ -11,6 +11,8 @@ let
   filterOutEmptyFeatureList = attrs:
     builtins.removeAttrs attrs (lib.optional ((attrs.features or null) == []) "features");
 
+  mkKeepRef = rev: "keep/${builtins.substring 0 32 rev}";
+
 in rec {
   inherit lib;
 
@@ -180,12 +182,12 @@ in rec {
 
   volatileSource = {
     git = "https://github.com/coliasgroup/volatile.git";
-    tag = "keep/aa7512906e9b76066ed928eb6986b0f9"; # branch coliasgroup
+    tag = mkKeepRef "aa7512906e9b76066ed928eb6986b0f9b1750e91"; # branch coliasgroup
   };
 
   fatSource = {
     git = "https://github.com/coliasgroup/rust-embedded-fat.git";
-    tag = "keep/e1465a43c9f550ef58701a275b313310"; # branch sel4
+    tag = mkKeepRef "e1465a43c9f550ef58701a275b3133105deb9183"; # branch sel4
   };
 
   ringWith = features: {
@@ -216,6 +218,6 @@ in rec {
 
   dafnySource = {
     git = "https://github.com/coliasgroup/dafny.git";
-    tag = "keep/02d0a578fdf594a38c7c72d7ad56e1a6"; # branch dev
+    tag = mkKeepRef "02d0a578fdf594a38c7c72d7ad56e1a62e464f44"; # branch dev
   };
 }
