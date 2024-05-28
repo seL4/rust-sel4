@@ -31,13 +31,16 @@
     feature(riscv_ext_intrinsics),
 )]
 
-// For pointer::is_aligned_to?
+// For pointer::is_aligned_to. Stabilizes in 1.80.0.
+#![feature(pointer_is_aligned)]
+
+// For pointer::is_aligned_to
 //
 // For now, use:
 // ```
 // assert_eq!(ptr.cast::<()>().align_offset(x), 0)
 // ```
-// (See definitions of pointer::is_aligned_to?)
+// (See definitions of pointer::is_aligned_to)
 #![feature(pointer_is_aligned_to)]
 
 // Without these, the more invasive sel4_cfg_if! and sel4_cfg_wrap_match! must be used instead of
