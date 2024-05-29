@@ -43,10 +43,8 @@ let
   }));
 
   src = sources.fetchGit {
-    url = "https://github.com/nspin/verus.git";
-    rev = "fdac1c3c52e639bf3e835802f63b43520379b1a1";
-    local = sources.localRoot + "/../s/verus-hacking/verus";
-    # useLocal = true;
+    url = "https://github.com/coliasgroup/verus.git";
+    rev = "fdac1c3c52e639bf3e835802f63b43520379b1a1"; # branch dev
   };
 
   lockfile = vendorLockfile {

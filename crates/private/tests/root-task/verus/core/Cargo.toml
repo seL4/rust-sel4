@@ -18,14 +18,14 @@ license = "BSD-2-Clause"
 metadata = { verus = { verify = true } }
 
 [dependencies.builtin]
-git = "https://github.com/nspin/verus.git"
+git = "https://github.com/coliasgroup/verus.git"
 tag = "keep/fdac1c3c52e639bf3e835802f63b4352"
 
 [dependencies.builtin_macros]
-git = "https://github.com/nspin/verus.git"
+git = "https://github.com/coliasgroup/verus.git"
 tag = "keep/fdac1c3c52e639bf3e835802f63b4352"
 
 [dependencies.vstd]
-git = "https://github.com/nspin/verus.git"
+git = "https://github.com/coliasgroup/verus.git"
 tag = "keep/fdac1c3c52e639bf3e835802f63b4352"
 default-features = false

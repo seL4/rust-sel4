@@ -222,7 +222,7 @@ in rec {
   };
 
   verusSource = {
-    git = "https://github.com/nspin/verus.git";
-    tag = mkKeepRef "fdac1c3c52e639bf3e835802f63b43520379b1a1";
+    git = "https://github.com/coliasgroup/verus.git";
+    tag = mkKeepRef "fdac1c3c52e639bf3e835802f63b43520379b1a1"; # branch dev
   };
 }
