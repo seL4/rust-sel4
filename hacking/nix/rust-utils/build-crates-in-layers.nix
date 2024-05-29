@@ -49,6 +49,7 @@ in
 , noDefaultFeatures ? false
 
 , test ? false
+, justBuildTests ? false
 
 , verifyWithVerus ? false
 , extraVerusArgs ? []
@@ -162,12 +163,12 @@ let
       else "build"
     );
 
-  mkCargoInvocation = runClippy: commonArgs: subcommandArgs:
+  mkCargoInvocation = isLastLayer: runClippy: commonArgs: subcommandArgs:
     let
       joinedCommonArgs = lib.concatStringsSep " " commonArgs;
       joinedSubcommandArgs = lib.concatStringsSep " " (
         subcommandArgs
-          ++ lib.optionals test [ "--no-run" ]
+          ++ lib.optionals (test && (!isLastLayer || justBuildTests)) [ "--no-run" ]
           ++ lib.optionals verifyWithVerus ([ "--" ] ++ extraVerusArgs)
       );
     in ''
@@ -225,7 +226,7 @@ let
             cp -r --preserve=timestamps ${prev} $out
             chmod -R +w $out
 
-            ${mkCargoInvocation runClippyThisLayer (flags ++ [
+            ${mkCargoInvocation false runClippyThisLayer (flags ++ [
               "--config" "${config}"
               "--manifest-path" "${workspace}/Cargo.toml"
               "--target-dir" "$out"
@@ -271,7 +272,7 @@ in let
       cp -r --preserve=timestamps ${lastIntermediateLayer} $target_dir
       chmod -R +w $target_dir
 
-      ${mkCargoInvocation runClippy (flags ++ [
+      ${mkCargoInvocation true runClippy (flags ++ [
         "--config" "${config}"
         "--manifest-path" "${workspace}/Cargo.toml"
         "--target-dir" "$target_dir"
@@ -279,9 +280,15 @@ in let
         "--out-dir" "$out/bin"
       ])}
 
-      ${lib.optionalString test (lib.concatStringsSep " " (findTestsCommandPrefix "$target_dir" ++ [
-        "-exec" "install" "-D" "-t" "$out/bin" "'{}'" "';'"
-      ]))}
+      ${lib.optionalString test (
+        if justBuildTests
+        then (lib.concatStringsSep " " (findTestsCommandPrefix "$target_dir" ++ [
+          "-exec" "install" "-D" "-t" "$out/bin" "'{}'" "';'"
+        ]))
+        else ''
+          touch $out
+        ''
+      )}
 
       runHook postBuild
     '';

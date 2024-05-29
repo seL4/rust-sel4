@@ -220,6 +220,7 @@ in rec {
         rootTask = mkTask {
           rootCrate = crates.tests-root-task-default-test-harness;
           test = true;
+          justBuildTests = true;
         };
         extraPlatformArgs = lib.optionalAttrs canSimulate {
           canAutomateSimply = true;
@@ -231,6 +232,7 @@ in rec {
           rootTask = lib.makeOverridable mkTask {
             rootCrate = crates.ring;
             test = true;
+            justBuildTests = true;
             features = [
               "less-safe-getrandom-custom-or-rdrand"
               # "slow_tests"
