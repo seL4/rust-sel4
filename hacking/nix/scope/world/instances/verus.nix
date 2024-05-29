@@ -11,6 +11,8 @@
 , seL4Modifications
 , mkTask
 
+, verus
+
 , mkInstance
 
 , canSimulate
@@ -18,6 +20,8 @@
 
 mkInstance {
   rootTask = mkTask rec {
+    inherit (verus) rustEnvironment;
+
     rootCrate = crates.tests-root-task-verus-task;
     release = false;
 

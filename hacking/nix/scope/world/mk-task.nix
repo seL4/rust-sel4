@@ -8,6 +8,7 @@
 , runCommand, runCommandCC
 , buildCrateInLayers, buildSysroot, crateUtils
 , crates
+, defaultRustEnvironment
 , defaultRustTargetTriple
 , libclangPath
 , seL4RustEnvVars
@@ -20,14 +21,15 @@ let
   '';
 in
 
-{ commonModifications ? {}
+{ rustEnvironment ? defaultRustEnvironment
+, targetTriple ? defaultRustTargetTriple
+
+, commonModifications ? {}
 , lastLayerModifications ? {}
 
 , extraProfile ? {}
 , replaceSysroot ? null
 , getELF ? if test then getELFDefaultForTest else getELFDefault
-
-, targetTriple ? defaultRustTargetTriple
 
 , test ? false
 , release ? false
@@ -59,6 +61,7 @@ let
   ];
 
   sysroot = (if replaceSysroot != null then replaceSysroot else buildSysroot) {
+    inherit rustEnvironment;
     inherit targetTriple;
     inherit profile;
     extraManifest = profiles;

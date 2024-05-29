@@ -57,13 +57,14 @@ in
 
   elaborateRustEnvironment =
     { rustToolchain
+    , isNightly
     , mkCustomTargetPath ? customTargetTripleTripleName: throw "unimplemented"
     , chooseLinker ? { targetTriple, platform }: null
     , compilerRTSource ? null
     , vendoredSuperLockfile ? null
     }:
     {
-      inherit rustToolchain;
+      inherit rustToolchain isNightly;
       inherit compilerRTSource;
       inherit chooseLinker;
       inherit vendoredSuperLockfile;
