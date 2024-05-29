@@ -79,7 +79,7 @@ let
       inherit type;
       value = {
         git = parseGitSource;
-        registry  = parseRegistrySource;
+        registry = parseRegistrySource;
       }.${type} value;
     };
 
