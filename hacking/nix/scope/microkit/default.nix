@@ -89,33 +89,6 @@ let
     '';
   };
 
-  exampleSource = microkitSource + "/example/qemu_virt_aarch64/hello";
-
-  examplePDs = stdenv.mkDerivation {
-    name = "example";
-
-    src = exampleSource;
-
-    MICROKIT_SDK = sdk;
-    MICROKIT_BOARD = "qemu_virt_aarch64";
-    MICROKIT_CONFIG = "debug";
-
-    MICROKIT_TOOL = "${sdk}/bin/microkit";
-
-    dontConfigure = true;
-    dontFixup = true;
-
-    buildPhase = ''
-      mkdir build
-      make BUILD_DIR=build
-    '';
-
-    installPhase = ''
-      mkdir $out
-      mv build/hello.elf $out
-    '';
-  };
-
   mkSystem = { searchPath, systemXML }:
     lib.fix (self: runCommand "system" {
       MICROKIT_SDK = sdk;
@@ -145,6 +118,33 @@ let
         -o $out/loader.img \
         -r $out/report.txt
     '');
+
+  exampleSource = microkitSource + "/example/qemu_virt_aarch64/hello";
+
+  examplePDs = stdenv.mkDerivation {
+    name = "example";
+
+    src = exampleSource;
+
+    MICROKIT_SDK = sdk;
+    MICROKIT_BOARD = "qemu_virt_aarch64";
+    MICROKIT_CONFIG = "debug";
+
+    MICROKIT_TOOL = "${sdk}/bin/microkit";
+
+    dontConfigure = true;
+    dontFixup = true;
+
+    buildPhase = ''
+      mkdir build
+      make BUILD_DIR=build
+    '';
+
+    installPhase = ''
+      mkdir $out
+      mv build/hello.elf $out
+    '';
+  };
 
   example = mkSystem {
     searchPath = examplePDs;
