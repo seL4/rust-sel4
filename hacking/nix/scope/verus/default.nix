@@ -13,6 +13,9 @@
 , vendorLockfile
 , sources
 , fenix
+, elaborateRustEnvironment
+, mkDefaultElaborateRustEnvironmentArgs
+, mkMkCustomTargetPathForEnvironment
 }:
 
 let
@@ -29,6 +32,15 @@ let
     ]);
     sha256 = "sha256-e4mlaJehWBymYxJGgnbuCObVlqMlQSilZ8FljG9zPHY=";
   };
+
+  rustEnvironment = lib.fix (self: elaborateRustEnvironment (mkDefaultElaborateRustEnvironmentArgs {
+    inherit rustToolchain;
+  } // {
+    isNightly = lib.hasPrefix "nightly" rustToolchainAttrs.toolchain.channel;
+    mkCustomTargetPath = mkMkCustomTargetPathForEnvironment {
+      rustEnvironment = self;
+    };
+  }));
 
   src = sources.fetchGit {
     url = "https://github.com/nspin/verus.git";
@@ -79,4 +91,8 @@ stdenv.mkDerivation {
     wrapProgram $out/bin/verus-driver \
       --prefix LD_LIBRARY_PATH : ${lib.makeLibraryPath [ rustToolchain ]} # HACK
   '';
+
+  passthru = {
+    inherit rustEnvironment;
+  };
 }

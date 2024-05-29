@@ -16,12 +16,10 @@
 , profile ? if release then "release" else null
 , alloc ? true
 , compilerBuiltinsMem ? true
-, compilerBuiltinsC ? true
+, compilerBuiltinsC ? rustEnvironment.compilerRTSource != null
 , extraManifest ? {}
 , extraConfig ? {}
 }:
-
-assert compilerBuiltinsC -> rustEnvironment.compilerRTSource != null;
 
 let
   workspace = linkFarm "workspace" [
@@ -82,6 +80,9 @@ in
   depsBuildBuild = [ buildPackages.stdenv.cc ];
   nativeBuildInputs = [ rustEnvironment.rustToolchain ];
   RUST_TARGET_PATH = rustEnvironment.mkTargetPath targetTriple;
+} // lib.optionalAttrs (!rustEnvironment.isNightly) {
+  # HACK
+  RUSTC_BOOTSTRAP = 1;
 } // lib.optionalAttrs compilerBuiltinsC {
   "CC_${targetTriple.name}" = "${stdenv.cc.targetPrefix}gcc";
   RUST_COMPILER_RT_ROOT = rustEnvironment.compilerRTSource;

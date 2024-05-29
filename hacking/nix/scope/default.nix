@@ -8,9 +8,9 @@
 , buildPlatform, hostPlatform, targetPlatform
 , pkgsBuildBuild
 , callPackage
-, linkFarm
+, runCommand, linkFarm
+, makeWrapper
 , overrideCC, libcCross
-, treeHelpers
 , fetchurl
 , qemu
 }:
@@ -61,14 +61,14 @@ superCallPackage ../rust-utils {} self //
     sha256 = "sha256-6lRcCTSUmWOh0GheLMTZkY7JC273pWLp2s98Bb2REJQ=";
   };
 
-  defaultRustEnvironment = elaborateRustEnvironment rec {
+  defaultRustEnvironment = elaborateRustEnvironment (mkDefaultElaborateRustEnvironmentArgs {
     rustToolchain = defaultRustToolchain;
-
+  } // {
+    isNightly = true;
     compilerRTSource = mkCompilerRTSource {
       version = "18.0-2024-02-13";
       hash = "sha256-fbq8H86WT13KsXJECHbcbFkqFseLvV/EC2kihTL2lgI=";
     };
-
     mkCustomTargetPath = customTargetTripleTripleName:
       let
         fname = "${customTargetTripleTripleName}.json";
@@ -76,6 +76,10 @@ superCallPackage ../rust-utils {} self //
         linkFarm "targets" [
           { name = fname; path = sources.srcRoot + "/support/targets/${fname}"; }
         ];
+  });
+
+  mkDefaultElaborateRustEnvironmentArgs = { rustToolchain }: rec {
+    inherit rustToolchain;
 
     chooseLinker = { targetTriple, platform }:
       if platform.isNone
@@ -118,6 +122,38 @@ superCallPackage ../rust-utils {} self //
     if hostPlatform.isNone
     then mkSeL4RustTargetTriple {}
     else mkBuiltinRustTargetTriple hostPlatform.config;
+
+  mkMkCustomTargetPathForEnvironment = { rustEnvironment }:
+    let
+      tool = buildCrateInLayers rec {
+        inherit rustEnvironment;
+        rootCrate = crates.sel4-generate-target-specs;
+        lastLayerModifications = crateUtils.elaborateModifications {
+          # HACK
+          modifyDerivation = drv: drv.overrideAttrs (self: super: {
+            nativeBuildInputs = (super.nativeBuildInputs or []) ++ [ makeWrapper ];
+            postBuild = ''
+              wrapProgram $out/bin/${rootCrate.name} \
+                --prefix LD_LIBRARY_PATH : ${lib.makeLibraryPath [ rustEnvironment.rustToolchain ]} 
+            '';
+          });
+        };
+      };
+
+      dir = runCommand "targest" {
+        nativeBuildInputs = [ tool ];
+      } ''
+        mkdir $out
+        sel4-generate-target-specs write --target-dir $out --all
+      '';
+    in
+      customTargetTripleTripleName:
+        let
+          fname = "${customTargetTripleTripleName}.json";
+        in
+          linkFarm "targets" [
+            { name = fname; path = builtins.toFile fname (builtins.readFile "${dir}/${fname}"); }
+          ];
 
   inherit (callPackage ./crates.nix {}) crates globalPatchSection publicCrates publicCratesTxt;
 

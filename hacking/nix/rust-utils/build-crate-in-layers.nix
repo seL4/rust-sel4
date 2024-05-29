@@ -103,6 +103,9 @@ let
     depsBuildBuild = [ buildPackages.stdenv.cc ];
     nativeBuildInputs = [ rustEnvironment.rustToolchain ];
     RUST_TARGET_PATH = rustEnvironment.mkTargetPath targetTriple;
+  } // lib.optionalAttrs (!rustEnvironment.isNightly) {
+    # HACK
+    RUSTC_BOOTSTRAP = 1;
   };
 
   baseManifest = {
