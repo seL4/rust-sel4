@@ -9,7 +9,7 @@
 
 , crateUtils, crates
 , mkTask, seL4Modifications
-, defaultRustTargetInfo
+, defaultRustTargetTriple
 
 , mkInstance
 
@@ -39,8 +39,8 @@ mkInstance {
 
     commonModifications = {
       modifyConfig = old: lib.recursiveUpdate old {
-        target.${defaultRustTargetInfo.name} = {
-          rustflags = (old.target.${defaultRustTargetInfo.name}.rustflags or []) ++ [
+        target.${defaultRustTargetTriple} = {
+          rustflags = (old.target.${defaultRustTargetTriple}.rustflags or []) ++ [
             # TODO
             # NOTE: won't work because cross gcc always uses hard-coded --with-ld
 

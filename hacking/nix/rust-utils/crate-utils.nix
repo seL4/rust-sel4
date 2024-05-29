@@ -7,7 +7,6 @@
 { lib, buildPlatform, hostPlatform
 , writeText, linkFarm, runCommand
 , toTOMLFile
-, chooseLinkerForRustTarget ? throw "chooseLinkerForRustTarget must be set"
 }:
 
 let
@@ -95,26 +94,26 @@ rec {
   ###
 
   # TODO improve this mechanism
-  linkerConfig = { rustToolchain, rustTargetName }@args:
+  linkerConfig = { rustEnvironment, targetTriple }@args:
     let
-      f = { rustTargetName, platform }:
+      f = { targetTriple, platform }:
         let
-          linker = chooseLinkerForRustTarget {
-            inherit rustToolchain rustTargetName platform;
+          linker = rustEnvironment.chooseLinker {
+            inherit targetTriple platform;
           };
         in
           lib.optionalAttrs (linker != null) {
             target = {
-              "${rustTargetName}".linker = linker;
+              "${targetTriple}".linker = linker;
             };
           };
     in
       clobber [
-        (f { rustTargetName = buildPlatform.config; platform = buildPlatform; })
-        (f { inherit rustTargetName; platform = hostPlatform; })
+        (f { targetTriple = buildPlatform.config; platform = buildPlatform; })
+        (f { inherit targetTriple; platform = hostPlatform; })
       ];
 
-  baseConfig = { rustToolchain, rustTargetName }@args: clobber [
+  baseConfig = { rustEnvironment, targetTriple }@args: clobber [
     {
       build.incremental = false;
     }

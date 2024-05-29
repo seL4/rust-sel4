@@ -6,9 +6,9 @@
 
 { lib, buildPackages
 , runCommand, runCommandCC
-, buildCrateInLayersHere, buildSysroot, crateUtils
+, buildCrateInLayers, buildSysroot, crateUtils
 , crates
-, defaultRustTargetInfo
+, defaultRustTargetTriple
 , libclangPath
 , seL4RustEnvVars
 } @ scopeArgs:
@@ -27,7 +27,7 @@ in
 , replaceSysroot ? null
 , getELF ? if test then getELFDefaultForTest else getELFDefault
 
-, rustTargetInfo ? defaultRustTargetInfo
+, targetTriple ? defaultRustTargetTriple
 
 , test ? false
 , release ? false
@@ -59,14 +59,15 @@ let
   ];
 
   sysroot = (if replaceSysroot != null then replaceSysroot else buildSysroot) {
-    inherit profile rustTargetInfo;
+    inherit targetTriple;
+    inherit profile;
     extraManifest = profiles;
   };
 
   theseCommonModifications = crateUtils.elaborateModifications {
     modifyManifest = lib.flip lib.recursiveUpdate profiles;
     modifyConfig = lib.flip lib.recursiveUpdate {
-      target.${rustTargetInfo.name}.rustflags = [
+      target.${targetTriple}.rustflags = [
         "--sysroot" sysroot
       ];
     };
@@ -103,8 +104,7 @@ let
 
 in
 
-buildCrateInLayersHere (prunedArgs // {
-
+buildCrateInLayers (prunedArgs // {
   commonModifications = crateUtils.composeModifications
     (crateUtils.elaborateModifications commonModifications)
     theseCommonModifications

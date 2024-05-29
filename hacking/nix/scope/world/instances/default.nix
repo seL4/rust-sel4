@@ -19,7 +19,7 @@
 
 , mkTask, mkSeL4KernelLoaderWithPayload
 , embedDebugInfo
-, seL4RustTargetInfoWithConfig, defaultRustTargetInfo
+, mkSeL4RustTargetTriple
 , worldConfig
 , seL4ForBoot
 , seL4Config
@@ -349,7 +349,7 @@ in rec {
         rootTask = mkTask {
           rootCrate = crates.example-root-task-without-runtime;
           release = false;
-          rustTargetInfo = seL4RustTargetInfoWithConfig { minimal = true; };
+          targetTriple = mkSeL4RustTargetTriple { minimal = true; };
         };
         extraPlatformArgs = lib.optionalAttrs canSimulate {
           canAutomateSimply = true;

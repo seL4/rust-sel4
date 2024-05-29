@@ -8,13 +8,13 @@
 , writeText, emptyFile
 , mkShell
 , defaultRustToolchain
-, defaultRustTargetInfo
-, bareMetalRustTargetInfo
+, defaultRustTargetTriple
+, bareMetalRustTargetTriple
 , libclangPath
 , sources
 , dummyCapDLSpec, serializeCapDLSpec
 , seL4RustEnvVars
-, seL4RustTargetInfoWithConfig
+, mkSeL4RustTargetTriple
 , worldConfig
 , seL4ForBoot
 , crateUtils
@@ -42,7 +42,7 @@ let
       targets = lib.flatten (
         lib.forEach [ true false ] (microkit:
           lib.forEach [ true false ] (minimal:
-            seL4RustTargetInfoWithConfig { inherit microkit minimal; })));
+            mkSeL4RustTargetTriple { inherit microkit minimal; })));
     in lib.listToAttrs (lib.forEach targets (target: {
       name = "BINDGEN_EXTRA_CLANG_ARGS_${target.name}";
       value = [ "-I${libcDir}/include" ];
@@ -55,9 +55,9 @@ let
 in
 mkShell (seL4RustEnvVars // kernelLoaderConfigEnvVars // capdlEnvVars // bindgenEnvVars // miscEnvVars // {
   # TODO
-  RUST_SEL4_TARGET = defaultRustTargetInfo.name;
+  RUST_SEL4_TARGET = defaultRustTargetTriple;
 
-  RUST_BARE_METAL_TARGET = bareMetalRustTargetInfo.name;
+  RUST_BARE_METAL_TARGET = bareMetalRustTargetTriple;
 
   HOST_CARGO_FLAGS = lib.concatStringsSep " " [
     "-Z" "build-std=core,alloc,compiler_builtins"

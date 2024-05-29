@@ -8,15 +8,11 @@
 , linkFarm, emptyDirectory
 , crateUtils
 , vendorLockfile, pruneLockfile
-, defaultRustToolchain, defaultRustTargetInfo
-} @ outerArgs:
-
-{ superLockfile
+, defaultRustEnvironment, defaultRustTargetTriple
 }:
 
 let
-
-  vendoredSuperLockfile = vendorLockfile { lockfile = superLockfile; };
+  defaultStdenv = stdenv;
 
   # TODO not actually resulting in errors
   denyWarningsDefault =
@@ -31,13 +27,15 @@ let
 
 in
 
-{ rootCrate
+{ stdenv ? defaultStdenv
+, rustEnvironment ? defaultRustEnvironment
+, targetTriple ? defaultRustTargetTriple
+
+, rootCrate
 
 , layers ? [ crateUtils.defaultIntermediateLayer ] # default to two building in two steps (external then local)
 , commonModifications ? {}
 , lastLayerModifications ? {}
-
-, test ? false
 
 , release ? false
 , profile ? if release then "release" else null
@@ -45,10 +43,7 @@ in
 , features ? []
 , noDefaultFeatures ? false
 
-, rustToolchain ? defaultRustToolchain
-, rustTargetInfo ? defaultRustTargetInfo
-
-, stdenv ? outerArgs.stdenv
+, test ? false
 
 , denyWarnings ? denyWarningsDefault
 , runClippy ? runClippyDefault
@@ -72,12 +67,13 @@ let
       f [] {};
 
   prunedLockfile = pruneLockfile {
-    inherit vendoredSuperLockfile;
+    inherit (rustEnvironment) rustToolchain vendoredSuperLockfile;
     rootCrates = [ rootCrate ];
     extraManifest = elaboratedCommonModifications.modifyManifest {}; # TODO
   };
 
   vendoredLockfile = vendorLockfile {
+    inherit (rustEnvironment) rustToolchain;
     lockfileContents = builtins.readFile prunedLockfile;
   };
 
@@ -105,9 +101,8 @@ let
 
   baseArgs = {
     depsBuildBuild = [ buildPackages.stdenv.cc ];
-    nativeBuildInputs = [ rustToolchain ];
-  } // lib.optionalAttrs (rustTargetInfo.path != null) {
-    RUST_TARGET_PATH = rustTargetInfo.path;
+    nativeBuildInputs = [ rustEnvironment.rustToolchain ];
+    RUST_TARGET_PATH = rustEnvironment.mkTargetPath targetTriple;
   };
 
   baseManifest = {
@@ -117,8 +112,7 @@ let
 
   baseConfig = denyWarnings: crateUtils.clobber [
     (crateUtils.baseConfig {
-      inherit rustToolchain;
-      rustTargetName = rustTargetInfo.name;
+      inherit rustEnvironment targetTriple;
     })
     {
       unstable.unstable-options = true;
@@ -142,7 +136,7 @@ let
   ] ++ lib.optionals (profile != null) [
     "--profile" profile
   ] ++ [
-    "--target" rustTargetInfo.name
+    "--target" targetTriple
     "-j" "$NIX_BUILD_CORES"
   ];
 
@@ -164,7 +158,7 @@ let
 
   findTestsCommandPrefix = targetDir: [
     "find"
-      "${targetDir}/${rustTargetInfo.name}/*/deps"
+      "${targetDir}/${targetTriple}/*/deps"
       "-maxdepth" "1"
       "-executable"
       "-name" "'*.elf'"

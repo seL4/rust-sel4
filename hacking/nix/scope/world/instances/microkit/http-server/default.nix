@@ -20,7 +20,7 @@
 , seL4Config
 , worldConfig
 , mkMicrokitInstance
-, seL4RustTargetInfoWithConfig
+, mkSeL4RustTargetTriple
 
 , canSimulate
 , mkPD
@@ -29,7 +29,7 @@
 let
   inherit (worldConfig) isMicrokit;
 
-  rustTargetInfo = seL4RustTargetInfoWithConfig { microkit = true; };
+  targetTriple = mkSeL4RustTargetTriple { microkit = true; };
 
   content = builtins.fetchGit {
     url = "https://github.com/seL4/website_pr_hosting";
@@ -139,7 +139,7 @@ let
       #     modifications = seL4Modifications;
       #   }
       # ];
-      inherit rustTargetInfo;
+      inherit targetTriple;
       commonModifications = {
         modifyManifest = lib.flip lib.recursiveUpdate {
           patch.crates-io = {
@@ -158,22 +158,22 @@ let
     pl031-driver = mkPD {
       rootCrate = crates.microkit-http-server-example-pl031-driver;
       release = true;
-      inherit rustTargetInfo;
+      inherit targetTriple;
     };
     sp804-driver = mkPD {
       rootCrate = crates.microkit-http-server-example-sp804-driver;
       release = true;
-      inherit rustTargetInfo;
+      inherit targetTriple;
     };
     virtio-net-driver = mkPD {
       rootCrate = crates.microkit-http-server-example-virtio-net-driver;
       release = true;
-      inherit rustTargetInfo;
+      inherit targetTriple;
     };
     virtio-blk-driver = mkPD {
       rootCrate = crates.microkit-http-server-example-virtio-blk-driver;
       release = true;
-      inherit rustTargetInfo;
+      inherit targetTriple;
     };
   };
 

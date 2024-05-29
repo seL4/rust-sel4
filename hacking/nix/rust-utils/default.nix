@@ -4,7 +4,11 @@
 # SPDX-License-Identifier: BSD-2-Clause
 #
 
-{ lib }:
+{ lib
+, runCommand
+, emptyDirectory
+, fetchFromGitHub
+}:
 
 self: with self;
 
@@ -27,4 +31,39 @@ in
   toTOMLFile = callBuildBuildPackage ./to-toml-file.nix {};
 
   symlinkToRegularFile = callBuildBuildPackage ./symlink-to-regular-file.nix {};
+
+  mkCompilerRTSource = { version, hash }:
+    let
+      llvmProject = fetchFromGitHub {
+        owner = "rust-lang";
+        repo = "llvm-project";
+        rev = "rustc/${version}";
+        inherit hash;
+      };
+    in
+      runCommand "compiler-rt" {} ''
+        cp -r ${llvmProject}/compiler-rt $out
+      '';
+
+  elaborateRustEnvironment =
+    { rustToolchain
+    , mkCustomTargetPath ? targetTriple: throw "unimplemented"
+    , chooseLinker ? { targetTriple, platform }: null
+    , compilerRTSource ? null
+    , vendoredSuperLockfile ? null
+    }:
+    {
+      inherit rustToolchain;
+      inherit compilerRTSource;
+      inherit chooseLinker;
+      inherit vendoredSuperLockfile;
+
+      # HACK
+      mkTargetPath = targetTriple: if lib.hasInfix "sel4" targetTriple then mkCustomTargetPath targetTriple else emptyDirectory;
+
+      vendoredSysrootLockfile = vendorLockfile {
+        inherit rustToolchain;
+        lockfile = symlinkToRegularFile "Cargo.lock" "${rustToolchain}/lib/rustlib/src/rust/Cargo.lock";
+      };
+    };
 }

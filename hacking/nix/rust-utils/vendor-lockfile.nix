@@ -5,14 +5,14 @@
 #
 
 { lib, runCommand, linkFarm
+, buildPackages
 , fetchurl
 , jq
 , defaultRustToolchain
-, rustToolchain ? defaultRustToolchain
-, buildPackages
 }:
 
-{ lockfileContents ? null
+{ rustToolchain ? defaultRustToolchain
+, lockfileContents ? null
 , lockfile ? null
 , fetchGitSubmodules ? false
 , extraMkCrateTarballURLFns ? {}
