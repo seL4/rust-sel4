@@ -20,7 +20,7 @@ let
     { isMicrokit ? false
     , kernelConfig ? null
     , kernelLoaderConfig ? null
-    , corePlatformConfig ? null
+    , microkitConfig ? null
     , canSimulate ? false
     , platformRequiresLoader ? true
     , mkInstanceForPlatform ? _: { attrs = {}; links = []; }
@@ -29,7 +29,7 @@ let
         isMicrokit
         kernelConfig
         kernelLoaderConfig
-        corePlatformConfig
+        microkitConfig
         canSimulate
         platformRequiresLoader
         mkInstanceForPlatform
@@ -48,7 +48,7 @@ self: with self;
 {
   inherit worldConfig;
 
-  microkit = assert worldConfig.isMicrokit; mkMicrokit worldConfig.corePlatformConfig;
+  microkit = assert worldConfig.isMicrokit; mkMicrokit worldConfig.microkitConfig;
 
   microkitForUserspace = microkit;
   microkitForBoot = microkit;
