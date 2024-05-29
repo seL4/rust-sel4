@@ -32,7 +32,8 @@ in
 , rustEnvironment ? defaultRustEnvironment
 , targetTriple ? defaultRustTargetTriple
 
-, rootCrate
+, rootCrate ? null
+, rootCrates ? if rootCrate != null then [ rootCrate ] else throw "must supply 'rootCrates' argument"
 
 , layers ? [ crateUtils.defaultIntermediateLayer ] # default to two building in two steps (external then local)
 , commonModifications ? {}
@@ -74,7 +75,7 @@ let
 
   prunedLockfile = pruneLockfile {
     inherit (rustEnvironment) rustToolchain vendoredSuperLockfile;
-    rootCrates = [ rootCrate ];
+    inherit rootCrates;
     extraManifest = elaboratedCommonModifications.modifyManifest {}; # TODO
   };
 
@@ -87,7 +88,7 @@ let
 
   elaboratedCommonModifications = elaborateModifications commonModifications;
 
-  closure = crateUtils.getClosureOfCrate rootCrate;
+  closure = crateUtils.getClosureOfCrates rootCrates;
 
   accumulatedLayers =
     let
@@ -105,6 +106,8 @@ let
 
   lastIntermediateLayer = f (lib.reverseList accumulatedLayers);
 
+  buildName = if rootCrate != null then rootCrate.name else "build-crates";
+
   baseArgs = {
     depsBuildBuild = [ buildPackages.stdenv.cc ];
     nativeBuildInputs = [ rustEnvironment.rustToolchain ] ++ lib.optionals verifyWithVerus [ verus ];
@@ -116,7 +119,7 @@ let
 
   baseManifest = {
     workspace.resolver = "2";
-    workspace.members = [ "src/${rootCrate.name}" ];
+    workspace.members = lib.forEach rootCrates (crate: "src/${crate.name}");
   };
 
   baseConfig = denyWarnings: crateUtils.clobber [
@@ -137,8 +140,8 @@ let
   baseFlags = [
     "--offline"
     "--frozen"
-    "-p" rootCrate.name
-  ] ++ lib.optionals (lib.length features > 0) [
+  ] ++ lib.concatMap (crate: [ "-p" crate.name ]) rootCrates
+    ++ lib.optionals (lib.length features > 0) [
     "--features" (lib.concatStringsSep "," features)
   ] ++ lib.optionals noDefaultFeatures [
     "--no-default-features"
@@ -211,7 +214,7 @@ let
         runClippyThisLayer = runClippy && layer.reals != {};
       in
         modifications.modifyDerivation (stdenv.mkDerivation (baseArgs // {
-          name = "${rootCrate.name}-intermediate";
+          name = "${buildName}-intermediate";
 
           phases = [ "buildPhase" ];
 
@@ -256,7 +259,7 @@ in let
   ];
 
   final = modifications.modifyDerivation (stdenv.mkDerivation (baseArgs // {
-    name = rootCrate.name;
+    name = buildName;
 
     phases = [ "buildPhase" ];
 
@@ -283,7 +286,7 @@ in let
     '';
 
     passthru = {
-      inherit rootCrate workspace lastIntermediateLayer;
+      inherit rootCrate rootCrates workspace lastIntermediateLayer;
     };
   }));
 
