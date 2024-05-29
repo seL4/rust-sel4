@@ -6,7 +6,7 @@
 
 { lib, buildPackages
 , runCommand, runCommandCC
-, buildCrateInLayers, buildSysroot, crateUtils
+, buildCratesInLayers, buildSysroot, crateUtils
 , crates
 , defaultRustEnvironment
 , defaultRustTargetTriple
@@ -107,7 +107,7 @@ let
 
 in
 
-buildCrateInLayers (prunedArgs // {
+buildCratesInLayers (prunedArgs // {
   commonModifications = crateUtils.composeModifications
     (crateUtils.elaborateModifications commonModifications)
     theseCommonModifications

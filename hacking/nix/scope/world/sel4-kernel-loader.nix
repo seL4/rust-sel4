@@ -5,7 +5,7 @@
 #
 
 { lib, buildPackages, writeText
-, buildCrateInLayers, buildSysroot, crateUtils
+, buildCratesInLayers, buildSysroot, crateUtils
 , crates, bareMetalRustTargetTriple
 , libclangPath
 , seL4RustEnvVars, seL4ForBoot, seL4ForUserspace
@@ -44,7 +44,7 @@ let
   };
 
 in
-buildCrateInLayers {
+buildCratesInLayers {
 
   inherit rootCrate;
   inherit targetTriple;
