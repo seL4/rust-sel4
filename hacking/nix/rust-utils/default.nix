@@ -18,7 +18,7 @@ let
 in
 
 {
-  buildCratesInLayers = callPackage ./build-crate-in-layers.nix {};
+  buildCratesInLayers = callPackage ./build-crates-in-layers.nix {};
 
   buildSysroot = callPackage ./build-sysroot.nix {};
 
