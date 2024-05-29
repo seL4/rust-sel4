@@ -214,5 +214,7 @@ let
     '';
 
 in {
+  lockfile = if lockfile != null then lockfile else builtins.toFile "Cargo.lock" lockfileContents;
+  inherit lockfileValue;
   configFragment = vendoredSources;
 }

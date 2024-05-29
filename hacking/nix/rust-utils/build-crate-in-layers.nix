@@ -16,7 +16,7 @@
 
 let
 
-  superVendoredLockfile = vendorLockfile { lockfile = superLockfile; };
+  vendoredSuperLockfile = vendorLockfile { lockfile = superLockfile; };
 
   # TODO not actually resulting in errors
   denyWarningsDefault =
@@ -71,14 +71,17 @@ let
     in
       f [] {};
 
-  lockfile = builtins.toFile "Cargo.lock" lockfileContents;
-  lockfileContents = builtins.readFile lockfileDrv;
-  lockfileDrv = pruneLockfile {
-    superLockfile = superLockfile;
-    superLockfileVendoringConfig = superVendoredLockfile.configFragment;
+  prunedLockfile = pruneLockfile {
+    inherit vendoredSuperLockfile;
     rootCrates = [ rootCrate ];
     extraManifest = elaboratedCommonModifications.modifyManifest {}; # TODO
   };
+
+  vendoredLockfile = vendorLockfile {
+    lockfileContents = builtins.readFile prunedLockfile;
+  };
+
+  inherit (vendoredLockfile) lockfile;
 
   elaboratedCommonModifications = elaborateModifications commonModifications;
 
@@ -120,7 +123,7 @@ let
     {
       unstable.unstable-options = true;
     }
-    (vendorLockfile { inherit lockfileContents; }).configFragment
+    vendoredLockfile.configFragment
     (lib.optionalAttrs denyWarnings {
       target."cfg(all())" = {
         rustflags = [ "-D" "warnings" ];

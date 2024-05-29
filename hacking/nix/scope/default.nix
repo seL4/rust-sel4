@@ -121,8 +121,7 @@ superCallPackage ../rust-utils {} self //
   vendoredTopLevelLockfile = vendorLockfile { lockfile = topLevelLockfile; };
 
   publicCratesCargoLock = pruneLockfile {
-    superLockfile = topLevelLockfile;
-    superLockfileVendoringConfig = vendoredTopLevelLockfile.configFragment;
+    vendoredSuperLockfile = vendoredTopLevelLockfile;
     rootCrates = lib.attrValues publicCrates;
     extraManifest = {
       patch = globalPatchSection;
