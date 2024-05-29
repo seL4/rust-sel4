@@ -56,6 +56,8 @@ in {
       map (instance: instance.links) world.instances.all
     ))
 
+    pkgs.build.this.someUnitTests
+
     someConfigurationBuildTests
 
     sel4testInstancesList
