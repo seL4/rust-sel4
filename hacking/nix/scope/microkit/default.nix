@@ -53,39 +53,62 @@ let
   cargoConfigFile = toTOMLFile "config.toml" vendoredLockfile.configFragment;
 
   sdk = stdenv.mkDerivation {
-    name = "microkit-sdk";
+    name = "microkit-sdk-without-tool";
 
-    src = microkitSource;
+    src = lib.cleanSourceWith {
+      src = microkitSource;
+      filter = name: type:
+        let baseName = baseNameOf (toString name);
+        in !(type == "directory" && baseName == "tool");
+    };
 
     nativeBuildInputs = [
       cmake ninja
       dtc libxml2
       python3Packages.sel4-deps
+    ];
+
+    depsBuildBuild = [
+      # NOTE: cause drv.__spliced.buildBuild to be used to work around splicing issue
+      qemuForSeL4
+    ];
+
+    dontConfigure = true;
+    dontFixup = true;
+
+    buildPhase = ''
+      python3 build_sdk.py --sel4=${kernelSourcePatched}
+    '';
+
+    installPhase = ''
+      mv release/microkit-sdk-* $out
+    '';
+  };
+
+  tool = stdenv.mkDerivation {
+    name = "microkit-sdk-just-tool";
+
+    src = lib.cleanSource (microkitSource + "/tool/microkit");
+
+    nativeBuildInputs = [
       rustToolchain
     ];
 
     depsBuildBuild = [
       buildPackages.stdenv.cc
-      # NOTE: cause drv.__spliced.buildBuild to be used to work around splicing issue
-      qemuForSeL4
     ];
 
+    dontInstall = true;
     dontFixup = true;
 
     configurePhase = ''
-      d=tool/microkit/.cargo
+      d=.cargo
       mkdir $d
       cp ${cargoConfigFile} $d/config.toml
     '';
 
     buildPhase = ''
-      python3 build_sdk.py \
-        --sel4=${kernelSourcePatched} \
-        --tool-target-triple=${buildPlatform.config}
-    '';
-
-    installPhase = ''
-      mv release/microkit-sdk-* $out
+      cargo build -Z unstable-options --frozen --out-dir $out/bin
     '';
   };
 
@@ -111,7 +134,7 @@ let
       };
     } ''
       mkdir $out
-      ${sdk}/bin/microkit ${systemXML} \
+      ${tool}/bin/microkit ${systemXML} \
         --search-path ${searchPath} \
         --board $MICROKIT_BOARD \
         --config $MICROKIT_CONFIG \
@@ -130,7 +153,7 @@ let
     MICROKIT_BOARD = "qemu_virt_aarch64";
     MICROKIT_CONFIG = "debug";
 
-    MICROKIT_TOOL = "${sdk}/bin/microkit";
+    MICROKIT_TOOL = "${tool}/bin/microkit";
 
     dontConfigure = true;
     dontFixup = true;
@@ -153,7 +176,7 @@ let
 
 in rec {
   inherit
-    sdk
+    sdk tool
     mkSystem
     example
   ;
