@@ -9,6 +9,7 @@
 , crateUtils
 , vendorLockfile, pruneLockfile
 , defaultRustEnvironment, defaultRustTargetTriple
+, verus
 }:
 
 let
@@ -45,9 +46,14 @@ in
 
 , test ? false
 
+, verifyWithVerus ? false
+, extraVerusArgs ? []
+
 , denyWarnings ? denyWarningsDefault
 , runClippy ? runClippyDefault
 }:
+
+assert !(test && verifyWithVerus);
 
 let
   inherit (crateUtils) composeModifications elaborateModifications;
@@ -101,7 +107,7 @@ let
 
   baseArgs = {
     depsBuildBuild = [ buildPackages.stdenv.cc ];
-    nativeBuildInputs = [ rustEnvironment.rustToolchain ];
+    nativeBuildInputs = [ rustEnvironment.rustToolchain ] ++ lib.optionals verifyWithVerus [ verus ];
     RUST_TARGET_PATH = rustEnvironment.mkTargetPath targetTriple;
   } // lib.optionalAttrs (!rustEnvironment.isNightly) {
     # HACK
@@ -143,15 +149,23 @@ let
     "-j" "$NIX_BUILD_CORES"
   ];
 
-  cargoSubcommand = if test then "test" else "build";
+  cargoSubcommand =
+    if test
+    then "test"
+    else (
+      if verifyWithVerus
+      then "verus"
+      else "build"
+    );
 
   mkCargoInvocation = runClippy: commonArgs: subcommandArgs:
     let
       joinedCommonArgs = lib.concatStringsSep " " commonArgs;
-      joinedSubcommandArgs = lib.concatStringsSep " "
-        (subcommandArgs ++ lib.optionals test [
-          "--no-run"
-        ]);
+      joinedSubcommandArgs = lib.concatStringsSep " " (
+        subcommandArgs
+          ++ lib.optionals test [ "--no-run" ]
+          ++ lib.optionals verifyWithVerus ([ "--" ] ++ extraVerusArgs)
+      );
     in ''
       ${lib.optionalString runClippy ''
         cargo clippy ${joinedCommonArgs} -- -D warnings
