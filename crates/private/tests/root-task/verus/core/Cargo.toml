@@ -1,0 +1,31 @@
+#
+# Copyright 2023, Colias Group, LLC
+#
+# SPDX-License-Identifier: BSD-2-Clause
+#
+#
+# This file is generated from './Cargo.nix'. You can edit this file directly
+# if you are not using this project's Cargo manifest management tools.
+# See 'hacking/cargo-manifest-management/README.md' for more information.
+#
+
+[package]
+name = "tests-root-task-verus-core"
+version = "0.1.0"
+authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
+edition = "2021"
+license = "BSD-2-Clause"
+metadata = { verus = { verify = true } }
+
+[dependencies.builtin]
+git = "https://github.com/nspin/verus.git"
+tag = "keep/fdac1c3c52e639bf3e835802f63b4352"
+
+[dependencies.builtin_macros]
+git = "https://github.com/nspin/verus.git"
+tag = "keep/fdac1c3c52e639bf3e835802f63b4352"
+
+[dependencies.vstd]
+git = "https://github.com/nspin/verus.git"
+tag = "keep/fdac1c3c52e639bf3e835802f63b4352"
+default-features = false

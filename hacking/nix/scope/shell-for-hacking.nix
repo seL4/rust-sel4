@@ -21,6 +21,8 @@
 
 , openssl
 
+, verus
+
 , shellForMakefile
 }:
 
@@ -41,6 +43,7 @@ mkShell (shellForMakefile.apply {
     strace
     cntr
     cachix
+    verus
   ];
 
   buildInputs = [

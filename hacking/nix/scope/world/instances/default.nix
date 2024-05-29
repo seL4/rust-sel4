@@ -79,6 +79,7 @@ in rec {
     tests.root-task.panicking.byConfig.unwind.withAlloc
     tests.root-task.panicking.byConfig.unwind.withoutAlloc
     tests.root-task.c
+    tests.root-task.verus
     tests.root-task.dafny
     tests.root-task.default-test-harness
     # tests.root-task.ring
@@ -204,6 +205,10 @@ in rec {
         };
 
       c = maybe haveFullRuntime (callPackage ./c.nix {
+        inherit canSimulate;
+      });
+
+      verus = maybe (haveFullRuntime && hostPlatform.is64bit) (callPackage ./verus.nix {
         inherit canSimulate;
       });
 
