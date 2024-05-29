@@ -136,6 +136,8 @@ superCallPackage ../rust-utils {} self //
 
   capdl-tool = callBuildBuildPackage ./capdl-tool {};
 
+  verus = callBuildBuildPackage ./verus {};
+
   dafny = callBuildBuildPackage ./dafny {};
 
   ### local tools

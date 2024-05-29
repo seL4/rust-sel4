@@ -220,4 +220,9 @@ in rec {
     git = "https://github.com/coliasgroup/dafny.git";
     tag = mkKeepRef "02d0a578fdf594a38c7c72d7ad56e1a62e464f44"; # branch dev
   };
+
+  verusSource = {
+    git = "https://github.com/nspin/verus.git";
+    tag = mkKeepRef "fdac1c3c52e639bf3e835802f63b43520379b1a1";
+  };
 }

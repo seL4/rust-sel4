@@ -64,6 +64,8 @@ members = [
     "crates/private/tests/root-task/panicking",
     "crates/private/tests/root-task/ring-test-harness",
     "crates/private/tests/root-task/tls",
+    "crates/private/tests/root-task/verus/core",
+    "crates/private/tests/root-task/verus/task",
     "crates/sel4",
     "crates/sel4-async/block-io",
     "crates/sel4-async/block-io/fat",
