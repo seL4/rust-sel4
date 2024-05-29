@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
 #
 
-{ lib, stdenv
+{ lib, stdenv, buildPlatform
 , buildPackages, pkgsBuildBuild
 , linkFarm, writeScript, runCommand
 , callPackage
@@ -12,8 +12,11 @@
 , dtc, libxml2
 , python3Packages
 , qemuForSeL4
-, newlib
 , sources
+, vendorLockfile
+, toTOMLFile
+, defaultRustToolchain
+, rustToolchain ? defaultRustToolchain
 }:
 
 # no configuration yet
@@ -42,48 +45,49 @@ let
     '';
   };
 
+  vendoredLockfile = vendorLockfile {
+    inherit rustToolchain;
+    lockfile = microkitSource + "/tool/microkit/Cargo.lock";
+  };
+
+  cargoConfigFile = toTOMLFile "config.toml" vendoredLockfile.configFragment;
+
   sdk = stdenv.mkDerivation {
     name = "microkit-sdk";
 
-    # src = microkitSource;
-
-    src = lib.cleanSourceWith {
-      src = microkitSource;
-      filter = name: type:
-        let baseName = baseNameOf (toString name);
-        in !(type == "directory" && baseName == "tool");
-    };
+    src = microkitSource;
 
     nativeBuildInputs = [
       cmake ninja
       dtc libxml2
       python3Packages.sel4-deps
+      rustToolchain
     ];
 
     depsBuildBuild = [
+      buildPackages.stdenv.cc
       # NOTE: cause drv.__spliced.buildBuild to be used to work around splicing issue
       qemuForSeL4
     ];
 
-    dontConfigure = true;
     dontFixup = true;
 
+    configurePhase = ''
+      d=tool/microkit/.cargo
+      mkdir $d
+      cp ${cargoConfigFile} $d/config.toml
+    '';
+
     buildPhase = ''
-      python3 build_sdk.py --sel4=${kernelSourcePatched}
+      python3 build_sdk.py \
+        --sel4=${kernelSourcePatched} \
+        --tool-target-triple=${buildPlatform.config}
     '';
 
     installPhase = ''
-      mv release/microkit-sdk-1.2.6 $out
+      mv release/microkit-sdk-* $out
     '';
   };
-
-  tool = linkFarm "microkit-tool" [
-    (rec {
-      name = "microkit";
-      path = lib.cleanSource (microkitSource + "/tool/${name}");
-      # path = microkitSource + "/tool/${name}";
-    })
-  ];
 
   exampleSource = microkitSource + "/example/qemu_virt_aarch64/hello";
 
@@ -92,21 +96,16 @@ let
 
     src = exampleSource;
 
-    dontConfigure = true;
-    dontFixup = true;
-
-    nativeBuildInputs = [
-      python3Packages.sel4-deps
-    ];
-
     MICROKIT_SDK = sdk;
     MICROKIT_BOARD = "qemu_virt_aarch64";
     MICROKIT_CONFIG = "debug";
 
-    MICROKIT_TOOL = "python3 -m microkit";
+    MICROKIT_TOOL = "${sdk}/bin/microkit";
+
+    dontConfigure = true;
+    dontFixup = true;
 
     buildPhase = ''
-      export PYTHONPATH=${tool}:$PYTHONPATH
       mkdir build
       make BUILD_DIR=build
     '';
@@ -138,9 +137,8 @@ let
         ];
       };
     } ''
-      export PYTHONPATH=${tool}:$PYTHONPATH
       mkdir $out
-      python3 -m microkit ${systemXML} \
+      ${sdk}/bin/microkit ${systemXML} \
         --search-path ${searchPath} \
         --board $MICROKIT_BOARD \
         --config $MICROKIT_CONFIG \
@@ -155,7 +153,7 @@ let
 
 in rec {
   inherit
-    sdk tool
+    sdk
     mkSystem
     example
   ;
