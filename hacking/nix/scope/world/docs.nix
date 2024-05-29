@@ -78,8 +78,7 @@ let
       lockfile = builtins.toFile "Cargo.lock" lockfileContents;
       lockfileContents = builtins.readFile lockfileDrv;
       lockfileDrv = pruneLockfile {
-        superLockfile = topLevelLockfile;
-        superLockfileVendoringConfig = vendoredTopLevelLockfile.configFragment;
+        vendoredSuperLockfile = vendoredTopLevelLockfile;
         rootCrates = [ rootCrate ];
       };
 

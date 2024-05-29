@@ -11,7 +11,7 @@
 }:
 
 { rootCrates
-, superLockfile, superLockfileVendoringConfig
+, vendoredSuperLockfile
 , extraManifest ? {}, extraConfig ? {}
 }:
 
@@ -32,7 +32,7 @@ let
     {
       unstable.unstable-options = true;
     }
-    superLockfileVendoringConfig
+    vendoredSuperLockfile.configFragment
     extraConfig
   ]);
 
@@ -44,7 +44,7 @@ runCommand "Cargo.lock" {
 } ''
   ln -s ${manifest} Cargo.toml
   ln -s ${src} src
-  cp --no-preserve=owner,mode ${superLockfile} Cargo.lock
+  cp --no-preserve=owner,mode ${vendoredSuperLockfile.lockfile} Cargo.lock
   cargo --config ${config} update -wq
   mv Cargo.lock $out
 ''
