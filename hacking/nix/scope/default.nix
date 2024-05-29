@@ -197,6 +197,21 @@ superCallPackage ../rust-utils {} self //
   shellForMakefile = callPackage ./shell-for-makefile.nix {};
   shellForHacking = callPackage ./shell-for-hacking.nix {};
 
+  ### unit tests
+
+  someUnitTests = buildCratesInLayers {
+    name = "some-unit-tests";
+    test = true;
+    rootCrates = with crates; [
+      sel4-bitfield-ops
+      sel4-kernel-loader-embed-page-tables
+      sel4-backtrace-types
+    ];
+    features = [
+      "sel4-backtrace-types/full"
+    ];
+  };
+
   ### kernel
 
   mkSeL4 = callPackage ./sel4 {};
