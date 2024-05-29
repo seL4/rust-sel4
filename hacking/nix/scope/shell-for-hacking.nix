@@ -49,4 +49,10 @@ mkShell (shellForMakefile.apply {
   buildInputs = [
     openssl
   ];
+
+  shellHook = ''
+    vargo() {
+      cargo +${verus.rustEnvironment.channel} "$@"
+    }
+  '';
 })

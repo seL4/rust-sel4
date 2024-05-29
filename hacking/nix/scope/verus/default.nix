@@ -36,7 +36,7 @@ let
   rustEnvironment = lib.fix (self: elaborateRustEnvironment (mkDefaultElaborateRustEnvironmentArgs {
     inherit rustToolchain;
   } // {
-    isNightly = lib.hasPrefix "nightly" rustToolchainAttrs.toolchain.channel;
+    inherit (rustToolchainAttrs.toolchain) channel;
     mkCustomTargetPath = mkMkCustomTargetPathForEnvironment {
       rustEnvironment = self;
     };
@@ -94,5 +94,6 @@ stdenv.mkDerivation {
 
   passthru = {
     inherit rustEnvironment;
+    rustToolchainChannel = rustToolchainAttrs.toolchain.channel;
   };
 }

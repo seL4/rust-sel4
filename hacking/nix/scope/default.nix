@@ -56,15 +56,17 @@ superCallPackage ../rust-utils {} self //
 
   inherit fenix;
 
+  topLevelRustToolchainFile = ../../../rust-toolchain.toml;
+
   defaultRustToolchain = fenix.fromToolchainFile {
-    dir = ../../..;
+    file = topLevelRustToolchainFile;
     sha256 = "sha256-6lRcCTSUmWOh0GheLMTZkY7JC273pWLp2s98Bb2REJQ=";
   };
 
   defaultRustEnvironment = elaborateRustEnvironment (mkDefaultElaborateRustEnvironmentArgs {
     rustToolchain = defaultRustToolchain;
   } // {
-    isNightly = true;
+    channel = (builtins.fromTOML (builtins.readFile topLevelRustToolchainFile)).toolchain.channel;
     compilerRTSource = mkCompilerRTSource {
       version = "18.0-2024-02-13";
       hash = "sha256-fbq8H86WT13KsXJECHbcbFkqFseLvV/EC2kihTL2lgI=";

@@ -57,14 +57,18 @@ in
 
   elaborateRustEnvironment =
     { rustToolchain
-    , isNightly
+    , channel ? null
+    , isNightly ?
+        if channel != null
+        then lib.hasPrefix "nightly" channel
+        else throw "could not determine isNightly automatically"
     , mkCustomTargetPath ? customTargetTripleTripleName: throw "unimplemented"
     , chooseLinker ? { targetTriple, platform }: null
     , compilerRTSource ? null
     , vendoredSuperLockfile ? null
     }:
     {
-      inherit rustToolchain isNightly;
+      inherit rustToolchain channel isNightly;
       inherit compilerRTSource;
       inherit chooseLinker;
       inherit vendoredSuperLockfile;
