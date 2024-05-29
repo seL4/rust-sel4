@@ -140,7 +140,7 @@ let
     } ''
       export PYTHONPATH=${tool}:$PYTHONPATH
       mkdir $out
-        python3 -m microkit ${systemXML} \
+      python3 -m microkit ${systemXML} \
         --search-path ${searchPath} \
         --board $MICROKIT_BOARD \
         --config $MICROKIT_CONFIG \
