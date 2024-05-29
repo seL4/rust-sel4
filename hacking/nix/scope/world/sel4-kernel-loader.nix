@@ -55,7 +55,7 @@ buildCrateInLayers {
   commonModifications = {
     modifyManifest = lib.flip lib.recursiveUpdate profiles;
     modifyConfig = lib.flip lib.recursiveUpdate {
-      target.${targetTriple}.rustflags = [
+      target.${targetTriple.name}.rustflags = [
         "--sysroot" sysroot
       ];
     };

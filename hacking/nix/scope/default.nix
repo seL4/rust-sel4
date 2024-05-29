@@ -69,9 +69,9 @@ superCallPackage ../rust-utils {} self //
       hash = "sha256-fbq8H86WT13KsXJECHbcbFkqFseLvV/EC2kihTL2lgI=";
     };
 
-    mkCustomTargetPath = targetTriple:
+    mkCustomTargetPath = customTargetTripleTripleName:
       let
-        fname = "${targetTriple}.json";
+        fname = "${customTargetTripleTripleName}.json";
       in
         linkFarm "targets" [
           { name = fname; path = sources.srcRoot + "/support/targets/${fname}"; }
@@ -101,7 +101,7 @@ superCallPackage ../rust-utils {} self //
   mkSeL4CustomRustTargetTripleName = { microkit ? false, minimal ? false }:
     "${rustTargetArchName}-sel4${lib.optionalString microkit "-microkit"}${lib.optionalString minimal "-minimal"}";
 
-  mkSeL4RustTargetTriple = mkSeL4CustomRustTargetTripleName;
+  mkSeL4RustTargetTriple = args: mkCustomRustTargetTriple (mkSeL4CustomRustTargetTripleName args);
 
   bareMetalBuiltinRustTargetTriple = {
     aarch64 = "aarch64-unknown-none";
@@ -112,12 +112,12 @@ superCallPackage ../rust-utils {} self //
     ia32 = "i686-unknown-linux-gnu"; # HACK
   }."${seL4Arch}";
 
-  bareMetalRustTargetTriple = bareMetalBuiltinRustTargetTriple;
+  bareMetalRustTargetTriple = mkBuiltinRustTargetTriple bareMetalBuiltinRustTargetTriple;
 
   defaultRustTargetTriple =
     if hostPlatform.isNone
     then mkSeL4RustTargetTriple {}
-    else hostPlatform.config;
+    else mkBuiltinRustTargetTriple hostPlatform.config;
 
   inherit (callPackage ./crates.nix {}) crates globalPatchSection publicCrates publicCratesTxt;
 

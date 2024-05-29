@@ -144,7 +144,7 @@ let
                   (lib.forEach views (view: ''
                     <tr>
                       <td>
-                        <a href="./views/${view.id}/${view.targetTriple}/doc/${metaCrateName}/index.html">rustdoc</a>
+                        <a href="./views/${view.id}/${view.targetTriple.name}/doc/${metaCrateName}/index.html">rustdoc</a>
                         <ul class=views>
                           ${lib.concatMapStrings mkEntry [
                             ''
@@ -152,7 +152,7 @@ let
                             ''
                             ''
                               rustc target spec:
-                              <a href="${mkJSONDataURI view.targetJSON}">${view.targetTriple}.json</a>
+                              <a href="${mkJSONDataURI view.targetJSON}">${view.targetTriple.name}.json</a>
                             ''
                             ''
                               seL4 config:

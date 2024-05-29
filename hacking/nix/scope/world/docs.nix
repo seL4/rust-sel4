@@ -38,7 +38,7 @@ let
       inherit seL4ConfigJSON;
       inherit (seL4Config) PLAT SEL4_ARCH KERNEL_MCS;
       inherit targetTriple;
-      targetJSON =  "${rustEnvironment.mkTargetPath targetTriple}/${targetTriple}.json";
+      targetJSON =  "${rustEnvironment.mkTargetPath targetTriple}/${targetTriple.name}.json";
       inherit runtime;
       rustdoc = buildDocs {
         inherit targetTriple;
@@ -102,12 +102,12 @@ let
         {
           unstable.unstable-options = true;
 
-          target.${targetTriple}.rustflags = [
+          target.${targetTriple.name}.rustflags = [
             "--sysroot" sysroot
           ];
 
           # TODO
-          # target.${targetTriple}.rustdocflags = [
+          # target.${targetTriple.name}.rustdocflags = [
           build.rustdocflags = [
             "--sysroot" sysroot
           ];
@@ -121,7 +121,7 @@ let
       ] ++ lib.optionals (lib.length features > 0) [
         "--features" (lib.concatStringsSep "," features)
       ] ++ [
-        "--target" targetTriple
+        "--target" targetTriple.name
       ]);
 
     in
