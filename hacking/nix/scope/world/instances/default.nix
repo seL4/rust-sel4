@@ -79,6 +79,7 @@ in rec {
     tests.root-task.panicking.byConfig.unwind.withAlloc
     tests.root-task.panicking.byConfig.unwind.withoutAlloc
     tests.root-task.c
+    tests.root-task.dafny
     tests.root-task.default-test-harness
     # tests.root-task.ring
     tests.capdl.threads
