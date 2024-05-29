@@ -9,81 +9,59 @@
 , rsync
 
 , crateUtils
-, defaultRustToolchain
-, defaultRustTargetInfo
-, libclangPath
-, vendorLockfile, pruneLockfile
-, crates
+, defaultRustEnvironment
+, pruneLockfile, vendorLockfile
 , buildSysroot
-, seL4RustTargetInfoWithConfig
+, libclangPath
+, crates
 
-, topLevelLockfile
-, vendoredTopLevelLockfile
-
+, mkSeL4RustTargetTriple
 , seL4RustEnvVars
 
 , worldConfig
 
-, seL4ConfigJSON
 , seL4Config
+, seL4ConfigJSON
 }:
 
 let
-  rustToolchain = defaultRustToolchain;
-
-  runtimes =
-    let
-      common = lib.optionals (!worldConfig.isMicrokit) [ "sel4-platform-info" ];
-    in [
-      { name = "none";
-        features = common ++ [];
-        rustTargetInfo = seL4RustTargetInfoWithConfig { minimal = false; };
-      }
-    ] ++ lib.optionals (hostPlatform.isAarch64 || hostPlatform.isx86_64) [
-      { name = "sel4-root-task";
-        features = common ++ [ "sel4-root-task" ];
-        rustTargetInfo = seL4RustTargetInfoWithConfig { minimal = false; };
-      }
-    ] ++ lib.optionals (worldConfig.isMicrokit or false) [
-      { name = "sel4-microkit";
-        features = common ++ [ "sel4-microkit" ];
-        rustTargetInfo = seL4RustTargetInfoWithConfig { microkit = true; minimal = true; };
-      }
-    ];
+  rustEnvironment = defaultRustEnvironment;
+  inherit (rustEnvironment) rustToolchain;
 
   rootCrate = crates.meta;
 
   mkView = { runtime ? null, minimal ? true }:
     let
       commonFeatures = lib.optionals (!worldConfig.isMicrokit) [ "sel4-platform-info" ];
-      rustTargetInfo = seL4RustTargetInfoWithConfig { microkit = runtime == "sel4-microkit"; inherit minimal; };
+      targetTriple = mkSeL4RustTargetTriple { microkit = runtime == "sel4-microkit"; inherit minimal; };
     in {
       inherit seL4ConfigJSON;
       inherit (seL4Config) PLAT SEL4_ARCH KERNEL_MCS;
-      hypervisorSupport = if seL4Config.ARCH_ARM then seL4Config.ARM_HYPERVISOR_SUPPORT else false;
-      targetName = rustTargetInfo.name;
-      targetJSON = "${rustTargetInfo.path}/${rustTargetInfo.name}.json";
+      inherit targetTriple;
+      targetJSON =  "${rustEnvironment.mkTargetPath targetTriple}/${targetTriple}.json";
       inherit runtime;
       rustdoc = buildDocs {
+        inherit targetTriple;
         features = commonFeatures ++ lib.optional (runtime != null) runtime;
-        inherit rustTargetInfo;
       };
     };
 
-  buildDocs = { features, rustTargetInfo }:
+  buildDocs = { targetTriple, features }:
     let
-      rustTargetName = rustTargetInfo.name;
-      rustTargetPath = rustTargetInfo.path;
-
-      lockfile = builtins.toFile "Cargo.lock" lockfileContents;
-      lockfileContents = builtins.readFile lockfileDrv;
-      lockfileDrv = pruneLockfile {
-        vendoredSuperLockfile = vendoredTopLevelLockfile;
+      prunedLockfile = pruneLockfile {
+        inherit (rustEnvironment) rustToolchain vendoredSuperLockfile;
         rootCrates = [ rootCrate ];
       };
 
+      vendoredLockfile = vendorLockfile {
+        inherit (rustEnvironment) rustToolchain;
+        lockfileContents = builtins.readFile prunedLockfile;
+      };
+
+      inherit (vendoredLockfile) lockfile;
+
       sysrootHost = buildSysroot {
-        inherit rustTargetInfo;
+        inherit targetTriple;
         release = false;
       };
 
@@ -91,8 +69,7 @@ let
 
       # TODO how does this work without std?
       # sysrootBuild = buildSysroot {
-      #   rustTargetName = buildPlatform.config;
-      #   rustTargetPath = emptyDirectory;
+      #   targetTriple = buildPlatform.config;
       #   release = false;
       # };
 
@@ -118,17 +95,19 @@ let
       src = crateUtils.collectReals (lib.attrValues rootCrate.closure);
 
       config = crateUtils.toTOMLFile "config" (crateUtils.clobber [
-        (crateUtils.baseConfig { inherit rustToolchain rustTargetName; })
-        (vendorLockfile { inherit lockfileContents; }).configFragment
+        (crateUtils.baseConfig {
+          inherit rustEnvironment targetTriple;
+        })
+        vendoredLockfile.configFragment
         {
           unstable.unstable-options = true;
 
-          target.${rustTargetName}.rustflags = [
+          target.${targetTriple}.rustflags = [
             "--sysroot" sysroot
           ];
 
           # TODO
-          # target.${rustTargetName}.rustdocflags = [
+          # target.${targetTriple}.rustdocflags = [
           build.rustdocflags = [
             "--sysroot" sysroot
           ];
@@ -142,15 +121,14 @@ let
       ] ++ lib.optionals (lib.length features > 0) [
         "--features" (lib.concatStringsSep "," features)
       ] ++ [
-        "--target" rustTargetName
+        "--target" targetTriple
       ]);
 
     in
       runCommandCC "rustdoc-view" ({
         depsBuildBuild = [ buildPackages.stdenv.cc ];
         nativeBuildInputs = [ rsync rustToolchain ];
-
-        RUST_TARGET_PATH = rustTargetPath;
+        RUST_TARGET_PATH = rustEnvironment.mkTargetPath targetTriple;
         LIBCLANG_PATH = libclangPath;
       } // seL4RustEnvVars)  ''
         target_dir=$(pwd)/target

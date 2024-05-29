@@ -10,14 +10,14 @@
 , mkTask, crates
 , crateUtils
 , seL4Modifications
-, seL4RustTargetInfoWithConfig
+, mkSeL4RustTargetTriple
 }:
 
 mkTask {
 
   rootCrate = crates.sel4-capdl-initializer;
 
-  rustTargetInfo = seL4RustTargetInfoWithConfig { minimal = true; };
+  targetTriple = mkSeL4RustTargetTriple { minimal = true; };
 
   release = true;
 

@@ -61,6 +61,34 @@ superCallPackage ../rust-utils {} self //
     sha256 = "sha256-6lRcCTSUmWOh0GheLMTZkY7JC273pWLp2s98Bb2REJQ=";
   };
 
+  defaultRustEnvironment = elaborateRustEnvironment rec {
+    rustToolchain = defaultRustToolchain;
+
+    compilerRTSource = mkCompilerRTSource {
+      version = "18.0-2024-02-13";
+      hash = "sha256-fbq8H86WT13KsXJECHbcbFkqFseLvV/EC2kihTL2lgI=";
+    };
+
+    mkCustomTargetPath = targetTriple:
+      let
+        fname = "${targetTriple}.json";
+      in
+        linkFarm "targets" [
+          { name = fname; path = sources.srcRoot + "/support/targets/${fname}"; }
+        ];
+
+    chooseLinker = { targetTriple, platform }:
+      if platform.isNone
+      then "${rustToolchain}/lib/rustlib/${buildPlatform.config}/bin/rust-lld"
+      else null;
+
+    vendoredSuperLockfile = vendoredTopLevelLockfile;
+  };
+
+  topLevelLockfile = sources.srcRoot + "/Cargo.lock";
+
+  vendoredTopLevelLockfile = vendorLockfile { lockfile = topLevelLockfile; };
+
   rustTargetArchName = {
     aarch64 = "aarch64";
     aarch32 = "armv7a";
@@ -70,14 +98,12 @@ superCallPackage ../rust-utils {} self //
     ia32 = "i686";
   }."${seL4Arch}";
 
-  defaultRustTargetInfo =
-    if !hostPlatform.isNone
-    then mkBuiltinRustTargetInfo hostPlatform.config
-    else seL4RustTargetInfoWithConfig {};
+  mkSeL4CustomRustTargetTripleName = { microkit ? false, minimal ? false }:
+    "${rustTargetArchName}-sel4${lib.optionalString microkit "-microkit"}${lib.optionalString minimal "-minimal"}";
 
-  seL4RustTargetInfoWithConfig = { microkit ? false, minimal ? false }: mkCustomRustTargetInfo "${rustTargetArchName}-sel4${lib.optionalString microkit "-microkit"}${lib.optionalString minimal "-minimal"}";
+  mkSeL4RustTargetTriple = mkSeL4CustomRustTargetTripleName;
 
-  bareMetalRustTargetInfo = mkBuiltinRustTargetInfo {
+  bareMetalBuiltinRustTargetTriple = {
     aarch64 = "aarch64-unknown-none";
     aarch32 = "armv7a-none-eabi"; # armv7a-none-eabihf?
     riscv64 = "riscv64${hostPlatform.this.rustTargetRiscVArch}-unknown-none-elf";
@@ -86,39 +112,16 @@ superCallPackage ../rust-utils {} self //
     ia32 = "i686-unknown-linux-gnu"; # HACK
   }."${seL4Arch}";
 
-  mkBuiltinRustTargetInfo = name: {
-    inherit name;
-    path = null;
-  };
+  bareMetalRustTargetTriple = bareMetalBuiltinRustTargetTriple;
 
-  mkCustomRustTargetInfo = name: {
-    inherit name;
-    path =
-      let
-        fname = "${name}.json";
-      in
-        linkFarm "targets" [
-          { name = fname; path = sources.srcRoot + "/support/targets/${fname}"; }
-        ];
-  };
-
-  chooseLinkerForRustTarget = { rustToolchain, rustTargetName, platform }:
-    if platform.isNone
-    then "${rustToolchain}/lib/rustlib/${buildPlatform.config}/bin/rust-lld"
-    else null;
+  defaultRustTargetTriple =
+    if hostPlatform.isNone
+    then mkSeL4RustTargetTriple {}
+    else hostPlatform.config;
 
   inherit (callPackage ./crates.nix {}) crates globalPatchSection publicCrates publicCratesTxt;
 
   distribution = callPackage ./distribution.nix {};
-
-  buildCrateInLayersHere = buildCrateInLayers {
-    # TODO pass vendored lockfile instead
-    superLockfile = topLevelLockfile;
-  };
-
-  topLevelLockfile = sources.srcRoot + "/Cargo.lock";
-
-  vendoredTopLevelLockfile = vendorLockfile { lockfile = topLevelLockfile; };
 
   publicCratesCargoLock = pruneLockfile {
     vendoredSuperLockfile = vendoredTopLevelLockfile;
@@ -141,7 +144,7 @@ superCallPackage ../rust-utils {} self //
 
   ### local tools
 
-  mkTool = rootCrate: buildCrateInLayersHere {
+  mkTool = rootCrate: buildCrateInLayers {
     inherit rootCrate;
   };
 

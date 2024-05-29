@@ -7,10 +7,10 @@
 { lib, runCommand
 , crateUtils
 , defaultRustToolchain
-, rustToolchain ? defaultRustToolchain
 }:
 
-{ rootCrates
+{ rustToolchain ? defaultRustToolchain
+, rootCrates
 , vendoredSuperLockfile
 , extraManifest ? {}, extraConfig ? {}
 }:

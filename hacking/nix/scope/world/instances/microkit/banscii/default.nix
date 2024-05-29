@@ -13,7 +13,7 @@
 , sources
 , crates
 , crateUtils
-, seL4RustTargetInfoWithConfig
+, mkSeL4RustTargetTriple
 , mkMicrokitInstance
 , worldConfig
 
@@ -30,7 +30,7 @@ let
     assistant = mkPD rec {
       rootCrate = crates.banscii-assistant;
       release = true;
-      rustTargetInfo = seL4RustTargetInfoWithConfig { microkit = true; minimal = false; };
+      targetTriple = mkSeL4RustTargetTriple { microkit = true; minimal = false; };
     };
     artist = mkPD rec {
       rootCrate = crates.banscii-artist;

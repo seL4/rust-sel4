@@ -13,7 +13,7 @@
 , sources
 , crates
 , crateUtils
-, seL4RustTargetInfoWithConfig
+, mkSeL4RustTargetTriple
 , mkMicrokitInstance
 , worldConfig
 , seL4Config
@@ -35,7 +35,7 @@ let
     #     };
     #   }
     # ];
-    rustTargetInfo = seL4RustTargetInfoWithConfig { microkit = true; minimal = true; };
+    targetTriple = mkSeL4RustTargetTriple { microkit = true; minimal = true; };
   } // args);
 
   inherit (worldConfig) isMicrokit;

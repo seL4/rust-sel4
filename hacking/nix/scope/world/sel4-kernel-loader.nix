@@ -5,17 +5,15 @@
 #
 
 { lib, buildPackages, writeText
-, buildCrateInLayersHere, buildSysroot, crateUtils
-, crates, bareMetalRustTargetInfo
+, buildCrateInLayers, buildSysroot, crateUtils
+, crates, bareMetalRustTargetTriple
 , libclangPath
 , seL4RustEnvVars, seL4ForBoot, seL4ForUserspace
 , kernelLoaderConfig
 }:
 
 let
-  rustTargetInfo = bareMetalRustTargetInfo;
-  rustTargetName = rustTargetInfo.name;
-  rustTargetPath = rustTargetInfo.path;
+  targetTriple = bareMetalRustTargetTriple;
 
   rootCrate = crates.sel4-kernel-loader;
 
@@ -39,25 +37,25 @@ let
   ];
 
   sysroot = buildSysroot {
-    inherit profile rustTargetInfo;
+    inherit targetTriple;
+    inherit profile;
     extraManifest = profiles;
     alloc = false;
   };
 
 in
-buildCrateInLayersHere {
+buildCrateInLayers {
 
   inherit rootCrate;
+  inherit targetTriple;
   inherit profile;
-
-  rustTargetInfo = bareMetalRustTargetInfo;
 
   features = [];
 
   commonModifications = {
     modifyManifest = lib.flip lib.recursiveUpdate profiles;
     modifyConfig = lib.flip lib.recursiveUpdate {
-      target.${rustTargetName}.rustflags = [
+      target.${targetTriple}.rustflags = [
         "--sysroot" sysroot
       ];
     };

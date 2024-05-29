@@ -11,7 +11,7 @@
 , serializeCapDLSpec
 , crateUtils
 , seL4Modifications
-, seL4RustTargetInfoWithConfig
+, mkSeL4RustTargetTriple
 }:
 
 { spec, fill }:
@@ -25,7 +25,7 @@ in mkTask {
 
   rootCrate = crates.sel4-capdl-initializer-with-embedded-spec;
 
-  rustTargetInfo = seL4RustTargetInfoWithConfig { minimal = true; };
+  targetTriple = mkSeL4RustTargetTriple { minimal = true; };
 
   release = true;
 

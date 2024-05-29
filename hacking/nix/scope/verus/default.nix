@@ -38,6 +38,7 @@ let
   };
 
   lockfile = vendorLockfile {
+    inherit rustToolchain;
     lockfile = src + "/source/Cargo.lock";
   };
 
