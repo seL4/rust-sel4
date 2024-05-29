@@ -18,6 +18,7 @@ pub fn cargo_manifest_policy() -> Policy {
                         | . [-]
                         | ['target'] .{2}
                         | ['profile'] . ['build-override']?
+                        | ['package'] ['metadata'] .
                     "#,
                 )
                 .unwrap(),
@@ -66,7 +67,7 @@ pub fn cargo_manifest_policy() -> Policy {
                 path_regex: PathRegex::new("['package']").unwrap(),
                 key_ordering: KeyOrdering {
                     front: vec!["name".to_owned(), "version".to_owned()],
-                    back: vec!["description".to_owned()],
+                    back: vec!["description".to_owned(), "metadata".to_owned()],
                 },
                 ..Default::default()
             },
