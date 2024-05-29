@@ -45,9 +45,19 @@ in
         cp -r ${llvmProject}/compiler-rt $out
       '';
 
+  mkBuiltinRustTargetTriple = name: {
+    inherit name;
+    isBuiltin = true;
+  };
+
+  mkCustomRustTargetTriple = name: {
+    inherit name;
+    isBuiltin = false;
+  };
+
   elaborateRustEnvironment =
     { rustToolchain
-    , mkCustomTargetPath ? targetTriple: throw "unimplemented"
+    , mkCustomTargetPath ? customTargetTripleTripleName: throw "unimplemented"
     , chooseLinker ? { targetTriple, platform }: null
     , compilerRTSource ? null
     , vendoredSuperLockfile ? null
@@ -58,8 +68,7 @@ in
       inherit chooseLinker;
       inherit vendoredSuperLockfile;
 
-      # HACK
-      mkTargetPath = targetTriple: if lib.hasInfix "sel4" targetTriple then mkCustomTargetPath targetTriple else emptyDirectory;
+      mkTargetPath = targetTriple: if !targetTriple.isBuiltin then mkCustomTargetPath targetTriple.name else emptyDirectory;
 
       vendoredSysrootLockfile = vendorLockfile {
         inherit rustToolchain;

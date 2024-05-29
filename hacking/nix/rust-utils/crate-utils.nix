@@ -7,6 +7,7 @@
 { lib, buildPlatform, hostPlatform
 , writeText, linkFarm, runCommand
 , toTOMLFile
+, mkBuiltinRustTargetTriple
 }:
 
 let
@@ -104,12 +105,12 @@ rec {
         in
           lib.optionalAttrs (linker != null) {
             target = {
-              "${targetTriple}".linker = linker;
+              "${targetTriple.name}".linker = linker;
             };
           };
     in
       clobber [
-        (f { targetTriple = buildPlatform.config; platform = buildPlatform; })
+        (f { targetTriple = mkBuiltinRustTargetTriple buildPlatform.config; platform = buildPlatform; })
         (f { inherit targetTriple; platform = hostPlatform; })
       ];
 

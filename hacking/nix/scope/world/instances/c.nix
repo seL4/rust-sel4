@@ -39,8 +39,8 @@ mkInstance {
 
     commonModifications = {
       modifyConfig = old: lib.recursiveUpdate old {
-        target.${defaultRustTargetTriple} = {
-          rustflags = (old.target.${defaultRustTargetTriple}.rustflags or []) ++ [
+        target.${defaultRustTargetTriple.name} = {
+          rustflags = (old.target.${defaultRustTargetTriple.name}.rustflags or []) ++ [
             # TODO
             # NOTE: won't work because cross gcc always uses hard-coded --with-ld
 

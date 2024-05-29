@@ -52,7 +52,7 @@ let
     # baseConfig # TODO will trigger rebuild
     {
       target = {
-        "${targetTriple}" = {
+        "${targetTriple.name}" = {
           rustflags = [
             "--sysroot" "/dev/null"
             "-C" "embed-bitcode=yes"
@@ -83,7 +83,7 @@ in
   nativeBuildInputs = [ rustEnvironment.rustToolchain ];
   RUST_TARGET_PATH = rustEnvironment.mkTargetPath targetTriple;
 } // lib.optionalAttrs compilerBuiltinsC {
-  "CC_${targetTriple}" = "${stdenv.cc.targetPrefix}gcc";
+  "CC_${targetTriple.name}" = "${stdenv.cc.targetPrefix}gcc";
   RUST_COMPILER_RT_ROOT = rustEnvironment.compilerRTSource;
 }) ''
   cargo build \
@@ -92,15 +92,15 @@ in
     --frozen \
     --config ${config} \
     ${lib.optionalString (profile != null) "--profile ${profile}"} \
-    --target ${targetTriple} \
+    --target ${targetTriple.name} \
     -Z build-std=${crates} \
     -Z build-std-features=${features} \
     --manifest-path ${workspace}/Cargo.toml \
     --target-dir $(pwd)/target
 
-  d=$out/lib/rustlib/${targetTriple}/lib
+  d=$out/lib/rustlib/${targetTriple.name}/lib
   mkdir -p $d
-  mv target/${targetTriple}/*/deps/* $d
+  mv target/${targetTriple.name}/*/deps/* $d
 ''
 
 # TODO

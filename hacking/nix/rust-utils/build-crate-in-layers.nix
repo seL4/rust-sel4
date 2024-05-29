@@ -136,7 +136,7 @@ let
   ] ++ lib.optionals (profile != null) [
     "--profile" profile
   ] ++ [
-    "--target" targetTriple
+    "--target" targetTriple.name
     "-j" "$NIX_BUILD_CORES"
   ];
 
@@ -158,7 +158,7 @@ let
 
   findTestsCommandPrefix = targetDir: [
     "find"
-      "${targetDir}/${targetTriple}/*/deps"
+      "${targetDir}/${targetTriple.name}/*/deps"
       "-maxdepth" "1"
       "-executable"
       "-name" "'*.elf'"

@@ -55,9 +55,9 @@ let
 in
 mkShell (seL4RustEnvVars // kernelLoaderConfigEnvVars // capdlEnvVars // bindgenEnvVars // miscEnvVars // {
   # TODO
-  RUST_SEL4_TARGET = defaultRustTargetTriple;
+  RUST_SEL4_TARGET = defaultRustTargetTriple.name;
 
-  RUST_BARE_METAL_TARGET = bareMetalRustTargetTriple;
+  RUST_BARE_METAL_TARGET = bareMetalRustTargetTriple.name;
 
   HOST_CARGO_FLAGS = lib.concatStringsSep " " [
     "-Z" "build-std=core,alloc,compiler_builtins"
