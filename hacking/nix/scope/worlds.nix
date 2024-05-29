@@ -22,7 +22,7 @@ let
 
   kernelLoaderConfig = {};
 
-  corePlatformConfig = {};
+  microkitConfig = {};
 
 in rec {
   aarch64 =
@@ -50,7 +50,7 @@ in rec {
               numCores = if smp then "2" else "1";
             in
               mkWorld {
-                inherit kernelLoaderConfig corePlatformConfig;
+                inherit kernelLoaderConfig microkitConfig;
                 inherit isMicrokit;
                 kernelConfig = kernelConfigCommon // {
                   ARM_CPU = mkString cpu;
@@ -217,7 +217,7 @@ in rec {
               qemuMemory = "3072";
             in
               mkWorld {
-                inherit kernelLoaderConfig corePlatformConfig;
+                inherit kernelLoaderConfig microkitConfig;
                 kernelConfig = kernelConfigCommon // {
                   QEMU_MEMORY = mkString qemuMemory;
                   KernelArch = mkString "riscv";
