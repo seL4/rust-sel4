@@ -25,6 +25,8 @@ mkInstance {
     rootCrate = crates.tests-root-task-verus-task;
     release = false;
 
+    verifyWithVerus = true;
+
     layers = [
       crateUtils.defaultIntermediateLayer
       {
