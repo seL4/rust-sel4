@@ -32,6 +32,9 @@ in
 , rustEnvironment ? defaultRustEnvironment
 , targetTriple ? defaultRustTargetTriple
 
+
+, name ? if rootCrate != null then rootCrate.name else "build-crates"
+
 , rootCrate ? null
 , rootCrates ? if rootCrate != null then [ rootCrate ] else throw "must supply 'rootCrates' argument"
 
@@ -105,8 +108,6 @@ let
       ;
 
   lastIntermediateLayer = f (lib.reverseList accumulatedLayers);
-
-  buildName = if rootCrate != null then rootCrate.name else "build-crates";
 
   baseArgs = {
     depsBuildBuild = [ buildPackages.stdenv.cc ];
@@ -214,7 +215,7 @@ let
         runClippyThisLayer = runClippy && layer.reals != {};
       in
         modifications.modifyDerivation (stdenv.mkDerivation (baseArgs // {
-          name = "${buildName}-intermediate";
+          name = "${name}-intermediate";
 
           phases = [ "buildPhase" ];
 
@@ -259,7 +260,7 @@ in let
   ];
 
   final = modifications.modifyDerivation (stdenv.mkDerivation (baseArgs // {
-    name = buildName;
+    name = name;
 
     phases = [ "buildPhase" ];
 
