@@ -127,7 +127,7 @@ superCallPackage ../rust-utils {} self //
 
   mkMkCustomTargetPathForEnvironment = { rustEnvironment }:
     let
-      tool = buildCrateInLayers rec {
+      tool = buildCratesInLayers rec {
         inherit rustEnvironment;
         rootCrate = crates.sel4-generate-target-specs;
         lastLayerModifications = crateUtils.elaborateModifications {
@@ -182,7 +182,7 @@ superCallPackage ../rust-utils {} self //
 
   ### local tools
 
-  mkTool = rootCrate: buildCrateInLayers {
+  mkTool = rootCrate: buildCratesInLayers {
     inherit rootCrate;
   };
 
