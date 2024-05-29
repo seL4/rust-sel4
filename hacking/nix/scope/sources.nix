@@ -62,7 +62,7 @@ in rec {
 
   microkit = fetchGit {
     url = "https://github.com/coliasgroup/microkit.git";
-    rev = "612127d2152fe7dcf90b337b65a2d15c135c60a2"; # branch "rust-nix"
+    rev = "9dba402fb9c9a0a52509c005e1d06772ab601295"; # branch "rust-nix"
     local = localRoot + "/microkit";
   };
 
