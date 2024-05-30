@@ -223,6 +223,6 @@ in rec {
 
   verusSource = {
     git = "https://github.com/coliasgroup/verus.git";
-    tag = mkKeepRef "fdac1c3c52e639bf3e835802f63b43520379b1a1"; # branch dev
+    tag = mkKeepRef "4209c060c2296a97eda93229eff41cfb0d0dae75"; # branch dev
   };
 }

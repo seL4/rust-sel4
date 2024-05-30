@@ -305,12 +305,12 @@ dependencies = [
 [[package]]
 name = "builtin"
 version = "0.1.0"
-source = "git+https://github.com/coliasgroup/verus.git?tag=keep/fdac1c3c52e639bf3e835802f63b4352#fdac1c3c52e639bf3e835802f63b43520379b1a1"
+source = "git+https://github.com/coliasgroup/verus.git?tag=keep/4209c060c2296a97eda93229eff41cfb#4209c060c2296a97eda93229eff41cfb0d0dae75"
 
 [[package]]
 name = "builtin_macros"
 version = "0.1.0"
-source = "git+https://github.com/coliasgroup/verus.git?tag=keep/fdac1c3c52e639bf3e835802f63b4352#fdac1c3c52e639bf3e835802f63b43520379b1a1"
+source = "git+https://github.com/coliasgroup/verus.git?tag=keep/4209c060c2296a97eda93229eff41cfb#4209c060c2296a97eda93229eff41cfb0d0dae75"
 dependencies = [
  "prettyplease_verus",
  "proc-macro2",
@@ -1612,7 +1612,7 @@ dependencies = [
 [[package]]
 name = "prettyplease_verus"
 version = "0.1.15"
-source = "git+https://github.com/coliasgroup/verus.git?tag=keep/fdac1c3c52e639bf3e835802f63b4352#fdac1c3c52e639bf3e835802f63b43520379b1a1"
+source = "git+https://github.com/coliasgroup/verus.git?tag=keep/4209c060c2296a97eda93229eff41cfb#4209c060c2296a97eda93229eff41cfb0d0dae75"
 dependencies = [
  "proc-macro2",
  "syn_verus",
@@ -2951,7 +2951,7 @@ dependencies = [
 [[package]]
 name = "syn_verus"
 version = "1.0.95"
-source = "git+https://github.com/coliasgroup/verus.git?tag=keep/fdac1c3c52e639bf3e835802f63b4352#fdac1c3c52e639bf3e835802f63b43520379b1a1"
+source = "git+https://github.com/coliasgroup/verus.git?tag=keep/4209c060c2296a97eda93229eff41cfb#4209c060c2296a97eda93229eff41cfb0d0dae75"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -3296,7 +3296,7 @@ source = "git+https://github.com/coliasgroup/volatile.git?tag=keep/aa7512906e9b7
 [[package]]
 name = "vstd"
 version = "0.1.0"
-source = "git+https://github.com/coliasgroup/verus.git?tag=keep/fdac1c3c52e639bf3e835802f63b4352#fdac1c3c52e639bf3e835802f63b43520379b1a1"
+source = "git+https://github.com/coliasgroup/verus.git?tag=keep/4209c060c2296a97eda93229eff41cfb#4209c060c2296a97eda93229eff41cfb0d0dae75"
 dependencies = [
  "builtin",
  "builtin_macros",
