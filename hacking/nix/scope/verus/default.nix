@@ -44,7 +44,7 @@ let
 
   src = sources.fetchGit {
     url = "https://github.com/coliasgroup/verus.git";
-    rev = "16f594e0472d7417870a41a8a901d63d330a6090"; # branch dev
+    rev = "c1d8b986315b1d7fcaa0bf63c2e0497fbebab231"; # branch dev
   };
 
   lockfile = vendorLockfile {
