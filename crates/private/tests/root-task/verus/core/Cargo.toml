@@ -21,13 +21,13 @@ verify = true
 
 [dependencies.builtin]
 git = "https://github.com/coliasgroup/verus.git"
-tag = "keep/4209c060c2296a97eda93229eff41cfb"
+tag = "keep/16f594e0472d7417870a41a8a901d63d"
 
 [dependencies.builtin_macros]
 git = "https://github.com/coliasgroup/verus.git"
-tag = "keep/4209c060c2296a97eda93229eff41cfb"
+tag = "keep/16f594e0472d7417870a41a8a901d63d"
 
 [dependencies.vstd]
 git = "https://github.com/coliasgroup/verus.git"
-tag = "keep/4209c060c2296a97eda93229eff41cfb"
+tag = "keep/16f594e0472d7417870a41a8a901d63d"
 default-features = false
