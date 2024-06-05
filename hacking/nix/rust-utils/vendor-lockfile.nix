@@ -8,26 +8,21 @@
 , buildPackages
 , fetchurl
 , jq
+, toTOMLFile
 , defaultRustToolchain
 }:
 
 { rustToolchain ? defaultRustToolchain
-, lockfileContents ? null
+, lockfileValue ? if lockfileContents == null then null else builtins.fromTOML lockfileContents
+, lockfileContents ? if lockfile == null then null else builtins.readFile lockfile
 , lockfile ? null
 , fetchGitSubmodules ? false
 , extraMkCrateTarballURLFns ? {}
 } @ args:
 
-assert lockfileContents != null || lockfile != null;
+assert lockfileValue != null;
 
 let
-  lockfileContents =
-    if lockfile != null
-    then builtins.readFile lockfile
-    else args.lockfileContents;
-
-  lockfileValue = builtins.fromTOML lockfileContents;
-
   packages =
     # TODO enforce?
     # assert lockfileValue.version == 3;
@@ -213,8 +208,18 @@ let
       printf '{"files": {}, "package": null}' > "$out/.cargo-checksum.json"
     '';
 
-in {
-  lockfile = if lockfile != null then lockfile else builtins.toFile "Cargo.lock" lockfileContents;
-  inherit lockfileValue;
+in lib.fix (self: {
   configFragment = vendoredSources;
-}
+  inherit lockfileValue;
+  lockfile =
+    let
+      fname = "Cargo.lock";
+    in
+      if lockfile != null
+      then lockfile
+      else (
+        if lockfileContents != null
+        then builtins.toFile fname lockfileContents
+        else toTOMLFile fname lockfileValue
+      );
+})
