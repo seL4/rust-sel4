@@ -92,6 +92,6 @@ stdenv.mkDerivation {
 
   passthru = {
     inherit rustEnvironment;
-    rustToolchainChannel = rustToolchainAttrs.toolchain.channel;
+    inherit z3;
   };
 }

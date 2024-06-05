@@ -8,6 +8,7 @@
 , python3
 , reuse
 , cargo-audit
+, kani
 }:
 
 let
@@ -21,6 +22,7 @@ let
       python3
       reuse
       cargo-audit
+      kani
     ];
   };
 

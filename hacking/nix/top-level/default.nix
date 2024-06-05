@@ -62,6 +62,9 @@ in {
 
     sel4testInstancesList
 
+    pkgs.build.this.kani
+    pkgs.build.this.verus
+
     pkgs.host.aarch32.none.this.worlds.default.seL4
     pkgs.host.ia32.none.this.worlds.default.seL4
 
