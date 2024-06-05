@@ -15,13 +15,14 @@
 , python3Packages
 , cmake
 
+, kani
+, verus
+
 , strace
 , cntr
 , cachix
 
 , openssl
-
-, verus
 
 , shellForMakefile
 }:
@@ -40,10 +41,11 @@ mkShell (shellForMakefile.apply {
     perl
     cmake
     rustPlatform.bindgenHook
+    kani
+    verus
     strace
     cntr
     cachix
-    verus
   ];
 
   buildInputs = [
@@ -51,6 +53,10 @@ mkShell (shellForMakefile.apply {
   ];
 
   shellHook = ''
+    kargo() {
+      cargo +${kani.rustEnvironment.channel} "$@"
+    }
+
     vargo() {
       cargo +${verus.rustEnvironment.channel} "$@"
     }

@@ -176,6 +176,8 @@ superCallPackage ../rust-utils {} self //
 
   capdl-tool = callBuildBuildPackage ./capdl-tool {};
 
+  kani = callBuildBuildPackage ./kani {};
+
   verus = callBuildBuildPackage ./verus {};
 
   dafny = callBuildBuildPackage ./dafny {};
