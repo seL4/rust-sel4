@@ -122,6 +122,10 @@ witness-fast-tests:
 	$(nix_build) -A witnessFastTests --no-out-link
 	$(try_restore_terminal)
 
+.PHONY: check-kani-proofs
+check-kani-proofs:
+	$(run_in_nix_shell) "cargo kani -p sel4-bitfield-ops"
+
 .PHONY: everything-except-non-incremental
 everything-except-non-incremental:
 	$(nix_build) -A everythingExceptNonIncremental --no-out-link
