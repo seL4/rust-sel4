@@ -11,7 +11,7 @@ use crate::{InvocationContext, IpcBuffer};
 mod token;
 
 #[allow(unused_imports)]
-use token::{BorrowError, BorrowMutError, SyncToken, Token, UnsyncToken};
+use token::{Accessor, BorrowError, BorrowMutError, SyncToken, TokenCell, UnsyncToken};
 
 /// The strategy for discovering the current thread's IPC buffer which uses thread-local state.
 ///
@@ -73,8 +73,7 @@ pub fn try_with_ipc_buffer_slot<F, T>(f: F) -> T
 where
     F: FnOnce(Result<&Option<&'static mut IpcBuffer>, BorrowError>) -> T,
 {
-    let (_, r) = take_ok(TOKEN.0.try_borrow());
-    f(r.map(|_| unsafe { __sel4_ipc_buffer.0.get().as_ref().unwrap() }))
+    IPC_BUFFER.0.try_with(f)
 }
 
 /// Provides low-level mutable access to this thread's IPC buffer.
@@ -86,36 +85,29 @@ pub fn try_with_ipc_buffer_slot_mut<F, T>(f: F) -> T
 where
     F: FnOnce(Result<&mut Option<&'static mut IpcBuffer>, BorrowMutError>) -> T,
 {
-    let (_, r) = take_ok(TOKEN.0.try_borrow_mut());
-    f(r.map(|_| unsafe { __sel4_ipc_buffer.0.get().as_mut().unwrap() }))
-}
-
-fn take_ok<T, E>(r: Result<T, E>) -> (Option<T>, Result<(), E>) {
-    match r {
-        Ok(ok) => (Some(ok), Ok(())),
-        Err(err) => (None, Err(err)),
-    }
+    IPC_BUFFER.0.try_with_mut(f)
 }
 
 /// Returns whether this crate's IPC buffer slot is thread-local.
 ///
 /// Requires the `"state"` feature to be enabled.
 pub const fn ipc_buffer_is_thread_local() -> bool {
-    IPC_BUFFER_IS_THREAD_LOCAL
+    STATE_IS_THREAD_LOCAL
 }
 
 #[repr(transparent)]
-struct IpcBufferSlot(UnsafeCell<Option<&'static mut IpcBuffer>>);
+struct SyncUnsafeCell<T>(UnsafeCell<T>);
 
-unsafe impl Sync for IpcBufferSlot {}
+unsafe impl<T: Sync> Sync for SyncUnsafeCell<T> {}
 
-struct WrappedToken(TokenImpl);
+#[repr(transparent)]
+struct TokenCellWrapper<A>(TokenCell<TokenImpl, A>);
 
 cfg_if::cfg_if! {
     if #[cfg(all(any(target_thread_local, feature = "tls"), not(feature = "non-thread-local-state")))] {
         type TokenImpl = UnsyncToken;
 
-        const IPC_BUFFER_IS_THREAD_LOCAL: bool = true;
+        const STATE_IS_THREAD_LOCAL: bool = true;
 
         macro_rules! maybe_add_thread_local_attr {
             { $item:item } => {
@@ -126,7 +118,7 @@ cfg_if::cfg_if! {
     } else if #[cfg(not(feature = "thread-local-state"))] {
         cfg_if::cfg_if! {
             if #[cfg(feature = "single-threaded")] {
-                unsafe impl Sync for WrappedToken {}
+                unsafe impl<A> Sync for TokenCellWrapper<A> {}
 
                 type TokenImpl = UnsyncToken;
             } else {
@@ -134,7 +126,7 @@ cfg_if::cfg_if! {
             }
         }
 
-        const IPC_BUFFER_IS_THREAD_LOCAL: bool = false;
+        const STATE_IS_THREAD_LOCAL: bool = false;
 
         macro_rules! maybe_add_thread_local_attr {
             { $item:item } => {
@@ -146,22 +138,45 @@ cfg_if::cfg_if! {
     }
 }
 
-maybe_add_thread_local_attr! {
-    static TOKEN: WrappedToken = WrappedToken(Token::INIT);
-}
-
-cfg_if::cfg_if! {
-    if #[cfg(feature = "extern-state")] {
-        extern "C" {
-            maybe_add_thread_local_attr! {
-                static __sel4_ipc_buffer: IpcBufferSlot;
+macro_rules! maybe_extern {
+    { $ident:ident: $ty:ty = $init:expr; } => {
+        cfg_if::cfg_if! {
+            if #[cfg(feature = "extern-state")] {
+                extern "C" {
+                    maybe_add_thread_local_attr! {
+                        static $ident: $ty;
+                    }
+                }
+            } else {
+                maybe_add_thread_local_attr! {
+                    #[allow(non_upper_case_globals)]
+                    #[cfg_attr(feature = "exposed-state", no_mangle)]
+                    static $ident: $ty = $init;
+                }
             }
         }
-    } else {
-        maybe_add_thread_local_attr! {
-            #[allow(non_upper_case_globals)]
-            #[cfg_attr(feature = "exposed-state", no_mangle)]
-            static __sel4_ipc_buffer: IpcBufferSlot = IpcBufferSlot(UnsafeCell::new(None));
-        }
     }
+}
+
+struct IpcBufferAccessor;
+
+impl Accessor<Option<&'static mut IpcBuffer>> for IpcBufferAccessor {
+    #[allow(unused_unsafe)]
+    fn with<F, U>(&self, f: F) -> U
+    where
+        F: FnOnce(&UnsafeCell<Option<&'static mut IpcBuffer>>) -> U,
+    {
+        f(unsafe { &__sel4_ipc_buffer.0 })
+    }
+}
+
+maybe_add_thread_local_attr! {
+    static IPC_BUFFER: TokenCellWrapper<IpcBufferAccessor> = unsafe {
+        TokenCellWrapper(TokenCell::new(IpcBufferAccessor))
+    };
+}
+
+maybe_extern! {
+    __sel4_ipc_buffer: SyncUnsafeCell<Option<&'static mut IpcBuffer>> =
+        SyncUnsafeCell(UnsafeCell::new(None));
 }

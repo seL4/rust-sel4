@@ -4,9 +4,53 @@
 // SPDX-License-Identifier: MIT
 //
 
-use core::cell::{Ref, RefCell, RefMut};
+use core::cell::{Ref, RefCell, RefMut, UnsafeCell};
 use core::fmt;
 use core::sync::atomic::{AtomicIsize, Ordering};
+
+pub(crate) struct TokenCell<K, A> {
+    token: K,
+    accessor: A,
+}
+
+pub(crate) trait Accessor<T> {
+    fn with<F, U>(&self, f: F) -> U
+    where
+        F: FnOnce(&UnsafeCell<T>) -> U;
+}
+
+impl<K: Token, A> TokenCell<K, A> {
+    pub(crate) const unsafe fn new(accessor: A) -> Self {
+        Self {
+            token: K::INIT,
+            accessor,
+        }
+    }
+
+    pub(crate) fn try_with<F, T, U>(&self, f: F) -> U
+    where
+        A: Accessor<T>,
+        F: FnOnce(Result<&T, BorrowError>) -> U,
+    {
+        let access = || {
+            self.accessor
+                .with(|cell| unsafe { cell.get().as_ref().unwrap() })
+        };
+        self.token.try_with(access, f)
+    }
+
+    pub(crate) fn try_with_mut<F, T, U>(&self, f: F) -> U
+    where
+        A: Accessor<T>,
+        F: FnOnce(Result<&mut T, BorrowMutError>) -> U,
+    {
+        let access = || {
+            self.accessor
+                .with(|cell| unsafe { cell.get().as_mut().unwrap() })
+        };
+        self.token.try_with_mut(access, f)
+    }
+}
 
 pub(crate) trait Token {
     const INIT: Self;
@@ -22,6 +66,24 @@ pub(crate) trait Token {
     fn try_borrow(&self) -> Result<Self::Borrow<'_>, BorrowError>;
 
     fn try_borrow_mut(&self) -> Result<Self::BorrowMut<'_>, BorrowMutError>;
+
+    fn try_with<F, G, T, U>(&self, access_resource: G, f: F) -> T
+    where
+        F: FnOnce(Result<U, BorrowError>) -> T,
+        G: FnOnce() -> U,
+    {
+        let (_, r) = take_ok(self.try_borrow());
+        f(r.map(|_| access_resource()))
+    }
+
+    fn try_with_mut<F, G, T, U>(&self, access_resource: G, f: F) -> T
+    where
+        F: FnOnce(Result<U, BorrowMutError>) -> T,
+        G: FnOnce() -> U,
+    {
+        let (_, r) = take_ok(self.try_borrow_mut());
+        f(r.map(|_| access_resource()))
+    }
 }
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Ord, PartialOrd, Hash)]
@@ -51,6 +113,13 @@ impl BorrowMutError {
 impl fmt::Display for BorrowMutError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "already borrowed")
+    }
+}
+
+fn take_ok<T, E>(r: Result<T, E>) -> (Option<T>, Result<(), E>) {
+    match r {
+        Ok(ok) => (Some(ok), Ok(())),
+        Err(err) => (None, Err(err)),
     }
 }
 
