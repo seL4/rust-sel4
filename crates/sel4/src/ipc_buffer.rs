@@ -8,7 +8,13 @@
 use core::mem;
 use core::slice;
 
-use crate::{cap, newtype_methods, sys, AbsoluteCPtr, Word};
+#[sel4_cfg(KERNEL_INVOCATION_REPORT_ERROR_IPC)]
+use core::str::{self, Utf8Error};
+
+use crate::{cap, newtype_methods, sel4_cfg, sys, AbsoluteCPtr, Word};
+
+#[sel4_cfg(KERNEL_INVOCATION_REPORT_ERROR_IPC)]
+use crate::const_helpers::u32_into_usize;
 
 /// Corresponds to `seL4_IPCBuffer`.
 #[derive(Default)]
@@ -67,5 +73,19 @@ impl IpcBuffer {
         inner.receiveCNode = slot.root().bits();
         inner.receiveIndex = slot.path().bits();
         inner.receiveDepth = slot.path().depth().try_into().unwrap();
+    }
+
+    #[sel4_cfg(KERNEL_INVOCATION_REPORT_ERROR_IPC)]
+    pub fn debug_error_bytes(&self) -> &[u8] {
+        let start = u32_into_usize(sys::DEBUG_MESSAGE_START) * mem::size_of::<Word>();
+        let len = u32_into_usize(sys::DEBUG_MESSAGE_MAXLEN) * mem::size_of::<Word>();
+        let all_bytes = &self.msg_bytes()[start..][..len];
+        let n = all_bytes.iter().take_while(|b| **b != 0).count();
+        &all_bytes[..n]
+    }
+
+    #[sel4_cfg(KERNEL_INVOCATION_REPORT_ERROR_IPC)]
+    pub fn debug_error(&self) -> Result<&str, Utf8Error> {
+        str::from_utf8(self.debug_error_bytes())
     }
 }
