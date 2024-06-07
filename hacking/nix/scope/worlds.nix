@@ -42,16 +42,24 @@ in rec {
             , el2 ? true
             , hypervisor ? false
             , cpu ? "cortex-a57"
-            , isMicrokit ? false
             , mkSeL4KernelLoaderWithPayloadQEMUArgs ? loader: [ "-kernel" loader ]
+
+            , isMicrokit ? false
+            , microkitBoard ? null
+            , microkitConfig ? if debugBuild == null || debugBuild then "debug" else "release"
+
             , extraQEMUArgs ? []
             }:
             let
               numCores = if smp then "2" else "1";
             in
               mkWorld {
-                inherit kernelLoaderConfig microkitConfig;
+                inherit kernelLoaderConfig;
                 inherit isMicrokit;
+                microkitConfig = {
+                  board = microkitBoard;
+                  config = microkitConfig;
+                };
                 kernelConfig = kernelConfigCommon // {
                   ARM_CPU = mkString cpu;
                   KernelArch = mkString "arm";
@@ -97,6 +105,7 @@ in rec {
             el2 = false;
             mcs = true;
             isMicrokit = true;
+            microkitBoard = "qemu_virt_aarch64";
             cpu = "cortex-a53";
             mkSeL4KernelLoaderWithPayloadQEMUArgs = loader: [ "-device" "loader,file=${loader},addr=0x70000000,cpu-num=0" ];
             extraQEMUArgs = [ "-m" "size=2G" ];

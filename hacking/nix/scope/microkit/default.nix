@@ -19,8 +19,7 @@
 , rustToolchain ? defaultRustToolchain
 }:
 
-# no configuration yet
-{}:
+{ board, config }:
 
 let
   microkitSource = sources.microkit;
@@ -77,7 +76,13 @@ let
     dontFixup = true;
 
     buildPhase = ''
-      python3 build_sdk.py --sel4=${kernelSourcePatched}
+      python3 build_sdk.py \
+        --sel4=${kernelSourcePatched} \
+        --only-board ${board} \
+        --only-config ${config} \
+        --skip-docs \
+        --skip-source-tarball
+
     '';
 
     installPhase = ''
@@ -115,8 +120,8 @@ let
   mkSystem = { searchPath, systemXML }:
     lib.fix (self: runCommand "system" {
       MICROKIT_SDK = sdk;
-      MICROKIT_BOARD = "qemu_virt_aarch64";
-      MICROKIT_CONFIG = "debug";
+      MICROKIT_BOARD = board;
+      MICROKIT_CONFIG = config;
 
       nativeBuildInputs = [
         python3Packages.sel4-deps
@@ -128,8 +133,8 @@ let
           { name = "pds"; path = searchPath; }
           { name = "loader.elf"; path = loader; }
           { name = "report.txt"; path = "${self}/report.txt"; }
-          { name = "sdk/monitor.elf"; path = "${sdk}/board/qemu_virt_aarch64/debug/elf/monitor.elf"; }
-          { name = "sdk/loader.elf"; path = "${sdk}/board/qemu_virt_aarch64/debug/elf/loader.elf"; }
+          { name = "sdk/monitor.elf"; path = "${sdk}/board/${board}/${config}/elf/monitor.elf"; }
+          { name = "sdk/loader.elf"; path = "${sdk}/board/${board}/${config}/elf/loader.elf"; }
         ];
       };
     } ''
@@ -142,7 +147,7 @@ let
         -r $out/report.txt
     '');
 
-  exampleSource = microkitSource + "/example/qemu_virt_aarch64/hello";
+  exampleSource = microkitSource + "/example/${board}/hello";
 
   examplePDs = stdenv.mkDerivation {
     name = "example";
@@ -150,8 +155,8 @@ let
     src = exampleSource;
 
     MICROKIT_SDK = sdk;
-    MICROKIT_BOARD = "qemu_virt_aarch64";
-    MICROKIT_CONFIG = "debug";
+    MICROKIT_BOARD = board;
+    MICROKIT_CONFIG = config;
 
     MICROKIT_TOOL = "${tool}/bin/microkit";
 
@@ -169,7 +174,7 @@ let
     '';
   };
 
-  example = mkSystem {
+  example = assert board == "qemu_virt_aarch64"; mkSystem {
     searchPath = examplePDs;
     systemXML = exampleSource + "/hello.system";
   };
