@@ -149,6 +149,14 @@ in rec {
         };
         mkInstanceForPlatform = platUtils.rpi4.mkInstanceForPlatform;
       };
+
+      zcu102 = mkWorld {
+        isMicrokit = true;
+        microkitConfig = {
+          board = "zcu102";
+          config = "debug";
+        };
+      };
     };
 
   aarch32 =
