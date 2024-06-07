@@ -53,6 +53,12 @@ self: with self;
   microkitForUserspace = microkit;
   microkitForBoot = microkit;
 
+  microkitDir =
+    let
+      inherit (worldConfig.microkitConfig) board config;
+    in
+      "${microkitForUserspace.sdk}/board/${board}/${config}";
+
   seL4 = assert !worldConfig.isMicrokit; mkSeL4 worldConfig.kernelConfig;
 
   seL4ForUserspace = seL4;
@@ -64,21 +70,15 @@ self: with self;
   seL4IncludeDir =
     if worldConfig.isMicrokit
     then
-      let
-        d = "${microkitForUserspace.sdk}/board/qemu_virt_aarch64/debug";
-      in
-        "${d}/include"
+      "${microkitDir}/include"
     else
       "${seL4ForUserspace}/libsel4/include";
 
   seL4RustEnvVars =
     if worldConfig.isMicrokit
-    then
-      let
-        d = "${microkitForUserspace.sdk}/board/qemu_virt_aarch64/debug";
-      in {
-          SEL4_INCLUDE_DIRS = "${d}/include";
-      }
+    then {
+      SEL4_INCLUDE_DIRS = "${microkitDir}/include";
+    }
     else {
       SEL4_PREFIX = seL4ForUserspace;
     };
