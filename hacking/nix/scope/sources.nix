@@ -49,7 +49,7 @@ in rec {
   seL4 = {
     rust = fetchGit {
       url = "https://github.com/coliasgroup/seL4.git";
-      rev = "80eaac9ee68b2b24249e1acda116dfc4bf56cdd8"; # branch "rust-testing"
+      rev = "a57464ad2c4e269dfb5e5bd87bf7d6b81417a2ed"; # branch "rust-testing"
       local = localRoot + "/seL4";
     };
 
