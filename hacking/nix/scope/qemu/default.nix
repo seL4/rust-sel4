@@ -6,7 +6,7 @@
 
 { lib, stdenv
 , buildPackages
-, fetchurl, fetchpatch
+, fetchurl, fetchpatch, fetchFromGitHub, fetchFromGitLab
 , python3Packages
 , pkg-config, ninja, meson, perl
 , zlib, lzo, glib
@@ -15,10 +15,18 @@
 , texinfo
 , snappy, libaio, libtasn1, gnutls, nettle, curl
 , attr, libcap, libcap_ng, libslirp
-, hostCpuTargets ? []
+
+, hostCpuTargets ? [
+    "arm-softmmu"
+    "aarch64-softmmu"
+    "riscv32-softmmu"
+    "riscv64-softmmu"
+    "i386-softmmu"
+    "x86_64-softmmu"
+  ]
 }:
 
-stdenv.mkDerivation rec {
+stdenv.mkDerivation (finalAttrs: with finalAttrs; {
   pname = "qemu";
   version = "9.0.0";
 
@@ -94,4 +102,4 @@ stdenv.mkDerivation rec {
   preBuild = ''
     cd build
   '';
-}
+})
