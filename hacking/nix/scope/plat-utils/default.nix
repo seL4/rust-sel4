@@ -9,4 +9,9 @@
 {
   qemu = callPackage ./qemu {};
   rpi4 = callPackage ./rpi4 {};
+
+  composeInstanceForPlatformAttrs = a: b: {
+    attrs = a.attrs // b.attrs;
+    links = a.links ++ b.links;
+  };
 }
