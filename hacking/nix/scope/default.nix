@@ -261,15 +261,7 @@ superCallPackage ../rust-utils {} self //
 
   opensbi = callPackage ./opensbi.nix {};
 
-  qemuForSeL4 = callPackage ./qemu {
-    hostCpuTargets = [
-      "arm-softmmu"
-      "aarch64-softmmu"
-      "riscv32-softmmu"
-      "riscv64-softmmu"
-      "i386-softmmu"
-      "x86_64-softmmu"
-    ];
-  };
+  qemuForSeL4 = callPackage ./qemu {};
+  qemuForSeL4Xilinx = callPackage ./qemu/xilinx.nix {};
 
 })

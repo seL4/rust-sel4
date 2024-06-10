@@ -156,6 +156,22 @@ in rec {
           board = "zcu102";
           config = "debug";
         };
+        canSimulate = true;
+        mkInstanceForPlatform = platUtils.qemu.mkMkInstanceForPlatform {
+          mkQemuCmd = loader: [
+            "${pkgsBuildBuild.this.qemuForSeL4Xilinx}/bin/qemu-system-aarch64"
+            # "${pkgsBuildBuild.this.qemuForSeL4}/bin/qemu-system-aarch64"
+              "-machine" "xlnx-zcu102"
+              # "-machine" "arm-generic-fdt"
+              # "-hw-dtb" "${pkgsBuildBuild.this.qemuForSeL4Xilinx.devicetrees}/SINGLE_ARCH//zcu102-arm.dtb"
+              "-m" "size=4G"
+              "-nographic"
+              "-serial" "mon:stdio"
+              "-device" "loader,file=${loader},addr=0x40000000,cpu-num=0"
+              "-device" "loader,addr=0xfd1a0104,data=0x0000000e,data-len=4"
+          ];
+        };
+
       };
     };
 
