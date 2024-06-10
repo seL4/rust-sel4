@@ -283,6 +283,31 @@ in rec {
               "-nographic"
               "-serial" "mon:stdio"
               "-kernel" loader
+            # TODO
+            # "${pkgsBuildBuild.spike}/bin/spike"
+            #   "-m4096"
+            #   "--kernel=${loader}"
+            #   "${opensbi}/share/opensbi/lp64/generic/firmware/fw_dynamic.elf"
+          ];
+        };
+      };
+
+      hifive = mkWorld {
+        inherit kernelLoaderConfig;
+        kernelConfig = kernelConfigCommon // {
+          KernelArch = mkString "riscv";
+          KernelSel4Arch = mkString "riscv64";
+          KernelPlatform = mkString "hifive";
+        };
+        canSimulate = true;
+        mkInstanceForPlatform = platUtils.qemu.mkMkInstanceForPlatform {
+          mkQemuCmd = loader: [
+            "${pkgsBuildBuild.this.qemuForSeL4}/bin/qemu-system-riscv64"
+              "-machine" "sifive_u"
+              "-m" "size=8192M"
+              "-nographic"
+              "-serial" "mon:stdio"
+              "-kernel" loader
           ];
         };
       };
