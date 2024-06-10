@@ -90,7 +90,7 @@ in rec {
                     # virtualization=on even when hypervisor to test loader dropping exception level
                     "${pkgsBuildBuild.this.qemuForSeL4}/bin/qemu-system-aarch64"
                       "-machine" "virt${lib.optionalString el2 ",virtualization=on"}"
-                      "-cpu" cpu "-smp" numCores "-m" "1024"
+                      "-cpu" cpu "-smp" numCores "-m" "size=1024"
                       "-nographic"
                       "-serial" "mon:stdio"
                   ] ++ mkSeL4KernelLoaderWithPayloadQEMUArgs loader ++ extraQEMUArgs;
@@ -190,7 +190,7 @@ in rec {
                   mkQemuCmd = loader: [
                     "${pkgsBuildBuild.this.qemuForSeL4}/bin/qemu-system-arm"
                       "-machine" "virt,highmem=off,secure=off,virtualization=${if bootInHyp then "on" else "off"}"
-                      "-cpu" cpu "-smp" numCores "-m" "1024"
+                      "-cpu" cpu "-smp" numCores "-m" "size=1024"
                       "-nographic"
                       "-serial" "mon:stdio"
                       "-kernel" loader
@@ -248,10 +248,11 @@ in rec {
                   mkQemuCmd = loader: [
                     "${pkgsBuildBuild.this.qemuForSeL4}/bin/qemu-system-riscv64"
                       "-machine" "virt"
-                      "-cpu" "rv64" "-smp" numCores "-m" qemuMemory
+                      "-cpu" "rv64" "-smp" numCores "-m" "size=${qemuMemory}"
                       "-nographic"
                       "-serial" "mon:stdio"
                       "-kernel" loader
+                      # "-d" "unimp,guest_errors"
                   ];
                 };
               };
