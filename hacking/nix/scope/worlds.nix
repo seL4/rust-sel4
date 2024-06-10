@@ -140,12 +140,12 @@ in rec {
       bcm2711 = mkWorld {
         inherit kernelLoaderConfig;
         kernelConfig = kernelConfigCommon // {
-          RPI4_MEMORY = mkString "4096";
+          RPI4_MEMORY = mkString "2048"; # match QEMU's model
           KernelArch = mkString "arm";
           KernelSel4Arch = mkString "aarch64";
           KernelPlatform = mkString "bcm2711";
-          KernelArmHypervisorSupport = on;
-          KernelMaxNumNodes = mkString "4";
+          KernelArmHypervisorSupport = on; # seems incompatible with QEMU's model
+          KernelMaxNumNodes = mkString "4"; # currently not working with QEMU
         };
         mkInstanceForPlatform = platUtils.rpi4.mkInstanceForPlatform;
       };

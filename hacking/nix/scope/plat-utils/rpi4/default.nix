@@ -5,12 +5,15 @@
 #
 
 { lib, hostPlatform, callPackage
+, pkgsBuildBuild
 , runCommand, writeText
 , fetchFromGitHub
 , ubootTools
 
 , fetchzip
 , stdenvNoCC, mtools, utillinux
+
+, platUtils
 }:
 
 let
@@ -96,7 +99,21 @@ let
         image = loader;
       };
       bootCopied = mkBootCopied boot;
-    in rec {
+      qemu = platUtils.qemu.mkMkInstanceForPlatform {
+        mkQemuCmd = loader: [
+          "${pkgsBuildBuild.this.qemuForSeL4}/bin/qemu-system-${if hostPlatform.is32bit then "arm" else "aarch64"}"
+            "-smp" "4"
+            "-m" "size=2048"
+            "-machine" "raspi4b"
+            "-nographic"
+            "-serial" "null"
+            "-serial" "mon:stdio"
+            "-kernel" loader
+        ];
+      } {
+        inherit loader rootTask;
+      };
+    in platUtils.composeInstanceForPlatformAttrs qemu (rec {
       attrs = {
         inherit boot bootCopied;
       };
@@ -105,7 +122,7 @@ let
           path = boot;
         }
       ];
-    };
+    });
 
 in {
   inherit
