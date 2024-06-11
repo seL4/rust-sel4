@@ -21,6 +21,8 @@ stdenv.mkDerivation rec {
     hash = "sha256-JNkPvmKYd5xbGB2lsZKWrpI6rBIckWbkLYu98bw7+QY=";
   };
 
+  hardeningDisable = [ "all" ];
+
   postPatch = ''
     patchShebangs ./scripts
   '';
