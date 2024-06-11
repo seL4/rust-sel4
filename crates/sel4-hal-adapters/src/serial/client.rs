@@ -19,18 +19,18 @@ use super::common::*;
 /// component. Interact with it using [serial::Read], [serial::Write],
 /// and [fmt::Write].
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub struct SerialDriver {
+pub struct Client {
     pub channel: Channel,
 }
 
-impl SerialDriver {
+impl Client {
     pub fn new(channel: Channel) -> Self {
-        SerialDriver { channel }
+        Client { channel }
     }
 }
 
 #[derive(Clone, Debug)]
-pub enum SerialDriverError {
+pub enum Error {
     ReadError(IpcError),
     WriteError(IpcError),
 }
@@ -41,40 +41,36 @@ pub enum IpcError {
     GotInvalidResponse,
 }
 
-impl serial::Error for SerialDriverError {
+impl serial::Error for Error {
     fn kind(&self) -> serial::ErrorKind {
         serial::ErrorKind::Other
     }
 }
 
-impl serial::ErrorType for SerialDriver {
-    type Error = SerialDriverError;
+impl serial::ErrorType for Client {
+    type Error = Error;
 }
 
-impl serial::Read<u8> for SerialDriver {
+impl serial::Read<u8> for Client {
     fn read(&mut self) -> nb::Result<u8, Self::Error> {
         let req = Request::GetChar;
         let resp = self
             .channel
             .pp_call(MessageInfo::send_using_postcard(req).unwrap())
             .recv_using_postcard::<GetCharSomeResponse>()
-            .map_err(|_| {
-                nb::Error::Other(SerialDriverError::ReadError(IpcError::GotInvalidResponse))
-            })?;
+            .map_err(|_| nb::Error::Other(Error::ReadError(IpcError::GotInvalidResponse)))?;
         resp.val.ok_or(nb::Error::WouldBlock)
     }
 }
 
-impl serial::Write<u8> for SerialDriver {
+impl serial::Write<u8> for Client {
     // TODO dont' block?
     fn write(&mut self, val: u8) -> nb::Result<(), Self::Error> {
         let req = Request::PutChar { val };
         self.channel
             .pp_call(MessageInfo::send_using_postcard(req).unwrap())
             .recv_empty()
-            .map_err(|_| {
-                nb::Error::Other(SerialDriverError::WriteError(IpcError::GotInvalidResponse))
-            })?;
+            .map_err(|_| nb::Error::Other(Error::WriteError(IpcError::GotInvalidResponse)))?;
         Ok(())
     }
 
@@ -85,7 +81,7 @@ impl serial::Write<u8> for SerialDriver {
 
 // XXX There's already an implementation of fmt::Write for serial::Write
 // in embedded_hal::fmt, but I'm not clear on how to use it.
-impl fmt::Write for SerialDriver {
+impl fmt::Write for Client {
     fn write_str(&mut self, s: &str) -> fmt::Result {
         s.as_bytes().iter().copied().for_each(|b| {
             let _ = self.write(b);
