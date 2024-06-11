@@ -2311,18 +2311,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "sel4-hal-adapters"
-version = "0.1.0"
-dependencies = [
- "embedded-hal-nb",
- "heapless",
- "log",
- "sel4-microkit",
- "sel4-microkit-message",
- "serde",
-]
-
-[[package]]
 name = "sel4-immediate-sync-once-cell"
 version = "0.1.0"
 
@@ -2447,6 +2435,18 @@ version = "0.1.0"
 dependencies = [
  "sel4",
  "sel4-immutable-cell",
+]
+
+[[package]]
+name = "sel4-microkit-embedded-hal-adapters"
+version = "0.1.0"
+dependencies = [
+ "embedded-hal-nb",
+ "heapless",
+ "log",
+ "sel4-microkit",
+ "sel4-microkit-message",
+ "serde",
 ]
 
 [[package]]

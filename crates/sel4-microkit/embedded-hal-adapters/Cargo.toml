@@ -10,7 +10,7 @@
 #
 
 [package]
-name = "sel4-hal-adapters"
+name = "sel4-microkit-embedded-hal-adapters"
 version = "0.1.0"
 authors = ["Nick Spinale <nick.spinale@coliasgroup.com>", "Ben Hamlin <hamlinb@galois.com>"]
 edition = "2021"
@@ -20,6 +20,6 @@ license = "BSD-2-Clause"
 embedded-hal-nb = "1.0"
 heapless = "0.7.16"
 log = "0.4.17"
-sel4-microkit = { path = "../sel4-microkit", default-features = false }
-sel4-microkit-message = { path = "../sel4-microkit/message" }
+sel4-microkit = { path = "..", default-features = false }
+sel4-microkit-message = { path = "../message" }
 serde = { version = "1.0.147", default-features = false }
