@@ -4,12 +4,11 @@
 # SPDX-License-Identifier: BSD-2-Clause
 #
 
-{ mk, localCrates, versions, virtioDriversWith }:
+{ mk, localCrates, virtioDriversWith }:
 
 mk {
   package.name = "microkit-http-server-example-virtio-hal-impl";
   dependencies = {
-    inherit (versions) log;
     virtio-drivers = virtioDriversWith [];
     inherit (localCrates)
       sel4-sync

@@ -1215,7 +1215,6 @@ dependencies = [
 name = "microkit-http-server-example-virtio-hal-impl"
 version = "0.1.0"
 dependencies = [
- "log",
  "sel4-bounce-buffer-allocator",
  "sel4-externally-shared",
  "sel4-immediate-sync-once-cell",
