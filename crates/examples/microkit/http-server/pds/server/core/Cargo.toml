@@ -17,6 +17,7 @@ edition = "2021"
 license = "BSD-2-Clause"
 
 [dependencies]
+embedded-io-async = "0.6.1"
 futures = { version = "0.3.28", default-features = false, features = ["async-await", "alloc"] }
 httparse = { version = "1.8.0", default-features = false }
 log = "0.4.17"

@@ -9,9 +9,11 @@
 
 #![no_std]
 
-use core::future::poll_fn;
-use core::pin::Pin;
+use core::future::{poll_fn, Future};
+use core::pin::{pin, Pin};
 use core::task::{Context, Poll};
+
+use embedded_io_async as eio;
 
 pub use embedded_io_async::{Error, ErrorKind, ErrorType};
 
@@ -21,36 +23,6 @@ pub trait Read: ErrorType {
         cx: &mut Context<'_>,
         buf: &mut [u8],
     ) -> Poll<Result<usize, Self::Error>>;
-
-    // // //
-
-    #[allow(async_fn_in_trait)]
-    async fn read(&mut self, buf: &mut [u8]) -> Result<usize, Self::Error>
-    where
-        Self: Unpin,
-    {
-        let mut pin = Pin::new(self);
-        poll_fn(move |cx| pin.as_mut().poll_read(cx, buf)).await
-    }
-
-    #[allow(async_fn_in_trait)]
-    async fn read_exact(&mut self, mut buf: &mut [u8]) -> Result<(), ReadExactError<Self::Error>>
-    where
-        Self: Unpin,
-    {
-        while !buf.is_empty() {
-            match self.read(buf).await {
-                Ok(0) => break,
-                Ok(n) => buf = &mut buf[n..],
-                Err(e) => return Err(ReadExactError::Other(e)),
-            }
-        }
-        if buf.is_empty() {
-            Ok(())
-        } else {
-            Err(ReadExactError::UnexpectedEof)
-        }
-    }
 }
 
 pub trait Write: ErrorType {
@@ -60,56 +32,149 @@ pub trait Write: ErrorType {
         buf: &[u8],
     ) -> Poll<Result<usize, Self::Error>>;
 
-    fn poll_flush(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>>;
+    fn poll_flush(self: Pin<&mut Self>, _cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
+        Poll::Ready(Ok(()))
+    }
+}
 
-    // // //
+impl<T: Read + Unpin> Read for &mut T {
+    fn poll_read(
+        self: Pin<&mut Self>,
+        cx: &mut Context<'_>,
+        buf: &mut [u8],
+    ) -> Poll<Result<usize, Self::Error>> {
+        T::poll_read(Pin::new(*Pin::into_inner(self)), cx, buf)
+    }
+}
 
-    #[allow(async_fn_in_trait)]
-    async fn write(&mut self, buf: &[u8]) -> Result<usize, Self::Error>
-    where
-        Self: Unpin,
-    {
-        let mut pin = Pin::new(self);
-        poll_fn(|cx| pin.as_mut().poll_write(cx, buf)).await
+impl<T: Write + Unpin> Write for &mut T {
+    fn poll_write(
+        self: Pin<&mut Self>,
+        cx: &mut Context<'_>,
+        buf: &[u8],
+    ) -> Poll<Result<usize, Self::Error>> {
+        T::poll_write(Pin::new(*Pin::into_inner(self)), cx, buf)
     }
 
-    #[allow(async_fn_in_trait)]
-    async fn write_all(&mut self, buf: &[u8]) -> Result<(), Self::Error>
-    where
-        Self: Unpin,
-    {
-        let mut buf = buf;
-        while !buf.is_empty() {
-            match self.write(buf).await {
-                Ok(0) => panic!("write() returned Ok(0)"),
-                Ok(n) => buf = &buf[n..],
-                Err(e) => return Err(e),
+    fn poll_flush(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
+        T::poll_flush(Pin::new(*Pin::into_inner(self)), cx)
+    }
+}
+
+#[derive(Debug, Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
+pub struct EmbeddedIOAsyncAdapter<T>(pub T);
+
+impl<T: ErrorType> ErrorType for EmbeddedIOAsyncAdapter<T> {
+    type Error = T::Error;
+}
+
+impl<T> eio::Read for EmbeddedIOAsyncAdapter<T>
+where
+    T: Read + Unpin,
+{
+    async fn read(&mut self, buf: &mut [u8]) -> Result<usize, Self::Error> {
+        poll_fn(|cx| Pin::new(&mut self.0).poll_read(cx, buf)).await
+    }
+}
+
+impl<T> eio::Write for EmbeddedIOAsyncAdapter<T>
+where
+    T: Write + Unpin,
+{
+    async fn write(&mut self, buf: &[u8]) -> Result<usize, Self::Error> {
+        poll_fn(|cx| Pin::new(&mut self.0).poll_write(cx, buf)).await
+    }
+
+    async fn flush(&mut self) -> Result<(), Self::Error> {
+        poll_fn(|cx| Pin::new(&mut self.0).poll_flush(cx)).await
+    }
+}
+
+pub trait ReadCancelSafe: eio::Read {}
+pub trait FlushCancelSafe: eio::Write {}
+pub trait WriteCancelSafe: FlushCancelSafe {}
+
+impl<T: Read + Unpin> ReadCancelSafe for EmbeddedIOAsyncAdapter<T> {}
+impl<T: Write + Unpin> FlushCancelSafe for EmbeddedIOAsyncAdapter<T> {}
+impl<T: Write + Unpin> WriteCancelSafe for EmbeddedIOAsyncAdapter<T> {}
+
+impl<T> Read for EmbeddedIOAsyncAdapter<T>
+where
+    T: eio::Read + ReadCancelSafe + Unpin,
+{
+    fn poll_read(
+        mut self: Pin<&mut Self>,
+        cx: &mut Context<'_>,
+        buf: &mut [u8],
+    ) -> Poll<Result<usize, Self::Error>> {
+        pin!(self.0.read(buf)).poll(cx)
+    }
+}
+
+impl<T> Write for EmbeddedIOAsyncAdapter<T>
+where
+    T: eio::Write + WriteCancelSafe + Unpin,
+{
+    fn poll_write(
+        mut self: Pin<&mut Self>,
+        cx: &mut Context<'_>,
+        buf: &[u8],
+    ) -> Poll<Result<usize, Self::Error>> {
+        pin!(self.0.write(buf)).poll(cx)
+    }
+
+    fn poll_flush(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
+        pin!(self.0.flush()).poll(cx)
+    }
+}
+
+#[derive(Debug, Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
+pub struct EmbeddedIOAsyncAdapterUsingReady<T>(pub T);
+
+impl<T: ErrorType> ErrorType for EmbeddedIOAsyncAdapterUsingReady<T> {
+    type Error = T::Error;
+}
+
+impl<T> Read for EmbeddedIOAsyncAdapterUsingReady<T>
+where
+    T: eio::Read + eio::ReadReady + Unpin,
+{
+    fn poll_read(
+        mut self: Pin<&mut Self>,
+        cx: &mut Context<'_>,
+        buf: &mut [u8],
+    ) -> Poll<Result<usize, Self::Error>> {
+        if self.0.read_ready()? {
+            match pin!(self.0.read(buf)).poll(cx) {
+                Poll::Ready(r) => Poll::Ready(r),
+                Poll::Pending => unreachable!(),
             }
+        } else {
+            Poll::Pending
         }
-        Ok(())
-    }
-
-    #[allow(async_fn_in_trait)]
-    async fn flush(&mut self) -> Result<(), Self::Error>
-    where
-        Self: Unpin,
-    {
-        let mut pin = Pin::new(self);
-        poll_fn(|cx| pin.as_mut().poll_flush(cx)).await
     }
 }
 
-/// Error returned by [`Read::read_exact`]
-#[derive(Debug, Copy, Clone, Eq, PartialEq)]
-pub enum ReadExactError<E> {
-    /// An EOF error was encountered before reading the exact amount of requested bytes.
-    UnexpectedEof,
-    /// Error returned by the inner Read.
-    Other(E),
-}
+impl<T> Write for EmbeddedIOAsyncAdapterUsingReady<T>
+where
+    T: eio::Write + eio::WriteReady + FlushCancelSafe + Unpin,
+{
+    fn poll_write(
+        mut self: Pin<&mut Self>,
+        cx: &mut Context<'_>,
+        buf: &[u8],
+    ) -> Poll<Result<usize, Self::Error>> {
+        if self.0.write_ready()? {
+            match pin!(self.0.write(buf)).poll(cx) {
+                Poll::Ready(r) => Poll::Ready(r),
+                Poll::Pending => unreachable!(),
+            }
+        } else {
+            Poll::Pending
+        }
+    }
 
-impl<E> From<E> for ReadExactError<E> {
-    fn from(err: E) -> Self {
-        Self::Other(err)
+    fn poll_flush(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
+        pin!(self.0.flush()).poll(cx)
     }
 }

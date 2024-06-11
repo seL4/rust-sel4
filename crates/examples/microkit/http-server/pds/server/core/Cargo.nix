@@ -9,7 +9,7 @@
 mk {
   package.name = "microkit-http-server-example-server-core";
   dependencies = {
-    inherit (versions) log webpki-roots;
+    inherit (versions) log embedded-io-async webpki-roots;
 
     futures = {
       version = versions.futures;
