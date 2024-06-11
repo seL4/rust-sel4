@@ -29,7 +29,7 @@ use smoltcp::{
     wire::{DnsQueryType, IpAddress, IpCidr, IpEndpoint, IpListenEndpoint, Ipv4Address, Ipv4Cidr},
 };
 
-use sel4_async_io::{Read, Write};
+use sel4_async_io::{Error as AsyncIOError, ErrorKind, ErrorType, Read, Write};
 
 pub(crate) const DEFAULT_KEEP_ALIVE_INTERVAL: u64 = 75000;
 pub(crate) const DEFAULT_TCP_SOCKET_BUFFER_SIZE: usize = 65535;
@@ -80,6 +80,12 @@ pub enum TcpSocketError {
     ListenError(tcp::ListenError),
     ConnectError(tcp::ConnectError),
     ConnectionResetDuringConnect,
+}
+
+impl AsyncIOError for TcpSocketError {
+    fn kind(&self) -> ErrorKind {
+        ErrorKind::Other
+    }
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
@@ -290,7 +296,7 @@ impl Socket<tcp::Socket<'static>> {
     }
 }
 
-impl sel4_async_io::ErrorType for Socket<tcp::Socket<'static>> {
+impl ErrorType for Socket<tcp::Socket<'static>> {
     type Error = TcpSocketError;
 }
 

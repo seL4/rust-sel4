@@ -4,8 +4,12 @@
 // SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 //
 
+use core::fmt::Debug;
+
 use rustls::unbuffered::{EncodeError, EncryptError};
 use rustls::Error as TlsError;
+
+use sel4_async_io::{Error as AsyncIOError, ErrorKind};
 
 #[derive(Debug)]
 pub enum Error<E> {
@@ -31,5 +35,11 @@ impl<E> From<EncodeError> for Error<E> {
 impl<E> From<EncryptError> for Error<E> {
     fn from(err: EncryptError) -> Self {
         Self::EncryptError(err)
+    }
+}
+
+impl<E: Debug> AsyncIOError for Error<E> {
+    fn kind(&self) -> ErrorKind {
+        ErrorKind::Other
     }
 }

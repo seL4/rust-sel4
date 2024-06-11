@@ -93,6 +93,8 @@ in rec {
     async-unsync = "0.2.2";
     cfg-if = "1.0.0";
     clap = "4.4.6";
+    embedded-hal-nb = "1.0";
+    embedded-io-async = "0.6.1";
     fallible-iterator = "0.2.0";
     fdt = "0.1.5";
     futures = "0.3.28";
