@@ -14,7 +14,7 @@ mk {
     "Ben Hamlin <hamlinb@galois.com>"
   ];
   dependencies = {
-    inherit (versions) log;
+    inherit (versions) log embedded-hal-nb heapless;
     serde = serdeWith [];
   } // (with localCrates; {
     inherit sel4-microkit-message;
