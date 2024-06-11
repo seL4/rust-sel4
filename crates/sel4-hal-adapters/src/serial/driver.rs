@@ -50,7 +50,6 @@ where
     }
 }
 
-
 impl<Device> Handler for Driver<Device>
 where
     Device: serial::Read<u8> + serial::Write<u8> + IrqDevice,
@@ -96,7 +95,7 @@ where
                         if val.is_some() {
                             self.notify = true;
                         }
-                        MessageInfo::send_using_postcard(GetCharSomeResponse { val }).unwrap()
+                        MessageInfo::send_using_postcard(GetCharResponse { val }).unwrap()
                     }
                 },
                 Err(_) => MessageInfo::send_unspecified_error(),

@@ -190,7 +190,7 @@ fn newline() {
 
 fn get_char() -> Option<u8> {
     let req = pl011_driver::Request::GetChar;
-    let resp: pl011_driver::GetCharSomeResponse = PL011_DRIVER
+    let resp: pl011_driver::GetCharResponse = PL011_DRIVER
         .pp_call(MessageInfo::send_using_postcard(req).unwrap())
         .recv_using_postcard()
         .unwrap();

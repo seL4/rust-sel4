@@ -39,7 +39,7 @@ impl serial::Read<u8> for Client {
         let resp = self
             .channel
             .pp_call(MessageInfo::send_using_postcard(req).unwrap())
-            .recv_using_postcard::<GetCharSomeResponse>()
+            .recv_using_postcard::<GetCharResponse>()
             .map_err(|_| nb::Error::Other(Error::ReadError(IpcError::GotInvalidResponse)))?;
         resp.val.ok_or(nb::Error::WouldBlock)
     }
