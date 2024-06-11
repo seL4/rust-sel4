@@ -6,6 +6,3 @@
 //
 
 #![no_std]
-
-#[cfg(feature = "smoltcp-hal")]
-pub mod smoltcp;

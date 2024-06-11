@@ -5,6 +5,8 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
+#![no_std]
+
 //! A generic microkit handler for implementors of [`smoltcp::phy::Device`].
 
 use smoltcp::{

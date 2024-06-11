@@ -2299,13 +2299,9 @@ name = "sel4-hal-adapters"
 version = "0.1.0"
 dependencies = [
  "log",
- "sel4-bounce-buffer-allocator",
- "sel4-externally-shared",
  "sel4-microkit",
  "sel4-microkit-message",
- "sel4-shared-ring-buffer",
  "serde",
- "smoltcp",
 ]
 
 [[package]]
@@ -2461,6 +2457,20 @@ dependencies = [
  "postcard",
  "serde",
  "zerocopy",
+]
+
+[[package]]
+name = "sel4-microkit-smoltcp-device-adapter"
+version = "0.1.0"
+dependencies = [
+ "log",
+ "sel4-bounce-buffer-allocator",
+ "sel4-externally-shared",
+ "sel4-microkit",
+ "sel4-microkit-message",
+ "sel4-shared-ring-buffer",
+ "serde",
+ "smoltcp",
 ]
 
 [[package]]
