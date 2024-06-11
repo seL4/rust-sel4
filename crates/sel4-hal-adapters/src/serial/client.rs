@@ -29,24 +29,6 @@ impl Client {
     }
 }
 
-#[derive(Clone, Debug)]
-pub enum Error {
-    ReadError(IpcError),
-    WriteError(IpcError),
-}
-
-#[derive(Clone, Debug)]
-pub enum IpcError {
-    GotError,
-    GotInvalidResponse,
-}
-
-impl serial::Error for Error {
-    fn kind(&self) -> serial::ErrorKind {
-        serial::ErrorKind::Other
-    }
-}
-
 impl serial::ErrorType for Client {
     type Error = Error;
 }
@@ -87,5 +69,23 @@ impl fmt::Write for Client {
             let _ = self.write(b);
         });
         Ok(())
+    }
+}
+
+#[derive(Clone, Debug)]
+pub enum Error {
+    ReadError(IpcError),
+    WriteError(IpcError),
+}
+
+#[derive(Clone, Debug)]
+pub enum IpcError {
+    GotError,
+    GotInvalidResponse,
+}
+
+impl serial::Error for Error {
+    fn kind(&self) -> serial::ErrorKind {
+        serial::ErrorKind::Other
     }
 }
