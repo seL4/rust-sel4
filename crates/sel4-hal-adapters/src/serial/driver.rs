@@ -16,6 +16,10 @@ use sel4_microkit_message::MessageInfoExt;
 
 use super::common::*;
 
+pub trait IrqDevice {
+    fn handle_irq(&self);
+}
+
 /// Handle messages using an implementor of [serial::Read<u8>] and [serial::Write<u8>].
 #[derive(Clone, Debug)]
 pub struct Driver<Device, const READ_BUF_SIZE: usize = 256> {
@@ -46,26 +50,6 @@ where
     }
 }
 
-pub trait IrqDevice {
-    fn handle_irq(&self);
-}
-
-#[non_exhaustive]
-#[derive(Clone, Debug)]
-pub enum Error<E> {
-    DeviceError(E),
-    BufferFull,
-    // XXX Other errors?
-}
-
-impl<E: fmt::Display> fmt::Display for Error<E> {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            Self::DeviceError(err) => write!(f, "device error: {err}"),
-            Self::BufferFull => write!(f, "buffer full"),
-        }
-    }
-}
 
 impl<Device> Handler for Driver<Device>
 where
@@ -119,6 +103,23 @@ where
             })
         } else {
             panic!("unexpected channel: {channel:?}");
+        }
+    }
+}
+
+#[non_exhaustive]
+#[derive(Clone, Debug)]
+pub enum Error<E> {
+    DeviceError(E),
+    BufferFull,
+    // XXX Other errors?
+}
+
+impl<E: fmt::Display> fmt::Display for Error<E> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Self::DeviceError(err) => write!(f, "device error: {err}"),
+            Self::BufferFull => write!(f, "buffer full"),
         }
     }
 }
