@@ -14,6 +14,7 @@ use alloc::sync::Arc;
 use alloc::vec;
 use core::time::Duration;
 
+use embedded_io_async::ReadExactError;
 use futures::future::{self, LocalBoxFuture};
 use futures::task::LocalSpawnExt;
 use rustls::pki_types::{PrivateKeyDer, UnixTime};
@@ -22,7 +23,7 @@ use rustls::ServerConfig;
 
 use sel4_async_block_io::{access::ReadOnly, constant_block_sizes, BlockIO};
 use sel4_async_block_io_fat as fat;
-use sel4_async_io::ReadExactError;
+use sel4_async_io::EmbeddedIOAsyncAdapter;
 use sel4_async_network::{ManagedInterface, TcpSocket, TcpSocketError};
 use sel4_async_network_rustls::{Error as AsyncRustlsError, ServerConnector};
 use sel4_async_network_rustls_utils::TimeProviderImpl;
@@ -118,7 +119,9 @@ async fn use_socket_for_http<D: fat::BlockDevice + 'static, T: fat::TimeSource +
     mut socket: TcpSocket,
 ) -> Result<(), ReadExactError<TcpSocketError>> {
     socket.accept(HTTP_PORT).await?;
-    server.handle_connection(&mut socket).await?;
+    server
+        .handle_connection(&mut EmbeddedIOAsyncAdapter(&mut socket))
+        .await?;
     socket.close();
     Ok(())
 }
@@ -135,7 +138,9 @@ async fn use_socket_for_https<D: fat::BlockDevice + 'static, T: fat::TimeSource 
 
     let mut conn = ServerConnector::from(tls_config).connect(socket)?.await?;
 
-    server.handle_connection(&mut conn).await?;
+    server
+        .handle_connection(&mut EmbeddedIOAsyncAdapter(&mut conn))
+        .await?;
 
     conn.into_io().close();
 
