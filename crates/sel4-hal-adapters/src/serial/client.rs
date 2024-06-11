@@ -5,10 +5,8 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use core::fmt;
-
 use embedded_hal_nb::nb;
-use embedded_hal_nb::serial::{self, Write as _};
+use embedded_hal_nb::serial;
 
 use sel4_microkit::{Channel, MessageInfo};
 use sel4_microkit_message::MessageInfoExt;
@@ -65,17 +63,6 @@ impl serial::Write<u8> for Client {
     }
 
     fn flush(&mut self) -> nb::Result<(), Self::Error> {
-        Ok(())
-    }
-}
-
-// XXX There's already an implementation of fmt::Write for serial::Write
-// in embedded_hal::fmt, but I'm not clear on how to use it.
-impl fmt::Write for Client {
-    fn write_str(&mut self, s: &str) -> fmt::Result {
-        s.as_bytes().iter().copied().for_each(|b| {
-            let _ = self.write(b);
-        });
         Ok(())
     }
 }
