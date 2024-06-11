@@ -5,18 +5,15 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-#![no_std]
-
-use num_enum::{IntoPrimitive, TryFromPrimitive};
-use zerocopy::{AsBytes, FromBytes};
 use core::fmt;
-use heapless::Deque;
 
-use embedded_hal::serial;
-use embedded_hal::prelude::_embedded_hal_serial_Write;
-use sel4cp::{Channel, Handler};
-use sel4cp::message::{MessageInfo, NoMessageValue, StatusMessageLabel};
-use sel4cp::message::MessageInfoRecvError;
+use embedded_hal_nb::nb;
+use embedded_hal_nb::serial::{self, Write as _};
+use heapless::Deque;
+use serde::{Deserialize, Serialize};
+
+use sel4_microkit::{Channel, Handler, MessageInfo};
+use sel4_microkit_message::MessageInfoExt;
 
 /// Handle messages using an implementor of [serial::Read<u8>] and [serial::Write<u8>].
 #[derive(Clone, Debug)]
@@ -33,9 +30,9 @@ pub struct SerialHandler<Device, const READ_BUF_SIZE: usize = 256> {
     notify: bool,
 }
 
-impl<Device> SerialHandler<Device>
+impl<Device, const READ_BUF_SIZE: usize> SerialHandler<Device, READ_BUF_SIZE>
 where
-    Device: serial::Read<u8> + serial::Write<u8> + IrqDevice
+    Device: serial::Read<u8> + serial::Write<u8> + IrqDevice,
 {
     pub fn new(device: Device, serial: Channel, client: Channel) -> Self {
         Self {
@@ -54,29 +51,17 @@ pub trait IrqDevice {
 
 #[non_exhaustive]
 #[derive(Clone, Debug)]
-pub enum SerialHandlerError<Device>
-where
-    Device: serial::Read<u8> + serial::Write<u8>,
-    <Device as serial::Read<u8>>::Error: core::fmt::Debug + Clone,
-    <Device as serial::Write<u8>>::Error: core::fmt::Debug + Clone,
-{
-    ReadError(<Device as serial::Read<u8>>::Error),
-    WriteError(<Device as serial::Write<u8>>::Error),
+pub enum SerialHandlerError<E> {
+    DeviceError(E),
     BufferFull,
     // XXX Other errors?
 }
 
-impl<Device> fmt::Display for SerialHandlerError<Device>
-where
-    Device: serial::Read<u8> + serial::Write<u8>,
-    <Device as serial::Read<u8>>::Error: core::fmt::Debug + Clone,
-    <Device as serial::Write<u8>>::Error: core::fmt::Debug + Clone,
-{
+impl<E: fmt::Display> fmt::Display for SerialHandlerError<E> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match *self {
-            SerialHandlerError::ReadError(_) => write!(f, "SerialHandlerError::ReadError"),
-            SerialHandlerError::WriteError(_) => write!(f, "SerialHandlerError::WriteError"),
-            SerialHandlerError::BufferFull => write!(f, "SerialHandlerError::BufferFull"),
+        match self {
+            SerialHandlerError::DeviceError(err) => write!(f, "device error: {err}"),
+            SerialHandlerError::BufferFull => write!(f, "buffer full"),
         }
     }
 }
@@ -84,10 +69,9 @@ where
 impl<Device> Handler for SerialHandler<Device>
 where
     Device: serial::Read<u8> + serial::Write<u8> + IrqDevice,
-    <Device as serial::Read<u8>>::Error: core::fmt::Debug + Clone,
-    <Device as serial::Write<u8>>::Error: core::fmt::Debug + Clone,
+    <Device as serial::ErrorType>::Error: fmt::Display,
 {
-    type Error = SerialHandlerError<Device>;
+    type Error = SerialHandlerError<Device::Error>;
 
     fn notified(&mut self, channel: Channel) -> Result<(), Self::Error> {
         // TODO Handle errors
@@ -104,7 +88,7 @@ where
                 self.notify = false;
             }
         } else {
-            unreachable!() // XXX Is this actually unreachable?
+            panic!("unexpected channel: {channel:?}");
         }
         Ok(())
     }
@@ -116,28 +100,24 @@ where
     ) -> Result<MessageInfo, Self::Error> {
         // TODO Handle errors
         if channel == self.client {
-            match msg_info.label().try_into().ok() /* XXX Handle errors? */ {
-                Some(RequestTag::Write) => match msg_info.recv() {
-                    Ok(WriteRequest { val }) => {
-                        // Blocking write
-                        while let Err(nb::Error::WouldBlock) = self.device.write(val) {}
-                        Ok(MessageInfo::send(StatusMessageLabel::Ok, NoMessageValue))
+            Ok(match msg_info.recv_using_postcard::<Request>() {
+                Ok(req) => match req {
+                    Request::PutChar { val } => {
+                        nb::block!(self.device.write(val)).unwrap();
+                        MessageInfo::send_empty()
                     }
-                    Err(_) => Ok(MessageInfo::send(StatusMessageLabel::Error, NoMessageValue)),
-                },
-                Some(RequestTag::Read) => match self.buffer.pop_front() {
-                    Some(val) => {
-                        Ok(MessageInfo::send(ReadResponseTag::Some, ReadSomeResponse { val }))
-                    }
-                    None => {
-                        self.notify = true;
-                        Ok(MessageInfo::send(ReadResponseTag::None, NoMessageValue))
+                    Request::GetChar => {
+                        let val = self.buffer.pop_front();
+                        if val.is_some() {
+                            self.notify = true;
+                        }
+                        MessageInfo::send_using_postcard(GetCharSomeResponse { val }).unwrap()
                     }
                 },
-                None => Ok(MessageInfo::send(StatusMessageLabel::Error, NoMessageValue)),
-            }
+                Err(_) => MessageInfo::send_unspecified_error(),
+            })
         } else {
-            unreachable!() // XXX Is this actually unreachable?
+            panic!("unexpected channel: {channel:?}");
         }
     }
 }
@@ -147,7 +127,7 @@ where
 /// and [fmt::Write].
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct SerialDriver {
-    pub channel: Channel
+    pub channel: Channel,
 }
 
 impl SerialDriver {
@@ -157,50 +137,52 @@ impl SerialDriver {
 }
 
 #[derive(Clone, Debug)]
-pub enum ReadError {
-    RecvError(MessageInfoRecvError),
-    InvalidResponse,
-    EOF,
+pub enum SerialDriverError {
+    ReadError(IpcError),
+    WriteError(IpcError),
 }
 
-impl serial::Read<u8> for SerialDriver {
-    type Error = ReadError;
+#[derive(Clone, Debug)]
+pub enum IpcError {
+    GotError,
+    GotInvalidResponse,
+}
 
-    // XXX Unclear if this blocks or how to prevent it from doing so...
-    fn read(&mut self) -> nb::Result<u8, Self::Error> {
-        let msg_info = self.channel
-            .pp_call(MessageInfo::send(RequestTag::Read, NoMessageValue));
-
-        match msg_info.label().try_into() {
-            Ok(ReadResponseTag::Some) => match msg_info.recv() {
-                Ok(ReadSomeResponse { val }) => Ok(val),
-                Err(e) => Err(nb::Error::Other(ReadError::RecvError(e))),
-            },
-            Ok(ReadResponseTag::None) => Err(nb::Error::Other(ReadError::EOF)),
-            Err(_) => Err(nb::Error::Other(ReadError::InvalidResponse)),
-        }
+impl serial::Error for SerialDriverError {
+    fn kind(&self) -> serial::ErrorKind {
+        serial::ErrorKind::Other
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub enum WriteError {
-    SendError,
-    InvalidResponse,
+impl serial::ErrorType for SerialDriver {
+    type Error = SerialDriverError;
+}
+
+impl serial::Read<u8> for SerialDriver {
+    fn read(&mut self) -> nb::Result<u8, Self::Error> {
+        let req = Request::GetChar;
+        let resp = self
+            .channel
+            .pp_call(MessageInfo::send_using_postcard(req).unwrap())
+            .recv_using_postcard::<GetCharSomeResponse>()
+            .map_err(|_| {
+                nb::Error::Other(SerialDriverError::ReadError(IpcError::GotInvalidResponse))
+            })?;
+        resp.val.ok_or(nb::Error::WouldBlock)
+    }
 }
 
 impl serial::Write<u8> for SerialDriver {
-    type Error = WriteError;
-
-    // XXX Unclear if this blocks or how to prevent it from doing so...
+    // TODO dont' block?
     fn write(&mut self, val: u8) -> nb::Result<(), Self::Error> {
-        let msg_info = self.channel
-            .pp_call(MessageInfo::send(RequestTag::Write, WriteRequest { val }));
-
-        match msg_info.label().try_into() {
-            Ok(StatusMessageLabel::Ok) => Ok(()),
-            Ok(StatusMessageLabel::Error) => Err(nb::Error::Other(WriteError::SendError)),
-            Err(_) => Err(nb::Error::Other(WriteError::InvalidResponse)),
-        }
+        let req = Request::PutChar { val };
+        self.channel
+            .pp_call(MessageInfo::send_using_postcard(req).unwrap())
+            .recv_empty()
+            .map_err(|_| {
+                nb::Error::Other(SerialDriverError::WriteError(IpcError::GotInvalidResponse))
+            })?;
+        Ok(())
     }
 
     fn flush(&mut self) -> nb::Result<(), Self::Error> {
@@ -208,39 +190,24 @@ impl serial::Write<u8> for SerialDriver {
     }
 }
 
-// XXX There's already an implementation of core::fmt::Write for serial::Write
+// XXX There's already an implementation of fmt::Write for serial::Write
 // in embedded_hal::fmt, but I'm not clear on how to use it.
 impl fmt::Write for SerialDriver {
     fn write_str(&mut self, s: &str) -> fmt::Result {
-        s.as_bytes().iter().copied().for_each(|b| { let _ = self.write(b); });
+        s.as_bytes().iter().copied().for_each(|b| {
+            let _ = self.write(b);
+        });
         Ok(())
     }
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, IntoPrimitive, TryFromPrimitive)]
-#[cfg_attr(target_pointer_width = "32", repr(u32))]
-#[cfg_attr(target_pointer_width = "64", repr(u64))]
-pub enum RequestTag {
-    Write,
-    Read,
+#[derive(Debug, Serialize, Deserialize)]
+pub enum Request {
+    PutChar { val: u8 },
+    GetChar,
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, AsBytes, FromBytes)]
-#[repr(C)]
-pub struct WriteRequest {
-    pub val: u8,
-}
-
-#[derive(Clone, Copy, PartialEq, Eq, IntoPrimitive, TryFromPrimitive)]
-#[cfg_attr(target_pointer_width = "32", repr(u32))]
-#[cfg_attr(target_pointer_width = "64", repr(u64))]
-pub enum ReadResponseTag {
-    None,
-    Some,
-}
-
-#[derive(Clone, Copy, PartialEq, Eq, AsBytes, FromBytes)]
-#[repr(C)]
-pub struct ReadSomeResponse {
-    pub val: u8,
+#[derive(Debug, Serialize, Deserialize)]
+pub struct GetCharSomeResponse {
+    pub val: Option<u8>,
 }
