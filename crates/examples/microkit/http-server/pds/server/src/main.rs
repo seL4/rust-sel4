@@ -14,7 +14,7 @@ use alloc::sync::Arc;
 use core::time::Duration;
 
 use smoltcp::iface::Config;
-use smoltcp::phy::{Device, Medium};
+use smoltcp::phy::{Device, DeviceCapabilities, Medium};
 use smoltcp::wire::{EthernetAddress, HardwareAddress};
 
 use sel4_async_block_io::{
@@ -120,7 +120,11 @@ fn init() -> impl Handler {
             ),
             16,
             2048,
-            1500,
+            {
+                let mut caps = DeviceCapabilities::default();
+                caps.max_transmission_unit = 1500;
+                caps
+            },
         )
         .unwrap()
     };
