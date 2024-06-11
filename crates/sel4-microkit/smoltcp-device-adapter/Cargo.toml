@@ -10,7 +10,7 @@
 #
 
 [package]
-name = "sel4-hal-adapters"
+name = "sel4-microkit-smoltcp-device-adapter"
 version = "0.1.0"
 authors = ["Nick Spinale <nick.spinale@coliasgroup.com>", "Ben Hamlin <hamlinb@galois.com>"]
 edition = "2021"
@@ -18,6 +18,14 @@ license = "BSD-2-Clause"
 
 [dependencies]
 log = "0.4.17"
-sel4-microkit = { path = "../sel4-microkit", default-features = false }
-sel4-microkit-message = { path = "../sel4-microkit/message" }
+sel4-bounce-buffer-allocator = { path = "../../sel4-bounce-buffer-allocator" }
+sel4-externally-shared = { path = "../../sel4-externally-shared", features = ["unstable"] }
+sel4-microkit = { path = "..", default-features = false }
+sel4-microkit-message = { path = "../message" }
+sel4-shared-ring-buffer = { path = "../../sel4-shared-ring-buffer" }
 serde = { version = "1.0.147", default-features = false }
+
+[dependencies.smoltcp]
+version = "0.10.0"
+default-features = false
+features = ["proto-ipv4", "proto-dhcpv4", "proto-dns", "socket-dhcpv4", "socket-dns", "socket-tcp"]

@@ -5,19 +5,23 @@
 # SPDX-License-Identifier: BSD-2-Clause
 #
 
-{ mk, versions, localCrates, serdeWith, authors }:
+{ mk, versions, localCrates, smoltcpWith, serdeWith, authors }:
 
 mk {
-  package.name = "sel4-hal-adapters";
+  package.name = "sel4-microkit-smoltcp-device-adapter";
   package.authors = with authors; [
     nspin
     "Ben Hamlin <hamlinb@galois.com>"
   ];
   dependencies = {
     inherit (versions) log;
+    smoltcp = smoltcpWith [];
     serde = serdeWith [];
   } // (with localCrates; {
     inherit sel4-microkit-message;
     sel4-microkit = sel4-microkit // { default-features = false; };
+    sel4-bounce-buffer-allocator = sel4-bounce-buffer-allocator;
+    sel4-externally-shared = sel4-externally-shared // { features = [ "unstable" ]; };
+    sel4-shared-ring-buffer = sel4-shared-ring-buffer;
   });
 }
