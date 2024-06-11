@@ -79,7 +79,7 @@ impl Handler for HandlerImpl {
                         if val.is_some() {
                             self.notify = true;
                         }
-                        MessageInfo::send_using_postcard(GetCharSomeResponse { val }).unwrap()
+                        MessageInfo::send_using_postcard(GetCharResponse { val }).unwrap()
                     }
                 },
                 Err(_) => MessageInfo::send_unspecified_error(),

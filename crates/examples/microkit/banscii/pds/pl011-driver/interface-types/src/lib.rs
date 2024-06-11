@@ -15,6 +15,6 @@ pub enum Request {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct GetCharSomeResponse {
+pub struct GetCharResponse {
     pub val: Option<u8>,
 }
