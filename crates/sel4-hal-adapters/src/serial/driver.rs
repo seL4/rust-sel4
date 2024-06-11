@@ -18,7 +18,7 @@ use super::common::*;
 
 /// Handle messages using an implementor of [serial::Read<u8>] and [serial::Write<u8>].
 #[derive(Clone, Debug)]
-pub struct SerialHandler<Device, const READ_BUF_SIZE: usize = 256> {
+pub struct Driver<Device, const READ_BUF_SIZE: usize = 256> {
     /// Device implementing [serial::Read<u8>] and [serial::Write<u8>].
     device: Device,
     /// Channel for this component.
@@ -31,7 +31,7 @@ pub struct SerialHandler<Device, const READ_BUF_SIZE: usize = 256> {
     notify: bool,
 }
 
-impl<Device, const READ_BUF_SIZE: usize> SerialHandler<Device, READ_BUF_SIZE>
+impl<Device, const READ_BUF_SIZE: usize> Driver<Device, READ_BUF_SIZE>
 where
     Device: serial::Read<u8> + serial::Write<u8> + IrqDevice,
 {
@@ -52,34 +52,34 @@ pub trait IrqDevice {
 
 #[non_exhaustive]
 #[derive(Clone, Debug)]
-pub enum SerialHandlerError<E> {
+pub enum Error<E> {
     DeviceError(E),
     BufferFull,
     // XXX Other errors?
 }
 
-impl<E: fmt::Display> fmt::Display for SerialHandlerError<E> {
+impl<E: fmt::Display> fmt::Display for Error<E> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            SerialHandlerError::DeviceError(err) => write!(f, "device error: {err}"),
-            SerialHandlerError::BufferFull => write!(f, "buffer full"),
+            Self::DeviceError(err) => write!(f, "device error: {err}"),
+            Self::BufferFull => write!(f, "buffer full"),
         }
     }
 }
 
-impl<Device> Handler for SerialHandler<Device>
+impl<Device> Handler for Driver<Device>
 where
     Device: serial::Read<u8> + serial::Write<u8> + IrqDevice,
     <Device as serial::ErrorType>::Error: fmt::Display,
 {
-    type Error = SerialHandlerError<Device::Error>;
+    type Error = Error<Device::Error>;
 
     fn notified(&mut self, channel: Channel) -> Result<(), Self::Error> {
         // TODO Handle errors
         if channel == self.serial {
             while let Ok(c) = self.device.read() {
                 if let Err(_) = self.buffer.push_back(c) {
-                    return Err(SerialHandlerError::BufferFull);
+                    return Err(Error::BufferFull);
                 }
             }
             self.device.handle_irq();
