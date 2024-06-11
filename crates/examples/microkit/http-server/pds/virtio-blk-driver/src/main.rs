@@ -33,7 +33,7 @@ use sel4_shared_ring_buffer_block_io_types::{
 };
 
 use microkit_http_server_example_virtio_blk_driver_interface_types::*;
-use microkit_http_server_example_virtio_hal_impl::HalImpl;
+use sel4_virtio_hal_impl::HalImpl;
 
 mod config;
 

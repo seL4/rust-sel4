@@ -21,7 +21,7 @@ mk {
       sel4-shared-ring-buffer
       sel4-shared-ring-buffer-block-io-types
       sel4-bounce-buffer-allocator
-      microkit-http-server-example-virtio-hal-impl
+      sel4-virtio-hal-impl
       microkit-http-server-example-virtio-blk-driver-interface-types
     ;
 

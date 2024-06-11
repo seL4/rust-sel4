@@ -20,7 +20,7 @@ mk {
       sel4-immediate-sync-once-cell
       sel4-shared-ring-buffer
       sel4-bounce-buffer-allocator
-      microkit-http-server-example-virtio-hal-impl
+      sel4-virtio-hal-impl
       microkit-http-server-example-virtio-net-driver-interface-types
     ;
 

@@ -7,7 +7,7 @@
 { mk, localCrates, virtioDriversWith }:
 
 mk {
-  package.name = "microkit-http-server-example-virtio-hal-impl";
+  package.name = "sel4-virtio-hal-impl";
   dependencies = {
     virtio-drivers = virtioDriversWith [];
     inherit (localCrates)

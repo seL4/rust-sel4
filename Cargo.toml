@@ -13,6 +13,7 @@
 default-members = []
 resolver = "2"
 members = [
+    "crates/drivers/sel4-virtio-hal-impl",
     "crates/examples/microkit/banscii/pds/artist",
     "crates/examples/microkit/banscii/pds/artist/interface-types",
     "crates/examples/microkit/banscii/pds/assistant",
@@ -22,7 +23,6 @@ members = [
     "crates/examples/microkit/banscii/pds/pl011-driver/core",
     "crates/examples/microkit/banscii/pds/pl011-driver/interface-types",
     "crates/examples/microkit/hello/pds/hello",
-    "crates/examples/microkit/http-server/helpers/virtio-hal-impl",
     "crates/examples/microkit/http-server/pds/pl031-driver",
     "crates/examples/microkit/http-server/pds/pl031-driver/core",
     "crates/examples/microkit/http-server/pds/pl031-driver/interface-types",
