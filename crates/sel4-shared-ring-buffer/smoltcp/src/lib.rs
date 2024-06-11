@@ -43,7 +43,7 @@ impl<A: AbstractBounceBufferAllocator> DeviceImpl<A> {
         tx_ring_buffers: RingBuffers<'static, Provide, fn()>,
         num_rx_buffers: usize,
         rx_buffer_size: usize,
-        mtu: usize,
+        caps: DeviceCapabilities,
     ) -> Result<Self, Error> {
         Ok(Self {
             inner: Rc::new(RefCell::new(Inner::new(
@@ -53,7 +53,7 @@ impl<A: AbstractBounceBufferAllocator> DeviceImpl<A> {
                 tx_ring_buffers,
                 num_rx_buffers,
                 rx_buffer_size,
-                mtu,
+                caps,
             )?)),
         })
     }
@@ -86,9 +86,7 @@ impl<A: AbstractBounceBufferAllocator> Device for DeviceImpl<A> {
     type TxToken<'a> = TxToken<A> where A: 'a;
 
     fn capabilities(&self) -> DeviceCapabilities {
-        let mut cap = DeviceCapabilities::default();
-        cap.max_transmission_unit = self.inner().borrow().mtu();
-        cap
+        self.inner().borrow().caps().clone()
     }
 
     fn receive(&mut self, _timestamp: Instant) -> Option<(Self::RxToken<'_>, Self::TxToken<'_>)> {

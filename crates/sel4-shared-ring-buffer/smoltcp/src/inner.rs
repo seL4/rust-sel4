@@ -8,6 +8,8 @@ use core::alloc::Layout;
 use core::ops::Range;
 use core::ptr::NonNull;
 
+use smoltcp::phy::DeviceCapabilities;
+
 use sel4_bounce_buffer_allocator::{AbstractBounceBufferAllocator, BounceBufferAllocator};
 use sel4_externally_shared::ExternallySharedRef;
 use sel4_shared_ring_buffer::{
@@ -23,7 +25,7 @@ pub(crate) struct Inner<A> {
     tx_ring_buffers: RingBuffers<'static, Provide, fn()>,
     rx_buffers: SlotTracker<RxStateTypesImpl>,
     tx_buffers: SlotTracker<TxStateTypesImpl>,
-    mtu: usize,
+    caps: DeviceCapabilities,
 }
 
 pub(crate) type RxBufferIndex = usize;
@@ -68,7 +70,7 @@ impl<A: AbstractBounceBufferAllocator> Inner<A> {
         tx_ring_buffers: RingBuffers<'static, Provide, fn()>,
         num_rx_buffers: usize,
         rx_buffer_size: usize,
-        mtu: usize,
+        caps: DeviceCapabilities,
     ) -> Result<Self, Error> {
         let rx_buffers = SlotTracker::new_occupied((0..num_rx_buffers).map(|i| {
             let range = bounce_buffer_allocator
@@ -93,12 +95,12 @@ impl<A: AbstractBounceBufferAllocator> Inner<A> {
             tx_ring_buffers,
             rx_buffers,
             tx_buffers,
-            mtu,
+            caps,
         })
     }
 
-    pub(crate) fn mtu(&self) -> usize {
-        self.mtu
+    pub(crate) fn caps(&self) -> &DeviceCapabilities {
+        &self.caps
     }
 
     pub(crate) fn poll(&mut self) -> Result<bool, PeerMisbehaviorError> {
