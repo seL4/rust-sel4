@@ -16,7 +16,7 @@ mk rec {
     inherit (localCrates)
       sel4-async-io
     ;
-    inherit (versions) log;
+    inherit (versions) log embedded-io-async;
     rustls = rustlsWith [] // (localCrates.rustls or {});
   };
 }

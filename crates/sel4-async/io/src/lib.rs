@@ -9,14 +9,11 @@
 
 #![no_std]
 
-use core::fmt;
 use core::future::poll_fn;
 use core::pin::Pin;
 use core::task::{Context, Poll};
 
-pub trait ErrorType {
-    type Error: fmt::Debug;
-}
+pub use embedded_io_async::{Error, ErrorKind, ErrorType};
 
 pub trait Read: ErrorType {
     fn poll_read(

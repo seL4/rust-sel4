@@ -23,7 +23,7 @@ use rustls::unbuffered::{
 };
 use rustls::{unbuffered::UnbufferedConnectionCommon, ClientConfig, ServerConfig, SideData};
 
-use sel4_async_io::{Read, Write};
+use sel4_async_io::{ErrorType, Read, Write};
 
 use crate::{
     utils::{poll_read, poll_write, try_or_resize_and_retry, Buffer, WriteCursor},
@@ -288,9 +288,9 @@ impl<T, D, IO> TlsStream<T, D, IO> {
     }
 }
 
-impl<T, D, IO> sel4_async_io::ErrorType for TlsStream<T, D, IO>
+impl<T, D, IO> ErrorType for TlsStream<T, D, IO>
 where
-    IO: sel4_async_io::ErrorType,
+    IO: ErrorType,
 {
     type Error = Error<IO::Error>;
 }

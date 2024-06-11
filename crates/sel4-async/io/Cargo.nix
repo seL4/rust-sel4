@@ -12,4 +12,7 @@ mk rec {
   });
   package.name = "sel4-async-io";
   package.license = "MIT OR Apache-2.0";
+  dependencies = {
+    inherit (versions) embedded-io-async;
+  };
 }
