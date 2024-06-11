@@ -61,7 +61,7 @@ dependencies = [
  "cfg-if",
  "once_cell",
  "version_check",
- "zerocopy 0.7.32",
+ "zerocopy",
 ]
 
 [[package]]
@@ -2275,7 +2275,7 @@ dependencies = [
  "cfg-if",
  "sel4-atomic-ptr",
  "volatile",
- "zerocopy 0.7.32",
+ "zerocopy",
 ]
 
 [[package]]
@@ -2452,7 +2452,7 @@ dependencies = [
  "num_enum",
  "postcard",
  "serde",
- "zerocopy 0.7.32",
+ "zerocopy",
 ]
 
 [[package]]
@@ -2575,7 +2575,7 @@ version = "0.1.0"
 dependencies = [
  "log",
  "sel4-externally-shared",
- "zerocopy 0.7.32",
+ "zerocopy",
 ]
 
 [[package]]
@@ -2599,7 +2599,7 @@ version = "0.1.0"
 dependencies = [
  "num_enum",
  "sel4-shared-ring-buffer",
- "zerocopy 0.7.32",
+ "zerocopy",
 ]
 
 [[package]]
@@ -2674,7 +2674,7 @@ name = "sel4-simple-task-runtime-config-types"
 version = "0.1.0"
 dependencies = [
  "serde",
- "zerocopy 0.7.32",
+ "zerocopy",
 ]
 
 [[package]]
@@ -3273,13 +3273,13 @@ checksum = "49874b5167b65d7193b8aba1567f5c7d93d001cafc34600cee003eda787e483f"
 
 [[package]]
 name = "virtio-drivers"
-version = "0.5.0"
+version = "0.7.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6c1b8da1e59e77cdae29b32fb936614dc849352d7f58da199072067fe402bbcf"
+checksum = "ff69e69ff755c004bb027891b58f951225832c84f6a734f9e1fdf0118aa91f91"
 dependencies = [
  "bitflags 2.4.2",
  "log",
- "zerocopy 0.6.6",
+ "zerocopy",
 ]
 
 [[package]]
@@ -3526,33 +3526,12 @@ dependencies = [
 
 [[package]]
 name = "zerocopy"
-version = "0.6.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "854e949ac82d619ee9a14c66a1b674ac730422372ccb759ce0c39cabcf2bf8e6"
-dependencies = [
- "byteorder",
- "zerocopy-derive 0.6.6",
-]
-
-[[package]]
-name = "zerocopy"
 version = "0.7.32"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "74d4d3961e53fa4c9a25a8637fc2bfaf2595b3d3ae34875568a5cf64787716be"
 dependencies = [
  "byteorder",
- "zerocopy-derive 0.7.32",
-]
-
-[[package]]
-name = "zerocopy-derive"
-version = "0.6.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "125139de3f6b9d625c39e2efdd73d41bdac468ccd556556440e322be0e1bbd91"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 2.0.52",
+ "zerocopy-derive",
 ]
 
 [[package]]

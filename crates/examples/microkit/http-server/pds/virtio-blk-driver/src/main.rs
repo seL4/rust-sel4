@@ -126,7 +126,7 @@ impl Handler for HandlerImpl {
                     unsafe {
                         let pending_entry = &mut *pending_entry;
                         self.dev
-                            .complete_read_block(
+                            .complete_read_blocks(
                                 token,
                                 &pending_entry.virtio_req,
                                 buf_ptr.as_mut(),
@@ -172,7 +172,7 @@ impl Handler for HandlerImpl {
                     let token = unsafe {
                         let pending_entry = &mut *pending_entry;
                         self.dev
-                            .read_block_nb(
+                            .read_blocks_nb(
                                 pending_entry
                                     .client_req
                                     .start_block_idx()
