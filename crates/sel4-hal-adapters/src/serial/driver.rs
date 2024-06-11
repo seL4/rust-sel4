@@ -85,19 +85,24 @@ where
         // TODO Handle errors
         if channel == self.client {
             Ok(match msg_info.recv_using_postcard::<Request>() {
-                Ok(req) => match req {
-                    Request::PutChar { val } => {
-                        nb::block!(self.device.write(val)).unwrap();
-                        MessageInfo::send_empty()
-                    }
-                    Request::GetChar => {
-                        let val = self.buffer.pop_front();
-                        if val.is_some() {
-                            self.notify = true;
+                Ok(req) => {
+                    match req {
+                        Request::PutChar { val } => MessageInfo::send_using_postcard(
+                            match nb::block!(self.device.write(val)) {
+                                Ok(_) => Ok(PutCharResponse),
+                                Err(_) => Err(PutCharError),
+                            },
+                        )
+                        .unwrap(),
+                        Request::GetChar => {
+                            let val = self.buffer.pop_front();
+                            if val.is_some() {
+                                self.notify = true;
+                            }
+                            MessageInfo::send_using_postcard::<Result<GetCharResponse, GetCharError>>(Ok(GetCharResponse { val })).unwrap()
                         }
-                        MessageInfo::send_using_postcard(GetCharResponse { val }).unwrap()
                     }
-                },
+                }
                 Err(_) => MessageInfo::send_unspecified_error(),
             })
         } else {

@@ -9,3 +9,5 @@ mod common;
 
 pub mod client;
 pub mod driver;
+
+pub use common::{GetCharError, PutCharError};

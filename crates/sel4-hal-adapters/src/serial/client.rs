@@ -15,7 +15,7 @@ use sel4_microkit_message::MessageInfoExt;
 
 use super::common::*;
 
-/// Device-independent embedded_hal::serial interface to a serial-device
+/// Device-independent embedded_hal_nb::serial interface to a serial-device
 /// component. Interact with it using [serial::Read], [serial::Write],
 /// and [fmt::Write].
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -26,6 +26,16 @@ pub struct Client {
 impl Client {
     pub fn new(channel: Channel) -> Self {
         Client { channel }
+    }
+
+    pub fn blocking_write(&mut self, val: u8) -> Result<(), Error> {
+        let req = Request::PutChar { val };
+        self.channel
+            .pp_call(MessageInfo::send_using_postcard(req).unwrap())
+            .recv_using_postcard::<Result<PutCharResponse, PutCharError>>()
+            .map_err(|_| Error::InvalidResponse)?
+            .map_err(Error::PutCharError)?;
+        Ok(())
     }
 }
 
@@ -39,25 +49,23 @@ impl serial::Read<u8> for Client {
         let resp = self
             .channel
             .pp_call(MessageInfo::send_using_postcard(req).unwrap())
-            .recv_using_postcard::<GetCharResponse>()
-            .map_err(|_| nb::Error::Other(Error::ReadError(IpcError::GotInvalidResponse)))?;
+            .recv_using_postcard::<Result<GetCharResponse, GetCharError>>()
+            .map_err(|_| Error::InvalidResponse)
+            .map_err(nb::Error::Other)?
+            .map_err(Error::GetCharError)
+            .map_err(nb::Error::Other)?;
         resp.val.ok_or(nb::Error::WouldBlock)
     }
 }
 
 impl serial::Write<u8> for Client {
-    // TODO dont' block?
     fn write(&mut self, val: u8) -> nb::Result<(), Self::Error> {
-        let req = Request::PutChar { val };
-        self.channel
-            .pp_call(MessageInfo::send_using_postcard(req).unwrap())
-            .recv_empty()
-            .map_err(|_| nb::Error::Other(Error::WriteError(IpcError::GotInvalidResponse)))?;
+        self.blocking_write(val).map_err(nb::Error::Other)?;
         Ok(())
     }
 
     fn flush(&mut self) -> nb::Result<(), Self::Error> {
-        todo!()
+        Ok(())
     }
 }
 
@@ -72,16 +80,11 @@ impl fmt::Write for Client {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Debug, Copy, Clone)]
 pub enum Error {
-    ReadError(IpcError),
-    WriteError(IpcError),
-}
-
-#[derive(Clone, Debug)]
-pub enum IpcError {
-    GotError,
-    GotInvalidResponse,
+    PutCharError(PutCharError),
+    GetCharError(GetCharError),
+    InvalidResponse,
 }
 
 impl serial::Error for Error {
