@@ -18,7 +18,6 @@ license = "BSD-2-Clause"
 
 [dependencies]
 log = "0.4.17"
-microkit-http-server-example-virtio-hal-impl = { path = "../../helpers/virtio-hal-impl" }
 microkit-http-server-example-virtio-net-driver-interface-types = { path = "interface-types" }
 sel4 = { path = "../../../../../sel4" }
 sel4-bounce-buffer-allocator = { path = "../../../../../sel4-bounce-buffer-allocator" }
@@ -28,4 +27,5 @@ sel4-logging = { path = "../../../../../sel4-logging" }
 sel4-microkit = { path = "../../../../../sel4-microkit", default-features = false }
 sel4-microkit-message = { path = "../../../../../sel4-microkit/message" }
 sel4-shared-ring-buffer = { path = "../../../../../sel4-shared-ring-buffer" }
+sel4-virtio-hal-impl = { path = "../../../../../drivers/sel4-virtio-hal-impl" }
 virtio-drivers = { version = "0.7.2", default-features = false, features = ["alloc"] }

@@ -1191,7 +1191,6 @@ version = "0.1.0"
 dependencies = [
  "log",
  "microkit-http-server-example-virtio-blk-driver-interface-types",
- "microkit-http-server-example-virtio-hal-impl",
  "sel4",
  "sel4-bounce-buffer-allocator",
  "sel4-externally-shared",
@@ -1201,6 +1200,7 @@ dependencies = [
  "sel4-microkit-message",
  "sel4-shared-ring-buffer",
  "sel4-shared-ring-buffer-block-io-types",
+ "sel4-virtio-hal-impl",
  "virtio-drivers",
 ]
 
@@ -1212,22 +1212,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "microkit-http-server-example-virtio-hal-impl"
-version = "0.1.0"
-dependencies = [
- "sel4-bounce-buffer-allocator",
- "sel4-externally-shared",
- "sel4-immediate-sync-once-cell",
- "sel4-sync",
- "virtio-drivers",
-]
-
-[[package]]
 name = "microkit-http-server-example-virtio-net-driver"
 version = "0.1.0"
 dependencies = [
  "log",
- "microkit-http-server-example-virtio-hal-impl",
  "microkit-http-server-example-virtio-net-driver-interface-types",
  "sel4",
  "sel4-bounce-buffer-allocator",
@@ -1237,6 +1225,7 @@ dependencies = [
  "sel4-microkit",
  "sel4-microkit-message",
  "sel4-shared-ring-buffer",
+ "sel4-virtio-hal-impl",
  "virtio-drivers",
 ]
 
@@ -2728,6 +2717,17 @@ dependencies = [
  "sel4-immediate-sync-once-cell",
  "sel4-panicking",
  "sel4-panicking-env",
+]
+
+[[package]]
+name = "sel4-virtio-hal-impl"
+version = "0.1.0"
+dependencies = [
+ "sel4-bounce-buffer-allocator",
+ "sel4-externally-shared",
+ "sel4-immediate-sync-once-cell",
+ "sel4-sync",
+ "virtio-drivers",
 ]
 
 [[package]]

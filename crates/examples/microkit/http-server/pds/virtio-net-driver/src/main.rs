@@ -24,8 +24,8 @@ use sel4_microkit::{
 use sel4_microkit_message::MessageInfoExt as _;
 use sel4_shared_ring_buffer::{roles::Use, RingBuffers};
 
-use microkit_http_server_example_virtio_hal_impl::HalImpl;
 use microkit_http_server_example_virtio_net_driver_interface_types::*;
+use sel4_virtio_hal_impl::HalImpl;
 
 mod config;
 
