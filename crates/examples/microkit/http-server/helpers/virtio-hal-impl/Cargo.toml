@@ -17,7 +17,6 @@ edition = "2021"
 license = "BSD-2-Clause"
 
 [dependencies]
-log = "0.4.17"
 sel4-bounce-buffer-allocator = { path = "../../../../../sel4-bounce-buffer-allocator" }
 sel4-externally-shared = { path = "../../../../../sel4-externally-shared" }
 sel4-immediate-sync-once-cell = { path = "../../../../../sel4-immediate-sync-once-cell" }
