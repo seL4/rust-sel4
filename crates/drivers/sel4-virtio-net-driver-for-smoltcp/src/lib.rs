@@ -1,7 +1,8 @@
 //
 // Copyright 2023, Colias Group, LLC
+// Copyright (c) 2019-2020 rCore Developers
 //
-// SPDX-License-Identifier: BSD-2-Clause
+// SPDX-License-Identifier: MIT
 //
 
 #![no_std]

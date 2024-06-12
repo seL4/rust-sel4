@@ -1,7 +1,7 @@
 #
 # Copyright 2023, Colias Group, LLC
 #
-# SPDX-License-Identifier: BSD-2-Clause
+# SPDX-License-Identifier: MIT
 #
 #
 # This file is generated from './Cargo.nix'. You can edit this file directly
@@ -12,9 +12,9 @@
 [package]
 name = "sel4-virtio-net-driver-for-smoltcp"
 version = "0.1.0"
-authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
+authors = ["Nick Spinale <nick.spinale@coliasgroup.com>", "Runji Wang <wangrunji0408@163.com>"]
 edition = "2021"
-license = "BSD-2-Clause"
+license = "MIT"
 
 [dependencies]
 log = "0.4.17"

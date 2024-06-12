@@ -1,13 +1,21 @@
 #
 # Copyright 2024, Colias Group, LLC
 #
-# SPDX-License-Identifier: BSD-2-Clause
+# SPDX-License-Identifier: MIT
 #
 
-{ mk, versions, localCrates, smoltcpWith, virtioDriversWith }:
+{ mk, mkDefaultFrontmatterWithReuseArgs, defaultReuseFrontmatterArgs, versions, localCrates, smoltcpWith, virtioDriversWith, authors }:
 
-mk {
+mk rec {
+  nix.frontmatter = mkDefaultFrontmatterWithReuseArgs (defaultReuseFrontmatterArgs // {
+    licenseID = package.license;
+  });
   package.name = "sel4-virtio-net-driver-for-smoltcp";
+  package.authors = with authors; [
+    nspin
+    "Runji Wang <wangrunji0408@163.com>"
+  ];
+  package.license = "MIT";
   dependencies = {
     inherit (versions) log;
     smoltcp = smoltcpWith [];
