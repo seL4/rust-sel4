@@ -128,6 +128,7 @@ let
       ];
 
       passthru = rec {
+        inherit systemXML;
         loader = "${self}/loader.img";
         links = [
           { name = "pds"; path = searchPath; }

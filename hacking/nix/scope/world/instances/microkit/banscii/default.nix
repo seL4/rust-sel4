@@ -7,7 +7,7 @@
 { lib, stdenv
 , buildPackages, pkgsBuildBuild
 , linkFarm, symlinkJoin, writeText, writeScript, runCommand
-, callPackage
+, python3Packages
 , microkit
 , mkTask
 , sources
@@ -16,16 +16,19 @@
 , mkSeL4RustTargetTriple
 , mkMicrokitInstance
 , worldConfig
+, seL4ConfigJSON
 
 , canSimulate
 , mkPD
 }:
 
 let
+  inherit (worldConfig.microkitConfig) board;
+
   pds = {
     serial-driver = mkPD rec {
       rootCrate = crates.banscii-serial-driver;
-      release = true;
+      features = [ "board-${board}" ];
     };
     assistant = mkPD rec {
       rootCrate = crates.banscii-assistant;
@@ -44,6 +47,8 @@ let
     };
   };
 
+  srcPath = relativePath: sources.srcRoot + "/crates/examples/microkit/banscii/${relativePath}";
+
 in
 lib.fix (self: mkMicrokitInstance {
   system = microkit.mkSystem {
@@ -55,7 +60,16 @@ lib.fix (self: mkMicrokitInstance {
         "${pds.artist}/bin"
       ];
     };
-    systemXML = sources.srcRoot + "/crates/examples/microkit/banscii/banscii.system";
+    systemXML = runCommand "banscii.system" {
+      nativeBuildInputs = [
+        python3Packages.jinja2
+      ];
+    } ''
+      python3 ${srcPath "generate_system_description.py"} \
+        --template ${srcPath "banscii.system.template"} \
+        --board ${board} \
+        -o $out
+    '';
   };
 } // {
   inherit pds;

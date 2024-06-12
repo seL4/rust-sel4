@@ -12,8 +12,12 @@ mk {
     inherit (localCrates)
       sel4-microkit-message
       sel4-microkit-embedded-hal-adapters
-      sel4-pl011-driver
+      
     ;
     sel4-microkit = localCrates.sel4-microkit // { default-features = false; };
+    sel4-pl011-driver = localCrates.sel4-pl011-driver // { optional = true; };
+  };
+  features = {
+    board-qemu_virt_aarch64 = [ "sel4-pl011-driver" ];
   };
 }
