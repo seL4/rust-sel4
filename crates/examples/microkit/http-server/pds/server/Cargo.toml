@@ -45,9 +45,6 @@ path = "../sp804-driver/interface-types"
 [dependencies.microkit-http-server-example-virtio-blk-driver-interface-types]
 path = "../virtio-blk-driver/interface-types"
 
-[dependencies.microkit-http-server-example-virtio-net-driver-interface-types]
-path = "../virtio-net-driver/interface-types"
-
 [dependencies.sel4-async-single-threaded-executor]
 path = "../../../../../sel4-async/single-threaded-executor"
 
@@ -55,6 +52,9 @@ path = "../../../../../sel4-async/single-threaded-executor"
 path = "../../../../../sel4-microkit"
 default-features = false
 features = ["alloc"]
+
+[dependencies.sel4-microkit-smoltcp-device-adapter]
+path = "../../../../../sel4-microkit/smoltcp-device-adapter"
 
 [dependencies.sel4-shared-ring-buffer-block-io-types]
 path = "../../../../../sel4-shared-ring-buffer/block-io/types"

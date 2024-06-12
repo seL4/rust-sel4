@@ -32,6 +32,7 @@ mk {
       sel4-logging
       sel4-immediate-sync-once-cell
       sel4-microkit-message
+      sel4-microkit-smoltcp-device-adapter
       sel4-async-single-threaded-executor
       sel4-async-network
       sel4-async-time
@@ -46,7 +47,6 @@ mk {
       microkit-http-server-example-pl031-driver-interface-types
       microkit-http-server-example-sp804-driver-interface-types
       microkit-http-server-example-virtio-blk-driver-interface-types
-      microkit-http-server-example-virtio-net-driver-interface-types
     ;
 
     sel4-newlib = localCrates.sel4-newlib // {

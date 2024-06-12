@@ -7,8 +7,7 @@
 
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Serialize, Deserialize)]
-pub struct MacAddress(pub [u8; 6]);
+use sel4_driver_traits::MacAddress;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub(crate) enum Request {

@@ -184,10 +184,11 @@ version = "0.1.0"
 dependencies = [
  "banscii-artist-interface-types",
  "banscii-assistant-core",
- "banscii-pl011-driver-interface-types",
+ "embedded-hal-nb",
  "hex",
  "sel4-externally-shared",
  "sel4-microkit",
+ "sel4-microkit-embedded-hal-adapters",
  "sel4-microkit-message",
 ]
 
@@ -210,28 +211,13 @@ dependencies = [
 ]
 
 [[package]]
-name = "banscii-pl011-driver"
+name = "banscii-serial-driver"
 version = "0.1.0"
 dependencies = [
- "banscii-pl011-driver-core",
- "banscii-pl011-driver-interface-types",
- "heapless",
  "sel4-microkit",
+ "sel4-microkit-embedded-hal-adapters",
  "sel4-microkit-message",
-]
-
-[[package]]
-name = "banscii-pl011-driver-core"
-version = "0.1.0"
-dependencies = [
- "tock-registers",
-]
-
-[[package]]
-name = "banscii-pl011-driver-interface-types"
-version = "0.1.0"
-dependencies = [
- "serde",
+ "sel4-pl011-driver",
 ]
 
 [[package]]
@@ -1145,7 +1131,6 @@ dependencies = [
  "microkit-http-server-example-server-core",
  "microkit-http-server-example-sp804-driver-interface-types",
  "microkit-http-server-example-virtio-blk-driver-interface-types",
- "microkit-http-server-example-virtio-net-driver-interface-types",
  "rcgen",
  "sel4",
  "sel4-async-block-io",
@@ -1159,6 +1144,7 @@ dependencies = [
  "sel4-logging",
  "sel4-microkit",
  "sel4-microkit-message",
+ "sel4-microkit-smoltcp-device-adapter",
  "sel4-newlib",
  "sel4-shared-ring-buffer",
  "sel4-shared-ring-buffer-block-io",
@@ -1248,7 +1234,6 @@ name = "microkit-http-server-example-virtio-net-driver"
 version = "0.1.0"
 dependencies = [
  "log",
- "microkit-http-server-example-virtio-net-driver-interface-types",
  "sel4",
  "sel4-bounce-buffer-allocator",
  "sel4-externally-shared",
@@ -1256,16 +1241,11 @@ dependencies = [
  "sel4-logging",
  "sel4-microkit",
  "sel4-microkit-message",
+ "sel4-microkit-smoltcp-device-adapter",
  "sel4-shared-ring-buffer",
  "sel4-virtio-hal-impl",
+ "sel4-virtio-net-driver-for-smoltcp",
  "virtio-drivers",
-]
-
-[[package]]
-name = "microkit-http-server-example-virtio-net-driver-interface-types"
-version = "0.1.0"
-dependencies = [
- "serde",
 ]
 
 [[package]]
@@ -2289,6 +2269,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "sel4-driver-traits"
+version = "0.1.0"
+dependencies = [
+ "serde",
+]
+
+[[package]]
 name = "sel4-elf-header"
 version = "0.1.0"
 
@@ -2444,6 +2431,7 @@ dependencies = [
  "embedded-hal-nb",
  "heapless",
  "log",
+ "sel4-driver-traits",
  "sel4-microkit",
  "sel4-microkit-message",
  "serde",
@@ -2483,6 +2471,7 @@ version = "0.1.0"
 dependencies = [
  "log",
  "sel4-bounce-buffer-allocator",
+ "sel4-driver-traits",
  "sel4-externally-shared",
  "sel4-microkit",
  "sel4-microkit-message",
@@ -2526,6 +2515,15 @@ dependencies = [
 [[package]]
 name = "sel4-panicking-env"
 version = "0.1.0"
+
+[[package]]
+name = "sel4-pl011-driver"
+version = "0.1.0"
+dependencies = [
+ "embedded-hal-nb",
+ "sel4-driver-traits",
+ "tock-registers",
+]
 
 [[package]]
 name = "sel4-platform-info"
@@ -2775,6 +2773,16 @@ dependencies = [
  "sel4-externally-shared",
  "sel4-immediate-sync-once-cell",
  "sel4-sync",
+ "virtio-drivers",
+]
+
+[[package]]
+name = "sel4-virtio-net-driver-for-smoltcp"
+version = "0.1.0"
+dependencies = [
+ "log",
+ "sel4-driver-traits",
+ "smoltcp",
  "virtio-drivers",
 ]
 

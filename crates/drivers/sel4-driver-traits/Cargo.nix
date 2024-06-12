@@ -4,11 +4,11 @@
 # SPDX-License-Identifier: BSD-2-Clause
 #
 
-{ mk, versions, serdeWith }:
+{ mk, serdeWith }:
 
 mk {
-  package.name = "banscii-pl011-driver-interface-types";
+  package.name = "sel4-driver-traits";
   dependencies = {
-    serde = serdeWith [];
+    serde = serdeWith [ "derive" ];
   };
 }

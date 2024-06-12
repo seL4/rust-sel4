@@ -18,7 +18,7 @@ use super::common::*;
 /// and [fmt::Write].
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Client {
-    pub channel: Channel,
+    channel: Channel,
 }
 
 impl Client {

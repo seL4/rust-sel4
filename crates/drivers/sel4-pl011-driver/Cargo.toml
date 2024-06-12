@@ -10,11 +10,13 @@
 #
 
 [package]
-name = "banscii-pl011-driver-interface-types"
+name = "sel4-pl011-driver"
 version = "0.1.0"
 authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
 edition = "2021"
 license = "BSD-2-Clause"
 
 [dependencies]
-serde = { version = "1.0.147", default-features = false }
+embedded-hal-nb = "1.0"
+sel4-driver-traits = { path = "../sel4-driver-traits" }
+tock-registers = "0.8.1"

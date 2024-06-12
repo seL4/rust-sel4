@@ -25,6 +25,7 @@ use sel4_bounce_buffer_allocator::{Basic, BounceBufferAllocator};
 use sel4_externally_shared::{ExternallySharedRef, ExternallySharedRefExt};
 use sel4_logging::{LevelFilter, Logger, LoggerBuilder};
 use sel4_microkit::{memory_region_symbol, protection_domain, Handler};
+use sel4_microkit_smoltcp_device_adapter::client::Client as NetClient;
 use sel4_newlib as _;
 use sel4_shared_ring_buffer::RingBuffers;
 use sel4_shared_ring_buffer_block_io::SharedRingBufferBlockIO;
@@ -35,14 +36,12 @@ use microkit_http_server_example_server_core::run_server;
 mod block_client;
 mod config;
 mod handler;
-mod net_client;
 mod rtc_client;
 mod timer_client;
 
 use block_client::BlockClient;
 use config::channels;
 use handler::HandlerImpl;
-use net_client::NetClient;
 use rtc_client::RtcClient;
 use timer_client::TimerClient;
 
