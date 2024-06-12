@@ -6,15 +6,15 @@
 -->
 <system>
 
-    <memory_region name="pl011_mmio" size="0x1000" phys_addr="0x9000000" />
+    <memory_region name="serial_mmio" size="0x1_000" phys_addr="{{ serial_mmio_phys_addr }}" />
 
     <memory_region name="assistant_to_artist" size="0x4_000" />
     <memory_region name="artist_to_assistant" size="0x4_000" />
 
-    <protection_domain name="pl011_driver" priority="254" pp="true">
+    <protection_domain name="serial_driver" priority="254" pp="true">
         <program_image path="banscii-serial-driver.elf" />
-        <map mr="pl011_mmio" vaddr="0x2000000" perms="rw" setvar_vaddr="pl011_register_block" />
-        <irq irq="33" id="0" />
+        <map mr="serial_mmio" vaddr="0x2_000_000" perms="rw" setvar_vaddr="serial_register_block" />
+        <irq irq="{{ serial_irq }}" id="0" />
     </protection_domain>
 
     <protection_domain name="assistant" priority="252">
@@ -30,7 +30,7 @@
     </protection_domain>
 
     <channel>
-        <end pd="pl011_driver" id="1" />
+        <end pd="serial_driver" id="1" />
         <end pd="assistant" id="0" />
     </channel>
 
