@@ -11,10 +11,11 @@ extern crate alloc;
 
 use alloc::vec;
 use alloc::vec::Vec;
-use core::fmt;
 use core::fmt::Write;
 use core::mem;
 use core::str;
+
+use embedded_hal_nb::serial::{self, Read as _, Write as _};
 
 use sel4_externally_shared::{
     access::{ReadOnly, ReadWrite},
@@ -23,13 +24,15 @@ use sel4_externally_shared::{
 use sel4_microkit::{
     memory_region_symbol, protection_domain, Channel, Handler, Infallible, MessageInfo,
 };
+use sel4_microkit_embedded_hal_adapters::serial::client::{
+    Client as SerialClient, Error as SerialClientError,
+};
 use sel4_microkit_message::MessageInfoExt as _;
 
 use banscii_artist_interface_types as artist;
 use banscii_assistant_core::Draft;
-use banscii_pl011_driver_interface_types as pl011_driver;
 
-const PL011_DRIVER: Channel = Channel::new(0);
+const SERIAL_DRIVER: Channel = Channel::new(0);
 const ARTIST: Channel = Channel::new(1);
 
 const REGION_SIZE: usize = 0x4_000;
@@ -48,16 +51,20 @@ fn init() -> impl Handler {
         )
     };
 
-    prompt();
-
-    HandlerImpl {
+    let mut this = HandlerImpl {
+        serial_client: SerialClient::new(SERIAL_DRIVER),
         region_in,
         region_out,
         buffer: Vec::new(),
-    }
+    };
+
+    this.prompt();
+
+    this
 }
 
 struct HandlerImpl {
+    serial_client: SerialClient,
     region_in: ExternallySharedRef<'static, [u8], ReadOnly>,
     region_out: ExternallySharedRef<'static, [u8], ReadWrite>,
     buffer: Vec<u8>,
@@ -68,23 +75,23 @@ impl Handler for HandlerImpl {
 
     fn notified(&mut self, channel: Channel) -> Result<(), Self::Error> {
         match channel {
-            PL011_DRIVER => {
-                while let Some(b) = get_char() {
+            SERIAL_DRIVER => {
+                while let Ok(b) = self.serial_client.read() {
                     if let b'\n' | b'\r' = b {
-                        newline();
+                        self.newline();
                         if !self.buffer.is_empty() {
                             self.try_create();
                         }
-                        prompt();
+                        self.prompt();
                     } else {
                         let c = char::from(b);
                         if c.is_ascii() && !c.is_ascii_control() {
                             if self.buffer.len() == MAX_SUBJECT_LEN {
-                                writeln!(PutCharWrite, "\n(char limit reached)").unwrap();
+                                writeln!(self.writer(), "\n(char limit reached)").unwrap();
                                 self.try_create();
-                                prompt();
+                                self.prompt();
                             }
-                            put_char(b);
+                            self.serial_client.write(b).unwrap();
                             self.buffer.push(b);
                         }
                     }
@@ -107,7 +114,7 @@ impl HandlerImpl {
                 self.create(subject);
             }
             Err(_) => {
-                writeln!(PutCharWrite, "error: input is not valid utf-8").unwrap();
+                writeln!(self.writer(), "error: input is not valid utf-8").unwrap();
             }
         };
         self.buffer.clear();
@@ -158,62 +165,36 @@ impl HandlerImpl {
             buf
         };
 
-        newline();
+        self.newline();
 
         for row in 0..height {
             for col in 0..width {
                 let i = row * width + col;
                 let b = pixel_data[i];
-                put_char(b);
+                self.serial_client.write(b).unwrap();
             }
-            newline();
+            self.newline();
         }
 
-        newline();
+        self.newline();
 
-        writeln!(PutCharWrite, "Signature:").unwrap();
+        writeln!(self.writer(), "Signature:").unwrap();
         for line in signature.chunks(32) {
-            writeln!(PutCharWrite, "{}", hex::encode(line)).unwrap();
+            writeln!(self.writer(), "{}", hex::encode(line)).unwrap();
         }
 
-        newline();
+        self.newline();
     }
-}
 
-fn prompt() {
-    write!(PutCharWrite, "banscii> ").unwrap();
-}
+    fn prompt(&mut self) {
+        write!(self.writer(), "banscii> ").unwrap();
+    }
 
-fn newline() {
-    writeln!(PutCharWrite).unwrap();
-}
+    fn newline(&mut self) {
+        writeln!(self.writer()).unwrap();
+    }
 
-fn get_char() -> Option<u8> {
-    let req = pl011_driver::Request::GetChar;
-    let resp: pl011_driver::GetCharResponse = PL011_DRIVER
-        .pp_call(MessageInfo::send_using_postcard(req).unwrap())
-        .recv_using_postcard()
-        .unwrap();
-    resp.val
-}
-
-fn put_char(val: u8) {
-    let req = pl011_driver::Request::PutChar { val };
-    PL011_DRIVER
-        .pp_call(MessageInfo::send_using_postcard(req).unwrap())
-        .recv_empty()
-        .unwrap();
-}
-
-fn put_str(s: &str) {
-    s.as_bytes().iter().copied().for_each(put_char)
-}
-
-struct PutCharWrite;
-
-impl fmt::Write for PutCharWrite {
-    fn write_str(&mut self, s: &str) -> fmt::Result {
-        put_str(s);
-        Ok(())
+    fn writer(&mut self) -> &mut dyn serial::Write<Error = SerialClientError> {
+        &mut self.serial_client as &mut dyn serial::Write<Error = SerialClientError>
     }
 }

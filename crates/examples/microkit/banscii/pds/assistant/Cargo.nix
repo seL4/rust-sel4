@@ -4,16 +4,17 @@
 # SPDX-License-Identifier: BSD-2-Clause
 #
 
-{ mk, localCrates }:
+{ mk, versions, localCrates }:
 
 mk {
   package.name = "banscii-assistant";
   dependencies = {
+    inherit (versions) embedded-hal-nb;
     hex = { version = "0.4.3"; default-features = false; features = [ "alloc" ]; };
     inherit (localCrates)
       sel4-microkit-message
+      sel4-microkit-embedded-hal-adapters
       banscii-assistant-core
-      banscii-pl011-driver-interface-types
       banscii-artist-interface-types
     ;
     sel4-externally-shared = localCrates.sel4-externally-shared // { features = [ "unstable" ]; };

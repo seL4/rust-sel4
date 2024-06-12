@@ -10,11 +10,11 @@
 #
 
 [package]
-name = "microkit-http-server-example-virtio-net-driver-interface-types"
+name = "sel4-driver-traits"
 version = "0.1.0"
 authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
 edition = "2021"
 license = "BSD-2-Clause"
 
 [dependencies]
-serde = { version = "1.0.147", default-features = false }
+serde = { version = "1.0.147", default-features = false, features = ["derive"] }

@@ -11,14 +11,14 @@ use embedded_hal_nb::nb;
 use embedded_hal_nb::serial;
 use heapless::Deque;
 
+use sel4_driver_traits::HandleInterrupt;
 use sel4_microkit::{Channel, Handler, MessageInfo};
 use sel4_microkit_message::MessageInfoExt;
 
 use super::common::*;
 
-pub trait IrqDevice {
-    fn handle_irq(&self);
-}
+// TODO
+// Factor buffering out into wrapper for serial::{Read,Write}
 
 /// Handle messages using an implementor of [serial::Read<u8>] and [serial::Write<u8>].
 #[derive(Clone, Debug)]
@@ -37,7 +37,7 @@ pub struct Driver<Device, const READ_BUF_SIZE: usize = 256> {
 
 impl<Device, const READ_BUF_SIZE: usize> Driver<Device, READ_BUF_SIZE>
 where
-    Device: serial::Read<u8> + serial::Write<u8> + IrqDevice,
+    Device: serial::Read<u8> + serial::Write<u8> + HandleInterrupt,
 {
     pub fn new(device: Device, serial: Channel, client: Channel) -> Self {
         Self {
@@ -52,7 +52,7 @@ where
 
 impl<Device> Handler for Driver<Device>
 where
-    Device: serial::Read<u8> + serial::Write<u8> + IrqDevice,
+    Device: serial::Read<u8> + serial::Write<u8> + HandleInterrupt,
     <Device as serial::ErrorType>::Error: fmt::Display,
 {
     type Error = Error<Device::Error>;
@@ -65,7 +65,7 @@ where
                     return Err(Error::BufferFull);
                 }
             }
-            self.device.handle_irq();
+            self.device.handle_interrupt();
             self.serial.irq_ack().unwrap();
             if self.notify {
                 self.client.notify();

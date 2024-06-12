@@ -23,8 +23,8 @@
 
 let
   pds = {
-    pl011-driver = mkPD rec {
-      rootCrate = crates.banscii-pl011-driver;
+    serial-driver = mkPD rec {
+      rootCrate = crates.banscii-serial-driver;
       release = true;
     };
     assistant = mkPD rec {
@@ -50,7 +50,7 @@ lib.fix (self: mkMicrokitInstance {
     searchPath = symlinkJoin {
       name = "x";
       paths = [
-        "${pds.pl011-driver}/bin"
+        "${pds.serial-driver}/bin"
         "${pds.assistant}/bin"
         "${pds.artist}/bin"
       ];

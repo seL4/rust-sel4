@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
+use sel4_driver_traits::MacAddress;
 use sel4_microkit::{Channel, MessageInfo};
 use sel4_microkit_message::MessageInfoExt as _;
 

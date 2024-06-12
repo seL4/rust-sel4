@@ -12,6 +12,7 @@ use smoltcp::{
     time::Instant,
 };
 
+use sel4_driver_traits::{GetMacAddress, HandleInterrupt};
 use sel4_externally_shared::ExternallySharedRef;
 use sel4_microkit::{Channel, Handler, Infallible, MessageInfo};
 use sel4_microkit_message::MessageInfoExt as _;
@@ -19,20 +20,11 @@ use sel4_shared_ring_buffer::{roles::Use, RingBuffers};
 
 use super::common::*;
 
-pub trait IrqAck {
-    fn irq_ack(&mut self);
-}
-
-pub trait HasMac {
-    fn mac_address(&self) -> [u8; 6];
-}
-
 pub struct Driver<Device> {
     dev: Device,
     client_region: ExternallySharedRef<'static, [u8]>,
-    client_region_paddr: usize,
-    rx_ring_buffers: RingBuffers<'static, Use, fn() -> Result<(), Infallible>>,
-    tx_ring_buffers: RingBuffers<'static, Use, fn() -> Result<(), Infallible>>,
+    rx_ring_buffers: RingBuffers<'static, Use, fn()>,
+    tx_ring_buffers: RingBuffers<'static, Use, fn()>,
     device_channel: Channel,
     client_channel: Channel,
 }
@@ -41,9 +33,8 @@ impl<Device> Driver<Device> {
     pub fn new(
         dev: Device,
         client_region: ExternallySharedRef<'static, [u8]>,
-        client_region_paddr: usize,
-        rx_ring_buffers: RingBuffers<'static, Use, fn() -> Result<(), Infallible>>,
-        tx_ring_buffers: RingBuffers<'static, Use, fn() -> Result<(), Infallible>>,
+        rx_ring_buffers: RingBuffers<'static, Use, fn()>,
+        tx_ring_buffers: RingBuffers<'static, Use, fn()>,
         device_channel: Channel,
         client_channel: Channel,
     ) -> Self {
@@ -52,7 +43,6 @@ impl<Device> Driver<Device> {
         Self {
             dev,
             client_region,
-            client_region_paddr,
             rx_ring_buffers,
             tx_ring_buffers,
             device_channel,
@@ -61,7 +51,7 @@ impl<Device> Driver<Device> {
     }
 }
 
-impl<Device: phy::Device + IrqAck + HasMac> Handler for Driver<Device> {
+impl<Device: phy::Device + HandleInterrupt + GetMacAddress> Handler for Driver<Device> {
     type Error = Infallible;
 
     fn notified(&mut self, channel: Channel) -> Result<(), Self::Error> {
@@ -80,7 +70,7 @@ impl<Device: phy::Device + IrqAck + HasMac> Handler for Driver<Device> {
                 rx_tok.consume(|rx_buf| {
                     assert!(desc_len >= rx_buf.len());
                     let buf_range = {
-                        let start = desc.encoded_addr() - self.client_region_paddr;
+                        let start = desc.encoded_addr();
                         start..start + rx_buf.len()
                     };
                     self.client_region
@@ -98,7 +88,7 @@ impl<Device: phy::Device + IrqAck + HasMac> Handler for Driver<Device> {
             }
 
             if notify_rx {
-                self.rx_ring_buffers.notify().unwrap();
+                self.rx_ring_buffers.notify();
             }
 
             let mut notify_tx = false;
@@ -114,7 +104,7 @@ impl<Device: phy::Device + IrqAck + HasMac> Handler for Driver<Device> {
 
                 tx_tok.consume(tx_len, |tx_buf| {
                     let buf_range = {
-                        let start = desc.encoded_addr() - self.client_region_paddr;
+                        let start = desc.encoded_addr();
                         start..start + tx_len
                     };
                     self.client_region
@@ -132,10 +122,10 @@ impl<Device: phy::Device + IrqAck + HasMac> Handler for Driver<Device> {
             }
 
             if notify_tx {
-                self.tx_ring_buffers.notify().unwrap();
+                self.tx_ring_buffers.notify();
             }
 
-            self.dev.irq_ack();
+            self.dev.handle_interrupt();
             self.device_channel.irq_ack().unwrap();
         } else {
             unreachable!()
@@ -153,9 +143,8 @@ impl<Device: phy::Device + IrqAck + HasMac> Handler for Driver<Device> {
             match msg_info.recv_using_postcard::<Request>() {
                 Ok(req) => match req {
                     Request::GetMacAddress => {
-                        let mac_address = self.dev.mac_address();
                         MessageInfo::send_using_postcard(GetMacAddressResponse {
-                            mac_address: MacAddress(mac_address),
+                            mac_address: self.dev.get_mac_address(),
                         })
                         .unwrap()
                     }

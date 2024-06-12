@@ -13,15 +13,16 @@
 default-members = []
 resolver = "2"
 members = [
+    "crates/drivers/sel4-driver-traits",
+    "crates/drivers/sel4-pl011-driver",
     "crates/drivers/sel4-virtio-hal-impl",
+    "crates/drivers/sel4-virtio-net-driver-for-smoltcp",
     "crates/examples/microkit/banscii/pds/artist",
     "crates/examples/microkit/banscii/pds/artist/interface-types",
     "crates/examples/microkit/banscii/pds/assistant",
     "crates/examples/microkit/banscii/pds/assistant/core",
     "crates/examples/microkit/banscii/pds/assistant/core/test",
-    "crates/examples/microkit/banscii/pds/pl011-driver",
-    "crates/examples/microkit/banscii/pds/pl011-driver/core",
-    "crates/examples/microkit/banscii/pds/pl011-driver/interface-types",
+    "crates/examples/microkit/banscii/pds/serial-driver",
     "crates/examples/microkit/hello/pds/hello",
     "crates/examples/microkit/http-server/pds/pl031-driver",
     "crates/examples/microkit/http-server/pds/pl031-driver/core",
@@ -34,7 +35,6 @@ members = [
     "crates/examples/microkit/http-server/pds/virtio-blk-driver",
     "crates/examples/microkit/http-server/pds/virtio-blk-driver/interface-types",
     "crates/examples/microkit/http-server/pds/virtio-net-driver",
-    "crates/examples/microkit/http-server/pds/virtio-net-driver/interface-types",
     "crates/examples/root-task/example-root-task",
     "crates/examples/root-task/example-root-task-without-runtime",
     "crates/examples/root-task/hello",
