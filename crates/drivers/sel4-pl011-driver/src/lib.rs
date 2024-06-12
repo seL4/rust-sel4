@@ -31,7 +31,7 @@ impl Driver {
         this
     }
 
-    pub fn init(&mut self) {
+    fn init(&mut self) {
         self.device.init();
     }
 }

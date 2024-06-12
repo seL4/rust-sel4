@@ -16,8 +16,7 @@ const ASSISTANT: Channel = Channel::new(1);
 
 #[protection_domain]
 fn init() -> Driver<DriverImpl> {
-    let mut driver_impl =
+    let driver_impl =
         unsafe { DriverImpl::new(memory_region_symbol!(pl011_register_block: *mut ()).as_ptr()) };
-    driver_impl.init();
     Driver::new(driver_impl, DEVICE, ASSISTANT)
 }
