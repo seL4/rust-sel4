@@ -41,11 +41,12 @@ mkShell (shellForMakefile.apply {
     perl
     cmake
     rustPlatform.bindgenHook
-    kani
-    verus
     strace
     cntr
     cachix
+  ] ++ lib.optionals hostPlatform.isx86_64 [
+    kani
+    verus
   ];
 
   buildInputs = [
