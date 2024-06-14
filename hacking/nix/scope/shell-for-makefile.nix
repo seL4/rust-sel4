@@ -4,7 +4,8 @@
 # SPDX-License-Identifier: BSD-2-Clause
 #
 
-{ mkShell
+{ lib, hostPlatform
+, mkShell
 , python3
 , reuse
 , cargo-audit
@@ -22,6 +23,7 @@ let
       python3
       reuse
       cargo-audit
+    ] ++ lib.optionals hostPlatform.isx86_64 [
       kani
     ];
   };

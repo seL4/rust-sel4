@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
 #
 
-{ lib, stdenv, hostPlatform, buildPackages
+{ lib, stdenv, hostPlatform, buildPlatform, buildPackages
 , callPackage
 , runCommand, linkFarm, writeText, writeScript
 
@@ -208,7 +208,7 @@ in rec {
         inherit canSimulate;
       });
 
-      verus = maybe (haveFullRuntime && hostPlatform.is64bit) (callPackage ./verus.nix {
+      verus = maybe (haveFullRuntime && hostPlatform.is64bit && buildPlatform.isx86_64) (callPackage ./verus.nix {
         inherit canSimulate;
       });
 
