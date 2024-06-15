@@ -20,7 +20,7 @@ license = "BSD-2-Clause"
 embedded-hal-nb = "1.0"
 heapless = "0.7.16"
 log = "0.4.17"
-sel4-driver-traits = { path = "../../drivers/sel4-driver-traits" }
-sel4-microkit = { path = "..", default-features = false }
-sel4-microkit-message = { path = "../message" }
+sel4-driver-traits = { path = "../../../drivers/sel4-driver-traits" }
+sel4-microkit = { path = "../..", default-features = false }
+sel4-microkit-message = { path = "../../message" }
 serde = { version = "1.0.147", default-features = false }

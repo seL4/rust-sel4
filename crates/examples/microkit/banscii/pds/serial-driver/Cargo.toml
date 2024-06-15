@@ -25,4 +25,4 @@ sel4-microkit-message = { path = "../../../../../sel4-microkit/message" }
 sel4-pl011-driver = { path = "../../../../../drivers/sel4-pl011-driver", optional = true }
 
 [dependencies.sel4-microkit-embedded-hal-adapters]
-path = "../../../../../sel4-microkit/embedded-hal-adapters"
+path = "../../../../../sel4-microkit/drivers/embedded-hal-adapters"

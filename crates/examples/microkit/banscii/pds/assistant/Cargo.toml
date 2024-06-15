@@ -30,4 +30,4 @@ default-features = false
 features = ["alloc"]
 
 [dependencies.sel4-microkit-embedded-hal-adapters]
-path = "../../../../../sel4-microkit/embedded-hal-adapters"
+path = "../../../../../sel4-microkit/drivers/embedded-hal-adapters"

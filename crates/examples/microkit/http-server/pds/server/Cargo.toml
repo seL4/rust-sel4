@@ -54,7 +54,7 @@ default-features = false
 features = ["alloc"]
 
 [dependencies.sel4-microkit-smoltcp-device-adapter]
-path = "../../../../../sel4-microkit/smoltcp-device-adapter"
+path = "../../../../../sel4-microkit/drivers/smoltcp-device-adapter"
 
 [dependencies.sel4-shared-ring-buffer-block-io-types]
 path = "../../../../../sel4-shared-ring-buffer/block-io/types"
