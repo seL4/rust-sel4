@@ -7,7 +7,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use sel4_driver_traits::MacAddress;
+use sel4_driver_interfaces::MacAddress;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub(crate) enum Request {

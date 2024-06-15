@@ -19,7 +19,7 @@ mk {
     serde = serdeWith [];
   } // (with localCrates; {
     inherit sel4-microkit-message;
-    inherit sel4-driver-traits;
+    inherit sel4-driver-interfaces;
     sel4-microkit = sel4-microkit // { default-features = false; };
     sel4-bounce-buffer-allocator = sel4-bounce-buffer-allocator;
     sel4-externally-shared = sel4-externally-shared // { features = [ "unstable" ]; };

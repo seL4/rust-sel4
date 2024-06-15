@@ -12,7 +12,7 @@ use smoltcp::{
     time::Instant,
 };
 
-use sel4_driver_traits::{GetMacAddress, HandleInterrupt};
+use sel4_driver_interfaces::{GetMacAddress, HandleInterrupt};
 use sel4_externally_shared::ExternallySharedRef;
 use sel4_microkit::{Channel, Handler, Infallible, MessageInfo};
 use sel4_microkit_message::MessageInfoExt as _;
