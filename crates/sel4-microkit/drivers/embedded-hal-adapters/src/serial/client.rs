@@ -11,7 +11,7 @@ use embedded_hal_nb::serial;
 use sel4_microkit::{Channel, MessageInfo};
 use sel4_microkit_message::MessageInfoExt;
 
-use super::common::*;
+use super::message_types::*;
 
 /// Device-independent embedded_hal_nb::serial interface to a serial-device
 /// component. Interact with it using [serial::Read], [serial::Write],
@@ -26,13 +26,20 @@ impl Client {
         Client { channel }
     }
 
-    pub fn blocking_write(&mut self, val: u8) -> Result<(), Error> {
-        let req = Request::PutChar { val };
+    fn request(&self, req: Request) -> Result<SuccessResponse, Error> {
         self.channel
             .pp_call(MessageInfo::send_using_postcard(req).unwrap())
-            .recv_using_postcard::<Result<PutCharResponse, PutCharError>>()
+            .recv_using_postcard::<Response>()
             .map_err(|_| Error::InvalidResponse)?
-            .map_err(Error::PutCharError)?;
+            .map_err(Error::ErrorResponse)
+    }
+
+    pub fn blocking_write(&mut self, val: u8) -> Result<(), Error> {
+        let resp = self.request(Request::PutChar { val })?;
+        match resp {
+            SuccessResponse::PutChar => (),
+            _ => return Err(Error::UnexpectedResponse),
+        }
         Ok(())
     }
 }
@@ -43,22 +50,18 @@ impl serial::ErrorType for Client {
 
 impl serial::Read<u8> for Client {
     fn read(&mut self) -> nb::Result<u8, Self::Error> {
-        let req = Request::GetChar;
-        let resp = self
-            .channel
-            .pp_call(MessageInfo::send_using_postcard(req).unwrap())
-            .recv_using_postcard::<Result<GetCharResponse, GetCharError>>()
-            .map_err(|_| Error::InvalidResponse)
-            .map_err(nb::Error::Other)?
-            .map_err(Error::GetCharError)
-            .map_err(nb::Error::Other)?;
-        resp.val.ok_or(nb::Error::WouldBlock)
+        let resp = self.request(Request::GetChar)?;
+        let val = match resp {
+            SuccessResponse::GetChar { val } => val,
+            _ => return Err(Error::UnexpectedResponse.into()),
+        };
+        val.ok_or(nb::Error::WouldBlock)
     }
 }
 
 impl serial::Write<u8> for Client {
     fn write(&mut self, val: u8) -> nb::Result<(), Self::Error> {
-        self.blocking_write(val).map_err(nb::Error::Other)?;
+        self.blocking_write(val)?;
         Ok(())
     }
 
@@ -69,9 +72,9 @@ impl serial::Write<u8> for Client {
 
 #[derive(Debug, Copy, Clone)]
 pub enum Error {
-    PutCharError(PutCharError),
-    GetCharError(GetCharError),
+    ErrorResponse(ErrorResponse),
     InvalidResponse,
+    UnexpectedResponse,
 }
 
 impl serial::Error for Error {

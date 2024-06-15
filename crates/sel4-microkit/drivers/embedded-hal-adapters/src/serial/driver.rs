@@ -15,7 +15,7 @@ use sel4_driver_interfaces::HandleInterrupt;
 use sel4_microkit::{Channel, Handler, MessageInfo};
 use sel4_microkit_message::MessageInfoExt;
 
-use super::common::*;
+use super::message_types::*;
 
 // TODO
 // Factor buffering out into wrapper for serial::{Read,Write}
@@ -86,22 +86,20 @@ where
         if channel == self.client {
             Ok(match msg_info.recv_using_postcard::<Request>() {
                 Ok(req) => {
-                    match req {
-                        Request::PutChar { val } => MessageInfo::send_using_postcard(
-                            match nb::block!(self.device.write(val)) {
-                                Ok(_) => Ok(PutCharResponse),
-                                Err(_) => Err(PutCharError),
-                            },
-                        )
-                        .unwrap(),
+                    let resp = match req {
+                        Request::PutChar { val } => match nb::block!(self.device.write(val)) {
+                            Ok(_) => Ok(SuccessResponse::PutChar),
+                            Err(_) => Err(ErrorResponse::WriteError),
+                        },
                         Request::GetChar => {
                             let val = self.buffer.pop_front();
                             if val.is_some() {
                                 self.notify = true;
                             }
-                            MessageInfo::send_using_postcard::<Result<GetCharResponse, GetCharError>>(Ok(GetCharResponse { val })).unwrap()
+                            Ok(SuccessResponse::GetChar { val })
                         }
-                    }
+                    };
+                    MessageInfo::send_using_postcard(resp).unwrap()
                 }
                 Err(_) => MessageInfo::send_unspecified_error(),
             })
