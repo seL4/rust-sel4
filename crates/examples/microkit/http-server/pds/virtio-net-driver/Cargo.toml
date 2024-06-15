@@ -30,7 +30,7 @@ sel4-virtio-hal-impl = { path = "../../../../../drivers/sel4-virtio-hal-impl" }
 virtio-drivers = { version = "0.7.2", default-features = false, features = ["alloc"] }
 
 [dependencies.sel4-microkit-smoltcp-device-adapter]
-path = "../../../../../sel4-microkit/smoltcp-device-adapter"
+path = "../../../../../sel4-microkit/drivers/smoltcp-device-adapter"
 
 [dependencies.sel4-virtio-net-driver-for-smoltcp]
 path = "../../../../../drivers/sel4-virtio-net-driver-for-smoltcp"
