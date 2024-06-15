@@ -13,16 +13,15 @@ pub(crate) enum Request {
     GetChar,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
-pub(crate) struct PutCharResponse;
+pub(crate) type Response = Result<SuccessResponse, ErrorResponse>;
 
 #[derive(Debug, Serialize, Deserialize)]
-pub(crate) struct GetCharResponse {
-    pub val: Option<u8>,
+pub(crate) enum SuccessResponse {
+    PutChar,
+    GetChar { val: Option<u8> },
 }
 
 #[derive(Debug, Copy, Clone, Serialize, Deserialize)]
-pub struct PutCharError;
-
-#[derive(Debug, Copy, Clone, Serialize, Deserialize)]
-pub struct GetCharError;
+pub enum ErrorResponse {
+    WriteError,
+}
