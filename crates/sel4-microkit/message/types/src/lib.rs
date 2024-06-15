@@ -99,11 +99,20 @@ impl MessageValueSend for EmptyMessageValue {
 }
 
 impl MessageValueRecv for EmptyMessageValue {
-    type Error = Infallible;
+    type Error = RecvEmptyMessageValueError;
 
-    fn read_message_value(_buf: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self)
+    fn read_message_value(buf: &[u8]) -> Result<Self, Self::Error> {
+        if buf.is_empty() {
+            Ok(Self)
+        } else {
+            Err(Self::Error::MessageIsNotEmpty)
+        }
     }
+}
+
+#[derive(Copy, Clone, Debug)]
+pub enum RecvEmptyMessageValueError {
+    MessageIsNotEmpty,
 }
 
 // // //
