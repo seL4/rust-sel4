@@ -18,7 +18,7 @@ use smoltcp::time::Instant;
 use virtio_drivers::device::net::{RxBuffer, VirtIONet};
 use virtio_drivers::{transport::Transport, Error, Hal};
 
-use sel4_driver_traits::{GetMacAddress, HandleInterrupt, MacAddress};
+use sel4_driver_interfaces::{GetMacAddress, HandleInterrupt, MacAddress};
 
 pub const NET_QUEUE_SIZE: usize = 16;
 

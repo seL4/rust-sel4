@@ -11,7 +11,7 @@ use embedded_hal_nb::nb;
 use embedded_hal_nb::serial;
 use heapless::Deque;
 
-use sel4_driver_traits::HandleInterrupt;
+use sel4_driver_interfaces::HandleInterrupt;
 use sel4_microkit::{Channel, Handler, MessageInfo};
 use sel4_microkit_message::MessageInfoExt;
 

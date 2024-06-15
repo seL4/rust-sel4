@@ -2269,7 +2269,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "sel4-driver-traits"
+name = "sel4-driver-interfaces"
 version = "0.1.0"
 dependencies = [
  "serde",
@@ -2431,7 +2431,7 @@ dependencies = [
  "embedded-hal-nb",
  "heapless",
  "log",
- "sel4-driver-traits",
+ "sel4-driver-interfaces",
  "sel4-microkit",
  "sel4-microkit-message",
  "serde",
@@ -2471,7 +2471,7 @@ version = "0.1.0"
 dependencies = [
  "log",
  "sel4-bounce-buffer-allocator",
- "sel4-driver-traits",
+ "sel4-driver-interfaces",
  "sel4-externally-shared",
  "sel4-microkit",
  "sel4-microkit-message",
@@ -2521,7 +2521,7 @@ name = "sel4-pl011-driver"
 version = "0.1.0"
 dependencies = [
  "embedded-hal-nb",
- "sel4-driver-traits",
+ "sel4-driver-interfaces",
  "tock-registers",
 ]
 
@@ -2781,7 +2781,7 @@ name = "sel4-virtio-net-driver-for-smoltcp"
 version = "0.1.0"
 dependencies = [
  "log",
- "sel4-driver-traits",
+ "sel4-driver-interfaces",
  "smoltcp",
  "virtio-drivers",
 ]

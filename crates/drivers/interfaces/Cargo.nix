@@ -7,7 +7,7 @@
 { mk, serdeWith }:
 
 mk {
-  package.name = "sel4-driver-traits";
+  package.name = "sel4-driver-interfaces";
   dependencies = {
     serde = serdeWith [ "derive" ];
   };

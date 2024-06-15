@@ -10,6 +10,6 @@ mk {
   package.name = "sel4-pl011-driver";
   dependencies = {
     inherit (versions) tock-registers embedded-hal-nb;
-    inherit (localCrates) sel4-driver-traits;
+    inherit (localCrates) sel4-driver-interfaces;
   };
 }

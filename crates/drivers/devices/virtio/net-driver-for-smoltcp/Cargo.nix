@@ -20,6 +20,6 @@ mk rec {
     inherit (versions) log;
     smoltcp = smoltcpWith [];
     virtio-drivers = virtioDriversWith [ "alloc" ];
-    inherit (localCrates) sel4-driver-traits;
+    inherit (localCrates) sel4-driver-interfaces;
   };
 }

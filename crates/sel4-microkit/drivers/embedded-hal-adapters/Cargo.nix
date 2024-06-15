@@ -17,7 +17,7 @@ mk {
     inherit (versions) log embedded-hal-nb heapless;
     serde = serdeWith [];
   } // (with localCrates; {
-    inherit sel4-driver-traits;
+    inherit sel4-driver-interfaces;
     inherit sel4-microkit-message;
     sel4-microkit = sel4-microkit // { default-features = false; };
   });
