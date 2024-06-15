@@ -18,5 +18,5 @@ license = "BSD-2-Clause"
 
 [dependencies]
 embedded-hal-nb = "1.0"
-sel4-driver-traits = { path = "../sel4-driver-traits" }
+sel4-driver-traits = { path = "../../interfaces" }
 tock-registers = "0.8.1"

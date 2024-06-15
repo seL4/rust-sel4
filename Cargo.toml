@@ -13,10 +13,10 @@
 default-members = []
 resolver = "2"
 members = [
-    "crates/drivers/sel4-driver-traits",
-    "crates/drivers/sel4-pl011-driver",
-    "crates/drivers/sel4-virtio-hal-impl",
-    "crates/drivers/sel4-virtio-net-driver-for-smoltcp",
+    "crates/drivers/devices/pl011",
+    "crates/drivers/devices/virtio/hal-impl",
+    "crates/drivers/devices/virtio/net-driver-for-smoltcp",
+    "crates/drivers/interfaces",
     "crates/examples/microkit/banscii/pds/artist",
     "crates/examples/microkit/banscii/pds/artist/interface-types",
     "crates/examples/microkit/banscii/pds/assistant",
