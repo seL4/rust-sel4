@@ -10,3 +10,4 @@
 pub mod net;
 pub mod rtc;
 pub mod serial;
+pub mod timer;

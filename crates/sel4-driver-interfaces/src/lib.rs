@@ -7,6 +7,7 @@
 #![no_std]
 
 pub mod net;
+pub mod timer;
 
 pub trait HandleInterrupt {
     fn handle_interrupt(&mut self);

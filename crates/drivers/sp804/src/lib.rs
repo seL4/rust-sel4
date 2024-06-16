@@ -6,9 +6,12 @@
 
 #![no_std]
 
+use core::convert::Infallible;
 use core::time::Duration;
-
 use tock_registers::interfaces::ReadWriteable;
+
+use sel4_driver_interfaces::timer::{Clock, ErrorType, Timer as TimerTrait};
+use sel4_driver_interfaces::HandleInterrupt;
 
 mod device;
 
@@ -82,12 +85,6 @@ impl Driver {
         let _ = self.current_value_checking_for_overflow();
     }
 
-    pub fn now(&mut self) -> Duration {
-        let value = self.current_value_checking_for_overflow();
-        let ticks = ((u64::from(self.high_bits) + 1) << 32) - u64::from(value);
-        self.ticks_to_duration(ticks)
-    }
-
     fn ticks_to_duration(&self, ticks: u64) -> Duration {
         Duration::from_nanos(
             u64::try_from((u128::from(ticks) * 1_000_000_000) / u128::from(self.scaled_freq()))
@@ -98,31 +95,50 @@ impl Driver {
     fn duration_to_ticks(&self, d: Duration) -> u128 {
         (d.as_nanos() * u128::from(self.scaled_freq())) / 1_000_000_000
     }
+}
 
-    pub fn handle_interrupt(&mut self) {
+impl HandleInterrupt for Driver {
+    fn handle_interrupt(&mut self) {
         if self.timer_for_reading().masked_interrupt_status() {
             self.check_for_overflow();
             self.timer_for_reading().clear_interrupt();
         }
         if self.timer_for_writing().masked_interrupt_status() {
-            self.clear_timeout();
+            self.clear_timeout().unwrap();
             self.timer_for_writing().clear_interrupt();
         }
     }
+}
 
-    pub fn set_timeout(&self, relative: Duration) {
-        self.clear_timeout();
+impl ErrorType for Driver {
+    type Error = Infallible;
+}
+
+impl Clock for Driver {
+    fn get_time(&mut self) -> Result<Duration, Self::Error> {
+        let value = self.current_value_checking_for_overflow();
+        let ticks = ((u64::from(self.high_bits) + 1) << 32) - u64::from(value);
+        let t = self.ticks_to_duration(ticks);
+        Ok(t)
+    }
+}
+
+impl TimerTrait for Driver {
+    fn set_timeout(&mut self, relative: Duration) -> Result<(), Self::Error> {
+        self.clear_timeout().unwrap();
         self.timer_for_writing()
             .set_load(self.duration_to_ticks(relative).try_into().unwrap());
         self.timer_for_writing()
             .control()
             .modify(Control::TimerEn::Enabled + Control::IntEnable::Enabled);
+        Ok(())
     }
 
-    pub fn clear_timeout(&self) {
+    fn clear_timeout(&mut self) -> Result<(), Self::Error> {
         self.timer_for_writing()
             .control()
             .modify(Control::TimerEn::Disabled + Control::IntEnable::Disabled);
         self.timer_for_writing().set_load(0);
+        Ok(())
     }
 }

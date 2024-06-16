@@ -11,7 +11,7 @@ use core::pin::Pin;
 use core::time::Duration;
 
 use futures::future::LocalBoxFuture;
-
+use lock_api::Mutex;
 use smoltcp::iface::Config;
 use smoltcp::time::Instant as SmoltcpInstant;
 
@@ -20,10 +20,13 @@ use sel4_async_network::{DhcpOverrides, ManagedInterface};
 use sel4_async_single_threaded_executor::{LocalPool, LocalSpawner};
 use sel4_async_time::{Instant, TimerManager};
 use sel4_bounce_buffer_allocator::Basic;
+use sel4_driver_interfaces::timer::{Clock, DefaultTimer, Timer};
 use sel4_microkit::{Channel, Handler, Infallible};
+use sel4_microkit_driver_adapters::timer::client::Client as TimerClient;
 use sel4_shared_ring_buffer_block_io::SharedRingBufferBlockIO;
+use sel4_sync::PanickingRawMutex;
 
-use crate::{DeviceImpl, TimerClient};
+use crate::DeviceImpl;
 
 pub(crate) enum Never {}
 
@@ -31,7 +34,7 @@ pub(crate) struct HandlerImpl {
     timer_driver_channel: sel4_microkit::Channel,
     net_driver_channel: sel4_microkit::Channel,
     block_driver_channel: sel4_microkit::Channel,
-    timer: Arc<TimerClient>,
+    timer: Arc<Mutex<PanickingRawMutex, DefaultTimer<TimerClient>>>,
     net_device: DeviceImpl<Basic>,
     shared_block_io: SharedRingBufferBlockIO<BlockSize512, ReadOnly, Basic, fn()>,
     shared_timers: TimerManager,
@@ -46,7 +49,7 @@ impl HandlerImpl {
         timer_driver_channel: sel4_microkit::Channel,
         net_driver_channel: sel4_microkit::Channel,
         block_driver_channel: sel4_microkit::Channel,
-        timer: Arc<TimerClient>,
+        timer: Arc<Mutex<PanickingRawMutex, DefaultTimer<TimerClient>>>,
         mut net_device: DeviceImpl<Basic>,
         net_config: Config,
         shared_block_io: SharedRingBufferBlockIO<BlockSize512, ReadOnly, Basic, fn()>,
@@ -87,16 +90,18 @@ impl HandlerImpl {
         this
     }
 
-    fn now(&self) -> Instant {
+    fn now(&mut self) -> Instant {
         Self::now_with_timer_client(&self.timer)
     }
 
-    fn now_with_timer_client(timer: &TimerClient) -> Instant {
-        Instant::new(Duration::from_micros(timer.now()))
+    fn now_with_timer_client(
+        timer: &Arc<Mutex<PanickingRawMutex, DefaultTimer<TimerClient>>>,
+    ) -> Instant {
+        Instant::new(timer.lock().get_time().unwrap())
     }
 
-    fn set_timeout(&self, d: Duration) {
-        self.timer.set_timeout(d.as_micros().try_into().unwrap())
+    fn set_timeout(&mut self, d: Duration) {
+        self.timer.lock().set_timeout(d).unwrap()
     }
 
     // TODO focused polling using these args doesn't play nicely with "repoll" mechanism below
