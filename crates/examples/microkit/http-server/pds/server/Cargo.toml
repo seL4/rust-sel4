@@ -31,6 +31,7 @@ sel4-bounce-buffer-allocator = { path = "../../../../../sel4-bounce-buffer-alloc
 sel4-externally-shared = { path = "../../../../../sel4-externally-shared", features = ["unstable"] }
 sel4-immediate-sync-once-cell = { path = "../../../../../sel4-immediate-sync-once-cell" }
 sel4-logging = { path = "../../../../../sel4-logging" }
+sel4-microkit-driver-adapters = { path = "../../../../../sel4-microkit/driver-adapters" }
 sel4-microkit-message = { path = "../../../../../sel4-microkit/message" }
 sel4-newlib = { path = "../../../../../sel4-newlib", features = ["nosys", "all-symbols"] }
 sel4-shared-ring-buffer = { path = "../../../../../sel4-shared-ring-buffer" }
@@ -50,9 +51,6 @@ path = "../../../../../sel4-async/single-threaded-executor"
 path = "../../../../../sel4-microkit"
 default-features = false
 features = ["alloc"]
-
-[dependencies.sel4-microkit-driver-adapters]
-path = "../../../../../sel4-microkit/drivers/embedded-hal-adapters"
 
 [dependencies.sel4-microkit-smoltcp-device-adapter]
 path = "../../../../../sel4-microkit/drivers/smoltcp-device-adapter"
