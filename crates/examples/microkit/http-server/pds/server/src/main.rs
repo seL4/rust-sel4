@@ -130,7 +130,7 @@ fn init() -> impl Handler {
 
     let net_config = {
         assert_eq!(net_device.capabilities().medium, Medium::Ethernet);
-        let mac_address = EthernetAddress(net_client.get_mac_address().0);
+        let mac_address = EthernetAddress(net_client.get_mac_address().unwrap().0);
         let hardware_addr = HardwareAddress::Ethernet(mac_address);
         let mut this = Config::new(hardware_addr);
         this.random_seed = 0;
