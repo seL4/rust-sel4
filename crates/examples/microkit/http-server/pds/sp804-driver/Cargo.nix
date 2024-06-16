@@ -11,8 +11,9 @@ mk {
   dependencies = {
     inherit (localCrates)
       sel4-microkit-message
-      microkit-http-server-example-sp804-driver-core
-      microkit-http-server-example-sp804-driver-interface-types
+      sel4-microkit-driver-adapters
+      sel4-driver-interfaces
+      sel4-sp804-driver
     ;
     sel4-microkit = localCrates.sel4-microkit // { default-features = false; };
   };

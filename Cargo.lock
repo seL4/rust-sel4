@@ -1120,9 +1120,9 @@ version = "0.1.0"
 dependencies = [
  "async-unsync",
  "futures",
+ "lock_api",
  "log",
  "microkit-http-server-example-server-core",
- "microkit-http-server-example-sp804-driver-interface-types",
  "microkit-http-server-example-virtio-blk-driver-interface-types",
  "rcgen",
  "rtcc",
@@ -1133,6 +1133,7 @@ dependencies = [
  "sel4-async-single-threaded-executor",
  "sel4-async-time",
  "sel4-bounce-buffer-allocator",
+ "sel4-driver-interfaces",
  "sel4-externally-shared",
  "sel4-immediate-sync-once-cell",
  "sel4-logging",
@@ -1145,6 +1146,7 @@ dependencies = [
  "sel4-shared-ring-buffer-block-io-types",
  "sel4-shared-ring-buffer-bookkeeping",
  "sel4-shared-ring-buffer-smoltcp",
+ "sel4-sync",
  "smoltcp",
 ]
 
@@ -1176,25 +1178,11 @@ dependencies = [
 name = "microkit-http-server-example-sp804-driver"
 version = "0.1.0"
 dependencies = [
- "microkit-http-server-example-sp804-driver-core",
- "microkit-http-server-example-sp804-driver-interface-types",
+ "sel4-driver-interfaces",
  "sel4-microkit",
+ "sel4-microkit-driver-adapters",
  "sel4-microkit-message",
-]
-
-[[package]]
-name = "microkit-http-server-example-sp804-driver-core"
-version = "0.1.0"
-dependencies = [
- "log",
- "tock-registers",
-]
-
-[[package]]
-name = "microkit-http-server-example-sp804-driver-interface-types"
-version = "0.1.0"
-dependencies = [
- "serde",
+ "sel4-sp804-driver",
 ]
 
 [[package]]
@@ -2730,6 +2718,14 @@ version = "0.1.0"
 dependencies = [
  "sel4",
  "sel4-panicking",
+]
+
+[[package]]
+name = "sel4-sp804-driver"
+version = "0.1.0"
+dependencies = [
+ "sel4-driver-interfaces",
+ "tock-registers",
 ]
 
 [[package]]

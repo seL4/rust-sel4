@@ -15,6 +15,7 @@ resolver = "2"
 members = [
     "crates/drivers/pl011",
     "crates/drivers/pl031",
+    "crates/drivers/sp804",
     "crates/drivers/virtio/hal-impl",
     "crates/drivers/virtio/net-driver-for-smoltcp",
     "crates/examples/microkit/banscii/pds/artist",
@@ -28,8 +29,6 @@ members = [
     "crates/examples/microkit/http-server/pds/server",
     "crates/examples/microkit/http-server/pds/server/core",
     "crates/examples/microkit/http-server/pds/sp804-driver",
-    "crates/examples/microkit/http-server/pds/sp804-driver/core",
-    "crates/examples/microkit/http-server/pds/sp804-driver/interface-types",
     "crates/examples/microkit/http-server/pds/virtio-blk-driver",
     "crates/examples/microkit/http-server/pds/virtio-blk-driver/interface-types",
     "crates/examples/microkit/http-server/pds/virtio-net-driver",

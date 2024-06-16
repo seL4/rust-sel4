@@ -13,6 +13,7 @@ use alloc::rc::Rc;
 use alloc::sync::Arc;
 use core::time::Duration;
 
+use lock_api::Mutex;
 use rtcc::DateTimeAccess;
 use smoltcp::iface::Config;
 use smoltcp::phy::{Device, DeviceCapabilities, Medium};
@@ -23,11 +24,13 @@ use sel4_async_block_io::{
 };
 use sel4_async_time::Instant;
 use sel4_bounce_buffer_allocator::{Basic, BounceBufferAllocator};
+use sel4_driver_interfaces::timer::{Clock, DefaultTimer};
 use sel4_externally_shared::{ExternallySharedRef, ExternallySharedRefExt};
 use sel4_logging::{LevelFilter, Logger, LoggerBuilder};
 use sel4_microkit::{memory_region_symbol, protection_domain, Handler};
 use sel4_microkit_driver_adapters::net::client::Client as NetClient;
 use sel4_microkit_driver_adapters::rtc::client::Client as RtcClient;
+use sel4_microkit_driver_adapters::timer::client::Client as TimerClient;
 use sel4_newlib as _;
 use sel4_shared_ring_buffer::RingBuffers;
 use sel4_shared_ring_buffer_block_io::SharedRingBufferBlockIO;
@@ -38,12 +41,10 @@ use microkit_http_server_example_server_core::run_server;
 mod block_client;
 mod config;
 mod handler;
-mod timer_client;
 
 use block_client::BlockClient;
 use config::channels;
 use handler::HandlerImpl;
-use timer_client::TimerClient;
 
 const BLOCK_CACHE_SIZE_IN_BLOCKS: usize = 128;
 
@@ -72,7 +73,9 @@ fn init() -> impl Handler {
     LOGGER.set().unwrap();
 
     let mut rtc_client = RtcClient::new(channels::RTC_DRIVER);
-    let timer_client = Arc::new(TimerClient::new(channels::TIMER_DRIVER));
+    let timer_client = Arc::new(Mutex::new(DefaultTimer(TimerClient::new(
+        channels::TIMER_DRIVER,
+    ))));
     let net_client = NetClient::new(channels::NET_DRIVER);
     let block_client = BlockClient::new(channels::BLOCK_DRIVER);
 
@@ -87,8 +90,8 @@ fn init() -> impl Handler {
     );
 
     let now_fn = {
-        let timer_client = timer_client.clone();
-        move || Instant::ZERO + Duration::from_micros(timer_client.now())
+        let timer_client: Arc<_> = timer_client.clone();
+        move || Instant::ZERO + timer_client.lock().get_time().unwrap()
     };
 
     let notify_net: fn() = || channels::NET_DRIVER.notify();
