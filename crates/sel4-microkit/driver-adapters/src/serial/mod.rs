@@ -6,10 +6,8 @@
 //
 
 mod message_types;
-mod write_buffered;
 
 pub mod client;
 pub mod driver;
 
 pub use message_types::ErrorResponse;
-pub use write_buffered::WriteBuffered;

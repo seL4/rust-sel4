@@ -17,4 +17,6 @@ edition = "2021"
 license = "BSD-2-Clause"
 
 [dependencies]
+embedded-hal-nb = "1.0"
+heapless = "0.7.16"
 serde = { version = "1.0.147", default-features = false, features = ["derive"] }

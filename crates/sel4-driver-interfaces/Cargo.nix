@@ -4,11 +4,12 @@
 # SPDX-License-Identifier: BSD-2-Clause
 #
 
-{ mk, serdeWith }:
+{ mk, versions, serdeWith }:
 
 mk {
   package.name = "sel4-driver-interfaces";
   dependencies = {
+    inherit (versions) embedded-hal-nb heapless;
     serde = serdeWith [ "derive" ];
   };
 }
