@@ -19,7 +19,7 @@ license = "BSD-2-Clause"
 [dependencies]
 log = "0.4.17"
 sel4-bounce-buffer-allocator = { path = "../../../sel4-bounce-buffer-allocator" }
-sel4-driver-interfaces = { path = "../../../drivers/interfaces" }
+sel4-driver-interfaces = { path = "../../../sel4-driver-interfaces" }
 sel4-externally-shared = { path = "../../../sel4-externally-shared", features = ["unstable"] }
 sel4-microkit = { path = "../..", default-features = false }
 sel4-microkit-message = { path = "../../message" }
