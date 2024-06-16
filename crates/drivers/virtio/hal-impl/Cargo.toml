@@ -10,13 +10,15 @@
 #
 
 [package]
-name = "sel4-pl011-driver"
+name = "sel4-virtio-hal-impl"
 version = "0.1.0"
 authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
 edition = "2021"
 license = "BSD-2-Clause"
 
 [dependencies]
-embedded-hal-nb = "1.0"
-sel4-driver-interfaces = { path = "../../../sel4-driver-interfaces" }
-tock-registers = "0.8.1"
+sel4-bounce-buffer-allocator = { path = "../../../sel4-bounce-buffer-allocator" }
+sel4-externally-shared = { path = "../../../sel4-externally-shared" }
+sel4-immediate-sync-once-cell = { path = "../../../sel4-immediate-sync-once-cell" }
+sel4-sync = { path = "../../../sel4-sync" }
+virtio-drivers = { version = "0.7.2", default-features = false }
