@@ -14,7 +14,8 @@ mk {
     "Ben Hamlin <hamlinb@galois.com>"
   ];
   dependencies = {
-    inherit (versions) log embedded-hal-nb heapless;
+    inherit (versions) log embedded-hal-nb heapless rtcc;
+    chrono = { version = versions.chrono; default-features = false; features = [ "serde" ]; };
     serde = serdeWith [];
   } // (with localCrates; {
     inherit sel4-driver-interfaces;

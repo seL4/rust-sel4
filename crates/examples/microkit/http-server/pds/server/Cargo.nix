@@ -10,7 +10,7 @@ mk {
   package.name = "microkit-http-server-example-server";
 
   dependencies = {
-    inherit (versions) log;
+    inherit (versions) log rtcc;
 
     futures = {
       version = versions.futures;
@@ -32,6 +32,7 @@ mk {
       sel4-logging
       sel4-immediate-sync-once-cell
       sel4-microkit-message
+      sel4-microkit-embedded-hal-adapters
       sel4-microkit-smoltcp-device-adapter
       sel4-async-single-threaded-executor
       sel4-async-network
@@ -44,7 +45,6 @@ mk {
       sel4-shared-ring-buffer-block-io-types
       sel4-async-block-io
       sel4-async-block-io-fat
-      microkit-http-server-example-pl031-driver-interface-types
       microkit-http-server-example-sp804-driver-interface-types
       microkit-http-server-example-virtio-blk-driver-interface-types
     ;

@@ -360,6 +360,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
 
 [[package]]
+name = "chrono"
+version = "0.4.38"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a21f936df1771bf62b77f047b726c4625ff2e8aa607c01ec06e5a05bd8463401"
+dependencies = [
+ "num-traits",
+ "serde",
+]
+
+[[package]]
 name = "clang-sys"
 version = "1.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1099,25 +1109,9 @@ dependencies = [
 name = "microkit-http-server-example-pl031-driver"
 version = "0.1.0"
 dependencies = [
- "microkit-http-server-example-pl031-driver-core",
- "microkit-http-server-example-pl031-driver-interface-types",
  "sel4-microkit",
- "sel4-microkit-message",
-]
-
-[[package]]
-name = "microkit-http-server-example-pl031-driver-core"
-version = "0.1.0"
-dependencies = [
- "log",
- "tock-registers",
-]
-
-[[package]]
-name = "microkit-http-server-example-pl031-driver-interface-types"
-version = "0.1.0"
-dependencies = [
- "serde",
+ "sel4-microkit-embedded-hal-adapters",
+ "sel4-pl031-driver",
 ]
 
 [[package]]
@@ -1127,11 +1121,11 @@ dependencies = [
  "async-unsync",
  "futures",
  "log",
- "microkit-http-server-example-pl031-driver-interface-types",
  "microkit-http-server-example-server-core",
  "microkit-http-server-example-sp804-driver-interface-types",
  "microkit-http-server-example-virtio-blk-driver-interface-types",
  "rcgen",
+ "rtcc",
  "sel4",
  "sel4-async-block-io",
  "sel4-async-block-io-fat",
@@ -1143,6 +1137,7 @@ dependencies = [
  "sel4-immediate-sync-once-cell",
  "sel4-logging",
  "sel4-microkit",
+ "sel4-microkit-embedded-hal-adapters",
  "sel4-microkit-message",
  "sel4-microkit-smoltcp-device-adapter",
  "sel4-newlib",
@@ -1792,6 +1787,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "rtcc"
+version = "0.3.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "95973c3a0274adc4f3c5b70d2b5b85618d6de9559a6737d3293ecae9a2fc0839"
+dependencies = [
+ "chrono",
+]
+
+[[package]]
 name = "rustc-demangle"
 version = "0.1.23"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2428,9 +2432,11 @@ dependencies = [
 name = "sel4-microkit-embedded-hal-adapters"
 version = "0.1.0"
 dependencies = [
+ "chrono",
  "embedded-hal-nb",
  "heapless",
  "log",
+ "rtcc",
  "sel4-driver-interfaces",
  "sel4-microkit",
  "sel4-microkit-message",
@@ -2522,6 +2528,14 @@ version = "0.1.0"
 dependencies = [
  "embedded-hal-nb",
  "sel4-driver-interfaces",
+ "tock-registers",
+]
+
+[[package]]
+name = "sel4-pl031-driver"
+version = "0.1.0"
+dependencies = [
+ "rtcc",
  "tock-registers",
 ]
 

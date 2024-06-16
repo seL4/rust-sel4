@@ -92,6 +92,7 @@ in rec {
     anyhow = "1.0.66";
     async-unsync = "0.2.2";
     cfg-if = "1.0.0";
+    chrono = "0.4.35";
     clap = "4.4.6";
     embedded-hal-nb = "1.0";
     embedded-io-async = "0.6.1";
@@ -112,6 +113,7 @@ in rec {
     proc-macro2 = "1.0.50";
     quote = "1.0.23";
     rand = "0.8.5";
+    rtcc = "0.3.2";
     rustc_version = "0.4.0";
     rustls = "0.23.5";
     serde = "1.0.147";
