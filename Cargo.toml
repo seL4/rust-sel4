@@ -111,7 +111,6 @@ members = [
     "crates/sel4-microkit",
     "crates/sel4-microkit/base",
     "crates/sel4-microkit/driver-adapters",
-    "crates/sel4-microkit/drivers/smoltcp-device-adapter",
     "crates/sel4-microkit/macros",
     "crates/sel4-microkit/message",
     "crates/sel4-microkit/message/types",

@@ -26,7 +26,8 @@ use sel4_bounce_buffer_allocator::{Basic, BounceBufferAllocator};
 use sel4_externally_shared::{ExternallySharedRef, ExternallySharedRefExt};
 use sel4_logging::{LevelFilter, Logger, LoggerBuilder};
 use sel4_microkit::{memory_region_symbol, protection_domain, Handler};
-use sel4_microkit_smoltcp_device_adapter::client::Client as NetClient;
+use sel4_microkit_driver_adapters::net::client::Client as NetClient;
+use sel4_microkit_driver_adapters::rtc::client::Client as RtcClient;
 use sel4_newlib as _;
 use sel4_shared_ring_buffer::RingBuffers;
 use sel4_shared_ring_buffer_block_io::SharedRingBufferBlockIO;
@@ -43,8 +44,6 @@ use block_client::BlockClient;
 use config::channels;
 use handler::HandlerImpl;
 use timer_client::TimerClient;
-
-type RtcClient = sel4_microkit_driver_adapters::rtc::client::Client;
 
 const BLOCK_CACHE_SIZE_IN_BLOCKS: usize = 128;
 

@@ -15,7 +15,7 @@ mk {
 
     inherit (localCrates)
       sel4-microkit-message
-      sel4-microkit-smoltcp-device-adapter
+      sel4-microkit-driver-adapters
       sel4
       sel4-logging
       sel4-immediate-sync-once-cell
