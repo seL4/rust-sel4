@@ -18,7 +18,7 @@ use sel4_microkit::{Channel, Handler, Infallible, MessageInfo};
 use sel4_microkit_message::MessageInfoExt as _;
 use sel4_shared_ring_buffer::{roles::Use, RingBuffers};
 
-use super::common::*;
+use super::message_types::*;
 
 pub struct Driver<Device> {
     dev: Device,
@@ -139,20 +139,20 @@ impl<Device: phy::Device + HandleInterrupt + GetMacAddress> Handler for Driver<D
         channel: Channel,
         msg_info: MessageInfo,
     ) -> Result<MessageInfo, Self::Error> {
-        Ok(if channel == self.client_channel {
-            match msg_info.recv_using_postcard::<Request>() {
-                Ok(req) => match req {
-                    Request::GetMacAddress => {
-                        MessageInfo::send_using_postcard(GetMacAddressResponse {
+        if channel == self.client_channel {
+            Ok(match msg_info.recv_using_postcard::<Request>() {
+                Ok(req) => {
+                    let resp: Response = match req {
+                        Request::GetMacAddress => Ok(SuccessResponse::GetMacAddress {
                             mac_address: self.dev.get_mac_address(),
-                        })
-                        .unwrap()
-                    }
-                },
+                        }),
+                    };
+                    MessageInfo::send_using_postcard(resp).unwrap()
+                }
                 Err(_) => MessageInfo::send_unspecified_error(),
-            }
+            })
         } else {
             unreachable!()
-        })
+        }
     }
 }
