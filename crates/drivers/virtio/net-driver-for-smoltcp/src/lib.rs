@@ -13,12 +13,12 @@ use alloc::rc::Rc;
 use core::cell::RefCell;
 
 use log::trace;
+use sel4_driver_interfaces::net::{GetMacAddress, MacAddress};
+use sel4_driver_interfaces::HandleInterrupt;
 use smoltcp::phy::{Device, DeviceCapabilities, Medium, RxToken, TxToken};
 use smoltcp::time::Instant;
 use virtio_drivers::device::net::{RxBuffer, VirtIONet};
 use virtio_drivers::{transport::Transport, Error, Hal};
-
-use sel4_driver_interfaces::{GetMacAddress, HandleInterrupt, MacAddress};
 
 pub const NET_QUEUE_SIZE: usize = 16;
 
