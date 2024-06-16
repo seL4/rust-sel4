@@ -19,4 +19,4 @@ license = "BSD-2-Clause"
 [dependencies]
 sel4-microkit = { path = "../../../../../sel4-microkit", default-features = false }
 sel4-microkit-driver-adapters = { path = "../../../../../sel4-microkit/driver-adapters" }
-sel4-pl031-driver = { path = "../../../../../drivers/devices/pl031" }
+sel4-pl031-driver = { path = "../../../../../drivers/pl031" }
