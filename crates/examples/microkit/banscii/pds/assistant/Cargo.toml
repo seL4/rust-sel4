@@ -29,5 +29,5 @@ path = "../../../../../sel4-microkit"
 default-features = false
 features = ["alloc"]
 
-[dependencies.sel4-microkit-embedded-hal-adapters]
+[dependencies.sel4-microkit-driver-adapters]
 path = "../../../../../sel4-microkit/drivers/embedded-hal-adapters"

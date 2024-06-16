@@ -10,7 +10,7 @@
 #
 
 [package]
-name = "sel4-microkit-embedded-hal-adapters"
+name = "sel4-microkit-driver-adapters"
 version = "0.1.0"
 authors = ["Nick Spinale <nick.spinale@coliasgroup.com>", "Ben Hamlin <hamlinb@galois.com>"]
 edition = "2021"

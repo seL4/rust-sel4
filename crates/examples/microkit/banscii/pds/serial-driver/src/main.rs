@@ -8,7 +8,7 @@
 #![no_main]
 
 use sel4_microkit::{memory_region_symbol, protection_domain, Channel};
-use sel4_microkit_embedded_hal_adapters::serial::driver::Driver;
+use sel4_microkit_driver_adapters::serial::driver::Driver;
 
 #[cfg(feature = "board-qemu_virt_aarch64")]
 use sel4_pl011_driver::Driver as DriverImpl;

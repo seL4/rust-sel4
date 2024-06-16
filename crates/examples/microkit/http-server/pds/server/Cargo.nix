@@ -32,7 +32,7 @@ mk {
       sel4-logging
       sel4-immediate-sync-once-cell
       sel4-microkit-message
-      sel4-microkit-embedded-hal-adapters
+      sel4-microkit-driver-adapters
       sel4-microkit-smoltcp-device-adapter
       sel4-async-single-threaded-executor
       sel4-async-network
