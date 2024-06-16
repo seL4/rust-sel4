@@ -33,15 +33,6 @@ impl Client {
             .map_err(|_| Error::InvalidResponse)?
             .map_err(Error::ErrorResponse)
     }
-
-    pub fn blocking_write(&mut self, val: u8) -> Result<(), Error> {
-        let resp = self.request(Request::PutChar { val })?;
-        match resp {
-            SuccessResponse::PutChar => (),
-            _ => return Err(Error::UnexpectedResponse),
-        }
-        Ok(())
-    }
 }
 
 impl serial::ErrorType for Client {
@@ -50,23 +41,26 @@ impl serial::ErrorType for Client {
 
 impl serial::Read<u8> for Client {
     fn read(&mut self) -> nb::Result<u8, Self::Error> {
-        let resp = self.request(Request::GetChar)?;
-        let val = match resp {
-            SuccessResponse::GetChar { val } => val,
-            _ => return Err(Error::UnexpectedResponse.into()),
-        };
-        val.ok_or(nb::Error::WouldBlock)
+        match self.request(Request::Read)? {
+            SuccessResponse::Read(v) => v.into(),
+            _ => Err(Error::UnexpectedResponse.into()),
+        }
     }
 }
 
 impl serial::Write<u8> for Client {
-    fn write(&mut self, val: u8) -> nb::Result<(), Self::Error> {
-        self.blocking_write(val)?;
-        Ok(())
+    fn write(&mut self, v: u8) -> nb::Result<(), Self::Error> {
+        match self.request(Request::Write(v))? {
+            SuccessResponse::Write(v) => v.into(),
+            _ => Err(Error::UnexpectedResponse.into()),
+        }
     }
 
     fn flush(&mut self) -> nb::Result<(), Self::Error> {
-        Ok(())
+        match self.request(Request::Flush)? {
+            SuccessResponse::Flush(v) => v.into(),
+            _ => Err(Error::UnexpectedResponse.into()),
+        }
     }
 }
 

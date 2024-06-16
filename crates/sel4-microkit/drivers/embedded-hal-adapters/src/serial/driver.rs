@@ -5,7 +5,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use core::fmt;
+use core::convert::Infallible;
 
 use embedded_hal_nb::nb;
 use embedded_hal_nb::serial;
@@ -16,9 +16,6 @@ use sel4_microkit::{Channel, Handler, MessageInfo};
 use sel4_microkit_message::MessageInfoExt;
 
 use super::message_types::*;
-
-// TODO
-// Factor buffering out into wrapper for serial::{Read,Write}
 
 /// Handle messages using an implementor of [serial::Read<u8>] and [serial::Write<u8>].
 #[derive(Clone, Debug)]
@@ -53,16 +50,23 @@ where
 impl<Device> Handler for Driver<Device>
 where
     Device: serial::Read<u8> + serial::Write<u8> + HandleInterrupt,
-    <Device as serial::ErrorType>::Error: fmt::Display,
 {
-    type Error = Error<Device::Error>;
+    type Error = Infallible;
 
     fn notified(&mut self, channel: Channel) -> Result<(), Self::Error> {
-        // TODO Handle errors
         if channel == self.serial {
-            while let Ok(c) = self.device.read() {
-                if let Err(_) = self.buffer.push_back(c) {
-                    return Err(Error::BufferFull);
+            while !self.buffer.is_full() {
+                match self.device.read() {
+                    Ok(v) => {
+                        self.buffer.push_back(v).unwrap();
+                    }
+                    Err(err) => {
+                        if let nb::Error::Other(err) = err {
+                            // TODO somehow inform the client
+                            log::debug!("read error: {err:?}")
+                        }
+                        break;
+                    }
                 }
             }
             self.device.handle_interrupt();
@@ -82,22 +86,23 @@ where
         channel: Channel,
         msg_info: MessageInfo,
     ) -> Result<MessageInfo, Self::Error> {
-        // TODO Handle errors
         if channel == self.client {
             Ok(match msg_info.recv_using_postcard::<Request>() {
                 Ok(req) => {
                     let resp = match req {
-                        Request::PutChar { val } => match nb::block!(self.device.write(val)) {
-                            Ok(_) => Ok(SuccessResponse::PutChar),
-                            Err(_) => Err(ErrorResponse::WriteError),
-                        },
-                        Request::GetChar => {
-                            let val = self.buffer.pop_front();
-                            if val.is_some() {
+                        Request::Read => {
+                            let v = self.buffer.pop_front();
+                            if v.is_some() {
                                 self.notify = true;
                             }
-                            Ok(SuccessResponse::GetChar { val })
+                            Ok(SuccessResponse::Read(v.into()))
                         }
+                        Request::Write(c) => NonBlocking::from_nb_result(self.device.write(c))
+                            .map(SuccessResponse::Write)
+                            .map_err(|_| ErrorResponse::WriteError),
+                        Request::Flush => NonBlocking::from_nb_result(self.device.flush())
+                            .map(SuccessResponse::Flush)
+                            .map_err(|_| ErrorResponse::FlushError),
                     };
                     MessageInfo::send_using_postcard(resp).unwrap()
                 }
@@ -105,23 +110,6 @@ where
             })
         } else {
             panic!("unexpected channel: {channel:?}");
-        }
-    }
-}
-
-#[non_exhaustive]
-#[derive(Clone, Debug)]
-pub enum Error<E> {
-    DeviceError(E),
-    BufferFull,
-    // XXX Other errors?
-}
-
-impl<E: fmt::Display> fmt::Display for Error<E> {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            Self::DeviceError(err) => write!(f, "device error: {err}"),
-            Self::BufferFull => write!(f, "buffer full"),
         }
     }
 }
