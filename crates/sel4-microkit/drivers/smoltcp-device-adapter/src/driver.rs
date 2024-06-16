@@ -138,19 +138,23 @@ impl<Device: phy::Device + HandleInterrupt + GetMacAddress> Handler for Driver<D
         msg_info: MessageInfo,
     ) -> Result<MessageInfo, Self::Error> {
         if channel == self.client_channel {
-            Ok(match msg_info.recv_using_postcard::<Request>() {
-                Ok(req) => {
-                    let resp: Response = match req {
-                        Request::GetMacAddress => Ok(SuccessResponse::GetMacAddress {
-                            mac_address: self.dev.get_mac_address(),
-                        }),
-                    };
-                    MessageInfo::send_using_postcard(resp).unwrap()
-                }
-                Err(_) => MessageInfo::send_unspecified_error(),
-            })
+            Ok(handle_client_request(&mut self.dev, msg_info))
         } else {
             unreachable!()
         }
+    }
+}
+
+pub fn handle_client_request<T: GetMacAddress>(dev: &mut T, msg_info: MessageInfo) -> MessageInfo {
+    match msg_info.recv_using_postcard::<Request>() {
+        Ok(req) => {
+            let resp: Response = match req {
+                Request::GetMacAddress => Ok(SuccessResponse::GetMacAddress {
+                    mac_address: dev.get_mac_address(),
+                }),
+            };
+            MessageInfo::send_using_postcard(resp).unwrap()
+        }
+        Err(_) => MessageInfo::send_unspecified_error(),
     }
 }
