@@ -38,8 +38,6 @@ impl<Device> Driver<Device> {
         device_channel: Channel,
         client_channel: Channel,
     ) -> Self {
-        // XXX We could maybe initialize DMA here, so we don't need to do
-        // it in main. Also maybe initialize the ring buffers.
         Self {
             dev,
             client_region,
