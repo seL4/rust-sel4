@@ -13,6 +13,7 @@ use alloc::rc::Rc;
 use alloc::sync::Arc;
 use core::time::Duration;
 
+use rtcc::DateTimeAccess;
 use smoltcp::iface::Config;
 use smoltcp::phy::{Device, DeviceCapabilities, Medium};
 use smoltcp::wire::{EthernetAddress, HardwareAddress};
@@ -36,14 +37,14 @@ use microkit_http_server_example_server_core::run_server;
 mod block_client;
 mod config;
 mod handler;
-mod rtc_client;
 mod timer_client;
 
 use block_client::BlockClient;
 use config::channels;
 use handler::HandlerImpl;
-use rtc_client::RtcClient;
 use timer_client::TimerClient;
+
+type RtcClient = sel4_microkit_embedded_hal_adapters::rtc::client::Client;
 
 const BLOCK_CACHE_SIZE_IN_BLOCKS: usize = 128;
 
@@ -71,12 +72,20 @@ static LOGGER: Logger = LoggerBuilder::const_default()
 fn init() -> impl Handler {
     LOGGER.set().unwrap();
 
-    let rtc_client = RtcClient::new(channels::RTC_DRIVER);
+    let mut rtc_client = RtcClient::new(channels::RTC_DRIVER);
     let timer_client = Arc::new(TimerClient::new(channels::TIMER_DRIVER));
     let net_client = NetClient::new(channels::NET_DRIVER);
     let block_client = BlockClient::new(channels::BLOCK_DRIVER);
 
-    let now_unix_time = Duration::from_secs(rtc_client.now().into());
+    let now_unix_time = Duration::from_secs(
+        rtc_client
+            .datetime()
+            .unwrap()
+            .and_utc()
+            .timestamp()
+            .try_into()
+            .unwrap(),
+    );
 
     let now_fn = {
         let timer_client = timer_client.clone();

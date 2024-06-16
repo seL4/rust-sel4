@@ -17,7 +17,8 @@ edition = "2021"
 license = "BSD-2-Clause"
 
 [dependencies]
-microkit-http-server-example-pl031-driver-core = { path = "core" }
-microkit-http-server-example-pl031-driver-interface-types = { path = "interface-types" }
 sel4-microkit = { path = "../../../../../sel4-microkit", default-features = false }
-sel4-microkit-message = { path = "../../../../../sel4-microkit/message" }
+sel4-pl031-driver = { path = "../../../../../drivers/devices/pl031" }
+
+[dependencies.sel4-microkit-embedded-hal-adapters]
+path = "../../../../../sel4-microkit/drivers/embedded-hal-adapters"

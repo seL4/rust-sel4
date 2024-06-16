@@ -21,6 +21,7 @@ async-unsync = { version = "0.2.2", default-features = false }
 futures = { version = "0.3.28", default-features = false, features = ["async-await", "alloc"] }
 log = "0.4.17"
 microkit-http-server-example-server-core = { path = "core", features = [] }
+rtcc = "0.3.2"
 sel4 = { path = "../../../../../sel4" }
 sel4-async-block-io = { path = "../../../../../sel4-async/block-io" }
 sel4-async-block-io-fat = { path = "../../../../../sel4-async/block-io/fat" }
@@ -36,9 +37,6 @@ sel4-shared-ring-buffer = { path = "../../../../../sel4-shared-ring-buffer" }
 sel4-shared-ring-buffer-block-io = { path = "../../../../../sel4-shared-ring-buffer/block-io" }
 sel4-shared-ring-buffer-smoltcp = { path = "../../../../../sel4-shared-ring-buffer/smoltcp" }
 
-[dependencies.microkit-http-server-example-pl031-driver-interface-types]
-path = "../pl031-driver/interface-types"
-
 [dependencies.microkit-http-server-example-sp804-driver-interface-types]
 path = "../sp804-driver/interface-types"
 
@@ -52,6 +50,9 @@ path = "../../../../../sel4-async/single-threaded-executor"
 path = "../../../../../sel4-microkit"
 default-features = false
 features = ["alloc"]
+
+[dependencies.sel4-microkit-embedded-hal-adapters]
+path = "../../../../../sel4-microkit/drivers/embedded-hal-adapters"
 
 [dependencies.sel4-microkit-smoltcp-device-adapter]
 path = "../../../../../sel4-microkit/drivers/smoltcp-device-adapter"
