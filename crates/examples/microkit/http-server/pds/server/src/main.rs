@@ -44,7 +44,7 @@ use config::channels;
 use handler::HandlerImpl;
 use timer_client::TimerClient;
 
-type RtcClient = sel4_microkit_embedded_hal_adapters::rtc::client::Client;
+type RtcClient = sel4_microkit_driver_adapters::rtc::client::Client;
 
 const BLOCK_CACHE_SIZE_IN_BLOCKS: usize = 128;
 

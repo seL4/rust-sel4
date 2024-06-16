@@ -24,7 +24,7 @@ use sel4_externally_shared::{
 use sel4_microkit::{
     memory_region_symbol, protection_domain, Channel, Handler, Infallible, MessageInfo,
 };
-use sel4_microkit_embedded_hal_adapters::serial::client::{
+use sel4_microkit_driver_adapters::serial::client::{
     Client as SerialClient, Error as SerialClientError,
 };
 use sel4_microkit_message::MessageInfoExt as _;

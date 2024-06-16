@@ -13,7 +13,7 @@ mk {
     hex = { version = "0.4.3"; default-features = false; features = [ "alloc" ]; };
     inherit (localCrates)
       sel4-microkit-message
-      sel4-microkit-embedded-hal-adapters
+      sel4-microkit-driver-adapters
       banscii-assistant-core
       banscii-artist-interface-types
     ;

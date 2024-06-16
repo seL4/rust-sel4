@@ -8,7 +8,7 @@
 #![no_main]
 
 use sel4_microkit::{memory_region_symbol, protection_domain, Channel};
-use sel4_microkit_embedded_hal_adapters::rtc::driver::Driver;
+use sel4_microkit_driver_adapters::rtc::driver::Driver;
 use sel4_pl031_driver::Driver as DriverImpl;
 
 const _DEVICE: Channel = Channel::new(0);

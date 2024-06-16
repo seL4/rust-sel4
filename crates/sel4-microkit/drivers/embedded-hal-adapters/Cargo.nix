@@ -8,7 +8,7 @@
 { mk, versions, localCrates, serdeWith, authors }:
 
 mk {
-  package.name = "sel4-microkit-embedded-hal-adapters";
+  package.name = "sel4-microkit-driver-adapters";
   package.authors = with authors; [
     nspin
     "Ben Hamlin <hamlinb@galois.com>"

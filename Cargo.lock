@@ -188,7 +188,7 @@ dependencies = [
  "hex",
  "sel4-externally-shared",
  "sel4-microkit",
- "sel4-microkit-embedded-hal-adapters",
+ "sel4-microkit-driver-adapters",
  "sel4-microkit-message",
 ]
 
@@ -215,7 +215,7 @@ name = "banscii-serial-driver"
 version = "0.1.0"
 dependencies = [
  "sel4-microkit",
- "sel4-microkit-embedded-hal-adapters",
+ "sel4-microkit-driver-adapters",
  "sel4-microkit-message",
  "sel4-pl011-driver",
 ]
@@ -1110,7 +1110,7 @@ name = "microkit-http-server-example-pl031-driver"
 version = "0.1.0"
 dependencies = [
  "sel4-microkit",
- "sel4-microkit-embedded-hal-adapters",
+ "sel4-microkit-driver-adapters",
  "sel4-pl031-driver",
 ]
 
@@ -1137,7 +1137,7 @@ dependencies = [
  "sel4-immediate-sync-once-cell",
  "sel4-logging",
  "sel4-microkit",
- "sel4-microkit-embedded-hal-adapters",
+ "sel4-microkit-driver-adapters",
  "sel4-microkit-message",
  "sel4-microkit-smoltcp-device-adapter",
  "sel4-newlib",
@@ -2429,7 +2429,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "sel4-microkit-embedded-hal-adapters"
+name = "sel4-microkit-driver-adapters"
 version = "0.1.0"
 dependencies = [
  "chrono",
