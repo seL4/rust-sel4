@@ -22,7 +22,7 @@ embedded-hal-nb = "1.0"
 heapless = "0.7.16"
 log = "0.4.17"
 rtcc = "0.3.2"
-sel4-driver-interfaces = { path = "../../../sel4-driver-interfaces" }
-sel4-microkit = { path = "../..", default-features = false }
-sel4-microkit-message = { path = "../../message" }
+sel4-driver-interfaces = { path = "../../sel4-driver-interfaces" }
+sel4-microkit = { path = "..", default-features = false }
+sel4-microkit-message = { path = "../message" }
 serde = { version = "1.0.147", default-features = false }

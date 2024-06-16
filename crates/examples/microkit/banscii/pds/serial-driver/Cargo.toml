@@ -21,8 +21,6 @@ board-qemu_virt_aarch64 = ["sel4-pl011-driver"]
 
 [dependencies]
 sel4-microkit = { path = "../../../../../sel4-microkit", default-features = false }
+sel4-microkit-driver-adapters = { path = "../../../../../sel4-microkit/driver-adapters" }
 sel4-microkit-message = { path = "../../../../../sel4-microkit/message" }
 sel4-pl011-driver = { path = "../../../../../drivers/devices/pl011", optional = true }
-
-[dependencies.sel4-microkit-driver-adapters]
-path = "../../../../../sel4-microkit/drivers/embedded-hal-adapters"
