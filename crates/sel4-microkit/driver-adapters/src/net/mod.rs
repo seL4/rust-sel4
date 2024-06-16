@@ -5,8 +5,6 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-#![no_std]
-
 mod message_types;
 
 pub mod client;

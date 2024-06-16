@@ -5,7 +5,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
 #
 
-{ mk, versions, localCrates, serdeWith, authors }:
+{ mk, versions, localCrates, serdeWith, smoltcpWith, authors }:
 
 mk {
   package.name = "sel4-microkit-driver-adapters";
@@ -15,11 +15,20 @@ mk {
   ];
   dependencies = {
     inherit (versions) log embedded-hal-nb heapless rtcc;
-    chrono = { version = versions.chrono; default-features = false; features = [ "serde" ]; };
     serde = serdeWith [];
+    smoltcp = smoltcpWith [];
+    chrono = { version = versions.chrono; default-features = false; features = [ "serde" ]; };
   } // (with localCrates; {
-    inherit sel4-driver-interfaces;
-    inherit sel4-microkit-message;
+    inherit
+      sel4-driver-interfaces
+      sel4-microkit-message
+      sel4-shared-ring-buffer
+      sel4-bounce-buffer-allocator
+    ;
+    sel4-externally-shared = sel4-externally-shared // { features = [ "unstable" ]; };
     sel4-microkit = sel4-microkit // { default-features = false; };
   });
+  features = {
+    # TODO
+  };
 }
