@@ -9,7 +9,7 @@
 mk {
   package.name = "sel4-driver-interfaces";
   dependencies = {
-    inherit (versions) embedded-hal-nb heapless;
+    inherit (versions) embedded-hal-nb rtcc heapless lock_api;
     serde = serdeWith [ "derive" ];
   };
 }
