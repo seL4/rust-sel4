@@ -19,6 +19,7 @@ impl Client {
     pub fn new(channel: Channel) -> Self {
         Self { channel }
     }
+
     fn request(&self, req: Request) -> Result<SuccessResponse, Error> {
         self.channel
             .pp_call(MessageInfo::send_using_postcard(req).unwrap())

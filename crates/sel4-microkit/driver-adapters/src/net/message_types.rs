@@ -17,11 +17,6 @@ pub(crate) enum Request {
 pub(crate) type Response = Result<SuccessResponse, ErrorResponse>;
 
 #[derive(Debug, Serialize, Deserialize)]
-pub(crate) struct GetMacAddressResponse {
-    pub mac_address: MacAddress,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
 pub(crate) enum SuccessResponse {
     GetMacAddress { mac_address: MacAddress },
 }
