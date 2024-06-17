@@ -31,7 +31,6 @@ members = [
     "crates/examples/microkit/http-server/pds/server/core",
     "crates/examples/microkit/http-server/pds/sp804-driver",
     "crates/examples/microkit/http-server/pds/virtio-blk-driver",
-    "crates/examples/microkit/http-server/pds/virtio-blk-driver/interface-types",
     "crates/examples/microkit/http-server/pds/virtio-net-driver",
     "crates/examples/root-task/example-root-task",
     "crates/examples/root-task/example-root-task-without-runtime",

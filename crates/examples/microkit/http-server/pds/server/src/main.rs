@@ -20,7 +20,7 @@ use smoltcp::phy::{Device, DeviceCapabilities, Medium};
 use smoltcp::wire::{EthernetAddress, HardwareAddress};
 
 use sel4_async_block_io::{
-    constant_block_sizes::BlockSize512, disk::Disk, CachedBlockIO, ConstantBlockSize,
+    constant_block_sizes::BlockSize512, disk::Disk, BlockSize, CachedBlockIO, ConstantBlockSize,
 };
 use sel4_async_time::Instant;
 use sel4_bounce_buffer_allocator::{Basic, BounceBufferAllocator};
@@ -28,6 +28,7 @@ use sel4_driver_interfaces::timer::{Clock, DefaultTimer};
 use sel4_externally_shared::{ExternallySharedRef, ExternallySharedRefExt};
 use sel4_logging::{LevelFilter, Logger, LoggerBuilder};
 use sel4_microkit::{memory_region_symbol, protection_domain, Handler};
+use sel4_microkit_driver_adapters::block::client::Client as BlockClient;
 use sel4_microkit_driver_adapters::net::client::Client as NetClient;
 use sel4_microkit_driver_adapters::rtc::client::Client as RtcClient;
 use sel4_microkit_driver_adapters::timer::client::Client as TimerClient;
@@ -38,11 +39,9 @@ use sel4_shared_ring_buffer_smoltcp::DeviceImpl;
 
 use microkit_http_server_example_server_core::run_server;
 
-mod block_client;
 mod config;
 mod handler;
 
-use block_client::BlockClient;
 use config::channels;
 use handler::HandlerImpl;
 
@@ -148,7 +147,10 @@ fn init() -> impl Handler {
         this
     };
 
-    let num_blocks = block_client.get_num_blocks();
+    let block_size = block_client.get_block_size().unwrap();
+    assert_eq!(block_size, BlockSize512::BLOCK_SIZE.bytes());
+
+    let num_blocks = block_client.get_num_blocks().unwrap();
 
     let shared_block_io = {
         let dma_region = unsafe {
