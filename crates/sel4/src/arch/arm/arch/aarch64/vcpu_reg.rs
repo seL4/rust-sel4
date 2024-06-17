@@ -10,7 +10,7 @@ use sel4_config::sel4_cfg_enum;
 use crate::sys;
 
 /// Corresponds to `seL4_VCPUReg`.
-#[repr(u32)]
+#[repr(u64)]
 #[allow(non_camel_case_types)]
 #[sel4_cfg_enum]
 pub enum VCpuReg {

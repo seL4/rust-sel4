@@ -521,6 +521,7 @@ impl ParameterTypes {
 
         if sel4_cfg_bool!(ARCH_AARCH64) | sel4_cfg_bool!(ARCH_AARCH32) {
             this.insert_enum("seL4_ARM_VMAttributes", WORD_SIZE);
+            this.insert_enum("seL4_VCPUReg", WORD_SIZE);
             this.insert_capability("seL4_ARM_Page");
             this.insert_capability("seL4_ARM_PageTable");
             this.insert_capability("seL4_ARM_PageDirectory");
