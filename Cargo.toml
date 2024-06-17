@@ -16,6 +16,7 @@ members = [
     "crates/drivers/pl011",
     "crates/drivers/pl031",
     "crates/drivers/sp804",
+    "crates/drivers/virtio/blk",
     "crates/drivers/virtio/hal-impl",
     "crates/drivers/virtio/net",
     "crates/examples/microkit/banscii/pds/artist",
