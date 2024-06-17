@@ -22,7 +22,7 @@ mk {
       sel4-shared-ring-buffer
       sel4-bounce-buffer-allocator
       sel4-virtio-hal-impl
-      sel4-virtio-net-driver-for-smoltcp
+      sel4-virtio-net
     ;
 
     sel4-externally-shared = localCrates.sel4-externally-shared // { features = [ "unstable" ]; };

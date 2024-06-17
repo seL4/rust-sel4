@@ -22,7 +22,7 @@ use sel4_microkit::{memory_region_symbol, protection_domain, var};
 use sel4_microkit_driver_adapters::net::driver::Driver;
 use sel4_shared_ring_buffer::{roles::Use, RingBuffers};
 use sel4_virtio_hal_impl::HalImpl;
-use sel4_virtio_net_driver_for_smoltcp::DeviceWrapper;
+use sel4_virtio_net::DeviceWrapper;
 
 mod config;
 

@@ -17,7 +17,7 @@ members = [
     "crates/drivers/pl031",
     "crates/drivers/sp804",
     "crates/drivers/virtio/hal-impl",
-    "crates/drivers/virtio/net-driver-for-smoltcp",
+    "crates/drivers/virtio/net",
     "crates/examples/microkit/banscii/pds/artist",
     "crates/examples/microkit/banscii/pds/artist/interface-types",
     "crates/examples/microkit/banscii/pds/assistant",
