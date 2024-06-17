@@ -1226,7 +1226,7 @@ dependencies = [
  "sel4-microkit-message",
  "sel4-shared-ring-buffer",
  "sel4-virtio-hal-impl",
- "sel4-virtio-net-driver-for-smoltcp",
+ "sel4-virtio-net",
  "virtio-drivers",
 ]
 
@@ -2777,7 +2777,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "sel4-virtio-net-driver-for-smoltcp"
+name = "sel4-virtio-net"
 version = "0.1.0"
 dependencies = [
  "log",

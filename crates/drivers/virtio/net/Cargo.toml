@@ -10,7 +10,7 @@
 #
 
 [package]
-name = "sel4-virtio-net-driver-for-smoltcp"
+name = "sel4-virtio-net"
 version = "0.1.0"
 authors = ["Nick Spinale <nick.spinale@coliasgroup.com>", "Runji Wang <wangrunji0408@163.com>"]
 edition = "2021"

@@ -10,7 +10,7 @@ mk rec {
   nix.frontmatter = mkDefaultFrontmatterWithReuseArgs (defaultReuseFrontmatterArgs // {
     licenseID = package.license;
   });
-  package.name = "sel4-virtio-net-driver-for-smoltcp";
+  package.name = "sel4-virtio-net";
   package.authors = with authors; [
     nspin
     "Runji Wang <wangrunji0408@163.com>"
