@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
+// TODO make fallible?
 pub trait GetBlockLayout {
     fn get_block_size(&mut self) -> usize;
 

@@ -2259,6 +2259,8 @@ version = "0.1.0"
 dependencies = [
  "embedded-hal-nb",
  "heapless",
+ "lock_api",
+ "rtcc",
  "serde",
 ]
 

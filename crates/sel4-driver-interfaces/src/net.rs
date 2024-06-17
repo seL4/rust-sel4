@@ -9,6 +9,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Serialize, Deserialize)]
 pub struct MacAddress(pub [u8; 6]);
 
+// TODO make fallible?
 pub trait GetMacAddress {
     fn get_mac_address(&mut self) -> MacAddress;
 }
