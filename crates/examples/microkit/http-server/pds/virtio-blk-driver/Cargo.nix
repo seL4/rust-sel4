@@ -22,7 +22,9 @@ mk {
       sel4-shared-ring-buffer-block-io-types
       sel4-bounce-buffer-allocator
       sel4-virtio-hal-impl
-      microkit-http-server-example-virtio-blk-driver-interface-types
+      sel4-virtio-blk
+      sel4-driver-interfaces
+      sel4-microkit-driver-adapters
     ;
 
     sel4-externally-shared = localCrates.sel4-externally-shared // { features = [ "unstable" ]; };

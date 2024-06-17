@@ -5,7 +5,7 @@
 //
 
 use sel4_driver_interfaces::block::GetBlockLayout;
-use sel4_microkit::{Channel, Handler, Infallible, MessageInfo};
+use sel4_microkit::MessageInfo;
 use sel4_microkit_message::MessageInfoExt as _;
 
 use super::message_types::*;

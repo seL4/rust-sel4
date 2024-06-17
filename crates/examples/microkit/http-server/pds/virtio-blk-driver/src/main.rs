@@ -26,13 +26,12 @@ use sel4_externally_shared::{ExternallySharedRef, ExternallySharedRefExt};
 use sel4_microkit::{
     memory_region_symbol, protection_domain, var, Channel, Handler, Infallible, MessageInfo,
 };
-use sel4_microkit_message::MessageInfoExt as _;
+use sel4_microkit_driver_adapters::block::driver::handle_client_request;
 use sel4_shared_ring_buffer::{roles::Use, RingBuffers};
 use sel4_shared_ring_buffer_block_io_types::{
     BlockIORequest, BlockIORequestStatus, BlockIORequestType,
 };
-
-use microkit_http_server_example_virtio_blk_driver_interface_types::*;
+use sel4_virtio_blk::GetBlockLayoutWrapper;
 use sel4_virtio_hal_impl::HalImpl;
 
 mod config;
@@ -207,20 +206,14 @@ impl Handler for HandlerImpl {
         channel: Channel,
         msg_info: MessageInfo,
     ) -> Result<MessageInfo, Self::Error> {
-        Ok(match channel {
-            channels::CLIENT => match msg_info.recv_using_postcard::<Request>() {
-                Ok(req) => match req {
-                    Request::GetNumBlocks => {
-                        let num_blocks = self.dev.capacity();
-                        MessageInfo::send_using_postcard(GetNumBlocksResponse { num_blocks })
-                            .unwrap()
-                    }
-                },
-                Err(_) => MessageInfo::send_unspecified_error(),
-            },
+        match channel {
+            channels::CLIENT => Ok(handle_client_request(
+                &mut GetBlockLayoutWrapper(&self.dev),
+                msg_info,
+            )),
             _ => {
                 unreachable!()
             }
-        })
+        }
     }
 }

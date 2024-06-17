@@ -18,15 +18,17 @@ license = "BSD-2-Clause"
 
 [dependencies]
 log = "0.4.17"
-microkit-http-server-example-virtio-blk-driver-interface-types = { path = "interface-types" }
 sel4 = { path = "../../../../../sel4" }
 sel4-bounce-buffer-allocator = { path = "../../../../../sel4-bounce-buffer-allocator" }
+sel4-driver-interfaces = { path = "../../../../../sel4-driver-interfaces" }
 sel4-externally-shared = { path = "../../../../../sel4-externally-shared", features = ["unstable"] }
 sel4-immediate-sync-once-cell = { path = "../../../../../sel4-immediate-sync-once-cell" }
 sel4-logging = { path = "../../../../../sel4-logging" }
 sel4-microkit = { path = "../../../../../sel4-microkit", default-features = false }
+sel4-microkit-driver-adapters = { path = "../../../../../sel4-microkit/driver-adapters" }
 sel4-microkit-message = { path = "../../../../../sel4-microkit/message" }
 sel4-shared-ring-buffer = { path = "../../../../../sel4-shared-ring-buffer" }
+sel4-virtio-blk = { path = "../../../../../drivers/virtio/blk" }
 sel4-virtio-hal-impl = { path = "../../../../../drivers/virtio/hal-impl" }
 virtio-drivers = { version = "0.7.2", default-features = false }
 

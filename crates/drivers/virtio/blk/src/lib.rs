@@ -13,7 +13,7 @@ use sel4_driver_interfaces::block::GetBlockLayout;
 use virtio_drivers::device::blk::{VirtIOBlk, SECTOR_SIZE};
 use virtio_drivers::{transport::Transport, Hal};
 
-pub struct GetBlockLayoutWrapper<T>(T);
+pub struct GetBlockLayoutWrapper<T>(pub T);
 
 impl<H: Hal, T: Transport, U: Deref<Target = VirtIOBlk<H, T>>> GetBlockLayout
     for GetBlockLayoutWrapper<U>
