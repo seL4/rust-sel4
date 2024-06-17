@@ -7,8 +7,6 @@
 
 use serde::{Deserialize, Serialize};
 
-use sel4_driver_interfaces::net::MacAddress;
-
 #[derive(Debug, Serialize, Deserialize)]
 pub(crate) enum Request {
     GetBlockSize,

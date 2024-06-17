@@ -1190,16 +1190,18 @@ name = "microkit-http-server-example-virtio-blk-driver"
 version = "0.1.0"
 dependencies = [
  "log",
- "microkit-http-server-example-virtio-blk-driver-interface-types",
  "sel4",
  "sel4-bounce-buffer-allocator",
+ "sel4-driver-interfaces",
  "sel4-externally-shared",
  "sel4-immediate-sync-once-cell",
  "sel4-logging",
  "sel4-microkit",
+ "sel4-microkit-driver-adapters",
  "sel4-microkit-message",
  "sel4-shared-ring-buffer",
  "sel4-shared-ring-buffer-block-io-types",
+ "sel4-virtio-blk",
  "sel4-virtio-hal-impl",
  "virtio-drivers",
 ]
