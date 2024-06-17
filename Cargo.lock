@@ -1123,7 +1123,6 @@ dependencies = [
  "lock_api",
  "log",
  "microkit-http-server-example-server-core",
- "microkit-http-server-example-virtio-blk-driver-interface-types",
  "rcgen",
  "rtcc",
  "sel4",
@@ -1204,13 +1203,6 @@ dependencies = [
  "sel4-virtio-blk",
  "sel4-virtio-hal-impl",
  "virtio-drivers",
-]
-
-[[package]]
-name = "microkit-http-server-example-virtio-blk-driver-interface-types"
-version = "0.1.0"
-dependencies = [
- "serde",
 ]
 
 [[package]]

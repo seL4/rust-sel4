@@ -46,7 +46,6 @@ mk {
       sel4-shared-ring-buffer-block-io-types
       sel4-async-block-io
       sel4-async-block-io-fat
-      microkit-http-server-example-virtio-blk-driver-interface-types
     ;
 
     sel4-newlib = localCrates.sel4-newlib // {

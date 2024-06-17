@@ -41,9 +41,6 @@ sel4-shared-ring-buffer-block-io = { path = "../../../../../sel4-shared-ring-buf
 sel4-shared-ring-buffer-smoltcp = { path = "../../../../../sel4-shared-ring-buffer/smoltcp" }
 sel4-sync = { path = "../../../../../sel4-sync" }
 
-[dependencies.microkit-http-server-example-virtio-blk-driver-interface-types]
-path = "../virtio-blk-driver/interface-types"
-
 [dependencies.sel4-async-single-threaded-executor]
 path = "../../../../../sel4-async/single-threaded-executor"
 
