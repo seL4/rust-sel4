@@ -58,7 +58,7 @@ pub struct Device {
 
 #[allow(dead_code)]
 impl Device {
-    pub unsafe fn new(ptr: *const ()) -> Self {
+    pub const unsafe fn new(ptr: *const ()) -> Self {
         let ptr = ptr.cast::<RtcRegisterBlock>();
         Self { ptr }
     }
