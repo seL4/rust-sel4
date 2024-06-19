@@ -8,9 +8,10 @@ use core::cell::RefCell;
 use core::ops::Deref;
 
 use lock_api::{Mutex, RawMutex};
-use rtcc::{DateTimeAccess, NaiveDateTime};
 
 use crate::{WrappedMutex, WrappedRefCell, WrappedRefCellError};
+
+pub use rtcc::{DateTime, DateTimeAccess, Datelike, NaiveDate, NaiveDateTime, NaiveTime, Timelike};
 
 impl<T: Deref<Target = RefCell<U>>, U: DateTimeAccess> DateTimeAccess for &WrappedRefCell<T> {
     type Error = WrappedRefCellError<U::Error>;
