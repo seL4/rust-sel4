@@ -15,20 +15,20 @@ use super::message_types::*;
 
 /// Handle messages using an implementor of [serial::Read<u8>] and [serial::Write<u8>].
 #[derive(Clone, Debug)]
-pub struct Driver<Device> {
-    device: Device,
+pub struct HandlerImpl<Driver> {
+    driver: Driver,
     client: Channel,
 }
 
-impl<Device> Driver<Device> {
-    pub fn new(device: Device, client: Channel) -> Self {
-        Self { device, client }
+impl<Driver> HandlerImpl<Driver> {
+    pub fn new(driver: Driver, client: Channel) -> Self {
+        Self { driver, client }
     }
 }
 
-impl<Device> Handler for Driver<Device>
+impl<Driver> Handler for HandlerImpl<Driver>
 where
-    Device: DateTimeAccess,
+    Driver: DateTimeAccess,
 {
     type Error = Infallible;
 
@@ -42,12 +42,12 @@ where
                 Ok(req) => {
                     let resp = match req {
                         Request::DateTime => self
-                            .device
+                            .driver
                             .datetime()
                             .map(SuccessResponse::DateTime)
                             .map_err(|_| ErrorResponse::DateTimeError),
                         Request::SetDateTime(v) => self
-                            .device
+                            .driver
                             .set_datetime(&v)
                             .map(|_| SuccessResponse::SetDateTime)
                             .map_err(|_| ErrorResponse::SetDateTimeError),

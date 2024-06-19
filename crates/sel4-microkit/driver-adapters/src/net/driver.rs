@@ -21,7 +21,7 @@ use sel4_shared_ring_buffer::{roles::Use, RingBuffers};
 
 use super::message_types::*;
 
-pub struct Driver<Device> {
+pub struct HandlerImpl<Device> {
     dev: Device,
     client_region: ExternallySharedRef<'static, [u8]>,
     rx_ring_buffers: RingBuffers<'static, Use, fn()>,
@@ -30,7 +30,7 @@ pub struct Driver<Device> {
     client_channel: Channel,
 }
 
-impl<Device> Driver<Device> {
+impl<Device> HandlerImpl<Device> {
     pub fn new(
         dev: Device,
         client_region: ExternallySharedRef<'static, [u8]>,
@@ -50,7 +50,7 @@ impl<Device> Driver<Device> {
     }
 }
 
-impl<Device: phy::Device + HandleInterrupt + GetNetDeviceMeta> Handler for Driver<Device> {
+impl<Device: phy::Device + HandleInterrupt + GetNetDeviceMeta> Handler for HandlerImpl<Device> {
     type Error = Infallible;
 
     fn notified(&mut self, channel: Channel) -> Result<(), Self::Error> {
