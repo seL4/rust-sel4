@@ -7,8 +7,7 @@
 use core::arch::asm;
 use core::mem;
 
-use aarch64_cpu::registers::CurrentEL;
-use tock_registers::interfaces::Readable;
+use aarch64_cpu::registers::{CurrentEL, Readable};
 
 use sel4_kernel_loader_payload_types::PayloadInfo;
 

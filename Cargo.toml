@@ -13,6 +13,7 @@
 default-members = []
 resolver = "2"
 members = [
+    "crates/drivers/bcm2835-aux-uart",
     "crates/drivers/pl011",
     "crates/drivers/pl031",
     "crates/drivers/sp804",

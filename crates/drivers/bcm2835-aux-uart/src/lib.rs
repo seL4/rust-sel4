@@ -1,5 +1,5 @@
 //
-// Copyright 2023, Colias Group, LLC
+// Copyright 2024, Colias Group, LLC
 //
 // SPDX-License-Identifier: BSD-2-Clause
 //
@@ -11,7 +11,7 @@ use core::convert::Infallible;
 use embedded_hal_nb::nb;
 use embedded_hal_nb::serial;
 
-use sel4_driver_interfaces::HandleInterrupt;
+// use sel4_driver_interfaces::HandleInterrupt;
 
 mod device;
 
@@ -48,11 +48,12 @@ impl serial::ErrorType for Driver {
     type Error = Infallible;
 }
 
-impl serial::Read for Driver {
-    fn read(&mut self) -> nb::Result<u8, Self::Error> {
-        self.device.get_char().ok_or(nb::Error::WouldBlock)
-    }
-}
+// TODO
+// impl serial::Read for Driver {
+//     fn read(&mut self) -> nb::Result<u8, Self::Error> {
+//         self.device.get_char().ok_or(nb::Error::WouldBlock)
+//     }
+// }
 
 impl serial::Write for Driver {
     fn write(&mut self, word: u8) -> nb::Result<(), Self::Error> {
@@ -65,8 +66,9 @@ impl serial::Write for Driver {
     }
 }
 
-impl HandleInterrupt for Driver {
-    fn handle_interrupt(&mut self) {
-        self.device.clear_all_interrupts()
-    }
-}
+// TODO
+// impl HandleInterrupt for Driver {
+//     fn handle_interrupt(&mut self) {
+//         self.device.clear_all_interrupts()
+//     }
+// }

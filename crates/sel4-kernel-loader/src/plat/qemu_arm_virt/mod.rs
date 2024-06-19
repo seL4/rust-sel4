@@ -4,29 +4,31 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use spin::Mutex;
+use embedded_hal_nb::nb;
+use embedded_hal_nb::serial::Write;
+use spin::lock_api::Mutex;
 
 use sel4_config::sel4_cfg_bool;
+use sel4_pl011_driver::Driver as Pl011Driver;
 
 use crate::{
     arch::{drivers::psci, reset_cntvoff},
-    drivers::pl011::Pl011Device,
     plat::Plat,
 };
 
 const SERIAL_DEVICE_BASE_ADDR: usize = 0x0900_0000;
 
-static SERIAL_DEVICE: Mutex<Pl011Device> = Mutex::new(get_serial_device());
+static SERIAL_DRIVER: Mutex<Pl011Driver> = Mutex::new(get_serial_driver());
 
-const fn get_serial_device() -> Pl011Device {
-    unsafe { Pl011Device::new(SERIAL_DEVICE_BASE_ADDR) }
+const fn get_serial_driver() -> Pl011Driver {
+    unsafe { Pl011Driver::new_uninit(SERIAL_DEVICE_BASE_ADDR as *mut _) }
 }
 
 pub(crate) enum PlatImpl {}
 
 impl Plat for PlatImpl {
     fn init() {
-        SERIAL_DEVICE.lock().init();
+        SERIAL_DRIVER.lock().init();
     }
 
     fn init_per_core() {
@@ -38,11 +40,11 @@ impl Plat for PlatImpl {
     }
 
     fn put_char(c: u8) {
-        SERIAL_DEVICE.lock().put_char(c);
+        nb::block!(SERIAL_DRIVER.lock().write(c)).unwrap_or_else(|err| match err {});
     }
 
     fn put_char_without_synchronization(c: u8) {
-        get_serial_device().put_char(c);
+        nb::block!(get_serial_driver().write(c)).unwrap_or_else(|err| match err {});
     }
 
     fn start_secondary_core(core_id: usize, sp: usize) {

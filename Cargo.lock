@@ -2049,6 +2049,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "sel4-bcm2835-aux-uart-driver"
+version = "0.1.0"
+dependencies = [
+ "embedded-hal-nb",
+ "sel4-driver-interfaces",
+ "tock-registers",
+]
+
+[[package]]
 name = "sel4-bitfield-ops"
 version = "0.1.0"
 
@@ -2308,6 +2317,7 @@ dependencies = [
  "aarch64-cpu",
  "cc",
  "cfg-if",
+ "embedded-hal-nb",
  "glob",
  "heapless",
  "log",
@@ -2316,6 +2326,7 @@ dependencies = [
  "quote",
  "riscv",
  "sbi",
+ "sel4-bcm2835-aux-uart-driver",
  "sel4-build-env",
  "sel4-config",
  "sel4-immutable-cell",
@@ -2324,12 +2335,12 @@ dependencies = [
  "sel4-kernel-loader-embed-page-tables-runtime",
  "sel4-kernel-loader-payload-types",
  "sel4-logging",
+ "sel4-pl011-driver",
  "sel4-platform-info",
  "sel4-rustfmt-helper",
  "serde",
  "smccc",
  "spin 0.9.8",
- "tock-registers",
 ]
 
 [[package]]

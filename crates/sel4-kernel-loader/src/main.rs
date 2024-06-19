@@ -17,7 +17,6 @@ use sel4_platform_info::PLATFORM_INFO;
 
 mod arch;
 mod barrier;
-mod drivers;
 mod fmt;
 mod logging;
 mod plat;

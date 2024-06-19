@@ -26,7 +26,7 @@ pub struct Driver {
 
 impl Driver {
     #[allow(clippy::missing_safety_doc)]
-    pub unsafe fn new_uninit(ptr: *mut (), freq: u64) -> Self {
+    pub const unsafe fn new_uninit(ptr: *mut (), freq: u64) -> Self {
         Self {
             device: Device::new(ptr),
             freq,
@@ -42,7 +42,7 @@ impl Driver {
         this
     }
 
-    fn init(&mut self) {
+    pub fn init(&mut self) {
         let control_common =
             Control::TimerEn::Disabled + Control::TimerPre::Div256 + Control::TimerSize::Use32Bit;
 

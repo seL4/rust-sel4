@@ -18,7 +18,7 @@ pub struct Driver {
 
 impl Driver {
     #[allow(clippy::missing_safety_doc)]
-    pub unsafe fn new_uninit(ptr: *mut ()) -> Self {
+    pub const unsafe fn new_uninit(ptr: *mut ()) -> Self {
         Self {
             device: Device::new(ptr),
         }
@@ -31,7 +31,7 @@ impl Driver {
         this
     }
 
-    fn init(&mut self) {}
+    pub fn init(&mut self) {}
 }
 
 impl DateTimeAccess for Driver {
