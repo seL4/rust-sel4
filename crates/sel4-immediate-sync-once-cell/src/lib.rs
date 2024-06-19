@@ -45,8 +45,9 @@ impl<T> ImmediateSyncOnceCell<T> {
         if self.init_started.swap(true, Ordering::SeqCst) {
             Err(value)
         } else {
-            let slot = unsafe { &mut *self.inner.get() };
-            *slot = Some(value);
+            unsafe {
+                *self.inner.get().as_mut().unwrap() = Some(value);
+            }
             self.init_completed.store(true, Ordering::SeqCst);
             Ok(())
         }
