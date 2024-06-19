@@ -18,8 +18,10 @@ pub(crate) type Response = Result<SuccessResponse, ErrorResponse>;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub(crate) enum SuccessResponse {
-    GetMacAddress { mac_address: MacAddress },
+    GetMacAddress(MacAddress),
 }
 
 #[derive(Debug, Copy, Clone, Serialize, Deserialize)]
-pub enum ErrorResponse {}
+pub enum ErrorResponse {
+    Unspecified,
+}
