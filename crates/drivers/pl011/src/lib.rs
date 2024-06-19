@@ -23,10 +23,15 @@ pub struct Driver {
 
 impl Driver {
     #[allow(clippy::missing_safety_doc)]
-    pub unsafe fn new(ptr: *mut ()) -> Self {
-        let mut this = Self {
+    pub unsafe fn new_uninit(ptr: *mut ()) -> Self {
+        Self {
             device: Device::new(ptr.cast()),
-        };
+        }
+    }
+
+    #[allow(clippy::missing_safety_doc)]
+    pub unsafe fn new(ptr: *mut ()) -> Self {
+        let mut this = Self::new_uninit(ptr);
         this.init();
         this
     }
