@@ -9,6 +9,6 @@
 mk {
   package.name = "sel4-logging";
   dependencies = {
-    inherit (versions) log;
+    inherit (versions) log lock_api;
   };
 }
