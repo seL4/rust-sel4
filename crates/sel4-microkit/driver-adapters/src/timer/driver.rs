@@ -14,18 +14,18 @@ use sel4_microkit_message::MessageInfoExt;
 use super::message_types::*;
 
 #[derive(Clone, Debug)]
-pub struct Driver<Device> {
-    device: Device,
+pub struct HandlerImpl<Driver> {
+    driver: Driver,
     timer: Channel,
     client: Channel,
     num_timers: usize,
 }
 
-impl<Device: Timers<TimerLayout = NumTimers>> Driver<Device> {
-    pub fn new(mut device: Device, timer: Channel, client: Channel) -> Result<Self, Device::Error> {
-        let num_timers = device.timer_layout()?.0;
+impl<Driver: Timers<TimerLayout = NumTimers>> HandlerImpl<Driver> {
+    pub fn new(mut driver: Driver, timer: Channel, client: Channel) -> Result<Self, Driver::Error> {
+        let num_timers = driver.timer_layout()?.0;
         Ok(Self {
-            device,
+            driver,
             timer,
             client,
             num_timers,
@@ -41,15 +41,15 @@ impl<Device: Timers<TimerLayout = NumTimers>> Driver<Device> {
     }
 }
 
-impl<Device> Handler for Driver<Device>
+impl<Driver> Handler for HandlerImpl<Driver>
 where
-    Device: Timers<TimerLayout = NumTimers, Timer = usize> + HandleInterrupt,
+    Driver: Timers<TimerLayout = NumTimers, Timer = usize> + HandleInterrupt,
 {
     type Error = Infallible;
 
     fn notified(&mut self, channel: Channel) -> Result<(), Self::Error> {
         if channel == self.timer {
-            self.device.handle_interrupt();
+            self.driver.handle_interrupt();
             self.timer.irq_ack().unwrap();
             self.client.notify();
         } else {
@@ -68,25 +68,25 @@ where
                 Ok(req) => {
                     let resp = match req {
                         Request::GetTime => self
-                            .device
+                            .driver
                             .get_time()
                             .map(SuccessResponse::GetTime)
                             .map_err(|_| ErrorResponse::Unspecified),
                         Request::NumTimers => self
-                            .device
+                            .driver
                             .timer_layout()
                             .map(|NumTimers(n)| SuccessResponse::NumTimers(n))
                             .map_err(|_| ErrorResponse::Unspecified),
                         Request::SetTimeout { timer, relative } => {
                             self.guard_timer(timer).and_then(|_| {
-                                self.device
+                                self.driver
                                     .set_timeout_on(timer, relative)
                                     .map(|_| SuccessResponse::SetTimeout)
                                     .map_err(|_| ErrorResponse::Unspecified)
                             })
                         }
                         Request::ClearTimeout { timer } => self.guard_timer(timer).and_then(|_| {
-                            self.device
+                            self.driver
                                 .clear_timeout_on(timer)
                                 .map(|_| SuccessResponse::ClearTimeout)
                                 .map_err(|_| ErrorResponse::Unspecified)

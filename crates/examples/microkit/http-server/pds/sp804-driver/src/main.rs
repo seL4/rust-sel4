@@ -9,8 +9,8 @@
 
 use sel4_driver_interfaces::timer::SingleTimer;
 use sel4_microkit::{memory_region_symbol, protection_domain, Channel, Handler};
-use sel4_microkit_driver_adapters::timer::driver::Driver;
-use sel4_sp804_driver::Driver as DriverImpl;
+use sel4_microkit_driver_adapters::timer::driver::HandlerImpl;
+use sel4_sp804_driver::Driver;
 
 const DEVICE: Channel = Channel::new(0);
 const CLIENT: Channel = Channel::new(1);
@@ -19,11 +19,11 @@ const FREQ: u64 = 1_000_000;
 
 #[protection_domain]
 fn init() -> impl Handler {
-    let driver_impl = unsafe {
-        DriverImpl::new(
+    let driver = unsafe {
+        Driver::new(
             memory_region_symbol!(sp804_mmio_vaddr: *mut ()).as_ptr(),
             FREQ,
         )
     };
-    Driver::new(SingleTimer(driver_impl), DEVICE, CLIENT).unwrap()
+    HandlerImpl::new(SingleTimer(driver), DEVICE, CLIENT).unwrap()
 }

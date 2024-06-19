@@ -8,15 +8,14 @@
 #![no_main]
 
 use sel4_microkit::{memory_region_symbol, protection_domain, Channel, Handler};
-use sel4_microkit_driver_adapters::rtc::driver::Driver;
-use sel4_pl031_driver::Driver as DriverImpl;
+use sel4_microkit_driver_adapters::rtc::driver::HandlerImpl;
+use sel4_pl031_driver::Driver;
 
 const _DEVICE: Channel = Channel::new(0);
 const CLIENT: Channel = Channel::new(1);
 
 #[protection_domain]
 fn init() -> impl Handler {
-    let driver_impl =
-        unsafe { DriverImpl::new(memory_region_symbol!(pl031_mmio_vaddr: *mut ()).as_ptr()) };
-    Driver::new(driver_impl, CLIENT)
+    let driver = unsafe { Driver::new(memory_region_symbol!(pl031_mmio_vaddr: *mut ()).as_ptr()) };
+    HandlerImpl::new(driver, CLIENT)
 }

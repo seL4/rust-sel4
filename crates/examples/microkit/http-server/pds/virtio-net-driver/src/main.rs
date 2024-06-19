@@ -19,7 +19,7 @@ use virtio_drivers::{
 
 use sel4_externally_shared::{ExternallySharedRef, ExternallySharedRefExt};
 use sel4_microkit::{memory_region_symbol, protection_domain, var};
-use sel4_microkit_driver_adapters::net::driver::Driver;
+use sel4_microkit_driver_adapters::net::driver::HandlerImpl;
 use sel4_shared_ring_buffer::{roles::Use, RingBuffers};
 use sel4_virtio_hal_impl::HalImpl;
 use sel4_virtio_net::DeviceWrapper;
@@ -34,7 +34,7 @@ const NET_BUFFER_LEN: usize = 2048;
 #[protection_domain(
     heap_size = 512 * 1024,
 )]
-fn init() -> Driver<DeviceWrapper<HalImpl, MmioTransport>> {
+fn init() -> HandlerImpl<DeviceWrapper<HalImpl, MmioTransport>> {
     HalImpl::init(
         config::VIRTIO_NET_DRIVER_DMA_SIZE,
         *var!(virtio_net_driver_dma_vaddr: usize = 0),
@@ -77,7 +77,7 @@ fn init() -> Driver<DeviceWrapper<HalImpl, MmioTransport>> {
     dev.ack_interrupt();
     channels::DEVICE.irq_ack().unwrap();
 
-    Driver::new(
+    HandlerImpl::new(
         DeviceWrapper::new(dev),
         client_region,
         rx_ring_buffers,

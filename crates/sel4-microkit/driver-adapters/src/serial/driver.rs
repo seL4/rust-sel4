@@ -19,9 +19,9 @@ use super::message_types::*;
 
 /// Handle messages using an implementor of [serial::Read<u8>] and [serial::Write<u8>].
 #[derive(Clone, Debug)]
-pub struct Driver<Device, const READ_BUF_SIZE: usize = 256> {
-    /// Device implementing [serial::Read<u8>] and [serial::Write<u8>].
-    device: Device,
+pub struct HandlerImpl<Driver, const READ_BUF_SIZE: usize = 256> {
+    /// Driver implementing [serial::Read<u8>] and [serial::Write<u8>].
+    driver: Driver,
     /// Channel for this component.
     serial: Channel,
     /// Channel for client component.
@@ -32,13 +32,13 @@ pub struct Driver<Device, const READ_BUF_SIZE: usize = 256> {
     notify: bool,
 }
 
-impl<Device, const READ_BUF_SIZE: usize> Driver<Device, READ_BUF_SIZE>
+impl<Driver, const READ_BUF_SIZE: usize> HandlerImpl<Driver, READ_BUF_SIZE>
 where
-    Device: serial::Read<u8> + serial::Write<u8> + HandleInterrupt,
+    Driver: serial::Read<u8> + serial::Write<u8> + HandleInterrupt,
 {
-    pub fn new(device: Device, serial: Channel, client: Channel) -> Self {
+    pub fn new(driver: Driver, serial: Channel, client: Channel) -> Self {
         Self {
-            device,
+            driver,
             serial,
             client,
             buffer: Deque::new(),
@@ -47,16 +47,16 @@ where
     }
 }
 
-impl<Device> Handler for Driver<Device>
+impl<Driver> Handler for HandlerImpl<Driver>
 where
-    Device: serial::Read<u8> + serial::Write<u8> + HandleInterrupt,
+    Driver: serial::Read<u8> + serial::Write<u8> + HandleInterrupt,
 {
     type Error = Infallible;
 
     fn notified(&mut self, channel: Channel) -> Result<(), Self::Error> {
         if channel == self.serial {
             while !self.buffer.is_full() {
-                match self.device.read() {
+                match self.driver.read() {
                     Ok(v) => {
                         self.buffer.push_back(v).unwrap();
                     }
@@ -69,7 +69,7 @@ where
                     }
                 }
             }
-            self.device.handle_interrupt();
+            self.driver.handle_interrupt();
             self.serial.irq_ack().unwrap();
             if self.notify {
                 self.client.notify();
@@ -97,10 +97,10 @@ where
                             }
                             Ok(SuccessResponse::Read(v.into()))
                         }
-                        Request::Write(c) => NonBlocking::from_nb_result(self.device.write(c))
+                        Request::Write(c) => NonBlocking::from_nb_result(self.driver.write(c))
                             .map(SuccessResponse::Write)
                             .map_err(|_| ErrorResponse::WriteError),
-                        Request::Flush => NonBlocking::from_nb_result(self.device.flush())
+                        Request::Flush => NonBlocking::from_nb_result(self.driver.flush())
                             .map(SuccessResponse::Flush)
                             .map_err(|_| ErrorResponse::FlushError),
                     };
