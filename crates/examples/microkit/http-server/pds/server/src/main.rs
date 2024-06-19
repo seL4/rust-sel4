@@ -24,6 +24,7 @@ use sel4_async_block_io::{
 };
 use sel4_async_time::Instant;
 use sel4_bounce_buffer_allocator::{Basic, BounceBufferAllocator};
+use sel4_driver_interfaces::block::GetBlockDeviceLayout;
 use sel4_driver_interfaces::net::GetNetDeviceMeta;
 use sel4_driver_interfaces::timer::{Clock, DefaultTimer};
 use sel4_externally_shared::{ExternallySharedRef, ExternallySharedRefExt};
@@ -73,11 +74,12 @@ fn init() -> impl Handler {
     LOGGER.set().unwrap();
 
     let mut rtc_client = RtcClient::new(channels::RTC_DRIVER);
+    let mut net_client = NetClient::new(channels::NET_DRIVER);
+    let mut block_client = BlockClient::new(channels::BLOCK_DRIVER);
+
     let timer_client = Arc::new(Mutex::new(DefaultTimer(TimerClient::new(
         channels::TIMER_DRIVER,
     ))));
-    let mut net_client = NetClient::new(channels::NET_DRIVER);
-    let block_client = BlockClient::new(channels::BLOCK_DRIVER);
 
     let now_unix_time = Duration::from_secs(
         rtc_client

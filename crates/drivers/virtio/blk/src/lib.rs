@@ -6,22 +6,25 @@
 
 #![no_std]
 
+use core::convert::Infallible;
 use core::ops::Deref;
 
-use sel4_driver_interfaces::block::GetBlockLayout;
+use sel4_driver_interfaces::block::GetBlockDeviceLayout;
 use virtio_drivers::device::blk::{VirtIOBlk, SECTOR_SIZE};
 use virtio_drivers::{transport::Transport, Hal};
 
-pub struct GetBlockLayoutWrapper<T>(pub T);
+pub struct GetBlockDeviceLayoutWrapper<T>(pub T);
 
-impl<H: Hal, T: Transport, U: Deref<Target = VirtIOBlk<H, T>>> GetBlockLayout
-    for GetBlockLayoutWrapper<U>
+impl<H: Hal, T: Transport, U: Deref<Target = VirtIOBlk<H, T>>> GetBlockDeviceLayout
+    for GetBlockDeviceLayoutWrapper<U>
 {
-    fn get_block_size(&mut self) -> usize {
-        SECTOR_SIZE
+    type Error = Infallible;
+
+    fn get_block_size(&mut self) -> Result<usize, Self::Error> {
+        Ok(SECTOR_SIZE)
     }
 
-    fn get_num_blocks(&mut self) -> u64 {
-        self.0.deref().capacity()
+    fn get_num_blocks(&mut self) -> Result<u64, Self::Error> {
+        Ok(self.0.deref().capacity())
     }
 }

@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
+use sel4_driver_interfaces::block::GetBlockDeviceLayout;
 use sel4_microkit::{Channel, MessageInfo};
 use sel4_microkit_message::MessageInfoExt as _;
 
@@ -25,15 +26,19 @@ impl Client {
             .map_err(|_| Error::InvalidResponse)?
             .map_err(Error::ErrorResponse)
     }
+}
 
-    pub fn get_block_size(&self) -> Result<usize, Error> {
+impl GetBlockDeviceLayout for Client {
+    type Error = Error;
+
+    fn get_block_size(&mut self) -> Result<usize, Self::Error> {
         match self.request(Request::GetBlockSize)? {
             SuccessResponse::GetBlockSize(size) => Ok(size),
             _ => Err(Error::UnexpectedResponse),
         }
     }
 
-    pub fn get_num_blocks(&self) -> Result<u64, Error> {
+    fn get_num_blocks(&mut self) -> Result<u64, Self::Error> {
         match self.request(Request::GetNumBlocks)? {
             SuccessResponse::GetNumBlocks(n) => Ok(n),
             _ => Err(Error::UnexpectedResponse),

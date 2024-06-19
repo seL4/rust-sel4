@@ -31,7 +31,7 @@ use sel4_shared_ring_buffer::{roles::Use, RingBuffers};
 use sel4_shared_ring_buffer_block_io_types::{
     BlockIORequest, BlockIORequestStatus, BlockIORequestType,
 };
-use sel4_virtio_blk::GetBlockLayoutWrapper;
+use sel4_virtio_blk::GetBlockDeviceLayoutWrapper;
 use sel4_virtio_hal_impl::HalImpl;
 
 mod config;
@@ -208,7 +208,7 @@ impl Handler for HandlerImpl {
     ) -> Result<MessageInfo, Self::Error> {
         match channel {
             channels::CLIENT => Ok(handle_client_request(
-                &mut GetBlockLayoutWrapper(&self.dev),
+                &mut GetBlockDeviceLayoutWrapper(&self.dev),
                 msg_info,
             )),
             _ => {

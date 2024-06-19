@@ -21,4 +21,6 @@ pub(crate) enum SuccessResponse {
 }
 
 #[derive(Debug, Copy, Clone, Serialize, Deserialize)]
-pub enum ErrorResponse {}
+pub enum ErrorResponse {
+    Unspecified,
+}
