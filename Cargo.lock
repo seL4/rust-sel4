@@ -2397,6 +2397,7 @@ dependencies = [
 name = "sel4-logging"
 version = "0.1.0"
 dependencies = [
+ "lock_api",
  "log",
 ]
 

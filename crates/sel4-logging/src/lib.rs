@@ -12,6 +12,10 @@ use log::{Log, Metadata, Record, SetLoggerError};
 
 pub use log::{self, LevelFilter};
 
+mod synchronized;
+
+pub use synchronized::SynchronizedLogger;
+
 pub struct Logger {
     pub level_filter: LevelFilter,
     pub filter: fn(&Metadata) -> bool,
