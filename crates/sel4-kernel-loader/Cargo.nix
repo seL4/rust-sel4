@@ -10,10 +10,10 @@ mk {
   package.name = "sel4-kernel-loader";
   package.license = "BSD-2-Clause AND GPL-2.0-only";
   dependencies = {
-    inherit (versions) tock-registers cfg-if log;
+    inherit (versions) cfg-if log embedded-hal-nb;
     postcard = postcardWith [];
     heapless = { version = versions.heapless; features = [ "serde" ]; };
-    spin = "0.9.4";
+    spin = { version = "0.9.4"; features = [ "lock_api" ]; };
     inherit (localCrates)
       sel4-platform-info
       sel4-logging
@@ -26,6 +26,9 @@ mk {
   target."cfg(any(target_arch = \"riscv32\", target_arch = \"riscv64\"))".dependencies = {
     sbi = "0.2.0";
     riscv = "0.10.0";
+  };
+  target."cfg(any(target_arch = \"arm\", target_arch = \"aarch64\"))".dependencies = {
+    inherit (localCrates) sel4-pl011-driver sel4-bcm2835-aux-uart-driver;
   };
   target."cfg(target_arch = \"aarch64\")".dependencies = {
     smccc = "0.1.1";

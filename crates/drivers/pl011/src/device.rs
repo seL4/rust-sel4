@@ -46,11 +46,11 @@ pub struct Device {
 }
 
 impl Device {
-    pub unsafe fn new(ptr: *mut RegisterBlock) -> Self {
+    pub const unsafe fn new(ptr: *mut RegisterBlock) -> Self {
         Self { ptr }
     }
 
-    fn ptr(&self) -> *mut RegisterBlock {
+    const fn ptr(&self) -> *mut RegisterBlock {
         self.ptr
     }
 
