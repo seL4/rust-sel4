@@ -12,7 +12,7 @@ use smoltcp::{
     time::Instant,
 };
 
-use sel4_driver_interfaces::net::GetMacAddress;
+use sel4_driver_interfaces::net::GetNetDeviceMeta;
 use sel4_driver_interfaces::HandleInterrupt;
 use sel4_externally_shared::ExternallySharedRef;
 use sel4_microkit::{Channel, Handler, Infallible, MessageInfo};
@@ -50,7 +50,7 @@ impl<Device> Driver<Device> {
     }
 }
 
-impl<Device: phy::Device + HandleInterrupt + GetMacAddress> Handler for Driver<Device> {
+impl<Device: phy::Device + HandleInterrupt + GetNetDeviceMeta> Handler for Driver<Device> {
     type Error = Infallible;
 
     fn notified(&mut self, channel: Channel) -> Result<(), Self::Error> {
@@ -146,13 +146,17 @@ impl<Device: phy::Device + HandleInterrupt + GetMacAddress> Handler for Driver<D
     }
 }
 
-pub fn handle_client_request<T: GetMacAddress>(dev: &mut T, msg_info: MessageInfo) -> MessageInfo {
+pub fn handle_client_request<T: GetNetDeviceMeta>(
+    dev: &mut T,
+    msg_info: MessageInfo,
+) -> MessageInfo {
     match msg_info.recv_using_postcard::<Request>() {
         Ok(req) => {
             let resp: Response = match req {
-                Request::GetMacAddress => Ok(SuccessResponse::GetMacAddress {
-                    mac_address: dev.get_mac_address(),
-                }),
+                Request::GetMacAddress => dev
+                    .get_mac_address()
+                    .map(SuccessResponse::GetMacAddress)
+                    .map_err(|_| ErrorResponse::Unspecified),
             };
             MessageInfo::send_using_postcard(resp).unwrap()
         }

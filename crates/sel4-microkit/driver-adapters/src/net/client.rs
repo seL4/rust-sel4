@@ -5,7 +5,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use sel4_driver_interfaces::net::MacAddress;
+use sel4_driver_interfaces::net::{GetNetDeviceMeta, MacAddress};
 use sel4_microkit::{Channel, MessageInfo};
 use sel4_microkit_message::MessageInfoExt as _;
 
@@ -27,10 +27,14 @@ impl Client {
             .map_err(|_| Error::InvalidResponse)?
             .map_err(Error::ErrorResponse)
     }
+}
 
-    pub fn get_mac_address(&self) -> Result<MacAddress, Error> {
+impl GetNetDeviceMeta for Client {
+    type Error = Error;
+
+    fn get_mac_address(&mut self) -> Result<MacAddress, Self::Error> {
         match self.request(Request::GetMacAddress)? {
-            SuccessResponse::GetMacAddress { mac_address } => Ok(mac_address),
+            SuccessResponse::GetMacAddress(mac_address) => Ok(mac_address),
             // _ => Err(Error::UnexpectedResponse),
         }
     }

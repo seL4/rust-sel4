@@ -11,9 +11,10 @@ extern crate alloc;
 
 use alloc::rc::Rc;
 use core::cell::RefCell;
+use core::convert::Infallible;
 
 use log::trace;
-use sel4_driver_interfaces::net::{GetMacAddress, MacAddress};
+use sel4_driver_interfaces::net::{GetNetDeviceMeta, MacAddress};
 use sel4_driver_interfaces::HandleInterrupt;
 use smoltcp::phy::{Device, DeviceCapabilities, Medium, RxToken, TxToken};
 use smoltcp::time::Instant;
@@ -42,9 +43,11 @@ impl<H: Hal, T: Transport> HandleInterrupt for DeviceWrapper<H, T> {
     }
 }
 
-impl<H: Hal, T: Transport> GetMacAddress for DeviceWrapper<H, T> {
-    fn get_mac_address(&mut self) -> MacAddress {
-        MacAddress(self.inner.borrow().mac_address())
+impl<H: Hal, T: Transport> GetNetDeviceMeta for DeviceWrapper<H, T> {
+    type Error = Infallible;
+
+    fn get_mac_address(&mut self) -> Result<MacAddress, Self::Error> {
+        Ok(MacAddress(self.inner.borrow().mac_address()))
     }
 }
 
