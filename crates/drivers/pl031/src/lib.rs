@@ -18,28 +18,29 @@ pub struct Driver {
 
 impl Driver {
     #[allow(clippy::missing_safety_doc)]
-    pub unsafe fn new(ptr: *mut ()) -> Self {
-        let mut this = Self {
+    pub unsafe fn new_uninit(ptr: *mut ()) -> Self {
+        Self {
             device: Device::new(ptr),
-        };
+        }
+    }
+
+    #[allow(clippy::missing_safety_doc)]
+    pub unsafe fn new(ptr: *mut ()) -> Self {
+        let mut this = Self::new_uninit(ptr);
         this.init();
         this
     }
 
     fn init(&mut self) {}
-
-    pub fn now(&mut self) -> NaiveDateTime {
-        DateTime::from_timestamp(self.device.get_data().into(), 0)
-            .unwrap()
-            .naive_utc()
-    }
 }
 
 impl DateTimeAccess for Driver {
     type Error = Error;
 
     fn datetime(&mut self) -> Result<NaiveDateTime, Self::Error> {
-        Ok(self.now())
+        Ok(DateTime::from_timestamp(self.device.get_data().into(), 0)
+            .unwrap()
+            .naive_utc())
     }
 
     fn set_datetime(&mut self, _datetime: &NaiveDateTime) -> Result<(), Self::Error> {
