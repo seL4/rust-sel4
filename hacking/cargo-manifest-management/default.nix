@@ -17,7 +17,9 @@ rec {
     inherit lib;
   };
 
-  manualManifests = import ./manual-manifests.nix;
+  manualManifests = import ./manual-manifests.nix {
+    inherit lib;
+  };
 
   workspace = makeBlueprint {
     inherit manifestScope manualManifests;
