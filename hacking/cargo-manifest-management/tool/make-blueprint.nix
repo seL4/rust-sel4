@@ -88,9 +88,6 @@ in
 
 let
   cargoNixPaths =
-    let
-      dirFilter = relativePathSegments: lib.head relativePathSegments == "crates";
-    in
       scanDirForFilesWithName workspaceDirFilter "Cargo.nix" workspaceRoot;
 
   generateManifest = cargoNixAbsolutePath:
