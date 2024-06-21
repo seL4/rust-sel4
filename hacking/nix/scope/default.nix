@@ -227,7 +227,9 @@ superCallPackage ../rust-utils {} self //
 
   ### worlds
 
-  mkWorld = unelaboratedWorldConfig: lib.makeScope newScope (callPackage ./world {} unelaboratedWorldConfig);
+  overrideWorldScope = self: super: {};
+
+  mkWorld = unelaboratedWorldConfig: (lib.makeScope newScope (callPackage ./world {} unelaboratedWorldConfig)).overrideScope' overrideWorldScope;
 
   worlds = (callPackage ./worlds.nix {})."${seL4Arch}";
 
