@@ -31,9 +31,11 @@ in
 , replaceSysroot ? null
 , getELF ? if test then getELFDefaultForTest else getELFDefault
 
-, test ? false
 , release ? false
 , profile ? if release then "release" else (if test then "test" else "dev")
+
+, test ? false
+
 , ...
 } @ args:
 

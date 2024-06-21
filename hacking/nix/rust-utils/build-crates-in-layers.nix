@@ -43,7 +43,7 @@ in
 , lastLayerModifications ? {}
 
 , release ? false
-, profile ? if release then "release" else null
+, profile ? if release then "release" else (if test then "test" else "dev")
 
 , features ? []
 , noDefaultFeatures ? false
