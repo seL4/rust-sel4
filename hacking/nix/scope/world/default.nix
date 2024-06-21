@@ -24,6 +24,7 @@ let
     , canSimulate ? false
     , platformRequiresLoader ? true
     , mkInstanceForPlatform ? _: { attrs = {}; links = []; }
+    , extra ? {}
     }:
     { inherit
         isMicrokit
@@ -33,6 +34,7 @@ let
         canSimulate
         platformRequiresLoader
         mkInstanceForPlatform
+        extra
       ;
     };
 in
