@@ -13,7 +13,7 @@
 { rustEnvironment ? defaultRustEnvironment
 , targetTriple ? defaultRustTargetTriple
 , release ? true
-, profile ? if release then "release" else null
+, profile ? if release then "release" else "dev"
 , alloc ? true
 , std ? false
 , compilerBuiltinsMem ? true

@@ -17,8 +17,9 @@ let
 
   rootCrate = crates.sel4-kernel-loader;
 
-  profile = "release";
-  # profile = "dev";
+  release = true;
+
+  profile = if release then "release" else "dev";
 
   profiles = crateUtils.clobber [
     {
