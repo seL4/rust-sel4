@@ -105,9 +105,7 @@ rec {
           };
         in
           lib.optionalAttrs (linker != null) {
-            target = {
-              "${targetTriple.name}".linker = linker;
-            };
+            target."${targetTriple.name}".linker = linker;
           };
     in
       clobber [
