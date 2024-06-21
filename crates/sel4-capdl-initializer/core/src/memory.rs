@@ -50,7 +50,7 @@ impl CopyAddrs {
             let outer_span = 1u64 << sel4::vspace_levels::span_bits(level);
             let inner_span = 1usize << sel4::vspace_levels::step_bits(level);
             let addr_space_footprint = coarsen_footprint(
-                &(user_image_bounds.start..(user_image_bounds.start + bootinfo.footprint_size())),
+                &(user_image_bounds.start..(user_image_bounds.end + bootinfo.footprint_size())),
                 inner_span,
             );
             match (
