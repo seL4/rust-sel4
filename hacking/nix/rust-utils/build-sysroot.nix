@@ -15,6 +15,7 @@
 , release ? true
 , profile ? if release then "release" else null
 , alloc ? true
+, std ? false
 , compilerBuiltinsMem ? true
 , compilerBuiltinsC ? rustEnvironment.compilerRTSource != null
 , extraManifest ? {}
@@ -68,6 +69,8 @@ let
     "compiler_builtins"
   ] ++ lib.optionals alloc [
     "alloc"
+  ] ++ lib.optionals std [
+    "std"
   ]);
 
   features = lib.concatStringsSep "," (lib.flatten [
