@@ -83,10 +83,18 @@ superCallPackage ../rust-utils {} self //
   mkDefaultElaborateRustEnvironmentArgs = { rustToolchain }: rec {
     inherit rustToolchain;
 
-    chooseLinker = { targetTriple, platform }:
-      if platform.isNone
-      then "${rustToolchain}/lib/rustlib/${buildPlatform.config}/bin/rust-lld"
-      else null;
+    chooseLinker = { targetTriple, platform, cc }:
+      if platform.config == buildPlatform.config
+      then null
+      else (
+        if platform.isNone
+        then "${rustToolchain}/lib/rustlib/${buildPlatform.config}/bin/rust-lld"
+        else (
+          if platform.isMusl # HACK for proper static linking on musl
+          then "${cc.targetPrefix}ld"
+          else "${cc.targetPrefix}cc"
+        )
+      );
 
     vendoredSuperLockfile = vendoredTopLevelLockfile;
   };

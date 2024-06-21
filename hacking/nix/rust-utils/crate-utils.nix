@@ -5,6 +5,7 @@
 #
 
 { lib, buildPlatform, hostPlatform
+, stdenv, buildPackages
 , writeText, linkFarm, runCommand
 , toTOMLFile
 , mkBuiltinRustTargetTriple
@@ -97,10 +98,10 @@ rec {
   # TODO improve this mechanism
   linkerConfig = { rustEnvironment, targetTriple }@args:
     let
-      f = { targetTriple, platform }:
+      f = { targetTriple, platform, cc }:
         let
           linker = rustEnvironment.chooseLinker {
-            inherit targetTriple platform;
+            inherit targetTriple platform cc;
           };
         in
           lib.optionalAttrs (linker != null) {
@@ -110,8 +111,16 @@ rec {
           };
     in
       clobber [
-        (f { targetTriple = mkBuiltinRustTargetTriple buildPlatform.config; platform = buildPlatform; })
-        (f { inherit targetTriple; platform = hostPlatform; })
+        (f {
+          targetTriple = mkBuiltinRustTargetTriple buildPlatform.config;
+          platform = buildPlatform;
+          inherit (buildPackages.stdenv) cc;
+        })
+        (f {
+          inherit targetTriple;
+          platform = hostPlatform;
+          inherit (stdenv) cc;
+        })
       ];
 
   baseConfig = { rustEnvironment, targetTriple }@args: clobber [
