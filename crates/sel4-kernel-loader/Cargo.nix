@@ -32,7 +32,7 @@ mk {
   };
   target."cfg(target_arch = \"aarch64\")".dependencies = {
     smccc = "0.1.1";
-    aarch64-cpu = "9.0.0";
+    aarch64-cpu = "9.4.0";
   };
   build-dependencies = {
     inherit (versions)
