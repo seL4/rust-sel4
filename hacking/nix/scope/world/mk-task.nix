@@ -31,7 +31,7 @@ in
 , replaceSysroot ? null
 , getELF ? if test then getELFDefaultForTest else getELFDefault
 
-, release ? false
+, release ? true
 , profile ? if release then "release" else (if test then "test" else "dev")
 
 , test ? false

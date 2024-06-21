@@ -42,7 +42,7 @@ in
 , commonModifications ? {}
 , lastLayerModifications ? {}
 
-, release ? false
+, release ? true
 , profile ? if release then "release" else (if test then "test" else "dev")
 
 , features ? []
