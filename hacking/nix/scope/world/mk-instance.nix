@@ -30,7 +30,6 @@ let
     }:
 
     let
-
       loader = mkSeL4KernelLoaderWithPayload {
         appELF = rootTask.elf;
       };

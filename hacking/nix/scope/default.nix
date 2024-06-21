@@ -34,7 +34,6 @@ let
   fenixRev = "9af557bccdfa8fb6a425661c33dbae46afef0afa";
   fenixSource = fetchTarball "https://github.com/nix-community/fenix/archive/${fenixRev}.tar.gz";
   fenix = import fenixSource {};
-
 in
 
 superCallPackage ../rust-utils {} self //
