@@ -89,11 +89,7 @@ superCallPackage ../rust-utils {} self //
       else (
         if platform.isNone
         then "${rustToolchain}/lib/rustlib/${buildPlatform.config}/bin/rust-lld"
-        else (
-          if platform.isMusl # HACK for proper static linking on musl
-          then "${cc.targetPrefix}ld"
-          else "${cc.targetPrefix}cc"
-        )
+        else "${cc.targetPrefix}cc"
       );
 
     vendoredSuperLockfile = vendoredTopLevelLockfile;
