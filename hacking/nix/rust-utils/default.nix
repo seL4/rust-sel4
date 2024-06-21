@@ -55,7 +55,7 @@ in
     isBuiltin = false;
   };
 
-  elaborateRustEnvironment =
+  elaborateRustEnvironment = lib.makeOverridable (
     { rustToolchain
     , channel ? null
     , isNightly ?
@@ -79,5 +79,6 @@ in
         inherit rustToolchain;
         lockfile = symlinkToRegularFile "Cargo.lock" "${rustToolchain}/lib/rustlib/src/rust/Cargo.lock";
       };
-    };
+    }
+  );
 }
