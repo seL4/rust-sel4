@@ -29,10 +29,8 @@ dummies! {
     SmallPage
     LargePage
     HugePage
-    PageGlobalDirectory
-    PageUpperDirectory
-    PageDirectory
-    PageTable
+    PT
+    VSpace
     IrqControl
     IrqHandler
     AsidControl
