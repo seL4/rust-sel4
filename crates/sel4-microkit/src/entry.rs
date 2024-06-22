@@ -10,10 +10,7 @@ use sel4_microkit_base::ipc_buffer_ptr;
 use sel4_panicking::catch_unwind;
 use sel4_panicking_env::abort;
 
-use crate::{
-    handler::{run_handler, Handler},
-    panicking::init_panicking,
-};
+use crate::{handler::Handler, panicking::init_panicking};
 
 #[cfg(target_thread_local)]
 #[no_mangle]
@@ -67,7 +64,7 @@ macro_rules! declare_init {
 #[doc(hidden)]
 #[allow(clippy::missing_safety_doc)]
 pub fn run_main<T: Handler>(init: impl FnOnce() -> T + UnwindSafe) -> ! {
-    let result = catch_unwind(|| match run_handler(init()) {
+    let result = catch_unwind(|| match init().run() {
         Ok(absurdity) => match absurdity {},
         Err(err) => err,
     });

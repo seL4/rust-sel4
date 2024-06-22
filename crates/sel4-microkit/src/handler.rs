@@ -52,62 +52,64 @@ pub trait Handler {
     fn take_deferred_action(&mut self) -> Option<DeferredAction> {
         None
     }
-}
 
-pub(crate) enum Never {}
+    #[doc(hidden)]
+    fn run(&mut self) -> Result<Never, Self::Error> {
+        let mut reply_tag: Option<MessageInfo> = None;
 
-pub(crate) fn run_handler<T: Handler>(mut handler: T) -> Result<Never, T::Error> {
-    let mut reply_tag: Option<MessageInfo> = None;
-
-    let mut prepared_deferred_action: Option<PreparedDeferredAction> = if pd_is_passive() {
-        sel4::with_ipc_buffer_mut(|ipc_buffer| ipc_buffer.msg_regs_mut()[0] = 0);
-        Some(PreparedDeferredAction::new(
-            MONITOR_EP_CAP.cast(),
-            sel4::MessageInfoBuilder::default().length(1).build(),
-        ))
-    } else {
-        None
-    };
-
-    loop {
-        let (tag, badge) = match (reply_tag.take(), prepared_deferred_action.take()) {
-            (Some(tag), None) => INPUT_CAP.reply_recv(tag.into_inner(), REPLY_CAP),
-            (None, Some(action)) => action.cptr().nb_send_recv(
-                action.msg_info(),
-                INPUT_CAP.cast::<sel4::cap_type::Unspecified>(),
-                REPLY_CAP,
-            ),
-            (None, None) => INPUT_CAP.recv(REPLY_CAP),
-            _ => unreachable!(),
-        };
-
-        let tag = MessageInfo::from_inner(tag);
-
-        let is_endpoint = badge & EVENT_TYPE_MASK != 0;
-
-        if is_endpoint {
-            let channel_index = badge & (sel4::Word::try_from(sel4::WORD_SIZE).unwrap() - 1);
-            reply_tag =
-                Some(handler.protected(Channel::new(channel_index.try_into().unwrap()), tag)?);
+        let mut prepared_deferred_action: Option<PreparedDeferredAction> = if pd_is_passive() {
+            sel4::with_ipc_buffer_mut(|ipc_buffer| ipc_buffer.msg_regs_mut()[0] = 0);
+            Some(PreparedDeferredAction::new(
+                MONITOR_EP_CAP.cast(),
+                sel4::MessageInfoBuilder::default().length(1).build(),
+            ))
         } else {
-            let mut badge_bits = badge;
-            while badge_bits != 0 {
-                let i = badge_bits.trailing_zeros();
-                handler.notified(Channel::new(i.try_into().unwrap()))?;
-                badge_bits &= !(1 << i);
-            }
+            None
         };
 
-        prepared_deferred_action = handler
-            .take_deferred_action()
-            .as_ref()
-            .map(DeferredAction::prepare);
+        loop {
+            let (tag, badge) = match (reply_tag.take(), prepared_deferred_action.take()) {
+                (Some(tag), None) => INPUT_CAP.reply_recv(tag.into_inner(), REPLY_CAP),
+                (None, Some(action)) => action.cptr().nb_send_recv(
+                    action.msg_info(),
+                    INPUT_CAP.cast::<sel4::cap_type::Unspecified>(),
+                    REPLY_CAP,
+                ),
+                (None, None) => INPUT_CAP.recv(REPLY_CAP),
+                _ => unreachable!(),
+            };
 
-        if prepared_deferred_action.is_some() && is_endpoint {
-            panic!("handler yielded deferred action after call to 'protected()'");
+            let tag = MessageInfo::from_inner(tag);
+
+            let is_endpoint = badge & EVENT_TYPE_MASK != 0;
+
+            if is_endpoint {
+                let channel_index = badge & (sel4::Word::try_from(sel4::WORD_SIZE).unwrap() - 1);
+                reply_tag =
+                    Some(self.protected(Channel::new(channel_index.try_into().unwrap()), tag)?);
+            } else {
+                let mut badge_bits = badge;
+                while badge_bits != 0 {
+                    let i = badge_bits.trailing_zeros();
+                    self.notified(Channel::new(i.try_into().unwrap()))?;
+                    badge_bits &= !(1 << i);
+                }
+            };
+
+            prepared_deferred_action = self
+                .take_deferred_action()
+                .as_ref()
+                .map(DeferredAction::prepare);
+
+            if prepared_deferred_action.is_some() && is_endpoint {
+                panic!("handler yielded deferred action after call to 'protected()'");
+            }
         }
     }
 }
+
+#[doc(hidden)]
+pub enum Never {}
 
 /// A [`Handler`] implementation which does not override any of the default method implementations.
 pub struct NullHandler(());
