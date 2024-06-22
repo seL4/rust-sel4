@@ -10,16 +10,11 @@ use sel4_microkit_base::MessageInfo;
 
 use crate::{
     defer::{DeferredAction, PreparedDeferredAction},
+    ipc::{self, Event},
     pd_is_passive, Channel,
 };
 
 pub use core::convert::Infallible;
-
-const INPUT_CAP: sel4::cap::Endpoint = sel4::Cap::from_bits(1);
-const REPLY_CAP: sel4::cap::Reply = sel4::Cap::from_bits(4);
-const MONITOR_EP_CAP: sel4::cap::Endpoint = sel4::Cap::from_bits(5);
-
-const EVENT_TYPE_MASK: sel4::Word = 1 << (sel4::WORD_SIZE - 1);
 
 /// Trait for the application-specific part of a protection domain's main loop.
 pub trait Handler {
@@ -58,41 +53,27 @@ pub trait Handler {
         let mut reply_tag: Option<MessageInfo> = None;
 
         let mut prepared_deferred_action: Option<PreparedDeferredAction> = if pd_is_passive() {
-            sel4::with_ipc_buffer_mut(|ipc_buffer| ipc_buffer.msg_regs_mut()[0] = 0);
-            Some(PreparedDeferredAction::new(
-                MONITOR_EP_CAP.cast(),
-                sel4::MessageInfoBuilder::default().length(1).build(),
-            ))
+            Some(ipc::forfeit_sc())
         } else {
             None
         };
 
         loop {
-            let (tag, badge) = match (reply_tag.take(), prepared_deferred_action.take()) {
-                (Some(tag), None) => INPUT_CAP.reply_recv(tag.into_inner(), REPLY_CAP),
-                (None, Some(action)) => action.cptr().nb_send_recv(
-                    action.msg_info(),
-                    INPUT_CAP.cast::<sel4::cap_type::Unspecified>(),
-                    REPLY_CAP,
-                ),
-                (None, None) => INPUT_CAP.recv(REPLY_CAP),
-                _ => unreachable!(),
+            let event = match (reply_tag.take(), prepared_deferred_action.take()) {
+                (Some(msg_info), None) => ipc::reply_recv(msg_info),
+                (None, Some(action)) => ipc::nb_send_recv(action),
+                (None, None) => ipc::recv(),
+                _ => panic!("handler yielded deferred action after call to 'protected()'"),
             };
 
-            let tag = MessageInfo::from_inner(tag);
-
-            let is_endpoint = badge & EVENT_TYPE_MASK != 0;
-
-            if is_endpoint {
-                let channel_index = badge & (sel4::Word::try_from(sel4::WORD_SIZE).unwrap() - 1);
-                reply_tag =
-                    Some(self.protected(Channel::new(channel_index.try_into().unwrap()), tag)?);
-            } else {
-                let mut badge_bits = badge;
-                while badge_bits != 0 {
-                    let i = badge_bits.trailing_zeros();
-                    self.notified(Channel::new(i.try_into().unwrap()))?;
-                    badge_bits &= !(1 << i);
+            match event {
+                Event::Protected(channel, msg_info) => {
+                    reply_tag = Some(self.protected(channel, msg_info)?);
+                }
+                Event::Notified(notified_event) => {
+                    for channel in notified_event.iter() {
+                        self.notified(channel)?;
+                    }
                 }
             };
 
@@ -100,10 +81,6 @@ pub trait Handler {
                 .take_deferred_action()
                 .as_ref()
                 .map(DeferredAction::prepare);
-
-            if prepared_deferred_action.is_some() && is_endpoint {
-                panic!("handler yielded deferred action after call to 'protected()'");
-            }
         }
     }
 }

@@ -46,6 +46,9 @@ mod printing;
 
 pub mod panicking;
 
+#[doc(hidden)]
+pub mod ipc;
+
 pub use defer::{DeferredAction, DeferredActionInterface, DeferredActionSlot};
 pub use handler::{Handler, Infallible, NullHandler};
 pub use printing::{debug_print, debug_println};
