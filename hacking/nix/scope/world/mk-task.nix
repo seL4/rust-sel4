@@ -7,7 +7,6 @@
 { lib, buildPackages
 , runCommand, runCommandCC
 , buildCratesInLayers, buildSysroot, crateUtils
-, crates
 , defaultRustEnvironment
 , defaultRustTargetTriple
 , libclangPath
