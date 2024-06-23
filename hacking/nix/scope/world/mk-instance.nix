@@ -90,34 +90,26 @@ let
 
     } // instanceForPlatform.attrs;
 
-  mkCapDLRootTask =
-    { script
-    , config
-    , passthru
+  mkSimpleCompositionCapDLRootTask =
+    { spec ? mkSimpleCompositionCapDLSpec (builtins.removeAttrs args [
+        "small" "passthru" "extraLinks" "spec"
+      ])
     , small ? false
-    }:
-    let
-    in lib.fix (self: with self;
-      {
-        inherit script config;
-        spec = mkSimpleCompositionCapDLSpec {
-          inherit script config;
-        };
+    , extraLinks ? []
+    , ...
+    } @ args:
+
+    lib.fix (self: with self;
+      (if small then mkSmallCapDLInitializer else mkCapDLInitializer) spec.cdl // {
+        specDrv = spec; # HACK
         extraLinks = [
           { name = "cdl"; path = spec; }
         ] ++ lib.optionals (!small) [
-          { name = "initializer.full.elf"; path = self.initializer.split.full; }
-        ];
+          { name = "initializer.full.elf"; path = self.split.full; }
+        ] ++ extraLinks;
       }
-      // (if small then {
-        initializer = mkSmallCapDLInitializer spec.cdl;
-        elf = initializer.elf;
-      } else {
-        initializer = mkCapDLInitializer spec.cdl;
-        elf = initializer.elf;
-      })
-      // passthru
     );
+
 in {
-  inherit mkInstance mkMicrokitInstance mkCapDLRootTask;
+  inherit mkInstance mkMicrokitInstance mkSimpleCompositionCapDLRootTask;
 }

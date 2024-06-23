@@ -137,7 +137,7 @@ self: with self;
   };
 
   inherit (callPackage ./mk-instance.nix {})
-    mkInstance mkMicrokitInstance mkCapDLRootTask
+    mkInstance mkMicrokitInstance mkSimpleCompositionCapDLRootTask
   ;
 
   instances = callPackage ./instances {};

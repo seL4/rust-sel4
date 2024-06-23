@@ -30,7 +30,7 @@
 , mkSimpleCompositionCapDLSpec
 
 , mkInstance
-, mkCapDLRootTask
+, mkSimpleCompositionCapDLRootTask
 }:
 
 let
@@ -280,7 +280,7 @@ in rec {
 
     capdl = {
       threads = maybe (haveFullRuntime && haveCapDLInitializer) (mkInstance {
-        rootTask = mkCapDLRootTask rec {
+        rootTask = mkSimpleCompositionCapDLRootTask rec {
           small = true;
           script = sources.srcRoot + "/crates/private/tests/capdl/threads/cdl.py";
           config = {
@@ -301,7 +301,7 @@ in rec {
       });
 
       utcover = maybe (haveFullRuntime && haveCapDLInitializer) (mkInstance {
-        rootTask = mkCapDLRootTask rec {
+        rootTask = mkSimpleCompositionCapDLRootTask rec {
           # small = true;
           script = sources.srcRoot + "/crates/private/tests/capdl/utcover/cdl.py";
           config = {
