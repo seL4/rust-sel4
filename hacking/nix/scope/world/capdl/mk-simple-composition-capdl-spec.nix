@@ -21,6 +21,7 @@
 , command ? "python3 ${script}"
 , computeUtCovers ? false
 , extraNativeBuildInputs ? []
+, extraPythonPath ? []
 }:
 
 let
@@ -59,7 +60,7 @@ lib.fix (self: runCommand "manifest" {
     pyyaml pyelftools pyfdt
   ]) ++ extraNativeBuildInputs;
 
-  PYTHONPATH_ = lib.concatStringsSep ":" [ capdlSimpleCompositionSrc capdlSrc ];
+  PYTHONPATH_ = lib.concatStringsSep ":" ([ capdlSimpleCompositionSrc capdlSrc ] ++ extraPythonPath);
 
   CONFIG = augmentedConfigJSON;
 
