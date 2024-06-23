@@ -92,11 +92,13 @@ let
   mkInstanceForPlatform =
     { loader
     , rootTask
+    , bootLinksExtraCommands ? ""
     , simpleAutomationParams ? null # TODO
     }:
     let
       boot = mkBootLinks {
         image = loader;
+        extraCommands = bootLinksExtraCommands;
       };
       bootCopied = mkBootCopied boot;
       qemu = platUtils.qemu.mkMkInstanceForPlatform {
