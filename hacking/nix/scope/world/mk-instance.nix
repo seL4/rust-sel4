@@ -39,13 +39,13 @@ let
         loader = loader.elf;
       } // extraPlatformArgs);
 
-    in rec {
-      inherit loader rootTask instanceForPlatform;
-
       symbolizeRootTaskBacktrace = writeScript "x.sh" ''
         #!${buildPackages.runtimeShell}
         exec ${buildPackages.this.sel4-backtrace-cli}/bin/sel4-symbolize-backtrace -f ${rootTask.elf} "$@"
       '';
+
+    in rec {
+      inherit loader rootTask instanceForPlatform;
 
       links = linkFarm "links" (lib.concatLists [
         instanceForPlatform.links
