@@ -39,28 +39,32 @@ let
   uBootBin = "${uBoot}/u-boot.bin";
 
   imageAddr = "0x30000000";
+  defaultBootCmd = "load mmc 0:1 ${imageAddr} /image.elf; bootelf -p ${imageAddr}";
 
-  uBootEnvTxt = writeText "uboot.env.txt" ''
+  uBootEnvTxt = { bootCmd }: writeText "uboot.env.txt" ''
     bootdelay=0
-    bootcmd=load mmc 0:1 ${imageAddr} /image.elf; bootelf -p ${imageAddr}"
+    bootcmd=${bootCmd}"
     autostart=1
   '';
 
-  uBootEnv = runCommand "uboot.env" {
-    nativeBuildInputs = [
-      ubootTools
-    ];
-  } ''
-    mkenvimage \
-      -s 0x4000 \
-      -o $out \
-      ${uBootEnvTxt}
-  '';
+  uBootEnv = { bootCmd }:
+    assert lib.stringLength bootCmd < 3 * 4096; # conservative
+    runCommand "uboot.env" {
+      nativeBuildInputs = [
+        ubootTools
+      ];
+    } ''
+      mkenvimage \
+        -s 0x4000 \
+        -o $out \
+        ${uBootEnvTxt { inherit bootCmd; }}
+    '';
 
   kernelFileName = "kernel${if hostPlatform.is32bit then "7l" else "8"}.img";
 
   mkBootLinks =
     { image ? null
+    , bootCmd ? defaultBootCmd
     , extraCommands ? ""
     }:
     runCommand "boot" {} ''
@@ -74,7 +78,7 @@ let
       rm $out/kernel*.img
       ln -s ${uBootBin} $out/${kernelFileName}
 
-      ln -s ${uBootEnv} $out/uboot.env
+      ln -s ${uBootEnv { inherit bootCmd; }} $out/uboot.env
 
       ${lib.optionalString (image != null) ''
         ln -s ${image} $out/image.elf
@@ -132,6 +136,7 @@ in {
     firmware
     uBoot
     defaultBootLinks
+    mkBootLinks
     mkPlatformSystemExtension
   ;
 }
