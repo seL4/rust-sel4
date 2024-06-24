@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use sel4_microkit_base::MessageInfo;
+use crate::MessageInfo;
 
 use crate::{defer::PreparedDeferredAction, Channel, ProtectionDomain};
 

@@ -38,19 +38,12 @@ extern crate alloc;
 pub use sel4_microkit_base::*;
 pub use sel4_microkit_macros::protection_domain;
 
-mod defer;
 mod entry;
-mod handler;
 mod heap;
 mod printing;
 
 pub mod panicking;
 
-#[doc(hidden)]
-pub mod ipc;
-
-pub use defer::{DeferredAction, DeferredActionInterface, DeferredActionSlot};
-pub use handler::{Handler, Infallible, NullHandler};
 pub use printing::{debug_print, debug_println};
 
 /// Declares the initialization function, stack size, and, optionally, heap and heap size.
