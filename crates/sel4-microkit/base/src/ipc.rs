@@ -83,6 +83,10 @@ impl Iterator for NotifiedEventIter {
     }
 }
 
+pub fn reply(msg_info: MessageInfo) {
+    REPLY_CAP.send(msg_info.into_inner())
+}
+
 pub fn recv() -> Event {
     Event::from_recv(INPUT_CAP.recv(REPLY_CAP))
 }
