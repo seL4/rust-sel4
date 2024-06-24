@@ -6,31 +6,46 @@
 
 use sel4_microkit_base::MessageInfo;
 
-use crate::{defer::PreparedDeferredAction, Channel};
+use crate::{defer::PreparedDeferredAction, Channel, ProtectionDomain};
 
 const INPUT_CAP: sel4::cap::Endpoint = sel4::Cap::from_bits(1);
 const REPLY_CAP: sel4::cap::Reply = sel4::Cap::from_bits(4);
 const MONITOR_EP_CAP: sel4::cap::Endpoint = sel4::Cap::from_bits(5);
 
-const EVENT_TYPE_MASK: sel4::Word = 1 << (sel4::WORD_SIZE - 1);
+const CHANNEL_BADGE_BIT: usize = 63;
+const PD_BADGE_BIT: usize = 62;
+
+fn strip_flag(badge: sel4::Badge, bit: usize) -> Option<sel4::Word> {
+    let mask = 1 << bit;
+    if badge & mask != 0 {
+        Some(badge & !mask)
+    } else {
+        None
+    }
+}
 
 #[doc(hidden)]
 #[derive(Debug, Clone)]
 pub enum Event {
-    Protected(Channel, MessageInfo),
     Notified(NotifiedEvent),
+    Protected(Channel, MessageInfo),
+    Fault(ProtectionDomain, MessageInfo),
 }
 
 impl Event {
     fn new(tag: sel4::MessageInfo, badge: sel4::Badge) -> Self {
-        match badge & EVENT_TYPE_MASK {
-            0 => Self::Notified(NotifiedEvent(badge)),
-            _ => {
-                let channel_index = badge & (sel4::Word::try_from(sel4::WORD_SIZE).unwrap() - 1);
-                let channel = Channel::new(channel_index.try_into().unwrap());
-                let tag = MessageInfo::from_inner(tag);
-                Self::Protected(channel, tag)
-            }
+        if let Some(channel_index) = strip_flag(badge, CHANNEL_BADGE_BIT) {
+            Self::Protected(
+                Channel::new(channel_index.try_into().unwrap()),
+                MessageInfo::from_inner(tag),
+            )
+        } else if let Some(pd_index) = strip_flag(badge, PD_BADGE_BIT) {
+            Self::Fault(
+                ProtectionDomain::new(pd_index.try_into().unwrap()),
+                MessageInfo::from_inner(tag),
+            )
+        } else {
+            Self::Notified(NotifiedEvent(badge))
         }
     }
 
