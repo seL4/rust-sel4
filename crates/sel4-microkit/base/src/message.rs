@@ -19,6 +19,11 @@ impl MessageInfo {
     }
 
     #[doc(hidden)]
+    pub fn inner(&self) -> &sel4::MessageInfo {
+        &self.inner
+    }
+
+    #[doc(hidden)]
     pub fn into_inner(self) -> sel4::MessageInfo {
         self.inner
     }
@@ -37,6 +42,10 @@ impl MessageInfo {
 
     pub fn count(&self) -> usize {
         self.inner.length()
+    }
+
+    pub fn fault(&self) -> sel4::Fault {
+        sel4::with_ipc_buffer(|ipc_buffer| sel4::Fault::new(ipc_buffer, self.inner()))
     }
 }
 

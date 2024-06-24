@@ -11,6 +11,7 @@ use crate::MessageInfo;
 const BASE_OUTPUT_NOTIFICATION_SLOT: usize = 10;
 const BASE_ENDPOINT_SLOT: usize = BASE_OUTPUT_NOTIFICATION_SLOT + 64;
 const BASE_IRQ_SLOT: usize = BASE_ENDPOINT_SLOT + 64;
+const BASE_TCB_SLOT: usize = BASE_IRQ_SLOT + 64;
 
 const MAX_CHANNELS: usize = 63;
 
@@ -77,5 +78,22 @@ impl IrqAckError {
 impl fmt::Display for IrqAckError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "irq ack error: {:?}", self.inner())
+    }
+}
+
+/// A handle to a child protection domain, identified by a child protection domain index.
+#[derive(Debug, Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
+pub struct ProtectionDomain {
+    index: usize,
+}
+
+impl ProtectionDomain {
+    pub const fn new(index: usize) -> Self {
+        Self { index }
+    }
+
+    #[doc(hidden)]
+    pub fn tcb(&self) -> sel4::cap::Tcb {
+        sel4::Cap::from_bits((BASE_TCB_SLOT + self.index) as sel4::CPtrBits)
     }
 }

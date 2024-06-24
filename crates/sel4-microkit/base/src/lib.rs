@@ -11,7 +11,7 @@ mod channel;
 mod message;
 mod symbols;
 
-pub use channel::{Channel, IrqAckError};
+pub use channel::{Channel, IrqAckError, ProtectionDomain};
 pub use message::{
     get_mr, set_mr, with_msg_bytes, with_msg_bytes_mut, with_msg_regs, with_msg_regs_mut,
     MessageInfo, MessageLabel, MessageRegisterValue,

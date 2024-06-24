@@ -117,7 +117,7 @@ macro_rules! maybe_extern_var {
 
 /// Returns whether this projection domain is a passive server.
 pub fn pd_is_passive() -> bool {
-    *maybe_extern_var!(passive: bool = false)
+    *maybe_extern_var!(microkit_passive: bool = false)
 }
 
 /// Returns the name of this projection domain without converting to unicode.

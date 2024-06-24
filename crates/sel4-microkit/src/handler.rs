@@ -6,12 +6,10 @@
 
 use core::fmt;
 
-use sel4_microkit_base::MessageInfo;
-
 use crate::{
     defer::{DeferredAction, PreparedDeferredAction},
     ipc::{self, Event},
-    pd_is_passive, Channel,
+    pd_is_passive, Channel, MessageInfo, ProtectionDomain,
 };
 
 pub use core::convert::Infallible;
@@ -37,6 +35,14 @@ pub trait Handler {
         msg_info: MessageInfo,
     ) -> Result<MessageInfo, Self::Error> {
         panic!("unexpected protected procedure call from channel {channel:?} with msg_info={msg_info:?}")
+    }
+
+    fn fault(
+        &mut self,
+        pd: ProtectionDomain,
+        msg_info: MessageInfo,
+    ) -> Result<MessageInfo, Self::Error> {
+        panic!("unexpected fault from protection domain {pd:?} with msg_info={msg_info:?}")
     }
 
     /// An advanced feature for use by protection domains which seek to coalesce syscalls when
@@ -67,13 +73,16 @@ pub trait Handler {
             };
 
             match event {
-                Event::Protected(channel, msg_info) => {
-                    reply_tag = Some(self.protected(channel, msg_info)?);
-                }
                 Event::Notified(notified_event) => {
                     for channel in notified_event.iter() {
                         self.notified(channel)?;
                     }
+                }
+                Event::Protected(channel, msg_info) => {
+                    reply_tag = Some(self.protected(channel, msg_info)?);
+                }
+                Event::Fault(pd, msg_info) => {
+                    reply_tag = Some(self.fault(pd, msg_info)?);
                 }
             };
 
