@@ -190,6 +190,19 @@ impl<C: InvocationContext> cap::Notification<C> {
     }
 }
 
+#[sel4_cfg(KERNEL_MCS)]
+impl<C: InvocationContext> cap::Reply<C> {
+    /// Corresponds to `seL4_Send`.
+    pub fn send(self, info: MessageInfo) {
+        self.invoke(|cptr, ipc_buffer| {
+            ipc_buffer
+                .inner_mut()
+                .seL4_Send(cptr.bits(), info.into_inner())
+        })
+    }
+}
+
+// TODO more
 impl<T: IpcCapType, C: InvocationContext> Cap<T, C> {
     /// Corresponds to `seL4_NBSendRecv`.
     #[sel4_cfg(KERNEL_MCS)]
