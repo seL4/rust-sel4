@@ -44,13 +44,6 @@ let
     '';
   };
 
-  vendoredLockfile = vendorLockfile {
-    inherit rustToolchain;
-    lockfile = microkitSource + "/tool/microkit/Cargo.lock";
-  };
-
-  cargoConfigFile = toTOMLFile "config.toml" vendoredLockfile.configFragment;
-
   sdk = stdenv.mkDerivation {
     name = "microkit-sdk-without-tool";
 
@@ -90,43 +83,45 @@ let
     '';
   };
 
-  tool = stdenv.mkDerivation {
-    name = "microkit-sdk-just-tool";
+  tool =
+    let
+      vendoredLockfile = vendorLockfile {
+        inherit rustToolchain;
+        lockfile = microkitSource + "/tool/microkit/Cargo.lock";
+      };
 
-    src = lib.cleanSource (microkitSource + "/tool/microkit");
+      cargoConfigFile = toTOMLFile "config.toml" vendoredLockfile.configFragment;
 
-    nativeBuildInputs = [
-      rustToolchain
-    ];
+    in
+      stdenv.mkDerivation {
+        name = "microkit-sdk-just-tool";
 
-    depsBuildBuild = [
-      buildPackages.stdenv.cc
-    ];
+        src = lib.cleanSource (microkitSource + "/tool/microkit");
 
-    dontInstall = true;
-    dontFixup = true;
+        nativeBuildInputs = [
+          rustToolchain
+        ];
 
-    configurePhase = ''
-      d=.cargo
-      mkdir $d
-      cp ${cargoConfigFile} $d/config.toml
-    '';
+        depsBuildBuild = [
+          buildPackages.stdenv.cc
+        ];
 
-    buildPhase = ''
-      cargo build -Z unstable-options --frozen --out-dir $out/bin
-    '';
-  };
+        dontInstall = true;
+        dontFixup = true;
+
+        configurePhase = ''
+          d=.cargo
+          mkdir $d
+          cp ${cargoConfigFile} $d/config.toml
+        '';
+
+        buildPhase = ''
+          cargo build -Z unstable-options --frozen --config ${cargoConfigFile} --out-dir $out/bin
+        '';
+      };
 
   mkSystem = { searchPath, systemXML }:
     lib.fix (self: runCommand "system" {
-      MICROKIT_SDK = sdk;
-      MICROKIT_BOARD = board;
-      MICROKIT_CONFIG = config;
-
-      nativeBuildInputs = [
-        python3Packages.sel4-deps
-      ];
-
       passthru = rec {
         inherit systemXML;
         loader = "${self}/loader.img";
@@ -140,12 +135,13 @@ let
       };
     } ''
       mkdir $out
-      ${tool}/bin/microkit ${systemXML} \
-        --search-path ${searchPath} \
-        --board $MICROKIT_BOARD \
-        --config $MICROKIT_CONFIG \
-        -o $out/loader.img \
-        -r $out/report.txt
+      MICROKIT_SDK=${sdk} \
+        ${tool}/bin/microkit ${systemXML} \
+          --search-path ${searchPath} \
+          --board ${board} \
+          --config ${config} \
+          -o $out/loader.img \
+          -r $out/report.txt
     '');
 
 in rec {
