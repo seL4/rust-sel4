@@ -78,10 +78,10 @@ let
     buildPhase = ''
       python3 build_sdk.py \
         --sel4=${kernelSourcePatched} \
-        --only-board ${board} \
-        --only-config ${config} \
+        --boards ${board} \
+        --configs ${config} \
         --skip-docs \
-        --skip-source-tarball
+        --skip-tar
 
     '';
 
