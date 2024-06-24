@@ -10,7 +10,7 @@ use sel4_microkit_base::ipc_buffer_ptr;
 use sel4_panicking::catch_unwind;
 use sel4_panicking_env::abort;
 
-use crate::{handler::Handler, panicking::init_panicking};
+use crate::{panicking::init_panicking, Handler};
 
 #[cfg(target_thread_local)]
 #[no_mangle]
