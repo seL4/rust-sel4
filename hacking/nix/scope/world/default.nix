@@ -24,9 +24,10 @@ let
     , canSimulate ? false
     , platformRequiresLoader ? true
     , mkInstanceForPlatform ? _: { attrs = {}; links = []; }
-    , extra ? {}
-    }:
-    { inherit
+    , ...
+    } @ args:
+    args // {
+      inherit
         isMicrokit
         kernelConfig
         kernelLoaderConfig
@@ -34,7 +35,6 @@ let
         canSimulate
         platformRequiresLoader
         mkInstanceForPlatform
-        extra
       ;
     };
 in
