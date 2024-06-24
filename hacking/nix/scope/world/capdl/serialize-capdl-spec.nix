@@ -10,7 +10,7 @@
 , sources
 }:
 
-{ spec }:
+{ cdl }:
 
 let
   exe = "parse-capDL";
@@ -25,5 +25,5 @@ runCommand "spec.json" {
     # (import <nixpkgs> {}).stack
   ];
 } ''
-  ${exe} --object-sizes=${objectSizes} --json=$out ${spec}
+  ${exe} --object-sizes=${objectSizes} --json=$out ${cdl}
 ''

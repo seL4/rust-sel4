@@ -19,7 +19,7 @@
 , seL4Modifications
 , seL4Config
 , worldConfig
-, mkMicrokitInstance
+, callPlatform
 , mkSeL4RustTargetTriple
 
 , canSimulate
@@ -178,22 +178,19 @@ let
   };
 
 in
-lib.fix (self: mkMicrokitInstance {
+lib.fix (self: callPlatform {
   system = microkit.mkSystem {
-    searchPath = symlinkJoin {
-      name = "x";
-      paths = [
-        "${pds.http-server}/bin"
-        "${pds.pl031-driver}/bin"
-        "${pds.sp804-driver}/bin"
-        "${pds.virtio-net-driver}/bin"
-        "${pds.virtio-blk-driver}/bin"
-      ];
-    };
+    searchPath = [
+      "${pds.http-server}/bin"
+      "${pds.pl031-driver}/bin"
+      "${pds.sp804-driver}/bin"
+      "${pds.virtio-net-driver}/bin"
+      "${pds.virtio-blk-driver}/bin"
+    ];
     systemXML = sources.srcRoot + "/crates/examples/microkit/http-server/http-server.system";
   };
   extraPlatformArgs = lib.optionalAttrs canSimulate {
-    extraQemuArgs = [
+    extraQEMUArgs = [
       "-device" "virtio-net-device,netdev=netdev0"
       "-netdev" "user,id=netdev0,hostfwd=tcp::8080-:80,hostfwd=tcp::8443-:443"
 

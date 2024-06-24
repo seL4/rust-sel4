@@ -42,7 +42,7 @@ in rec {
             , el2 ? true
             , hypervisor ? false
             , cpu ? "cortex-a57"
-            , mkSeL4KernelLoaderWithPayloadQEMUArgs ? loader: [ "-kernel" loader ]
+            , mkLoaderQEMUArgs ? loader: [ "-kernel" loader ]
 
             , isMicrokit ? false
             , microkitBoard ? null
@@ -84,8 +84,8 @@ in rec {
                   # KernelArmExportPMUUser = on;
                   # KernelSignalFastpath = on;
                 canSimulate = true;
-                mkInstanceForPlatform = platUtils.qemu.mkMkInstanceForPlatform {
-                  mkQemuCmd = loader: [
+                mkPlatformSystemExtension = platUtils.qemu.mkMkPlatformSystemExtension {
+                  mkQEMUCmd = loader: [
                     # NOTE
                     # virtualization=on even when hypervisor to test loader dropping exception level
                     "${pkgsBuildBuild.this.qemuForSeL4}/bin/qemu-system-aarch64"
@@ -93,7 +93,7 @@ in rec {
                       "-cpu" cpu "-smp" numCores "-m" "size=1024"
                       "-nographic"
                       "-serial" "mon:stdio"
-                  ] ++ mkSeL4KernelLoaderWithPayloadQEMUArgs loader ++ extraQEMUArgs;
+                  ] ++ mkLoaderQEMUArgs loader ++ extraQEMUArgs;
                 };
               };
         in rec {
@@ -107,7 +107,7 @@ in rec {
             isMicrokit = true;
             microkitBoard = "qemu_virt_aarch64";
             cpu = "cortex-a53";
-            mkSeL4KernelLoaderWithPayloadQEMUArgs = loader: [ "-device" "loader,file=${loader},addr=0x70000000,cpu-num=0" ];
+            mkLoaderQEMUArgs = loader: [ "-device" "loader,file=${loader},addr=0x70000000,cpu-num=0" ];
             extraQEMUArgs = [ "-m" "size=2G" ];
           };
 
@@ -147,7 +147,7 @@ in rec {
           KernelArmHypervisorSupport = on; # seems incompatible with QEMU's model
           KernelMaxNumNodes = mkString "4"; # currently not working with QEMU
         };
-        mkInstanceForPlatform = platUtils.rpi4.mkInstanceForPlatform;
+        mkPlatformSystemExtension = platUtils.rpi4.mkPlatformSystemExtension;
       };
 
       zcu102 =
@@ -168,8 +168,8 @@ in rec {
               };
             }) // {
               canSimulate = true;
-              mkInstanceForPlatform = platUtils.qemu.mkMkInstanceForPlatform {
-                mkQemuCmd = loader: [
+              mkPlatformSystemExtension = platUtils.qemu.mkMkPlatformSystemExtension {
+                mkQEMUCmd = loader: [
                   "${pkgsBuildBuild.this.qemuForSeL4Xilinx}/bin/qemu-system-aarch64"
                   # "${pkgsBuildBuild.this.qemuForSeL4}/bin/qemu-system-aarch64"
                     "-machine" "xlnx-zcu102"
@@ -219,8 +219,8 @@ in rec {
                   KernelIsMCS = fromBool mcs;
                 };
                 canSimulate = true;
-                mkInstanceForPlatform = platUtils.qemu.mkMkInstanceForPlatform {
-                  mkQemuCmd = loader: [
+                mkPlatformSystemExtension = platUtils.qemu.mkMkPlatformSystemExtension {
+                  mkQEMUCmd = loader: [
                     "${pkgsBuildBuild.this.qemuForSeL4}/bin/qemu-system-arm"
                       "-machine" "virt,highmem=off,secure=off,virtualization=${if bootInHyp then "on" else "off"}"
                       "-cpu" cpu "-smp" numCores "-m" "size=1024"
@@ -247,7 +247,7 @@ in rec {
           KernelArmHypervisorSupport = off;
           KernelMaxNumNodes = mkString "4";
         };
-        mkInstanceForPlatform = platUtils.rpi4.mkInstanceForPlatform;
+        mkPlatformSystemExtension = platUtils.rpi4.mkPlatformSystemExtension;
       };
     };
 
@@ -277,8 +277,8 @@ in rec {
                   KernelIsMCS = fromBool mcs;
                 };
                 canSimulate = true;
-                mkInstanceForPlatform = platUtils.qemu.mkMkInstanceForPlatform {
-                  mkQemuCmd = loader: [
+                mkPlatformSystemExtension = platUtils.qemu.mkMkPlatformSystemExtension {
+                  mkQEMUCmd = loader: [
                     "${pkgsBuildBuild.this.qemuForSeL4}/bin/qemu-system-riscv64"
                       "-machine" "virt"
                       "-cpu" "rv64" "-smp" numCores "-m" "size=${qemuMemory}"
@@ -309,8 +309,8 @@ in rec {
           KernelPlatform = mkString "spike";
         };
         canSimulate = true;
-        mkInstanceForPlatform = platUtils.qemu.mkMkInstanceForPlatform {
-          mkQemuCmd = loader: [
+        mkPlatformSystemExtension = platUtils.qemu.mkMkPlatformSystemExtension {
+          mkQEMUCmd = loader: [
             "${pkgsBuildBuild.this.qemuForSeL4}/bin/qemu-system-riscv64"
               "-machine" "spike"
               "-cpu" "rv64" "-m" "size=4096M"
@@ -334,8 +334,8 @@ in rec {
           KernelPlatform = mkString "hifive";
         };
         canSimulate = true;
-        mkInstanceForPlatform = platUtils.qemu.mkMkInstanceForPlatform {
-          mkQemuCmd = loader: [
+        mkPlatformSystemExtension = platUtils.qemu.mkMkPlatformSystemExtension {
+          mkQEMUCmd = loader: [
             "${pkgsBuildBuild.this.qemuForSeL4}/bin/qemu-system-riscv64"
               "-machine" "sifive_u"
               "-m" "size=8192M"
@@ -368,8 +368,8 @@ in rec {
                   KernelIsMCS = fromBool mcs;
                 };
                 canSimulate = true;
-                mkInstanceForPlatform = platUtils.qemu.mkMkInstanceForPlatform {
-                  mkQemuCmd = loader: [
+                mkPlatformSystemExtension = platUtils.qemu.mkMkPlatformSystemExtension {
+                  mkQEMUCmd = loader: [
                     "${pkgsBuildBuild.this.qemuForSeL4}/bin/qemu-system-riscv32"
                       "-machine" "spike"
                       "-cpu" "rv32" "-m" "size=2000M"
@@ -408,9 +408,8 @@ in rec {
           KernelFPU = mkString "FXSAVE";
         };
         canSimulate = true;
-        mkInstanceForPlatform = platUtils.qemu.mkMkInstanceForPlatform {
-          platformRequiresLoader = false;
-          mkQemuCmd =
+        mkPlatformSystemExtension = platUtils.qemu.mkMkPlatformSystemExtension {
+          mkQEMUCmd =
             let
               enable = opt: "+${opt}";
               disable = opt: "-${opt}";

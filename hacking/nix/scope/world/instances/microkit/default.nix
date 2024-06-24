@@ -14,9 +14,9 @@
 , crates
 , crateUtils
 , mkSeL4RustTargetTriple
-, mkMicrokitInstance
 , worldConfig
 , seL4Config
+, callPlatform
 
 , maybe
 , canSimulate
@@ -51,9 +51,9 @@ in {
           };
         };
       in
-        mkMicrokitInstance {
+        callPlatform {
           system = microkit.mkSystem {
-            searchPath = "${pds.hello}/bin";
+            searchPath =  [ "${pds.hello}/bin" ];
             systemXML = sources.srcRoot + "/crates/examples/microkit/hello/hello.system";
           };
         } // {
@@ -89,15 +89,12 @@ in {
           };
         };
       in
-        mkMicrokitInstance {
+        callPlatform {
           system = microkit.mkSystem {
-            searchPath = symlinkJoin {
-              name = "x";
-              paths = [
-                "${pds.client}/bin"
-                "${pds.server}/bin"
-              ];
-            };
+            searchPath = [
+              "${pds.client}/bin"
+              "${pds.server}/bin"
+            ];
             systemXML = sources.srcRoot + "/crates/private/tests/microkit/passive-server-with-deferred-action/x.system";
           };
           extraPlatformArgs = lib.optionalAttrs canSimulate  {

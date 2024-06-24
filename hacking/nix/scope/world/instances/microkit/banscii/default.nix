@@ -14,9 +14,9 @@
 , crates
 , crateUtils
 , mkSeL4RustTargetTriple
-, mkMicrokitInstance
 , worldConfig
 , seL4ConfigJSON
+, callPlatform
 
 , canSimulate
 , mkPD
@@ -50,16 +50,13 @@ let
   srcPath = relativePath: sources.srcRoot + "/crates/examples/microkit/banscii/${relativePath}";
 
 in
-lib.fix (self: mkMicrokitInstance {
+lib.fix (self: callPlatform {
   system = microkit.mkSystem {
-    searchPath = symlinkJoin {
-      name = "x";
-      paths = [
-        "${pds.serial-driver}/bin"
-        "${pds.assistant}/bin"
-        "${pds.artist}/bin"
-      ];
-    };
+    searchPath = [
+      "${pds.serial-driver}/bin"
+      "${pds.assistant}/bin"
+      "${pds.artist}/bin"
+    ];
     systemXML = runCommand "banscii.system" {
       nativeBuildInputs = [
         python3Packages.jinja2

@@ -6,7 +6,8 @@
 
 { lib
 , hostPlatform
-, runCommand, runCommandCC
+, buildPackages
+, runCommand, runCommandCC, linkFarm, writeScript
 , jq
 , symlinkToRegularFile
 , crateUtils
@@ -23,7 +24,7 @@ let
     , microkitConfig ? null
     , canSimulate ? false
     , platformRequiresLoader ? true
-    , mkInstanceForPlatform ? _: { attrs = {}; links = []; }
+    , mkPlatformSystemExtension ? _: { attrs = {}; links = []; }
     , ...
     } @ args:
     args // {
@@ -34,7 +35,7 @@ let
         microkitConfig
         canSimulate
         platformRequiresLoader
-        mkInstanceForPlatform
+        mkPlatformSystemExtension
       ;
     };
 in
@@ -125,8 +126,26 @@ self: with self;
   mkSimpleCompositionCapDLSpec = callPackage ./capdl/mk-simple-composition-capdl-spec.nix {};
   mkCapDLInitializerWithSpec = callPackage ./capdl/mk-capdl-initializer-with-spec.nix {};
 
-  # mkCapDLInitializer = mkSmallCapDLInitializer;
-  mkCapDLInitializer = mkCapDLInitializerWithSpec;
+  mkCapDLInitializer =
+    { spec ? null
+    , specAttrs ? spec.specAttrs
+    , small ? false
+    , extraDebuggingLinks ? []
+    }:
+
+    lib.fix (self:
+      (if small then mkSmallCapDLInitializer else mkCapDLInitializerWithSpec) spec.specAttrs // {
+        inherit spec;
+        debuggingLinks = [
+          { name = "spec.cdl"; path = spec.specAttrs.cdl; }
+          { name = "fill"; path = spec.specAttrs.fill; }
+        ] ++ lib.optionals (spec != null) [
+          { name = "spec"; path = spec; }
+        ] ++ lib.optionals (!small) [
+          { name = "initializer.full.elf"; path = self.split.full; }
+        ] ++ extraDebuggingLinks;
+      }
+    );
 
   sel4-kernel-loader = callPackage ./sel4-kernel-loader.nix {
     inherit (worldConfig) kernelLoaderConfig;
@@ -136,9 +155,61 @@ self: with self;
     app = appELF;
   };
 
-  inherit (callPackage ./mk-instance.nix {})
-    mkInstance mkMicrokitInstance mkSimpleCompositionCapDLRootTask
-  ;
+  mkSystem =
+    { rootTask
+    , extraDebuggingLinks ? []
+    , passthru ? {}
+    }:
+    let
+      loader =
+        assert worldConfig.platformRequiresLoader;
+        mkSeL4KernelLoaderWithPayload {
+          appELF = rootTask.elf;
+        };
+
+      symbolizeRootTaskBacktrace = writeScript "x.sh" ''
+        #!${buildPackages.runtimeShell}
+        exec ${buildPackages.this.sel4-backtrace-cli}/bin/sel4-symbolize-backtrace -f ${rootTask.elf} "$@"
+      '';
+    in {
+      inherit loader rootTask;
+      rootTaskImage = rootTask.elf;
+      loaderImage = loader.elf;
+      debuggingLinks = [
+        { name = "kernel.elf"; path = "${seL4ForBoot}/bin/kernel.elf"; }
+        { name = "root-task.elf"; path = rootTask.elf; }
+        { name = "symbolize-root-task-backtrace"; path = symbolizeRootTaskBacktrace; }
+        { name = "sel4-symbolize-backtrace";
+          path = "${buildPackages.this.sel4-backtrace-cli}/bin/sel4-symbolize-backtrace";
+        }
+      ] ++ lib.optionals worldConfig.platformRequiresLoader [
+        { name = "loader.elf"; path = loader.elf; }
+        { name = "loader.debug.elf"; path = loader.split.full; }
+      ] ++ (rootTask.debuggingLinks or []) ++ extraDebuggingLinks;
+    } // passthru;
+
+  callPlatform =
+    { system
+    , extraPlatformArgs ? {}
+    , extraDebuggingLinks ? []
+    , ...
+    } @ args:
+    let
+      platformSystemExtension = worldConfig.mkPlatformSystemExtension ({
+        inherit worldConfig;
+      } // (
+        if worldConfig.platformRequiresLoader
+        then { inherit (system) loaderImage; }
+        else { inherit (system) rootTaskImage; }
+      ) // extraPlatformArgs);
+    in {
+      links = linkFarm "links" (
+        system.debuggingLinks ++ platformSystemExtension.links
+      );
+    }
+    // platformSystemExtension.attrs
+    // builtins.removeAttrs system [ "debuggingLinks" ]
+    // builtins.removeAttrs args [ "extraPlatformArgs" "extraDebuggingLinks" ];
 
   instances = callPackage ./instances {};
 

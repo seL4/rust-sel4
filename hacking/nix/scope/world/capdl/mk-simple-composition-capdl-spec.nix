@@ -66,8 +66,8 @@ lib.fix (self: runCommand "manifest" {
 
   passthru = {
     config = augmentedConfig;
-    cdl = {
-      spec = "${self}/spec.cdl";
+    specAttrs = {
+      cdl = "${self}/spec.cdl";
       fill = "${self}/links";
     };
   };
