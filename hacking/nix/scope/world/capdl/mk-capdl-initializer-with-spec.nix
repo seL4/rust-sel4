@@ -14,11 +14,11 @@
 , sel4-capdl-initializer
 }:
 
-{ spec, fill }:
+{ cdl, fill }:
 
 let
   json = serializeCapDLSpec {
-    inherit spec;
+    inherit cdl;
   };
 
 in lib.fix (self: runCommand "sel4-capdl-initializer-with-spec" {
@@ -28,7 +28,7 @@ in lib.fix (self: runCommand "sel4-capdl-initializer-with-spec" {
   ];
 
   passthru = {
-    inherit spec json fill;
+    inherit cdl json fill;
     elf = self;
     split = {
       full = sel4-capdl-initializer.elf;

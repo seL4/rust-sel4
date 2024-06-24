@@ -25,12 +25,10 @@
 , seL4Config
 , seL4RustEnvVars
 
+, callPlatform
+, mkSystem
 , mkCapDLInitializer
-, mkSmallCapDLInitializer
 , mkSimpleCompositionCapDLSpec
-
-, mkInstance
-, mkSimpleCompositionCapDLRootTask
 }:
 
 let
@@ -65,6 +63,18 @@ let
 
     say 'all tests passed'
   '';
+
+  mkInstance =
+    { rootTask
+    , ...
+    } @ args:
+    callPlatform (
+      {
+        system = mkSystem {
+          inherit rootTask;
+        };
+      } // builtins.removeAttrs args [ "rootTask" ]
+    );
 
 in rec {
 
@@ -150,7 +160,7 @@ in rec {
         extraPlatformArgs = lib.optionalAttrs canSimulate {
           canAutomateSimply = true;
         };
-        extraLinks = [
+        extraDebuggingLinks = [
           { name = "root-task.orig.elf"; path = rootTask.orig.elf; }
         ];
       });
@@ -205,15 +215,15 @@ in rec {
         };
 
       c = maybe haveFullRuntime (callPackage ./c.nix {
-        inherit canSimulate;
+        inherit mkInstance canSimulate;
       });
 
       verus = maybe (haveFullRuntime && hostPlatform.is64bit && buildPlatform.isx86_64) (callPackage ./verus.nix {
-        inherit canSimulate;
+        inherit mkInstance canSimulate;
       });
 
       dafny = maybe haveFullRuntime (callPackage ./dafny.nix {
-        inherit canSimulate;
+        inherit mkInstance canSimulate;
       });
 
       default-test-harness = maybe (haveFullRuntime && haveUnwindingSupport) (mkInstance {
@@ -279,19 +289,19 @@ in rec {
     };
 
     capdl = {
-      threads = maybe (haveFullRuntime && haveCapDLInitializer) (mkInstance {
-        rootTask = mkSimpleCompositionCapDLRootTask rec {
+      threads = maybe (haveFullRuntime && haveCapDLInitializer) (mkInstance rec {
+        test = mkTask {
+          rootCrate = crates.tests-capdl-threads-components-test;
+          release = true; # test optimizations
+        };
+        rootTask = mkCapDLInitializer {
           small = true;
-          script = sources.srcRoot + "/crates/private/tests/capdl/threads/cdl.py";
-          config = {
-            components = {
-              example_component.image = passthru.test.elf;
-            };
-          };
-          passthru = {
-            test = mkTask {
-              rootCrate = crates.tests-capdl-threads-components-test;
-              release = true; # test optimizations
+          spec = mkSimpleCompositionCapDLSpec {
+            script = sources.srcRoot + "/crates/private/tests/capdl/threads/cdl.py";
+            config = {
+              components = {
+                example_component.image = test.elf;
+              };
             };
           };
         };
@@ -300,19 +310,19 @@ in rec {
         };
       });
 
-      utcover = maybe (haveFullRuntime && haveCapDLInitializer) (mkInstance {
-        rootTask = mkSimpleCompositionCapDLRootTask rec {
-          # small = true;
-          script = sources.srcRoot + "/crates/private/tests/capdl/utcover/cdl.py";
-          config = {
-            components = {
-              example_component.image = passthru.test.elf;
-            };
-          };
-          passthru = {
-            test = mkTask {
-              rootCrate = crates.tests-capdl-utcover-components-test;
-              release = false;
+      utcover = maybe (haveFullRuntime && haveCapDLInitializer) (mkInstance rec {
+        test = mkTask {
+          rootCrate = crates.tests-capdl-utcover-components-test;
+          release = false;
+        };
+        rootTask = mkCapDLInitializer {
+          small = true;
+          spec = mkSimpleCompositionCapDLSpec {
+            script = sources.srcRoot + "/crates/private/tests/capdl/utcover/cdl.py";
+            config = {
+              components = {
+                example_component.image = test.elf;
+              };
             };
           };
         };

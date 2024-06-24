@@ -120,29 +120,46 @@ let
         '';
       };
 
-  mkSystem = { searchPath, systemXML }:
+  mkLoader =
+    { systemXML
+    , searchPath
+    }:
     lib.fix (self: runCommand "system" {
-      passthru = rec {
+      passthru = {
         inherit systemXML;
-        loader = "${self}/loader.img";
-        links = [
-          { name = "pds"; path = searchPath; }
-          { name = "loader.img"; path = loader; }
-          { name = "report.txt"; path = "${self}/report.txt"; }
-          { name = "sdk/monitor.elf"; path = "${sdk}/board/${board}/${config}/elf/monitor.elf"; }
-          { name = "sdk/loader.elf"; path = "${sdk}/board/${board}/${config}/elf/loader.elf"; }
-        ];
+        image = "${self}/loader.img";
       };
     } ''
       mkdir $out
       MICROKIT_SDK=${sdk} \
         ${tool}/bin/microkit ${systemXML} \
-          --search-path ${searchPath} \
+          --search-path ${lib.concatStringsSep " " searchPath} \
           --board ${board} \
           --config ${config} \
           -o $out/loader.img \
           -r $out/report.txt
     '');
+
+  mkSystem =
+    { systemXML
+    , searchPath
+    , extraDebuggingLinks ? []
+    , passthru ? {}
+    }:
+    let
+      loader = mkLoader { inherit systemXML searchPath; };
+    in {
+      inherit loader;
+      loaderImage = loader.image;
+      debuggingLinks = [
+        { name = "loader.img"; path = loader; }
+        { name = "report.txt"; path = "${loader}/report.txt"; }
+        { name = "sdk/elf"; path = "${sdk}/board/${board}/${config}/elf"; }
+        { name = "sel4-symbolize-backtrace";
+          path = "${buildPackages.this.sel4-backtrace-cli}/bin/sel4-symbolize-backtrace";
+        }
+      ] ++ extraDebuggingLinks;
+    } // passthru;
 
 in rec {
   inherit

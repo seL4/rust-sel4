@@ -22,7 +22,7 @@ let
 
 in rec {
 
-  automateQemuSimple = { simulate, timeout }:
+  automateQEMUSimple = { simulate, timeout }:
     let
       py = buildPackages.python3.withPackages (pkgs: [
         pkgs.pexpect
@@ -35,24 +35,24 @@ in rec {
         ${py}/bin/python3 ${./automate_simple.py} --simulate ${simulate} --timeout ${toString timeout}
       '';
 
-  mkMkInstanceForPlatform =
-    { mkQemuCmd
-    , platformRequiresLoader ? true
+  mkMkPlatformSystemExtension =
+    { mkQEMUCmd
     }:
 
-    { rootTask ? null
-    , loader ? null
+    { worldConfig
+    , rootTaskImage ? null
+    , loaderImage ? null
+    , extraQEMUArgs ? []
     , canAutomateSimply ? false
     , simpleAutomationParams ? if canAutomateSimply then {} else null
-    , extraQemuArgs ? []
     }:
 
     let
-      qemuCmd = mkQemuCmd (if platformRequiresLoader then loader else rootTask);
+      qemuCmd = mkQEMUCmd (if worldConfig.platformRequiresLoader then loaderImage else rootTaskImage);
 
       simulate = writeScript "run.sh" ''
         #!${buildPackages.runtimeShell}
-        exec ${lib.concatStringsSep " " (qemuCmd ++ extraQemuArgs)} "$@"
+        exec ${lib.concatStringsSep " " (qemuCmd ++ extraQEMUArgs)} "$@"
       '';
 
       elaboratedSimpleAutomationParams =
@@ -63,7 +63,7 @@ in rec {
       automate =
         if elaboratedSimpleAutomationParams == null
         then null
-        else automateQemuSimple {
+        else automateQEMUSimple {
           inherit simulate;
           inherit (elaboratedSimpleAutomationParams) timeout;
         };

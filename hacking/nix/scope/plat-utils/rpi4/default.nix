@@ -89,20 +89,21 @@ let
 
   defaultBootLinks = mkBootLinks {};
 
-  mkInstanceForPlatform =
-    { loader
-    , rootTask
+  mkPlatformSystemExtension =
+    { worldConfig
+    , loaderImage
+    , extraQEMUPlatformArgs ? {}
     , bootLinksExtraCommands ? ""
     , simpleAutomationParams ? null # TODO
     }:
     let
       boot = mkBootLinks {
-        image = loader;
+        image = loaderImage;
         extraCommands = bootLinksExtraCommands;
       };
       bootCopied = mkBootCopied boot;
-      qemu = platUtils.qemu.mkMkInstanceForPlatform {
-        mkQemuCmd = loader: [
+      qemu = platUtils.qemu.mkMkPlatformSystemExtension {
+        mkQEMUCmd = loader: [
           "${pkgsBuildBuild.this.qemuForSeL4}/bin/qemu-system-${if hostPlatform.is32bit then "arm" else "aarch64"}"
             "-smp" "4"
             "-m" "size=2048"
@@ -112,10 +113,10 @@ let
             "-serial" "mon:stdio"
             "-kernel" loader
         ];
-      } {
-        inherit loader rootTask;
-      };
-    in platUtils.composeInstanceForPlatformAttrs qemu (rec {
+      } ({
+        inherit worldConfig loaderImage;
+      } // extraQEMUPlatformArgs);
+    in platUtils.composePlatformExtensions qemu (rec {
       attrs = {
         inherit boot bootCopied;
       };
@@ -131,6 +132,6 @@ in {
     firmware
     uBoot
     defaultBootLinks
-    mkInstanceForPlatform
+    mkPlatformSystemExtension
   ;
 }

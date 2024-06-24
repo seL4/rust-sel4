@@ -14,11 +14,11 @@
 , mkSeL4RustTargetTriple
 }:
 
-{ spec, fill }:
+{ cdl, fill }:
 
 let
   json = serializeCapDLSpec {
-    inherit spec;
+    inherit cdl;
   };
 
 in mkTask {
@@ -48,7 +48,7 @@ in mkTask {
       CAPDL_EMBED_FRAMES = 1;
 
       passthru = (super.passthru or {}) // {
-        inherit spec json fill;
+        inherit cdl json fill;
       };
     });
   });
