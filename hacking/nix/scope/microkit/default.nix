@@ -148,42 +148,9 @@ let
         -r $out/report.txt
     '');
 
-  exampleSource = microkitSource + "/example/${board}/hello";
-
-  examplePDs = stdenv.mkDerivation {
-    name = "example";
-
-    src = exampleSource;
-
-    MICROKIT_SDK = sdk;
-    MICROKIT_BOARD = board;
-    MICROKIT_CONFIG = config;
-
-    MICROKIT_TOOL = "${tool}/bin/microkit";
-
-    dontConfigure = true;
-    dontFixup = true;
-
-    buildPhase = ''
-      mkdir build
-      make BUILD_DIR=build
-    '';
-
-    installPhase = ''
-      mkdir $out
-      mv build/hello.elf $out
-    '';
-  };
-
-  example = assert board == "qemu_virt_aarch64"; mkSystem {
-    searchPath = examplePDs;
-    systemXML = exampleSource + "/hello.system";
-  };
-
 in rec {
   inherit
     sdk tool
     mkSystem
-    example
   ;
 }
