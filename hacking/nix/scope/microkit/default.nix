@@ -127,7 +127,7 @@ let
         loader = "${self}/loader.img";
         links = [
           { name = "pds"; path = searchPath; }
-          { name = "loader.elf"; path = loader; }
+          { name = "loader.img"; path = loader; }
           { name = "report.txt"; path = "${self}/report.txt"; }
           { name = "sdk/monitor.elf"; path = "${sdk}/board/${board}/${config}/elf/monitor.elf"; }
           { name = "sdk/loader.elf"; path = "${sdk}/board/${board}/${config}/elf/loader.elf"; }
