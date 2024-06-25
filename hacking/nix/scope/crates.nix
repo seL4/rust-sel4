@@ -19,7 +19,7 @@ let
 
   globalPatchSection = workspaceManifest.patch;
 
-  overrides = {
+  overridesForMkCrate = {
     sel4-sys = {
       extraPaths = [
         "build"
@@ -59,13 +59,11 @@ let
   };
 
   unAugmentedCrates = lib.listToAttrs (lib.forEach workspaceMemberPaths (cratePath: rec {
-    name = (crateUtils.crateManifest cratePath).package.name; # TODO redundant
-    value = crateUtils.mkCrate cratePath (overrides.${name} or {});
+    name = (crateUtils.crateManifest cratePath).package.name;
+    value = crateUtils.mkCrate cratePath (overridesForMkCrate.${name} or {});
   }));
 
-  augmentedCrates = crateUtils.augmentCrates unAugmentedCrates;
-
-  crates = augmentedCrates;
+  crates = crateUtils.augmentCrates unAugmentedCrates;
 
   isPrivate = crateName: builtins.match "^sel4-.*" crateName == null;
 
@@ -75,5 +73,5 @@ let
     (lib.concatMapStrings (crateName: "${crateName}\n") (lib.attrNames publicCrates));
 
 in {
-  inherit crates globalPatchSection publicCrates publicCratesTxt;
+  inherit crates overridesForMkCrate globalPatchSection publicCrates publicCratesTxt;
 }
