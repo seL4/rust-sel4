@@ -31,8 +31,8 @@ let
   };
 
   capdlEnvVars = lib.optionalAttrs (!worldConfig.isMicrokit) {
-    CAPDL_SPEC_FILE = serializeCapDLSpec { inherit (dummyCapDLSpec.passthru) spec; };
-    CAPDL_FILL_DIR = dummyCapDLSpec.passthru.fill;
+    CAPDL_SPEC_FILE = serializeCapDLSpec { inherit (dummyCapDLSpec) cdl; };
+    CAPDL_FILL_DIR = dummyCapDLSpec.fill;
   };
 
   libcDir = "${stdenv.cc.libc}/${hostPlatform.config}";
