@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
 #
 
-{ mk, localCrates, versions, serdeWith, smoltcpWith, ringWith }:
+{ mk, localCrates, versions, serdeWith, smoltcpWith }:
 
 mk {
   package.name = "microkit-http-server-example-server";
