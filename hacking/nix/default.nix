@@ -171,7 +171,21 @@ let
         inherit lib pkgs;
       } // import ./top-level self);
 
-  this = makeOverridableWith lib.id mkThis baseArgs;
+  this = lib.fix (self: makeOverridableWith lib.id mkThis baseArgs // rec {
+    overrideNixpkgsArgs = f: self.override (superArgs: selfBase:
+      let
+        concreteSuperArgs = superArgs selfBase;
+      in
+        concreteSuperArgs // {
+          nixpkgsArgsFor = crossSystem: f (concreteSuperArgs.nixpkgsArgsFor crossSystem);
+        }
+    );
+    withOverlays = overlays: self.overrideNixpkgsArgs (superNixpkgsArgs:
+      superNixpkgsArgs // {
+        overlays = superNixpkgsArgs.overlays ++ overlays;
+      }
+    );
+  });
 
 in
   this
