@@ -160,7 +160,8 @@ superCallPackage ../rust-utils {} self //
             { name = fname; path = builtins.toFile fname (builtins.readFile "${dir}/${fname}"); }
           ];
 
-  inherit (callPackage ./crates.nix {}) crates globalPatchSection publicCrates publicCratesTxt;
+  inherit (callPackage ./crates.nix {})
+    crates overridesForMkCrate globalPatchSection publicCrates publicCratesTxt;
 
   distribution = callPackage ./distribution.nix {};
 
