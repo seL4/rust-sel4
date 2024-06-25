@@ -66,6 +66,14 @@ impl<A: AbstractBounceBufferAllocator> DeviceImpl<A> {
         self.inner().borrow_mut().poll().unwrap()
     }
 
+    pub fn can_receive(&self) -> bool {
+        self.inner().borrow_mut().can_receive()
+    }
+
+    pub fn can_transmit(&self) -> bool {
+        self.inner().borrow_mut().can_transmit()
+    }
+
     fn new_rx_token(&self, rx_buffer: RxBufferIndex) -> RxToken<A> {
         RxToken {
             buffer: rx_buffer,
