@@ -92,7 +92,6 @@ in rec {
     tests.root-task.verus
     tests.root-task.dafny
     tests.root-task.default-test-harness
-    # tests.root-task.ring
     tests.capdl.threads
     tests.capdl.utcover
     microkit.examples.hello
@@ -105,6 +104,8 @@ in rec {
     examples.root-task.spawn-thread
     examples.root-task.spawn-task
     examples.root-task.serial-device
+
+    # tests.root-task.ring
   ];
 
   allAutomationScripts = map
@@ -237,6 +238,7 @@ in rec {
         };
       });
 
+      # ring at 8c665d20ed7621b81d8f4ad564cb7f43a02d42ad (sel4-testing)
       ring = maybe (haveFullRuntime && haveUnwindingSupport && !hostPlatform.isRiscV32 && !hostPlatform.isx86) (
         let
           rootTask = lib.makeOverridable mkTask {
@@ -245,6 +247,7 @@ in rec {
             justBuildTests = true;
             features = [
               "less-safe-getrandom-custom-or-rdrand"
+              "less-correct-none-os-has-linux-abi"
               # "slow_tests"
             ];
             release = true;
