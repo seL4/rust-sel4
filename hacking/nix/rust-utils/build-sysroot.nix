@@ -36,7 +36,7 @@ let
   manifest = crateUtils.toTOMLFile "Cargo.toml" (crateUtils.clobber [
     {
       inherit package;
-      lib.path = crateUtils.dummyLibInSrc;
+      lib.path = crateUtils.dummyLibWithoutStdInSrc;
     }
     extraManifest
   ]);

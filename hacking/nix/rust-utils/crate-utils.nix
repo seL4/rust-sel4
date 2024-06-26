@@ -26,6 +26,7 @@ rec {
   ###
 
   dummyLibInSrc = dummyInSrc "lib.rs" dummyLib;
+  dummyLibWithoutStdInSrc = dummyInSrc "lib.rs" dummyLibWithoutStd;
   dummyMainWithStdInSrc = dummyInSrc "main.rs" dummyMainWithStd;
   dummyMainWithOrWithoutStdInSrc = dummyInSrc "main.rs" dummyMainWithOrWithoutStd;
 
@@ -39,13 +40,13 @@ rec {
     in
       "${src}/${name}";
 
+  dummyLibWithoutStd = writeText "lib.rs" ''
+    #![no_std]
+  '';
+
   dummyMainWithStd = writeText "main.rs" ''
     fn main() {}
   '';
-
-  # dummyLib = writeText "lib.rs" ''
-  #   #![no_std]
-  # '';
 
   # HACK for cargo test (required by harness = "false")
   dummyLib = dummyMainOrLibWithOrWithoutStd;
