@@ -73,6 +73,7 @@ let
         --sel4=${kernelSourcePatched} \
         --boards ${board} \
         --configs ${config} \
+        --skip-tool \
         --skip-docs \
         --skip-tar
 
