@@ -97,6 +97,10 @@ pub trait Handler {
 #[doc(hidden)]
 pub enum Never {}
 
+impl Handler for Never {
+    type Error = Infallible;
+}
+
 /// A [`Handler`] implementation which does not override any of the default method implementations.
 pub struct NullHandler(());
 
