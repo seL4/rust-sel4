@@ -33,8 +33,8 @@ let
 
   content = builtins.fetchGit {
     url = "https://github.com/seL4/website_pr_hosting";
-    ref = "PR_280";
-    rev = "0a579415c4837c96c4d4629e4b4d4691aaff07ca";
+    ref = "gh-pages";
+    rev = "e320919be95968dc13e2122d97737b02a8a31997";
   };
 
   diskImage = mkDiskImage {};
@@ -49,6 +49,9 @@ let
     { maxIndividualFileSize ? null
     , excludePatterns ? null
     }:
+    let
+      contentSubdir = "PR_371";
+    in
     vmTools.runInLinuxVM (runCommand "disk-image" {
       nativeBuildInputs = [ python3 kmod parted fatresize dosfstools ];
       preVM = ''
@@ -87,7 +90,7 @@ let
       # HACK:
       #  - some filesystem layer doesn't seem to like '?' in filename
       #  - rsync doesn't play nicely with some filesystem layer
-      cp -r --no-preserve=owner,mode ${content}/localhost x/
+      cp -r --no-preserve=owner,mode ${content}/${contentSubdir} x/
       find x/ -name '*\?' -delete
       ${lib.optionalString (excludePatterns != null) ''
         find x/ -type f \( ${
@@ -109,7 +112,7 @@ let
       # NOTE
       # Somehow $partition sometimes ends up smaller than $partition_size.
       # conv=notrunc works around this possibility.
-      fatresize -v -s $partition_size $partition
+      fatresize -vf -s $partition_size $partition
 
       real_img=real-disk.img
       touch $real_img
