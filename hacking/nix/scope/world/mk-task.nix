@@ -89,6 +89,7 @@ let
   theseLastLayerModifications = crateUtils.elaborateModifications {
     modifyDerivation = drv: drv.overrideAttrs (self: super: seL4RustEnvVars // {
       passthru = (super.passthru or {}) // {
+        inherit sysroot;
         elf = getELF self.finalPackage;
         split = {
           full = self.finalPackage.elf;
