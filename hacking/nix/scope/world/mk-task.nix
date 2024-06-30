@@ -33,12 +33,28 @@ in
 , release ? true
 , profile ? if release then "release" else (if test then "test" else "dev")
 
+, sameProfileForSysroot ? false
+, profileForSysroot ? if sameProfileForSysroot then profile else "release"
+
 , test ? false
 
 , ...
 } @ args:
 
 let
+  commonProfile = crateUtils.clobber [
+    {
+      codegen-units = 1;
+      incremental = false;
+      build-override = {
+        opt-level = 0;
+        debug = false;
+        strip = true;
+      };
+    }
+    extraProfile
+  ];
+
   profiles = crateUtils.clobber [
     {
       profile.release = {
@@ -46,25 +62,17 @@ let
       };
     }
     {
-      profile.${profile} = crateUtils.clobber [
-        {
-          codegen-units = 1;
-          incremental = false;
-          build-override = {
-            opt-level = 0;
-            debug = false;
-            strip = true;
-          };
-        }
-        extraProfile
-      ];
+      profile.${profile} = commonProfile;
+    }
+    {
+      profile.${profileForSysroot} = commonProfile;
     }
   ];
 
   sysroot = (if replaceSysroot != null then replaceSysroot else buildSysroot) {
     inherit rustEnvironment;
     inherit targetTriple;
-    inherit profile;
+    profile = profileForSysroot;
     extraManifest = profiles;
   };
 
