@@ -53,7 +53,7 @@ macro_rules! declare_stack {
         static __sel4_runtime_common__stack_top: $crate::_private::start::StackTop = {
             static STACK: $crate::_private::start::Stack<{ $size }> =
                 $crate::_private::start::Stack::new();
-            unsafe { STACK.top() }
+            STACK.top()
         };
     };
 }
