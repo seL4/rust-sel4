@@ -26,7 +26,7 @@
   patch.crates-io = {
     ring = localCrates.ring or  {
       git = "https://github.com/coliasgroup/ring.git";
-      rev = "c5880ee6ae56bb684f5bb2499f1c05cef8943745"; # branch sel4
+      rev = "0f749acc5d5a8310dfc3ff985df04056f497fc1b"; # branch sel4
     };
   };
 }

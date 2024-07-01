@@ -247,7 +247,6 @@ in rec {
             justBuildTests = true;
             features = [
               "less-safe-getrandom-custom-or-rdrand"
-              "less-correct-none-os-has-linux-abi"
               # "slow_tests"
             ];
             release = true;

@@ -198,7 +198,6 @@ in rec {
     version = "=0.17.8";
     features = [
       "less-safe-getrandom-custom-or-rdrand"
-      "less-correct-none-os-has-linux-abi"
     ] ++ features;
   };
 
