@@ -76,7 +76,6 @@ let
         --skip-tool \
         --skip-docs \
         --skip-tar
-
     '';
 
     installPhase = ''
