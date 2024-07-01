@@ -41,7 +41,7 @@ pub trait Handler {
         &mut self,
         pd: ProtectionDomain,
         msg_info: MessageInfo,
-    ) -> Result<MessageInfo, Self::Error> {
+    ) -> Result<Option<MessageInfo>, Self::Error> {
         panic!("unexpected fault from protection domain {pd:?} with msg_info={msg_info:?}")
     }
 
@@ -82,7 +82,7 @@ pub trait Handler {
                     reply_tag = Some(self.protected(channel, msg_info)?);
                 }
                 Event::Fault(pd, msg_info) => {
-                    reply_tag = Some(self.fault(pd, msg_info)?);
+                    reply_tag = self.fault(pd, msg_info)?;
                 }
             };
 
