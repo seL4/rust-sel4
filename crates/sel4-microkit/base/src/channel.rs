@@ -83,11 +83,11 @@ impl fmt::Display for IrqAckError {
 
 /// A handle to a child protection domain, identified by a child protection domain index.
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
-pub struct ProtectionDomain {
+pub struct Child {
     index: usize,
 }
 
-impl ProtectionDomain {
+impl Child {
     pub const fn new(index: usize) -> Self {
         Self { index }
     }

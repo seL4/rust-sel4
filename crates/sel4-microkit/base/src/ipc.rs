@@ -6,7 +6,7 @@
 
 use crate::MessageInfo;
 
-use crate::{defer::PreparedDeferredAction, Channel, ProtectionDomain};
+use crate::{defer::PreparedDeferredAction, Channel, Child};
 
 const INPUT_CAP: sel4::cap::Endpoint = sel4::Cap::from_bits(1);
 const REPLY_CAP: sel4::cap::Reply = sel4::Cap::from_bits(4);
@@ -29,7 +29,7 @@ fn strip_flag(badge: sel4::Badge, bit: usize) -> Option<sel4::Word> {
 pub enum Event {
     Notified(NotifiedEvent),
     Protected(Channel, MessageInfo),
-    Fault(ProtectionDomain, MessageInfo),
+    Fault(Child, MessageInfo),
 }
 
 impl Event {
@@ -41,7 +41,7 @@ impl Event {
             )
         } else if let Some(pd_index) = strip_flag(badge, PD_BADGE_BIT) {
             Self::Fault(
-                ProtectionDomain::new(pd_index.try_into().unwrap()),
+                Child::new(pd_index.try_into().unwrap()),
                 MessageInfo::from_inner(tag),
             )
         } else {

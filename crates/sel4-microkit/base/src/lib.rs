@@ -16,7 +16,7 @@ mod symbols;
 #[doc(hidden)]
 pub mod ipc;
 
-pub use channel::{Channel, IrqAckError, ProtectionDomain};
+pub use channel::{Channel, Child, IrqAckError};
 pub use defer::{DeferredAction, DeferredActionInterface, DeferredActionSlot};
 pub use handler::{Handler, Infallible, Never, NullHandler};
 pub use message::{
