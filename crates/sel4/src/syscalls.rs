@@ -247,14 +247,14 @@ pub fn set_tls_base(addr: usize) {
 
 const UNUSED_FOR_IN: Word = 0;
 
-/// The result of [`Endpoint::recv_with_mrs`].
+/// The result of [`cap::Endpoint::recv_with_mrs`].
 pub struct RecvWithMRs {
     pub info: MessageInfo,
     pub badge: Badge,
     pub msg: [Word; NUM_FAST_MESSAGE_REGISTERS],
 }
 
-/// The result of [`Endpoint::call_with_mrs`].
+/// The result of [`cap::Endpoint::call_with_mrs`].
 pub struct CallWithMRs {
     pub info: MessageInfo,
     pub msg: [Word; NUM_FAST_MESSAGE_REGISTERS],

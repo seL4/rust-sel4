@@ -59,7 +59,7 @@ impl From<ObjectTypeArch> for ObjectType {
     }
 }
 
-/// An object description for [`Untyped::untyped_retype`](crate::Untyped::untyped_retype).
+/// An object description for [`Untyped::untyped_retype`](crate::cap::Untyped::untyped_retype).
 #[sel4_cfg_enum]
 #[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub enum ObjectBlueprint {
