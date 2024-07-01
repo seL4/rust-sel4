@@ -9,7 +9,7 @@ use core::fmt;
 use crate::{
     defer::{DeferredAction, PreparedDeferredAction},
     ipc::{self, Event},
-    pd_is_passive, Channel, MessageInfo, ProtectionDomain,
+    pd_is_passive, Channel, Child, MessageInfo,
 };
 
 pub use core::convert::Infallible;
@@ -39,10 +39,10 @@ pub trait Handler {
 
     fn fault(
         &mut self,
-        pd: ProtectionDomain,
+        child: Child,
         msg_info: MessageInfo,
     ) -> Result<Option<MessageInfo>, Self::Error> {
-        panic!("unexpected fault from protection domain {pd:?} with msg_info={msg_info:?}")
+        panic!("unexpected fault from protection domain {child:?} with msg_info={msg_info:?}")
     }
 
     /// An advanced feature for use by protection domains which seek to coalesce syscalls when
@@ -81,8 +81,8 @@ pub trait Handler {
                 Event::Protected(channel, msg_info) => {
                     reply_tag = Some(self.protected(channel, msg_info)?);
                 }
-                Event::Fault(pd, msg_info) => {
-                    reply_tag = self.fault(pd, msg_info)?;
+                Event::Fault(child, msg_info) => {
+                    reply_tag = self.fault(child, msg_info)?;
                 }
             };
 
