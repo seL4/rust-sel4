@@ -33,9 +33,7 @@ impl ElfBitWidth {
 pub type ConcreteFileHeader32 = FileHeader32<Endianness>;
 pub type ConcreteFileHeader64 = FileHeader64<Endianness>;
 
-pub trait FileHeaderExt:
-    FileHeader + FileHeader<Word: PrimInt, Sword: PrimInt, Endian = Endianness>
-{
+pub trait FileHeaderExt: FileHeader<Word: PrimInt, Sword: PrimInt, Endian = Endianness> {
     fn checked_add_signed(x: Self::Word, y: Self::Sword) -> Option<Self::Word>;
     fn write_word_bytes(endian: impl Endian, n: Self::Word) -> Vec<u8>;
 }
