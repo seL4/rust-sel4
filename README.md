@@ -35,7 +35,7 @@ Microkit](https://github.com/seL4/microkit). In particular, this project works w
 following versions of those related projects:
 
 - seL4, when used without Microkit:
-  [`2249143c73b04c3a0d6d9ecf4055e0c6245772ab`](https://github.com/seL4/seL4/tree/2249143c73b04c3a0d6d9ecf4055e0c6245772ab)
+  [`cd6d3b8c25d49be2b100b0608cf0613483a6fffa`](https://github.com/seL4/seL4/tree/cd6d3b8c25d49be2b100b0608cf0613483a6fffa)
   (version 13.0.0, on [github.com/seL4/seL4:master](https://github.com/seL4/seL4/tree/master))
 - seL4, when used with Microkit:
   [`0cdbffec9cf6b4c7c9c57971cbee5a24a70c8fd0`](https://github.com/seL4/seL4/tree/0cdbffec9cf6b4c7c9c57971cbee5a24a70c8fd0)
