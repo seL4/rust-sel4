@@ -13,7 +13,7 @@ const BASE_ENDPOINT_SLOT: usize = BASE_OUTPUT_NOTIFICATION_SLOT + 64;
 const BASE_IRQ_SLOT: usize = BASE_ENDPOINT_SLOT + 64;
 const BASE_TCB_SLOT: usize = BASE_IRQ_SLOT + 64;
 
-const MAX_CHANNELS: usize = 63;
+const MAX_CHANNELS: usize = 62;
 
 /// A channel between this protection domain and another, identified by a channel index.
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
