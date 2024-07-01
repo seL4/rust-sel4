@@ -28,7 +28,7 @@ let
 
   capdlCommon = {
     url = "https://github.com/coliasgroup/capdl.git";
-    rev = "c89943d2fdf0546b3b8da70f4b712830dc4880ed"; # branch rust-testing
+    rev = "6ea203e8ebbcf8d786939aa706262b5073aae676"; # branch rust-testing
     local = localRoot + "/capdl";
   };
 
