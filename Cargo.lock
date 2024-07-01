@@ -1724,7 +1724,7 @@ dependencies = [
 [[package]]
 name = "ring"
 version = "0.17.8"
-source = "git+https://github.com/coliasgroup/ring.git?rev=c5880ee6ae56bb684f5bb2499f1c05cef8943745#c5880ee6ae56bb684f5bb2499f1c05cef8943745"
+source = "git+https://github.com/coliasgroup/ring.git?rev=0f749acc5d5a8310dfc3ff985df04056f497fc1b#0f749acc5d5a8310dfc3ff985df04056f497fc1b"
 dependencies = [
  "cc",
  "cfg-if",
