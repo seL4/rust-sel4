@@ -104,7 +104,7 @@ in rec {
           el2 = mk { smp = true; hypervisor = true; };
           el2MCS = mk { smp = true; hypervisor = true; mcs = true; };
           microkit = mk {
-            el2 = false;
+            el2 = true;
             mcs = true;
             isMicrokit = true;
             microkitBoard = "qemu_virt_aarch64";
