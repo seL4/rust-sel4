@@ -11,6 +11,7 @@ use num::{CheckedAdd, NumCast, ToPrimitive};
 use object::{
     elf::{PF_R, PF_W, PT_LOAD},
     read::elf::{ElfFile, FileHeader, ProgramHeader as _},
+    read::ReadRef,
     write::elf::{ProgramHeader, Writer},
     Object, ObjectSegment, ObjectSymbol,
 };
@@ -19,7 +20,13 @@ use crate::{FileHeaderExt, Injection, Input};
 
 impl<'a, T: FileHeaderExt> Input<'a, T> {
     pub fn render_with_data(&self, orig: &[u8]) -> Result<Vec<u8>> {
-        let orig_obj: &ElfFile<T> = &ElfFile::parse(orig)?;
+        self.render_with_data_already_parsed(&ElfFile::parse(orig)?)
+    }
+
+    pub fn render_with_data_already_parsed<'b, R: ReadRef<'b>>(
+        &self,
+        orig_obj: &ElfFile<'b, T, R>,
+    ) -> Result<Vec<u8>> {
         let orig_endian = orig_obj.endian();
         let orig_image_end = next_vaddr(orig_obj)?;
 
@@ -97,7 +104,7 @@ impl<'a, T: FileHeaderExt> Input<'a, T> {
 
         for (phdr, revised_offset) in loadable_segments(orig_obj).zip(&revised_offsets) {
             writer.pad_until(*revised_offset);
-            writer.write(phdr.data(orig_endian, orig).ok().unwrap());
+            writer.write(phdr.data(orig_endian, orig_obj.data()).ok().unwrap());
         }
 
         for (injection, offset) in &new_segments {
@@ -145,15 +152,18 @@ impl<'a, T: FileHeaderExt> Input<'a, T> {
     }
 }
 
-fn loadable_segments<'a, T: FileHeaderExt>(
-    obj: &'a ElfFile<T>,
-) -> impl Iterator<Item = &'a <T as FileHeader>::ProgramHeader> {
+fn loadable_segments<'a, 'b, T: FileHeaderExt, R: ReadRef<'b>>(
+    obj: &'a ElfFile<'b, T, R>,
+) -> impl Iterator<Item = &'b <T as FileHeader>::ProgramHeader> + 'a {
     obj.raw_segments()
         .iter()
         .filter(|phdr| phdr.p_type(obj.endian()) == PT_LOAD)
 }
 
-fn get_symbol_vaddr<T: FileHeaderExt>(obj: &ElfFile<T>, name: &str) -> Result<T::Word> {
+fn get_symbol_vaddr<'a, T: FileHeaderExt, R: ReadRef<'a>>(
+    obj: &ElfFile<'a, T, R>,
+    name: &str,
+) -> Result<T::Word> {
     for symbol in obj.symbols() {
         if symbol.name()? == name {
             ensure!(usize::try_from(symbol.size()).unwrap() == mem::size_of::<T::Word>());
@@ -163,7 +173,10 @@ fn get_symbol_vaddr<T: FileHeaderExt>(obj: &ElfFile<T>, name: &str) -> Result<T:
     Err(anyhow!("symbol '{}' not present", name))
 }
 
-fn vaddr_to_offset<T: FileHeaderExt>(obj: &ElfFile<T>, vaddr: T::Word) -> Result<u64>
+fn vaddr_to_offset<'a, T: FileHeaderExt, R: ReadRef<'a>>(
+    obj: &ElfFile<'a, T, R>,
+    vaddr: T::Word,
+) -> Result<u64>
 where
 {
     for segment in obj.segments() {
@@ -182,7 +195,7 @@ where
     ))
 }
 
-fn first_vaddr<T: FileHeaderExt>(obj: &ElfFile<T>) -> Result<T::Word>
+fn first_vaddr<'a, T: FileHeaderExt, R: ReadRef<'a>>(obj: &ElfFile<'a, T, R>) -> Result<T::Word>
 where
 {
     loadable_segments(obj)
@@ -191,7 +204,7 @@ where
         .ok_or(anyhow!("no segments"))
 }
 
-fn next_vaddr<T: FileHeaderExt>(obj: &ElfFile<T>) -> Result<T::Word>
+fn next_vaddr<'a, T: FileHeaderExt, R: ReadRef<'a>>(obj: &ElfFile<'a, T, R>) -> Result<T::Word>
 where
 {
     loadable_segments(obj)
