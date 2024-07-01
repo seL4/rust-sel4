@@ -35,14 +35,14 @@ Microkit](https://github.com/seL4/microkit). In particular, this project works w
 following versions of those related projects:
 
 - seL4, when used without Microkit:
-  [`c28e52a1ece2020723d1857c893e75897559563e`](https://github.com/seL4/seL4/tree/c28e52a1ece2020723d1857c893e75897559563e)
-  (on [github.com/seL4/seL4:master](https://github.com/seL4/seL4/tree/master))
+  [`2249143c73b04c3a0d6d9ecf4055e0c6245772ab`](https://github.com/seL4/seL4/tree/2249143c73b04c3a0d6d9ecf4055e0c6245772ab)
+  (version 13.0.0, on [github.com/seL4/seL4:master](https://github.com/seL4/seL4/tree/master))
 - seL4, when used with Microkit:
-  [`57975d485397ce1744f7163644dd530560d0b7ec`](https://github.com/seL4/seL4/tree/57975d485397ce1744f7163644dd530560d0b7ec)
+  [`0cdbffec9cf6b4c7c9c57971cbee5a24a70c8fd0`](https://github.com/seL4/seL4/tree/0cdbffec9cf6b4c7c9c57971cbee5a24a70c8fd0)
   (on [github.com/seL4/seL4:microkit](https://github.com/seL4/seL4/tree/microkit))
 - seL4 Microkit:
-  [`e300c3298023aad9b2d1df9c36f8229e8001a59a`](https://github.com/seL4/microkit/tree/e300c3298023aad9b2d1df9c36f8229e8001a59a)
-  (on [github.com/seL4/microkit:main](https://github.com/seL4/microkit/tree/main))
+  [`1ccdfcb3b224533c965fd6508de3dd56657f959c`](https://github.com/seL4/microkit/tree/1ccdfcb3b224533c965fd6508de3dd56657f959c)
+  (version 1.3.0, on [github.com/seL4/microkit:main](https://github.com/seL4/microkit/tree/main))
 
 ### Demos
 
