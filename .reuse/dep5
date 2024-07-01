@@ -4,6 +4,11 @@ Upstream-Contact: seL4 team <support@sel4.systems>
 Source: http://sel4.systems
 
 Files:
+  VERSION
+Copyright: 2024, Colias Group, LLC
+License: CC-BY-SA-4.0
+
+Files:
   Cargo.lock
   support/*.json
   hacking/cargo-manifest-management/tool/Cargo.lock
