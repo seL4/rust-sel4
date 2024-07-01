@@ -48,6 +48,7 @@ in rec {
             , microkitBoard ? null
             , microkitConfig ? if debugBuild == null || debugBuild then "debug" else "release"
 
+            , qemuMemory ? "2048"
             , extraQEMUArgs ? []
             }:
             let
@@ -61,6 +62,7 @@ in rec {
                   config = microkitConfig;
                 };
                 kernelConfig = kernelConfigCommon // {
+                  QEMU_MEMORY = mkString qemuMemory;
                   ARM_CPU = mkString cpu;
                   KernelArch = mkString "arm";
                   KernelSel4Arch = mkString "aarch64";
@@ -90,7 +92,7 @@ in rec {
                     # virtualization=on even when hypervisor to test loader dropping exception level
                     "${pkgsBuildBuild.this.qemuForSeL4}/bin/qemu-system-aarch64"
                       "-machine" "virt${lib.optionalString el2 ",virtualization=on"}"
-                      "-cpu" cpu "-smp" numCores "-m" "size=1024"
+                      "-cpu" cpu "-smp" numCores "-m" "size=${qemuMemory}M"
                       "-nographic"
                       "-serial" "mon:stdio"
                   ] ++ mkLoaderQEMUArgs loader ++ extraQEMUArgs;
@@ -108,7 +110,6 @@ in rec {
             microkitBoard = "qemu_virt_aarch64";
             cpu = "cortex-a53";
             mkLoaderQEMUArgs = loader: [ "-device" "loader,file=${loader},addr=0x70000000,cpu-num=0" ];
-            extraQEMUArgs = [ "-m" "size=2G" ];
           };
 
           forBuildTests = {
