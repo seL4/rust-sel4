@@ -18,7 +18,7 @@ const GRANULE_SIZE: usize = sel4::FrameObjectType::GRANULE.bytes();
 
 pub(crate) fn create_child_vspace<'a>(
     allocator: &mut ObjectAllocator,
-    image: &'a impl Object<'a, 'a>,
+    image: &'a impl Object<'a>,
     caller_vspace: sel4::cap::VSpace,
     free_page_addr: usize,
     asid_pool: sel4::cap::AsidPool,
@@ -57,7 +57,7 @@ pub(crate) fn create_child_vspace<'a>(
     (child_vspace, ipc_buffer_addr, ipc_buffer_cap)
 }
 
-fn footprint<'a>(image: &'a impl Object<'a, 'a>) -> Range<usize> {
+fn footprint<'a>(image: &'a impl Object<'a>) -> Range<usize> {
     let min: usize = image
         .segments()
         .map(|seg| seg.address())
@@ -104,7 +104,7 @@ fn map_image<'a>(
     allocator: &mut ObjectAllocator,
     vspace: sel4::cap::VSpace,
     footprint: Range<usize>,
-    image: &'a impl Object<'a, 'a>,
+    image: &'a impl Object<'a>,
     caller_vspace: sel4::cap::VSpace,
     free_page_addr: usize,
 ) {

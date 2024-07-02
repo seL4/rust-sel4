@@ -105,7 +105,7 @@ impl<T: FileHeader<Endian = Endianness, Word: PrimInt + WrappingSub + Integer>> 
     ) {
         let endian = elf.endian();
         for phdr in elf
-            .raw_segments()
+            .elf_program_headers()
             .iter()
             .filter(|phdr| phdr.p_type(endian) == PT_LOAD)
         {
@@ -190,14 +190,14 @@ fn elf_virt_addr_range<'a, T: FileHeader<Endian = Endianness, Word: PrimInt>, R:
 ) -> Range<T::Word> {
     let endian = elf.endian();
     let virt_min = elf
-        .raw_segments()
+        .elf_program_headers()
         .iter()
         .filter(|phdr| phdr.p_type(endian) == PT_LOAD)
         .map(|phdr| phdr.p_vaddr(endian))
         .min()
         .unwrap();
     let virt_max = elf
-        .raw_segments()
+        .elf_program_headers()
         .iter()
         .filter(|phdr| phdr.p_type(endian) == PT_LOAD)
         .map(|phdr| {
@@ -215,7 +215,7 @@ fn elf_phys_to_vaddr_offset<'a, T: FileHeader<Word: PrimInt + WrappingSub>, R: R
 ) -> T::Word {
     let endian = elf.endian();
     unified(
-        elf.raw_segments()
+        elf.elf_program_headers()
             .iter()
             .filter(|phdr| phdr.p_type(endian) == PT_LOAD)
             .map(|phdr| phys_to_virt_offset_for(phdr.p_paddr(endian), phdr.p_vaddr(endian))),

@@ -289,14 +289,14 @@ impl SchemeExt for schemes::RiscV32Sv32 {
 fn elf_phys_addr_range<'a, R: ReadRef<'a>>(elf: &ElfFile<'a, FileHeader, R>) -> Range<u64> {
     let endian = elf.endian();
     let virt_min = elf
-        .raw_segments()
+        .elf_program_headers()
         .iter()
         .filter(|phdr| phdr.p_type(endian) == PT_LOAD)
         .map(|phdr| phdr.p_paddr(endian))
         .min()
         .unwrap();
     let virt_max = elf
-        .raw_segments()
+        .elf_program_headers()
         .iter()
         .filter(|phdr| phdr.p_type(endian) == PT_LOAD)
         .map(|phdr| {
@@ -312,7 +312,7 @@ fn elf_phys_addr_range<'a, R: ReadRef<'a>>(elf: &ElfFile<'a, FileHeader, R>) -> 
 fn elf_phys_to_vaddr_offset<'a, R: ReadRef<'a>>(elf: &ElfFile<'a, FileHeader, R>) -> u64 {
     let endian = elf.endian();
     unified(
-        elf.raw_segments()
+        elf.elf_program_headers()
             .iter()
             .filter(|phdr| phdr.p_type(endian) == PT_LOAD)
             .map(|phdr| {
