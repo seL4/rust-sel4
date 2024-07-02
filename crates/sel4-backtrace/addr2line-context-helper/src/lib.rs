@@ -11,20 +11,20 @@ extern crate alloc;
 use alloc::borrow::Cow;
 use alloc::rc::Rc;
 
-use addr2line::object::{Object, ObjectSection};
 use addr2line::Context as AbstractContext;
+use object::{Object, ObjectSection};
 
 pub use addr2line::gimli::Error;
 
 pub type Context = AbstractContext<gimli::EndianRcSlice<gimli::RunTimeEndian>>;
 
-pub fn new_context<'data: 'file, 'file, O: Object<'data, 'file>>(
+pub fn new_context<'data: 'file, 'file, O: Object<'data>>(
     file: &'file O,
 ) -> Result<Context, Error> {
     new_context_with_sup(file, None)
 }
 
-pub fn new_context_with_sup<'data: 'file, 'file, O: Object<'data, 'file>>(
+pub fn new_context_with_sup<'data: 'file, 'file, O: Object<'data>>(
     file: &'file O,
     sup_file: Option<&'file O>,
 ) -> Result<Context, Error> {
@@ -40,7 +40,7 @@ pub fn new_context_with_sup<'data: 'file, 'file, O: Object<'data, 'file>>(
         endian: Endian,
     ) -> Result<gimli::EndianRcSlice<Endian>, Error>
     where
-        O: Object<'data, 'file>,
+        O: Object<'data>,
         Endian: gimli::Endianity,
     {
         let data = file

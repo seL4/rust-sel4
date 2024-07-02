@@ -62,7 +62,7 @@ impl<'a, T: FileHeaderExt> Input<'a, T> {
         };
 
         writer.write_file_header({
-            let hdr = orig_obj.raw_header();
+            let hdr = orig_obj.elf_header();
             &object::write::elf::FileHeader {
                 os_abi: hdr.e_ident().os_abi,
                 abi_version: hdr.e_ident().abi_version,
@@ -155,7 +155,7 @@ impl<'a, T: FileHeaderExt> Input<'a, T> {
 fn loadable_segments<'a, 'b, T: FileHeaderExt, R: ReadRef<'b>>(
     obj: &'a ElfFile<'b, T, R>,
 ) -> impl Iterator<Item = &'b <T as FileHeader>::ProgramHeader> + 'a {
-    obj.raw_segments()
+    obj.elf_program_headers()
         .iter()
         .filter(|phdr| phdr.p_type(obj.endian()) == PT_LOAD)
 }
