@@ -249,6 +249,15 @@ impl<C: InvocationContext> Tcb<C> {
                 .seL4_TCB_BindNotification(cptr.bits(), notification.bits())
         }))
     }
+
+    /// Corresponds to `seL4_TCB_UnbindNotification`.
+    pub fn tcb_unbind_notification(self) -> Result<()> {
+        Error::wrap(self.invoke(|cptr, ipc_buffer| {
+            ipc_buffer
+                .inner_mut()
+                .seL4_TCB_UnbindNotification(cptr.bits())
+        }))
+    }
 }
 
 #[sel4_cfg(KERNEL_MCS)]
