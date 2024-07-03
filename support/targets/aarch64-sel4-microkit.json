@@ -7,7 +7,7 @@
   "exe-suffix": ".elf",
   "features": "+v8a,+strict-align,+neon,+fp-armv8",
   "has-thread-local": true,
-  "link-script": "__sel4_ipc_buffer_obj = (_end + 4096 - 1) & ~(4096 - 1);",
+  "link-script": "__sel4_ipc_buffer_obj = (__ehdr_start & ~(4096 - 1)) - 4096;",
   "linker": "rust-lld",
   "linker-flavor": "gnu-lld",
   "llvm-target": "aarch64-unknown-none",

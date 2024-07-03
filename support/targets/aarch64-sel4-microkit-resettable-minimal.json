@@ -7,7 +7,7 @@
   "env": "sel4",
   "exe-suffix": ".elf",
   "features": "+v8a,+strict-align,+neon,+fp-armv8",
-  "link-script": "__sel4_ipc_buffer_obj = (__ehdr_start & ~(4096 - 1)) - 4096;",
+  "link-script": "SECTIONS {\n    .persistent : {\n        *(.persistent .persistent.*)\n    }\n} INSERT BEFORE .data;\n\nASSERT(DEFINED(_reset), \"_reset is not defined\")\n\nENTRY(_reset)\n__sel4_ipc_buffer_obj = (__ehdr_start & ~(4096 - 1)) - 4096;",
   "linker": "rust-lld",
   "linker-flavor": "gnu-lld",
   "llvm-target": "aarch64-unknown-none",
