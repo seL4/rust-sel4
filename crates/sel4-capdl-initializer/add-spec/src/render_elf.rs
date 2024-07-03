@@ -6,7 +6,9 @@
 
 use num::{NumCast, One, PrimInt, Zero};
 
-use sel4_render_elf_with_data::{FileHeaderExt, Input, SymbolicInjection, SymbolicValue};
+use sel4_render_elf_with_data::{
+    FileHeaderExt, Input, SymbolicInjection, SymbolicValue, PF_R, PF_W,
+};
 
 pub(crate) struct RenderElfArgs<'a> {
     pub(crate) orig_elf: &'a [u8],
@@ -28,6 +30,7 @@ impl<'a> RenderElfArgs<'a> {
             align_residue,
             content: self.data,
             memsz,
+            p_flags: PF_R | PF_W,
             patches: vec![
                 (
                     "sel4_capdl_initializer_serialized_spec_start".to_owned(),

@@ -9,7 +9,7 @@ use std::mem;
 
 use anyhow::Result;
 use num::{NumCast, Zero};
-use object::elf::{PF_W, PT_LOAD};
+use object::elf::{PF_R, PF_W, PT_LOAD};
 use object::read::elf::{ElfFile, ProgramHeader};
 use object::{Endian, File, Object, ObjectSection, ReadCache, ReadRef};
 
@@ -176,6 +176,7 @@ impl Regions {
             align_residue,
             content: &self.raw,
             memsz: NumCast::from(memsz).unwrap(),
+            p_flags: PF_R,
             patches: vec![(
                 "sel4_reset_regions_start".to_owned(),
                 SymbolicValue {

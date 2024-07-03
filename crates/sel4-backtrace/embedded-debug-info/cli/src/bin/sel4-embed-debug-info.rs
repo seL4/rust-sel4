@@ -12,7 +12,7 @@ use num::{NumCast, One, PrimInt, Zero};
 
 use sel4_render_elf_with_data::{
     ConcreteFileHeader32, ConcreteFileHeader64, ElfBitWidth, FileHeaderExt, Input,
-    SymbolicInjection, SymbolicValue,
+    SymbolicInjection, SymbolicValue, PF_R,
 };
 
 fn main() -> Result<(), io::Error> {
@@ -72,6 +72,7 @@ fn with_bit_width<T: FileHeaderExt<Word: PrimInt, Sword: PrimInt>>(
         align_residue: T::Word::zero(),
         content,
         memsz: content_len,
+        p_flags: PF_R,
         patches: vec![(
             "embedded_debug_info_start".to_owned(),
             SymbolicValue {

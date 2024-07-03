@@ -12,6 +12,8 @@ use object::{
     Endian, Endianness, File,
 };
 
+pub use object::elf::{PF_R, PF_W, PF_X};
+
 mod render;
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
@@ -89,6 +91,7 @@ pub struct SymbolicInjection<'a, T: FileHeaderExt> {
     pub align_residue: T::Word,
     pub content: &'a [u8],
     pub memsz: T::Word,
+    pub p_flags: u32,
     pub patches: Vec<(Symbol, SymbolicValue<T>)>,
 }
 
@@ -111,6 +114,7 @@ impl<'a, T: FileHeaderExt> SymbolicInjection<'a, T> {
             vaddr,
             content: self.content,
             memsz: self.memsz,
+            p_flags: self.p_flags,
             patches: self
                 .patches
                 .iter()
@@ -129,6 +133,7 @@ pub struct Injection<'a, T: FileHeaderExt> {
     pub vaddr: T::Word,
     pub content: &'a [u8],
     pub memsz: T::Word,
+    pub p_flags: u32,
     pub patches: Vec<(Symbol, ConcreteValue<T>)>,
 }
 
@@ -147,6 +152,10 @@ impl<'a, T: FileHeaderExt> Injection<'a, T> {
 
     fn content(&self) -> &'a [u8] {
         self.content
+    }
+
+    fn p_flags(&self) -> u32 {
+        self.p_flags
     }
 
     fn patches(&self) -> impl Iterator<Item = &(Symbol, ConcreteValue<T>)> {

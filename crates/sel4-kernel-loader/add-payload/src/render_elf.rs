@@ -7,7 +7,7 @@
 use num::{NumCast, One, PrimInt, Zero};
 use object::{read::elf::FileHeader, Endianness};
 
-use sel4_render_elf_with_data::{FileHeaderExt, Input, SymbolicInjection, SymbolicValue};
+use sel4_render_elf_with_data::{FileHeaderExt, Input, SymbolicInjection, SymbolicValue, PF_R};
 
 pub fn render_elf<T>(orig_elf: &[u8], serialized_payload: &[u8]) -> Vec<u8>
 where
@@ -22,6 +22,7 @@ where
         align_residue,
         content: serialized_payload,
         memsz: NumCast::from(memsz).unwrap(),
+        p_flags: PF_R,
         patches: vec![(
             "loader_payload_start".to_owned(),
             SymbolicValue {
