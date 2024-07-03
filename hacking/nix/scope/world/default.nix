@@ -204,7 +204,7 @@ self: with self;
       ) // extraPlatformArgs);
     in {
       links = linkFarm "links" (
-        system.debuggingLinks ++ platformSystemExtension.links
+        system.debuggingLinks ++ platformSystemExtension.links ++ extraDebuggingLinks
       );
     }
     // platformSystemExtension.attrs
