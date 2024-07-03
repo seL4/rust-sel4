@@ -9,7 +9,7 @@ use std::mem;
 use anyhow::{anyhow, ensure, Result};
 use num::{CheckedAdd, NumCast, ToPrimitive};
 use object::{
-    elf::{PF_R, PF_W, PT_LOAD},
+    elf::PT_LOAD,
     read::elf::{ElfFile, FileHeader, ProgramHeader as _},
     read::ReadRef,
     write::elf::{ProgramHeader, Writer},
@@ -92,7 +92,7 @@ impl<'a, T: FileHeaderExt> Input<'a, T> {
             let vaddr = injection.vaddr();
             writer.write_program_header(&ProgramHeader {
                 p_type: PT_LOAD,
-                p_flags: PF_R | PF_W,
+                p_flags: injection.p_flags(),
                 p_offset: (*offset).try_into()?,
                 p_vaddr: vaddr.into(),
                 p_paddr: vaddr.into(),
