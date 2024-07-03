@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+     Copyright 2024, Colias Group, LLC
+
+     SPDX-License-Identifier: BSD-2-Clause
+-->
+<system>
+    <protection_domain name="test" priority="128">
+        <program_image path="test.elf" path_for_symbols="test.sup.elf" />
+    </protection_domain>
+</system>

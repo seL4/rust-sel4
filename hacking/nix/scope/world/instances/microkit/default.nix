@@ -6,10 +6,11 @@
 
 { lib, stdenv
 , buildPackages, pkgsBuildBuild
-, linkFarm, symlinkJoin, writeText, runCommand
+, linkFarm, symlinkJoin, writeText, runCommand, runCommandCC
 , callPackage
 , microkit
 , mkTask
+, prepareResettable
 , sources
 , crates
 , crateUtils
@@ -102,6 +103,53 @@ in {
           };
         } // {
           inherit pds;
+        }
+    );
+
+    reset = maybe isMicrokit (
+      let
+        pd = rec {
+          orig = mkPD rec {
+            rootCrate = crates.tests-microkit-reset;
+            targetTriple = mkSeL4RustTargetTriple {
+              microkit = true;
+              resettable = true;
+              minimal = false;
+            };
+            release = false;
+          };
+
+          origELF = "${orig}/bin/test.elf";
+
+          patched = prepareResettable origELF;
+
+          sup = runCommandCC "test.sup.elf" {} ''
+            $OBJCOPY --only-keep-debug ${origELF} $out
+          '';
+        };
+      in
+        callPlatform {
+          system = microkit.mkSystem {
+            searchPath = [
+              (linkFarm "pd" {
+                "test.elf" = pd.patched;
+              })
+              (linkFarm "pd" {
+                "test.sup.elf" = pd.sup;
+              })
+            ];
+            systemXML = sources.srcRoot + "/crates/private/tests/microkit/reset/x.system";
+          };
+          extraPlatformArgs = lib.optionalAttrs canSimulate  {
+            canAutomateSimply = true;
+          };
+          extraDebuggingLinks = [
+            { name = "test.orig.elf"; path = pd.origELF; }
+            { name = "test.patched.elf"; path = pd.patched; }
+            { name = "test.sup.elf"; path = pd.sup; }
+          ];
+        } // {
+          inherit pd;
         }
     );
   };

@@ -2530,6 +2530,25 @@ dependencies = [
 ]
 
 [[package]]
+name = "sel4-reset"
+version = "0.1.0"
+dependencies = [
+ "cfg-if",
+]
+
+[[package]]
+name = "sel4-reset-cli"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "clap",
+ "fallible-iterator 0.2.0",
+ "num",
+ "object",
+ "sel4-render-elf-with-data",
+]
+
+[[package]]
 name = "sel4-root-task"
 version = "0.1.0"
 dependencies = [
@@ -3062,6 +3081,14 @@ name = "tests-microkit-passive-server-with-deferred-action-pds-server"
 version = "0.1.0"
 dependencies = [
  "sel4-microkit",
+]
+
+[[package]]
+name = "tests-microkit-reset"
+version = "0.1.0"
+dependencies = [
+ "sel4-microkit",
+ "sel4-reset",
 ]
 
 [[package]]
