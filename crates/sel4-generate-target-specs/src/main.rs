@@ -21,7 +21,7 @@ use clap::{Arg, ArgAction, Command};
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 struct Config {
     arch: Arch,
-    microkit: bool,
+    context: Context,
     minimal: bool,
 }
 
@@ -49,6 +49,12 @@ impl RiscVArch {
             Self::GC => "gc".to_owned(),
         }
     }
+}
+
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+enum Context {
+    RootTask,
+    Microkit { resettable: bool },
 }
 
 impl Config {
@@ -103,10 +109,14 @@ impl Config {
             options.eh_frame_header = !self.minimal;
         }
 
-        if self.microkit {
+        if let Context::Microkit { resettable } = &self.context {
+            let mut linker_script = String::new();
+            if *resettable {
+                linker_script.push_str(include_str!("microkit-resettable.lds"));
+            }
+            linker_script.push_str("__sel4_ipc_buffer_obj = (__ehdr_start & ~(4096 - 1)) - 4096;");
             let options = &mut target.options;
-            options.link_script =
-                Some("__sel4_ipc_buffer_obj = (_end + 4096 - 1) & ~(4096 - 1);".into());
+            options.link_script = Some(linker_script.into());
         }
 
         if !self.minimal {
@@ -121,14 +131,17 @@ impl Config {
     }
 
     fn filter(&self) -> bool {
-        !self.microkit || self.arch.microkit_support()
+        !self.context.is_microkit() || self.arch.microkit_support()
     }
 
     fn name(&self) -> String {
         let mut name = self.arch.name();
         name.push_str("-sel4");
-        if self.microkit {
+        if let Context::Microkit { resettable } = &self.context {
             name.push_str("-microkit");
+            if *resettable {
+                name.push_str("-resettable");
+            }
         }
         if self.minimal {
             name.push_str("-minimal");
@@ -138,13 +151,12 @@ impl Config {
 
     fn all() -> Vec<Self> {
         let mut all = vec![];
-        let all_bools = &[true, false];
         for arch in Arch::all() {
-            for microkit in all_bools.iter().copied() {
-                for minimal in all_bools.iter().copied() {
+            for context in Context::all() {
+                for minimal in [true, false] {
                     let config = Self {
                         arch,
-                        microkit,
+                        context,
                         minimal,
                     };
                     if config.filter() {
@@ -190,6 +202,21 @@ impl Arch {
         v.push(Self::RiscV32(RiscVArch::IMAC));
         v.push(Self::RiscV32(RiscVArch::IMAFC));
         v.push(Self::X86_64);
+        v
+    }
+}
+
+impl Context {
+    fn is_microkit(&self) -> bool {
+        matches!(self, Self::Microkit { .. })
+    }
+
+    fn all() -> Vec<Self> {
+        let mut v = vec![];
+        v.push(Self::RootTask);
+        for resettable in [true, false] {
+            v.push(Self::Microkit { resettable });
+        }
         v
     }
 }
