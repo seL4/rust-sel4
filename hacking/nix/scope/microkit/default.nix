@@ -152,7 +152,7 @@ let
       inherit loader;
       loaderImage = loader.image;
       debuggingLinks = [
-        { name = "loader.img"; path = loader; }
+        { name = "loader.img"; path = "${loader}/loader.img"; }
         { name = "report.txt"; path = "${loader}/report.txt"; }
         { name = "sdk/elf"; path = "${sdk}/board/${board}/${config}/elf"; }
         { name = "sel4-symbolize-backtrace";
