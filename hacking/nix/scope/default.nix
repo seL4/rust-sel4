@@ -107,8 +107,14 @@ superCallPackage ../rust-utils {} self //
     ia32 = "i686";
   }."${seL4Arch}";
 
-  mkSeL4CustomRustTargetTripleName = { microkit ? false, minimal ? false }:
-    "${rustTargetArchName}-sel4${lib.optionalString microkit "-microkit"}${lib.optionalString minimal "-minimal"}";
+  mkSeL4CustomRustTargetTripleName = { microkit ? false, resettable ? false, minimal ? false }:
+    lib.concatStrings [
+      rustTargetArchName
+      "-sel4"
+      (lib.optionalString microkit "-microkit")
+      (lib.optionalString resettable "-resettable")
+      (lib.optionalString minimal "-minimal")
+    ];
 
   mkSeL4RustTargetTriple = args: mkCustomRustTargetTriple (mkSeL4CustomRustTargetTripleName args);
 
@@ -197,7 +203,9 @@ superCallPackage ../rust-utils {} self //
   sel4-capdl-initializer-add-spec = mkTool crates.sel4-capdl-initializer-add-spec;
   sel4-simple-task-runtime-config-cli = mkTool crates.sel4-simple-task-runtime-config-cli;
   sel4-kernel-loader-add-payload = mkTool crates.sel4-kernel-loader-add-payload;
+  sel4-reset-cli = mkTool crates.sel4-reset-cli;
 
+  prepareResettable = callPackage ./prepare-resettable.nix {};
   embedDebugInfo = callPackage ./embed-debug-info.nix {};
 
   shellForMakefile = callPackage ./shell-for-makefile.nix {};
