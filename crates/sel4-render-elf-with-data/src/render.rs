@@ -45,9 +45,10 @@ impl<'a, T: FileHeaderExt> Input<'a, T> {
                 .iter()
                 .map(|symbolic_injection| {
                     let filesz = symbolic_injection.filesz();
+                    let memsz = symbolic_injection.memsz;
                     let offset = writer.reserve(filesz.to_usize().unwrap(), 1);
                     let vaddr = symbolic_injection.align_from(next_vaddr);
-                    next_vaddr = vaddr.checked_add(&filesz).unwrap();
+                    next_vaddr = vaddr.checked_add(&memsz).unwrap();
                     Ok((symbolic_injection.locate(vaddr)?, offset))
                 })
                 .collect::<Result<Vec<(Injection<_>, usize)>>>()?
