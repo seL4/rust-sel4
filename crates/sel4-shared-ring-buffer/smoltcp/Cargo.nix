@@ -18,5 +18,4 @@ mk {
     ;
     sel4-externally-shared = localCrates.sel4-externally-shared // { features = [ "unstable" ]; };
   };
-  
 }

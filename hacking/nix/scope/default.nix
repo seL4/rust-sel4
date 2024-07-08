@@ -139,7 +139,7 @@ superCallPackage ../rust-utils {} self //
             nativeBuildInputs = (super.nativeBuildInputs or []) ++ [ makeWrapper ];
             postBuild = ''
               wrapProgram $out/bin/${rootCrate.name} \
-                --prefix LD_LIBRARY_PATH : ${lib.makeLibraryPath [ rustEnvironment.rustToolchain ]} 
+                --prefix LD_LIBRARY_PATH : ${lib.makeLibraryPath [ rustEnvironment.rustToolchain ]}
             '';
           });
         };
