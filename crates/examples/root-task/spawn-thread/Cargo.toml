@@ -22,3 +22,4 @@ sel4 = { path = "../../../sel4" }
 sel4-elf-header = { path = "../../../sel4-elf-header" }
 sel4-initialize-tls = { path = "../../../sel4-initialize-tls" }
 sel4-root-task = { path = "../../../sel4-root-task" }
+sel4-stack = { path = "../../../sel4-stack" }

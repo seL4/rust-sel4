@@ -28,6 +28,7 @@ sel4-kernel-loader-embed-page-tables-runtime = { path = "embed-page-tables/runti
 sel4-kernel-loader-payload-types = { path = "payload-types", features = ["serde"] }
 sel4-logging = { path = "../sel4-logging" }
 sel4-platform-info = { path = "../sel4-platform-info" }
+sel4-stack = { path = "../sel4-stack" }
 spin = { version = "0.9.4", features = ["lock_api"] }
 
 [build-dependencies]

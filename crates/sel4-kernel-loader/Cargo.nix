@@ -20,6 +20,7 @@ mk {
       sel4-config
       sel4-kernel-loader-embed-page-tables-runtime
       sel4-immutable-cell
+      sel4-stack
     ;
     sel4-kernel-loader-payload-types = localCrates.sel4-kernel-loader-payload-types // { features = [ "serde" ]; };
   };

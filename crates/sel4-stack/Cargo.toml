@@ -10,12 +10,8 @@
 #
 
 [package]
-name = "sel4-reset"
+name = "sel4-stack"
 version = "0.1.0"
 authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
 edition = "2021"
 license = "BSD-2-Clause"
-
-[dependencies]
-cfg-if = "1.0.0"
-sel4-stack = { path = "../sel4-stack" }
