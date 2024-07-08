@@ -4,11 +4,11 @@
 # SPDX-License-Identifier: BSD-2-Clause
 #
 
-{ lib, stdenv, hostPlatform, buildPackages
-, linkFarm, symlinkJoin, writeText, writeScript, runCommand
+{ lib, buildPackages
+, callPackage
+, runCommand, writeScript
 , fetchgit
-, parted, fatresize, dosfstools, kmod
-, cmake, perl, python3, python3Packages
+, perl
 , microkit
 
 , crates
@@ -17,7 +17,6 @@
 , sources
 
 , seL4Modifications
-, seL4Config
 , worldConfig
 , callPlatform
 , mkSeL4RustTargetTriple
@@ -29,105 +28,54 @@
 let
   inherit (worldConfig) isMicrokit;
 
-  targetTriple = mkSeL4RustTargetTriple { microkit = true; };
+  mkDiskImage = callPackage ./mk-disk-image.nix {};
 
-  content = builtins.fetchGit {
+  filter = { src, maxIndividualFileSize ? null, excludePatterns ? null }:
+    runCommand "filtered" {} ''
+      cp -r --no-preserve=owner,mode ${src} $out
+      find $out -name  -delete
+      ${lib.optionalString (excludePatterns != null) ''
+        find $out -type f \( ${
+          lib.concatMapStringsSep " -o " (pat: "-name '${pat}'") excludePatterns
+        } \) -delete
+      ''}
+      ${lib.optionalString (maxIndividualFileSize != null) ''
+        find $out -size +${maxIndividualFileSize} -delete
+      ''}
+    '';
+
+  rawContent = builtins.fetchGit {
     url = "https://github.com/seL4/website_pr_hosting";
     ref = "gh-pages";
     rev = "e320919be95968dc13e2122d97737b02a8a31997";
   };
 
-  diskImage = mkDiskImage {};
-  smallDiskImage = mkDiskImage { excludePatterns = [ "*.mp4" "*.pdf" ]; };
-
-  vmTools = buildPackages.vmTools.override {
-    # HACK
-    requireKVM = false;
-  };
-
-  mkDiskImage =
-    { maxIndividualFileSize ? null
-    , excludePatterns ? null
-    }:
+  # HACK link structure requires website_pr_hosting/${contentSubdir}
+  patchedContent =
     let
       contentSubdir = "PR_371";
     in
-    vmTools.runInLinuxVM (runCommand "disk-image" {
-      nativeBuildInputs = [ python3 kmod parted fatresize dosfstools ];
-      preVM = ''
-        mkdir scratch
-        scratch=$(realpath scratch)
-        QEMU_OPTS+=" -virtfs local,path=$scratch,security_model=none,mount_tag=scratch"
+      runCommand "patched" {} ''
+        cp -r --no-preserve=owner,mode ${rawContent}/${contentSubdir} $out
+        mkdir -p $out/website_pr_hosting
+        cp -r --no-preserve=owner,mode ${rawContent}/${contentSubdir} $out/website_pr_hosting/${contentSubdir}/
       '';
-    } ''
-      mkdir /tmp/scratch
-      mount -t 9p scratch /tmp/scratch -o trans=virtio,version=9p2000.L,msize=131072
-      cd scratch
 
-      modprobe loop
+  mkThisDiskImage = filterArgs: mkDiskImage {
+    src = filter ({
+      src = patchedContent;
+    } // filterArgs);
+  };
 
-      mkdir /mnt
+  commonExcludePatterns = [ ''*\?'' ];
 
-      # HACK: fatresize segfaults when run on a filesystem that's not on a partition (?)
+  largeDiskImage = mkThisDiskImage { excludePatterns = commonExcludePatterns; };
+  smallDiskImage = mkThisDiskImage { excludePatterns = commonExcludePatterns ++ [ "*.mp4" "*.pdf" ]; };
 
-      img_size=500M
-      img=disk.img
-      touch $img
-      truncate -s $img_size $img
+  # diskImage = largeDiskImage;
+  diskImage = smallDiskImage;
 
-      dev=$(losetup --find --show $img)
-
-      parted -s $dev mklabel msdos
-      parted -s $dev mkpart primary fat16 512B 100%
-
-      partprobe $dev
-      partition=''${dev}p1
-
-      mkfs.vfat -F 16 $partition
-
-      mount $partition /mnt
-
-      # HACK:
-      #  - some filesystem layer doesn't seem to like '?' in filename
-      #  - rsync doesn't play nicely with some filesystem layer
-      cp -r --no-preserve=owner,mode ${content}/${contentSubdir} x/
-      find x/ -name '*\?' -delete
-      ${lib.optionalString (excludePatterns != null) ''
-        find x/ -type f \( ${
-          lib.concatMapStringsSep " -o " (pat: "-name '${pat}'") excludePatterns
-        } \) -delete
-      ''}
-      ${lib.optionalString (maxIndividualFileSize != null) ''
-        find x/ -size +${maxIndividualFileSize} -delete
-      ''}
-      cp -r x/* /mnt/
-
-      umount /mnt
-
-      min=$(fatresize --info $partition | sed -rn 's/Min size: (.*)$/\1/p')
-      min_rounded_up=$(python3 -c "print(512 * ($min // 512 + 1))")
-      partition_size=$(python3 -c "print(max(64 << 20, $min_rounded_up))")
-      total_disk_size=$(expr $partition_size + 512)
-
-      # NOTE
-      # Somehow $partition sometimes ends up smaller than $partition_size.
-      # conv=notrunc works around this possibility.
-      fatresize -vf -s $partition_size $partition
-
-      real_img=real-disk.img
-      touch $real_img
-      truncate -s $total_disk_size $real_img
-      parted -s $real_img mklabel msdos
-      parted -s $real_img mkpart primary fat16 512B 100%
-
-      dd if=$partition of=$real_img iflag=count_bytes oflag=seek_bytes seek=512 count=$partition_size conv=notrunc
-
-      losetup -d $dev
-
-      mv $real_img $out/disk.img
-    '');
-
-  libcDir = "${stdenv.cc.libc}/${hostPlatform.config}";
+  targetTriple = mkSeL4RustTargetTriple { microkit = true; };
 
   pds = {
     http-server = mkPD {
@@ -203,7 +151,7 @@ lib.fix (self: callPlatform {
   };
 } // {
   inherit pds;
-  inherit diskImage smallDiskImage;
+  inherit largeDiskImage smallDiskImage diskImage;
 } // lib.optionalAttrs canSimulate rec {
   automate =
     let
