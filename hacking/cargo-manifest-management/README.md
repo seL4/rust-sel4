@@ -28,7 +28,7 @@ Concrete benefits of using this tool include:
 - The ability to refer to version bounds and Git sources of remote dependencies symbolically. Using
   consistent version bounds and Git sources for each instance of a given remote dependency
   throughout the project enables proper dependency resolution. Referring to these symbolically makes
-  this less tedious, and also makes updating dependencies in an intentional way easy. 
+  this less tedious, and also makes updating dependencies in an intentional way easy.
 
 You don't need to have experience with Nix to create and modify `Cargo.nix` files. They are written
 using the Nix programming language, but they don't depend on any of the advanced features of Nixpkgs
