@@ -2315,6 +2315,7 @@ dependencies = [
  "sel4-pl011-driver",
  "sel4-platform-info",
  "sel4-rustfmt-helper",
+ "sel4-stack",
  "serde",
  "smccc",
  "spin 0.9.8",
@@ -2534,6 +2535,7 @@ name = "sel4-reset"
 version = "0.1.0"
 dependencies = [
  "cfg-if",
+ "sel4-stack",
 ]
 
 [[package]]
@@ -2589,6 +2591,7 @@ dependencies = [
  "sel4-elf-header",
  "sel4-initialize-tls",
  "sel4-panicking-env",
+ "sel4-stack",
  "unwinding",
 ]
 
@@ -2731,6 +2734,10 @@ dependencies = [
  "sel4-driver-interfaces",
  "tock-registers",
 ]
+
+[[package]]
+name = "sel4-stack"
+version = "0.1.0"
 
 [[package]]
 name = "sel4-sync"
@@ -2943,6 +2950,7 @@ dependencies = [
  "sel4-elf-header",
  "sel4-initialize-tls",
  "sel4-root-task",
+ "sel4-stack",
 ]
 
 [[package]]

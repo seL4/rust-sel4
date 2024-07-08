@@ -52,29 +52,8 @@ pub(crate) mod page_tables {
 }
 
 pub(crate) mod stacks {
-    use core::cell::UnsafeCell;
-
     use sel4_config::sel4_cfg_usize;
-
-    #[repr(C, align(16))]
-    struct Stack<const N: usize>(UnsafeCell<[u8; N]>);
-
-    unsafe impl<const N: usize> Sync for Stack<N> {}
-
-    impl<const N: usize> Stack<N> {
-        pub const fn new() -> Self {
-            Self(UnsafeCell::new([0; N]))
-        }
-
-        pub const fn top(&self) -> StackTop {
-            StackTop(self.0.get().cast::<u8>().wrapping_add(N))
-        }
-    }
-
-    #[repr(transparent)]
-    pub struct StackTop(#[allow(dead_code)] *mut u8);
-
-    unsafe impl Sync for StackTop {}
+    use sel4_stack::{Stack, StackTop};
 
     const PRIMARY_STACK_SIZE: usize = 4096 * 8; // TODO this is excessive
 
@@ -86,17 +65,13 @@ pub(crate) mod stacks {
     const NUM_SECONDARY_CORES: usize = sel4_cfg_usize!(MAX_NUM_NODES) - 1;
 
     const SECONDARY_STACK_SIZE: usize = 4096 * 2;
-    const SECONDARY_STACKS_SIZE: usize = SECONDARY_STACK_SIZE * NUM_SECONDARY_CORES;
 
-    static SECONDARY_STACKS: Stack<SECONDARY_STACKS_SIZE> = Stack::new();
+    static SECONDARY_STACKS: [Stack<SECONDARY_STACK_SIZE>; NUM_SECONDARY_CORES] =
+        [const { Stack::new() }; NUM_SECONDARY_CORES];
 
     #[allow(clippy::zst_offset)] // for case where NUM_SECONDARY_CORES == 0
     pub(crate) fn get_secondary_stack_bottom(core_id: usize) -> usize {
-        unsafe {
-            SECONDARY_STACKS
-                .0
-                .get()
-                .offset((core_id * SECONDARY_STACK_SIZE).try_into().unwrap()) as usize
-        }
+        assert!(core_id > 0 && core_id < sel4_cfg_usize!(MAX_NUM_NODES));
+        SECONDARY_STACKS[core_id - 1].top().ptr() as usize
     }
 }

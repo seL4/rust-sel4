@@ -14,6 +14,7 @@ mk {
       sel4
       sel4-root-task
       sel4-elf-header
+      sel4-stack
       sel4-initialize-tls
     ;
   };

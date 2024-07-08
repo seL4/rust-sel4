@@ -26,6 +26,7 @@ sel4 = { path = "../sel4", default-features = false, optional = true }
 sel4-elf-header = { path = "../sel4-elf-header" }
 sel4-initialize-tls = { path = "../sel4-initialize-tls", features = ["on-stack"], optional = true }
 sel4-panicking-env = { path = "../sel4-panicking/env" }
+sel4-stack = { path = "../sel4-stack" }
 
 [target."cfg(not(target_arch = \"arm\"))".dependencies.unwinding]
 version = "0.1.6"
