@@ -13,10 +13,10 @@ use core::arch::global_asm;
 macro_rules! declare_stack {
     ($size:expr) => {
         #[no_mangle]
-        static __sel4_runtime_common__stack_top: $crate::_private::start::StackTop = {
+        static __sel4_runtime_common__stack_bottom: $crate::_private::start::StackBottom = {
             static STACK: $crate::_private::start::Stack<{ $size }> =
                 $crate::_private::start::Stack::new();
-            STACK.top()
+            STACK.bottom()
         };
     };
 }
@@ -25,7 +25,7 @@ macro_rules! common_asm_prefix {
     () => {
         r#"
             .extern sel4_runtime_rust_entry
-            .extern __sel4_runtime_common__stack_top
+            .extern __sel4_runtime_common__stack_bottom
 
             .global _start
 
@@ -41,7 +41,7 @@ cfg_if::cfg_if! {
         global_asm! {
             common_asm_prefix!(),
             r#"
-                    ldr x9, =__sel4_runtime_common__stack_top
+                    ldr x9, =__sel4_runtime_common__stack_bottom
                     ldr x9, [x9]
                     mov sp, x9
                     b sel4_runtime_rust_entry
@@ -53,7 +53,7 @@ cfg_if::cfg_if! {
         global_asm! {
             common_asm_prefix!(),
             r#"
-                    ldr r8, =__sel4_runtime_common__stack_top
+                    ldr r8, =__sel4_runtime_common__stack_bottom
                     ldr r8, [r8]
                     mov sp, r8
                     b sel4_runtime_rust_entry
@@ -72,7 +72,7 @@ cfg_if::cfg_if! {
                         addi gp, gp, %pcrel_lo(1b)
                     .option pop
 
-                        la sp, __sel4_runtime_common__stack_top
+                        la sp, __sel4_runtime_common__stack_bottom
                         lx sp, (sp)
                         jal sel4_runtime_rust_entry
 
@@ -106,7 +106,7 @@ cfg_if::cfg_if! {
         global_asm! {
             common_asm_prefix!(),
             r#"
-                    mov rsp, __sel4_runtime_common__stack_top
+                    mov rsp, __sel4_runtime_common__stack_bottom
                     mov rbp, rsp
                     sub rsp, 0x8 // Stack must be 16-byte aligned before call
                     push rbp
@@ -121,5 +121,5 @@ cfg_if::cfg_if! {
 }
 
 pub mod _private {
-    pub use sel4_stack::{Stack, StackTop};
+    pub use sel4_stack::{Stack, StackBottom};
 }

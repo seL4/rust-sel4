@@ -53,14 +53,14 @@ pub(crate) mod page_tables {
 
 pub(crate) mod stacks {
     use sel4_config::sel4_cfg_usize;
-    use sel4_stack::{Stack, StackTop};
+    use sel4_stack::{Stack, StackBottom};
 
     const PRIMARY_STACK_SIZE: usize = 4096 * 8; // TODO this is excessive
 
     static PRIMARY_STACK: Stack<PRIMARY_STACK_SIZE> = Stack::new();
 
     #[no_mangle]
-    static __primary_stack_top: StackTop = PRIMARY_STACK.top();
+    static __primary_stack_bottom: StackBottom = PRIMARY_STACK.bottom();
 
     const NUM_SECONDARY_CORES: usize = sel4_cfg_usize!(MAX_NUM_NODES) - 1;
 
@@ -72,6 +72,6 @@ pub(crate) mod stacks {
     #[allow(clippy::zst_offset)] // for case where NUM_SECONDARY_CORES == 0
     pub(crate) fn get_secondary_stack_bottom(core_id: usize) -> usize {
         assert!(core_id > 0 && core_id < sel4_cfg_usize!(MAX_NUM_NODES));
-        SECONDARY_STACKS[core_id - 1].top().ptr() as usize
+        SECONDARY_STACKS[core_id - 1].bottom().ptr() as usize
     }
 }

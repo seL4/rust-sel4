@@ -36,7 +36,7 @@ clear_bss_loop:
     cmp     x0, x1
     b.lt    clear_bss_loop
 
-    ldr     x9, =__primary_stack_top
+    ldr     x9, =__primary_stack_bottom
     ldr     x9, [x9]
     mov     sp, x9
     bl      init_core_state

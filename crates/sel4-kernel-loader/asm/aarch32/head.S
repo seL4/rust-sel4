@@ -51,7 +51,7 @@ clearzi:
 
 clearzi_exit:
 
-    ldr     r9, =__primary_stack_top
+    ldr     r9, =__primary_stack_bottom
     ldr     r9, [r9]
     mov     sp, r9
     bl      leave_hyp

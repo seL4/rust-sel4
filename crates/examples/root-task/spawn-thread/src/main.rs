@@ -134,7 +134,7 @@ fn find_largest_kernel_untyped(bootinfo: &sel4::BootInfo) -> sel4::cap::Untyped 
 fn create_user_context(f: SecondaryThreadFn) -> sel4::UserContext {
     let mut ctx = sel4::UserContext::default();
 
-    *ctx.sp_mut() = (SECONDARY_THREAD_STACK.top().ptr() as usize)
+    *ctx.sp_mut() = (SECONDARY_THREAD_STACK.bottom().ptr() as usize)
         .try_into()
         .unwrap();
     *ctx.pc_mut() = (secondary_thread_entrypoint as usize).try_into().unwrap();
