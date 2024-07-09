@@ -21,5 +21,4 @@ anyhow = "1.0.66"
 clap = "4.4.6"
 fallible-iterator = "0.2.0"
 num = "0.4.1"
-object = { version = "0.36.1", features = ["all"] }
-sel4-render-elf-with-data = { path = "../../sel4-render-elf-with-data" }
+sel4-synthetic-elf = { path = "../../sel4-synthetic-elf" }

@@ -10,6 +10,6 @@ mk {
   package.name = "sel4-backtrace-embedded-debug-info-cli";
   dependencies = {
     inherit (versions) num clap;
-    inherit (localCrates) sel4-render-elf-with-data;
+    inherit (localCrates) sel4-synthetic-elf;
   };
 }

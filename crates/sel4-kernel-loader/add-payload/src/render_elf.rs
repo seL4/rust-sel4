@@ -4,39 +4,37 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use num::{NumCast, One, PrimInt, Zero};
-use object::{read::elf::FileHeader, Endianness};
+use num::NumCast;
+use object::read::elf::FileHeader;
 
-use sel4_render_elf_with_data::{FileHeaderExt, Input, SymbolicInjection, SymbolicValue, PF_R};
+use sel4_synthetic_elf::{Builder, PatchValue, Segment};
 
-pub fn render_elf<T>(orig_elf: &[u8], serialized_payload: &[u8]) -> Vec<u8>
+pub fn render_elf<T>(orig_elf_buffer: &[u8], serialized_payload: &[u8]) -> Vec<u8>
 where
-    T: FileHeaderExt + FileHeader<Word: PrimInt, Sword: PrimInt, Endian = Endianness>,
+    T: FileHeader<Word: NumCast + PatchValue>,
 {
-    let align_modulus = T::Word::one();
-    let align_residue = T::Word::one();
-    let memsz = serialized_payload.len();
-    let mut input = Input::<T>::default();
-    input.symbolic_injections.push(SymbolicInjection {
-        align_modulus,
-        align_residue,
-        content: serialized_payload,
-        memsz: NumCast::from(memsz).unwrap(),
-        p_flags: PF_R,
-        patches: vec![(
-            "loader_payload_start".to_owned(),
-            SymbolicValue {
-                addend: T::Sword::zero(),
-            },
-        )],
-    });
-    input
-        .image_start_patches
-        .push("loader_image_start".to_owned());
-    input.image_end_patches.push("loader_image_end".to_owned());
-    input.concrete_patches.push((
-        "loader_payload_size".to_owned(),
-        NumCast::from(serialized_payload.len()).unwrap(),
-    ));
-    input.render_with_data(orig_elf).unwrap()
+    let orig_elf_file = &object::read::elf::ElfFile::<T>::parse(orig_elf_buffer).unwrap();
+
+    let mut builder = Builder::new(&orig_elf_file).unwrap();
+
+    builder.discard_p_align(true);
+
+    let vaddr = builder.next_vaddr().next_multiple_of(4096);
+
+    builder.add_segment(Segment::simple(vaddr, serialized_payload.into()));
+
+    builder
+        .patch_word_with_cast("loader_payload_start", vaddr)
+        .unwrap();
+    builder
+        .patch_word_with_cast("loader_payload_size", serialized_payload.len())
+        .unwrap();
+    builder
+        .patch_word_with_cast("loader_image_start", builder.footprint().unwrap().start)
+        .unwrap();
+    builder
+        .patch_word_with_cast("loader_image_end", builder.footprint().unwrap().end)
+        .unwrap();
+
+    builder.build().unwrap()
 }

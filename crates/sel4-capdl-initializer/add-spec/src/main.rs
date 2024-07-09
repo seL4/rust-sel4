@@ -9,7 +9,6 @@ use std::fs;
 use anyhow::Result;
 
 use sel4_capdl_initializer_types::{Footprint, InputSpec};
-use sel4_render_elf_with_data::{ConcreteFileHeader32, ConcreteFileHeader64, ElfBitWidth};
 
 mod args;
 mod render_elf;
@@ -27,7 +26,7 @@ fn main() -> Result<()> {
         eprintln!("{:#?}", args);
     }
 
-    let initializer_elf = fs::read(&args.initializer_elf_path)?;
+    let initializer_elf_buf = fs::read(&args.initializer_elf_path)?;
     let spec_json = fs::read_to_string(&args.spec_json_path)?;
     let fill_dir_path = &args.fill_dir_path;
     let out_file_path = &args.out_file_path;
@@ -56,17 +55,19 @@ fn main() -> Result<()> {
     }
 
     let render_elf_args = render_elf::RenderElfArgs {
-        orig_elf: &initializer_elf,
         data: &serialized_spec,
         granule_size_bits: GRANULE_SIZE_BITS,
         heap_size,
     };
 
-    let rendered_initializer_elf = match ElfBitWidth::detect(&initializer_elf).unwrap() {
-        ElfBitWidth::Elf32 => render_elf_args.call_with::<ConcreteFileHeader32>(),
-        ElfBitWidth::Elf64 => render_elf_args.call_with::<ConcreteFileHeader64>(),
+    let rendered_initializer_elf_buf = match object::File::parse(&*initializer_elf_buf).unwrap() {
+        object::File::Elf32(initializer_elf) => render_elf_args.call_with(&initializer_elf),
+        object::File::Elf64(initializer_elf) => render_elf_args.call_with(&initializer_elf),
+        _ => {
+            panic!()
+        }
     };
 
-    fs::write(out_file_path, rendered_initializer_elf)?;
+    fs::write(out_file_path, rendered_initializer_elf_buf)?;
     Ok(())
 }

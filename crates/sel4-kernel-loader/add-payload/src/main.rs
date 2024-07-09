@@ -16,7 +16,7 @@ use object::{
 use serde::Serialize;
 
 use sel4_config_generic_types::Configuration;
-use sel4_render_elf_with_data::FileHeaderExt;
+use sel4_synthetic_elf::PatchValue;
 
 mod args;
 mod render_elf;
@@ -53,12 +53,10 @@ fn main() -> Result<()> {
 
 fn continue_with_word_size<T>(args: &Args) -> Result<()>
 where
-    T: FileHeaderExt
-        + FileHeader<
-            Word: PrimInt + WrappingSub + Integer + Serialize,
-            Sword: PrimInt,
-            Endian = Endianness,
-        >,
+    T: FileHeader<
+        Word: PrimInt + WrappingSub + Integer + Serialize + PatchValue,
+        Endian = Endianness,
+    >,
 {
     let loader_bytes = fs::read(&args.loader_path)?;
 

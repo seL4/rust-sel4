@@ -4,16 +4,16 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
+use std::borrow::Cow;
 use std::fs;
-use std::mem;
 
 use anyhow::Result;
-use num::{NumCast, Zero};
-use object::elf::{PF_R, PF_W, PT_LOAD};
-use object::read::elf::{ElfFile, ProgramHeader};
+use num::NumCast;
+use object::elf::{PF_W, PT_LOAD};
+use object::read::elf::{ElfFile, FileHeader, ProgramHeader};
 use object::{Endian, File, Object, ObjectSection, ReadCache, ReadRef};
 
-use sel4_render_elf_with_data::{FileHeaderExt, Input, SymbolicInjection, SymbolicValue};
+use sel4_synthetic_elf::{object, Builder, PatchValue, Segment};
 
 mod args;
 
@@ -39,46 +39,76 @@ fn main() -> Result<()> {
     }
 }
 
-fn continue_with_type<'a, T, R>(args: &Args, elf: &ElfFile<'a, T, R>) -> Result<()>
+fn continue_with_type<'a, T, R>(args: &Args, elf: &'a ElfFile<'a, T, R>) -> Result<()>
 where
     R: ReadRef<'a>,
-    T: FileHeaderExt,
+    T: FileHeader<Word: NumCast + PatchValue>,
 {
     let endian = elf.endian();
 
     let persistent_section = elf.section_by_name(".persistent");
 
+    let mut builder = Builder::empty(&elf);
+
     let mut regions_builder = RegionsBuilder::<T>::new();
 
     let mut persistent_section_placed = false;
 
-    for phdr in elf.elf_program_headers().iter() {
-        if phdr.p_type(endian) == PT_LOAD && phdr.p_flags(endian) & PF_W != 0 {
-            let vaddr = <u64 as NumCast>::from(phdr.p_vaddr(endian)).unwrap();
-            let memsz = <u64 as NumCast>::from(phdr.p_memsz(endian)).unwrap();
-            let data = phdr.data(endian, elf.data()).unwrap();
-            let skip = persistent_section
-                .as_ref()
-                .and_then(|section| {
-                    if section.address() == vaddr {
-                        persistent_section_placed = true;
-                        Some(section.size())
-                    } else {
-                        None
-                    }
-                })
-                .unwrap_or(0);
-            regions_builder.add_region_with_skip(skip, vaddr, memsz, data);
+    for phdr in elf.elf_program_headers() {
+        if phdr.p_type(endian) == PT_LOAD {
+            let mut segment = Segment::from_phdr(phdr, endian, elf.data())?;
+            if phdr.p_flags(endian) & PF_W != 0 {
+                let vaddr = phdr.p_vaddr(endian).into();
+                let memsz = phdr.p_memsz(endian).into();
+                let data = phdr.data(endian, elf.data()).unwrap();
+                let skip = persistent_section
+                    .as_ref()
+                    .and_then(|section| {
+                        if section.address() == vaddr {
+                            persistent_section_placed = true;
+                            Some(section.size())
+                        } else {
+                            None
+                        }
+                    })
+                    .unwrap_or(0);
+                regions_builder.add_region_with_skip(skip, vaddr, memsz, data);
+                segment.data = match &segment.data {
+                    Cow::Borrowed(slice) => slice[..usize::try_from(skip).unwrap()].into(),
+                    _ => panic!(),
+                }
+            }
+            builder.add_segment(segment);
         }
     }
 
     assert!(!(persistent_section.is_some() && !persistent_section_placed));
 
-    let out_bytes = regions_builder
-        .build(endian)
-        .input::<T>()
-        .render_with_data_already_parsed(elf)
+    let regions = regions_builder.build(endian);
+
+    let vaddr = builder.next_vaddr().next_multiple_of(4096);
+
+    builder.add_segment(Segment::simple(vaddr, regions.raw.into()));
+
+    builder
+        .patch_word_with_cast("sel4_reset_regions_start", vaddr)
         .unwrap();
+    builder
+        .patch_word_with_cast("sel4_reset_regions_meta_offset", regions.meta_offset)
+        .unwrap();
+    builder
+        .patch_word_with_cast("sel4_reset_regions_meta_count", regions.meta_count)
+        .unwrap();
+    builder
+        .patch_word_with_cast("sel4_reset_regions_data_offset", regions.data_offset)
+        .unwrap();
+    builder
+        .patch_word_with_cast("sel4_reset_regions_data_size", regions.data_size)
+        .unwrap();
+
+    builder.discard_p_align(true);
+
+    let out_bytes = builder.build().unwrap();
 
     let out_file_path = &args.out_file_path;
 
@@ -86,12 +116,12 @@ where
     Ok(())
 }
 
-struct RegionsBuilder<T: FileHeaderExt> {
+struct RegionsBuilder<T: FileHeader> {
     meta: Vec<RegionMeta<T>>,
     data: Vec<u8>,
 }
 
-impl<T: FileHeaderExt> RegionsBuilder<T> {
+impl<T: FileHeader<Word: NumCast + PatchValue>> RegionsBuilder<T> {
     fn new() -> Self {
         Self {
             meta: vec![],
@@ -141,19 +171,19 @@ impl<T: FileHeaderExt> RegionsBuilder<T> {
     }
 }
 
-struct RegionMeta<T: FileHeaderExt> {
+struct RegionMeta<T: FileHeader> {
     vaddr: T::Word,
     offset: T::Word,
     filesz: T::Word,
     memsz: T::Word,
 }
 
-impl<T: FileHeaderExt> RegionMeta<T> {
+impl<T: FileHeader<Word: PatchValue>> RegionMeta<T> {
     fn pack(&self, endian: impl Endian, buf: &mut Vec<u8>) {
-        buf.extend_from_slice(&T::write_word_bytes(endian, self.vaddr));
-        buf.extend_from_slice(&T::write_word_bytes(endian, self.offset));
-        buf.extend_from_slice(&T::write_word_bytes(endian, self.filesz));
-        buf.extend_from_slice(&T::write_word_bytes(endian, self.memsz));
+        buf.extend_from_slice(&self.vaddr.to_bytes(endian));
+        buf.extend_from_slice(&self.offset.to_bytes(endian));
+        buf.extend_from_slice(&self.filesz.to_bytes(endian));
+        buf.extend_from_slice(&self.memsz.to_bytes(endian));
     }
 }
 
@@ -163,43 +193,4 @@ struct Regions {
     meta_count: usize,
     data_offset: usize,
     data_size: usize,
-}
-
-impl Regions {
-    fn input<T: FileHeaderExt>(&self) -> Input<T> {
-        let align_modulus = NumCast::from(4096).unwrap();
-        let align_residue = T::Word::zero();
-        let memsz = self.raw.len();
-        let mut input = Input::<T>::default();
-        input.symbolic_injections.push(SymbolicInjection {
-            align_modulus,
-            align_residue,
-            content: &self.raw,
-            memsz: NumCast::from(memsz).unwrap(),
-            p_flags: PF_R,
-            patches: vec![(
-                "sel4_reset_regions_start".to_owned(),
-                SymbolicValue {
-                    addend: T::Sword::zero(),
-                },
-            )],
-        });
-        input.concrete_patches.push((
-            "sel4_reset_regions_meta_offset".to_owned(),
-            NumCast::from(self.meta_offset).unwrap(),
-        ));
-        input.concrete_patches.push((
-            "sel4_reset_regions_meta_count".to_owned(),
-            NumCast::from(self.meta_count).unwrap(),
-        ));
-        input.concrete_patches.push((
-            "sel4_reset_regions_data_offset".to_owned(),
-            NumCast::from(self.data_offset).unwrap(),
-        ));
-        input.concrete_patches.push((
-            "sel4_reset_regions_data_size".to_owned(),
-            NumCast::from(self.data_size).unwrap(),
-        ));
-        input
-    }
 }

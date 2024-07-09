@@ -8,12 +8,9 @@ use std::fs;
 use std::io;
 
 use clap::{Arg, Command};
-use num::{NumCast, One, PrimInt, Zero};
+use num::NumCast;
 
-use sel4_render_elf_with_data::{
-    ConcreteFileHeader32, ConcreteFileHeader64, ElfBitWidth, FileHeaderExt, Input,
-    SymbolicInjection, SymbolicValue, PF_R,
-};
+use sel4_synthetic_elf::{object, Builder, PatchValue, Segment};
 
 fn main() -> Result<(), io::Error> {
     let matches = Command::new("")
@@ -50,38 +47,38 @@ fn main() -> Result<(), io::Error> {
         .to_owned();
     let out_elf_path = matches.get_one::<String>("out_elf").unwrap().to_owned();
 
-    let image_elf = fs::read(image_elf_path)?;
-    let debug_info_elf = fs::read(debug_info_elf_path)?;
+    let image_elf_buf = fs::read(image_elf_path)?;
+    let debug_info_elf_buf = fs::read(debug_info_elf_path)?;
 
-    let out_elf = match ElfBitWidth::detect(&image_elf).unwrap() {
-        ElfBitWidth::Elf32 => with_bit_width::<ConcreteFileHeader32>(&image_elf, &debug_info_elf),
-        ElfBitWidth::Elf64 => with_bit_width::<ConcreteFileHeader64>(&image_elf, &debug_info_elf),
+    let out_elf_buf = match object::File::parse(&*image_elf_buf).unwrap() {
+        object::File::Elf32(image_elf) => with_bit_width(&image_elf, &debug_info_elf_buf),
+        object::File::Elf64(image_elf) => with_bit_width(&image_elf, &debug_info_elf_buf),
+        _ => {
+            panic!()
+        }
     };
 
-    fs::write(out_elf_path, out_elf)
+    fs::write(out_elf_path, out_elf_buf)
 }
 
-fn with_bit_width<T: FileHeaderExt<Word: PrimInt, Sword: PrimInt>>(
-    image_elf: &[u8],
+fn with_bit_width<T: object::read::elf::FileHeader<Word: NumCast + PatchValue>>(
+    image_elf: &object::read::elf::ElfFile<T>,
     content: &[u8],
 ) -> Vec<u8> {
-    let content_len = NumCast::from(content.len()).unwrap();
-    let mut input = Input::<T>::default();
-    input.symbolic_injections.push(SymbolicInjection {
-        align_modulus: T::Word::one(),
-        align_residue: T::Word::zero(),
-        content,
-        memsz: content_len,
-        p_flags: PF_R,
-        patches: vec![(
-            "embedded_debug_info_start".to_owned(),
-            SymbolicValue {
-                addend: T::Sword::zero(),
-            },
-        )],
-    });
-    input
-        .concrete_patches
-        .push(("embedded_debug_info_size".to_owned(), content_len));
-    input.render_with_data(image_elf).unwrap()
+    let mut builder = Builder::new(&image_elf).unwrap();
+
+    builder.discard_p_align(true);
+
+    let vaddr = builder.footprint().unwrap().end.next_multiple_of(4096);
+
+    builder.add_segment(Segment::simple(vaddr, content.into()));
+
+    builder
+        .patch_word_with_cast("embedded_debug_info_start", vaddr)
+        .unwrap();
+    builder
+        .patch_word_with_cast("embedded_debug_info_size", content.len())
+        .unwrap();
+
+    builder.build().unwrap()
 }

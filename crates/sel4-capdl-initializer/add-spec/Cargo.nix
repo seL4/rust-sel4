@@ -19,7 +19,7 @@ mk {
     object = { version = versions.object; features = [ "all" ]; };
     postcard = postcardWith [ "alloc" ];
     inherit (localCrates)
-      sel4-render-elf-with-data
+      sel4-synthetic-elf
     ;
     sel4-capdl-initializer-types = localCrates.sel4-capdl-initializer-types // { features = [ "std" "serde" "deflate" ]; };
   };
