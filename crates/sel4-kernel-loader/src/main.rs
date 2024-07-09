@@ -71,7 +71,7 @@ fn main(per_core: <ArchImpl as Arch>::PerCore) -> ! {
     }
 
     for core_id in 1..MAX_NUM_NODES {
-        let sp = this_image::stacks::get_secondary_stack_bottom(core_id);
+        let sp = this_image::stacks::get_secondary_stack_bottom(core_id).ptr() as usize;
         {
             let mut init_info = SECONDARY_CORE_INIT_INFO.write();
             *init_info = Some(SecondaryCoreInitInfo {
