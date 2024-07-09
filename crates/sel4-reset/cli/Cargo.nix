@@ -15,9 +15,8 @@ mk {
       num
       clap
     ;
-    object = { version = versions.object; features = [ "all" ]; };
     inherit (localCrates)
-      sel4-render-elf-with-data
+      sel4-synthetic-elf
     ;
   };
 }

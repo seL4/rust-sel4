@@ -122,6 +122,7 @@ in rec {
     smoltcp = "0.10.0";
     syn = "1.0.107";
     synstructure = "0.12.6";
+    thiserror = "1.0";
     tock-registers = "0.8.1";
     unwinding = "0.1.6";
     virtio-drivers = "0.7.2";

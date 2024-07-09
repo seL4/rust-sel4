@@ -10,13 +10,13 @@
 #
 
 [package]
-name = "sel4-backtrace-embedded-debug-info-cli"
+name = "sel4-synthetic-elf"
 version = "0.1.0"
 authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
 edition = "2021"
 license = "BSD-2-Clause"
 
 [dependencies]
-clap = "4.4.6"
 num = "0.4.1"
-sel4-synthetic-elf = { path = "../../../sel4-synthetic-elf" }
+object = { version = "0.36.1", features = ["all"] }
+thiserror = "1.0"

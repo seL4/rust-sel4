@@ -2004,7 +2004,7 @@ version = "0.1.0"
 dependencies = [
  "clap",
  "num",
- "sel4-render-elf-with-data",
+ "sel4-synthetic-elf",
 ]
 
 [[package]]
@@ -2093,7 +2093,7 @@ dependencies = [
  "object",
  "postcard",
  "sel4-capdl-initializer-types",
- "sel4-render-elf-with-data",
+ "sel4-synthetic-elf",
  "serde_json",
 ]
 
@@ -2335,7 +2335,7 @@ dependencies = [
  "sel4-config-generic-types",
  "sel4-kernel-loader-config-types",
  "sel4-kernel-loader-payload-types",
- "sel4-render-elf-with-data",
+ "sel4-synthetic-elf",
  "serde",
  "serde_json",
  "serde_yaml",
@@ -2546,8 +2546,7 @@ dependencies = [
  "clap",
  "fallible-iterator 0.2.0",
  "num",
- "object",
- "sel4-render-elf-with-data",
+ "sel4-synthetic-elf",
 ]
 
 [[package]]
@@ -2746,6 +2745,15 @@ dependencies = [
  "lock_api",
  "sel4",
  "sel4-immediate-sync-once-cell",
+]
+
+[[package]]
+name = "sel4-synthetic-elf"
+version = "0.1.0"
+dependencies = [
+ "num",
+ "object",
+ "thiserror",
 ]
 
 [[package]]
