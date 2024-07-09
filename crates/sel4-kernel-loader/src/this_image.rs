@@ -70,8 +70,8 @@ pub(crate) mod stacks {
         [const { Stack::new() }; NUM_SECONDARY_CORES];
 
     #[allow(clippy::zst_offset)] // for case where NUM_SECONDARY_CORES == 0
-    pub(crate) fn get_secondary_stack_bottom(core_id: usize) -> usize {
+    pub(crate) fn get_secondary_stack_bottom(core_id: usize) -> StackBottom {
         assert!(core_id > 0 && core_id < sel4_cfg_usize!(MAX_NUM_NODES));
-        SECONDARY_STACKS[core_id - 1].bottom().ptr() as usize
+        SECONDARY_STACKS[core_id - 1].bottom()
     }
 }
