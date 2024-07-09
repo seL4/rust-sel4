@@ -28,8 +28,8 @@ impl<const N: usize> Stack<N> {
         Self(UnsafeCell::new([0; N]))
     }
 
-    pub const fn top(&self) -> StackTop {
-        StackTop(self.0.get().cast::<u8>().wrapping_add(N))
+    pub const fn bottom(&self) -> StackBottom {
+        StackBottom(self.0.get().cast::<u8>().wrapping_add(N))
     }
 }
 
@@ -40,12 +40,12 @@ impl<const N: usize> Default for Stack<N> {
 }
 
 #[repr(transparent)]
-pub struct StackTop(#[allow(dead_code)] *mut u8);
+pub struct StackBottom(#[allow(dead_code)] *mut u8);
 
-impl StackTop {
+impl StackBottom {
     pub fn ptr(&self) -> *mut u8 {
         self.0
     }
 }
 
-unsafe impl Sync for StackTop {}
+unsafe impl Sync for StackBottom {}

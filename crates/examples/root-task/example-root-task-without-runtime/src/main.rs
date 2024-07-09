@@ -95,22 +95,22 @@ mod stack {
             Self(UnsafeCell::new([0; N]))
         }
 
-        pub const fn top(&self) -> StackTop {
-            StackTop(self.0.get().cast::<u8>().wrapping_add(N))
+        pub const fn bottom(&self) -> StackBottom {
+            StackBottom(self.0.get().cast::<u8>().wrapping_add(N))
         }
     }
 
     #[repr(transparent)]
-    pub struct StackTop(#[allow(dead_code)] *mut u8);
+    pub struct StackBottom(#[allow(dead_code)] *mut u8);
 
-    unsafe impl Sync for StackTop {}
+    unsafe impl Sync for StackBottom {}
 
     const STACK_SIZE: usize = 0x4000;
 
     static STACK: Stack<STACK_SIZE> = Stack::new();
 
     #[no_mangle]
-    static __stack_top: StackTop = STACK.top();
+    static __stack_bottom: StackBottom = STACK.bottom();
 }
 
 cfg_if::cfg_if! {
@@ -118,13 +118,13 @@ cfg_if::cfg_if! {
         global_asm! {
             r#"
                 .extern __rust_entry
-                .extern __stack_top
+                .extern __stack_bottom
 
                 .section .text
 
                 .global _start
                 _start:
-                    ldr x9, =__stack_top
+                    ldr x9, =__stack_bottom
                     ldr x9, [x9]
                     mov sp, x9
                     b __rust_entry
@@ -136,13 +136,13 @@ cfg_if::cfg_if! {
             global_asm! {
                 r#"
                     .extern __rust_entry
-                    .extern __stack_top
+                    .extern __stack_bottom
 
                     .section .text
 
                     .global _start
                     _start:
-                        ldr r8, =__stack_top
+                        ldr r8, =__stack_bottom
                         ldr r8, [r8]
                         mov sp, r8
                         b __rust_entry
@@ -155,7 +155,7 @@ cfg_if::cfg_if! {
             () => {
                 r#"
                     .extern __rust_entry
-                    .extern __stack_top
+                    .extern __stack_bottom
 
                     .section .text
 
@@ -169,7 +169,7 @@ cfg_if::cfg_if! {
                         addi gp, gp, %pcrel_lo(1b)
                     .option pop
 
-                        la sp, __stack_top
+                        la sp, __stack_bottom
                         lx sp, (sp)
                         jal __rust_entry
 
@@ -201,13 +201,13 @@ cfg_if::cfg_if! {
         global_asm! {
             r#"
                 .extern __rust_entry
-                .extern __stack_top
+                .extern __stack_bottom
 
                 .section .text
 
                 .global _start
                 _start:
-                    mov rsp, __stack_top
+                    mov rsp, __stack_bottom
                     mov rbp, rsp
                     sub rsp, 0x8 // Stack must be 16-byte aligned before call
                     push rbp

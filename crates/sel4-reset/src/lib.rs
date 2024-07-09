@@ -12,7 +12,7 @@ use core::slice;
 
 use cfg_if::cfg_if;
 
-use sel4_stack::{Stack, StackTop};
+use sel4_stack::{Stack, StackBottom};
 
 // // //
 
@@ -50,7 +50,7 @@ const STACK_SIZE: usize = 4096;
 static STACK: Stack<STACK_SIZE> = Stack::new();
 
 #[no_mangle]
-static __sel4_reset__stack_top: StackTop = STACK.top();
+static __sel4_reset__stack_bottom: StackBottom = STACK.bottom();
 
 // // //
 
@@ -145,7 +145,7 @@ cfg_if::cfg_if! {
         global_asm! {
             common_asm_prefix!(),
             r#"
-                    ldr x9, =__sel4_reset__stack_top
+                    ldr x9, =__sel4_reset__stack_bottom
                     ldr x9, [x9]
                     mov sp, x9
                     bl __sel4_reset__reset_memory
