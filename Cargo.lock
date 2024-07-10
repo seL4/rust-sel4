@@ -2521,16 +2521,6 @@ name = "sel4-platform-info-types"
 version = "0.1.0"
 
 [[package]]
-name = "sel4-render-elf-with-data"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "fallible-iterator 0.2.0",
- "num",
- "object",
-]
-
-[[package]]
 name = "sel4-reset"
 version = "0.1.0"
 dependencies = [
