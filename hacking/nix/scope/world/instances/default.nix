@@ -298,7 +298,7 @@ in rec {
           release = true; # test optimizations
         };
         rootTask = mkCapDLInitializer {
-          small = true;
+          small = false;
           spec = mkSimpleCompositionCapDLSpec {
             script = sources.srcRoot + "/crates/private/tests/capdl/threads/cdl.py";
             config = {
