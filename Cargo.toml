@@ -122,7 +122,6 @@ members = [
     "crates/sel4-panicking/env",
     "crates/sel4-platform-info",
     "crates/sel4-platform-info/types",
-    "crates/sel4-render-elf-with-data",
     "crates/sel4-reset",
     "crates/sel4-reset/cli",
     "crates/sel4-root-task",
