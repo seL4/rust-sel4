@@ -16,7 +16,7 @@ use sel4_abstract_rc::{AbstractRcT, RcT};
 use sel4_bounce_buffer_allocator::{AbstractBounceBufferAllocator, BounceBufferAllocator};
 use sel4_externally_shared::ExternallySharedRef;
 use sel4_shared_ring_buffer::{roles::Provide, RingBuffers};
-use sel4_sync_abstractions::UnsyncPanickingRawMutex;
+use sel4_sync_trivial::UnsyncPanickingRawMutex;
 
 mod inner;
 

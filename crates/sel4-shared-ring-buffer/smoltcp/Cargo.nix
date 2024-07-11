@@ -13,7 +13,7 @@ mk {
     smoltcp = smoltcpWith [];
     inherit (localCrates)
       sel4-abstract-rc
-      sel4-sync-abstractions
+      sel4-sync-trivial
       sel4-shared-ring-buffer
       sel4-shared-ring-buffer-bookkeeping
       sel4-bounce-buffer-allocator

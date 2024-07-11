@@ -7,7 +7,7 @@
 { mk, versions }:
 
 mk {
-  package.name = "sel4-sync-abstractions";
+  package.name = "sel4-sync-trivial";
   dependencies = {
     inherit (versions) lock_api;
   };
