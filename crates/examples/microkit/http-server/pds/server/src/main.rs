@@ -110,6 +110,7 @@ fn init() -> impl Handler {
             BounceBufferAllocator::new(Basic::new(dma_region.as_ptr().len()), 1);
 
         DeviceImpl::new(
+            Default::default(),
             dma_region,
             bounce_buffer_allocator,
             RingBuffers::from_ptrs_using_default_initialization_strategy_for_role(

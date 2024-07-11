@@ -11,4 +11,7 @@ mk {
   dependencies = {
     inherit (versions) lock_api;
   };
+  features = {
+    alloc = [];
+  };
 }

@@ -6,10 +6,17 @@
 
 #![no_std]
 
+#[cfg(feature = "alloc")]
+extern crate alloc;
+
 use core::cell::Cell;
 use core::sync::atomic::{AtomicBool, Ordering};
 
 pub use lock_api;
+
+mod rc;
+
+pub use rc::{AbstractRc, AbstractRcT, ArcT, RcT};
 
 pub struct PanickingRawMutex {
     locked: AtomicBool,

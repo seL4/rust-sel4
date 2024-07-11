@@ -2635,11 +2635,13 @@ dependencies = [
 name = "sel4-shared-ring-buffer-smoltcp"
 version = "0.1.0"
 dependencies = [
+ "lock_api",
  "log",
  "sel4-bounce-buffer-allocator",
  "sel4-externally-shared",
  "sel4-shared-ring-buffer",
  "sel4-shared-ring-buffer-bookkeeping",
+ "sel4-sync-abstractions",
  "smoltcp",
 ]
 
