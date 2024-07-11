@@ -6,6 +6,8 @@
 
 #![no_std]
 
+pub use lock_api;
+
 pub use sel4_sync_trivial::*;
 
 mod mutex;
