@@ -4,6 +4,10 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
+#![no_std]
+
+extern crate alloc;
+
 use alloc::rc::Rc;
 use alloc::sync::Arc;
 use core::ops::Deref;

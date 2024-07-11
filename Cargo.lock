@@ -1867,6 +1867,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "sel4-abstract-rc"
+version = "0.1.0"
+
+[[package]]
 name = "sel4-async-block-io"
 version = "0.1.0"
 dependencies = [
@@ -2637,6 +2641,7 @@ version = "0.1.0"
 dependencies = [
  "lock_api",
  "log",
+ "sel4-abstract-rc",
  "sel4-bounce-buffer-allocator",
  "sel4-externally-shared",
  "sel4-shared-ring-buffer",

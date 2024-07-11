@@ -12,10 +12,11 @@ use lock_api::{Mutex, RawMutex};
 use smoltcp::phy::{self, Device, DeviceCapabilities};
 use smoltcp::time::Instant;
 
+use sel4_abstract_rc::{AbstractRcT, RcT};
 use sel4_bounce_buffer_allocator::{AbstractBounceBufferAllocator, BounceBufferAllocator};
 use sel4_externally_shared::ExternallySharedRef;
 use sel4_shared_ring_buffer::{roles::Provide, RingBuffers};
-use sel4_sync_abstractions::{AbstractRcT, RcT, UnsyncPanickingRawMutex};
+use sel4_sync_abstractions::UnsyncPanickingRawMutex;
 
 mod inner;
 
