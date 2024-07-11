@@ -10,11 +10,8 @@
 #
 
 [package]
-name = "sel4-sync-abstractions"
+name = "sel4-abstract-rc"
 version = "0.1.0"
 authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
 edition = "2021"
 license = "BSD-2-Clause"
-
-[dependencies]
-lock_api = "0.4.12"

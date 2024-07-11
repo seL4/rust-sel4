@@ -12,11 +12,12 @@ mk {
     inherit (versions) log lock_api;
     smoltcp = smoltcpWith [];
     inherit (localCrates)
+      sel4-abstract-rc
+      sel4-sync-abstractions
       sel4-shared-ring-buffer
       sel4-shared-ring-buffer-bookkeeping
       sel4-bounce-buffer-allocator
     ;
-    sel4-sync-abstractions = localCrates.sel4-sync-abstractions // { features = [ "alloc" ]; };
     sel4-externally-shared = localCrates.sel4-externally-shared // { features = [ "unstable" ]; };
   };
 }
