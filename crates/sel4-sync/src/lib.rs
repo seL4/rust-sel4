@@ -6,7 +6,7 @@
 
 #![no_std]
 
-pub use sel4_sync_abstractions::*;
+pub use sel4_sync_trivial::*;
 
 mod mutex;
 

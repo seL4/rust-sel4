@@ -2646,7 +2646,7 @@ dependencies = [
  "sel4-externally-shared",
  "sel4-shared-ring-buffer",
  "sel4-shared-ring-buffer-bookkeeping",
- "sel4-sync-abstractions",
+ "sel4-sync-trivial",
  "smoltcp",
 ]
 
@@ -2742,11 +2742,11 @@ dependencies = [
  "lock_api",
  "sel4",
  "sel4-immediate-sync-once-cell",
- "sel4-sync-abstractions",
+ "sel4-sync-trivial",
 ]
 
 [[package]]
-name = "sel4-sync-abstractions"
+name = "sel4-sync-trivial"
 version = "0.1.0"
 dependencies = [
  "lock_api",
