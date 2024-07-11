@@ -9,8 +9,6 @@
 use core::cell::Cell;
 use core::sync::atomic::{AtomicBool, Ordering};
 
-pub use lock_api;
-
 pub struct PanickingRawMutex {
     locked: AtomicBool,
 }
