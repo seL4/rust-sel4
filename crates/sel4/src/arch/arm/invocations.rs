@@ -145,7 +145,7 @@ impl<C: InvocationContext> IrqControl<C> {
     pub fn irq_control_get_trigger_core(
         self,
         irq: Word,
-        trigger: Word,
+        edge_triggered: bool,
         target: Word,
         dst: &AbsoluteCPtr,
     ) -> Result<()> {
@@ -153,7 +153,7 @@ impl<C: InvocationContext> IrqControl<C> {
             ipc_buffer.inner_mut().seL4_IRQControl_GetTriggerCore(
                 cptr.bits(),
                 irq,
-                trigger,
+                edge_triggered.into(),
                 dst.root().bits(),
                 dst.path().bits(),
                 dst.path().depth_for_kernel(),
@@ -166,14 +166,14 @@ impl<C: InvocationContext> IrqControl<C> {
     pub fn irq_control_get_trigger(
         self,
         irq: Word,
-        trigger: Word,
+        edge_triggered: bool,
         dst: &AbsoluteCPtr,
     ) -> Result<()> {
         Error::wrap(self.invoke(|cptr, ipc_buffer| {
             ipc_buffer.inner_mut().seL4_IRQControl_GetTrigger(
                 cptr.bits(),
                 irq,
-                trigger,
+                edge_triggered.into(),
                 dst.root().bits(),
                 dst.path().bits(),
                 dst.path().depth_for_kernel(),

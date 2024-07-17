@@ -336,13 +336,13 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
                                 if #[sel4_cfg(MAX_NUM_NODES = "1")] {
                                     init_thread::slot::IRQ_CONTROL.cap().irq_control_get_trigger(
                                         *irq,
-                                        obj.extra.trigger,
+                                        obj.extra.trigger != 0,
                                         &cslot_to_relative_cptr(slot),
                                     )?;
                                 } else {
                                     init_thread::slot::IRQ_CONTROL.cap().irq_control_get_trigger_core(
                                         *irq,
-                                        obj.extra.trigger,
+                                        obj.extra.trigger != 0,
                                         obj.extra.target,
                                         &cslot_to_relative_cptr(slot),
                                     )?;
