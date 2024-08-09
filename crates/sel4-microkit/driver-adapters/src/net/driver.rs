@@ -75,7 +75,7 @@ impl<Device: phy::Device + HandleInterrupt + GetNetDeviceMeta> Handler for Handl
                     self.client_region
                         .as_mut_ptr()
                         .index(buf_range)
-                        .copy_from_slice(&rx_buf);
+                        .copy_from_slice(rx_buf);
                 });
 
                 self.rx_ring_buffers

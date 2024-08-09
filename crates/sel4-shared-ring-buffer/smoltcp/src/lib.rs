@@ -36,6 +36,7 @@ impl<A, R: RawMutex, P: AbstractRcT> Clone for DeviceImpl<A, R, P> {
 }
 
 impl<A: AbstractBounceBufferAllocator, R: RawMutex, P: AbstractRcT> DeviceImpl<A, R, P> {
+    #[allow(clippy::too_many_arguments)]
     pub fn new(
         raw_mutex: R,
         dma_region: ExternallySharedRef<'static, [u8]>,

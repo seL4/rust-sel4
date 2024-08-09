@@ -15,7 +15,7 @@ where
 {
     let orig_elf_file = &object::read::elf::ElfFile::<T>::parse(orig_elf_buffer).unwrap();
 
-    let mut builder = Builder::new(&orig_elf_file).unwrap();
+    let mut builder = Builder::new(orig_elf_file).unwrap();
 
     builder.discard_p_align(true);
 

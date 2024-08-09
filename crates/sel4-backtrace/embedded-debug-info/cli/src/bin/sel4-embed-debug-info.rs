@@ -65,7 +65,7 @@ fn with_bit_width<T: object::read::elf::FileHeader<Word: NumCast + PatchValue>>(
     image_elf: &object::read::elf::ElfFile<T>,
     content: &[u8],
 ) -> Vec<u8> {
-    let mut builder = Builder::new(&image_elf).unwrap();
+    let mut builder = Builder::new(image_elf).unwrap();
 
     builder.discard_p_align(true);
 

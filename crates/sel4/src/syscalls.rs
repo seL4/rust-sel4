@@ -322,4 +322,5 @@ mod fast_messages_sealing {
     impl FastMessagesSealed for &[Word] {}
 }
 
+#[allow(clippy::assertions_on_constants)]
 const _: () = assert!(NUM_FAST_MESSAGE_REGISTERS == 4);

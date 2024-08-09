@@ -20,7 +20,7 @@ impl<'a> RenderElfArgs<'a> {
         &self,
         orig_elf: &object::read::elf::ElfFile<T>,
     ) -> Vec<u8> {
-        let mut builder = Builder::new(&orig_elf).unwrap();
+        let mut builder = Builder::new(orig_elf).unwrap();
 
         builder.discard_p_align(true);
 

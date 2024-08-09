@@ -30,7 +30,7 @@ impl<C: InvocationContext> VCpu<C> {
         let res = self.invoke(|cptr, ipc_buffer| {
             ipc_buffer
                 .inner_mut()
-                .seL4_ARM_VCPU_ReadRegs(cptr.bits(), field.into_sys().into())
+                .seL4_ARM_VCPU_ReadRegs(cptr.bits(), field.into_sys())
         });
         Error::or(res.error, res.value)
     }
@@ -38,11 +38,9 @@ impl<C: InvocationContext> VCpu<C> {
     /// Corresponds to `seL4_ARM_VCPU_WriteRegs`.
     pub fn vcpu_write_regs(self, field: VCpuReg, value: Word) -> Result<()> {
         Error::wrap(self.invoke(|cptr, ipc_buffer| {
-            ipc_buffer.inner_mut().seL4_ARM_VCPU_WriteRegs(
-                cptr.bits(),
-                field.into_sys().into(),
-                value,
-            )
+            ipc_buffer
+                .inner_mut()
+                .seL4_ARM_VCPU_WriteRegs(cptr.bits(), field.into_sys(), value)
         }))
     }
 
