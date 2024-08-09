@@ -35,6 +35,8 @@
 #[cfg(feature = "alloc")]
 extern crate alloc;
 
+use sel4::sel4_cfg;
+
 pub use sel4_microkit_base::*;
 pub use sel4_microkit_macros::protection_domain;
 
@@ -44,6 +46,7 @@ mod printing;
 
 pub mod panicking;
 
+#[sel4_cfg(PRINTING)]
 pub use printing::{debug_print, debug_println};
 
 /// Declares the initialization function, stack size, and, optionally, heap and heap size.
