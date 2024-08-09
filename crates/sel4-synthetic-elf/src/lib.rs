@@ -46,7 +46,7 @@ impl<'a: 'data, 'data, T: object::read::elf::FileHeader, R: ReadRef<'data>>
         base_elf_file: &'a object::read::elf::ElfFile<'data, T, R>,
     ) -> Result<Self, Box<dyn Error>> {
         let mut this = Self::empty(base_elf_file);
-        this.segments.add_segments_from_phdrs(&this.base_elf_file)?;
+        this.segments.add_segments_from_phdrs(this.base_elf_file)?;
         Ok(this)
     }
 
@@ -69,12 +69,12 @@ impl<'a: 'data, 'data, T: object::read::elf::FileHeader, R: ReadRef<'data>>
     pub fn patch_bytes(&mut self, name: &str, value: Vec<u8>) -> Result<u64, Box<dyn Error>> {
         Ok(self
             .patches
-            .add_bytes_via_symbol(&self.base_elf_file, name, value)?)
+            .add_bytes_via_symbol(self.base_elf_file, name, value)?)
     }
 
     pub fn patch(&mut self, name: &str, value: impl PatchValue) -> Result<u64, Box<dyn Error>> {
         Ok(self.patches.add_via_symbol(
-            &self.base_elf_file,
+            self.base_elf_file,
             name,
             value,
             self.base_elf_file.endian(),
@@ -111,7 +111,7 @@ impl<'a: 'data, 'data, T: object::read::elf::FileHeader, R: ReadRef<'data>>
     pub fn build(&self) -> Result<Vec<u8>, Box<dyn Error>> {
         let mut buf = self
             .segments
-            .build_using_ehdr(&self.base_elf_file, self.discard_p_align)?;
+            .build_using_ehdr(self.base_elf_file, self.discard_p_align)?;
         self.patches.apply(&mut buf).unwrap();
         Ok(buf)
     }

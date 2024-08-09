@@ -14,7 +14,7 @@ fn main() {
     let translated_src = env::var(TRANSLATED_ENV).unwrap();
     let out_dir = env::var("OUT_DIR").unwrap();
     let translated_dst = PathBuf::from(&out_dir).join("translated.rs");
-    fs::copy(&translated_src, &translated_dst).unwrap();
+    fs::copy(&translated_src, translated_dst).unwrap();
 
     println!("cargo:rerun-if-env-changed={TRANSLATED_ENV}");
     println!("cargo:rerun-if-changed={}", translated_src);

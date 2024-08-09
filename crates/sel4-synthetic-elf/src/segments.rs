@@ -14,6 +14,7 @@ use object::read::ReadRef;
 use object::{Endian, Endianness, Object};
 use thiserror::Error;
 
+#[derive(Default)]
 pub struct Segments<'a> {
     segments: Vec<Segment<'a>>,
 }
@@ -173,6 +174,7 @@ impl<'a> Segment<'a> {
     }
 }
 
+#[allow(clippy::enum_variant_names)]
 #[derive(Error, Debug)]
 pub enum SegmentsError {
     ReadError(object::read::Error),

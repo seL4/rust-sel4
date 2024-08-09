@@ -48,7 +48,7 @@ where
 
     let persistent_section = elf.section_by_name(".persistent");
 
-    let mut builder = Builder::empty(&elf);
+    let mut builder = Builder::empty(elf);
 
     let mut regions_builder = RegionsBuilder::<T>::new();
 
@@ -82,7 +82,7 @@ where
         }
     }
 
-    assert!(!(persistent_section.is_some() && !persistent_section_placed));
+    assert!(persistent_section.is_none() || persistent_section_placed);
 
     let regions = regions_builder.build(endian);
 

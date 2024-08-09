@@ -35,6 +35,7 @@ enum Arch {
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[allow(clippy::upper_case_acronyms)]
 enum RiscVArch {
     IMAC,
     IMAFC,
@@ -194,15 +195,15 @@ impl Arch {
     }
 
     fn all() -> Vec<Self> {
-        let mut v = vec![];
-        v.push(Self::AArch64);
-        v.push(Self::Armv7a);
-        v.push(Self::RiscV64(RiscVArch::IMAC));
-        v.push(Self::RiscV64(RiscVArch::GC));
-        v.push(Self::RiscV32(RiscVArch::IMAC));
-        v.push(Self::RiscV32(RiscVArch::IMAFC));
-        v.push(Self::X86_64);
-        v
+        vec![
+            Self::AArch64,
+            Self::Armv7a,
+            Self::RiscV64(RiscVArch::IMAC),
+            Self::RiscV64(RiscVArch::GC),
+            Self::RiscV32(RiscVArch::IMAC),
+            Self::RiscV32(RiscVArch::IMAFC),
+            Self::X86_64,
+        ]
     }
 }
 

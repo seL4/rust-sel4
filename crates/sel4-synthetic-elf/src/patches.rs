@@ -11,6 +11,7 @@ use object::read::ReadRef;
 use object::{Endian, File, Object, ObjectSegment, ObjectSymbol};
 use thiserror::Error;
 
+#[derive(Default)]
 pub struct Patches {
     patches: Vec<(u64, Vec<u8>)>,
 }
@@ -74,7 +75,7 @@ impl Patches {
             .zip(self.patches.iter().map(|(_vaddr, value)| value))
         {
             elf_file_data[usize::try_from(*offset_into_file).unwrap()..][..value.len()]
-                .copy_from_slice(&value);
+                .copy_from_slice(value);
         }
 
         Ok(())
@@ -92,7 +93,7 @@ impl Patches {
                     .find_map(|segment| {
                         let start = segment.address();
                         let end = start + segment.size();
-                        if (start..end).contains(&vaddr) {
+                        if (start..end).contains(vaddr) {
                             let offset_in_segment = vaddr - start;
                             let (file_start, file_size) = segment.file_range();
                             if offset_in_segment + u64::try_from(value.len()).unwrap() <= file_size
@@ -102,9 +103,10 @@ impl Patches {
                         }
                         None
                     })
-                    .ok_or_else(|| {
-                        PatchesApplyError::AddrRangeNotMappedWithData(*vaddr, value.len())
-                    })
+                    .ok_or(PatchesApplyError::AddrRangeNotMappedWithData(
+                        *vaddr,
+                        value.len(),
+                    ))
             })
             .collect::<Result<Vec<_>, PatchesApplyError>>()
     }

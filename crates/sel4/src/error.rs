@@ -68,4 +68,5 @@ impl Error {
     }
 }
 
+#[allow(clippy::assertions_on_constants)]
 const _: () = assert!(sys::seL4_Error::seL4_NumErrors == 11);
