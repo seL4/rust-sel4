@@ -135,6 +135,13 @@ in rec {
             mcs = mk {
               mcs = true;
             };
+            ukitRelease = mk {
+              el2 = true;
+              mcs = true;
+              isMicrokit = true;
+              microkitBoard = "qemu_virt_aarch64";
+              debugBuild = false;
+            };
           };
         };
 
