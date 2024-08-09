@@ -27,6 +27,10 @@ impl Channel {
         Self { index }
     }
 
+    pub const fn index(&self) -> usize {
+        self.index
+    }
+
     fn cap<T: sel4::CapType>(&self, base_slot: usize) -> sel4::Cap<T> {
         sel4::Cap::from_bits((base_slot + self.index) as sel4::CPtrBits)
     }
@@ -90,6 +94,10 @@ pub struct Child {
 impl Child {
     pub const fn new(index: usize) -> Self {
         Self { index }
+    }
+
+    pub const fn index(&self) -> usize {
+        self.index
     }
 
     #[doc(hidden)]
