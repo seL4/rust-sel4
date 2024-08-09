@@ -27,7 +27,11 @@ in {
     let
       worlds = pkgs.host.aarch64.none.this.worlds.qemu-arm-virt.forBuildTests;
     in
-      map (world: world.sel4-capdl-initializer) (lib.attrValues worlds);
+      lib.forEach (lib.attrValues worlds) (world: [
+        world.sel4-capdl-initializer
+      ] ++ lib.optionals world.worldConfig.isMicrokit [
+        world.instances.microkit.tests.passive-server-with-deferred-action.links
+      ]);
 
   sel4testInstances = (lib.mapAttrs (k: v: v.this.sel4test.automate) {
     aarch64 = pkgs.host.aarch64.none;
