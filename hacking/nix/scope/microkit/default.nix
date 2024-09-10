@@ -15,8 +15,8 @@
 , sources
 , vendorLockfile
 , toTOMLFile
-, defaultRustToolchain
-, rustToolchain ? defaultRustToolchain
+, defaultRustEnvironment
+, rustEnvironment ? defaultRustEnvironment
 }:
 
 { board, config }:
@@ -86,7 +86,7 @@ let
   tool =
     let
       vendoredLockfile = vendorLockfile {
-        inherit rustToolchain;
+        inherit (rustEnvironment) rustToolchain;
         lockfile = microkitSource + "/tool/microkit/Cargo.lock";
       };
 
@@ -99,7 +99,7 @@ let
         src = lib.cleanSource (microkitSource + "/tool/microkit");
 
         nativeBuildInputs = [
-          rustToolchain
+          rustEnvironment.rustToolchain
         ];
 
         depsBuildBuild = [
@@ -116,7 +116,7 @@ let
         '';
 
         buildPhase = ''
-          cargo build -Z unstable-options --frozen --config ${cargoConfigFile} --out-dir $out/bin
+          cargo build -Z unstable-options --frozen --config ${cargoConfigFile} ${rustEnvironment.artifactDirFlag} $out/bin
         '';
       };
 

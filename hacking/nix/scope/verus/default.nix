@@ -37,6 +37,10 @@ let
     inherit rustToolchain;
   } // {
     inherit (rustToolchainAttrs.toolchain) channel;
+    backwardsCompatibilityHacks = {
+      outDirInsteadOfArtifactDir = true;
+      noLibraryWorkspace = true;
+    };
     mkCustomTargetPath = mkMkCustomTargetPathForEnvironment {
       rustEnvironment = self;
     };
@@ -77,7 +81,7 @@ stdenv.mkDerivation {
         -p verus-driver -p cargo-verus \
         --features=verus-driver/singular \
         --release \
-        --out-dir $out/bin
+        ${rustEnvironment.artifactDirFlag} $out/bin
   '';
 
   installPhase = ''

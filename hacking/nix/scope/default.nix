@@ -59,7 +59,7 @@ superCallPackage ../rust-utils {} self //
 
   defaultRustToolchain = fenix.fromToolchainFile {
     file = topLevelRustToolchainFile;
-    sha256 = "sha256-6lRcCTSUmWOh0GheLMTZkY7JC273pWLp2s98Bb2REJQ=";
+    sha256 = "sha256-GJR7CjFPMh450uP/EUzXeng15vusV3ktq7Cioop945U=";
   };
 
   defaultRustEnvironment = elaborateRustEnvironment (mkDefaultElaborateRustEnvironmentArgs {
@@ -67,8 +67,8 @@ superCallPackage ../rust-utils {} self //
   } // {
     channel = (builtins.fromTOML (builtins.readFile topLevelRustToolchainFile)).toolchain.channel;
     compilerRTSource = mkCompilerRTSource {
-      version = "18.0-2024-02-13";
-      hash = "sha256-fbq8H86WT13KsXJECHbcbFkqFseLvV/EC2kihTL2lgI=";
+      version = "19.1-2024-07-30";
+      hash = "sha256-fV51iDAbkRmWJj0twTmQKdZdLueMAKSZR6bBtgVPCbk=";
     };
     mkCustomTargetPath = customTargetTripleTripleName:
       let
