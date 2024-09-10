@@ -15,10 +15,10 @@
   "llvm-target": "armv7a-none-eabi",
   "max-atomic-width": 64,
   "metadata": {
-    "description": null,
-    "host_tools": null,
-    "std": null,
-    "tier": null
+    "description": "Bare Armv7-A",
+    "host_tools": false,
+    "std": false,
+    "tier": 2
   },
   "panic-strategy": "abort",
   "relocation-model": "static",

@@ -277,7 +277,7 @@ in let
         "--manifest-path" "${workspace}/Cargo.toml"
         "--target-dir" "$target_dir"
       ]) (lib.optionals (!test) [
-        "--out-dir" "$out/bin"
+        rustEnvironment.artifactDirFlag "$out/bin"
       ])}
 
       ${lib.optionalString test (

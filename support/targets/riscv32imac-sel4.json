@@ -13,10 +13,10 @@
   "llvm-target": "riscv32",
   "max-atomic-width": 32,
   "metadata": {
-    "description": null,
-    "host_tools": null,
-    "std": null,
-    "tier": null
+    "description": "Bare RISC-V (RV32IMAC ISA)",
+    "host_tools": false,
+    "std": false,
+    "tier": 2
   },
   "relocation-model": "static",
   "target-pointer-width": "32"
