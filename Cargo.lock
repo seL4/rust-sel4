@@ -2041,6 +2041,9 @@ dependencies = [
 [[package]]
 name = "sel4-bitfield-ops"
 version = "0.1.0"
+dependencies = [
+ "rustc_version",
+]
 
 [[package]]
 name = "sel4-bitfield-parser"

@@ -4,8 +4,11 @@
 # SPDX-License-Identifier: BSD-2-Clause
 #
 
-{ mk }:
+{ mk, versions }:
 
 mk {
   package.name = "sel4-bitfield-ops";
+  build-dependencies = {
+    inherit (versions) rustc_version;
+  };
 }

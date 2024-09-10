@@ -225,6 +225,7 @@ cfg_if::cfg_if! {
 unsafe extern "C" fn __rust_entry(bootinfo: *const sel4::BootInfo) -> ! {
     let bootinfo = sel4::BootInfoPtr::new(bootinfo);
     match main(&bootinfo) {
+        #[allow(unreachable_patterns)]
         Ok(absurdity) => match absurdity {},
         Err(err) => panic!("Error: {}", err),
     }
