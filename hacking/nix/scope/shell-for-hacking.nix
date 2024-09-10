@@ -7,7 +7,7 @@
 { lib, stdenv, hostPlatform, buildPackages
 , mkShell
 
-, pkgconfig
+, pkg-config
 , git
 , cacert
 , rustup, rustPlatform
@@ -34,7 +34,7 @@ mkShell (shellForMakefile.apply {
   ];
 
   nativeBuildInputs = [
-    pkgconfig
+    pkg-config
     git
     cacert
     rustup
