@@ -51,6 +51,7 @@ fn inner_entry() -> ! {
     }
 
     match catch_unwind(main) {
+        #[allow(unreachable_patterns)]
         Ok(never) => never,
         Err(_) => abort!("main() panicked"),
     }
@@ -60,9 +61,7 @@ fn get_ipc_buffer() -> *mut sel4::IpcBuffer {
     extern "C" {
         static _end: usize;
     }
-    unsafe {
-        (ptr::addr_of!(_end) as usize)
-            .next_multiple_of(sel4::cap_type::Granule::FRAME_OBJECT_TYPE.bytes())
-            as *mut sel4::IpcBuffer
-    }
+    (ptr::addr_of!(_end) as usize)
+        .next_multiple_of(sel4::cap_type::Granule::FRAME_OBJECT_TYPE.bytes())
+        as *mut sel4::IpcBuffer
 }

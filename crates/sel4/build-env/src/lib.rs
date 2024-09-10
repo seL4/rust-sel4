@@ -19,9 +19,8 @@ fn get_asserting_valid_unicode(var: &str) -> Option<String> {
             }
         })
         .ok()
-        .map(|val| {
+        .inspect(|_| {
             println!("cargo:rerun-if-env-changed={var}");
-            val
         })
 }
 
@@ -40,9 +39,8 @@ pub fn try_get_with_sel4_prefix_relative_fallback(
     get_asserting_valid_unicode(var)
         .map(PathBuf::from)
         .or_else(|| get_sel4_prefix().map(|fallback| fallback.join(relative_path_from_fallback)))
-        .map(|path| {
+        .inspect(|path| {
             println!("cargo:rerun-if-changed={}", path.display());
-            path
         })
 }
 
@@ -56,9 +54,8 @@ pub fn get_libsel4_include_dirs() -> impl Iterator<Item = PathBuf> {
         .or_else(|| get_sel4_prefix().map(|sel4_prefix| vec![sel4_prefix.join("libsel4/include")]))
         .unwrap_or_else(|| panic!("{SEL4_INCLUDE_DIRS_ENV} or {SEL4_PREFIX_ENV} must be set"))
         .into_iter()
-        .map(|path| {
+        .inspect(|path| {
             println!("cargo:rerun-if-changed={}", path.display());
-            path
         })
 }
 
