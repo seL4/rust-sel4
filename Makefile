@@ -12,8 +12,8 @@ ifneq ($(J),)
 	jobs_args := -j$(J)
 endif
 
-ifneq ($(CORES),)
-	cores_args := --cores $(CORES)
+ifneq ($(C),)
+	cores_args := --cores $(C)
 endif
 
 nix_args := $(keep_going_args) $(jobs_args) $(cores_args)
