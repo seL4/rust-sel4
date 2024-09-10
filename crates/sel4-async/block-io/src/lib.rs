@@ -467,6 +467,7 @@ impl<T: AsRef<[u8]>> ByteIO<ReadOnly> for SliceByteIO<T> {
             Operation::Read { buf, .. } => {
                 buf.copy_from_slice(&self.inner().as_ref()[offset..][..buf.len()]);
             }
+            #[allow(unreachable_patterns)]
             Operation::Write { witness, .. } => witness.absurd(),
         }
         Ok(())

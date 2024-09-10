@@ -44,6 +44,7 @@ pub trait MutexSyncOps {
 unsafe impl<O: MutexSyncOps> lock_api::RawMutex for GenericRawMutex<O> {
     type GuardMarker = lock_api::GuardNoSend; // TODO
 
+    #[allow(clippy::declare_interior_mutable_const)]
     const INIT: Self = unimplemented!();
 
     fn lock(&self) {
