@@ -33,6 +33,7 @@ impl<E> Termination for Result<!, E> {
 
     fn report(self) -> Self::Error {
         match self {
+            #[allow(unreachable_patterns)]
             Ok(absurdity) => match absurdity {},
             Err(err) => err,
         }
@@ -44,6 +45,7 @@ impl<E> Termination for Result<Never, E> {
 
     fn report(self) -> Self::Error {
         match self {
+            #[allow(unreachable_patterns)]
             Ok(absurdity) => match absurdity {},
             Err(err) => err,
         }

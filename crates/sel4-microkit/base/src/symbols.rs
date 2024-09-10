@@ -137,5 +137,5 @@ pub fn ipc_buffer_ptr() -> *mut sel4::IpcBuffer {
         static mut __sel4_ipc_buffer_obj: sel4::IpcBuffer;
     }
 
-    unsafe { ptr::addr_of_mut!(__sel4_ipc_buffer_obj) }
+    ptr::addr_of_mut!(__sel4_ipc_buffer_obj)
 }

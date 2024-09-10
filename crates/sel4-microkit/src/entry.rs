@@ -65,6 +65,7 @@ macro_rules! declare_init {
 #[allow(clippy::missing_safety_doc)]
 pub fn run_main<T: Handler>(init: impl FnOnce() -> T + UnwindSafe) -> ! {
     let result = catch_unwind(|| match init().run() {
+        #[allow(unreachable_patterns)]
         Ok(absurdity) => match absurdity {},
         Err(err) => err,
     });

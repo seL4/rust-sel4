@@ -9,8 +9,8 @@
 #![feature(core_intrinsics)]
 #![feature(lang_items)]
 #![feature(panic_can_unwind)]
-#![feature(panic_info_message)]
 #![feature(thread_local)]
+#![cfg_attr(not(panic_info_message_stable), feature(panic_info_message))]
 #![allow(internal_features)]
 
 #[cfg(feature = "alloc")]
@@ -20,6 +20,9 @@ use core::fmt;
 use core::mem::ManuallyDrop;
 use core::panic::Location;
 use core::panic::{PanicInfo, UnwindSafe};
+
+#[cfg(panic_info_message_stable)]
+use core::panic::PanicMessage;
 
 use cfg_if::cfg_if;
 
@@ -38,9 +41,12 @@ use strategy::{panic_cleanup, start_panic};
 pub use hook::{set_hook, PanicHook};
 pub use payload::{Payload, SmallPayload, UpcastIntoPayload, SMALL_PAYLOAD_MAX_SIZE};
 
+#[cfg(not(panic_info_message_stable))]
+type PanicMessage<'a> = &'a fmt::Arguments<'a>;
+
 pub struct ExternalPanicInfo<'a> {
     payload: Payload,
-    message: Option<&'a fmt::Arguments<'a>>,
+    message: Option<PanicMessage<'a>>,
     location: Option<&'a Location<'a>>,
     can_unwind: bool,
 }
@@ -50,8 +56,8 @@ impl<'a> ExternalPanicInfo<'a> {
         &self.payload
     }
 
-    pub fn message(&self) -> Option<&fmt::Arguments> {
-        self.message
+    pub fn message(&self) -> Option<&PanicMessage> {
+        self.message.as_ref()
     }
 
     pub fn location(&self) -> Option<&Location> {
@@ -66,14 +72,14 @@ impl<'a> ExternalPanicInfo<'a> {
 impl fmt::Display for ExternalPanicInfo<'_> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         f.write_str("panicked at ")?;
-        if let Some(location) = self.location {
+        if let Some(location) = self.location() {
             location.fmt(f)?;
         } else {
             f.write_str("unknown location")?;
         }
-        if let Some(message) = self.message {
+        if let Some(message) = self.message() {
             f.write_str(":\n")?;
-            f.write_fmt(*message)?;
+            message.fmt(f)?;
         }
         Ok(())
     }
@@ -83,6 +89,9 @@ impl fmt::Display for ExternalPanicInfo<'_> {
 fn panic(info: &PanicInfo) -> ! {
     do_panic(ExternalPanicInfo {
         payload: NoPayload.upcast_into_payload(),
+        #[cfg(panic_info_message_stable)]
+        message: Some(info.message()),
+        #[cfg(not(panic_info_message_stable))]
         message: info.message(),
         location: info.location(),
         can_unwind: info.can_unwind(),
