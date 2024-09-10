@@ -238,7 +238,7 @@ superCallPackage ../rust-utils {} self //
 
   overrideWorldScope = self: super: {};
 
-  mkWorldFrom = newScope: unelaboratedWorldConfig: (lib.makeScope newScope (callPackage ./world {} unelaboratedWorldConfig)).overrideScope' overrideWorldScope;
+  mkWorldFrom = newScope: unelaboratedWorldConfig: (lib.makeScope newScope (callPackage ./world {} unelaboratedWorldConfig)).overrideScope overrideWorldScope;
 
   mkWorld = mkWorldFrom newScope;
 

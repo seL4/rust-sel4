@@ -55,7 +55,7 @@ let
   tests = stdenv.mkDerivation {
     name = "sel4test";
 
-    src = fetchRepoProject {
+    src = buildPackages.fetchRepoProject {
       name = "sel4test";
       manifest = "https://github.com/seL4/sel4test-manifest.git";
       rev = "8bf6fd506a0546866ba5fbd7396f497d5a056f5c";
