@@ -14,6 +14,7 @@ let
     overrides = self: super: {
       base-compat = self.callPackage ./base-compat-0-12-2.nix {};
       base-compat-batteries = self.callPackage ./base-compat-batteries-0-12-2.nix {};
+      MissingH = self.callPackage ./MissingH-1.5.0.1.nix {};
       capDL-tool = self.callPackage ./capDL-tool.nix {
         inherit sources;
       };
