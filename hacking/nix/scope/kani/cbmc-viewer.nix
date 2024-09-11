@@ -14,15 +14,15 @@
 
 buildPythonPackage rec {
   pname = "cbmc-viewer";
-  version = "3.8";
+  version = "3.9";
 
   format = "pyproject";
 
   src = fetchFromGitHub {
     owner = "model-checking";
     repo = "cbmc-viewer";
-    rev = "viewer-3.8";
-    hash = "sha256-GIpinwjl/v6Dz5HyOsoPfM9fxG0poZ0HPsKLe9js9vM=";
+    rev = "viewer-3.9";
+    hash = "sha256-BfXusrOXGBvquM841K4gb5HQVSryiZS8+ihgj7DVxbI=";
   };
 
   propagatedBuildInputs = [

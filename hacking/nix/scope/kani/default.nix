@@ -34,7 +34,7 @@ let
         toolchain.components = rustToolchainAttrs.toolchain.components ++ [ "rust-src" ];
       }
     ]);
-    sha256 = "sha256-akRjdj8CP0mRL4czKC7GssksdunxdckSNiNU36zduV0=";
+    sha256 = "sha256-opDDHyN+Xa9kcjdHwGl3IpBsUw7ikGU+Ng00JeCdkMA=";
   };
 
   rustEnvironment = lib.fix (self: elaborateRustEnvironment (mkDefaultElaborateRustEnvironmentArgs {
@@ -49,8 +49,8 @@ let
   src = fetchFromGitHub {
     owner = "model-checking";
     repo = "kani";
-    rev = "kani-0.52.0";
-    sha256 = "sha256-LyMZt6E1U03n4w5L9JMxgklAyvhltSJTvRl7zxYpw6A=";
+    rev = "kani-0.55.0";
+    sha256 = "sha256-BBcJopXNSKwvMqs/wcw743+g4lvGTqy1OrATTBxph+I=";
   };
 
   localLockfile = vendorLockfile {
