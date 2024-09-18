@@ -62,7 +62,7 @@ superCallPackage ../rust-utils {} self //
     sha256 = "sha256-GJR7CjFPMh450uP/EUzXeng15vusV3ktq7Cioop945U=";
   };
 
-  defaultRustEnvironment = elaborateRustEnvironment (mkDefaultElaborateRustEnvironmentArgs {
+  upstreamDefaultRustEnvironment = elaborateRustEnvironment (mkDefaultElaborateRustEnvironmentArgs {
     rustToolchain = defaultRustToolchain;
   } // {
     channel = (builtins.fromTOML (builtins.readFile topLevelRustToolchainFile)).toolchain.channel;
@@ -78,6 +78,11 @@ superCallPackage ../rust-utils {} self //
           { name = fname; path = sources.srcRoot + "/support/targets/${fname}"; }
         ];
   });
+
+  ferroceneDefaultRustEnvironment = ferrocene.rustEnvironment;
+
+  defaultRustEnvironment = upstreamDefaultRustEnvironment;
+  # defaultRustEnvironment = ferroceneDefaultRustEnvironment;
 
   mkDefaultElaborateRustEnvironmentArgs = { rustToolchain }: rec {
     inherit rustToolchain;
@@ -191,6 +196,8 @@ superCallPackage ../rust-utils {} self //
   verus = callBuildBuildPackage ./verus {};
 
   dafny = callBuildBuildPackage ./dafny {};
+
+  ferrocene = callBuildBuildPackage ./ferrocene {};
 
   ### local tools
 
