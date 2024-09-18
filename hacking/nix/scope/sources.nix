@@ -55,14 +55,14 @@ in rec {
 
     rust-microkit = fetchGit {
       url = "https://github.com/coliasgroup/seL4.git";
-      rev = "0cdbffec9cf6b4c7c9c57971cbee5a24a70c8fd0"; # branch "rust-microkit"
+      rev = "4cae30a6ef166a378d4d23697b00106ce7e4e76f"; # branch "rust-microkit"
       local = localRoot + "/seL4";
     };
   };
 
   microkit = fetchGit {
     url = "https://github.com/coliasgroup/microkit.git";
-    rev = "9d5c0957720ae1093ab1a3cc9e15fc926dbe0431"; # branch "rust-nix"
+    rev = "9633b9cf9a29b227512762f3102c7868bae4b840"; # branch "rust-nix"
     local = localRoot + "/microkit";
   };
 
