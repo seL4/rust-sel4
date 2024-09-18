@@ -93,7 +93,7 @@ let
       cargoConfigFile = toTOMLFile "config.toml" vendoredLockfile.configFragment;
 
     in
-      stdenv.mkDerivation {
+      stdenv.mkDerivation ({
         name = "microkit-sdk-just-tool";
 
         src = lib.cleanSource (microkitSource + "/tool/microkit");
@@ -105,6 +105,11 @@ let
         depsBuildBuild = [
           buildPackages.stdenv.cc
         ];
+
+      } // lib.optionalAttrs (!rustEnvironment.isNightly) {
+        # HACK
+        RUSTC_BOOTSTRAP = 1;
+      } // {
 
         dontInstall = true;
         dontFixup = true;
@@ -118,7 +123,7 @@ let
         buildPhase = ''
           cargo build -Z unstable-options --frozen --config ${cargoConfigFile} ${rustEnvironment.artifactDirFlag} $out/bin
         '';
-      };
+      });
 
   mkLoader =
     { systemXML

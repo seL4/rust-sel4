@@ -130,7 +130,10 @@ let
         nativeBuildInputs = [ rsync rustToolchain ];
         RUST_TARGET_PATH = rustEnvironment.mkTargetPath targetTriple;
         LIBCLANG_PATH = libclangPath;
-      } // seL4RustEnvVars)  ''
+      } // lib.optionalAttrs (!rustEnvironment.isNightly) {
+        # HACK
+        RUSTC_BOOTSTRAP = 1;
+      } // seL4RustEnvVars) ''
         target_dir=$(pwd)/target
 
         cargo doc \
