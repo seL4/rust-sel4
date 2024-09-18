@@ -151,7 +151,7 @@ superCallPackage ../rust-utils {} self //
         };
       };
 
-      dir = runCommand "targest" {
+      dir = runCommand "target" {
         nativeBuildInputs = [ tool ];
       } ''
         mkdir $out
