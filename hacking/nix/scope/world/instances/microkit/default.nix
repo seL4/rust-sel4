@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
 #
 
-{ lib, stdenv
+{ lib, stdenv, hostPlatform
 , buildPackages, pkgsBuildBuild
 , linkFarm, symlinkJoin, writeText, runCommand, runCommandCC
 , callPackage
@@ -62,7 +62,7 @@ in {
         }
     );
 
-    banscii = maybe isMicrokit (callPackage ./banscii {
+    banscii = maybe (isMicrokit && seL4Config.PLAT == "qemu-arm-virt") (callPackage ./banscii {
       inherit canSimulate;
       inherit mkPD;
     });
@@ -106,7 +106,7 @@ in {
         }
     );
 
-    reset = maybe isMicrokit (
+    reset = maybe (isMicrokit && hostPlatform.isAarch64) (
       let
         pd = rec {
           orig = mkPD rec {

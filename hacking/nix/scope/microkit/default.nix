@@ -68,6 +68,13 @@ let
     dontConfigure = true;
     dontFixup = true;
 
+    # TODO make PR upstream to improve flexibility
+    postPatch = ''
+      substituteInPlace build_sdk.py --replace \
+        '"riscv64-unknown-elf-"' \
+        '"${stdenv.cc.targetPrefix}"'
+    '';
+
     buildPhase = ''
       python3 build_sdk.py \
         --sel4=${kernelSourcePatched} \
