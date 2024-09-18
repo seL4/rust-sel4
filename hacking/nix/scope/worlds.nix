@@ -269,13 +269,27 @@ in rec {
           mk =
             { mcs ? false
             , smp ? false
+            , mkLoaderQEMUArgs ? loader: [ "-kernel" loader ]
+
+            , debugBuild ? null
+
+            , isMicrokit ? false
+            , microkitBoard ? null
+            , microkitConfig ? if debugBuild == null || debugBuild then "debug" else "release"
+
+            , extraQEMUArgs ? []
             }:
             let
               numCores = if smp then "2" else "1";
-              qemuMemory = "3072";
+              qemuMemory = "2048";
             in
               mkWorld {
-                inherit kernelLoaderConfig microkitConfig;
+                inherit kernelLoaderConfig;
+                inherit isMicrokit;
+                microkitConfig = {
+                  board = microkitBoard;
+                  config = microkitConfig;
+                };
                 kernelConfig = kernelConfigCommon // {
                   QEMU_MEMORY = mkString qemuMemory;
                   KernelArch = mkString "riscv";
@@ -292,9 +306,8 @@ in rec {
                       "-cpu" "rv64" "-smp" numCores "-m" "size=${qemuMemory}"
                       "-nographic"
                       "-serial" "mon:stdio"
-                      "-kernel" loader
                       # "-d" "unimp,guest_errors"
-                  ];
+                  ] ++ mkLoaderQEMUArgs loader ++ extraQEMUArgs;
                 };
               };
         in rec {
@@ -306,6 +319,11 @@ in rec {
           legacy = {
             smp = mk { mcs = false; smp = true; };
             nosmp = mk { mcs = false; smp = false; };
+          };
+          microkit = mk {
+            mcs = true;
+            isMicrokit = true;
+            microkitBoard = "qemu_virt_riscv64";
           };
         };
 
