@@ -15,10 +15,10 @@
   "llvm-target": "riscv64",
   "max-atomic-width": 64,
   "metadata": {
-    "description": "Bare RISC-V (RV64IMAFDC ISA)",
-    "host_tools": false,
-    "std": false,
-    "tier": 2
+    "description": null,
+    "host_tools": null,
+    "std": null,
+    "tier": null
   },
   "relocation-model": "static",
   "supported-sanitizers": [

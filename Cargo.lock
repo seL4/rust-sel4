@@ -2276,6 +2276,7 @@ name = "sel4-generate-target-specs"
 version = "0.1.0"
 dependencies = [
  "clap",
+ "rustc_version",
  "serde_json",
 ]
 

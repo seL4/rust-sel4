@@ -14,10 +14,10 @@
   "llvm-target": "x86_64-unknown-none-elf",
   "max-atomic-width": 64,
   "metadata": {
-    "description": "Freestanding/bare-metal x86_64 softfloat",
-    "host_tools": false,
-    "std": false,
-    "tier": 2
+    "description": null,
+    "host_tools": null,
+    "std": null,
+    "tier": null
   },
   "panic-strategy": "abort",
   "plt-by-default": false,

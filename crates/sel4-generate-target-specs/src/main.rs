@@ -223,7 +223,12 @@ impl Context {
 }
 
 fn builtin(triple: &str) -> Target {
-    Target::expect_builtin(&TargetTriple::from_triple(triple))
+    let mut target = Target::expect_builtin(&TargetTriple::from_triple(triple));
+    #[cfg(target_spec_has_metadata)]
+    {
+        target.metadata = Default::default();
+    }
+    target
 }
 
 fn all_target_specs() -> BTreeMap<String, Target> {
