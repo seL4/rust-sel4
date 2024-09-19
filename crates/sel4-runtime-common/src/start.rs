@@ -12,6 +12,7 @@ use core::arch::global_asm;
 #[macro_export]
 macro_rules! declare_stack {
     ($size:expr) => {
+        #[allow(non_upper_case_globals)]
         #[no_mangle]
         static __sel4_runtime_common__stack_bottom: $crate::_private::start::StackBottom = {
             static STACK: $crate::_private::start::Stack<{ $size }> =
