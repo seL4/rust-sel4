@@ -11,4 +11,7 @@ mk {
   dependencies = {
     inherit (versions) serde_json clap;
   };
+  build-dependencies = {
+    inherit (versions) rustc_version;
+  };
 }
