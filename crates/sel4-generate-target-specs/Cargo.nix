@@ -14,4 +14,7 @@ mk {
   build-dependencies = {
     inherit (versions) rustc_version;
   };
+  package.metadata.rust-analyzer = {
+    rustc_private = true;
+  };
 }
