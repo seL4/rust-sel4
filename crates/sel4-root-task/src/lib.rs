@@ -56,7 +56,12 @@ macro_rules! declare_root_task {
 }
 
 #[doc(hidden)]
-pub const DEFAULT_STACK_SIZE: usize = 0x10000;
+pub const DEFAULT_STACK_SIZE: usize = 1024
+    * if cfg!(panic = "unwind") && cfg!(debug_assertions) {
+        128
+    } else {
+        64
+    };
 
 // For macros
 #[doc(hidden)]
