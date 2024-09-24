@@ -16,6 +16,9 @@ authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
 edition = "2021"
 license = "BSD-2-Clause"
 
+[package.metadata.rust-analyzer]
+rustc_private = true
+
 [dependencies]
 clap = "4.4.6"
 serde_json = "1.0.87"
