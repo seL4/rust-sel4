@@ -22,7 +22,7 @@ use core::panic::Location;
 use core::panic::{PanicInfo, UnwindSafe};
 
 #[cfg(panic_info_message_stable)]
-use core::panic::PanicMessage;
+pub use core::panic::PanicMessage;
 
 use cfg_if::cfg_if;
 
@@ -42,7 +42,7 @@ pub use hook::{set_hook, PanicHook};
 pub use payload::{Payload, SmallPayload, UpcastIntoPayload, SMALL_PAYLOAD_MAX_SIZE};
 
 #[cfg(not(panic_info_message_stable))]
-type PanicMessage<'a> = &'a fmt::Arguments<'a>;
+pub type PanicMessage<'a> = &'a fmt::Arguments<'a>;
 
 pub struct ExternalPanicInfo<'a> {
     payload: Payload,
