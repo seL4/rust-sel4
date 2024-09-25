@@ -124,7 +124,7 @@ in rec {
     synstructure = "0.12.6";
     thiserror = "1.0";
     tock-registers = "0.8.1";
-    unwinding = "0.1.6";
+    unwinding = "0.2.1";
     virtio-drivers = "0.7.2";
     webpki-roots = "0.26";
     zerocopy = "0.7.32";
