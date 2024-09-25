@@ -84,10 +84,7 @@ in rec {
     tests.root-task.config
     tests.root-task.tls
     tests.root-task.backtrace
-    tests.root-task.panicking.byConfig.abort.withAlloc
-    tests.root-task.panicking.byConfig.abort.withoutAlloc
-    tests.root-task.panicking.byConfig.unwind.withAlloc
-    tests.root-task.panicking.byConfig.unwind.withoutAlloc
+    # tests.root-task.panicking
     tests.root-task.c
     tests.root-task.verus
     tests.root-task.dafny
@@ -179,41 +176,60 @@ in rec {
             abort = null;
           };
 
+          profile = {
+            release = true;
+            debug = false;
+          };
+
           byConfig = lib.flip lib.mapAttrs panicStrategy
             (panicStrategyName: _:
               lib.flip lib.mapAttrs alloc
-                (_: allocFeatures: maybe (haveFullRuntime && haveUnwindingSupport) (mkInstance {
-                  rootTask = mkTask {
-                    rootCrate = crates.tests-root-task-panicking;
-                    release = false;
-                    features = allocFeatures ++ [ "panic-${panicStrategyName}" ];
-                    extraProfile = {
-                      panic = panicStrategyName;
-                    };
-                  };
-                  extraPlatformArgs = lib.optionalAttrs canSimulate {
-                    canAutomateSimply = panicStrategyName == "unwind";
-                  };
-                })));
+                (_: allocFeatures:
+                  lib.flip lib.mapAttrs profile
+                    (_: release:
+                      maybe (haveFullRuntime && haveUnwindingSupport) (mkInstance {
+                        rootTask = mkTask {
+                          rootCrate = crates.tests-root-task-panicking;
+                          inherit release;
+                          features = allocFeatures ++ [ "panic-${panicStrategyName}" ];
+                          extraProfile = {
+                            panic = panicStrategyName;
+                          };
+                        };
+                        extraPlatformArgs = lib.optionalAttrs canSimulate {
+                          canAutomateSimply = panicStrategyName == "unwind";
+                        };
+                }))));
 
-          paths = [
-            [ "abort" "withAlloc" ]
-            [ "abort" "withoutAlloc" ]
-            [ "unwind" "withAlloc" ]
-            [ "unwind" "withoutAlloc" ]
-          ];
+          paths = lib.mapCartesianProduct
+            ({ panicStrategyName, allocName, profileName }: [ panicStrategyName allocName profileName ])
+            (lib.mapAttrs (lib.const lib.attrNames) {
+              panicStrategyName = panicStrategy;
+              allocName = alloc;
+              profileName = profile;
+            });
 
-          automate = mkRunTests "run-all-panicking-tests" (lib.forEach paths (path: {
-            name = lib.concatStringsSep "." path;
-            value = (lib.attrByPath path (throw "x") byConfig).automate;
-          }));
+          automate = mkRunTests "run-all-panicking-tests"
+            (lib.forEach
+              (lib.filter
+                (config: config != null)
+                (lib.forEach paths (path: lib.attrByPath path (throw "x") byConfig)))
+              (config: {
+                name = "test"; # TODO
+                value = config.automate;
+              }));
 
           simulate = writeText "all-panicking-scripts" (toString (lib.forEach paths (path:
             (lib.attrByPath path (throw "x") byConfig).simulate
           )));
 
+          links = linkFarm "links" {
+            inherit simulate;
+          };
+
         in {
-          inherit byConfig automate simulate;
+          inherit byConfig;
+          inherit links simulate automate;
         };
 
       c = maybe haveFullRuntime (callPackage ./c.nix {
