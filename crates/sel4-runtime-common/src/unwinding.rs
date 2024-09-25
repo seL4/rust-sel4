@@ -37,7 +37,7 @@ unsafe impl EhFrameFinder for EhFrameFinderImpl {
         })?;
 
         Some(FrameInfo {
-            text_base,
+            text_base: Some(text_base),
             kind: FrameInfoKind::EhFrameHdr(eh_frame_hdr),
         })
     }
