@@ -10,6 +10,10 @@ use sel4_panicking_env::abort;
 static GLOBAL_ALLOCATOR_MUTEX_NOTIFICATION: ImmediateSyncOnceCell<sel4::cap::Notification> =
     ImmediateSyncOnceCell::new();
 
+/// Provides the global allocator with a [`sel4::cap::Notification`] to use as a mutex..
+///
+/// Until this function is used, contention in the global allocator will result in a panic. This is
+/// only useful for multi-threaded root tasks.
 pub fn set_global_allocator_mutex_notification(nfn: sel4::cap::Notification) {
     GLOBAL_ALLOCATOR_MUTEX_NOTIFICATION
         .set(nfn)

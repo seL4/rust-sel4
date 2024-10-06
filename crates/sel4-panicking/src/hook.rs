@@ -9,10 +9,14 @@ use sel4_panicking_env::debug_println;
 
 use crate::ExternalPanicInfo;
 
+/// Type for panic hooks.
+///
+/// See [`set_hook`].
 pub type PanicHook = &'static (dyn Fn(&ExternalPanicInfo) + Send + Sync);
 
 static PANIC_HOOK: ImmediateSyncOnceCell<PanicHook> = ImmediateSyncOnceCell::new();
 
+/// Like `std::panic::set_hook`.
 pub fn set_hook(hook: PanicHook) {
     PANIC_HOOK.set(hook).unwrap_or_else(|_| panic!())
 }
