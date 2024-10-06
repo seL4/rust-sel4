@@ -44,6 +44,9 @@ pub use payload::{Payload, SmallPayload, UpcastIntoPayload, SMALL_PAYLOAD_MAX_SI
 #[cfg(not(panic_info_message_stable))]
 pub type PanicMessage<'a> = &'a fmt::Arguments<'a>;
 
+/// Information passed to a [`PanicHook`].
+///
+/// Analogous to `std::panic::PanicHookInfo`.
 pub struct ExternalPanicInfo<'a> {
     payload: Payload,
     message: Option<PanicMessage<'a>>,
@@ -98,6 +101,7 @@ fn panic(info: &PanicInfo) -> ! {
     })
 }
 
+/// Like `std::panic::panic_any`.
 #[track_caller]
 pub fn panic_any<M: UpcastIntoPayload>(msg: M) -> ! {
     do_panic(ExternalPanicInfo {
@@ -127,6 +131,7 @@ cfg_if! {
     }
 }
 
+/// Like `std::panic::catch_unwind`.
 pub fn catch_unwind<R, F: FnOnce() -> R + UnwindSafe>(f: F) -> Result<R, Payload> {
     union Data<F, R> {
         f: ManuallyDrop<F>,

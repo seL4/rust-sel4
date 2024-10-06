@@ -15,7 +15,7 @@ sel4_cfg_if! {
         // Create new no-op macros instead of re-exporting from sel4_panicking_env for the sake of
         // performance.
 
-        /// No-op for this configuration
+        /// No-op for this configuration.
         #[macro_export]
         macro_rules! debug_print {
             ($($arg:tt)*) => {
@@ -26,7 +26,7 @@ sel4_cfg_if! {
             };
         }
 
-        /// No-op for this configuration
+        /// No-op for this configuration.
         #[macro_export]
         macro_rules! debug_println {
             ($($arg:tt)*) => {

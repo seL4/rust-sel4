@@ -18,6 +18,15 @@ extern "Rust" {
     fn __sel4_panicking_env__abort_hook(info: Option<&AbortInfo>);
 }
 
+/// Registers a function to be used by [`debug_put_char`], [`debug_print!`], and [`debug_println!`].
+///
+/// This macro uses the function `$path` to define the following symbol:
+///
+/// ```rust
+/// extern "Rust" {
+///     fn __sel4_panicking_env__debug_put_char(c: u8);
+/// }
+/// ```
 #[macro_export]
 macro_rules! register_debug_put_char {
     ($(#[$attrs:meta])* $path:path) => {
@@ -33,6 +42,15 @@ macro_rules! register_debug_put_char {
     };
 }
 
+/// Registers an abort hook to be used by [`abort!`] and [`abort_without_info`].
+///
+/// This macro uses the function `$path` to define the following symbol:
+///
+/// ```rust
+/// extern "Rust" {
+///     fn __sel4_panicking_env__abort_hook(info: Option<&AbortInfo>);
+/// }
+/// ```
 #[macro_export]
 macro_rules! register_abort_hook {
     ($(#[$attrs:meta])* $path:path) => {
@@ -71,6 +89,8 @@ fn default_abort_hook(info: Option<&AbortInfo>) {
 ///     fn __sel4_panicking_env__debug_put_char(c: u8);
 /// }
 /// ```
+///
+/// [`register_debug_put_char`] provides a typesafe way to define that symbol.
 pub fn debug_put_char(c: u8) {
     unsafe { __sel4_panicking_env__debug_put_char(c) }
 }
@@ -94,13 +114,13 @@ pub fn __debug_print_macro_helper(args: fmt::Arguments) {
     })
 }
 
-/// Like `std::print`, except backed by [`debug_put_char`].
+/// Like `std::print!`, except backed by [`debug_put_char`].
 #[macro_export]
 macro_rules! debug_print {
     ($($arg:tt)*) => ($crate::__debug_print_macro_helper(format_args!($($arg)*)));
 }
 
-/// Like `std::println`, except backed by [`debug_put_char`].
+/// Like `std::println!`, except backed by [`debug_put_char`].
 #[macro_export]
 macro_rules! debug_println {
     () => ($crate::debug_println!(""));
@@ -150,7 +170,7 @@ fn abort(info: Option<&AbortInfo>) -> ! {
     core::intrinsics::abort()
 }
 
-/// Abort without any [`AbortInfo`].
+/// Aborts without any [`AbortInfo`].
 ///
 /// This function does the same thing as [`abort!`], except it passes `None` to the abort hook.
 pub fn abort_without_info() -> ! {
@@ -166,10 +186,24 @@ pub fn __abort_macro_helper(message: Option<fmt::Arguments>) -> ! {
     }))
 }
 
-/// Abort execution with a message.
+/// Aborts execution with a message.
 ///
-/// This function first invokes an externally defined abort hook which is resolved at link time,
-/// and then calls `core::intrinsics::abort()`.
+/// This function first invokes an externally defined abort hook which is resolved at link time, and
+/// then calls `core::intrinsics::abort()`.
+///
+/// The following externally defined symbol is used as the abort hook:
+///
+/// ```rust
+/// extern "Rust" {
+///     fn __sel4_panicking_env__abort_hook(info: Option<&AbortInfo>);
+/// }
+/// ```
+///
+/// The [`sel4_panicking_env` crate](crate) defines a weak version of this symbol which just prints
+/// the [`AbortInfo`] argument using [`debug_print!`].
+///
+/// [`register_abort_hook`] provides a typesafe way to define that symbol.
+
 #[macro_export]
 macro_rules! abort {
     () => ($crate::__abort_macro_helper(::core::option::Option::None));

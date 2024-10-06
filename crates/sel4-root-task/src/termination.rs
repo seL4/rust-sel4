@@ -6,6 +6,7 @@
 
 use core::fmt;
 
+/// Trait for the return type of [`#[root_task]`](crate::root_task) main functions.
 pub trait Termination {
     type Error: fmt::Debug;
 
@@ -53,6 +54,11 @@ impl<E: fmt::Debug> Termination for Result<Never, E> {
 }
 
 // NOTE(rustc_wishlist) remove once #![never_type] is stabilized
+/// Stable alternative to `!`.
+///
+/// This type in uninhabited like `!`, but does not require the unstable `#[feature(never_type)]`.
+/// It implements [`Termination`], so it is useful in return types for
+/// [`#[root_task]`](crate::root_task) main functions.
 #[derive(Debug, Copy, Clone, PartialOrd, Ord, PartialEq, Eq, Hash)]
 pub enum Never {}
 
