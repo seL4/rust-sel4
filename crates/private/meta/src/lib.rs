@@ -89,8 +89,6 @@ definitely! {
     sel4_async_block_io_fat
     sel4_async_io
     sel4_async_network
-    sel4_async_network_rustls
-    // sel4_async_network_rustls_utils
     sel4_async_single_threaded_executor
     sel4_async_time
     sel4_async_unsync
