@@ -116,7 +116,7 @@ pub mod vspace_levels {
 
     pub const NUM_LEVELS: usize = sel4_cfg_usize!(PT_LEVELS);
 
-    pub const FIRST_LEVEL_WITH_FRAME_ENTRIES: usize = NUM_LEVELS
+    pub const HIGHEST_LEVEL_WITH_PAGE_ENTRIES: usize = NUM_LEVELS
         - if sel4_cfg_usize!(PT_LEVELS) == 3 || sel4_cfg_usize!(PT_LEVELS) == 4 {
             3
         } else {

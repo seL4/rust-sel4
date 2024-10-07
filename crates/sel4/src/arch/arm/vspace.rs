@@ -184,6 +184,6 @@ pub mod vspace_levels {
 
     pub const NUM_LEVELS: usize = if sel4_cfg_bool!(ARCH_AARCH64) { 4 } else { 2 };
 
-    pub const FIRST_LEVEL_WITH_FRAME_ENTRIES: usize =
+    pub const HIGHEST_LEVEL_WITH_PAGE_ENTRIES: usize =
         NUM_LEVELS - if sel4_cfg_bool!(ARCH_AARCH64) { 3 } else { 2 };
 }

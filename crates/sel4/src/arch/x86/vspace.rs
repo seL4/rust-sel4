@@ -132,5 +132,5 @@ impl CapTypeForTranslationTableObject for cap_type::PageTable {
 pub mod vspace_levels {
     pub const NUM_LEVELS: usize = 4;
 
-    pub const FIRST_LEVEL_WITH_FRAME_ENTRIES: usize = NUM_LEVELS - 3;
+    pub const HIGHEST_LEVEL_WITH_PAGE_ENTRIES: usize = NUM_LEVELS - 3;
 }
