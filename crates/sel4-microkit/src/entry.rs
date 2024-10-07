@@ -54,6 +54,7 @@ extern "C" {
 #[macro_export]
 macro_rules! declare_init {
     ($init:expr) => {
+        #[allow(non_snake_case)]
         #[no_mangle]
         fn __sel4_microkit__main() -> ! {
             $crate::_private::run_main($init);
