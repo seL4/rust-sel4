@@ -79,28 +79,49 @@ pub mod absent {}
 
 definitely! {
     sel4
+    // sel4_abstract_rc
     sel4_async_block_io
     sel4_async_block_io_fat
     sel4_async_io
     sel4_async_network
+    sel4_async_network_rustls
+    // sel4_async_network_rustls_utils
     sel4_async_single_threaded_executor
     sel4_async_time
     sel4_async_unsync
     sel4_atomic_ptr
     sel4_bounce_buffer_allocator
     sel4_config
+    sel4_dlmalloc
+    sel4_driver_interfaces
+    sel4_elf_header
     sel4_externally_shared
     sel4_immediate_sync_once_cell
     sel4_immutable_cell
+    sel4_initialize_tls
     sel4_logging
+    sel4_newlib
     sel4_one_ref_cell
+    sel4_panicking
+    sel4_panicking_env
+    sel4_reset
     sel4_shared_ring_buffer
     sel4_shared_ring_buffer_block_io
     sel4_shared_ring_buffer_block_io_types
     sel4_shared_ring_buffer_bookkeeping
     sel4_shared_ring_buffer_smoltcp
+    sel4_stack
     sel4_sync
+    sel4_sync_trivial
     sel4_sys
+
+    sel4_bcm2835_aux_uart_driver
+    sel4_pl011_driver
+    sel4_pl031_driver
+    sel4_sp804_driver
+    sel4_virtio_net
+    sel4_virtio_blk
+    sel4_virtio_hal_impl
 }
 
 maybe! {
