@@ -37,6 +37,9 @@ pub trait Handler {
         panic!("unexpected protected procedure call from channel {channel:?} with msg_info={msg_info:?}")
     }
 
+    /// This method has the same meaning and type as its analog in `libmicrokit`.
+    ///
+    /// The default implementation just panics.
     fn fault(
         &mut self,
         child: Child,

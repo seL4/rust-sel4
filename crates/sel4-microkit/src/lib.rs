@@ -38,7 +38,6 @@ extern crate alloc;
 use sel4::sel4_cfg;
 
 pub use sel4_microkit_base::*;
-pub use sel4_microkit_macros::protection_domain;
 
 mod entry;
 mod heap;
@@ -49,9 +48,44 @@ pub mod panicking;
 #[sel4_cfg(PRINTING)]
 pub use printing::{debug_print, debug_println};
 
-/// Declares the initialization function, stack size, and, optionally, heap and heap size.
+/// Declares a function to be the the protection domain's initialization function.
 ///
-/// See the [`protection_domain`] attribute macro for more detail.
+/// For example:
+///
+/// ```rust
+/// #[protection_domain]
+/// fn init() -> impl Handler {
+///     todo!()
+/// }
+/// ```
+///
+/// The initialization function have a signature of the form:
+///
+/// ```rust
+/// fn<T: Handler>() -> T
+/// ```
+///
+/// (See [`Handler`])
+///
+/// This macro takes two optional parameters, whose values can be any expression of type `usize`:
+///
+/// ```rust
+/// #[protection_domain(
+///     stack_size = <stack_size_expr: usize>,
+///     heap_size = <heap_size_expr: usize>,
+/// )]
+/// ```
+///
+/// - `stack_size`: Declares the size of the protection domain's stack, in bytes. Note that this
+///   includes space for thread-local storage. If absent, [`DEFAULT_STACK_SIZE`] will be used.
+/// - `heap_size`: Creates a `#[global_allocator]`, backed by a static heap of the specified size.
+///   If this parameter is not specified, no `#[global_allocator]` will be automatically declared,
+///   and, unless one is manually declared, heap allocations will result in a link-time error.
+///
+/// Note that, if both parameters are provided, they must appear in the order above.
+pub use sel4_microkit_macros::protection_domain;
+
+#[doc(hidden)]
 #[macro_export]
 macro_rules! declare_protection_domain {
     {
@@ -82,6 +116,7 @@ macro_rules! declare_protection_domain {
     };
 }
 
+/// The default stack size used by [`#[protection_domain]`](crate::protection_domain).
 pub const DEFAULT_STACK_SIZE: usize = 1024
     * if cfg!(panic = "unwind") && cfg!(debug_assertions) {
         128
