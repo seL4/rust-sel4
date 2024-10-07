@@ -6,6 +6,7 @@
 
 #![no_std]
 #![feature(cfg_target_thread_local)]
+#![feature(linkage)]
 #![feature(never_type)]
 
 pub use sel4_panicking_env::abort;
