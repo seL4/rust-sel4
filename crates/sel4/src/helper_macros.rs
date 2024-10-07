@@ -105,12 +105,15 @@ macro_rules! declare_cap_alias {
 }
 
 macro_rules! declare_fault_newtype {
-    ($t:ident, $sys:path) => {
+    ($t:ident, $sys:ident) => {
+        #[doc = "Corresponds to `"]
+        #[doc = stringify!($sys)]
+        #[doc = "`."]
         #[derive(Debug, Clone, PartialEq, Eq)]
-        pub struct $t($sys);
+        pub struct $t($crate::sys::$sys);
 
         impl $t {
-            $crate::newtype_methods!(pub $sys);
+            $crate::newtype_methods!(pub $crate::sys::$sys);
         }
     };
 }
