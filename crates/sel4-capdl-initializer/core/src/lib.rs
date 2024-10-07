@@ -673,9 +673,9 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
                                 if badge == 0 && rights == CapRights::all() {
                                     orig
                                 } else {
-                                    let src = init_thread::slot::CNODE.cap().relative(orig);
+                                    let src = init_thread::slot::CNODE.cap().absolute_cptr(orig);
                                     let new = self.cslot_alloc_or_panic().cap();
-                                    let dst = init_thread::slot::CNODE.cap().relative(new);
+                                    let dst = init_thread::slot::CNODE.cap().absolute_cptr(new);
                                     dst.mint(&src, rights, badge)?;
                                     new.cast()
                                 }
@@ -757,7 +757,7 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
                 let rights = cap.rights().map(From::from).unwrap_or(CapRights::all());
                 let src = init_thread::slot::CNODE
                     .cap()
-                    .relative(self.orig_cap::<cap_type::Unspecified>(cap.obj()));
+                    .absolute_cptr(self.orig_cap::<cap_type::Unspecified>(cap.obj()));
                 let dst = cnode
                     .absolute_cptr_from_bits_with_depth((*i).try_into().unwrap(), obj.size_bits);
                 match badge {
@@ -784,7 +784,7 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
 
     fn copy<U: sel4::CapType>(&mut self, cap: sel4::Cap<U>) -> Result<sel4::Cap<U>> {
         let slot = self.cslot_alloc_or_panic();
-        let src = init_thread::slot::CNODE.cap().relative(cap);
+        let src = init_thread::slot::CNODE.cap().absolute_cptr(cap);
         cslot_to_relative_cptr(slot).copy(&src, CapRights::all())?;
         Ok(slot.cap().downcast())
     }
@@ -823,7 +823,7 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
 }
 
 fn cslot_to_relative_cptr(slot: Slot) -> sel4::AbsoluteCPtr {
-    init_thread::slot::CNODE.cap().relative(slot.cptr())
+    init_thread::slot::CNODE.cap().absolute_cptr(slot.cptr())
 }
 
 fn init_thread_cnode_relative_cptr() -> sel4::AbsoluteCPtr {

@@ -46,9 +46,9 @@ fn main(bootinfo: &sel4::BootInfoPtr) -> sel4::Result<Never> {
 
     cnode
         .with(&mut ipc_buffer)
-        .relative(badged_notification_slot.cptr())
+        .absolute_cptr(badged_notification_slot.cptr())
         .mint(
-            &cnode.relative(unbadged_notification_slot.cptr()),
+            &cnode.absolute_cptr(unbadged_notification_slot.cptr()),
             sel4::CapRights::write_only(),
             badge,
         )?;

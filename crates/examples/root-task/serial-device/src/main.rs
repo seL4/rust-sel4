@@ -41,7 +41,7 @@ fn main(bootinfo: &sel4::BootInfoPtr) -> sel4::Result<Never> {
             SERIAL_DEVICE_IRQ.try_into().unwrap(),
             &sel4::init_thread::slot::CNODE
                 .cap()
-                .relative(irq_handler_cap),
+                .absolute_cptr(irq_handler_cap),
         )
         .unwrap();
 
@@ -165,10 +165,10 @@ fn trim_untyped(
 ) {
     let rel_a = sel4::init_thread::slot::CNODE
         .cap()
-        .relative(free_slot_a.cptr());
+        .absolute_cptr(free_slot_a.cptr());
     let rel_b = sel4::init_thread::slot::CNODE
         .cap()
-        .relative(free_slot_b.cptr());
+        .absolute_cptr(free_slot_b.cptr());
     let mut cur_paddr = ut_paddr;
     while cur_paddr != target_paddr {
         let size_bits = (target_paddr - cur_paddr).ilog2().try_into().unwrap();

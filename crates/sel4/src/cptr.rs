@@ -390,7 +390,7 @@ impl HasCPtrWithDepth for CPtrWithDepth {
 }
 
 impl<C> CNode<C> {
-    pub fn relative<T: HasCPtrWithDepth>(self, path: T) -> AbsoluteCPtr<C> {
+    pub fn absolute_cptr<T: HasCPtrWithDepth>(self, path: T) -> AbsoluteCPtr<C> {
         AbsoluteCPtr {
             root: self,
             path: path.cptr_with_depth(),
@@ -402,10 +402,10 @@ impl<C> CNode<C> {
         bits: CPtrBits,
         depth: usize,
     ) -> AbsoluteCPtr<C> {
-        self.relative(CPtrWithDepth::from_bits_with_depth(bits, depth))
+        self.absolute_cptr(CPtrWithDepth::from_bits_with_depth(bits, depth))
     }
 
     pub fn absolute_cptr_for_self(self) -> AbsoluteCPtr<C> {
-        self.relative(CPtrWithDepth::empty())
+        self.absolute_cptr(CPtrWithDepth::empty())
     }
 }
