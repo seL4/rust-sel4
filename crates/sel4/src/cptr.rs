@@ -397,7 +397,11 @@ impl<C> CNode<C> {
         }
     }
 
-    pub fn relative_bits_with_depth(self, bits: CPtrBits, depth: usize) -> AbsoluteCPtr<C> {
+    pub fn absolute_cptr_from_bits_with_depth(
+        self,
+        bits: CPtrBits,
+        depth: usize,
+    ) -> AbsoluteCPtr<C> {
         self.relative(CPtrWithDepth::from_bits_with_depth(bits, depth))
     }
 

@@ -64,8 +64,10 @@ impl IpcBuffer {
 
     pub fn recv_slot(&self) -> AbsoluteCPtr {
         let inner = self.inner();
-        cap::CNode::from_bits(inner.receiveCNode)
-            .relative_bits_with_depth(inner.receiveIndex, inner.receiveCNode.try_into().unwrap())
+        cap::CNode::from_bits(inner.receiveCNode).absolute_cptr_from_bits_with_depth(
+            inner.receiveIndex,
+            inner.receiveCNode.try_into().unwrap(),
+        )
     }
 
     pub fn set_recv_slot(&mut self, slot: &AbsoluteCPtr) {
