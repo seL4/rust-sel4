@@ -91,6 +91,7 @@ impl PreparedDeferredAction {
     }
 }
 
+/// Utility type for implementing [`Handler::take_deferred_action`].
 // TODO maybe excessive. remove?
 pub struct DeferredActionSlot {
     inner: Option<DeferredAction>,

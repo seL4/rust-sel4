@@ -60,19 +60,21 @@ pub use sel4_panicking_env::{debug_print, debug_println};
 /// }
 /// ```
 ///
-///
 /// The main function have a signature of the form:
 ///
 /// ```rust
-/// fn<T: sel4_root_task::Termination>(&sel4::BootInfoPtr) -> T
+/// fn<T: Termination>(&sel4::BootInfoPtr) -> T
 /// ```
 ///
 /// (See [`Termination`])
 ///
-/// This macro takes two optional parameters:
+/// This macro takes two optional parameters, whose values can be any expression of type `usize`:
 ///
 /// ```rust
-/// #[root_task(stack_size = <stack_size_expr: usize>, heap_size = <heap_size_expr: usize>)]
+/// #[root_task(
+///     stack_size = <stack_size_expr: usize>,
+///     heap_size = <heap_size_expr: usize>,
+/// )]
 /// ```
 ///
 /// - `stack_size`: Declares the size of the initial thread's stack, in bytes. Note that this
