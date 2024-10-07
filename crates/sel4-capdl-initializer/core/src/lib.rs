@@ -479,7 +479,7 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
                 if !entries.is_empty() {
                     let frame_object_type =
                         sel4::FrameObjectType::from_bits(obj.size_bits).unwrap();
-                    let frame = self.orig_cap::<cap_type::UnspecifiedFrame>(obj_id);
+                    let frame = self.orig_cap::<cap_type::UnspecifiedPage>(obj_id);
                     self.fill_frame(frame, frame_object_type, entries)?;
                 }
             }
@@ -489,7 +489,7 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
 
     fn fill_frame(
         &self,
-        frame: sel4::Cap<cap_type::UnspecifiedFrame>,
+        frame: sel4::Cap<cap_type::UnspecifiedPage>,
         frame_object_type: sel4::FrameObjectType,
         fill: &[FillEntry<D>],
     ) -> Result<()> {
@@ -556,7 +556,7 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
             let vaddr = vaddr + (i << sel4::vspace_levels::step_bits(level));
             match entry {
                 PageTableEntry::Frame(cap) => {
-                    let frame = self.orig_cap::<cap_type::UnspecifiedFrame>(cap.object);
+                    let frame = self.orig_cap::<cap_type::UnspecifiedPage>(cap.object);
                     let rights = (&cap.rights).into();
                     self.copy(frame)?
                         .frame_map(vspace, vaddr, rights, cap.vm_attributes())?;

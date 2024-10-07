@@ -17,7 +17,7 @@ pub fn benchmark_finalize_log() -> Word {
     sys::seL4_BenchmarkFinalizeLog()
 }
 
-pub fn benchmark_set_log_buffer(frame: cap::UnspecifiedFrame) -> Result<()> {
+pub fn benchmark_set_log_buffer(frame: cap::UnspecifiedPage) -> Result<()> {
     Error::wrap(sys::seL4_BenchmarkSetLogBuffer(frame.bits()))
 }
 
