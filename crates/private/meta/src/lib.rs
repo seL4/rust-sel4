@@ -106,7 +106,14 @@ definitely! {
     sel4_one_ref_cell
     sel4_panicking
     sel4_panicking_env
+}
+
+maybe! {
+    #[cfg(target_arch = "aarch64")]
     sel4_reset
+}
+
+definitely! {
     sel4_shared_ring_buffer
     sel4_shared_ring_buffer_block_io
     sel4_shared_ring_buffer_block_io_types
