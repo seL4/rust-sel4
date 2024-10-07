@@ -18,7 +18,7 @@ use crate::ObjectBlueprintAArch64;
 #[sel4_cfg(ARCH_AARCH32)]
 use crate::ObjectBlueprintAArch32;
 
-/// Frame sizes for AArch64.
+/// Frame object types for this kernel configuration.
 #[sel4_cfg_enum]
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum FrameObjectType {
@@ -103,8 +103,9 @@ impl CapTypeForFrameObjectOfFixedSize for cap_type::Section {
     const FRAME_OBJECT_TYPE: FrameObjectType = FrameObjectType::Section;
 }
 
-//
+// // //
 
+/// Translation table object types for this kernel configuration.
 #[sel4_cfg_enum]
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum TranslationTableObjectType {
