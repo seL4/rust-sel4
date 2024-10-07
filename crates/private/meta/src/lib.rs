@@ -23,9 +23,11 @@
 //!   notification-based mutexes.
 //! - [`sel4_logging`]: [`Log`](log::Log) implementation for the [`log`] crate.
 //! - [`sel4_externally_shared`]: Abstractions for interacting with data in shared memory.
-//! - [`sel4_shared_ring_buffer`]: Implementation of shared data structures used in the [seL4 Device
+//! - [`sel4_shared_ring_buffer`] and `sel4_shared_ring_buffer_*`: Implementation of shared data structures used in the [seL4 Device
 //!   Driver Framework](https://github.com/au-ts/sddf).
 //! - `sel4_async_*`: Crates for leveraging async Rust in seL4 userspace.
+//! - `sel4_*_driver`: Crates implementing drivers for use with `sel4_shared_ring_buffer_*` and the orthogonal [`sel4_driver_interfaces`].
+//! - ...and many more, including lower-level crates for implementing additional runtimes.
 //!
 //! ### Runtime crates
 //!
@@ -79,6 +81,9 @@ pub mod absent {}
 
 definitely! {
     sel4
+    sel4_sys
+    sel4_config
+
     // sel4_abstract_rc
     sel4_async_block_io
     sel4_async_block_io_fat
@@ -91,7 +96,6 @@ definitely! {
     sel4_async_unsync
     sel4_atomic_ptr
     sel4_bounce_buffer_allocator
-    sel4_config
     sel4_dlmalloc
     sel4_driver_interfaces
     sel4_elf_header
@@ -113,7 +117,6 @@ definitely! {
     sel4_stack
     sel4_sync
     sel4_sync_trivial
-    sel4_sys
 
     sel4_bcm2835_aux_uart_driver
     sel4_pl011_driver
