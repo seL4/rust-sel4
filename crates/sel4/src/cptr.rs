@@ -54,6 +54,7 @@ impl CPtrWithDepth {
         self.depth
     }
 
+    /// The [`CPtrWithDepth`] with a depth of 0.
     pub const fn empty() -> Self {
         Self::from_bits_with_depth(0, 0)
     }
@@ -321,6 +322,11 @@ impl<C> Unspecified<C> {
 /// current thread's capability space.
 ///
 /// `seL4_CNode_*` capability invocations are methods of [`AbsoluteCPtr`] rather than [`Cap`].
+///
+/// In addition to [`AbsoluteCPtr::new`], the following methods can be used to construct an [`AbsoluteCPtr`]:
+/// - [`CNode::absolute_cptr`]
+/// - [`CNode::absolute_cptr_from_bits_with_depth`]
+/// - [`CNode::absolute_cptr_for_self`]
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub struct AbsoluteCPtr<C = NoExplicitInvocationContext> {
     root: CNode<C>,
@@ -368,6 +374,7 @@ impl<C: InvocationContext> AbsoluteCPtr<C> {
 ///
 /// [`CPtr`] and [`Cap`] each logically contain a [`CPtrWithDepth`] with a depth of [`WORD_SIZE`].
 pub trait HasCPtrWithDepth {
+    /// Returns the logical [`CPtrWithDepth`] entailed by `self`.
     fn cptr_with_depth(self) -> CPtrWithDepth;
 }
 
@@ -390,6 +397,7 @@ impl HasCPtrWithDepth for CPtrWithDepth {
 }
 
 impl<C> CNode<C> {
+    /// Returns the [`AbsoluteCPtr`] for `path` in the context of `self`.
     pub fn absolute_cptr<T: HasCPtrWithDepth>(self, path: T) -> AbsoluteCPtr<C> {
         AbsoluteCPtr {
             root: self,
@@ -397,6 +405,9 @@ impl<C> CNode<C> {
         }
     }
 
+    /// Returns the [`AbsoluteCPtr`] for
+    /// [`CPtrWithDepth::from_bits_with_depth(bits, depth)`](CPtrWithDepth::from_bits_with_depth)
+    /// in the context of `self`.
     pub fn absolute_cptr_from_bits_with_depth(
         self,
         bits: CPtrBits,
@@ -405,6 +416,12 @@ impl<C> CNode<C> {
         self.absolute_cptr(CPtrWithDepth::from_bits_with_depth(bits, depth))
     }
 
+    /// Returns the [`AbsoluteCPtr`] for `self` in its own context.
+    ///
+    /// Currently implemented as:
+    /// ```rust
+    /// self.absolute_cptr(CPtrWithDepth::empty())
+    /// ```
     pub fn absolute_cptr_for_self(self) -> AbsoluteCPtr<C> {
         self.absolute_cptr(CPtrWithDepth::empty())
     }
