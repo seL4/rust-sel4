@@ -401,7 +401,7 @@ impl<C> CNode<C> {
         self.relative(CPtrWithDepth::from_bits_with_depth(bits, depth))
     }
 
-    pub fn relative_self(self) -> AbsoluteCPtr<C> {
+    pub fn absolute_cptr_for_self(self) -> AbsoluteCPtr<C> {
         self.relative(CPtrWithDepth::empty())
     }
 }

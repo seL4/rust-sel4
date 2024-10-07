@@ -826,5 +826,5 @@ fn cslot_to_relative_cptr(slot: Slot) -> sel4::AbsoluteCPtr {
 }
 
 fn init_thread_cnode_relative_cptr() -> sel4::AbsoluteCPtr {
-    init_thread::slot::CNODE.cap().relative_self()
+    init_thread::slot::CNODE.cap().absolute_cptr_for_self()
 }

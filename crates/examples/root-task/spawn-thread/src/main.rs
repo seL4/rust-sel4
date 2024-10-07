@@ -91,7 +91,9 @@ impl ObjectAllocator {
         self.ut
             .untyped_retype(
                 &T::object_blueprint(),
-                &sel4::init_thread::slot::CNODE.cap().relative_self(),
+                &sel4::init_thread::slot::CNODE
+                    .cap()
+                    .absolute_cptr_for_self(),
                 slot_index,
                 1,
             )
@@ -108,7 +110,9 @@ impl ObjectAllocator {
         self.ut
             .untyped_retype(
                 &T::object_blueprint(size_bits),
-                &sel4::init_thread::slot::CNODE.cap().relative_self(),
+                &sel4::init_thread::slot::CNODE
+                    .cap()
+                    .absolute_cptr_for_self(),
                 slot_index,
                 1,
             )
