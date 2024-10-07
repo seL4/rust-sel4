@@ -97,9 +97,9 @@ fn main(bootinfo: &sel4::BootInfoPtr) -> sel4::Result<Never> {
 // // //
 
 #[repr(C, align(4096))]
-struct FreePagePlaceHolder(#[allow(dead_code)] [u8; GRANULE_SIZE]);
+struct FreePagePlaceholder(#[allow(dead_code)] [u8; GRANULE_SIZE]);
 
-static mut FREE_PAGE_PLACEHOLDER: FreePagePlaceHolder = FreePagePlaceHolder([0; GRANULE_SIZE]);
+static mut FREE_PAGE_PLACEHOLDER: FreePagePlaceholder = FreePagePlaceholder([0; GRANULE_SIZE]);
 
 fn init_free_page_addr(bootinfo: &sel4::BootInfo) -> usize {
     let addr = ptr::addr_of!(FREE_PAGE_PLACEHOLDER) as usize;
