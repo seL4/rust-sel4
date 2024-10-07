@@ -43,8 +43,8 @@ pub mod vspace_levels {
     /// The maximum number of levels of translation tables for this kernel configuration.
     pub use crate::arch::vspace_levels::NUM_LEVELS;
 
-    /// Lowest level of translation table whose entries can be pages rather than lower-level translation tables.
-    pub use crate::arch::vspace_levels::FIRST_LEVEL_WITH_FRAME_ENTRIES;
+    /// Highest level of translation table whose entries can be pages rather than lower-level translation tables.
+    pub use crate::arch::vspace_levels::HIGHEST_LEVEL_WITH_PAGE_ENTRIES;
 
     /// The number of address bits spanned by the given translation table level.
     pub fn span_bits(level: usize) -> usize {
