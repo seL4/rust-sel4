@@ -188,7 +188,15 @@ pub fn __abort_macro_helper(message: Option<fmt::Arguments>) -> ! {
 
 /// Aborts execution with a message.
 ///
-/// This function first invokes an externally defined abort hook which is resolved at link time, and
+/// [`abort!`] accepts the same patterns `core::panic!`:
+///
+/// ```rust
+/// abort!();
+/// abort!("uh oh!");
+/// abort!("uh {} {}!", 123, "oh");
+/// ```
+///
+/// This macro first invokes an externally defined abort hook which is resolved at link time, and
 /// then calls `core::intrinsics::abort()`.
 ///
 /// The following externally defined symbol is used as the abort hook:
