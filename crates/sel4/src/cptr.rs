@@ -241,7 +241,7 @@ pub mod cap_type {
     }
 
     declare_cap_type! {
-        /// Any intermediate translation structure capability.
+        /// Any intermediate translation table capability.
         UnspecifiedIntermediateTranslationTable
     }
 

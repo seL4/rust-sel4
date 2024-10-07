@@ -141,14 +141,17 @@ impl From<ObjectBlueprintArch> for ObjectBlueprint {
     }
 }
 
+/// Trait for [`CapType`]s which correspond to kernel objects.
 pub trait CapTypeForObject: CapType {
     fn object_type() -> ObjectType;
 }
 
+/// Trait for [`CapType`]s which correspond to kernel objects of fixed size.
 pub trait CapTypeForObjectOfFixedSize: CapTypeForObject {
     fn object_blueprint() -> ObjectBlueprint;
 }
 
+/// Trait for [`CapType`]s which correspond to kernel objects of variable size.
 pub trait CapTypeForObjectOfVariableSize: CapTypeForObject {
     fn object_blueprint(size_bits: usize) -> ObjectBlueprint;
 }

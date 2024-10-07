@@ -150,9 +150,9 @@ pub fn sel4_cfg_if(toks: TokenStream) -> TokenStream {
     get_impls().cfg_if_impl(toks.into()).into()
 }
 
-/// Like `core::cfg!()`, except using the seL4 kernel configuration.
+/// Like `core::cfg!`, except using the seL4 kernel configuration.
 ///
-/// Unlike `core::cfg!()`, this macro requires the configuration key to correspond to a boolean
+/// Unlike `core::cfg!`, this macro requires the configuration key to correspond to a boolean
 /// value.
 ///
 /// See [`macro@sel4_cfg`] for documentation on the configuration expression syntax.
@@ -169,7 +169,7 @@ pub fn sel4_cfg_bool(key_toks: TokenStream) -> TokenStream {
     get_impls().cfg_bool_impl(key_toks.into()).into()
 }
 
-/// Like `core::cfg!()`, except using the seL4 kernel configuration.
+/// Like `core::cfg!`, except using the seL4 kernel configuration.
 ///
 /// This macro requires the configuration key to correspond to a string value. It parses that value
 /// into an integer at compile-time, and assignes to it the type `usize`.
@@ -188,7 +188,7 @@ pub fn sel4_cfg_str(key_toks: TokenStream) -> TokenStream {
         .into()
 }
 
-/// Like `core::cfg!()`, except using the seL4 kernel configuration.
+/// Like `core::cfg!`, except using the seL4 kernel configuration.
 ///
 /// This macro requires the configuration key to correspond to a string value. It parses that value
 /// into an integer at compile-time, and assigns it type `usize`.
@@ -207,7 +207,7 @@ pub fn sel4_cfg_usize(key_toks: TokenStream) -> TokenStream {
         .into()
 }
 
-/// Like `core::cfg!()`, except using the seL4 kernel configuration.
+/// Like `core::cfg!`, except using the seL4 kernel configuration.
 ///
 /// This macro requires the configuration key to correspond to a string value. It parses that value
 /// into an integer at compile-time, and assigns to it the one of the types `u32` or `u64`,

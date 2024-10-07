@@ -10,6 +10,7 @@ use crate::{
     ObjectBlueprintX64, ObjectBlueprintX86,
 };
 
+/// Frame object types for this kernel configuration.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum FrameObjectType {
     _4k,
@@ -63,8 +64,9 @@ impl CapTypeForFrameObjectOfFixedSize for cap_type::HugePage {
     const FRAME_OBJECT_TYPE: FrameObjectType = FrameObjectType::HugePage;
 }
 
-//
+// // //
 
+/// Translation table object types for this kernel configuration.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum TranslationTableObjectType {
     PML4,

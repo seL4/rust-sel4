@@ -15,6 +15,7 @@ use crate::{
     ObjectBlueprintRiscV,
 };
 
+/// Frame object types for this kernel configuration.
 #[sel4_config::sel4_cfg_enum]
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum FrameObjectType {
@@ -79,8 +80,9 @@ impl CapTypeForFrameObjectOfFixedSize for cap_type::GigaPage {
     const FRAME_OBJECT_TYPE: FrameObjectType = FrameObjectType::GigaPage;
 }
 
-//
+// // //
 
+/// Translation table object types for this kernel configuration.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum TranslationTableObjectType {
     PageTable,

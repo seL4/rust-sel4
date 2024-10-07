@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: MIT
 //
 
-//! Items that are applicable within the context of the root task's initial thread.
+//! Items that are applicable within the context of the root task's initial thread's CSpace.
 
 use core::marker::PhantomData;
 use core::ops::Range;
@@ -109,6 +109,7 @@ impl<T: CapType> SlotRegion<T> {
     }
 }
 
+/// Initial CSpace slot constants corresponding to `seL4_Cap*`.
 pub mod slot {
     use super::{cap_type, sel4_cfg, sys, Slot};
 
@@ -121,6 +122,9 @@ pub mod slot {
         ] => {
             $(
                 $(#[$outer])*
+                #[doc = "Corresponds to `"]
+                #[doc = stringify!($sys_name)]
+                #[doc = "`."]
                 pub const $name: Slot<cap_type::$cap_type> = Slot::from_sys(sys::seL4_RootCNodeCapSlots::$sys_name);
             )*
         };
@@ -155,6 +159,7 @@ pub mod slot {
     ];
 }
 
+/// Suspends the initial thread using [`slot::TCB`].
 // NOTE(rustc_wishlist) use ! once #![never_type] is stabilized
 #[cfg(feature = "state")]
 pub fn suspend_self<T>() -> T {
