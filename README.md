@@ -22,7 +22,7 @@ This repository contains crates for supporting the use of Rust in
 The [./hacking](./hacking) directory contains scripts for developing and testing these crates using
 Nix and, optionally, Docker.
 
-This work is funded by the [seL4 Foundation](https://sel4.systems/Foundation/home.pml).
+This work is funded by the [seL4 Foundation](https://sel4.systems/Foundation/).
 
 ### Rendered rustdoc
 
