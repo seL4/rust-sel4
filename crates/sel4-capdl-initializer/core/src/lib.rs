@@ -158,7 +158,7 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
         // least one reference to an object allocated from an untyped, or else
         // its watermark will reset. This juggling approach is an easy way to
         // ensure that we are always holding such a reference.
-        let mut hold_slots = HoldSlots::new(self.cslot_allocator, cslot_to_relative_cptr)?;
+        let mut hold_slots = HoldSlots::new(self.cslot_allocator, cslot_to_absolute_cptr)?;
 
         // Create root objects
 
@@ -221,7 +221,7 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
                                 );
                                 self.ut_cap(*i_ut).untyped_retype(
                                     &blueprint,
-                                    &init_thread_cnode_relative_cptr(),
+                                    &init_thread_cnode_absolute_cptr(),
                                     self.alloc_orig_cslot(*obj_id).index(),
                                     1,
                                 )?;
@@ -244,7 +244,7 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
                                 &sel4::ObjectBlueprint::Untyped {
                                     size_bits: max_size_bits,
                                 },
-                                &init_thread_cnode_relative_cptr(),
+                                &init_thread_cnode_absolute_cptr(),
                                 hold_slot.index(),
                                 1,
                             )?;
@@ -267,7 +267,7 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
                     );
                     self.ut_cap(*i_ut).untyped_retype(
                         &blueprint,
-                        &init_thread_cnode_relative_cptr(),
+                        &init_thread_cnode_absolute_cptr(),
                         self.alloc_orig_cslot(obj_id).index(),
                         1,
                     )?;
@@ -299,7 +299,7 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
                 );
                 parent_cptr.untyped_retype(
                     &child.object.blueprint().unwrap(),
-                    &init_thread_cnode_relative_cptr(),
+                    &init_thread_cnode_absolute_cptr(),
                     self.alloc_orig_cslot(child_obj_id).index(),
                     1,
                 )?;
@@ -315,7 +315,7 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
                 let slot = self.cslot_alloc_or_panic();
                 init_thread::slot::ASID_CONTROL
                     .cap()
-                    .asid_control_make_pool(ut, &cslot_to_relative_cptr(slot))?;
+                    .asid_control_make_pool(ut, &cslot_to_absolute_cptr(slot))?;
                 self.set_orig_cslot(*obj_id, slot);
             }
         }
@@ -328,7 +328,7 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
                     match self.spec().object(*handler) {
                         Object::Irq(_) => {
                             init_thread::slot::IRQ_CONTROL.cap()
-                                .irq_control_get(*irq, &cslot_to_relative_cptr(slot))?;
+                                .irq_control_get(*irq, &cslot_to_absolute_cptr(slot))?;
                         }
                         #[sel4_cfg(any(ARCH_AARCH64, ARCH_AARCH32))]
                         Object::ArmIrq(obj) => {
@@ -337,14 +337,14 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
                                     init_thread::slot::IRQ_CONTROL.cap().irq_control_get_trigger(
                                         *irq,
                                         obj.extra.trigger != 0,
-                                        &cslot_to_relative_cptr(slot),
+                                        &cslot_to_absolute_cptr(slot),
                                     )?;
                                 } else {
                                     init_thread::slot::IRQ_CONTROL.cap().irq_control_get_trigger_core(
                                         *irq,
                                         obj.extra.trigger != 0,
                                         obj.extra.target,
-                                        &cslot_to_relative_cptr(slot),
+                                        &cslot_to_absolute_cptr(slot),
                                     )?;
                                 }
                             }
@@ -357,7 +357,7 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
                                 obj.extra.pci_func,
                                 obj.extra.handle,
                                 *irq,
-                                &cslot_to_relative_cptr(slot),
+                                &cslot_to_absolute_cptr(slot),
                             )?;
                         }
                         #[sel4_cfg(ARCH_X86_64)]
@@ -368,7 +368,7 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
                                 obj.extra.level,
                                 obj.extra.polarity,
                                 *irq,
-                                &cslot_to_relative_cptr(slot),
+                                &cslot_to_absolute_cptr(slot),
                             )?;
                         }
                         _ => {
@@ -393,7 +393,7 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
                         let slot = self.cslot_alloc_or_panic();
                         init_thread::slot::IO_PORT_CONTROL
                             .cap()
-                            .ioport_control_issue(start_port, end_port, &cslot_to_relative_cptr(slot))?;
+                            .ioport_control_issue(start_port, end_port, &cslot_to_absolute_cptr(slot))?;
                         self.set_orig_cslot(obj_id, slot);
                     }
                 }
@@ -445,9 +445,9 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
                 let nfn = match logical_nfn_cap.badge {
                     0 => self.orig_cap(logical_nfn_cap.object),
                     badge => {
-                        let orig_cptr = self.orig_relative_cptr(logical_nfn_cap.object);
+                        let orig_cptr = self.orig_absolute_cptr(logical_nfn_cap.object);
                         let slot = self.cslot_alloc_or_panic();
-                        let cptr = cslot_to_relative_cptr(slot);
+                        let cptr = cslot_to_absolute_cptr(slot);
                         cptr.mint(&orig_cptr, CapRights::all(), badge)?;
                         slot.cap().downcast()
                     }
@@ -785,7 +785,7 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
     fn copy<U: sel4::CapType>(&mut self, cap: sel4::Cap<U>) -> Result<sel4::Cap<U>> {
         let slot = self.cslot_alloc_or_panic();
         let src = init_thread::slot::CNODE.cap().absolute_cptr(cap);
-        cslot_to_relative_cptr(slot).copy(&src, CapRights::all())?;
+        cslot_to_absolute_cptr(slot).copy(&src, CapRights::all())?;
         Ok(slot.cap().downcast())
     }
 
@@ -813,8 +813,8 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
         self.orig_cslot(obj_id).cap().downcast()
     }
 
-    fn orig_relative_cptr(&self, obj_id: ObjectId) -> sel4::AbsoluteCPtr {
-        cslot_to_relative_cptr(self.orig_cslot(obj_id))
+    fn orig_absolute_cptr(&self, obj_id: ObjectId) -> sel4::AbsoluteCPtr {
+        cslot_to_absolute_cptr(self.orig_cslot(obj_id))
     }
 
     fn ut_cap(&self, ut_index: usize) -> sel4::cap::Untyped {
@@ -822,10 +822,10 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
     }
 }
 
-fn cslot_to_relative_cptr(slot: Slot) -> sel4::AbsoluteCPtr {
+fn cslot_to_absolute_cptr(slot: Slot) -> sel4::AbsoluteCPtr {
     init_thread::slot::CNODE.cap().absolute_cptr(slot.cptr())
 }
 
-fn init_thread_cnode_relative_cptr() -> sel4::AbsoluteCPtr {
+fn init_thread_cnode_absolute_cptr() -> sel4::AbsoluteCPtr {
     init_thread::slot::CNODE.cap().absolute_cptr_for_self()
 }
