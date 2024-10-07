@@ -78,8 +78,11 @@ impl From<CPtr> for CPtrWithDepth {
 ///   [`ImplicitInvocationContext`](crate::ImplicitInvocationContext), which uses the [`IpcBuffer`]
 ///   set by [`set_ipc_buffer`](crate::set_ipc_buffer). Otherwise, it is an alias for
 ///   [`NoInvocationContext`](crate::NoInvocationContext), which does not implement
-///   [`InvocationContext`]. In such cases, the [`with`](Cap::with) method is used to specify
-///   an invocation context before the capability is invoked.
+///   [`InvocationContext`]. In such cases, the [`with`](Cap::with) method is used to specify an
+///   invocation context before the capability is invoked.
+///
+/// Note that `seL4_CNode_*` capability invocations are methods of [`AbsoluteCPtr`] rather than
+/// [`Cap`].
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct Cap<T: CapType, C = NoExplicitInvocationContext> {
     cptr: CPtr,
@@ -312,7 +315,12 @@ impl<C> Unspecified<C> {
     }
 }
 
-/// A [`CPtrWithDepth`] in a particular [`CNode`].
+/// A [`CPtrWithDepth`] to be resolved in the context of a particular [`CNode`].
+///
+/// Used to address capability slots, including those that may not be directly addressable in the
+/// current thread's capability space.
+///
+/// `seL4_CNode_*` capability invocations are methods of [`AbsoluteCPtr`] rather than [`Cap`].
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub struct AbsoluteCPtr<C = NoExplicitInvocationContext> {
     root: CNode<C>,
@@ -353,6 +361,8 @@ impl<C: InvocationContext> AbsoluteCPtr<C> {
 }
 
 /// Trait for types whose members which logically contain a [`CPtrWithDepth`].
+///
+/// [`CPtr`] and [`Cap`] each logically contain a [`CPtrWithDepth`] with a depth of [`WORD_SIZE`].
 pub trait HasCPtrWithDepth {
     fn cptr_with_depth(self) -> CPtrWithDepth;
 }
