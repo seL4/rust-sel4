@@ -328,6 +328,10 @@ pub struct AbsoluteCPtr<C = NoExplicitInvocationContext> {
 }
 
 impl<C> AbsoluteCPtr<C> {
+    pub const fn new(root: CNode<C>, path: CPtrWithDepth) -> Self {
+        Self { root, path }
+    }
+
     pub const fn root(&self) -> &CNode<C> {
         &self.root
     }
