@@ -22,7 +22,7 @@ impl FrameObjectType {
 /// Trait for [`CapType`]s which correspond to frame objects.
 pub trait CapTypeForFrameObject: CapType {}
 
-impl CapTypeForFrameObject for cap_type::UnspecifiedFrame {}
+impl CapTypeForFrameObject for cap_type::UnspecifiedPage {}
 
 /// Trait for [`CapTypeForFrameObject`]s which correspond to frame objects of fixed size.
 pub trait CapTypeForFrameObjectOfFixedSize:

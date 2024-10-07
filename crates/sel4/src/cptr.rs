@@ -236,8 +236,8 @@ pub mod cap_type {
     }
 
     declare_cap_type! {
-        /// Any frame capability.
-        UnspecifiedFrame
+        /// Any page capability.
+        UnspecifiedPage
     }
 
     declare_cap_type! {
@@ -290,7 +290,7 @@ pub mod cap {
 
     declare_cap_alias!(Null);
     declare_cap_alias!(Unspecified);
-    declare_cap_alias!(UnspecifiedFrame);
+    declare_cap_alias!(UnspecifiedPage);
     declare_cap_alias!(UnspecifiedIntermediateTranslationTable);
 
     declare_cap_alias!(VSpace);
