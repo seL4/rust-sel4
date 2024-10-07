@@ -53,7 +53,9 @@ fn main(bootinfo: &sel4::BootInfoPtr) -> sel4::Result<Never> {
     kernel_ut
         .untyped_retype(
             &sel4::ObjectBlueprint::Notification,
-            &sel4::init_thread::slot::CNODE.cap().relative_self(),
+            &sel4::init_thread::slot::CNODE
+                .cap()
+                .absolute_cptr_for_self(),
             irq_notification_slot.index(),
             1,
         )
@@ -95,7 +97,9 @@ fn main(bootinfo: &sel4::BootInfoPtr) -> sel4::Result<Never> {
     device_ut_cap
         .untyped_retype(
             &sel4::cap_type::Granule::object_blueprint(),
-            &sel4::init_thread::slot::CNODE.cap().relative_self(),
+            &sel4::init_thread::slot::CNODE
+                .cap()
+                .absolute_cptr_for_self(),
             serial_device_frame_slot.index(),
             1,
         )
@@ -170,7 +174,9 @@ fn trim_untyped(
         let size_bits = (target_paddr - cur_paddr).ilog2().try_into().unwrap();
         ut.untyped_retype(
             &sel4::ObjectBlueprint::Untyped { size_bits },
-            &sel4::init_thread::slot::CNODE.cap().relative_self(),
+            &sel4::init_thread::slot::CNODE
+                .cap()
+                .absolute_cptr_for_self(),
             free_slot_b.index(),
             1,
         )
