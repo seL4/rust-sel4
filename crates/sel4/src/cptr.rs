@@ -71,7 +71,7 @@ impl From<CPtr> for CPtrWithDepth {
     }
 }
 
-/// A capability pointer in the current CSpace.
+/// A capability pointer to be resolved in the current CSpace.
 ///
 /// - The `T` parameter is a [`CapType`] marking the type of the pointed-to capability.
 /// - The `C` parameter is a strategy for discovering the current thread's IPC buffer. When the
@@ -81,6 +81,8 @@ impl From<CPtr> for CPtrWithDepth {
 ///   [`NoInvocationContext`](crate::NoInvocationContext), which does not implement
 ///   [`InvocationContext`]. In such cases, the [`with`](Cap::with) method is used to specify an
 ///   invocation context before the capability is invoked.
+///
+/// The most general way to construct a [`Cap`] is with [`CPtr::cast`].
 ///
 /// Note that `seL4_CNode_*` capability invocations are methods of [`AbsoluteCPtr`] rather than
 /// [`Cap`].
@@ -318,12 +320,16 @@ impl<C> Unspecified<C> {
 
 /// A [`CPtrWithDepth`] to be resolved in the context of a particular [`CNode`].
 ///
-/// Used to address capability slots, including those that may not be directly addressable in the
-/// current thread's capability space.
+/// [`AbsoluteCPtr`] addresses capability slots in a more general way than [`Cap`]. It allows one to
+/// address any capability slot that is directly addressable from any CNode that is directly
+/// addressible in the current thread's CSpace. Furthermore, it allows one to address capability
+/// slots that contain CNodes by limiting the lookup depth to prevent the kernel's lookup procedure
+/// from descending into the CNode contained in that slot.
 ///
 /// `seL4_CNode_*` capability invocations are methods of [`AbsoluteCPtr`] rather than [`Cap`].
 ///
-/// In addition to [`AbsoluteCPtr::new`], the following methods can be used to construct an [`AbsoluteCPtr`]:
+/// In addition to [`AbsoluteCPtr::new`], the following methods can be used to construct an
+/// [`AbsoluteCPtr`]:
 /// - [`CNode::absolute_cptr`]
 /// - [`CNode::absolute_cptr_from_bits_with_depth`]
 /// - [`CNode::absolute_cptr_for_self`]
