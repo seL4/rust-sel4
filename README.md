@@ -38,11 +38,11 @@ following versions of those related projects:
   [`cd6d3b8c25d49be2b100b0608cf0613483a6fffa`](https://github.com/seL4/seL4/tree/cd6d3b8c25d49be2b100b0608cf0613483a6fffa)
   (version 13.0.0, on [github.com/seL4/seL4:master](https://github.com/seL4/seL4/tree/master))
 - seL4, when used with Microkit:
-  [`0cdbffec9cf6b4c7c9c57971cbee5a24a70c8fd0`](https://github.com/seL4/seL4/tree/0cdbffec9cf6b4c7c9c57971cbee5a24a70c8fd0)
+  [`4cae30a6ef166a378d4d23697b00106ce7e4e76f`](https://github.com/seL4/seL4/tree/4cae30a6ef166a378d4d23697b00106ce7e4e76f)
   (on [github.com/seL4/seL4:microkit](https://github.com/seL4/seL4/tree/microkit))
 - seL4 Microkit:
-  [`1ccdfcb3b224533c965fd6508de3dd56657f959c`](https://github.com/seL4/microkit/tree/1ccdfcb3b224533c965fd6508de3dd56657f959c)
-  (version 1.3.0, on [github.com/seL4/microkit:main](https://github.com/seL4/microkit/tree/main))
+  [`395cf0e5be489bbd7586b012188fc1f712cd1a57`](https://github.com/seL4/microkit/tree/395cf0e5be489bbd7586b012188fc1f712cd1a57)
+  (version 1.4.1, on [github.com/seL4/microkit:main](https://github.com/seL4/microkit/tree/main))
 
 ### Demos
 
