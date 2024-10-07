@@ -36,7 +36,6 @@ mk {
       sel4-one-ref-cell
       sel4-panicking
       sel4-panicking-env
-      sel4-reset
       sel4-shared-ring-buffer
       sel4-shared-ring-buffer-block-io
       sel4-shared-ring-buffer-block-io-types
@@ -63,6 +62,11 @@ mk {
   };
   target."cfg(not(target_thread_local))".dependencies = {
     sel4 = localCrates.sel4 // { features = [ "single-threaded" ]; };
+  };
+  target."cfg(target_arch = \"aarch64\")".dependencies = {
+    inherit (localCrates)
+      sel4-reset
+    ;
   };
   target."cfg(not(target_arch = \"x86_64\"))".dependencies = {
     sel4-platform-info = localCrates.sel4-platform-info  // { optional = true; };

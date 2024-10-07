@@ -52,7 +52,6 @@ sel4-panicking = { path = "../../sel4-panicking" }
 sel4-panicking-env = { path = "../../sel4-panicking/env" }
 sel4-pl011-driver = { path = "../../drivers/pl011" }
 sel4-pl031-driver = { path = "../../drivers/pl031" }
-sel4-reset = { path = "../../sel4-reset" }
 sel4-root-task = { path = "../../sel4-root-task", features = ["full"], optional = true }
 sel4-shared-ring-buffer = { path = "../../sel4-shared-ring-buffer" }
 sel4-shared-ring-buffer-block-io = { path = "../../sel4-shared-ring-buffer/block-io" }
@@ -73,3 +72,6 @@ sel4-platform-info = { path = "../../sel4-platform-info", optional = true }
 
 [target."cfg(not(target_thread_local))".dependencies]
 sel4 = { path = "../../sel4", features = ["single-threaded"] }
+
+[target."cfg(target_arch = \"aarch64\")".dependencies]
+sel4-reset = { path = "../../sel4-reset" }
