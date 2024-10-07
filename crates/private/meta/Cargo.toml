@@ -28,8 +28,6 @@ sel4-async-block-io = { path = "../../sel4-async/block-io" }
 sel4-async-block-io-fat = { path = "../../sel4-async/block-io/fat" }
 sel4-async-io = { path = "../../sel4-async/io" }
 sel4-async-network = { path = "../../sel4-async/network" }
-sel4-async-network-rustls = { path = "../../sel4-async/network/rustls" }
-sel4-async-network-rustls-utils = { path = "../../sel4-async/network/rustls/utils" }
 sel4-async-single-threaded-executor = { path = "../../sel4-async/single-threaded-executor" }
 sel4-async-time = { path = "../../sel4-async/time" }
 sel4-async-unsync = { path = "../../sel4-async/unsync" }

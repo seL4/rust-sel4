@@ -20,8 +20,6 @@ mk {
       sel4-async-block-io-fat
       sel4-async-io
       sel4-async-network
-      sel4-async-network-rustls
-      sel4-async-network-rustls-utils
       sel4-async-single-threaded-executor
       sel4-async-time
       sel4-async-unsync
