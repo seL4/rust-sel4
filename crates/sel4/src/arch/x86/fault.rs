@@ -8,14 +8,14 @@ use sel4_config::{sel4_cfg, sel4_cfg_enum, sel4_cfg_wrap_match};
 
 use crate::{declare_fault_newtype, sys};
 
-declare_fault_newtype!(NullFault, sys::seL4_Fault_NullFault);
-declare_fault_newtype!(CapFault, sys::seL4_Fault_CapFault);
-declare_fault_newtype!(UnknownSyscall, sys::seL4_Fault_UnknownSyscall);
-declare_fault_newtype!(UserException, sys::seL4_Fault_UserException);
-declare_fault_newtype!(VmFault, sys::seL4_Fault_VMFault);
+declare_fault_newtype!(NullFault, seL4_Fault_NullFault);
+declare_fault_newtype!(CapFault, seL4_Fault_CapFault);
+declare_fault_newtype!(UnknownSyscall, seL4_Fault_UnknownSyscall);
+declare_fault_newtype!(UserException, seL4_Fault_UserException);
+declare_fault_newtype!(VmFault, seL4_Fault_VMFault);
 
 #[sel4_cfg(KERNEL_MCS)]
-declare_fault_newtype!(Timeout, sys::seL4_Fault_Timeout);
+declare_fault_newtype!(Timeout, seL4_Fault_Timeout);
 
 #[sel4_cfg_enum]
 #[derive(Debug, Clone, PartialEq, Eq)]
