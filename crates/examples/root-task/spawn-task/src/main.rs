@@ -53,7 +53,7 @@ fn main(bootinfo: &sel4::BootInfoPtr) -> sel4::Result<Never> {
         .mint(
             &sel4::init_thread::slot::CNODE
                 .cap()
-                .relative(inter_task_nfn),
+                .absolute_cptr(inter_task_nfn),
             sel4::CapRights::write_only(),
             0,
         )
@@ -75,7 +75,9 @@ fn main(bootinfo: &sel4::BootInfoPtr) -> sel4::Result<Never> {
     child_cnode
         .absolute_cptr_from_bits_with_depth(2, child_cnode_size_bits)
         .mint(
-            &sel4::init_thread::slot::CNODE.cap().relative(child_tcb),
+            &sel4::init_thread::slot::CNODE
+                .cap()
+                .absolute_cptr(child_tcb),
             sel4::CapRights::all(),
             0,
         )
