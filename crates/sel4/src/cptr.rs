@@ -9,12 +9,7 @@ use core::fmt;
 use core::hash::Hash;
 use core::marker::PhantomData;
 
-use sel4_config::sel4_cfg;
-
 use crate::{sys, InvocationContext, IpcBuffer, NoExplicitInvocationContext, WORD_SIZE};
-
-#[sel4_cfg(not(KERNEL_MCS))]
-use crate::Result;
 
 /// The raw bits of a capability pointer.
 pub type CPtrBits = sys::seL4_CPtr;
@@ -394,12 +389,5 @@ impl<C> CNode<C> {
 
     pub fn relative_self(self) -> AbsoluteCPtr<C> {
         self.relative(CPtrWithDepth::empty())
-    }
-}
-
-impl<C: InvocationContext> CNode<C> {
-    #[sel4_cfg(not(KERNEL_MCS))]
-    pub fn save_caller(self, ep: Endpoint) -> Result<()> {
-        self.relative(ep).save_caller()
     }
 }
