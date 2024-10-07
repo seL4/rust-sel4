@@ -28,28 +28,47 @@ sel4-async-block-io = { path = "../../sel4-async/block-io" }
 sel4-async-block-io-fat = { path = "../../sel4-async/block-io/fat" }
 sel4-async-io = { path = "../../sel4-async/io" }
 sel4-async-network = { path = "../../sel4-async/network" }
+sel4-async-network-rustls = { path = "../../sel4-async/network/rustls" }
+sel4-async-network-rustls-utils = { path = "../../sel4-async/network/rustls/utils" }
 sel4-async-single-threaded-executor = { path = "../../sel4-async/single-threaded-executor" }
 sel4-async-time = { path = "../../sel4-async/time" }
 sel4-async-unsync = { path = "../../sel4-async/unsync" }
 sel4-atomic-ptr = { path = "../../sel4-atomic-ptr" }
+sel4-bcm2835-aux-uart-driver = { path = "../../drivers/bcm2835-aux-uart" }
 sel4-bounce-buffer-allocator = { path = "../../sel4-bounce-buffer-allocator" }
 sel4-config = { path = "../../sel4/config" }
+sel4-dlmalloc = { path = "../../sel4-dlmalloc" }
+sel4-driver-interfaces = { path = "../../sel4-driver-interfaces" }
+sel4-elf-header = { path = "../../sel4-elf-header" }
 sel4-externally-shared = { path = "../../sel4-externally-shared", features = ["unstable"] }
 sel4-immediate-sync-once-cell = { path = "../../sel4-immediate-sync-once-cell" }
 sel4-immutable-cell = { path = "../../sel4-immutable-cell" }
+sel4-initialize-tls = { path = "../../sel4-initialize-tls" }
 sel4-logging = { path = "../../sel4-logging" }
 sel4-microkit = { path = "../../sel4-microkit", features = ["full"], optional = true }
 sel4-microkit-message = { path = "../../sel4-microkit/message", optional = true }
 sel4-microkit-message-types = { path = "../../sel4-microkit/message/types", optional = true }
+sel4-newlib = { path = "../../sel4-newlib" }
 sel4-one-ref-cell = { path = "../../sel4-one-ref-cell" }
+sel4-panicking = { path = "../../sel4-panicking" }
+sel4-panicking-env = { path = "../../sel4-panicking/env" }
+sel4-pl011-driver = { path = "../../drivers/pl011" }
+sel4-pl031-driver = { path = "../../drivers/pl031" }
+sel4-reset = { path = "../../sel4-reset" }
 sel4-root-task = { path = "../../sel4-root-task", features = ["full"], optional = true }
 sel4-shared-ring-buffer = { path = "../../sel4-shared-ring-buffer" }
 sel4-shared-ring-buffer-block-io = { path = "../../sel4-shared-ring-buffer/block-io" }
 sel4-shared-ring-buffer-block-io-types = { path = "../../sel4-shared-ring-buffer/block-io/types" }
 sel4-shared-ring-buffer-bookkeeping = { path = "../../sel4-shared-ring-buffer/bookkeeping" }
 sel4-shared-ring-buffer-smoltcp = { path = "../../sel4-shared-ring-buffer/smoltcp" }
+sel4-sp804-driver = { path = "../../drivers/sp804" }
+sel4-stack = { path = "../../sel4-stack" }
 sel4-sync = { path = "../../sel4-sync" }
+sel4-sync-trivial = { path = "../../sel4-sync/trivial" }
 sel4-sys = { path = "../../sel4/sys" }
+sel4-virtio-blk = { path = "../../drivers/virtio/blk" }
+sel4-virtio-hal-impl = { path = "../../drivers/virtio/hal-impl" }
+sel4-virtio-net = { path = "../../drivers/virtio/net" }
 
 [target."cfg(not(target_arch = \"x86_64\"))".dependencies]
 sel4-platform-info = { path = "../../sel4-platform-info", optional = true }
