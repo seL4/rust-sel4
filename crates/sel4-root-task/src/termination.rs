@@ -7,7 +7,7 @@
 use core::fmt;
 
 pub trait Termination {
-    type Error;
+    type Error: fmt::Debug;
 
     fn report(self) -> Self::Error;
 }
@@ -28,7 +28,7 @@ impl Termination for Never {
     }
 }
 
-impl<E> Termination for Result<!, E> {
+impl<E: fmt::Debug> Termination for Result<!, E> {
     type Error = E;
 
     fn report(self) -> Self::Error {
@@ -40,7 +40,7 @@ impl<E> Termination for Result<!, E> {
     }
 }
 
-impl<E> Termination for Result<Never, E> {
+impl<E: fmt::Debug> Termination for Result<Never, E> {
     type Error = E;
 
     fn report(self) -> Self::Error {

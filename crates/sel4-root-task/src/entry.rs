@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use core::fmt;
 use core::panic::UnwindSafe;
 
 use crate::{abort, panicking::catch_unwind, Termination};
@@ -60,13 +59,10 @@ macro_rules! declare_main {
 
 #[doc(hidden)]
 #[allow(clippy::missing_safety_doc)]
-pub fn run_main<T>(
-    f: impl FnOnce(&sel4::BootInfoPtr) -> T + UnwindSafe,
-    bootinfo: &sel4::BootInfoPtr,
-) -> !
+pub fn run_main<F, T>(f: F, bootinfo: &sel4::BootInfoPtr) -> !
 where
+    F: FnOnce(&sel4::BootInfoPtr) -> T + UnwindSafe,
     T: Termination,
-    T::Error: fmt::Debug,
 {
     let result = catch_unwind(move || f(bootinfo).report());
     match result {
