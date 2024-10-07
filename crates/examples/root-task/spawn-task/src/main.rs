@@ -49,7 +49,7 @@ fn main(bootinfo: &sel4::BootInfoPtr) -> sel4::Result<Never> {
         object_allocator.allocate_variable_sized::<sel4::cap_type::CNode>(child_cnode_size_bits);
 
     child_cnode
-        .relative_bits_with_depth(1, child_cnode_size_bits)
+        .absolute_cptr_from_bits_with_depth(1, child_cnode_size_bits)
         .mint(
             &sel4::init_thread::slot::CNODE
                 .cap()
@@ -73,7 +73,7 @@ fn main(bootinfo: &sel4::BootInfoPtr) -> sel4::Result<Never> {
         .unwrap();
 
     child_cnode
-        .relative_bits_with_depth(2, child_cnode_size_bits)
+        .absolute_cptr_from_bits_with_depth(2, child_cnode_size_bits)
         .mint(
             &sel4::init_thread::slot::CNODE.cap().relative(child_tcb),
             sel4::CapRights::all(),

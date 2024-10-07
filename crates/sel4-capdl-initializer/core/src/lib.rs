@@ -758,7 +758,8 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
                 let src = init_thread::slot::CNODE
                     .cap()
                     .relative(self.orig_cap::<cap_type::Unspecified>(cap.obj()));
-                let dst = cnode.relative_bits_with_depth((*i).try_into().unwrap(), obj.size_bits);
+                let dst = cnode
+                    .absolute_cptr_from_bits_with_depth((*i).try_into().unwrap(), obj.size_bits);
                 match badge {
                     None => dst.copy(&src, rights),
                     Some(badge) => dst.mint(&src, rights, badge),
