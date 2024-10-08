@@ -99,7 +99,7 @@ pub unsafe extern "C" fn cont_fn(cont_arg: *mut sel4_runtime_common::ContArg) ->
                     sel4::cap::Reply::from_bits(thread_config.reply_authority().unwrap().try_into().unwrap())
                 } else {
                     assert!(thread_config.reply_authority().is_none());
-                    sel4::ImplicitReplyAuthority
+                    sel4::ImplicitReplyAuthority::default()
                 }
             }
         };
