@@ -20,6 +20,6 @@ license = "BSD-2-Clause"
 cfg-if = "1.0.0"
 serde = { version = "1.0.147", default-features = false, features = ["derive"] }
 
-[target."cfg(target_env = \"sel4\")".dependencies]
+[target."cfg(target_os = \"none\")".dependencies]
 sel4 = { path = "../../../../sel4" }
 sel4-simple-task-threading = { path = "../threading" }

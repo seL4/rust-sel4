@@ -11,7 +11,7 @@ use core::marker::PhantomData;
 use serde::{Deserialize, Serialize};
 
 cfg_if::cfg_if! {
-    if #[cfg(target_env = "sel4")] {
+    if #[cfg(target_os = "none")] {
         mod when_sel4;
         pub use when_sel4::*;
     } else {

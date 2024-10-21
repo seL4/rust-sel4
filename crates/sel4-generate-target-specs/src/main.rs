@@ -105,7 +105,6 @@ impl Config {
         {
             let options = &mut target.options;
             options.is_builtin = false;
-            options.env = "sel4".into();
             options.exe_suffix = ".elf".into();
             options.eh_frame_header = !self.minimal;
         }

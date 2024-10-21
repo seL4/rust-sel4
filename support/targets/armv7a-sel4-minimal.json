@@ -7,7 +7,6 @@
   "disable-redzone": true,
   "eh-frame-header": false,
   "emit-debug-gdb-scripts": false,
-  "env": "sel4",
   "exe-suffix": ".elf",
   "features": "+v7,+thumb2,+soft-float,-neon,+strict-align",
   "linker": "rust-lld",
