@@ -4,7 +4,6 @@
   "crt-objects-fallback": "false",
   "data-layout": "e-m:e-p:32:32-i64:64-n32-S128",
   "emit-debug-gdb-scripts": false,
-  "env": "sel4",
   "exe-suffix": ".elf",
   "features": "+m,+a,+c",
   "has-thread-local": true,

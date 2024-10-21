@@ -12,7 +12,7 @@ mk {
     inherit (versions) cfg-if;
     serde = serdeWith [ "derive" ];
   };
-  target."cfg(target_env = \"sel4\")".dependencies = {
+  target."cfg(target_os = \"none\")".dependencies = {
     inherit (localCrates)
       sel4
       sel4-simple-task-threading
