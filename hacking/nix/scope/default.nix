@@ -112,13 +112,19 @@ superCallPackage ../rust-utils {} self //
     ia32 = "i686";
   }."${seL4Arch}";
 
-  mkSeL4CustomRustTargetTripleName = { microkit ? false, resettable ? false, minimal ? false }:
+  mkSeL4CustomRustTargetTripleName =
+    { microkit ? false
+    , resettable ? false
+    , minimal ? false
+    , musl ? false
+    }:
     lib.concatStrings [
       rustTargetArchName
       "-sel4"
       (lib.optionalString microkit "-microkit")
       (lib.optionalString resettable "-resettable")
       (lib.optionalString minimal "-minimal")
+      (lib.optionalString musl "-musl")
     ];
 
   mkSeL4RustTargetTriple = args: mkCustomRustTargetTriple (mkSeL4CustomRustTargetTripleName args);
