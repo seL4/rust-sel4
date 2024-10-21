@@ -52,6 +52,11 @@ let
     CHILD_ELF = emptyFile;
   };
 
+  buildStdFlags = std: lib.concatStringsSep " " [
+    "-Z" "build-std=core,alloc,compiler_builtins${lib.optionalString std ",std"}"
+    "-Z" "build-std-features=compiler-builtins-mem"
+  ];
+
 in
 mkShell (seL4RustEnvVars // kernelLoaderConfigEnvVars // capdlEnvVars // bindgenEnvVars // miscEnvVars // {
   # TODO
@@ -59,10 +64,9 @@ mkShell (seL4RustEnvVars // kernelLoaderConfigEnvVars // capdlEnvVars // bindgen
 
   RUST_BARE_METAL_TARGET = bareMetalRustTargetTriple.name;
 
-  HOST_CARGO_FLAGS = lib.concatStringsSep " " [
-    "-Z" "build-std=core,alloc,compiler_builtins"
-    "-Z" "build-std-features=compiler-builtins-mem"
-  ];
+  HOST_CARGO_FLAGS = buildStdFlags false;
+
+  HOST_CARGO_FLAGS_STD = buildStdFlags true;
 
   HOST_CC = "${buildPackages.stdenv.cc.targetPrefix}gcc";
 
@@ -84,6 +88,7 @@ mkShell (seL4RustEnvVars // kernelLoaderConfigEnvVars // capdlEnvVars // bindgen
 
   shellHook = ''
     export h=$HOST_CARGO_FLAGS
+    export hs=$HOST_CARGO_FLAGS_STD
     export t="--target $RUST_SEL4_TARGET"
     export bt="--target $RUST_BARE_METAL_TARGET"
   '';

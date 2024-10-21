@@ -23,6 +23,7 @@ struct Config {
     arch: Arch,
     context: Context,
     minimal: bool,
+    musl: bool,
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
@@ -127,11 +128,26 @@ impl Config {
             }
         }
 
+        if self.musl {
+            let options = &mut target.options;
+            options.os = "linux".into();
+            options.env = "musl".into();
+            options.families.to_mut().push("unix".into());
+            options.crt_static_default = true;
+            options.crt_static_respected = true;
+        }
+
         target
     }
 
     fn filter(&self) -> bool {
-        !self.context.is_microkit() || self.arch.microkit_support()
+        if self.context.is_microkit() && !self.arch.microkit_support() {
+            return false;
+        }
+        if self.musl && self.minimal {
+            return false;
+        }
+        true
     }
 
     fn name(&self) -> String {
@@ -146,6 +162,9 @@ impl Config {
         if self.minimal {
             name.push_str("-minimal");
         }
+        if self.musl {
+            name.push_str("-musl");
+        }
         name
     }
 
@@ -154,18 +173,22 @@ impl Config {
         for arch in Arch::all() {
             for context in Context::all() {
                 for minimal in [true, false] {
-                    let config = Self {
-                        arch,
-                        context,
-                        minimal,
-                    };
-                    if config.filter() {
-                        all.push(config);
+                    for musl in [true, false] {
+                        all.push(Self {
+                            arch,
+                            context,
+                            minimal,
+                            musl,
+                        });
                     }
                 }
             }
         }
         all
+    }
+
+    fn all_filtered() -> Vec<Self> {
+        Self::all().into_iter().filter(Self::filter).collect()
     }
 }
 
@@ -232,7 +255,7 @@ fn builtin(triple: &str) -> Target {
 }
 
 fn all_target_specs() -> BTreeMap<String, Target> {
-    Config::all()
+    Config::all_filtered()
         .into_iter()
         .map(|config| (config.name(), config.target_spec()))
         .collect::<BTreeMap<_, _>>()

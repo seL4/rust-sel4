@@ -1,0 +1,42 @@
+{
+  "arch": "aarch64",
+  "crt-objects-fallback": "false",
+  "crt-static-default": true,
+  "crt-static-respected": true,
+  "data-layout": "e-m:e-i8:8:32-i16:16:32-i64:64-i128:128-n32:64-S128-Fn32",
+  "disable-redzone": true,
+  "env": "musl",
+  "exe-suffix": ".elf",
+  "features": "+v8a,+strict-align,+neon,+fp-armv8",
+  "has-thread-local": true,
+  "link-script": "__sel4_ipc_buffer_obj = (__ehdr_start & ~(4096 - 1)) - 4096;",
+  "linker": "rust-lld",
+  "linker-flavor": "gnu-lld",
+  "llvm-target": "aarch64-unknown-none",
+  "max-atomic-width": 128,
+  "metadata": {
+    "description": null,
+    "host_tools": null,
+    "std": null,
+    "tier": null
+  },
+  "os": "linux",
+  "pre-link-args": {
+    "gnu-lld": [
+      "-z",
+      "max-page-size=4096"
+    ]
+  },
+  "relocation-model": "static",
+  "stack-probes": {
+    "kind": "inline"
+  },
+  "supported-sanitizers": [
+    "kcfi",
+    "kernel-address"
+  ],
+  "target-family": [
+    "unix"
+  ],
+  "target-pointer-width": "64"
+}
