@@ -33,6 +33,7 @@ in
 , release ? true
 , profile ? if release then "release" else (if test then "test" else "dev")
 
+, std ? false
 , sameProfileForSysroot ? false
 , profileForSysroot ? if sameProfileForSysroot then profile else "release"
 
@@ -70,6 +71,7 @@ let
   ];
 
   sysroot = (if replaceSysroot != null then replaceSysroot else buildSysroot) {
+    inherit std;
     inherit rustEnvironment;
     inherit targetTriple;
     profile = profileForSysroot;
@@ -110,6 +112,7 @@ let
   };
 
   prunedArgs = builtins.removeAttrs args [
+    "std"
     "extraProfile"
     "replaceSysroot"
     "getELF"
