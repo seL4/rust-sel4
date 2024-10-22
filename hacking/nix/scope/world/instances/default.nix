@@ -24,6 +24,10 @@
 , seL4ForBoot
 , seL4Config
 , seL4RustEnvVars
+, seL4Modifications
+
+, muslForSeL4
+, dummyLibunwind
 
 , callPlatform
 , mkSystem
@@ -234,6 +238,32 @@ in rec {
 
       c = maybe haveFullRuntime (callPackage ./c.nix {
         inherit mkInstance canSimulate;
+      });
+
+      musl = maybe haveFullRuntime (mkInstance {
+        rootTask =
+          let
+            targetTriple = mkSeL4RustTargetTriple { musl = true; };
+          in
+            mkTask {
+              rootCrate = crates.tests-root-task-musl;
+              release = false;
+              std = true;
+              inherit targetTriple;
+              commonModifications = {
+                modifyConfig = old: lib.recursiveUpdate old {
+                  target.${targetTriple.name} = {
+                    rustflags = (old.target.${targetTriple.name}.rustflags or []) ++ [
+                      "-L" "${muslForSeL4}/lib"
+                      "-L" "${dummyLibunwind}/lib"
+                    ];
+                  };
+                };
+              };
+            };
+        extraPlatformArgs = lib.optionalAttrs canSimulate {
+          canAutomateSimply = true;
+        };
       });
 
       verus = maybe (haveFullRuntime && hostPlatform.is64bit && buildPlatform.isx86_64) (callPackage ./verus.nix {
