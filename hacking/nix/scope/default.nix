@@ -265,6 +265,8 @@ superCallPackage ../rust-utils {} self //
 
   muslForSeL4Raw = callPackage ./musl/raw.nix {};
 
+  dummyLibunwind = callPackage ./musl/dummy-libunwind.nix {};
+
   ### sel4test
 
   mkSeL4Test = callPackage ./sel4test {};
