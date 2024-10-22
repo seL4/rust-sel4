@@ -25,6 +25,7 @@ unwinding = ["sel4-panicking/unwinding"]
 [dependencies]
 cfg-if = "1.0.0"
 sel4 = { path = "../sel4", features = ["single-threaded"] }
+sel4-ctors-dtors = { path = "../sel4-ctors-dtors" }
 sel4-dlmalloc = { path = "../sel4-dlmalloc" }
 sel4-immediate-sync-once-cell = { path = "../sel4-immediate-sync-once-cell" }
 sel4-microkit-base = { path = "base" }

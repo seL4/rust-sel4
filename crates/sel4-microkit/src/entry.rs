@@ -39,7 +39,7 @@ fn inner_entry() -> ! {
 
     unsafe {
         sel4::set_ipc_buffer(ipc_buffer_ptr().as_mut().unwrap());
-        sel4_runtime_common::run_ctors();
+        sel4_ctors_dtors::run_ctors();
         __sel4_microkit__main();
     }
 

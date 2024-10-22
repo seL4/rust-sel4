@@ -88,7 +88,7 @@ pub unsafe extern "C" fn cont_fn(cont_arg: *mut sel4_runtime_common::ContArg) ->
         }
 
         sel4_panicking::set_hook(&panic_hook);
-        sel4_runtime_common::run_ctors();
+        sel4_ctors_dtors::run_ctors();
         __sel4_simple_task_main(config.arg());
     } else {
         let endpoint =

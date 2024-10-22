@@ -23,6 +23,7 @@ mk {
       sel4-simple-task-runtime-macros
       sel4-simple-task-threading
       sel4-sync
+      sel4-ctors-dtors
     ;
     sel4-runtime-common = localCrates.sel4-runtime-common // { features = [ "tls" "unwinding" ]; };
   };

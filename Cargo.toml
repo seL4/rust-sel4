@@ -95,6 +95,7 @@ members = [
     "crates/sel4-capdl-initializer/with-embedded-spec/build-env",
     "crates/sel4-capdl-initializer/with-embedded-spec/embedded-spec",
     "crates/sel4-capdl-initializer/with-embedded-spec/embedded-spec/validate",
+    "crates/sel4-ctors-dtors",
     "crates/sel4-dlmalloc",
     "crates/sel4-driver-interfaces",
     "crates/sel4-elf-header",
