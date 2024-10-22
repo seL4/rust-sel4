@@ -34,7 +34,7 @@ fn inner_entry(bootinfo: *const sel4::BootInfo) -> ! {
     unsafe {
         let bootinfo = sel4::BootInfoPtr::new(bootinfo);
         sel4::set_ipc_buffer(bootinfo.ipc_buffer().as_mut().unwrap());
-        sel4_runtime_common::run_ctors();
+        sel4_ctors_dtors::run_ctors();
         __sel4_root_task__main(&bootinfo);
     }
 

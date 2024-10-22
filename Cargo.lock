@@ -2250,6 +2250,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "sel4-ctors-dtors"
+version = "0.1.0"
+
+[[package]]
 name = "sel4-dlmalloc"
 version = "0.1.0"
 dependencies = [
@@ -2404,6 +2408,7 @@ version = "0.1.0"
 dependencies = [
  "cfg-if",
  "sel4",
+ "sel4-ctors-dtors",
  "sel4-dlmalloc",
  "sel4-immediate-sync-once-cell",
  "sel4-microkit-base",
@@ -2563,6 +2568,7 @@ name = "sel4-root-task"
 version = "0.1.0"
 dependencies = [
  "sel4",
+ "sel4-ctors-dtors",
  "sel4-dlmalloc",
  "sel4-immediate-sync-once-cell",
  "sel4-panicking",
@@ -2692,6 +2698,7 @@ dependencies = [
  "sel4",
  "sel4-backtrace",
  "sel4-backtrace-simple",
+ "sel4-ctors-dtors",
  "sel4-dlmalloc",
  "sel4-immediate-sync-once-cell",
  "sel4-panicking",
@@ -2962,6 +2969,7 @@ version = "0.1.0"
 dependencies = [
  "cfg-if",
  "sel4",
+ "sel4-ctors-dtors",
  "sel4-dlmalloc",
  "sel4-panicking",
  "sel4-panicking-env",

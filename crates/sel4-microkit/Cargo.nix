@@ -16,6 +16,7 @@ mk {
       sel4-panicking
       sel4-dlmalloc
       sel4-sync
+      sel4-ctors-dtors
       sel4-microkit-base
       sel4-microkit-macros
     ;

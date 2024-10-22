@@ -4,13 +4,16 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-// See https://maskray.me/blog/2021-11-07-init-ctors-init-array
+// See:
+// - https://github.com/ARM-software/abi-aa/blob/main/sysvabi64/sysvabi64.rst
+// - https://maskray.me/blog/2021-11-07-init-ctors-init-array
+
+#![no_std]
+#![feature(linkage)]
 
 use core::mem;
 use core::ptr;
 use core::slice;
-
-use sel4_panicking_env::abort;
 
 type ArrayEntry = unsafe extern "C" fn();
 
@@ -41,7 +44,7 @@ unsafe fn run_array(start_addr: usize, end_addr: usize, section_name: &str) {
         if start_addr % mem::size_of::<ArrayEntry>() != 0
             || end_addr % mem::size_of::<ArrayEntry>() != 0
         {
-            abort!("{section_name:?} section is not properly aligned");
+            panic!("{section_name:?} section is not properly aligned");
         }
 
         let len = (end_addr - start_addr) / mem::size_of::<ArrayEntry>();

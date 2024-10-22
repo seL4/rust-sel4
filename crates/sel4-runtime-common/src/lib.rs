@@ -6,14 +6,9 @@
 
 #![no_std]
 #![feature(cfg_target_thread_local)]
-#![feature(linkage)]
 
 use sel4_elf_header::{ElfHeader, ProgramHeader};
 use sel4_panicking_env::abort;
-
-mod ctors;
-
-pub use ctors::{run_ctors, run_dtors};
 
 #[cfg(feature = "start")]
 mod start;
