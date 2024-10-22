@@ -2490,6 +2490,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "sel4-musl"
+version = "0.1.0"
+
+[[package]]
 name = "sel4-newlib"
 version = "0.1.0"
 dependencies = [
