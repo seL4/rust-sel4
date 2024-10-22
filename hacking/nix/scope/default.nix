@@ -259,6 +259,12 @@ superCallPackage ../rust-utils {} self //
 
   platUtils = callPackage ./plat-utils {};
 
+  ### musl
+
+  muslForSeL4 = callPackage ./musl {};
+
+  muslForSeL4Raw = callPackage ./musl/raw.nix {};
+
   ### sel4test
 
   mkSeL4Test = callPackage ./sel4test {};
