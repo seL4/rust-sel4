@@ -2612,6 +2612,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "sel4-root-task-with-std"
+version = "0.1.0"
+dependencies = [
+ "sel4",
+ "sel4-ctors-dtors",
+ "sel4-panicking-env",
+ "sel4-runtime-common",
+]
+
+[[package]]
 name = "sel4-runtime-common"
 version = "0.1.0"
 dependencies = [
@@ -3215,6 +3225,20 @@ dependencies = [
  "sel4",
  "sel4-platform-info",
  "sel4-root-task",
+]
+
+[[package]]
+name = "tests-root-task-musl"
+version = "0.1.0"
+dependencies = [
+ "dlmalloc",
+ "lock_api",
+ "sel4",
+ "sel4-dlmalloc",
+ "sel4-linux-syscall-types",
+ "sel4-musl",
+ "sel4-root-task-with-std",
+ "sel4-sync-trivial",
 ]
 
 [[package]]
