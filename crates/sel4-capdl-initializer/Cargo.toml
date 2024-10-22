@@ -29,4 +29,4 @@ sel4-sync = { path = "../sel4-sync" }
 [dependencies.sel4-root-task]
 path = "../sel4-root-task"
 default-features = false
-features = ["alloc", "single-threaded"]
+features = ["single-threaded"]
