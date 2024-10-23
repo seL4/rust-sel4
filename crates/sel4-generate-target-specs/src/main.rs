@@ -144,7 +144,7 @@ impl Config {
         if self.context.is_microkit() && !self.arch.microkit_support() {
             return false;
         }
-        if self.musl && self.minimal {
+        if self.musl && (self.minimal || self.context.is_microkit()) {
             return false;
         }
         true
