@@ -1,6 +1,6 @@
 // https://git.musl-libc.org/cgit/musl/tree/arch/arm/bits/syscall.h.in
 
-pub mod NR {
+pub mod syscall_number {
     pub const restart_syscall: isize = 0;
     pub const exit: isize = 1;
     pub const fork: isize = 2;
@@ -409,7 +409,7 @@ pub mod NR {
     pub const fchmodat2: isize = 452;
 }
 
-pub mod ARM_NR {
+pub mod arm_syscall_number {
     pub const breakpoint: isize = 0x0f0001;
     pub const cacheflush: isize = 0x0f0002;
     pub const usr26: isize = 0x0f0003;

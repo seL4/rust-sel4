@@ -92,27 +92,27 @@ impl Syscall {
         let args = &mut args;
 
         Ok(match sysnum {
-            NR::lseek => Lseek {
+            syscall_number::lseek => Lseek {
                 fd: next(args)?,
                 offset: next(args)?,
                 whence: next(args)?,
             },
-            NR::write => Write {
+            syscall_number::write => Write {
                 fd: next(args)?,
                 buf: next(args)?,
                 count: next(args)?,
             },
-            NR::writev => Writev {
+            syscall_number::writev => Writev {
                 fd: next(args)?,
                 iov: next(args)?,
                 iovcnt: next(args)?,
             },
-            NR::getuid => Getuid,
-            NR::geteuid => Geteuid,
-            NR::getgid => Getgid,
-            NR::getegid => Getegid,
-            NR::brk => Brk { addr: next(args)? },
-            NR::mmap => Mmap {
+            syscall_number::getuid => Getuid,
+            syscall_number::geteuid => Geteuid,
+            syscall_number::getgid => Getgid,
+            syscall_number::getegid => Getegid,
+            syscall_number::brk => Brk { addr: next(args)? },
+            syscall_number::mmap => Mmap {
                 addr: next(args)?,
                 length: next(args)?,
                 prot: next(args)?,

@@ -1,6 +1,6 @@
 // https://git.musl-libc.org/cgit/musl/tree/arch/x86_64/bits/syscall.h.in
 
-pub mod NR {
+pub mod syscall_number {
     pub const read: isize = 0;
     pub const write: isize = 1;
     pub const open: isize = 2;
