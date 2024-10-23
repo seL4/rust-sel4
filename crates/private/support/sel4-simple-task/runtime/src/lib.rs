@@ -64,8 +64,8 @@ pub struct ContArg {
 }
 
 #[allow(clippy::missing_safety_doc)]
-pub unsafe extern "C" fn cont_fn(cont_arg: *mut sel4_runtime_common::ContArg) -> ! {
-    let cont_arg: &ContArg = &*cont_arg.cast_const().cast();
+pub fn cont_fn(cont_arg: *mut sel4_runtime_common::ContArg) -> ! {
+    let cont_arg: &ContArg = unsafe { &*cont_arg.cast_const().cast() };
 
     let config = &cont_arg.config;
     let thread_index = cont_arg.thread_index;
@@ -73,11 +73,11 @@ pub unsafe extern "C" fn cont_fn(cont_arg: *mut sel4_runtime_common::ContArg) ->
 
     THREAD_INDEX.set(thread_index).unwrap();
 
-    sel4::set_ipc_buffer(
+    sel4::set_ipc_buffer(unsafe {
         (usize::try_from(thread_config.ipc_buffer_addr()).unwrap() as *mut sel4::IpcBuffer)
             .as_mut()
-            .unwrap(),
-    );
+            .unwrap()
+    });
 
     if thread_index == 0 {
         CONFIG.set(config.clone()).unwrap();
@@ -89,7 +89,10 @@ pub unsafe extern "C" fn cont_fn(cont_arg: *mut sel4_runtime_common::ContArg) ->
 
         sel4_panicking::set_hook(&panic_hook);
         sel4_ctors_dtors::run_ctors();
-        __sel4_simple_task_main(config.arg());
+
+        unsafe {
+            __sel4_simple_task_main(config.arg());
+        }
     } else {
         let endpoint =
             sel4::cap::Endpoint::from_bits(thread_config.endpoint().unwrap().try_into().unwrap());
@@ -103,7 +106,9 @@ pub unsafe extern "C" fn cont_fn(cont_arg: *mut sel4_runtime_common::ContArg) ->
                 }
             }
         };
-        StaticThread::recv_and_run(endpoint, reply_authority);
+        unsafe {
+            StaticThread::recv_and_run(endpoint, reply_authority);
+        }
     }
 
     idle()

@@ -11,7 +11,7 @@ use crate::{abort, panicking::catch_unwind, Termination};
 #[cfg(target_thread_local)]
 #[no_mangle]
 unsafe extern "C" fn sel4_runtime_rust_entry(bootinfo: *const sel4::BootInfo) -> ! {
-    unsafe extern "C" fn cont_fn(cont_arg: *mut sel4_runtime_common::ContArg) -> ! {
+    fn cont_fn(cont_arg: *mut sel4_runtime_common::ContArg) -> ! {
         inner_entry(cont_arg.cast_const().cast())
     }
 

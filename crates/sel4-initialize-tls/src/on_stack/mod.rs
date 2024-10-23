@@ -12,7 +12,7 @@ mod reserve;
 
 use reserve::{reserve_on_stack, ReserveOnStackContArg};
 
-pub type ContFn = unsafe extern "C" fn(cont_arg: *mut ContArg) -> !;
+pub type ContFn = fn(cont_arg: *mut ContArg) -> !;
 
 pub enum ContArg {}
 
