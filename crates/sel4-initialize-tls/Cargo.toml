@@ -17,6 +17,8 @@ edition = "2021"
 license = "BSD-2-Clause"
 
 [features]
+alloc = []
+on-heap = ["alloc"]
 on-stack = []
 
 [dependencies]

@@ -15,7 +15,7 @@ mk {
       sel4-root-task
       sel4-elf-header
       sel4-stack
-      sel4-initialize-tls
     ;
+    sel4-initialize-tls = localCrates.sel4-initialize-tls // { features = [ "on-heap" ]; };
   };
 }
