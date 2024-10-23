@@ -19,6 +19,8 @@ pub use syscall_registers::{
     IteratorAsSyscallArgs, SyscallArg, SyscallArgs, SyscallWordArg, VaListAsSyscallArgs,
 };
 
+pub type SyscallNumber = isize;
+
 pub const ENOSYS: i64 = 38;
 pub const ENOMEM: i64 = 12;
 
