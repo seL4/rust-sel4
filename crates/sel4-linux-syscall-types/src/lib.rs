@@ -8,18 +8,15 @@
 
 #![no_std]
 #![feature(c_variadic)]
-// #![allow(non_snake_case)]
-// #![allow(non_upper_case_globals)]
 
-use core::ffi::c_void;
+use core::ffi::{c_char, c_uint, c_ulong, c_void};
 
 mod arch;
 mod syscall_registers;
 
 pub use arch::*;
 pub use syscall_registers::{
-    IteratorAsSyscallRegisters, SyscallRegisterValue, SyscallRegisterWord, SyscallRegisters,
-    VaListAsSyscallRegisters,
+    IteratorAsSyscallArgs, SyscallArg, SyscallArgs, SyscallWordArg, VaListAsSyscallArgs,
 };
 
 pub const ENOSYS: i64 = 38;
@@ -27,6 +24,12 @@ pub const ENOMEM: i64 = 12;
 
 pub const SEEK_CUR: i32 = 1;
 pub const MAP_ANONYMOUS: i32 = 0x20;
+
+#[allow(non_camel_case_types)]
+type c_off_t = usize;
+
+#[allow(non_camel_case_types)]
+type c_size_t = usize;
 
 #[repr(C)]
 #[derive(Debug)]
@@ -38,83 +41,72 @@ pub struct IOVec {
 #[derive(Debug)]
 pub enum Syscall {
     Lseek {
-        fd: i32,
-        offset: usize,
-        whence: i32,
+        fd: c_uint,
+        offset: c_off_t,
+        whence: c_uint,
     },
     Write {
-        fd: i32,
-        buf: *const u8, // TODO c_void
-        count: usize,
+        fd: c_uint,
+        buf: *const c_char, // TODO c_void
+        count: c_size_t,
     },
     Writev {
-        fd: i32,
+        fd: c_uint,
         iov: *const IOVec,
-        iovcnt: i32,
+        iovcnt: c_ulong,
     },
     Getuid,
     Geteuid,
     Getgid,
     Getegid,
     Brk {
-        addr: *const u8, // TODO c_void
+        addr: c_ulong,
     },
     Mmap {
-        addr: *const u8, // TODO c_void
-        length: usize,
-        prot: i32,
-        flag: i32,
-        fd: i32,
-        offset: usize,
+        addr: c_ulong,
+        len: c_ulong,
+        prot: c_ulong,
+        flag: c_ulong,
+        fd: c_ulong,
+        offset: c_ulong,
     },
-}
-
-#[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord)]
-pub enum ParseSyscallError {
-    UnrecognizedSyscallNumber,
-    TooFewValues,
 }
 
 impl Syscall {
-    pub fn parse(
-        sysnum: isize,
-        mut args: impl SyscallRegisters,
-    ) -> Result<Self, ParseSyscallError> {
-        use Syscall::*;
-
-        fn next<T: SyscallRegisterValue>(
-            args: &mut impl SyscallRegisters,
-        ) -> Result<T, ParseSyscallError> {
-            args.next_register_value()
-                .ok_or(ParseSyscallError::TooFewValues)
+    pub fn parse(sysnum: isize, mut args: impl SyscallArgs) -> Result<Self, ParseSyscallError> {
+        fn next<T: SyscallArg>(args: &mut impl SyscallArgs) -> Result<T, ParseSyscallError> {
+            args.next_arg().ok_or(ParseSyscallError::TooFewValues)
         }
 
         let args = &mut args;
 
+        use syscall_number::*;
+        use Syscall::*;
+
         Ok(match sysnum {
-            syscall_number::LSEEK => Lseek {
+            LSEEK => Lseek {
                 fd: next(args)?,
                 offset: next(args)?,
                 whence: next(args)?,
             },
-            syscall_number::WRITE => Write {
+            WRITE => Write {
                 fd: next(args)?,
                 buf: next(args)?,
                 count: next(args)?,
             },
-            syscall_number::WRITEV => Writev {
+            WRITEV => Writev {
                 fd: next(args)?,
                 iov: next(args)?,
                 iovcnt: next(args)?,
             },
-            syscall_number::GETUID => Getuid,
-            syscall_number::GETEUID => Geteuid,
-            syscall_number::GETGID => Getgid,
-            syscall_number::GETEGID => Getegid,
-            syscall_number::BRK => Brk { addr: next(args)? },
-            syscall_number::MMAP => Mmap {
+            GETUID => Getuid,
+            GETEUID => Geteuid,
+            GETGID => Getgid,
+            GETEGID => Getegid,
+            BRK => Brk { addr: next(args)? },
+            MMAP => Mmap {
                 addr: next(args)?,
-                length: next(args)?,
+                len: next(args)?,
                 prot: next(args)?,
                 flag: next(args)?,
                 fd: next(args)?,
@@ -123,4 +115,10 @@ impl Syscall {
             _ => return Err(ParseSyscallError::UnrecognizedSyscallNumber),
         })
     }
+}
+
+#[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord)]
+pub enum ParseSyscallError {
+    UnrecognizedSyscallNumber,
+    TooFewValues,
 }
