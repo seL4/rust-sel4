@@ -30,6 +30,10 @@ use core::slice;
 )))]
 compile_error!("unsupported architecture");
 
+mod set_thread_pointer;
+
+pub use set_thread_pointer::{SetThreadPointerFn, DEFAULT_SET_THREAD_POINTER_FN};
+
 #[cfg(feature = "on-stack")]
 mod on_stack;
 
