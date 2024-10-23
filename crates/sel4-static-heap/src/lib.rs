@@ -38,7 +38,7 @@ impl<const N: usize, A> StaticHeap<N, A> {
     }
 }
 
-impl<const N: usize> Default for StaticHeap<N> {
+impl<const N: usize, A> Default for StaticHeap<N, A> {
     fn default() -> Self {
         Self::new()
     }
