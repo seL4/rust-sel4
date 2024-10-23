@@ -10,13 +10,8 @@
 #
 
 [package]
-name = "sel4-dlmalloc"
+name = "sel4-static-heap"
 version = "0.1.0"
 authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
 edition = "2021"
 license = "BSD-2-Clause"
-
-[dependencies]
-dlmalloc = "0.2.3"
-lock_api = "0.4.12"
-sel4-static-heap = { path = "../sel4-static-heap" }

@@ -7,12 +7,14 @@
 #![no_std]
 
 use core::alloc::{GlobalAlloc, Layout};
-use core::cell::{RefCell, UnsafeCell};
+use core::cell::RefCell;
 use core::mem;
 use core::ptr;
 
 use dlmalloc::{Allocator as DlmallocAllocator, Dlmalloc};
 use lock_api::{Mutex, RawMutex};
+
+pub use sel4_static_heap::StaticHeap;
 
 pub type StaticDlmallocGlobalAlloc<R, T> = DlmallocGlobalAlloc<R, StaticDlmallocAllocator<T>>;
 
@@ -73,6 +75,7 @@ enum StaticDlmallocAllocatorState<T> {
     Initialized { free: Free },
 }
 
+// TODO: ptr, watermark: usize, size: usize
 struct Free {
     watermark: *mut u8,
     end: *mut u8,
@@ -100,7 +103,7 @@ impl Free {
 }
 
 impl<T> StaticDlmallocAllocator<T> {
-    const fn new(get_initial_bounds: T) -> Self {
+    pub const fn new(get_initial_bounds: T) -> Self {
         Self {
             state: RefCell::new(StaticDlmallocAllocatorState::Uninitialized { get_initial_bounds }),
         }
@@ -183,28 +186,8 @@ impl<T: FnOnce() -> StaticHeapBounds> GetStaticHeapBounds for T {
     }
 }
 
-// TODO alignment should depend on configuration
-// TODO does this alignment provide any benefit?
-// NOTE(rustc_wishlist) use SyncUnsafeCell once #![feature(sync_unsafe_cell)] stabilizes
-#[repr(C, align(4096))]
-pub struct StaticHeap<const N: usize>(UnsafeCell<[u8; N]>);
-
-unsafe impl<const N: usize> Sync for StaticHeap<N> {}
-
-impl<const N: usize> StaticHeap<N> {
-    pub const fn new() -> Self {
-        Self(UnsafeCell::new([0; N]))
-    }
-}
-
-impl<const N: usize> Default for StaticHeap<N> {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
 impl<const N: usize> GetStaticHeapBounds for &StaticHeap<N> {
     fn bounds(self) -> StaticHeapBounds {
-        StaticHeapBounds::new(self.0.get().cast(), N)
+        StaticHeapBounds::new(self.start(), self.size())
     }
 }
