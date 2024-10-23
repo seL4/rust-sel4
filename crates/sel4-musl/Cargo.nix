@@ -8,4 +8,10 @@
 
 mk {
   package.name = "sel4-musl";
+  dependencies = {
+    inherit (localCrates)
+      sel4-immediate-sync-once-cell
+      sel4-linux-syscall-types
+    ;
+  };
 }
