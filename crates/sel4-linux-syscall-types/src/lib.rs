@@ -8,8 +8,19 @@
 
 #![no_std]
 #![feature(c_variadic)]
+#![allow(non_snake_case)]
+#![allow(non_upper_case_globals)]
 
-use core::ffi::{c_void, VaList};
+use core::ffi::c_void;
+
+mod arch;
+mod syscall_registers;
+
+pub use arch::*;
+pub use syscall_registers::{
+    IteratorAsSyscallRegisters, SyscallRegisterValue, SyscallRegisterWord, SyscallRegisters,
+    VaListAsSyscallRegisters,
+};
 
 pub const ENOSYS: i64 = 38;
 pub const ENOMEM: i64 = 12;
@@ -58,42 +69,58 @@ pub enum Syscall {
     },
 }
 
+#[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord)]
+pub enum ParseSyscallError {
+    UnrecognizedSyscallNumber,
+    TooFewValues,
+}
+
 impl Syscall {
-    pub fn get(sysnum: i64, args: &mut VaList) -> Option<Self> {
+    pub fn parse(
+        sysnum: isize,
+        mut args: impl SyscallRegisters,
+    ) -> Result<Self, ParseSyscallError> {
         use Syscall::*;
 
-        Some(match sysnum {
-            62 => Lseek {
-                fd: unsafe { args.arg() },
-                offset: unsafe { args.arg() },
-                whence: unsafe { args.arg() },
+        fn next<T: SyscallRegisterValue>(
+            args: &mut impl SyscallRegisters,
+        ) -> Result<T, ParseSyscallError> {
+            args.next_register_value()
+                .ok_or(ParseSyscallError::TooFewValues)
+        }
+
+        let args = &mut args;
+
+        Ok(match sysnum {
+            NR::lseek => Lseek {
+                fd: next(args)?,
+                offset: next(args)?,
+                whence: next(args)?,
             },
-            64 => Write {
-                fd: unsafe { args.arg() },
-                buf: unsafe { args.arg() },
-                count: unsafe { args.arg() },
+            NR::write => Write {
+                fd: next(args)?,
+                buf: next(args)?,
+                count: next(args)?,
             },
-            66 => Writev {
-                fd: unsafe { args.arg() },
-                iov: unsafe { args.arg() },
-                iovcnt: unsafe { args.arg() },
+            NR::writev => Writev {
+                fd: next(args)?,
+                iov: next(args)?,
+                iovcnt: next(args)?,
             },
-            174 => Getuid,
-            175 => Geteuid,
-            176 => Getgid,
-            177 => Getegid,
-            214 => Brk {
-                addr: unsafe { args.arg() },
+            NR::getuid => Getuid,
+            NR::geteuid => Geteuid,
+            NR::getgid => Getgid,
+            NR::getegid => Getegid,
+            NR::brk => Brk { addr: next(args)? },
+            NR::mmap => Mmap {
+                addr: next(args)?,
+                length: next(args)?,
+                prot: next(args)?,
+                flag: next(args)?,
+                fd: next(args)?,
+                offset: next(args)?,
             },
-            222 => Mmap {
-                addr: unsafe { args.arg() },
-                length: unsafe { args.arg() },
-                prot: unsafe { args.arg() },
-                flag: unsafe { args.arg() },
-                fd: unsafe { args.arg() },
-                offset: unsafe { args.arg() },
-            },
-            _ => return None,
+            _ => return Err(ParseSyscallError::UnrecognizedSyscallNumber),
         })
     }
 }
