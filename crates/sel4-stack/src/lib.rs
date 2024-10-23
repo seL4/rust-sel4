@@ -40,7 +40,7 @@ impl<const N: usize> Default for Stack<N> {
 }
 
 #[repr(transparent)]
-pub struct StackBottom(#[allow(dead_code)] *mut u8);
+pub struct StackBottom(*mut u8);
 
 impl StackBottom {
     pub fn ptr(&self) -> *mut u8 {
