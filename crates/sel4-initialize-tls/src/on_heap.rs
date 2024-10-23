@@ -12,7 +12,7 @@ pub struct HeapTlsReservation {
 }
 
 impl HeapTlsReservation {
-    fn new(tls_image: &TlsImage) -> Self {
+    fn initialize(tls_image: &TlsImage) -> Self {
         let layout = tls_image.reservation_layout();
         let start = unsafe { ::alloc::alloc::alloc(layout.footprint()) };
         unsafe {
@@ -36,6 +36,6 @@ impl Drop for HeapTlsReservation {
 
 impl TlsImage {
     pub fn initialize_on_heap(&self) -> HeapTlsReservation {
-        HeapTlsReservation::new(self)
+        HeapTlsReservation::initialize(self)
     }
 }
