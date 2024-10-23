@@ -13,5 +13,7 @@ mk {
   };
   features = {
     on-stack = [];
+    on-heap = [ "alloc" ];
+    alloc = [];
   };
 }

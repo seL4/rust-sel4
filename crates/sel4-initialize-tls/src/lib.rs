@@ -21,6 +21,9 @@ use core::alloc::Layout;
 use core::mem;
 use core::slice;
 
+#[cfg(feature = "alloc")]
+extern crate alloc;
+
 #[cfg(not(any(
     target_arch = "aarch64",
     target_arch = "arm",
@@ -39,6 +42,12 @@ mod on_stack;
 
 #[cfg(feature = "on-stack")]
 pub use on_stack::*;
+
+#[cfg(feature = "on-heap")]
+mod on_heap;
+
+#[cfg(feature = "on-heap")]
+pub use on_heap::*;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct UncheckedTlsImage {

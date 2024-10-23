@@ -20,7 +20,7 @@ use core::ptr;
 use cfg_if::cfg_if;
 
 use sel4_elf_header::{ElfHeader, PT_TLS};
-use sel4_initialize_tls::{TlsImage, TlsReservationLayout, UncheckedTlsImage};
+use sel4_initialize_tls::{TlsImage, UncheckedTlsImage};
 use sel4_root_task::{
     abort, panicking::catch_unwind, root_task, set_global_allocator_mutex_notification, Never,
 };
@@ -144,7 +144,7 @@ fn create_user_context(f: SecondaryThreadFn) -> sel4::UserContext {
     *ctx.pc_mut() = (secondary_thread_entrypoint as usize).try_into().unwrap();
     *ctx.c_param_mut(0) = f.into_arg();
 
-    let tls_reservation = TlsReservation::new(&get_tls_image());
+    let tls_reservation = get_tls_image().initialize_on_heap();
     *user_context_thread_pointer_mut(&mut ctx) = tls_reservation.thread_pointer() as sel4::Word;
     mem::forget(tls_reservation);
 
@@ -211,34 +211,6 @@ impl SecondaryThreadFn {
 }
 
 // // //
-
-struct TlsReservation {
-    start: *mut u8,
-    layout: TlsReservationLayout,
-}
-
-impl TlsReservation {
-    fn new(tls_image: &TlsImage) -> Self {
-        let layout = tls_image.reservation_layout();
-        let start = unsafe { ::alloc::alloc::alloc(layout.footprint()) };
-        unsafe {
-            tls_image.initialize_tls_reservation(start);
-        };
-        Self { start, layout }
-    }
-
-    fn thread_pointer(&self) -> usize {
-        (self.start as usize) + self.layout.thread_pointer_offset()
-    }
-}
-
-impl Drop for TlsReservation {
-    fn drop(&mut self) {
-        unsafe {
-            ::alloc::alloc::dealloc(self.start, self.layout.footprint());
-        }
-    }
-}
 
 fn get_tls_image() -> TlsImage {
     extern "C" {
