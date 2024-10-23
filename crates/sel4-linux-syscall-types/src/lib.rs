@@ -8,8 +8,8 @@
 
 #![no_std]
 #![feature(c_variadic)]
-#![allow(non_snake_case)]
-#![allow(non_upper_case_globals)]
+// #![allow(non_snake_case)]
+// #![allow(non_upper_case_globals)]
 
 use core::ffi::c_void;
 
@@ -92,27 +92,27 @@ impl Syscall {
         let args = &mut args;
 
         Ok(match sysnum {
-            syscall_number::lseek => Lseek {
+            syscall_number::LSEEK => Lseek {
                 fd: next(args)?,
                 offset: next(args)?,
                 whence: next(args)?,
             },
-            syscall_number::write => Write {
+            syscall_number::WRITE => Write {
                 fd: next(args)?,
                 buf: next(args)?,
                 count: next(args)?,
             },
-            syscall_number::writev => Writev {
+            syscall_number::WRITEV => Writev {
                 fd: next(args)?,
                 iov: next(args)?,
                 iovcnt: next(args)?,
             },
-            syscall_number::getuid => Getuid,
-            syscall_number::geteuid => Geteuid,
-            syscall_number::getgid => Getgid,
-            syscall_number::getegid => Getegid,
-            syscall_number::brk => Brk { addr: next(args)? },
-            syscall_number::mmap => Mmap {
+            syscall_number::GETUID => Getuid,
+            syscall_number::GETEUID => Geteuid,
+            syscall_number::GETGID => Getgid,
+            syscall_number::GETEGID => Getegid,
+            syscall_number::BRK => Brk { addr: next(args)? },
+            syscall_number::MMAP => Mmap {
                 addr: next(args)?,
                 length: next(args)?,
                 prot: next(args)?,
