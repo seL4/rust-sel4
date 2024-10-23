@@ -37,6 +37,9 @@ mod set_thread_pointer;
 
 pub use set_thread_pointer::{SetThreadPointerFn, DEFAULT_SET_THREAD_POINTER_FN};
 
+mod static_allocation;
+pub use static_allocation::*;
+
 #[cfg(feature = "on-stack")]
 mod on_stack;
 
