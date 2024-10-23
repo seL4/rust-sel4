@@ -10,7 +10,8 @@
 use core::ffi::{c_char, CStr};
 
 use sel4_immediate_sync_once_cell::ImmediateSyncOnceCell;
-use sel4_linux_syscall_types::{
+
+pub use sel4_linux_syscall_types::{
     ParseSyscallError, Syscall, SyscallReturnValue, VaListAsSyscallArgs,
 };
 
