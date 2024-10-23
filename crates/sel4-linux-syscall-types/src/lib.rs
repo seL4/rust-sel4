@@ -9,7 +9,7 @@
 #![no_std]
 #![feature(c_variadic)]
 
-use core::ffi::{c_char, c_uint, c_ulong, c_void};
+use core::ffi::{c_char, c_int, c_void};
 
 mod arch;
 mod syscall_registers;
@@ -23,8 +23,8 @@ pub type SyscallNumber = isize;
 
 pub type SyscallReturnValue = isize;
 
-pub const ENOSYS: i64 = 38;
-pub const ENOMEM: i64 = 12;
+pub const ENOSYS: SyscallReturnValue = 38;
+pub const ENOMEM: SyscallReturnValue = 12;
 
 pub const SEEK_CUR: i32 = 1;
 pub const MAP_ANONYMOUS: i32 = 0x20;
@@ -36,43 +36,43 @@ type c_off_t = usize;
 type c_size_t = usize;
 
 #[repr(C)]
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct IOVec {
     pub iov_base: *const c_void,
     pub iov_len: usize,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Syscall {
     Lseek {
-        fd: c_uint,
+        fd: c_int,
         offset: c_off_t,
-        whence: c_uint,
+        whence: c_int,
     },
     Write {
-        fd: c_uint,
+        fd: c_int,
         buf: *const c_char, // TODO c_void
         count: c_size_t,
     },
     Writev {
-        fd: c_uint,
+        fd: c_int,
         iov: *const IOVec,
-        iovcnt: c_ulong,
+        iovcnt: c_int,
     },
     Getuid,
     Geteuid,
     Getgid,
     Getegid,
     Brk {
-        addr: c_ulong,
+        addr: *mut c_void,
     },
     Mmap {
-        addr: c_ulong,
-        len: c_ulong,
-        prot: c_ulong,
-        flag: c_ulong,
-        fd: c_ulong,
-        offset: c_ulong,
+        addr: *mut c_void,
+        len: c_size_t,
+        prot: c_int,
+        flag: c_int,
+        fd: c_int,
+        offset: c_off_t,
     },
 }
 
