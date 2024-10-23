@@ -21,6 +21,8 @@ pub use syscall_registers::{
 
 pub type SyscallNumber = isize;
 
+pub type SyscallReturnValue = isize;
+
 pub const ENOSYS: i64 = 38;
 pub const ENOMEM: i64 = 12;
 
@@ -75,12 +77,25 @@ pub enum Syscall {
 }
 
 impl Syscall {
-    pub fn parse(sysnum: isize, mut args: impl SyscallArgs) -> Result<Self, ParseSyscallError> {
-        fn next<T: SyscallArg>(args: &mut impl SyscallArgs) -> Result<T, ParseSyscallError> {
-            args.next_arg().ok_or(ParseSyscallError::TooFewValues)
-        }
+    pub fn parse<T: SyscallArgs>(
+        sysnum: SyscallNumber,
+        mut args: T,
+    ) -> Result<Self, ParseSyscallError<T>> {
+        Self::parse_inner(sysnum, &mut args).map_err(|err| match err {
+            ParseSyscallErrorInner::UnrecognizedSyscallNumber => {
+                ParseSyscallError::UnrecognizedSyscallNumber { sysnum, args }
+            }
+            ParseSyscallErrorInner::TooFewValues => ParseSyscallError::TooFewValues { sysnum },
+        })
+    }
 
-        let args = &mut args;
+    fn parse_inner<T: SyscallArgs>(
+        sysnum: SyscallNumber,
+        args: &mut T,
+    ) -> Result<Self, ParseSyscallErrorInner> {
+        fn next<T: SyscallArg>(args: &mut impl SyscallArgs) -> Result<T, ParseSyscallErrorInner> {
+            args.next_arg().ok_or(ParseSyscallErrorInner::TooFewValues)
+        }
 
         use syscall_number::*;
         use Syscall::*;
@@ -114,13 +129,19 @@ impl Syscall {
                 fd: next(args)?,
                 offset: next(args)?,
             },
-            _ => return Err(ParseSyscallError::UnrecognizedSyscallNumber),
+            _ => return Err(ParseSyscallErrorInner::UnrecognizedSyscallNumber),
         })
     }
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord)]
-pub enum ParseSyscallError {
+pub enum ParseSyscallError<T> {
+    UnrecognizedSyscallNumber { sysnum: SyscallNumber, args: T },
+    TooFewValues { sysnum: SyscallNumber },
+}
+
+#[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord)]
+pub enum ParseSyscallErrorInner {
     UnrecognizedSyscallNumber,
     TooFewValues,
 }

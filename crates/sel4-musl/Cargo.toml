@@ -15,3 +15,7 @@ version = "0.1.0"
 authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
 edition = "2021"
 license = "BSD-2-Clause"
+
+[dependencies]
+sel4-immediate-sync-once-cell = { path = "../sel4-immediate-sync-once-cell" }
+sel4-linux-syscall-types = { path = "../sel4-linux-syscall-types" }
