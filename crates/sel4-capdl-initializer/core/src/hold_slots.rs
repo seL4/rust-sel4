@@ -24,7 +24,6 @@ impl<T> HoldSlots<T> {
     ) -> Result<Self, CapDLInitializerError> {
         Ok(Self {
             slots: {
-                // NOTE(rustc_wishlist) array_try_from_fn
                 let mut f = || cslot_allocator.alloc();
                 [f()?, f()?]
             },

@@ -8,7 +8,6 @@
 
 use core::cell::UnsafeCell;
 
-// NOTE(rustc_wishlist) use SyncUnsafeCell once #![feature(sync_unsafe_cell)] stabilizes
 #[repr(transparent)]
 pub struct ImmutableCell<T: ?Sized> {
     value: UnsafeCell<T>,

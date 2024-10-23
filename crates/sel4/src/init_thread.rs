@@ -160,7 +160,6 @@ pub mod slot {
 }
 
 /// Suspends the initial thread using [`slot::TCB`].
-// NOTE(rustc_wishlist) use ! once #![never_type] is stabilized
 #[cfg(feature = "state")]
 pub fn suspend_self<T>() -> T {
     slot::TCB.cap().tcb_suspend().unwrap();

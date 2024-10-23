@@ -13,10 +13,10 @@ use crate::SubKey;
 // actually need the scalability of something like a timer wheel, `tokio`'s implementation would be
 // a good place to start.
 
-// TODO: Add feature like `tokio::time::Interval`
+// TODO
+// Add feature like `tokio::time::Interval`
 
-// NOTE(rustc_wishlist)
-//
+// NOTE
 // Once #![feature(btree_cursors)] stabilizes, revert back to using it for a simpler, more
 // lightweight, and more efficient (on the small scale) implementation. See git history for such an
 // implementation.
