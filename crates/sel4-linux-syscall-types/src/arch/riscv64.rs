@@ -1,6 +1,6 @@
 // https://git.musl-libc.org/cgit/musl/tree/arch/riscv64/bits/syscall.h.in
 
-pub mod NR {
+pub mod syscall_number {
     pub const io_setup: isize = 0;
     pub const io_destroy: isize = 1;
     pub const io_submit: isize = 2;
