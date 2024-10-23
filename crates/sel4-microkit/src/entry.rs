@@ -15,7 +15,7 @@ use crate::{panicking::init_panicking, Handler};
 #[cfg(target_thread_local)]
 #[no_mangle]
 unsafe extern "C" fn sel4_runtime_rust_entry() -> ! {
-    unsafe extern "C" fn cont_fn(_cont_arg: *mut sel4_runtime_common::ContArg) -> ! {
+    fn cont_fn(_cont_arg: *mut sel4_runtime_common::ContArg) -> ! {
         inner_entry()
     }
 
