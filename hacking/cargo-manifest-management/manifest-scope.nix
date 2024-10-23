@@ -94,6 +94,7 @@ in rec {
     cfg-if = "1.0.0";
     chrono = "0.4.35";
     clap = "4.4.6";
+    dlmalloc = "0.2.3";
     embedded-hal-nb = "1.0";
     embedded-io-async = "0.6.1";
     fallible-iterator = "0.2.0";
