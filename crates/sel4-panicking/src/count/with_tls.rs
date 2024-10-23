@@ -24,7 +24,6 @@ pub(crate) fn count_panic_caught() {
     update(&PANIC_COUNT, |count| count - 1);
 }
 
-// NOTE(rustc_wishlist) until #![feature(cell_update)] stabilizes
 fn update<T: Copy>(cell: &Cell<T>, f: impl FnOnce(T) -> T) -> T {
     let old = cell.get();
     let new = f(old);

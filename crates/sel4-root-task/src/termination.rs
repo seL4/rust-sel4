@@ -53,7 +53,6 @@ impl<E: fmt::Debug> Termination for Result<Never, E> {
     }
 }
 
-// NOTE(rustc_wishlist) remove once #![never_type] is stabilized
 /// Stable alternative to `!`.
 ///
 /// This type in uninhabited like `!`, but does not require the unstable `#[feature(never_type)]`.

@@ -14,15 +14,11 @@ const GRANULE_SIZE: usize = 2048;
 // TODO
 // This is just a temporary implementation to serve as a stand-in.
 
-// NOTE(rustc_wishlist)
-//
-// #![feature(allocator_api)] and #![feature(btreemap_alloc)]
-//
-// Should be parameterized with an allocator A, to enable this type to be used without a global
-// allocator.
+// NOTE
+// Once #![feature(allocator_api)] and #![feature(btreemap_alloc)] land, Should be parameterized
+// with an allocator A, to enable this type to be used without a global allocator.
 
-// NOTE(rustc_wishlist)
-//
+// NOTE
 // #![feature(btree_cursors)] would make this stand-in implementation simpler and more efficient.
 // See git history.
 

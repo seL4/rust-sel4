@@ -9,7 +9,6 @@
 use core::cell::UnsafeCell;
 use core::sync::atomic::{AtomicBool, Ordering};
 
-// NOTE(rustc_wishlist) use SyncUnsafeCell once #![feature(sync_unsafe_cell)] stabilizes
 pub struct ImmediateSyncOnceCell<T> {
     init_started: AtomicBool,
     init_completed: AtomicBool,

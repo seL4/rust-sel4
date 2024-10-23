@@ -8,7 +8,6 @@
 
 use core::cell::UnsafeCell;
 
-// NOTE(rustc_wishlist) use SyncUnsafeCell once #![feature(sync_unsafe_cell)] stabilizes
 #[repr(C)]
 pub struct StaticHeap<const N: usize, A = ()> {
     _alignment: [A; 0],
