@@ -9,9 +9,9 @@
 mk {
   package.name = "sel4-dlmalloc";
   dependencies = {
-    dlmalloc = "0.2.3";
     inherit (versions)
       lock_api
+      dlmalloc
     ;
   };
 }
