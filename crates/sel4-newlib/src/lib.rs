@@ -14,7 +14,7 @@ use core::ffi::{c_char, c_int, c_uint};
 mod errno;
 mod heap;
 
-pub use heap::StaticHeap;
+pub use heap::StaticHeapWithWatermark;
 
 extern "C" {
     #[link_name = "srand"]

@@ -4,46 +4,27 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use core::cell::UnsafeCell;
 use core::ffi::{c_int, c_void};
 use core::sync::atomic::{AtomicIsize, Ordering};
 
 use sel4_panicking_env::abort;
+use sel4_static_heap::StaticHeap;
 
 use crate::errno;
 
-// NOTE(rustc_wishlist) use SyncUnsafeCell once #![feature(sync_unsafe_cell)] stabilizes
 #[repr(align(4096))] // no real reason for this
-struct BackingMemory<const N: usize>(UnsafeCell<[u8; N]>);
-
-unsafe impl<const N: usize> Sync for BackingMemory<N> {}
-
-impl<const N: usize> BackingMemory<N> {
-    const fn new() -> Self {
-        Self(UnsafeCell::new([0; N]))
-    }
-
-    const fn start(&self) -> *mut u8 {
-        self.0.get().cast()
-    }
-
-    const fn size(&self) -> usize {
-        N
-    }
-}
+struct Align;
 
 #[doc(hidden)]
-pub struct StaticHeap<const N: usize> {
-    memory: BackingMemory<N>,
+pub struct StaticHeapWithWatermark<const N: usize> {
+    memory: StaticHeap<N, Align>,
     watermark: AtomicIsize,
 }
 
-unsafe impl<const N: usize> Sync for StaticHeap<N> {}
-
-impl<const N: usize> StaticHeap<N> {
+impl<const N: usize> StaticHeapWithWatermark<N> {
     pub const fn new() -> Self {
         Self {
-            memory: BackingMemory::new(),
+            memory: StaticHeap::new(),
             watermark: AtomicIsize::new(0),
         }
     }
@@ -69,7 +50,7 @@ impl<const N: usize> StaticHeap<N> {
     }
 }
 
-impl<const N: usize> Default for StaticHeap<N> {
+impl<const N: usize> Default for StaticHeapWithWatermark<N> {
     fn default() -> Self {
         Self::new()
     }
@@ -80,7 +61,8 @@ macro_rules! declare_sbrk_with_static_heap {
     ($n:expr) => {
         #[no_mangle]
         extern "C" fn _sbrk(incr: core::ffi::c_int) -> *mut core::ffi::c_void {
-            static HEAP: $crate::StaticHeap<{ $n }> = $crate::StaticHeap::new();
+            static HEAP: $crate::StaticHeapWithWatermark<{ $n }> =
+                $crate::StaticHeapWithWatermark::new();
             HEAP.sbrk(incr)
         }
     };

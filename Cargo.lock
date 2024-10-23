@@ -2490,6 +2490,7 @@ dependencies = [
  "cc",
  "log",
  "sel4-panicking-env",
+ "sel4-static-heap",
 ]
 
 [[package]]
