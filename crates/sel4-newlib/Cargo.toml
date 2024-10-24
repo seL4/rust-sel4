@@ -28,7 +28,6 @@ nosys = []
 [dependencies]
 log = { version = "0.4.17", optional = true }
 sel4-panicking-env = { path = "../sel4-panicking/env" }
-sel4-static-heap = { path = "../sel4-static-heap" }
 
 [build-dependencies]
 cc = { version = "1.0.82", optional = true }
