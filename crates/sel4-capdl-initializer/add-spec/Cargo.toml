@@ -21,7 +21,7 @@ anyhow = "1.0.66"
 clap = "4.4.6"
 fallible-iterator = "0.2.0"
 num = "0.4.1"
-object = { version = "0.36.1", features = ["all"] }
+object = { version = "0.36.5", features = ["all"] }
 postcard = { version = "1.0.2", default-features = false, features = ["alloc"] }
 sel4-capdl-initializer-types = { path = "../types", features = ["std", "serde", "deflate"] }
 sel4-synthetic-elf = { path = "../../sel4-synthetic-elf" }

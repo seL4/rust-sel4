@@ -19,6 +19,6 @@ license = "BSD-2-Clause"
 [dependencies]
 clap = "4.4.6"
 hex = "0.4.3"
-object = "0.36.1"
+object = "0.36.5"
 sel4-backtrace-addr2line-context-helper = { path = "../addr2line-context-helper" }
 sel4-backtrace-types = { path = "../types", features = ["full"] }
