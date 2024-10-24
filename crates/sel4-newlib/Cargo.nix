@@ -22,7 +22,7 @@ mk {
     ];
   };
   dependencies = {
-    inherit (localCrates) sel4-panicking-env sel4-static-heap;
+    inherit (localCrates) sel4-panicking-env;
     log = { version = versions.log; optional = true; };
   };
   build-dependencies = {
