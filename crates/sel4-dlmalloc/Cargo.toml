@@ -19,4 +19,3 @@ license = "BSD-2-Clause"
 [dependencies]
 dlmalloc = "0.2.3"
 lock_api = "0.4.12"
-sel4-static-heap = { path = "../sel4-static-heap" }

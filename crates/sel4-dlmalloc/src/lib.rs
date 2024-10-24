@@ -7,14 +7,12 @@
 #![no_std]
 
 use core::alloc::{GlobalAlloc, Layout};
-use core::cell::RefCell;
+use core::cell::{RefCell, UnsafeCell};
 use core::mem;
 use core::ptr;
 
 use dlmalloc::{Allocator as DlmallocAllocator, Dlmalloc};
 use lock_api::{Mutex, RawMutex};
-
-pub use sel4_static_heap::StaticHeap;
 
 pub type StaticDlmallocGlobalAlloc<R, T> = DlmallocGlobalAlloc<R, StaticDlmallocAllocator<T>>;
 
@@ -186,8 +184,31 @@ impl<T: FnOnce() -> StaticHeapBounds> GetStaticHeapBounds for T {
     }
 }
 
+#[repr(C)]
+pub struct StaticHeap<const N: usize, A = ()> {
+    _alignment: [A; 0],
+    space: UnsafeCell<[u8; N]>,
+}
+
+unsafe impl<const N: usize, A> Sync for StaticHeap<N, A> {}
+
+impl<const N: usize, A> StaticHeap<N, A> {
+    pub const fn new() -> Self {
+        Self {
+            _alignment: [],
+            space: UnsafeCell::new([0; N]),
+        }
+    }
+}
+
+impl<const N: usize, A> Default for StaticHeap<N, A> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl<const N: usize> GetStaticHeapBounds for &StaticHeap<N> {
     fn bounds(self) -> StaticHeapBounds {
-        StaticHeapBounds::new(self.start(), self.size())
+        StaticHeapBounds::new(self.space.get().cast(), N)
     }
 }
