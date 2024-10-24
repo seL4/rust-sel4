@@ -1,3 +1,9 @@
+//
+// Copyright 2024, Colias Group, LLC
+//
+// SPDX-License-Identifier: BSD-2-Clause
+//
+
 use core::ffi::VaList;
 
 pub type SyscallWordArg = usize;
