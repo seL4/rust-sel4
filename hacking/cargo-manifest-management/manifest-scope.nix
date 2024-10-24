@@ -88,7 +88,7 @@ in rec {
   };
 
   versions = {
-    addr2line = "0.23.0";
+    addr2line = "0.24.2";
     anyhow = "1.0.66";
     async-unsync = "0.2.2";
     cfg-if = "1.0.0";
@@ -101,14 +101,14 @@ in rec {
     fdt = "0.1.5";
     futures = "0.3.28";
     getrandom = "0.2.10";
-    gimli = "0.30.0";
+    gimli = "0.31.1";
     heapless = "0.7.16";
     lock_api = "0.4.12";
     log = "0.4.17";
     num = "0.4.1";
     num_enum = "0.5.9";
     num-traits = "0.2.16";
-    object = "0.36.1";
+    object = "0.36.5";
     pin-project = "1.1.3";
     postcard = "1.0.2";
     proc-macro2 = "1.0.50";

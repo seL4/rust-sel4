@@ -22,7 +22,7 @@ clap = "4.4.6"
 fallible-iterator = "0.2.0"
 heapless = "0.7.16"
 num = "0.4.1"
-object = { version = "0.36.1", features = ["all"] }
+object = { version = "0.36.5", features = ["all"] }
 postcard = { version = "1.0.2", default-features = false, features = ["alloc"] }
 sel4-config-generic-types = { path = "../../sel4/config/generic/types", features = ["serde"] }
 sel4-kernel-loader-config-types = { path = "../config-types" }
