@@ -2259,7 +2259,6 @@ version = "0.1.0"
 dependencies = [
  "dlmalloc",
  "lock_api",
- "sel4-static-heap",
 ]
 
 [[package]]
@@ -2756,10 +2755,6 @@ dependencies = [
 
 [[package]]
 name = "sel4-stack"
-version = "0.1.0"
-
-[[package]]
-name = "sel4-static-heap"
 version = "0.1.0"
 
 [[package]]
