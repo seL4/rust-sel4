@@ -17,13 +17,13 @@ mk {
     ;
   };
   build-dependencies = {
-    inherit (versions) proc-macro2 quote syn;
+    inherit (versions) proc-macro2 quote prettyplease;
     bindgen = "0.68.1";
     xmltree = "0.10.3";
     glob = "0.3.0";
+    syn = { version = versions.syn; features = [ "parsing" ]; };
     inherit (localCrates)
       sel4-build-env
-      sel4-rustfmt-helper
       sel4-bitfield-parser
       sel4-config
       sel4-config-data

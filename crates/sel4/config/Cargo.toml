@@ -20,6 +20,7 @@ license = "BSD-2-Clause"
 sel4-config-macros = { path = "macros" }
 
 [build-dependencies]
+prettyplease = "0.2.25"
 sel4-config-data = { path = "data" }
 sel4-config-generic = { path = "generic" }
-sel4-rustfmt-helper = { path = "../../sel4-rustfmt-helper" }
+syn = { version = "2.0.85", features = ["parsing"] }

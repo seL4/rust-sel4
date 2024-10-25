@@ -12,12 +12,12 @@ mk {
     sel4-capdl-initializer-types = localCrates.sel4-capdl-initializer-types // { features = [ "borrowed-indirect" ]; };
   };
   build-dependencies = {
-    inherit (versions) serde_json;
+    inherit (versions) serde_json prettyplease;
+    syn = { version = versions.syn; features = [ "parsing" ]; };
     inherit (localCrates)
       sel4-capdl-initializer-embed-spec
       sel4-capdl-initializer-with-embedded-spec-build-env
       sel4-capdl-initializer-types
-      sel4-rustfmt-helper
     ;
   };
   features = {

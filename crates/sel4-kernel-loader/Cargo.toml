@@ -36,6 +36,8 @@ cc = "1.0.76"
 glob = "0.3.0"
 object = "0.36.5"
 postcard = { version = "1.0.2", default-features = false, features = ["alloc"] }
+prettyplease = "0.2.25"
+proc-macro2 = "1.0.89"
 quote = "1.0.37"
 sel4-build-env = { path = "../sel4/build-env" }
 sel4-config = { path = "../sel4/config" }
@@ -43,8 +45,8 @@ sel4-kernel-loader-config-types = { path = "config-types" }
 sel4-kernel-loader-embed-page-tables = { path = "embed-page-tables" }
 sel4-kernel-loader-payload-types = { path = "payload-types" }
 sel4-platform-info = { path = "../sel4-platform-info" }
-sel4-rustfmt-helper = { path = "../sel4-rustfmt-helper" }
 serde = "1.0.147"
+syn = { version = "2.0.85", features = ["parsing"] }
 
 [target."cfg(any(target_arch = \"arm\", target_arch = \"aarch64\"))".dependencies]
 sel4-bcm2835-aux-uart-driver = { path = "../drivers/bcm2835-aux-uart" }

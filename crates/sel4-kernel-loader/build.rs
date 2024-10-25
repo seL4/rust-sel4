@@ -17,6 +17,7 @@ use object::{
     read::elf::{ElfFile, ProgramHeader},
     ReadRef,
 };
+use proc_macro2::TokenStream;
 use quote::format_ident;
 
 use sel4_build_env::{get_libsel4_include_dirs, get_with_sel4_prefix_relative_fallback};
@@ -25,7 +26,6 @@ use sel4_kernel_loader_embed_page_tables::{
     schemes, LeafLocation, Region, RegionsBuilder, Scheme, SchemeHelpers,
 };
 use sel4_platform_info::PLATFORM_INFO;
-use sel4_rustfmt_helper::Rustfmt;
 
 pub const SEL4_KERNEL_ENV: &str = "SEL4_KERNEL";
 
@@ -81,9 +81,10 @@ fn main() {
     }
 
     if let "aarch64" | "aarch32" = sel4_cfg_str!(SEL4_ARCH) {
+        let toks = mk_loader_map();
+        let formatted = prettyplease::unparse(&syn::parse2(toks).unwrap());
         let out_path = PathBuf::from(&out_dir).join("loader_page_tables.rs");
-        fs::write(&out_path, mk_loader_map()).unwrap();
-        Rustfmt::detect().format(&out_path);
+        fs::write(&out_path, formatted).unwrap();
     }
 
     let kernel_path = get_with_sel4_prefix_relative_fallback(SEL4_KERNEL_ENV, "bin/kernel.elf");
@@ -96,13 +97,10 @@ fn main() {
         (kernel_phys_addr_range.end + KERNEL_HEADROOM).next_multiple_of(GRANULE_SIZE);
 
     {
+        let toks = mk_kernel_map(kernel_phys_addr_range, kernel_phys_to_virt_offset);
+        let formatted = prettyplease::unparse(&syn::parse2(toks).unwrap());
         let out_path = PathBuf::from(&out_dir).join("kernel_page_tables.rs");
-        fs::write(
-            &out_path,
-            mk_kernel_map(kernel_phys_addr_range, kernel_phys_to_virt_offset),
-        )
-        .unwrap();
-        Rustfmt::detect().format(&out_path);
+        fs::write(&out_path, formatted).unwrap();
     }
 
     // Note that -Ttext={} is incompatible with --no-rosegment (no error),
@@ -123,7 +121,7 @@ fn main() {
 
 // // //
 
-fn mk_loader_map() -> String {
+fn mk_loader_map() -> TokenStream {
     let device_range_end = match sel4_cfg_str!(SEL4_ARCH) {
         "aarch64" => 1 << 39,
         "aarch32" => SchemeHelpers::<SchemeImpl>::virt_bounds().end,
@@ -143,15 +141,16 @@ fn mk_loader_map() -> String {
         ));
     }
 
-    let toks = regions.build().construct_table().embed(
+    regions.build().construct_table().embed(
         format_ident!("loader_level_0_table"),
         format_ident!("sel4_kernel_loader_embed_page_tables_runtime"),
-    );
-
-    format!("{toks}")
+    )
 }
 
-fn mk_kernel_map(kernel_phys_addr_range: Range<u64>, kernel_phys_to_virt_offset: u64) -> String {
+fn mk_kernel_map(
+    kernel_phys_addr_range: Range<u64>,
+    kernel_phys_to_virt_offset: u64,
+) -> TokenStream {
     let virt_start = kernel_phys_addr_range
         .start
         .wrapping_add(kernel_phys_to_virt_offset);
@@ -170,12 +169,10 @@ fn mk_kernel_map(kernel_phys_addr_range: Range<u64>, kernel_phys_to_virt_offset:
             SchemeImpl::mk_kernel_leaf_for_kernel_map(kernel_phys_to_virt_offset, loc)
         }));
 
-    let toks = regions.build().construct_table().embed(
+    regions.build().construct_table().embed(
         format_ident!("kernel_boot_level_0_table"),
         format_ident!("sel4_kernel_loader_embed_page_tables_runtime"),
-    );
-
-    format!("{}", toks)
+    )
 }
 
 trait SchemeExt: Scheme {

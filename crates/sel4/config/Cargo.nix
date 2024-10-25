@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
 #
 
-{ mk, localCrates }:
+{ mk, versions, localCrates }:
 
 mk {
   package.name = "sel4-config";
@@ -14,10 +14,13 @@ mk {
     ;
   };
   build-dependencies = {
+    inherit (versions)
+      prettyplease
+    ;
+    syn = { version = versions.syn; features = [ "parsing" ]; };
     inherit (localCrates)
       sel4-config-data
       sel4-config-generic
-      sel4-rustfmt-helper
     ;
   };
 }
