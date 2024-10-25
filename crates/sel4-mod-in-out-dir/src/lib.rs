@@ -61,10 +61,13 @@ impl Parse for Input {
             if !path.is_ident("relative_path") {
                 return Err(Error::new_spanned(path, "unrecognized argument"));
             }
-            let lit = name_value.lit;
-            match lit {
-                syn::Lit::Str(s) => Some(s.value()),
-                _ => return Err(Error::new_spanned(lit, "value must be a string literal")),
+            let value = name_value.value;
+            match value {
+                syn::Expr::Lit(syn::ExprLit {
+                    lit: syn::Lit::Str(s),
+                    ..
+                }) => Some(s.value()),
+                _ => return Err(Error::new_spanned(value, "value must be a string literal")),
             }
         };
         Ok(Self { relative_path })
