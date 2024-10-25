@@ -23,4 +23,3 @@ proc-macro = true
 proc-macro2 = "1.0.89"
 quote = "1.0.37"
 syn = "1.0.107"
-synstructure = "0.12.6"
