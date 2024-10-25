@@ -134,7 +134,6 @@ members = [
     "crates/sel4-root-task/default-test-harness",
     "crates/sel4-root-task/macros",
     "crates/sel4-runtime-common",
-    "crates/sel4-rustfmt-helper",
     "crates/sel4-shared-ring-buffer",
     "crates/sel4-shared-ring-buffer/block-io",
     "crates/sel4-shared-ring-buffer/block-io/types",

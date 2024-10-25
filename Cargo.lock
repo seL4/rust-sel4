@@ -2659,13 +2659,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "sel4-rustfmt-helper"
-version = "0.1.0"
-dependencies = [
- "which",
-]
-
-[[package]]
 name = "sel4-shared-ring-buffer"
 version = "0.1.0"
 dependencies = [
