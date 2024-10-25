@@ -14,7 +14,6 @@ mk {
       proc-macro2
       quote
       syn
-      synstructure
     ;
   };
 }
