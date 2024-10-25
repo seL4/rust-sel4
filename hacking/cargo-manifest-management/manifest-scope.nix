@@ -111,6 +111,7 @@ in rec {
     object = "0.36.5";
     pin-project = "1.1.3";
     postcard = "1.0.2";
+    prettyplease = "0.2.25";
     proc-macro2 = "1.0.89";
     quote = "1.0.37";
     rand = "0.8.5";

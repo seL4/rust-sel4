@@ -12,7 +12,6 @@ use glob::glob;
 use proc_macro2::TokenStream;
 
 use sel4_build_env::{find_in_libsel4_include_dirs, get_libsel4_include_dirs};
-use sel4_rustfmt_helper::Rustfmt;
 
 mod bf;
 mod c;
@@ -74,20 +73,18 @@ fn check_configuration() {
 
 struct OutDir {
     path: PathBuf,
-    rustfmt: Rustfmt,
 }
 
 impl OutDir {
     fn new() -> Self {
         Self {
             path: Path::new(&env::var(OUT_DIR_ENV).unwrap()).to_owned(),
-            rustfmt: Rustfmt::detect(),
         }
     }
 
-    fn write_file(&self, fragment: TokenStream, filename: impl AsRef<Path>) {
+    fn write_file(&self, toks: TokenStream, filename: impl AsRef<Path>) {
+        let formatted = prettyplease::unparse(&syn::parse2(toks).unwrap());
         let out_path = self.path.join(filename);
-        fs::write(&out_path, format!("{fragment}")).unwrap();
-        self.rustfmt.format(&out_path);
+        fs::write(&out_path, formatted).unwrap();
     }
 }

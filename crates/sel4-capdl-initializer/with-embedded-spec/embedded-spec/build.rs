@@ -9,7 +9,6 @@ use std::fs;
 use std::path::PathBuf;
 
 use sel4_capdl_initializer_with_embedded_spec_build_env::get_embedding;
-use sel4_rustfmt_helper::Rustfmt;
 
 fn main() {
     // TODO
@@ -24,9 +23,9 @@ fn main() {
     let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
 
     {
+        let formatted = prettyplease::unparse(&syn::parse2(embedded_spec).unwrap());
         let spec_out_path = out_dir.join("spec.rs");
-        fs::write(&spec_out_path, format!("{}", embedded_spec)).unwrap();
-        Rustfmt::detect().format(&spec_out_path);
+        fs::write(&spec_out_path, formatted).unwrap();
     }
 
     for (fname, content) in &aux_files {

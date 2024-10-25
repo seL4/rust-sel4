@@ -37,15 +37,17 @@ mk {
   };
   build-dependencies = {
     inherit (versions)
+      proc-macro2
       quote
       object
       serde
+      prettyplease
     ;
     postcard = postcardWith [ "alloc" ];
     cc = "1.0.76";
     glob = "0.3.0";
+    syn = { version = versions.syn; features = [ "parsing" ]; };
     inherit (localCrates)
-      sel4-rustfmt-helper
       sel4-platform-info
       sel4-config
       sel4-kernel-loader-config-types

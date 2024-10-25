@@ -1586,9 +1586,9 @@ checksum = "5b40af805b3121feab8a3c29f04d8ad262fa8e0561883e7653e024ae4479e6de"
 
 [[package]]
 name = "prettyplease"
-version = "0.2.16"
+version = "0.2.25"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a41cf62165e97c7f814d2221421dbb9afcbcdb0a88068e5ea206e19951c2cbb5"
+checksum = "64d1ec885c64d0457d564db4ec299b2dae3f9c02808b8ad9c3a089c591b18033"
 dependencies = [
  "proc-macro2",
  "syn 2.0.85",
@@ -2207,11 +2207,12 @@ dependencies = [
 name = "sel4-capdl-initializer-with-embedded-spec-embedded-spec"
 version = "0.1.0"
 dependencies = [
+ "prettyplease",
  "sel4-capdl-initializer-embed-spec",
  "sel4-capdl-initializer-types",
  "sel4-capdl-initializer-with-embedded-spec-build-env",
- "sel4-rustfmt-helper",
  "serde_json",
+ "syn 2.0.85",
 ]
 
 [[package]]
@@ -2227,10 +2228,11 @@ dependencies = [
 name = "sel4-config"
 version = "0.1.0"
 dependencies = [
+ "prettyplease",
  "sel4-config-data",
  "sel4-config-generic",
  "sel4-config-macros",
- "sel4-rustfmt-helper",
+ "syn 2.0.85",
 ]
 
 [[package]]
@@ -2343,6 +2345,8 @@ dependencies = [
  "log",
  "object",
  "postcard",
+ "prettyplease",
+ "proc-macro2",
  "quote",
  "riscv",
  "sbi",
@@ -2357,11 +2361,11 @@ dependencies = [
  "sel4-logging",
  "sel4-pl011-driver",
  "sel4-platform-info",
- "sel4-rustfmt-helper",
  "sel4-stack",
  "serde",
  "smccc",
  "spin 0.9.8",
+ "syn 2.0.85",
 ]
 
 [[package]]
@@ -2835,6 +2839,7 @@ dependencies = [
  "bindgen",
  "glob",
  "log",
+ "prettyplease",
  "proc-macro2",
  "quote",
  "sel4-bitfield-ops",
@@ -2842,7 +2847,6 @@ dependencies = [
  "sel4-build-env",
  "sel4-config",
  "sel4-config-data",
- "sel4-rustfmt-helper",
  "syn 2.0.85",
  "xmltree",
 ]
