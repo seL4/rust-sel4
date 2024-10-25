@@ -80,7 +80,7 @@ pub fn symbolize(
     addrs: impl Iterator<Item = u64>,
 ) -> Result<(), fmt::Error> {
     for probe in addrs {
-        write!(w, "0x{:016x}: ", probe)?;
+        write!(w, "{:#018x}  ", probe)?;
 
         if opts.do_functions || opts.do_inlines {
             let mut printed_anything = false;
@@ -88,7 +88,7 @@ pub fn symbolize(
             let mut first = true;
             while let Some(frame) = frames.next().unwrap() {
                 if !first {
-                    write!(w, " (inlined by) ")?;
+                    write!(w, "{: >18}  ", "(inlined by)")?;
                 }
                 first = false;
 
@@ -107,7 +107,7 @@ pub fn symbolize(
                         print_function(w, None, None, opts.demangle)?;
                     }
 
-                    write!(w, " at ")?;
+                    write!(w, "  at ")?;
                 }
 
                 print_loc(w, frame.location.as_ref())?;
@@ -127,7 +127,7 @@ pub fn symbolize(
 
                     print_function(w, name, None, opts.demangle)?;
 
-                    write!(w, " at ")?;
+                    write!(w, "  at ")?;
                 }
 
                 print_loc(w, None)?;
