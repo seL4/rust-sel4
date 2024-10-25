@@ -5,7 +5,7 @@
 //
 
 use proc_macro2::TokenStream;
-use quote::{format_ident, quote, quote_spanned, ToTokens};
+use quote::{quote, quote_spanned, ToTokens};
 use syn::{parse2, spanned::Spanned, Token};
 
 use crate::{parse_or_return, Condition, MacroImpls};
@@ -144,8 +144,7 @@ impl<'a> Helper<'a> {
 
     fn process_attrs(&mut self, attrs: &mut Vec<syn::Attribute>) -> bool /* keep */ {
         let synthetic_attr = self.impls.synthetic_attr();
-        let key =
-            |attr: &syn::Attribute| !attr.path().is_ident(&format_ident!("{}", synthetic_attr));
+        let key = |attr: &syn::Attribute| !attr.path().is_ident(synthetic_attr);
         attrs.sort_by_key(key);
         let keep = attrs.drain(attrs.partition_point(key)..).all(|attr| {
             match attr.parse_args::<Condition>() {
