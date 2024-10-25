@@ -90,6 +90,6 @@ mkShell (seL4RustEnvVars // kernelLoaderConfigEnvVars // capdlEnvVars // bindgen
     export h=$HOST_CARGO_FLAGS
     export hs=$HOST_CARGO_FLAGS_STD
     export t="--target $RUST_SEL4_TARGET"
-    export bt="--target $RUST_BARE_METAL_TARGET"
+    export tb="--target $RUST_BARE_METAL_TARGET"
   '';
 })
