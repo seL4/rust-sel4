@@ -121,7 +121,7 @@ in rec {
     serde_json = "1.0.87";
     serde_yaml = "0.9.14";
     smoltcp = "0.10.0";
-    syn = "1.0.107";
+    syn = "2.0.85";
     thiserror = "1.0";
     tock-registers = "0.8.1";
     unwinding = "0.2.1";
