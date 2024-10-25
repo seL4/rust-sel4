@@ -5,7 +5,7 @@
 //
 
 use proc_macro2::TokenStream;
-use quote::{format_ident, quote};
+use quote::quote;
 use syn::{
     parse::{ParseStream, Parser},
     spanned::Spanned,
@@ -100,7 +100,7 @@ fn parse_condition(synthetic_attr: &str, input: syn::parse::ParseStream) -> syn:
             ))
         }
     };
-    if !attr.path().is_ident(&format_ident!("{}", synthetic_attr)) {
+    if !attr.path().is_ident(synthetic_attr) {
         return Err(syn::Error::new(
             attr.span(),
             format!("expected '{synthetic_attr}'"),
