@@ -34,7 +34,7 @@ impl<'a> MacroImpls<'a> {
         self.config
     }
 
-    fn synthetic_attr(&self) -> &'a str {
+    const fn synthetic_attr(&self) -> &'a str {
         self.synthetic_attr
     }
 }
