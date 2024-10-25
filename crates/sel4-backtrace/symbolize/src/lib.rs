@@ -60,7 +60,6 @@ fn print_function(
 pub struct Options {
     pub do_functions: bool,
     pub do_inlines: bool,
-    pub print_addrs: bool,
     pub demangle: bool,
 }
 
@@ -69,7 +68,6 @@ impl Default for Options {
         Self {
             do_functions: true,
             do_inlines: true,
-            print_addrs: true,
             demangle: true,
         }
     }
@@ -82,9 +80,7 @@ pub fn symbolize(
     addrs: impl Iterator<Item = u64>,
 ) -> Result<(), fmt::Error> {
     for probe in addrs {
-        if opts.print_addrs {
-            write!(w, "0x{:016x}: ", probe)?;
-        }
+        write!(w, "0x{:016x}: ", probe)?;
 
         if opts.do_functions || opts.do_inlines {
             let mut printed_anything = false;
