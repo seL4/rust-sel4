@@ -12,7 +12,7 @@ use syn::{
     Token,
 };
 
-use crate::MacroImpls;
+use crate::{Condition, MacroImpls};
 
 impl<'a> MacroImpls<'a> {
     pub fn cfg_if_impl(&self, toks: TokenStream) -> TokenStream {
@@ -26,7 +26,7 @@ impl<'a> MacroImpls<'a> {
             }
         };
         for branch_with_condition in input.branches_with_conditions.iter() {
-            match self.eval_nested_meta(&branch_with_condition.condition) {
+            match self.eval(&branch_with_condition.condition) {
                 Ok(pass) => {
                     if pass {
                         return branch_with_condition.branch.clone();
@@ -74,7 +74,7 @@ fn parse_cfg_if_input(
 }
 
 struct BranchWithCondition {
-    condition: syn::NestedMeta,
+    condition: Condition,
     branch: TokenStream,
 }
 
@@ -86,8 +86,6 @@ fn parse_branch_with_condition(
     let branch = parse_branch(input)?;
     Ok(BranchWithCondition { condition, branch })
 }
-
-type Condition = syn::NestedMeta;
 
 fn parse_condition(synthetic_attr: &str, input: syn::parse::ParseStream) -> syn::Result<Condition> {
     input.parse::<Token![if]>()?;
@@ -102,7 +100,7 @@ fn parse_condition(synthetic_attr: &str, input: syn::parse::ParseStream) -> syn:
             ))
         }
     };
-    if !attr.path.is_ident(&format_ident!("{}", synthetic_attr)) {
+    if !attr.path().is_ident(&format_ident!("{}", synthetic_attr)) {
         return Err(syn::Error::new(
             attr.span(),
             format!("expected '{synthetic_attr}'"),

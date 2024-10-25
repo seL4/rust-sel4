@@ -8,7 +8,7 @@ use proc_macro2::TokenStream;
 use quote::{format_ident, quote, quote_spanned, ToTokens};
 use syn::{parse2, spanned::Spanned, Token};
 
-use crate::{parse_or_return, MacroImpls};
+use crate::{parse_or_return, Condition, MacroImpls};
 
 macro_rules! ensure_empty {
     ($tokenstream:ident) => {
@@ -22,8 +22,8 @@ macro_rules! ensure_empty {
 
 impl<'a> MacroImpls<'a> {
     pub fn cfg_impl(&self, input: TokenStream, item: TokenStream) -> TokenStream {
-        let attr = parse_or_return!(input as syn::NestedMeta);
-        let r = self.eval_nested_meta(&attr);
+        let cond = parse_or_return!(input as Condition);
+        let r = self.eval(&cond);
         match r {
             Ok(pass) => {
                 if pass {
@@ -38,7 +38,7 @@ impl<'a> MacroImpls<'a> {
 
     pub fn cfg_attr_impl(&self, input: TokenStream, item: TokenStream) -> TokenStream {
         let input = parse_or_return!(input as CfgAttrInput);
-        let r = self.eval_nested_meta(&input.condition);
+        let r = self.eval(&input.condition);
         match r {
             Ok(pass) => {
                 let this = if pass {
@@ -103,8 +103,8 @@ impl<'a> MacroImpls<'a> {
 }
 
 struct CfgAttrInput {
-    condition: syn::NestedMeta,
-    body: syn::NestedMeta,
+    condition: Condition,
+    body: TokenStream,
 }
 
 impl syn::parse::Parse for CfgAttrInput {
@@ -144,12 +144,13 @@ impl<'a> Helper<'a> {
 
     fn process_attrs(&mut self, attrs: &mut Vec<syn::Attribute>) -> bool /* keep */ {
         let synthetic_attr = self.impls.synthetic_attr();
-        let key = |attr: &syn::Attribute| !attr.path.is_ident(&format_ident!("{}", synthetic_attr));
+        let key =
+            |attr: &syn::Attribute| !attr.path().is_ident(&format_ident!("{}", synthetic_attr));
         attrs.sort_by_key(key);
         let keep = attrs.drain(attrs.partition_point(key)..).all(|attr| {
-            match attr.parse_args::<syn::NestedMeta>() {
-                Ok(expr) => {
-                    let r = self.impls.eval_nested_meta(&expr);
+            match attr.parse_args::<Condition>() {
+                Ok(cond) => {
+                    let r = self.impls.eval(&cond);
                     match r {
                         Ok(pass) => pass,
                         Err(err) => {
