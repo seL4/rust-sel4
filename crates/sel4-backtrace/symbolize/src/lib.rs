@@ -70,7 +70,6 @@ fn print_function(
 pub struct Options {
     pub do_functions: bool,
     pub do_inlines: bool,
-    pub pretty: bool,
     pub print_addrs: bool,
     pub basenames: bool,
     pub demangle: bool,
@@ -81,7 +80,6 @@ impl Default for Options {
         Self {
             do_functions: true,
             do_inlines: true,
-            pretty: true,
             print_addrs: true,
             basenames: true,
             demangle: true,
@@ -98,12 +96,7 @@ pub fn symbolize(
     for probe in addrs {
         if opts.print_addrs {
             let addr = probe;
-            write!(w, "0x{:016x}", addr)?;
-            if opts.pretty {
-                write!(w, ": ")?;
-            } else {
-                writeln!(w)?;
-            }
+            write!(w, "0x{:016x}: ", addr)?;
         }
 
         if opts.do_functions || opts.do_inlines {
@@ -111,7 +104,7 @@ pub fn symbolize(
             let mut frames = ctx.find_frames(probe).skip_all_loads().unwrap().peekable();
             let mut first = true;
             while let Some(frame) = frames.next().unwrap() {
-                if opts.pretty && !first {
+                if !first {
                     write!(w, " (inlined by) ")?;
                 }
                 first = false;
@@ -131,11 +124,7 @@ pub fn symbolize(
                         print_function(w, None, None, opts.demangle)?;
                     }
 
-                    if opts.pretty {
-                        write!(w, " at ")?;
-                    } else {
-                        writeln!(w)?;
-                    }
+                    write!(w, " at ")?;
                 }
 
                 print_loc(w, frame.location.as_ref(), opts.basenames)?;
@@ -155,11 +144,7 @@ pub fn symbolize(
 
                     print_function(w, name, None, opts.demangle)?;
 
-                    if opts.pretty {
-                        write!(w, " at ")?;
-                    } else {
-                        writeln!(w)?;
-                    }
+                    write!(w, " at ")?;
                 }
 
                 print_loc(w, None, opts.basenames)?;
