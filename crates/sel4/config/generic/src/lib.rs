@@ -9,11 +9,12 @@ use sel4_config_generic_types::Configuration;
 mod attr_macros;
 mod cfg_if;
 mod common_helpers;
-mod eval;
+mod condition;
 mod expr_macros;
 mod generate_consts;
 
 use common_helpers::parse_or_return;
+use condition::{Condition, EvalError};
 
 pub use generate_consts::generate_consts;
 
@@ -36,5 +37,9 @@ impl<'a> MacroImpls<'a> {
 
     const fn synthetic_attr(&self) -> &'a str {
         self.synthetic_attr
+    }
+
+    fn eval(&self, cond: &Condition) -> Result<bool, EvalError> {
+        cond.eval(self.config())
     }
 }
