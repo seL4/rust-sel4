@@ -18,5 +18,5 @@ license = "BSD-2-Clause"
 
 [dependencies]
 bitfield = "0.14"
-proc-macro2 = "1.0.50"
-quote = "1.0.23"
+proc-macro2 = "1.0.89"
+quote = "1.0.37"

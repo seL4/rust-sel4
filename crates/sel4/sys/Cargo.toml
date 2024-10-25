@@ -25,8 +25,8 @@ sel4-config = { path = "../config" }
 [build-dependencies]
 bindgen = "0.68.1"
 glob = "0.3.0"
-proc-macro2 = "1.0.50"
-quote = "1.0.23"
+proc-macro2 = "1.0.89"
+quote = "1.0.37"
 sel4-bitfield-parser = { path = "../bitfield-parser" }
 sel4-build-env = { path = "../build-env" }
 sel4-config = { path = "../config" }

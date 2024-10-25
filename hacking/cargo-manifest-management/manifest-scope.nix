@@ -111,8 +111,8 @@ in rec {
     object = "0.36.5";
     pin-project = "1.1.3";
     postcard = "1.0.2";
-    proc-macro2 = "1.0.50";
-    quote = "1.0.23";
+    proc-macro2 = "1.0.89";
+    quote = "1.0.37";
     rand = "0.8.5";
     rtcc = "0.3.2";
     rustc_version = "0.4.0";
