@@ -12,11 +12,11 @@ mk {
     inherit (versions)
       proc-macro2
       quote
+      syn
       serde
       serde_json
     ;
     hex = "0.4.3";
-    syn = { version = versions.syn; features = [ "full" ]; };
     sel4-capdl-initializer-types = localCrates.sel4-capdl-initializer-types // { features = [ "serde" "std" "deflate" ]; };
   };
 }
