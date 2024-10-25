@@ -23,7 +23,6 @@ fn print_loc(
     w: &mut impl fmt::Write,
     loc: Option<&Location<'_>>,
     basenames: bool,
-    llvm: bool,
 ) -> Result<(), fmt::Error> {
     if let Some(loc) = loc {
         if let Some(ref file) = loc.file.as_ref() {
@@ -37,16 +36,12 @@ fn print_loc(
         } else {
             write!(w, "??:")?;
         }
-        if llvm {
-            write!(w, "{}:{}", loc.line.unwrap_or(0), loc.column.unwrap_or(0))?;
-        } else if let Some(line) = loc.line {
+        if let Some(line) = loc.line {
             write!(w, "{}", line)?;
         } else {
             write!(w, "?")?;
         }
         writeln!(w)?;
-    } else if llvm {
-        writeln!(w, "??:0:0")?;
     } else {
         writeln!(w, "??:0")?;
     }
@@ -79,7 +74,6 @@ pub struct Options {
     pub print_addrs: bool,
     pub basenames: bool,
     pub demangle: bool,
-    pub llvm: bool,
 }
 
 impl Default for Options {
@@ -91,7 +85,6 @@ impl Default for Options {
             print_addrs: true,
             basenames: true,
             demangle: true,
-            llvm: false,
         }
     }
 }
@@ -105,11 +98,7 @@ pub fn symbolize(
     for probe in addrs {
         if opts.print_addrs {
             let addr = probe;
-            if opts.llvm {
-                write!(w, "0x{:x}", addr)?;
-            } else {
-                write!(w, "0x{:016x}", addr)?;
-            }
+            write!(w, "0x{:016x}", addr)?;
             if opts.pretty {
                 write!(w, ": ")?;
             } else {
@@ -149,7 +138,7 @@ pub fn symbolize(
                     }
                 }
 
-                print_loc(w, frame.location.as_ref(), opts.basenames, opts.llvm)?;
+                print_loc(w, frame.location.as_ref(), opts.basenames)?;
 
                 printed_anything = true;
 
@@ -173,15 +162,11 @@ pub fn symbolize(
                     }
                 }
 
-                print_loc(w, None, opts.basenames, opts.llvm)?;
+                print_loc(w, None, opts.basenames)?;
             }
         } else {
             let loc = ctx.find_location(probe).unwrap();
-            print_loc(w, loc.as_ref(), opts.basenames, opts.llvm)?;
-        }
-
-        if opts.llvm {
-            writeln!(w)?;
+            print_loc(w, loc.as_ref(), opts.basenames)?;
         }
     }
 
