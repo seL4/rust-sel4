@@ -91,7 +91,7 @@ fn parse_condition(synthetic_attr: &str, input: syn::parse::ParseStream) -> syn:
     input.parse::<Token![if]>()?;
     let attrs = syn::Attribute::parse_outer(input)?;
     let attr = match attrs.len() {
-        0 => return Err(syn::Error::new(input.span(), "expected attribute")),
+        0 => return Err(input.error("expected attribute")),
         1 => &attrs[0],
         _ => {
             return Err(syn::Error::new(
