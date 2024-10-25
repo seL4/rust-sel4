@@ -83,8 +83,7 @@ pub fn symbolize(
 ) -> Result<(), fmt::Error> {
     for probe in addrs {
         if opts.print_addrs {
-            let addr = probe;
-            write!(w, "0x{:016x}: ", addr)?;
+            write!(w, "0x{:016x}: ", probe)?;
         }
 
         if opts.do_functions || opts.do_inlines {
