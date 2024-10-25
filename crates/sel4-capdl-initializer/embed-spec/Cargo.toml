@@ -18,8 +18,8 @@ license = "BSD-2-Clause"
 
 [dependencies]
 hex = "0.4.3"
-proc-macro2 = "1.0.50"
-quote = "1.0.23"
+proc-macro2 = "1.0.89"
+quote = "1.0.37"
 sel4-capdl-initializer-types = { path = "../types", features = ["serde", "std", "deflate"] }
 serde = "1.0.147"
 serde_json = "1.0.87"
