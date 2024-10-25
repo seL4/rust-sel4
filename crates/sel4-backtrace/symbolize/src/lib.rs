@@ -19,20 +19,10 @@ use addr2line::fallible_iterator::FallibleIterator;
 use addr2line::gimli;
 use addr2line::{Context, Location};
 
-fn print_loc(
-    w: &mut impl fmt::Write,
-    loc: Option<&Location<'_>>,
-    basenames: bool,
-) -> Result<(), fmt::Error> {
+fn print_loc(w: &mut impl fmt::Write, loc: Option<&Location<'_>>) -> Result<(), fmt::Error> {
     if let Some(loc) = loc {
         if let Some(ref file) = loc.file.as_ref() {
-            let path = if basenames {
-                file
-            } else {
-                // TODO
-                file
-            };
-            write!(w, "{}:", path)?;
+            write!(w, "{}:", file)?;
         } else {
             write!(w, "??:")?;
         }
@@ -71,7 +61,6 @@ pub struct Options {
     pub do_functions: bool,
     pub do_inlines: bool,
     pub print_addrs: bool,
-    pub basenames: bool,
     pub demangle: bool,
 }
 
@@ -81,7 +70,6 @@ impl Default for Options {
             do_functions: true,
             do_inlines: true,
             print_addrs: true,
-            basenames: true,
             demangle: true,
         }
     }
@@ -127,7 +115,7 @@ pub fn symbolize(
                     write!(w, " at ")?;
                 }
 
-                print_loc(w, frame.location.as_ref(), opts.basenames)?;
+                print_loc(w, frame.location.as_ref())?;
 
                 printed_anything = true;
 
@@ -147,11 +135,11 @@ pub fn symbolize(
                     write!(w, " at ")?;
                 }
 
-                print_loc(w, None, opts.basenames)?;
+                print_loc(w, None)?;
             }
         } else {
             let loc = ctx.find_location(probe).unwrap();
-            print_loc(w, loc.as_ref(), opts.basenames)?;
+            print_loc(w, loc.as_ref())?;
         }
     }
 
