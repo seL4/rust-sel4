@@ -85,6 +85,7 @@ members = [
     "crates/sel4-backtrace/embedded-debug-info",
     "crates/sel4-backtrace/embedded-debug-info/cli",
     "crates/sel4-backtrace/simple",
+    "crates/sel4-backtrace/symbolize",
     "crates/sel4-backtrace/types",
     "crates/sel4-bounce-buffer-allocator",
     "crates/sel4-capdl-initializer",

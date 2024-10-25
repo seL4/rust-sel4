@@ -2052,12 +2052,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "sel4-backtrace-symbolize"
+version = "0.1.0"
+dependencies = [
+ "addr2line",
+]
+
+[[package]]
 name = "sel4-backtrace-types"
 version = "0.1.0"
 dependencies = [
  "addr2line",
  "cfg-if",
  "postcard",
+ "sel4-backtrace-symbolize",
  "serde",
 ]
 

@@ -21,11 +21,12 @@ alloc = ["serde?/alloc"]
 full = ["alloc", "serde", "postcard", "symbolize"]
 postcard = ["serde", "dep:postcard"]
 serde = ["dep:serde"]
-symbolize = ["addr2line", "alloc"]
+symbolize = ["addr2line", "alloc", "sel4-backtrace-symbolize"]
 
 [dependencies]
 cfg-if = "1.0.0"
 postcard = { version = "1.0.2", default-features = false, optional = true }
+sel4-backtrace-symbolize = { path = "../symbolize", optional = true }
 serde = { version = "1.0.147", default-features = false, features = ["derive"], optional = true }
 
 [dependencies.addr2line]
