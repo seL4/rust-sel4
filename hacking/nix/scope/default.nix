@@ -59,7 +59,7 @@ superCallPackage ../rust-utils {} self //
 
   defaultRustToolchain = fenix.fromToolchainFile {
     file = topLevelRustToolchainFile;
-    sha256 = "sha256-GJR7CjFPMh450uP/EUzXeng15vusV3ktq7Cioop945U=";
+    sha256 = "sha256-L1F7kAfo8YWrKXHflUaVvCELdvnK2XjcL/lwopFQX2c=";
   };
 
   upstreamDefaultRustEnvironment = elaborateRustEnvironment (mkDefaultElaborateRustEnvironmentArgs {
