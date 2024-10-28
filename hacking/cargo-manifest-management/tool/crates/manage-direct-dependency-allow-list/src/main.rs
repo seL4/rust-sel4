@@ -9,11 +9,22 @@ use std::fs;
 use std::path::PathBuf;
 
 use cargo_metadata::{semver::VersionReq, Metadata, MetadataCommand};
-use clap::Parser;
+use clap::{Parser, Subcommand};
 use toml::{Table, Value};
 
 #[derive(Debug, Parser)]
-struct Args {
+struct Cli {
+    #[command(subcommand)]
+    command: Command,
+}
+
+#[derive(Debug, Subcommand)]
+enum Command {
+    CheckWorkspace(CheckWorkspaceArgs),
+}
+
+#[derive(Debug, Parser)]
+struct CheckWorkspaceArgs {
     #[arg(long)]
     manifest_path: PathBuf,
 
@@ -23,17 +34,18 @@ struct Args {
 
 #[derive(Debug, Clone, Default)]
 struct AllowList {
-    versions: HashMap<String, HashSet<VersionReq>>,
+    allow: HashMap<String, HashMap<VersionReq, HashSet<String>>>,
 }
 
 impl AllowList {
     fn deserialize(table: &Table) -> Self {
         let mut this = Self::default();
-        for (package_name, v) in table["versions"].as_table().unwrap().iter() {
+        for (source_key, v) in table["allow"].as_table().unwrap().iter() {
             match v {
                 Value::String(req_str) => {
+                    let package_name = source_key;
                     let req = VersionReq::parse(req_str).unwrap();
-                    this.insert_version(package_name, req);
+                    this.insert_version(package_name, req, source_key);
                 }
                 Value::Table(v) => {
                     let req = VersionReq::parse(v["version"].as_str().unwrap()).unwrap();
@@ -43,7 +55,7 @@ impl AllowList {
                         .iter()
                         .map(|v| v.as_str().unwrap())
                     {
-                        this.insert_version(package_name, req.clone());
+                        this.insert_version(package_name, req.clone(), source_key);
                     }
                 }
                 _ => {
@@ -54,11 +66,13 @@ impl AllowList {
         this
     }
 
-    fn insert_version(&mut self, package_name: &str, req: VersionReq) {
-        self.versions
+    fn insert_version(&mut self, package_name: &str, req: VersionReq, source_key: &str) {
+        self.allow
             .entry(package_name.to_owned())
             .or_default()
-            .insert(req);
+            .entry(req)
+            .or_default()
+            .insert(source_key.to_owned());
     }
 
     fn check(&self, metadata: &Metadata) {
@@ -79,8 +93,8 @@ impl AllowList {
     }
 
     fn check_one(&self, dep: &str, req: &VersionReq) -> bool {
-        if let Some(allowed_reqs) = self.versions.get(dep) {
-            allowed_reqs.contains(req)
+        if let Some(allowed_reqs) = self.allow.get(dep) {
+            allowed_reqs.contains_key(req)
         } else {
             false
         }
@@ -88,17 +102,20 @@ impl AllowList {
 }
 
 fn main() {
-    let args = Args::parse();
-    let allowlist = AllowList::deserialize(
-        &fs::read_to_string(&args.allowlist)
-            .unwrap()
-            .parse::<Table>()
-            .unwrap_or_else(|err| panic!("{err}")),
-    );
-    let metadata = MetadataCommand::new()
-        .manifest_path(&args.manifest_path)
-        .no_deps()
-        .exec()
-        .unwrap();
-    allowlist.check(&metadata);
+    match Cli::parse().command {
+        Command::CheckWorkspace(args) => {
+            let allowlist = AllowList::deserialize(
+                &fs::read_to_string(&args.allowlist)
+                    .unwrap()
+                    .parse::<Table>()
+                    .unwrap_or_else(|err| panic!("{err}")),
+            );
+            let metadata = MetadataCommand::new()
+                .manifest_path(&args.manifest_path)
+                .no_deps()
+                .exec()
+                .unwrap();
+            allowlist.check(&metadata);
+        }
+    }
 }

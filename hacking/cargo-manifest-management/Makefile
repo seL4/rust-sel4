@@ -6,11 +6,14 @@
 
 blueprint := blueprint.json
 
-run := cargo run --manifest-path=tool/Cargo.toml -p manage-cargo-manifests --
+run := cargo run \
+	--manifest-path=tool/Cargo.toml -p manage-cargo-manifests --
 
-run_check_dependencies := \
-	cargo run --manifest-path=tool/Cargo.toml -p check-dependency-allow-list -- \
-		--manifest-path=../../Cargo.toml --allowlist third-party-dependency-versions.toml
+run_allow := cargo run \
+	--manifest-path=tool/Cargo.toml -p manage-direct-dependency-allow-list --
+
+run_allow_check_workspace := $(run_allow) check-workspace \
+	--manifest-path=../../Cargo.toml --allowlist direct-dependency-allow-list.toml
 
 .PHONY: none
 none:
@@ -26,13 +29,13 @@ $(blueprint):
 .PHONY: update
 update: $(blueprint)
 	$(run) --blueprint $<
-	$(run_check_dependencies)
+	$(run_allow)
 
 .PHONY: check
 check: $(blueprint)
 	$(run) --blueprint $< --just-check
-	$(run_check_dependencies)
+	$(run_allow)
 
-.PHONY: check-dependencies
-check-dependencies:
-	$(run_check_dependencies)
+.PHONY: check-workspace-direct-dependencies
+check-workspace-direct-dependencies:
+	$(run_allow_check_workspace)

@@ -89,9 +89,9 @@ in rec {
 
   versions =
     let
-      table = (builtins.fromTOML (builtins.readFile ./third-party-dependency-versions.toml)).versions;
+      allow = (builtins.fromTOML (builtins.readFile ./direct-dependency-allow-list.toml)).allow;
     in
-      lib.flip lib.mapAttrs table (_: v:
+      lib.flip lib.mapAttrs allow (_: v:
         if lib.isString v then v else v.version
       );
 
