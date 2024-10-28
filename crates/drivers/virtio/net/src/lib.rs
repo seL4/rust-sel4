@@ -52,8 +52,14 @@ impl<H: Hal, T: Transport> GetNetDeviceMeta for DeviceWrapper<H, T> {
 }
 
 impl<H: Hal, T: Transport> Device for DeviceWrapper<H, T> {
-    type RxToken<'a> = VirtioRxToken<H, T> where Self: 'a;
-    type TxToken<'a> = VirtioTxToken<H, T> where Self: 'a;
+    type RxToken<'a>
+        = VirtioRxToken<H, T>
+    where
+        Self: 'a;
+    type TxToken<'a>
+        = VirtioTxToken<H, T>
+    where
+        Self: 'a;
 
     fn receive(&mut self, _timestamp: Instant) -> Option<(Self::RxToken<'_>, Self::TxToken<'_>)> {
         match self.inner.borrow_mut().receive() {
