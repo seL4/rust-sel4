@@ -25,7 +25,9 @@ mkInstance {
     rootCrate = crates.tests-root-task-verus-task;
     release = false;
 
-    verifyWithVerus = true;
+    extraProfile = {
+      panic = "abort";
+    };
 
     layers = [
       crateUtils.defaultIntermediateLayer
@@ -34,6 +36,8 @@ mkInstance {
         modifications = seL4Modifications;
       }
     ];
+  
+    verifyWithVerus = true;
   };
 
   extraPlatformArgs = lib.optionalAttrs canSimulate  {
