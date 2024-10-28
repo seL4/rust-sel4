@@ -1,0 +1,17 @@
+#
+# Copyright 2024, Colias Group, LLC
+#
+# SPDX-License-Identifier: BSD-2-Clause
+#
+
+[package]
+name = "check-dependency-allow-list"
+version = "0.1.0"
+authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
+edition = "2021"
+license = "BSD-2-Clause"
+
+[dependencies]
+clap = { version = "4.4.6", features = [ "derive" ] }
+cargo_metadata = "0.18.1"
+toml = "0.8.19"
