@@ -56,6 +56,7 @@ pub(crate) fn start_panic(payload: Payload) -> i32 {
 
     assert!(CURRENT_PAYLOAD.replace(Some(payload)).is_none());
 
+    #[allow(static_mut_refs)]
     unsafe {
         assert!(!CURRENT_EXCEPTION.exception_present);
         CURRENT_EXCEPTION = CurrentException {
