@@ -87,7 +87,13 @@ in rec {
     coliasgroup = "Copyright 2023, Colias Group, LLC";
   };
 
-  versions = (builtins.fromTOML (builtins.readFile ./third-party-dependency-versions.toml)).versions;
+  versions =
+    let
+      table = (builtins.fromTOML (builtins.readFile ./third-party-dependency-versions.toml)).versions;
+    in
+      lib.flip lib.mapAttrs table (_: v:
+        if lib.isString v then v else v.version
+      );
 
   zerocopyWith = features: filterOutEmptyFeatureList {
     version = versions.zerocopy;
