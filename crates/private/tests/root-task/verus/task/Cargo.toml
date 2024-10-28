@@ -18,5 +18,5 @@ license = "BSD-2-Clause"
 
 [dependencies]
 sel4 = { path = "../../../../../sel4" }
-sel4-root-task = { path = "../../../../../sel4-root-task" }
+sel4-root-task = { path = "../../../../../sel4-root-task", default-features = false }
 tests-root-task-verus-core = { path = "../core" }
