@@ -94,7 +94,7 @@ impl Policy {
     fn matching_rules_in_order_of_precedence<'a>(
         &'a self,
         path: &'a [PathSegment],
-    ) -> impl 'a + Iterator<Item = &TableRule> {
+    ) -> impl 'a + Iterator<Item = &'a TableRule> {
         self.table_rules
             .iter()
             .rev()
