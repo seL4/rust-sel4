@@ -10,7 +10,7 @@ mk {
   package.name = "banscii-assistant";
   dependencies = {
     inherit (versions) embedded-hal-nb;
-    hex = { version = "0.4.3"; default-features = false; features = [ "alloc" ]; };
+    hex = { version = versions.hex; default-features = false; features = [ "alloc" ]; };
     inherit (localCrates)
       sel4-microkit-message
       sel4-microkit-driver-adapters

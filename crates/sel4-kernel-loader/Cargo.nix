@@ -13,7 +13,7 @@ mk {
     inherit (versions) cfg-if log embedded-hal-nb;
     postcard = postcardWith [];
     heapless = { version = versions.heapless; features = [ "serde" ]; };
-    spin = { version = "0.9.4"; features = [ "lock_api" ]; };
+    spin = { version = versions.spin; features = [ "lock_api" ]; };
     inherit (localCrates)
       sel4-platform-info
       sel4-logging
@@ -25,15 +25,13 @@ mk {
     sel4-kernel-loader-payload-types = localCrates.sel4-kernel-loader-payload-types // { features = [ "serde" ]; };
   };
   target."cfg(any(target_arch = \"riscv32\", target_arch = \"riscv64\"))".dependencies = {
-    sbi = "0.2.0";
-    riscv = "0.10.0";
+    inherit (versions) sbi riscv;
   };
   target."cfg(any(target_arch = \"arm\", target_arch = \"aarch64\"))".dependencies = {
     inherit (localCrates) sel4-pl011-driver sel4-bcm2835-aux-uart-driver;
   };
   target."cfg(target_arch = \"aarch64\")".dependencies = {
-    smccc = "0.1.1";
-    aarch64-cpu = "9.4.0";
+    inherit (versions) smccc aarch64-cpu;
   };
   build-dependencies = {
     inherit (versions)
@@ -42,10 +40,10 @@ mk {
       object
       serde
       prettyplease
+      cc
+      glob
     ;
     postcard = postcardWith [ "alloc" ];
-    cc = "1.0.76";
-    glob = "0.3.0";
     syn = { version = versions.syn; features = [ "parsing" ]; };
     inherit (localCrates)
       sel4-platform-info

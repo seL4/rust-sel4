@@ -9,8 +9,7 @@
 mk {
   package.name = "sel4-config-data";
   dependencies = {
-    inherit (versions) serde_json;
-    lazy_static = "1.4.0";
+    inherit (versions) serde_json lazy_static;
     sel4-config-generic-types = localCrates.sel4-config-generic-types // { features = [ "serde" ]; };
   };
   build-dependencies = {

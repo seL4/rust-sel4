@@ -20,13 +20,13 @@ mk {
       ];
     };
 
-    httparse = { version = "1.8.0"; default-features = false; };
+    httparse = { version = versions.httparse; default-features = false; };
 
     smoltcp = smoltcpWith [];
 
     rustls = rustlsWith [] // (localCrates.rustls or {});
 
-    rustls-pemfile = { version = "2.0.0"; default-features = false; };
+    rustls-pemfile = { version = versions.rustls-pemfile; default-features = false; };
 
     inherit (localCrates)
       sel4-async-single-threaded-executor

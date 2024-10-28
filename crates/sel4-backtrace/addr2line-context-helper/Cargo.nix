@@ -12,6 +12,6 @@ mk {
     addr2line = { version = versions.addr2line; default-features = false; features = [ "rustc-demangle" "cpp_demangle" "fallible-iterator" "smallvec" ]; };
     gimli = { version = versions.gimli; default-features = false; features = [ "endian-reader" ]; };
     object = { version = versions.object; default-features = false; features = [ "read" ]; };
-    stable_deref_trait = { version = "1.1.0"; default-features = false; features = [ "alloc" ]; };
+    stable_deref_trait = { version = versions.stable_deref_trait; default-features = false; features = [ "alloc" ]; };
   };
 }

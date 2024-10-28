@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
 #
 
-{ mk, localCrates }:
+{ mk, versions, localCrates }:
 
 mk {
   package.name = "tests-root-task-c";
@@ -16,7 +16,6 @@ mk {
     ;
   };
   build-dependencies = {
-    cc = "1.0.76";
-    glob = "0.3.0";
+    inherit (versions) cc glob;
   };
 }
