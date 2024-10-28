@@ -155,7 +155,7 @@ in rec {
   };
 
   ringWith = features: {
-    version = "=0.17.8";
+    version = versions.ring;
     features = [
       "less-safe-getrandom-custom-or-rdrand"
     ] ++ features;
