@@ -95,8 +95,18 @@ impl<A: AbstractBounceBufferAllocator, R: RawMutex, P: AbstractRcT> DeviceImpl<A
 }
 
 impl<A: AbstractBounceBufferAllocator, R: RawMutex, P: AbstractRcT> Device for DeviceImpl<A, R, P> {
-    type RxToken<'a> = RxToken<A, R, P> where A: 'a, R: 'a, P: 'a;
-    type TxToken<'a> = TxToken<A, R, P> where A: 'a, R: 'a, P: 'a;
+    type RxToken<'a>
+        = RxToken<A, R, P>
+    where
+        A: 'a,
+        R: 'a,
+        P: 'a;
+    type TxToken<'a>
+        = TxToken<A, R, P>
+    where
+        A: 'a,
+        R: 'a,
+        P: 'a;
 
     fn capabilities(&self) -> DeviceCapabilities {
         self.inner().lock().caps().clone()
