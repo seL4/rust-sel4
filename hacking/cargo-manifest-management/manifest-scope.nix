@@ -125,7 +125,7 @@ in rec {
     syn = "2.0.85";
     thiserror = "1.0";
     tock-registers = "0.8.1";
-    unwinding = "0.2.1";
+    unwinding = "0.2.3";
     virtio-drivers = "0.7.2";
     webpki-roots = "0.26";
     zerocopy = "0.7.32";
