@@ -11,7 +11,6 @@ mk {
   dependencies = {
     inherit (versions)
       anyhow
-      fallible-iterator
       num
       clap
     ;

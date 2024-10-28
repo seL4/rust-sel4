@@ -19,6 +19,5 @@ license = "BSD-2-Clause"
 [dependencies]
 anyhow = "1.0.66"
 clap = "4.4.6"
-fallible-iterator = "0.2.0"
 num = "0.4.1"
 sel4-synthetic-elf = { path = "../../sel4-synthetic-elf" }
