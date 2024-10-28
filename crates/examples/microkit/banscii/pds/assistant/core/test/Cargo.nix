@@ -9,8 +9,7 @@
 mk {
   package.name = "banscii-assistant-core-test";
   dependencies = {
-    inherit (versions) log;
-    env_logger = "0.10.0";
+    inherit (versions) log env_logger;
     inherit (localCrates) banscii-assistant-core;
   };
 }
