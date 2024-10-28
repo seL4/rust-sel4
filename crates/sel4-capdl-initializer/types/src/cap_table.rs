@@ -40,7 +40,7 @@ pub trait HasCapTable {
     #[allow(clippy::type_complexity)]
     fn slots_as<'a, T: TryFrom<&'a Cap>>(
         &'a self,
-    ) -> iter::Map<slice::Iter<'_, (usize, Cap)>, fn(&'a (usize, Cap)) -> (usize, T)>
+    ) -> iter::Map<slice::Iter<'a, (usize, Cap)>, fn(&'a (usize, Cap)) -> (usize, T)>
     where
         <T as TryFrom<&'a Cap>>::Error: fmt::Debug,
     {
