@@ -26,6 +26,6 @@ mk {
     log = { version = versions.log; optional = true; };
   };
   build-dependencies = {
-    cc = { version = "1.0.82"; optional = true; };
+    cc = { version = versions.cc; optional = true; };
   };
 }

@@ -10,7 +10,7 @@ mk {
   package.name = "banscii-assistant-core";
   dependencies = {
     inherit (versions) log;
-    ab_glyph = { version = "0.2.22"; default-features = false; features = [ "libm" ]; };
+    ab_glyph = { version = versions.ab_glyph; default-features = false; features = [ "libm" ]; };
     num-traits = { version = versions.num-traits; default-features = false; features = [ "libm" ]; };
   };
 }

@@ -66,6 +66,6 @@ mk {
   };
 
   build-dependencies = {
-    rcgen = "0.11.1";
+    inherit (versions) rcgen;
   };
 }

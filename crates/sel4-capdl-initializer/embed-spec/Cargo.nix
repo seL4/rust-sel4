@@ -15,8 +15,8 @@ mk {
       syn
       serde
       serde_json
+      hex
     ;
-    hex = "0.4.3";
     sel4-capdl-initializer-types = localCrates.sel4-capdl-initializer-types // { features = [ "serde" "std" "deflate" ]; };
   };
 }

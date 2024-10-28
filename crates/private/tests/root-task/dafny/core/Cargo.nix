@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
 #
 
-{ mk, localCrates, dafnySource }:
+{ mk, versions, localCrates, dafnySource }:
 
 mk {
   package.name = "tests-root-task-dafny-core";
@@ -14,6 +14,6 @@ mk {
       # dafny_runtime
     ;
     dafny_runtime = dafnySource;
-    num = { version = "0.4"; default-features = false; features = ["alloc"]; };
+    num = { version = versions.num; default-features = false; features = ["alloc"]; };
   };
 }

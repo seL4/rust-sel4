@@ -15,9 +15,9 @@ mk {
       version = versions.futures;
       default-features = false;
     };
-    bytemuck = { version = "1.4.0"; default-features = false; };
-    gpt_disk_types = { version = "0.15.0"; features = [ "bytemuck" ]; };
-    lru = { version = "0.10.0"; optional = true; };
+    bytemuck = { version = versions.bytemuck; default-features = false; };
+    gpt_disk_types = { version = versions.gpt_disk_types; features = [ "bytemuck" ]; };
+    lru = { version = versions.lru; optional = true; };
   };
   features = {
     alloc = [ "futures/alloc" "lru" ];

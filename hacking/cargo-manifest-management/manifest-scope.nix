@@ -88,9 +88,15 @@ in rec {
   };
 
   versions = {
+    aarch64-cpu = "9.4.0";
+    ab_glyph = "0.2.22";
     addr2line = "0.24.2";
     anyhow = "1.0.66";
     async-unsync = "0.2.2";
+    bindgen = "0.68.1";
+    bitfield = "0.14";
+    bytemuck = "1.4.0";
+    cc = "1.0.76";
     cfg-if = "1.0.0";
     chrono = "0.4.35";
     clap = "4.4.6";
@@ -102,32 +108,50 @@ in rec {
     futures = "0.3.28";
     getrandom = "0.2.10";
     gimli = "0.31.1";
+    glob = "0.3.0";
+    gpt_disk_types = "0.15.0";
     heapless = "0.7.16";
+    hex = "0.4.3";
+    httparse = "1.8.0";
+    lazy_static = "1.4.0"; # TODO remove
     lock_api = "0.4.12";
     log = "0.4.17";
+    lru = "0.10.0";
+    miniz_oxide = "0.6.2";
     num = "0.4.1";
     num_enum = "0.5.9";
     num-traits = "0.2.16";
     object = "0.36.5";
+    pest = "2.4.1";
     pin-project = "1.1.3";
     postcard = "1.0.2";
     prettyplease = "0.2.25";
     proc-macro2 = "1.0.89";
     quote = "1.0.37";
     rand = "0.8.5";
+    rcgen = "0.11.1";
+    regex = "1.7.0";
+    riscv = "0.10.0";
+    rsa = "0.8.1";
     rtcc = "0.3.2";
     rustc_version = "0.4.0";
     rustls = "0.23.5";
+    rustls-pemfile = "2.0.0";
+    sbi = "0.2.0";
     serde = "1.0.147";
     serde_json = "1.0.87";
     serde_yaml = "0.9.14";
+    smccc = "0.1.1";
     smoltcp = "0.10.0";
+    spin = "0.9.4";
+    stable_deref_trait = "1.1.0"; # for gimli dep of sel4-backtrace-addr2line-context-helper
     syn = "2.0.85";
     thiserror = "1.0";
     tock-registers = "0.8.1";
     unwinding = "0.2.3";
     virtio-drivers = "0.7.2";
     webpki-roots = "0.26";
+    xmltree = "0.10.3";
     zerocopy = "0.7.32";
   };
 
