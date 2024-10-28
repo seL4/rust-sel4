@@ -1,4 +1,4 @@
-[versions]
+[allow]
 aarch64-cpu = "9.4.0"
 ab_glyph = "0.2.22"
 addr2line = "0.24.2"
