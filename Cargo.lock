@@ -2165,7 +2165,6 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "clap",
- "fallible-iterator 0.2.0",
  "num",
  "object",
  "postcard",
@@ -2412,7 +2411,6 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "clap",
- "fallible-iterator 0.2.0",
  "heapless",
  "num",
  "object",
@@ -2635,7 +2633,6 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "clap",
- "fallible-iterator 0.2.0",
  "num",
  "sel4-synthetic-elf",
 ]
