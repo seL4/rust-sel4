@@ -26,6 +26,18 @@ in {
     }
   );
 
+  withConfigOverride = f: self.withOverlays [
+    (self': super': {
+      this = super'.this.overrideScope (self'': super'': {
+        overridableScopeConfig = f super''.overridableScopeConfig;
+      });
+    })
+  ];
+
+  withClippy = self.withConfigOverride (super: super // {
+    runClippyDefault = true;
+  });
+
   inherit (pkgs.build.this) shellForMakefile shellForHacking;
 
   worldsForEverythingInstances = [
