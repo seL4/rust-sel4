@@ -11,7 +11,7 @@ use zerocopy::{FromBytes, Immutable, IntoBytes};
 
 use sel4_shared_ring_buffer::Descriptor;
 
-#[derive(Copy, Clone, Debug, PartialOrd, Ord, PartialEq, Eq, IntoBytes, FromBytes, Immutable)]
+#[derive(Copy, Clone, Debug, PartialOrd, Ord, PartialEq, Eq, FromBytes, IntoBytes, Immutable)]
 #[repr(C)]
 pub struct BlockIORequest {
     status: i32,

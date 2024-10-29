@@ -9,7 +9,7 @@ use core::ops::Range;
 use zerocopy::{FromBytes, Immutable, IntoBytes};
 
 #[repr(C)]
-#[derive(Copy, Clone, Debug, PartialOrd, Ord, PartialEq, Eq, IntoBytes, FromBytes, Immutable)]
+#[derive(Copy, Clone, Debug, PartialOrd, Ord, PartialEq, Eq, FromBytes, IntoBytes, Immutable)]
 pub struct Descriptor {
     encoded_addr: usize,
     len: u32,

@@ -31,7 +31,7 @@ pub type Address = NativeWord;
 pub type CPtrBits = NativeWord;
 
 #[repr(C)]
-#[derive(Debug, Clone, PartialEq, Eq, IntoBytes, FromBytes, Immutable, KnownLayout)]
+#[derive(Debug, Clone, PartialEq, Eq, FromBytes, IntoBytes, Immutable, KnownLayout)]
 struct Head {
     static_heap: ZerocopyOptionWordRange,
     static_heap_mutex_notification: ZerocopyOptionWord,
@@ -42,7 +42,7 @@ struct Head {
 }
 
 #[repr(C)]
-#[derive(Debug, Clone, PartialEq, Eq, IntoBytes, FromBytes, Immutable)]
+#[derive(Debug, Clone, PartialEq, Eq, FromBytes, IntoBytes, Immutable)]
 struct Thread {
     ipc_buffer_addr: ZerocopyWord,
     endpoint: ZerocopyOptionWord,
@@ -102,7 +102,7 @@ impl<'a> RuntimeConfig<'a> {
 }
 
 #[repr(transparent)]
-#[derive(Debug, Clone, PartialEq, Eq, IntoBytes, FromBytes, Immutable)]
+#[derive(Debug, Clone, PartialEq, Eq, FromBytes, IntoBytes, Immutable)]
 pub struct RuntimeThreadConfig {
     inner: Thread,
 }

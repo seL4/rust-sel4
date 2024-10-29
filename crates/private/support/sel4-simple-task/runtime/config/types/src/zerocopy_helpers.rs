@@ -47,7 +47,7 @@ impl<T: fmt::Display> fmt::Display for InvalidZerocopyOptionTagOr<T> {
 //
 
 #[repr(C)]
-#[derive(Debug, Clone, PartialEq, Eq, IntoBytes, FromBytes, Immutable, KnownLayout)]
+#[derive(Debug, Clone, PartialEq, Eq, FromBytes, IntoBytes, Immutable, KnownLayout)]
 pub struct ZerocopyWordRange {
     start: ZerocopyWord,
     end: ZerocopyWord,
@@ -93,7 +93,7 @@ impl<T: TryInto<NativeWord> + Copy> TryFrom<&Range<T>> for ZerocopyWordRange {
 //
 
 #[repr(C)]
-#[derive(Debug, Clone, PartialEq, Eq, IntoBytes, FromBytes, Immutable, KnownLayout)]
+#[derive(Debug, Clone, PartialEq, Eq, FromBytes, IntoBytes, Immutable, KnownLayout)]
 pub struct ZerocopyOptionWord {
     is_present: u8,
     value: ZerocopyWord,
@@ -156,7 +156,7 @@ impl TryFrom<&ZerocopyOptionWord> for Option<ZerocopyWord> {
 //
 
 #[repr(C)]
-#[derive(Debug, Clone, PartialEq, Eq, IntoBytes, FromBytes, Immutable, KnownLayout)]
+#[derive(Debug, Clone, PartialEq, Eq, FromBytes, IntoBytes, Immutable, KnownLayout)]
 pub struct ZerocopyOptionWordRange {
     is_present: u8,
     value: ZerocopyWordRange,
