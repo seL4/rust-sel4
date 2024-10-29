@@ -15,7 +15,7 @@ fn main() {
     let cert = generate_simple_self_signed(subject_alt_names).unwrap();
     let out_dir = env::var("OUT_DIR").unwrap();
     let cert_path = PathBuf::from(&out_dir).join("cert.pem");
-    fs::write(cert_path, cert.serialize_pem().unwrap()).unwrap();
+    fs::write(cert_path, cert.cert.pem()).unwrap();
     let priv_path = PathBuf::from(&out_dir).join("priv.pem");
-    fs::write(priv_path, cert.serialize_private_key_pem()).unwrap();
+    fs::write(priv_path, cert.key_pair.serialize_pem()).unwrap();
 }
