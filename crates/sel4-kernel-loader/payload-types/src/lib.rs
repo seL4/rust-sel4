@@ -110,7 +110,7 @@ pub struct DirectRegionContent<'a> {
     pub content: &'a [u8],
 }
 
-impl<'a> RegionContent for DirectRegionContent<'a> {
+impl RegionContent for DirectRegionContent<'_> {
     type Source = ();
 
     fn len(&self) -> usize {

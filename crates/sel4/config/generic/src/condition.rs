@@ -92,7 +92,7 @@ fn err<T, U: ToString>(node: impl Spanned, message: U) -> Result<T, EvalError> {
 
 struct ConfigurationForEval<'a>(&'a Configuration);
 
-impl<'a> ConfigurationForEval<'a> {
+impl ConfigurationForEval<'_> {
     fn lookup_key(&self, k: &syn::Ident) -> Result<&Value, EvalError> {
         self.0
             .get(&k.to_string())

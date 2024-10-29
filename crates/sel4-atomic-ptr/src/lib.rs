@@ -26,7 +26,7 @@ pub struct AtomicPtr<'a, T> {
     reference: PhantomData<&'a T>,
 }
 
-impl<'a, T> Copy for AtomicPtr<'a, T> {}
+impl<T> Copy for AtomicPtr<'_, T> {}
 
 impl<T> Clone for AtomicPtr<'_, T> {
     fn clone(&self) -> Self {
@@ -40,7 +40,7 @@ impl<T> fmt::Debug for AtomicPtr<'_, T> {
     }
 }
 
-impl<'a, T> AtomicPtr<'a, T> {
+impl<T> AtomicPtr<'_, T> {
     /// # Safety
     ///
     /// Necessary but not sufficient:

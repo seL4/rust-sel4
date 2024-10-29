@@ -61,7 +61,7 @@ impl<'a, D> FrameInit<'a, D, NeverEmbedded> {
     }
 }
 
-impl<'a, D> object::Frame<'a, D, NeverEmbedded> {
+impl<D> object::Frame<'_, D, NeverEmbedded> {
     pub fn can_embed(&self, granule_size_bits: usize, is_root: bool) -> bool {
         is_root
             && self.paddr.is_none()
@@ -167,7 +167,7 @@ pub struct Fill<'a, D> {
     pub entries: Indirect<'a, [FillEntry<D>]>,
 }
 
-impl<'a, D> Fill<'a, D> {
+impl<D> Fill<'_, D> {
     pub fn depends_on_bootinfo(&self) -> bool {
         self.entries.iter().any(|entry| entry.content.is_bootinfo())
     }
@@ -278,19 +278,19 @@ pub struct BytesContent<'a> {
 }
 
 #[cfg(feature = "alloc")]
-impl<'a> BytesContent<'a> {
+impl BytesContent<'_> {
     pub fn pack(raw_content: &[u8]) -> Vec<u8> {
         raw_content.to_vec()
     }
 }
 
-impl<'a> SelfContainedContent for BytesContent<'a> {
+impl SelfContainedContent for BytesContent<'_> {
     fn self_contained_copy_out(&self, dst: &mut [u8]) {
         dst.copy_from_slice(self.bytes)
     }
 }
 
-impl<'a> fmt::Debug for BytesContent<'a> {
+impl fmt::Debug for BytesContent<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("BytesContent")
             .field("bytes", &"&[...]")
@@ -306,14 +306,14 @@ pub struct DeflatedBytesContent<'a> {
 }
 
 #[cfg(all(feature = "alloc", feature = "deflate"))]
-impl<'a> DeflatedBytesContent<'a> {
+impl DeflatedBytesContent<'_> {
     pub fn pack(raw_content: &[u8]) -> Vec<u8> {
         miniz_oxide::deflate::compress_to_vec(raw_content, 10)
     }
 }
 
 #[cfg(feature = "deflate")]
-impl<'a> SelfContainedContent for DeflatedBytesContent<'a> {
+impl SelfContainedContent for DeflatedBytesContent<'_> {
     fn self_contained_copy_out(&self, dst: &mut [u8]) {
         let n = miniz_oxide::inflate::decompress_slice_iter_to_slice(
             dst,
@@ -327,7 +327,7 @@ impl<'a> SelfContainedContent for DeflatedBytesContent<'a> {
 }
 
 #[cfg(feature = "deflate")]
-impl<'a> fmt::Debug for DeflatedBytesContent<'a> {
+impl fmt::Debug for DeflatedBytesContent<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("DeflatedBytesContent")
             .field("deflated_bytes", &"&[...]")

@@ -152,7 +152,7 @@ pub struct BootInfoExtra<'a> {
     pub content_with_header: &'a [u8],
 }
 
-impl<'a> BootInfoExtra<'a> {
+impl BootInfoExtra<'_> {
     pub fn content_with_header(&self) -> &[u8] {
         self.content_with_header
     }

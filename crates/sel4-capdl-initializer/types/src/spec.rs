@@ -86,7 +86,7 @@ pub enum Object<'a, D, M> {
     Reply,
 }
 
-impl<'a, D, M> Object<'a, D, M> {
+impl<D, M> Object<'_, D, M> {
     pub fn paddr(&self) -> Option<usize> {
         match self {
             Object::Untyped(obj) => obj.paddr,

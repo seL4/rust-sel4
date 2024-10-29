@@ -8,7 +8,7 @@ use core::sync::atomic::Ordering;
 
 use super::{generic, Atomic, AtomicPtr};
 
-impl<'a, T> AtomicPtr<'a, T> {
+impl<T> AtomicPtr<'_, T> {
     fn as_mut_ptr(self) -> *mut T {
         self.pointer.as_ptr()
     }
@@ -18,7 +18,7 @@ impl<'a, T> AtomicPtr<'a, T> {
     }
 }
 
-impl<'a, T: Atomic> AtomicPtr<'a, T> {
+impl<T: Atomic> AtomicPtr<'_, T> {
     #[inline]
     pub fn load(self, order: Ordering) -> T {
         // SAFETY: data races are prevented by atomic intrinsics.

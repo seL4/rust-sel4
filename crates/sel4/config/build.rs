@@ -16,5 +16,5 @@ fn main() {
     let formatted = prettyplease::unparse(&syn::parse2(toks).unwrap());
     let out_dir = env::var("OUT_DIR").unwrap();
     let out_path = PathBuf::from(&out_dir).join("consts_gen.rs");
-    fs::write(&out_path, formatted).unwrap();
+    fs::write(out_path, formatted).unwrap();
 }

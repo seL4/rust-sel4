@@ -36,7 +36,7 @@ impl Footprint for IndirectEmbeddedFrame {}
 #[cfg(feature = "deflate")]
 impl Footprint for IndirectDeflatedBytesContent {}
 
-impl<'a, T: Sized + Footprint> Footprint for Indirect<'a, T> {
+impl<T: Sized + Footprint> Footprint for Indirect<'_, T> {
     fn external_footprint(&self) -> usize {
         self.inner().total_footprint()
     }
@@ -51,13 +51,13 @@ impl<T: Footprint> Footprint for Option<T> {
     }
 }
 
-impl<'a, T: Footprint> Footprint for Indirect<'a, [T]> {
+impl<T: Footprint> Footprint for Indirect<'_, [T]> {
     fn external_footprint(&self) -> usize {
         self.inner().iter().map(Footprint::total_footprint).sum()
     }
 }
 
-impl<'a, N: Footprint, D: Footprint, M: Footprint> Footprint for Spec<'a, N, D, M> {
+impl<N: Footprint, D: Footprint, M: Footprint> Footprint for Spec<'_, N, D, M> {
     fn external_footprint(&self) -> usize {
         self.objects.external_footprint()
             + self.irqs.external_footprint()
@@ -65,13 +65,13 @@ impl<'a, N: Footprint, D: Footprint, M: Footprint> Footprint for Spec<'a, N, D, 
     }
 }
 
-impl<'a, N: Footprint, D: Footprint, M: Footprint> Footprint for NamedObject<'a, N, D, M> {
+impl<N: Footprint, D: Footprint, M: Footprint> Footprint for NamedObject<'_, N, D, M> {
     fn external_footprint(&self) -> usize {
         self.name.external_footprint() + self.object.external_footprint()
     }
 }
 
-impl<'a, D: Footprint, M: Footprint> Footprint for Object<'a, D, M> {
+impl<D: Footprint, M: Footprint> Footprint for Object<'_, D, M> {
     fn external_footprint(&self) -> usize {
         match self {
             Self::CNode(obj) => obj.slots.external_footprint(),
@@ -85,7 +85,7 @@ impl<'a, D: Footprint, M: Footprint> Footprint for Object<'a, D, M> {
     }
 }
 
-impl<'a, D: Footprint, M: Footprint> Footprint for FrameInit<'a, D, M> {
+impl<D: Footprint, M: Footprint> Footprint for FrameInit<'_, D, M> {
     fn external_footprint(&self) -> usize {
         match self {
             Self::Fill(fill) => fill.external_footprint(),
@@ -94,7 +94,7 @@ impl<'a, D: Footprint, M: Footprint> Footprint for FrameInit<'a, D, M> {
     }
 }
 
-impl<'a, D: Footprint> Footprint for Fill<'a, D> {
+impl<D: Footprint> Footprint for Fill<'_, D> {
     fn external_footprint(&self) -> usize {
         self.entries.external_footprint()
     }

@@ -135,7 +135,7 @@ pub struct AbortInfo<'a> {
     location: Option<&'a Location<'a>>,
 }
 
-impl<'a> AbortInfo<'a> {
+impl AbortInfo<'_> {
     /// The `core::fmt::Arguments` with which [`abort!`] was called.
     pub fn message(&self) -> Option<&fmt::Arguments> {
         self.message
@@ -211,7 +211,6 @@ pub fn __abort_macro_helper(message: Option<fmt::Arguments>) -> ! {
 /// the [`AbortInfo`] argument using [`debug_print!`].
 ///
 /// [`register_abort_hook`] provides a typesafe way to define that symbol.
-
 #[macro_export]
 macro_rules! abort {
     () => ($crate::__abort_macro_helper(::core::option::Option::None));

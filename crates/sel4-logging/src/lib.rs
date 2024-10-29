@@ -91,7 +91,7 @@ struct DisplayWrapper<'a> {
     record: &'a Record<'a>,
 }
 
-impl<'a> fmt::Display for DisplayWrapper<'a> {
+impl fmt::Display for DisplayWrapper<'_> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         (self.fmt)(self.record, f)
     }

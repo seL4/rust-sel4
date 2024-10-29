@@ -149,7 +149,7 @@ type BorrowFlag = AtomicIsize;
 
 pub(crate) struct SyncTokenBorrow<'a>(&'a BorrowFlag);
 
-impl<'a> Drop for SyncTokenBorrow<'a> {
+impl Drop for SyncTokenBorrow<'_> {
     fn drop(&mut self) {
         self.0.fetch_sub(1, Ordering::Release);
     }
@@ -157,7 +157,7 @@ impl<'a> Drop for SyncTokenBorrow<'a> {
 
 pub(crate) struct SyncTokenBorrowMut<'a>(&'a BorrowFlag);
 
-impl<'a> Drop for SyncTokenBorrowMut<'a> {
+impl Drop for SyncTokenBorrowMut<'_> {
     fn drop(&mut self) {
         self.0.fetch_add(1, Ordering::Release);
     }

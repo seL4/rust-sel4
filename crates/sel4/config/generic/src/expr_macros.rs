@@ -17,7 +17,7 @@ use sel4_config_generic_types::{Key, Value};
 
 use crate::{parse_or_return, MacroImpls};
 
-impl<'a> MacroImpls<'a> {
+impl MacroImpls<'_> {
     pub fn cfg_generic_impl<T>(
         &self,
         key_toks: TokenStream,
