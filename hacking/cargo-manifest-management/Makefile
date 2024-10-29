@@ -6,14 +6,20 @@
 
 blueprint := blueprint.json
 
+tools_manifest_path_arg := --manifest-path=tool/Cargo.toml
+
 run := cargo run \
-	--manifest-path=tool/Cargo.toml -p manage-cargo-manifests --
+	$(tools_manifest_path_arg) -p manage-cargo-manifests --
 
 run_allow := cargo run \
-	--manifest-path=tool/Cargo.toml -p manage-direct-dependency-allow-list --
+	$(tools_manifest_path_arg) -p manage-direct-dependency-allow-list --
 
-run_allow_check_workspace := $(run_allow) check-workspace \
-	--manifest-path=../../Cargo.toml --allowlist direct-dependency-allow-list.toml
+project_manifest_path_arg := --manifest-path=../../Cargo.toml
+
+allowlist := direct-dependency-allow-list.toml
+
+run_allow_check_workspace := $(run_allow) check-workspace --allowlist $(allowlist) $(project_manifest_path_arg)
+run_allow_update := $(run_allow) update --allowlist $(allowlist) -o $(allowlist)
 
 .PHONY: none
 none:
@@ -40,6 +46,10 @@ check: $(blueprint)
 check-workspace-direct-dependencies:
 	$(run_allow_check_workspace)
 
-.PHONY: x
-x:
-	$(run_allow) update --allowlist direct-dependency-allow-list.toml -o direct-dependency-allow-list.toml
+.PHONY: update-workspace-direct-dependencies
+update-workspace-direct-dependencies:
+	$(run_allow_update)
+
+.PHONY: dry-update-workspace-direct-dependencies
+dry-update-workspace-direct-dependencies:
+	$(run_allow_update) --dry-run
