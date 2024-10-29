@@ -17,7 +17,7 @@ edition = "2021"
 license = "BSD-2-Clause"
 
 [dependencies]
-async-unsync = { version = "0.2.2", default-features = false }
+async-unsync = { version = "0.3.0", default-features = false }
 futures = { version = "0.3.28", default-features = false, features = ["async-await", "alloc"] }
 lock_api = "0.4.12"
 log = "0.4.17"
@@ -56,7 +56,7 @@ path = "../../../../../sel4-shared-ring-buffer/block-io/types"
 path = "../../../../../sel4-shared-ring-buffer/bookkeeping"
 
 [dependencies.smoltcp]
-version = "0.10.0"
+version = "0.11.0"
 default-features = false
 features = [
     "proto-ipv4",
@@ -69,4 +69,4 @@ features = [
 ]
 
 [build-dependencies]
-rcgen = "0.11.1"
+rcgen = "0.13.1"

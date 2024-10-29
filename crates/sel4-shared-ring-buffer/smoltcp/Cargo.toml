@@ -27,6 +27,6 @@ sel4-shared-ring-buffer-bookkeeping = { path = "../bookkeeping" }
 sel4-sync-trivial = { path = "../../sel4-sync/trivial" }
 
 [dependencies.smoltcp]
-version = "0.10.0"
+version = "0.11.0"
 default-features = false
 features = ["proto-ipv4", "proto-dhcpv4", "proto-dns", "socket-dhcpv4", "socket-dns", "socket-tcp"]

@@ -18,10 +18,10 @@ license = "BSD-2-Clause"
 
 [dependencies]
 futures = { version = "0.3.28", default-features = false, features = ["alloc"] }
-heapless = "0.7.16"
+heapless = "0.8.0"
 hex = { version = "0.4.3", default-features = false }
 log = "0.4.17"
-lru = "0.10.0"
+lru = "0.12.5"
 sel4-async-block-io = { path = ".." }
 
 [dependencies.embedded-fat]

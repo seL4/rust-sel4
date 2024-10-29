@@ -17,7 +17,7 @@ edition = "2021"
 license = "BSD-2-Clause"
 
 [dependencies]
-fallible-iterator = "0.2.0"
+fallible-iterator = "0.3.0"
 proc-macro2 = "1.0.89"
 quote = "1.0.37"
 sel4-config-generic-types = { path = "types" }

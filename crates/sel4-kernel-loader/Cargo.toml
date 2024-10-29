@@ -19,7 +19,7 @@ license = "BSD-2-Clause AND GPL-2.0-only"
 [dependencies]
 cfg-if = "1.0.0"
 embedded-hal-nb = "1.0"
-heapless = { version = "0.7.16", features = ["serde"] }
+heapless = { version = "0.8.0", features = ["serde"] }
 log = "0.4.17"
 postcard = { version = "1.0.2", default-features = false }
 sel4-config = { path = "../sel4/config" }
@@ -53,9 +53,9 @@ sel4-bcm2835-aux-uart-driver = { path = "../drivers/bcm2835-aux-uart" }
 sel4-pl011-driver = { path = "../drivers/pl011" }
 
 [target."cfg(any(target_arch = \"riscv32\", target_arch = \"riscv64\"))".dependencies]
-riscv = "0.10.0"
+riscv = "0.12.1"
 sbi = "0.2.0"
 
 [target."cfg(target_arch = \"aarch64\")".dependencies]
-aarch64-cpu = "9.4.0"
+aarch64-cpu = "10.0.0"
 smccc = "0.1.1"

@@ -22,6 +22,6 @@ sel4-driver-interfaces = { path = "../../../sel4-driver-interfaces" }
 virtio-drivers = { version = "0.7.2", default-features = false, features = ["alloc"] }
 
 [dependencies.smoltcp]
-version = "0.10.0"
+version = "0.11.0"
 default-features = false
 features = ["proto-ipv4", "proto-dhcpv4", "proto-dns", "socket-dhcpv4", "socket-dns", "socket-tcp"]
