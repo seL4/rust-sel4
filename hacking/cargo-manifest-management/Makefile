@@ -29,12 +29,12 @@ $(blueprint):
 .PHONY: update
 update: $(blueprint)
 	$(run) --blueprint $<
-	$(run_allow)
+	$(run_allow_check_workspace)
 
 .PHONY: check
 check: $(blueprint)
 	$(run) --blueprint $< --just-check
-	$(run_allow)
+	$(run_allow_check_workspace)
 
 .PHONY: check-workspace-direct-dependencies
 check-workspace-direct-dependencies:
