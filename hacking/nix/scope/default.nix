@@ -36,9 +36,24 @@ let
   fenix = import fenixSource {};
 in
 
+let
+  elaborateScopeConfig =
+    { runClippyDefault ? false
+    }:
+    {
+      inherit
+        runClippyDefault
+      ;
+    };
+in
+
 superCallPackage ../rust-utils {} self //
 
 (with self; {
+
+  overridableScopeConfig = {};
+
+  scopeConfig = elaborateScopeConfig overridableScopeConfig;
 
   sources = callPackage ./sources.nix {};
 

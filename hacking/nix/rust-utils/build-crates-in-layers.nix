@@ -10,6 +10,7 @@
 , vendorLockfile, pruneLockfile
 , defaultRustEnvironment, defaultRustTargetTriple
 , verus
+, scopeConfig
 }:
 
 let
@@ -21,10 +22,7 @@ let
     false
   ;
 
-  runClippyDefault =
-    # true
-    false
-  ;
+  inherit (scopeConfig) runClippyDefault;
 
 in
 
