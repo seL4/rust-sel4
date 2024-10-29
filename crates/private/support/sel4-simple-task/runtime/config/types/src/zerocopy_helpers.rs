@@ -7,7 +7,7 @@
 use core::fmt;
 use core::ops::Range;
 
-use zerocopy::{AsBytes, BigEndian, FromBytes, FromZeroes, U64};
+use zerocopy::{BigEndian, FromBytes, Immutable, IntoBytes, KnownLayout, U64};
 
 pub type ZerocopyWord = U64<BigEndian>;
 
@@ -47,7 +47,7 @@ impl<T: fmt::Display> fmt::Display for InvalidZerocopyOptionTagOr<T> {
 //
 
 #[repr(C)]
-#[derive(Debug, Clone, PartialEq, Eq, AsBytes, FromBytes, FromZeroes)]
+#[derive(Debug, Clone, PartialEq, Eq, IntoBytes, FromBytes, Immutable, KnownLayout)]
 pub struct ZerocopyWordRange {
     start: ZerocopyWord,
     end: ZerocopyWord,
@@ -93,7 +93,7 @@ impl<T: TryInto<NativeWord> + Copy> TryFrom<&Range<T>> for ZerocopyWordRange {
 //
 
 #[repr(C)]
-#[derive(Debug, Clone, PartialEq, Eq, AsBytes, FromBytes, FromZeroes)]
+#[derive(Debug, Clone, PartialEq, Eq, IntoBytes, FromBytes, Immutable, KnownLayout)]
 pub struct ZerocopyOptionWord {
     is_present: u8,
     value: ZerocopyWord,
@@ -156,7 +156,7 @@ impl TryFrom<&ZerocopyOptionWord> for Option<ZerocopyWord> {
 //
 
 #[repr(C)]
-#[derive(Debug, Clone, PartialEq, Eq, AsBytes, FromBytes, FromZeroes)]
+#[derive(Debug, Clone, PartialEq, Eq, IntoBytes, FromBytes, Immutable, KnownLayout)]
 pub struct ZerocopyOptionWordRange {
     is_present: u8,
     value: ZerocopyWordRange,

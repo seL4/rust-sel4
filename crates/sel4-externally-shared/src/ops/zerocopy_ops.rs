@@ -7,7 +7,7 @@
 use core::marker::PhantomData;
 
 use volatile::ops::{BulkOps, Ops, UnitaryOps};
-use zerocopy::{AsBytes, FromBytes};
+use zerocopy::{FromBytes, IntoBytes};
 
 #[derive(Default, Copy, Clone)]
 pub struct ZerocopyOps<O> {
@@ -16,7 +16,7 @@ pub struct ZerocopyOps<O> {
 
 impl<O: Ops> Ops for ZerocopyOps<O> {}
 
-impl<O: UnitaryOps<T>, T: FromBytes + AsBytes> UnitaryOps<T> for ZerocopyOps<O> {
+impl<O: UnitaryOps<T>, T: FromBytes + IntoBytes> UnitaryOps<T> for ZerocopyOps<O> {
     unsafe fn read(src: *const T) -> T {
         unsafe { O::read(src) }
     }
@@ -26,7 +26,7 @@ impl<O: UnitaryOps<T>, T: FromBytes + AsBytes> UnitaryOps<T> for ZerocopyOps<O> 
     }
 }
 
-impl<O: BulkOps<T>, T: FromBytes + AsBytes> BulkOps<T> for ZerocopyOps<O> {
+impl<O: BulkOps<T>, T: FromBytes + IntoBytes> BulkOps<T> for ZerocopyOps<O> {
     unsafe fn memmove(dst: *mut T, src: *const T, count: usize) {
         unsafe { O::memmove(dst, src, count) }
     }

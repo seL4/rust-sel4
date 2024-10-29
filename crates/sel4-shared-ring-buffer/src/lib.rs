@@ -10,7 +10,7 @@ use core::marker::PhantomData;
 use core::num::Wrapping;
 use core::sync::atomic::Ordering;
 
-use zerocopy::{AsBytes, FromBytes};
+use zerocopy::{FromBytes, IntoBytes};
 
 use sel4_externally_shared::{
     map_field, ExternallySharedPtr, ExternallySharedPtrExt, ExternallySharedRef,
@@ -219,7 +219,7 @@ impl<'a, R: RingBufferRole, T: Copy> RingBuffer<'a, R, T> {
     }
 }
 
-impl<'a, T: Copy + FromBytes + AsBytes> RingBuffer<'a, Write, T> {
+impl<'a, T: Copy + FromBytes + IntoBytes> RingBuffer<'a, Write, T> {
     pub fn enqueue_and_commit(&mut self, desc: T) -> Result<Result<(), T>, PeerMisbehaviorError> {
         self.enqueue(desc, true)
     }
@@ -263,7 +263,7 @@ impl<'a, T: Copy + FromBytes + AsBytes> RingBuffer<'a, Write, T> {
     }
 }
 
-impl<'a, T: Copy + FromBytes + AsBytes> RingBuffer<'a, Read, T> {
+impl<'a, T: Copy + FromBytes + IntoBytes> RingBuffer<'a, Read, T> {
     pub fn dequeue(&mut self) -> Result<Option<T>, PeerMisbehaviorError> {
         if self.is_empty()? {
             return Ok(None);

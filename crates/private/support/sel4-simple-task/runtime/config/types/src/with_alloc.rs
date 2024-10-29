@@ -12,7 +12,7 @@ use alloc::string::String;
 use alloc::vec;
 use alloc::vec::Vec;
 
-use zerocopy::AsBytes;
+use zerocopy::IntoBytes;
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
