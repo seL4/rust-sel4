@@ -11,6 +11,20 @@ let
   aggregate = name: drvs: pkgs.build.writeText "aggregate-${name}" (toString (lib.flatten drvs));
 
 in {
+  overrideNixpkgsArgs = f: self.override (superArgs: selfBase:
+    let
+      concreteSuperArgs = superArgs selfBase;
+    in
+      concreteSuperArgs // {
+        nixpkgsArgsFor = crossSystem: f (concreteSuperArgs.nixpkgsArgsFor crossSystem);
+      }
+  );
+
+  withOverlays = overlays: self.overrideNixpkgsArgs (superNixpkgsArgs:
+    superNixpkgsArgs // {
+      overlays = superNixpkgsArgs.overlays ++ overlays;
+    }
+  );
 
   inherit (pkgs.build.this) shellForMakefile shellForHacking;
 
