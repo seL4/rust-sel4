@@ -11,7 +11,7 @@ use core::fmt;
 use core::mem;
 
 use num_enum::{IntoPrimitive, TryFromPrimitive};
-use zerocopy::{AsBytes, FromBytes, Unalign};
+use zerocopy::{FromBytes, Immutable, IntoBytes, Unalign};
 
 #[cfg(feature = "postcard")]
 mod when_postcard;
@@ -197,12 +197,12 @@ impl MessageRecv for EmptyMessage {
 
 // // //
 
-impl<T: AsBytes> MessageValueSend for T {
-    type Error = SendAsBytesError;
+impl<T: IntoBytes + Immutable> MessageValueSend for T {
+    type Error = SendIntoBytesError;
 
     fn write_message_value(self, buf: &mut [u8]) -> Result<usize, Self::Error> {
         self.write_to_prefix(buf)
-            .ok_or(SendAsBytesError::ValueTooLarge)?;
+            .map_err(|_| SendIntoBytesError::ValueTooLarge)?;
         Ok(mem::size_of_val(&self))
     }
 }
@@ -211,14 +211,15 @@ impl<T: FromBytes + Copy> MessageValueRecv for T {
     type Error = RecvFromBytesError;
 
     fn read_message_value(buf: &[u8]) -> Result<Self, Self::Error> {
-        Unalign::<T>::read_from_prefix(buf)
-            .ok_or(RecvFromBytesError::MessageTooShort)
-            .map(|unalign| unalign.get())
+        Ok(Unalign::<T>::read_from_prefix(buf)
+            .map_err(|_| RecvFromBytesError::MessageTooShort)?
+            .0
+            .get())
     }
 }
 
 #[derive(Copy, Clone, Debug)]
-pub enum SendAsBytesError {
+pub enum SendIntoBytesError {
     ValueTooLarge,
 }
 

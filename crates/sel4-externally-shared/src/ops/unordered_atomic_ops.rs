@@ -32,6 +32,7 @@ impl<T: UnsignedPrimitiveWithUnorderedAtomics> UnitaryOps<T> for UnorderedAtomic
 }
 
 #[allow(clippy::missing_safety_doc)]
+#[cfg_attr(not(feature = "unstable"), allow(dead_code))]
 pub unsafe trait UnsignedPrimitiveWithUnorderedAtomics: Copy {}
 
 macro_rules! impl_unsigned_primitive_with_unordered_atomics {

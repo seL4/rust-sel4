@@ -12,7 +12,7 @@ extern crate alloc;
 use core::ops::Range;
 use core::str;
 
-use zerocopy::{AsBytes, FromBytes, FromZeroes, Ref};
+use zerocopy::{FromBytes, Immutable, IntoBytes, KnownLayout};
 
 mod zerocopy_helpers;
 
@@ -31,7 +31,7 @@ pub type Address = NativeWord;
 pub type CPtrBits = NativeWord;
 
 #[repr(C)]
-#[derive(Debug, Clone, PartialEq, Eq, AsBytes, FromBytes, FromZeroes)]
+#[derive(Debug, Clone, PartialEq, Eq, IntoBytes, FromBytes, Immutable, KnownLayout)]
 struct Head {
     static_heap: ZerocopyOptionWordRange,
     static_heap_mutex_notification: ZerocopyOptionWord,
@@ -42,7 +42,7 @@ struct Head {
 }
 
 #[repr(C)]
-#[derive(Debug, Clone, PartialEq, Eq, AsBytes, FromBytes, FromZeroes)]
+#[derive(Debug, Clone, PartialEq, Eq, IntoBytes, FromBytes, Immutable)]
 struct Thread {
     ipc_buffer_addr: ZerocopyWord,
     endpoint: ZerocopyOptionWord,
@@ -75,9 +75,8 @@ impl<'a> RuntimeConfig<'a> {
     }
 
     pub fn threads(&self) -> &[RuntimeThreadConfig] {
-        Ref::new_slice(self.index(self.head().threads.try_into_native().unwrap()))
+        FromBytes::ref_from_bytes(self.index(self.head().threads.try_into_native().unwrap()))
             .unwrap()
-            .into_slice()
     }
 
     pub fn image_identifier(&self) -> Option<&str> {
@@ -93,8 +92,8 @@ impl<'a> RuntimeConfig<'a> {
     }
 
     fn head(&self) -> &Head {
-        let (head, _) = Ref::<_, Head>::new_from_prefix(self.bytes).unwrap();
-        head.into_ref()
+        let (head, _) = FromBytes::ref_from_prefix(self.bytes).unwrap();
+        head
     }
 
     fn index(&self, range: Range<usize>) -> &[u8] {
@@ -103,7 +102,7 @@ impl<'a> RuntimeConfig<'a> {
 }
 
 #[repr(transparent)]
-#[derive(Debug, Clone, PartialEq, Eq, AsBytes, FromBytes, FromZeroes)]
+#[derive(Debug, Clone, PartialEq, Eq, IntoBytes, FromBytes, Immutable)]
 pub struct RuntimeThreadConfig {
     inner: Thread,
 }

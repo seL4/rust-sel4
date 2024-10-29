@@ -8,7 +8,7 @@ use core::marker::PhantomData;
 use core::mem;
 
 use volatile::ops::{BulkOps, Ops, UnitaryOps};
-use zerocopy::{AsBytes, FromBytes};
+use zerocopy::{FromBytes, Immutable, IntoBytes};
 
 #[derive(Default, Copy, Clone)]
 pub struct BytewiseOps<O> {
@@ -17,10 +17,10 @@ pub struct BytewiseOps<O> {
 
 impl<O: Ops> Ops for BytewiseOps<O> {}
 
-impl<O: BulkOps<u8>, T: FromBytes + AsBytes> UnitaryOps<T> for BytewiseOps<O> {
+impl<O: BulkOps<u8>, T: FromBytes + IntoBytes + Immutable> UnitaryOps<T> for BytewiseOps<O> {
     unsafe fn read(src: *const T) -> T {
         let mut val = T::new_zeroed();
-        let view = val.as_bytes_mut();
+        let view = val.as_mut_bytes();
         unsafe { O::memcpy(view.as_mut_ptr(), src.cast(), mem::size_of::<T>()) };
         val
     }
@@ -31,7 +31,7 @@ impl<O: BulkOps<u8>, T: FromBytes + AsBytes> UnitaryOps<T> for BytewiseOps<O> {
     }
 }
 
-impl<O: BulkOps<u8>, T: FromBytes + AsBytes> BulkOps<T> for BytewiseOps<O> {
+impl<O: BulkOps<u8>, T: FromBytes + IntoBytes> BulkOps<T> for BytewiseOps<O> {
     unsafe fn memmove(dst: *mut T, src: *const T, count: usize) {
         unsafe { O::memmove(dst.cast(), src.cast(), count * mem::size_of::<T>()) }
     }
