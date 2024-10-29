@@ -1,3 +1,9 @@
+#
+# Copyright 2024, Colias Group, LLC
+#
+# SPDX-License-Identifier: BSD-2-Clause
+#
+
 [allow]
 aarch64-cpu = "10.0.0"
 ab_glyph = "0.2.22"
