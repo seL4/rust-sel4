@@ -40,6 +40,7 @@ enum IndirectImpl<'a, T: ?Sized> {
     },
 }
 
+#[allow(clippy::needless_lifetimes)]
 impl<'a, T: ?Sized> Indirect<'a, T> {
     #[cfg(feature = "borrowed-indirect")]
     pub const fn from_borrowed(borrowed: &'a T) -> Self {
@@ -121,7 +122,7 @@ impl<T: fmt::Debug + ?Sized> fmt::Debug for Indirect<'_, T> {
     }
 }
 
-impl<'a, 'b, T: ?Sized, U: ?Sized> PartialEq<Indirect<'b, U>> for Indirect<'a, T>
+impl<'b, T: ?Sized, U: ?Sized> PartialEq<Indirect<'b, U>> for Indirect<'_, T>
 where
     T: PartialEq<U>,
 {

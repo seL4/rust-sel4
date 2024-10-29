@@ -15,7 +15,7 @@ pub(crate) struct RenderElfArgs<'a> {
     pub(crate) heap_size: usize,
 }
 
-impl<'a> RenderElfArgs<'a> {
+impl RenderElfArgs<'_> {
     pub(crate) fn call_with<T: FileHeader<Word: NumCast + PatchValue>>(
         &self,
         orig_elf: &object::read::elf::ElfFile<T>,

@@ -8,7 +8,7 @@ use sel4::{ObjectBlueprint, VmAttributes};
 
 use crate::{cap, Badge, Cap, FillEntryContentBootInfoId, Object, Rights};
 
-impl<'a, D, M> Object<'a, D, M> {
+impl<D, M> Object<'_, D, M> {
     pub fn blueprint(&self) -> Option<ObjectBlueprint> {
         Some(sel4::sel4_cfg_wrap_match! {
             match self {

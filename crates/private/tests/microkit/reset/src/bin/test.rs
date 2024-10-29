@@ -6,6 +6,7 @@
 
 #![no_std]
 #![no_main]
+#![allow(static_mut_refs)]
 
 use sel4_microkit::{debug_println, protection_domain, NullHandler};
 use sel4_reset::reset;

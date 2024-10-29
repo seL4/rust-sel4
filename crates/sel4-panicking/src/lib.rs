@@ -54,7 +54,7 @@ pub struct ExternalPanicInfo<'a> {
     can_unwind: bool,
 }
 
-impl<'a> ExternalPanicInfo<'a> {
+impl ExternalPanicInfo<'_> {
     pub fn payload(&self) -> &Payload {
         &self.payload
     }

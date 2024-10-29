@@ -7,7 +7,7 @@
 #![no_std]
 #![no_main]
 
-use core::ffi::{c_char, CStr};
+use core::ffi::c_char;
 
 use sel4_newlib as _;
 use sel4_root_task::{debug_println, root_task};
@@ -18,7 +18,7 @@ extern "C" {
 
 #[root_task]
 fn main(_: &sel4::BootInfoPtr) -> ! {
-    let s = CStr::from_bytes_with_nul(b"1234\0").unwrap();
+    let s = c"1234";
     let n = unsafe { test(s.as_ptr()) };
     debug_println!("n = {}", n);
     assert_eq!(n, 1234 + 234);

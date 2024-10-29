@@ -20,7 +20,7 @@ macro_rules! ensure_empty {
     };
 }
 
-impl<'a> MacroImpls<'a> {
+impl MacroImpls<'_> {
     pub fn cfg_impl(&self, input: TokenStream, item: TokenStream) -> TokenStream {
         let cond = parse_or_return!(input as Condition);
         let r = self.eval(&cond);

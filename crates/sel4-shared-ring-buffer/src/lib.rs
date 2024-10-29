@@ -85,13 +85,13 @@ impl<'a, R: RingBuffersRole, F, T: Copy> RingBuffers<'a, R, F, T> {
     }
 }
 
-impl<'a, U, R: RingBuffersRole, F: Fn() -> U, T> RingBuffers<'a, R, F, T> {
+impl<U, R: RingBuffersRole, F: Fn() -> U, T> RingBuffers<'_, R, F, T> {
     pub fn notify(&self) -> U {
         (self.notify)()
     }
 }
 
-impl<'a, U, R: RingBuffersRole, F: FnMut() -> U, T> RingBuffers<'a, R, F, T> {
+impl<U, R: RingBuffersRole, F: FnMut() -> U, T> RingBuffers<'_, R, F, T> {
     pub fn notify_mut(&mut self) -> U {
         (self.notify)()
     }
@@ -219,7 +219,7 @@ impl<'a, R: RingBufferRole, T: Copy> RingBuffer<'a, R, T> {
     }
 }
 
-impl<'a, T: Copy + FromBytes + IntoBytes> RingBuffer<'a, Write, T> {
+impl<T: Copy + FromBytes + IntoBytes> RingBuffer<'_, Write, T> {
     pub fn enqueue_and_commit(&mut self, desc: T) -> Result<Result<(), T>, PeerMisbehaviorError> {
         self.enqueue(desc, true)
     }
@@ -263,7 +263,7 @@ impl<'a, T: Copy + FromBytes + IntoBytes> RingBuffer<'a, Write, T> {
     }
 }
 
-impl<'a, T: Copy + FromBytes + IntoBytes> RingBuffer<'a, Read, T> {
+impl<T: Copy + FromBytes + IntoBytes> RingBuffer<'_, Read, T> {
     pub fn dequeue(&mut self) -> Result<Option<T>, PeerMisbehaviorError> {
         if self.is_empty()? {
             return Ok(None);

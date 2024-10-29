@@ -134,7 +134,7 @@ pub struct IterExpired<'a, T, U, V> {
     queue: &'a mut TimerQueue<T, U, V>,
 }
 
-impl<'a, T: Ord + Clone, U: Ord, V> Iterator for IterExpired<'a, T, U, V> {
+impl<T: Ord + Clone, U: Ord, V> Iterator for IterExpired<'_, T, U, V> {
     type Item = Expired<T, U, V>;
 
     fn next(&mut self) -> Option<Self::Item> {

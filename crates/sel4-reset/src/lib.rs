@@ -30,7 +30,7 @@ struct Regions<'a> {
     data: &'a [u8],
 }
 
-impl<'a> Regions<'a> {
+impl Regions<'_> {
     unsafe fn reset_memory(&self) {
         for meta in self.meta {
             let dst = unsafe { slice::from_raw_parts_mut(meta.vaddr as *mut _, meta.memsz) };

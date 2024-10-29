@@ -19,13 +19,13 @@ use syn::{parse_macro_input, ItemMod, MetaNameValue, Result};
 /// #[path = concat!(env!("OUT_DIR"), "/foo.rs")]
 /// mod foo;
 /// ```
-
+///
 /// This macro does exactly that:
 /// ```ignore
 /// #[in_out_dir]
 /// mod foo;
 /// ```
-
+///
 /// This works too:
 /// ```ignore
 /// #[in_out_dir(relative_path = "path/to/bar.rs")]

@@ -144,13 +144,13 @@ impl<'a, T: SlotSemaphore> TemporaryPermit<'a, T> {
     }
 }
 
-impl<'a, T: SlotSemaphore> Drop for TemporaryPermit<'a, T> {
+impl<T: SlotSemaphore> Drop for TemporaryPermit<'_, T> {
     fn drop(&mut self) {
         self.sem.give(self.n);
     }
 }
 
-impl<'a, T: SlotSemaphore, const N: usize> SlotSetReservation<'a, T, N> {
+impl<T: SlotSemaphore, const N: usize> SlotSetReservation<'_, T, N> {
     pub fn count(&self) -> usize {
         self.n
     }
@@ -176,7 +176,7 @@ impl<'a, T: SlotSemaphore, const N: usize> SlotSetReservation<'a, T, N> {
     }
 }
 
-impl<'a, T: SlotSemaphore, const N: usize> Drop for SlotSetReservation<'a, T, N> {
+impl<T: SlotSemaphore, const N: usize> Drop for SlotSetReservation<'_, T, N> {
     fn drop(&mut self) {
         for sem in &self.handle.per_pool_semaphores {
             sem.give(self.n);

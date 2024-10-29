@@ -172,8 +172,8 @@ impl<'a, N, P: Access, A: AbstractBounceBufferAllocator, F: FnMut()> RequestFutu
     }
 }
 
-impl<'a, N, P: Access, A: AbstractBounceBufferAllocator, F: FnMut()> Future
-    for RequestFuture<'a, N, P, A, F>
+impl<N, P: Access, A: AbstractBounceBufferAllocator, F: FnMut()> Future
+    for RequestFuture<'_, N, P, A, F>
 {
     type Output = Result<(), Error>;
 
@@ -182,8 +182,8 @@ impl<'a, N, P: Access, A: AbstractBounceBufferAllocator, F: FnMut()> Future
     }
 }
 
-impl<'a, N, P: Access, A: AbstractBounceBufferAllocator, F: FnMut()> Drop
-    for RequestFuture<'a, N, P, A, F>
+impl<N, P: Access, A: AbstractBounceBufferAllocator, F: FnMut()> Drop
+    for RequestFuture<'_, N, P, A, F>
 {
     fn drop(&mut self) {
         if !self.poll_returned_ready {

@@ -14,7 +14,7 @@ use syn::{
 
 use crate::{Condition, MacroImpls};
 
-impl<'a> MacroImpls<'a> {
+impl MacroImpls<'_> {
     pub fn cfg_if_impl(&self, toks: TokenStream) -> TokenStream {
         let parser = move |parse_stream: ParseStream| {
             parse_cfg_if_input(self.synthetic_attr(), parse_stream)
