@@ -16,6 +16,8 @@ ifneq ($(C),)
 	cores_args := --cores $(C)
 endif
 
+CLIPPY ?= 1
+
 ifeq ($(CLIPPY),1)
 	nix_clippy_attr_prefix := withClippy.
 endif
