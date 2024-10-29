@@ -43,8 +43,8 @@ struct UpdateArgs {
     #[arg(short = 'o')]
     out: Option<PathBuf>,
 
-    #[arg(long)]
-    dry_run: bool,
+    #[arg(long = "check")]
+    just_check: bool,
 }
 
 fn main() -> anyhow::Result<()> {
@@ -70,7 +70,7 @@ fn main() -> anyhow::Result<()> {
             let mut view = AllowListUpdateView::new(&mut doc);
             let out_of_date = view.update();
             if out_of_date {
-                if args.dry_run {
+                if args.just_check {
                     bail!("out of date");
                 } else {
                     let doc_str = doc.to_string();
@@ -98,25 +98,23 @@ impl AllowListCheckWorkspaceView {
     fn new(table: &Table) -> Self {
         let mut this = Self::default();
         for (source_key, v) in table["allow"].as_table().unwrap().iter() {
-            match v {
-                Item::Value(Value::String(req_str)) => {
-                    let req = VersionReq::parse(req_str.value()).unwrap();
-                    this.insert_version(source_key, req, source_key);
+            if let Item::Value(Value::String(req_str)) = v {
+                let req = VersionReq::parse(req_str.value()).unwrap();
+                this.insert_version(source_key, req, source_key);
+            } else if let Some(v) = v.as_table_like() {
+                let req = VersionReq::parse(v.get("version").unwrap().as_str().unwrap()).unwrap();
+                for package_name in v
+                    .get("applies-to")
+                    .unwrap()
+                    .as_array()
+                    .unwrap()
+                    .iter()
+                    .map(|v| v.as_str().unwrap())
+                {
+                    this.insert_version(package_name, req.clone(), source_key);
                 }
-                Item::Table(v) => {
-                    let req = VersionReq::parse(v["version"].as_str().unwrap()).unwrap();
-                    for package_name in v["applies-to"]
-                        .as_array()
-                        .unwrap()
-                        .iter()
-                        .map(|v| v.as_str().unwrap())
-                    {
-                        this.insert_version(package_name, req.clone(), source_key);
-                    }
-                }
-                _ => {
-                    panic!();
-                }
+            } else {
+                panic!()
             }
         }
         this
