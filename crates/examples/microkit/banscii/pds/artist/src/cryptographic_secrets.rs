@@ -17,6 +17,6 @@ fn get_priv_key() -> RsaPrivateKey {
 }
 
 pub(crate) fn sign(data: &[u8]) -> Signature {
-    let signing_key = SigningKey::<Sha256>::new_with_prefix(get_priv_key());
+    let signing_key = SigningKey::<Sha256>::new(get_priv_key());
     signing_key.sign(data)
 }

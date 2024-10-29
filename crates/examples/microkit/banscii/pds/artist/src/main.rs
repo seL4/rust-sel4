@@ -11,6 +11,8 @@ extern crate alloc;
 
 use alloc::vec;
 
+use rsa::signature::SignatureEncoding;
+
 use sel4_externally_shared::{
     access::{ReadOnly, ReadWrite},
     ExternallySharedRef, ExternallySharedRefExt,
@@ -87,8 +89,7 @@ impl Handler for HandlerImpl {
                         .index(masterpiece_start..masterpiece_end)
                         .copy_from_slice(&masterpiece.pixel_data);
 
-                    let signature = cryptographic_secrets::sign(&masterpiece.pixel_data);
-                    let signature = signature.as_ref();
+                    let signature = cryptographic_secrets::sign(&masterpiece.pixel_data).to_bytes();
 
                     let signature_start = masterpiece_end;
                     let signature_size = signature.len();
@@ -97,7 +98,7 @@ impl Handler for HandlerImpl {
                     self.region_out
                         .as_mut_ptr()
                         .index(signature_start..signature_end)
-                        .copy_from_slice(signature);
+                        .copy_from_slice(&signature);
 
                     MessageInfo::send_using_postcard(Response {
                         height: masterpiece.height,
