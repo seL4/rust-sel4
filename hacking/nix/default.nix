@@ -30,9 +30,9 @@ let
 
   treeHelpers = import ./tree-helpers.nix { inherit lib; };
 
-  makeOverridableWith = f: g: x: (g x) // {
+  makeOverridableWith = f: g: x: lib.fix (self: (g self x) // {
     override = x': makeOverridableWith f g (f x' x);
-  };
+  });
 
   crossSystems =
     with treeHelpers;
@@ -157,35 +157,20 @@ let
         (import ./overlay)
       ];
     };
+    attrs = {};
   };
 
-  mkThis =
-    with treeHelpers;
-    args: lib.fix (self:
-      let
-        concreteArgs = args self;
-        pkgs = untree (mapLeaves (crossSystem:
-          nixpkgsFn (concreteArgs.nixpkgsArgsFor crossSystem)
-        ) crossSystems);
-      in {
-        inherit lib pkgs;
-      } // import ./top-level self);
+  mkThis = self: args:
+    let
+      concreteArgs = args self;
+      pkgs = treeHelpers.untree (treeHelpers.mapLeaves (crossSystem:
+        nixpkgsFn (concreteArgs.nixpkgsArgsFor crossSystem)
+      ) crossSystems);
+    in {
+      inherit lib pkgs;
+    } // import ./top-level self // concreteArgs.attrs;
 
-  this = lib.fix (self: makeOverridableWith lib.id mkThis baseArgs // rec {
-    overrideNixpkgsArgs = f: self.override (superArgs: selfBase:
-      let
-        concreteSuperArgs = superArgs selfBase;
-      in
-        concreteSuperArgs // {
-          nixpkgsArgsFor = crossSystem: f (concreteSuperArgs.nixpkgsArgsFor crossSystem);
-        }
-    );
-    withOverlays = overlays: self.overrideNixpkgsArgs (superNixpkgsArgs:
-      superNixpkgsArgs // {
-        overlays = superNixpkgsArgs.overlays ++ overlays;
-      }
-    );
-  });
+  this = makeOverridableWith lib.id mkThis baseArgs;
 
 in
   this
