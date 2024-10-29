@@ -89,11 +89,10 @@ in rec {
 
   versions =
     let
-      allow = (builtins.fromTOML (builtins.readFile ./direct-dependency-allow-list.toml)).allow;
+      table = builtins.fromTOML (builtins.readFile ./direct-dependency-allow-list.toml);
+      getVersion = v: if lib.isString v then v else v.version;
     in
-      lib.flip lib.mapAttrs allow (_: v:
-        if lib.isString v then v else v.version
-      );
+      lib.mapAttrs (lib.const getVersion) table.allow;
 
   zerocopyWith = features: filterOutEmptyFeatureList {
     version = versions.zerocopy;
