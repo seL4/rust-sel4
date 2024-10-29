@@ -18,7 +18,7 @@ license = "BSD-2-Clause"
 
 [dependencies]
 embedded-hal-nb = "1.0"
-heapless = "0.7.16"
+heapless = "0.8.0"
 lock_api = "0.4.12"
 rtcc = "0.3.2"
 serde = { version = "1.0.147", default-features = false, features = ["derive"] }

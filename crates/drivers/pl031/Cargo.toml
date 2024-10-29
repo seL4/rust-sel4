@@ -18,4 +18,4 @@ license = "BSD-2-Clause"
 
 [dependencies]
 rtcc = "0.3.2"
-tock-registers = "0.8.1"
+tock-registers = "0.9.0"

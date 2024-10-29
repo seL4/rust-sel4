@@ -19,7 +19,7 @@ license = "BSD-2-Clause"
 [dependencies]
 anyhow = "1.0.66"
 clap = "4.4.6"
-heapless = "0.7.16"
+heapless = "0.8.0"
 num = "0.4.1"
 object = { version = "0.36.5", features = ["all"] }
 postcard = { version = "1.0.2", default-features = false, features = ["alloc"] }

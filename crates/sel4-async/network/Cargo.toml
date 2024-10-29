@@ -21,7 +21,7 @@ log = "0.4.17"
 sel4-async-io = { path = "../io" }
 
 [dependencies.smoltcp]
-version = "0.10.0"
+version = "0.11.0"
 default-features = false
 features = [
     "proto-ipv4",

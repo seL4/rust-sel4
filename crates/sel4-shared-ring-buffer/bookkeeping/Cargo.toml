@@ -17,4 +17,4 @@ edition = "2021"
 license = "BSD-2-Clause"
 
 [dependencies]
-async-unsync = { version = "0.2.2", default-features = false, optional = true }
+async-unsync = { version = "0.3.0", default-features = false, optional = true }

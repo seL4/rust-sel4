@@ -23,7 +23,7 @@ very_unstable = ["volatile/very_unstable"]
 [dependencies]
 cfg-if = "1.0.0"
 sel4-atomic-ptr = { path = "../sel4-atomic-ptr" }
-zerocopy = "0.7.32"
+zerocopy = "0.8.7"
 
 [dependencies.volatile]
 git = "https://github.com/coliasgroup/volatile.git"
