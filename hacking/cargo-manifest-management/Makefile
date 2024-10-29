@@ -39,3 +39,7 @@ check: $(blueprint)
 .PHONY: check-workspace-direct-dependencies
 check-workspace-direct-dependencies:
 	$(run_allow_check_workspace)
+
+.PHONY: x
+x:
+	$(run_allow) update --allowlist direct-dependency-allow-list.toml -o direct-dependency-allow-list.toml
