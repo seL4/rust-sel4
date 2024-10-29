@@ -16,6 +16,10 @@ ifneq ($(C),)
 	cores_args := --cores $(C)
 endif
 
+ifeq ($(CLIPPY),1)
+	nix_clippy_attr_prefix := withClippy.
+endif
+
 nix_args := $(keep_going_args) $(jobs_args) $(cores_args)
 
 append_to_nix_config := NIX_CONFIG="$$(printf "%s\n" "$$NIX_CONFIG" && cat hacking/binary-cache/fragment.nix.conf)"
@@ -98,7 +102,7 @@ try_restore_terminal := tput smam 2> /dev/null || true
 
 .PHONY: run-tests
 run-tests:
-	script=$$($(nix_build) -A runTests --no-out-link) && $$script
+	script=$$($(nix_build) -A $(nix_clippy_attr_prefix)runTests --no-out-link) && $$script
 	$(try_restore_terminal)
 
 .PHONY: run-sel4test-for
@@ -109,17 +113,17 @@ run-sel4test-for:
 
 .PHONY: run-fast-tests
 run-fast-tests:
-	script=$$($(nix_build) -A runFastTests --no-out-link) && $$script
+	script=$$($(nix_build) -A $(nix_clippy_attr_prefix)runFastTests --no-out-link) && $$script
 	$(try_restore_terminal)
 
 .PHONY: witness-tests
 witness-tests:
-	$(nix_build) -A witnessTests --no-out-link
+	$(nix_build) -A $(nix_clippy_attr_prefix)witnessTests --no-out-link
 	$(try_restore_terminal)
 
 .PHONY: witness-fast-tests
 witness-fast-tests:
-	$(nix_build) -A witnessFastTests --no-out-link
+	$(nix_build) -A $(nix_clippy_attr_prefix)witnessFastTests --no-out-link
 	$(try_restore_terminal)
 
 .PHONY: check-kani-proofs
@@ -134,23 +138,23 @@ check-kani-proofs:
 
 .PHONY: everything-except-non-incremental
 everything-except-non-incremental:
-	$(nix_build) -A everythingExceptNonIncremental --no-out-link
+	$(nix_build) -A $(nix_clippy_attr_prefix)everythingExceptNonIncremental --no-out-link
 
 .PHONY: everything
 everything:
-	$(nix_build) -A everything --no-out-link
+	$(nix_build) -A $(nix_clippy_attr_prefix)everything --no-out-link
 
 .PHONY: everything-with-excess
 everything-with-excess:
-	$(nix_build) -A everythingWithExcess --no-out-link
+	$(nix_build) -A $(nix_clippy_attr_prefix)everythingWithExcess --no-out-link
 
 .PHONY: html-links
 html-links:
-	$(nix_build) -A html -o $(out)/$@
+	$(nix_build) -A $(nix_clippy_attr_prefix)html -o $(out)/$@
 
 .PHONY: html
 html: | $(out)
-	src=$$($(nix_build) -A html --no-out-link) && \
+	src=$$($(nix_build) -A $(nix_clippy_attr_prefix)html --no-out-link) && \
 	dst=$(out)/html && \
 	rm -rf $$dst && \
 	cp -rL --no-preserve=owner,mode $$src $$dst
