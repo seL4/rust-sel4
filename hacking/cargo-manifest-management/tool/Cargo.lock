@@ -500,9 +500,7 @@ dependencies = [
  "cargo_metadata",
  "clap",
  "serde_json",
- "toml",
- "toml-normalize",
- "toml-path-regex",
+ "toml_edit 0.20.7",
  "ureq",
 ]
 

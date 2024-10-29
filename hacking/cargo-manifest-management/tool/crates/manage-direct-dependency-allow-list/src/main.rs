@@ -12,10 +12,7 @@ use anyhow::bail;
 use cargo_metadata::semver::{Version, VersionReq};
 use cargo_metadata::{Metadata, MetadataCommand};
 use clap::{Parser, Subcommand};
-use toml::{Table, Value};
-
-use toml_normalize::{Formatter, KeyOrdering, Policy, TableRule};
-use toml_path_regex::PathRegex;
+use toml_edit::{Document, Formatted, Item, Table, Value};
 
 #[derive(Debug, Parser)]
 struct Cli {
@@ -53,11 +50,11 @@ struct UpdateArgs {
 fn main() -> anyhow::Result<()> {
     match Cli::parse().command {
         Command::CheckWorkspace(args) => {
-            let table = fs::read_to_string(&args.allowlist)
+            let doc = fs::read_to_string(&args.allowlist)
                 .unwrap()
-                .parse::<Table>()
+                .parse::<Document>()
                 .unwrap_or_else(|err| panic!("{err}"));
-            let view = AllowListCheckWorkspaceView::new(&table);
+            let view = AllowListCheckWorkspaceView::new(&doc);
             let metadata = MetadataCommand::new()
                 .manifest_path(&args.manifest_path)
                 .no_deps()
@@ -66,24 +63,23 @@ fn main() -> anyhow::Result<()> {
             view.check(&metadata);
         }
         Command::Update(args) => {
-            let mut table = fs::read_to_string(&args.allowlist)
+            let mut doc = fs::read_to_string(&args.allowlist)
                 .unwrap()
-                .parse::<Table>()
+                .parse::<Document>()
                 .unwrap_or_else(|err| panic!("{err}"));
-            let mut view = AllowListUpdateView::new(&mut table);
+            let mut view = AllowListUpdateView::new(&mut doc);
             let out_of_date = view.update();
             if out_of_date {
                 if args.dry_run {
                     bail!("out of date");
                 } else {
-                    let formatter = Formatter::new(allowlist_policy());
-                    let table_str = formatter.format(&table).unwrap().to_string();
+                    let doc_str = doc.to_string();
                     match &args.out {
                         None => {
-                            println!("{table_str}");
+                            println!("{doc_str}");
                         }
                         Some(path) => {
-                            fs::write(path, table_str).unwrap();
+                            fs::write(path, doc_str).unwrap();
                         }
                     }
                 }
@@ -103,11 +99,11 @@ impl AllowListCheckWorkspaceView {
         let mut this = Self::default();
         for (source_key, v) in table["allow"].as_table().unwrap().iter() {
             match v {
-                Value::String(req_str) => {
-                    let req = VersionReq::parse(req_str).unwrap();
+                Item::Value(Value::String(req_str)) => {
+                    let req = VersionReq::parse(req_str.value()).unwrap();
                     this.insert_version(source_key, req, source_key);
                 }
-                Value::Table(v) => {
+                Item::Table(v) => {
                     let req = VersionReq::parse(v["version"].as_str().unwrap()).unwrap();
                     for package_name in v["applies-to"]
                         .as_array()
@@ -169,7 +165,7 @@ struct AllowListUpdateView<'a> {
 #[derive(Debug)]
 struct AllowListUpdateViewEntry<'a> {
     req: VersionReq,
-    req_slot: &'a mut String,
+    req_slot: &'a mut Formatted<String>,
     applies_to: Vec<String>,
     allow_out_of_date: bool,
 }
@@ -178,44 +174,42 @@ impl<'a> AllowListUpdateView<'a> {
     fn new(table: &'a mut Table) -> Self {
         let mut this = Self::default();
         for (key, value) in table["allow"].as_table_mut().unwrap().iter_mut() {
-            let entry = match value {
-                Value::String(req_slot) => {
-                    let req = VersionReq::parse(req_slot).unwrap();
-                    AllowListUpdateViewEntry {
-                        req,
-                        req_slot,
-                        applies_to: vec![key.to_owned()],
-                        allow_out_of_date: false,
-                    }
+            let entry = if let Item::Value(Value::String(req_slot)) = value {
+                let req = VersionReq::parse(req_slot.value()).unwrap();
+                AllowListUpdateViewEntry {
+                    req,
+                    req_slot,
+                    applies_to: vec![key.to_owned()],
+                    allow_out_of_date: false,
                 }
-                Value::Table(v) => {
-                    let applies_to = v["applies-to"]
-                        .as_array()
-                        .unwrap()
-                        .iter()
-                        .map(|v| v.as_str().unwrap().to_owned())
-                        .collect();
-                    let allow_out_of_date = v
-                        .get("allow_out_of_date")
-                        .map(|v| v.as_bool().unwrap())
-                        .unwrap_or(false);
-                    let req_slot = match &mut v["version"] {
-                        Value::String(req_slot) => req_slot,
-                        _ => panic!(),
-                    };
-                    let req = VersionReq::parse(req_slot).unwrap();
-                    AllowListUpdateViewEntry {
-                        req,
-                        req_slot,
-                        applies_to,
-                        allow_out_of_date,
-                    }
+            } else if let Some(v) = value.as_table_like_mut() {
+                let applies_to = v
+                    .get("applies-to")
+                    .unwrap()
+                    .as_array()
+                    .unwrap()
+                    .iter()
+                    .map(|v| v.as_str().unwrap().to_owned())
+                    .collect();
+                let allow_out_of_date = v
+                    .get("allow_out_of_date")
+                    .map(|v| v.as_bool().unwrap())
+                    .unwrap_or(false);
+                let req_slot = match v.get_mut("version").unwrap() {
+                    Item::Value(Value::String(req_slot)) => req_slot,
+                    _ => panic!(),
+                };
+                let req = VersionReq::parse(req_slot.value()).unwrap();
+                AllowListUpdateViewEntry {
+                    req,
+                    req_slot,
+                    applies_to,
+                    allow_out_of_date,
                 }
-                _ => {
-                    panic!();
-                }
+            } else {
+                panic!()
             };
-            this.allow.insert(key.clone(), entry);
+            this.allow.insert(key.get().to_owned(), entry);
         }
         this
     }
@@ -228,7 +222,7 @@ impl<'a> AllowListUpdateView<'a> {
                 if !v.allow_out_of_date {
                     out_of_date = true;
                     eprintln!("{}: {} -> {}", k, v.req, max_stable_version);
-                    *v.req_slot = max_stable_version.to_string();
+                    *v.req_slot = Formatted::new(max_stable_version.to_string());
                 }
             }
         }
@@ -262,49 +256,4 @@ fn fetch_max_stable_version(crate_name: &str) -> Version {
         .as_str()
         .unwrap();
     Version::parse(ver).unwrap()
-}
-
-pub fn allowlist_policy() -> Policy {
-    Policy {
-        max_width: Some(usize::MAX),
-        table_rules: vec![
-            TableRule {
-                path_regex: PathRegex::new(
-                    r#"
-                        .*
-                    "#,
-                )
-                .unwrap(),
-                ..Default::default()
-            },
-            TableRule {
-                path_regex: PathRegex::new(
-                    r#"
-                        ['allow']
-                    "#,
-                )
-                .unwrap(),
-                never_inline: Some(true),
-                ..Default::default()
-            },
-            TableRule {
-                path_regex: PathRegex::new(
-                    r#"
-                        ['allow'] .
-                    "#,
-                )
-                .unwrap(),
-                key_ordering: KeyOrdering {
-                    front: vec![
-                        "version".to_owned(),
-                        "applies-to".to_owned(),
-                        "old".to_owned(),
-                    ],
-                    ..Default::default()
-                },
-                ..Default::default()
-            },
-        ],
-        ..Default::default()
-    }
 }
