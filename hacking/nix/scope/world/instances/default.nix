@@ -154,6 +154,7 @@ in rec {
               rootCrate = crates.tests-root-task-backtrace;
               release = false;
               extraProfile = {
+                panic = "unwind";
                 opt-level = 2;
               };
             };
@@ -278,6 +279,7 @@ in rec {
       default-test-harness = maybe (haveFullRuntime && haveUnwindingSupport) (mkInstance {
         rootTask = mkTask {
           rootCrate = crates.tests-root-task-default-test-harness;
+          targetTriple = mkSeL4RustTargetTriple { unwind = true; };
           test = true;
           justBuildTests = true;
         };
@@ -343,6 +345,9 @@ in rec {
         test = mkTask {
           rootCrate = crates.tests-capdl-threads-components-test;
           release = true; # test optimizations
+          extraProfile = {
+            panic = "unwind";
+          };
         };
         rootTask = mkCapDLInitializer {
           small = false;
@@ -364,6 +369,9 @@ in rec {
         test = mkTask {
           rootCrate = crates.tests-capdl-utcover-components-test;
           release = false;
+          extraProfile = {
+            panic = "unwind";
+          };
         };
         rootTask = mkCapDLInitializer {
           small = true;

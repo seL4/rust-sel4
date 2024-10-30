@@ -13,7 +13,7 @@ mk {
       sel4
       sel4-backtrace-embedded-debug-info
     ;
-    sel4-root-task = localCrates.sel4-root-task // { features = [ "alloc" "single-threaded" ]; };
+    sel4-root-task = localCrates.sel4-root-task // { features = [ "unwinding" "alloc" "single-threaded" ]; };
     sel4-backtrace-simple = localCrates.sel4-backtrace-simple // { features = [ "alloc" ]; };
     sel4-backtrace = localCrates.sel4-backtrace // { features = [ "full" ]; };
     sel4-backtrace-types = localCrates.sel4-backtrace-types // { features = [ "full" ]; };

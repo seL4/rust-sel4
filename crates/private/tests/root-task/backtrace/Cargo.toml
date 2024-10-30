@@ -22,4 +22,7 @@ sel4-backtrace = { path = "../../../../sel4-backtrace", features = ["full"] }
 sel4-backtrace-embedded-debug-info = { path = "../../../../sel4-backtrace/embedded-debug-info" }
 sel4-backtrace-simple = { path = "../../../../sel4-backtrace/simple", features = ["alloc"] }
 sel4-backtrace-types = { path = "../../../../sel4-backtrace/types", features = ["full"] }
-sel4-root-task = { path = "../../../../sel4-root-task", features = ["alloc", "single-threaded"] }
+
+[dependencies.sel4-root-task]
+path = "../../../../sel4-root-task"
+features = ["unwinding", "alloc", "single-threaded"]
