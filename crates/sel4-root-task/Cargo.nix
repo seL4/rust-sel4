@@ -22,11 +22,8 @@ mk {
     sel4-runtime-common = localCrates.sel4-runtime-common // { features = [ "tls" "start" ]; };
   };
   features = {
-    default = [
-      "unwinding"
-    ];
     full = [
-      "default"
+      "unwinding"
       "alloc"
     ];
     unwinding = [

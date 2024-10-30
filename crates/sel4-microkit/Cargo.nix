@@ -24,11 +24,8 @@ mk {
     sel4 = localCrates.sel4 // { features = [ "single-threaded" ]; };
   };
   features = {
-    default = [
-      "unwinding"
-    ];
     full = [
-      "default"
+      "unwinding"
       "alloc"
     ];
     unwinding = [

@@ -18,8 +18,7 @@ license = "BSD-2-Clause"
 
 [features]
 alloc = ["sel4-panicking/alloc"]
-default = ["unwinding"]
-full = ["default", "alloc"]
+full = ["unwinding", "alloc"]
 unwinding = ["sel4-panicking/unwinding", "sel4-runtime-common/unwinding"]
 
 [dependencies]
