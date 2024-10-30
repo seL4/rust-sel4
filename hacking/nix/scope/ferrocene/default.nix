@@ -12,6 +12,7 @@
 , zlib
 
 , fenix
+, assembleRustToolchain
 , crateUtils
 , elaborateRustEnvironment
 , mkDefaultElaborateRustEnvironmentArgs
@@ -169,37 +170,39 @@ let
   # DO NOT CHECK IN THIS FILE
   hashesFilePath = ./SHA256SUMS;
 
-  # upstreamChannel = "1.79.0";
-  upstreamChannel = "beta";
+  upstreamChannel = "1.83.0-beta.2";
+  upstreamDate = null;
 
-  # versionTag = "24.08.0";
-  versionTag = "6ce9c7ddc";
-  versionName = "pre-rolling-2024-09-11";
+  versionTag = builtins.substring 0 9 versionRev;
+  versionRev = "eecd617bc6f3c693099a1ba900abb93ab9db9196";
+  versionName = "nightly-2024-10-30";
 
   repo = fetchFromGitHub {
     owner = "ferrocene";
     repo = "ferrocene";
-    rev = "6ce9c7ddc767a9b4cddd4ef8a0d4a317bb63159a"; # branch release/1.82
-    hash = "sha256-r1s3ifDA9QF9dCPieChFjJo9cwEY6vi5RMtXWyUiw0g=";
+    rev = versionRev;
+    hash = "sha256-HZBJOESd2O0IGX80YmgjLduO1S8CM7VSQxf85FwJw/8=";
   };
 
   libcManifestDir = "${repo}/ferrocene/library/libc";
 
-  upstreamRustToolchain = fenix.fromToolchainFile {
-    file = crateUtils.toTOMLFile "rust-toolchain.toml" {
-      toolchain = {
-        channel = upstreamChannel;
-        components = [ "rustc-dev" ];
-      };
-    };
-    sha256 = "sha256-4vvAuAhW4cBwR+g1IrI79X7gKL4VsEYKD05XZL0rLc4=";
-  };
+  upstreamRustToolchain = assembleRustToolchain ({
+    channel = upstreamChannel;
+    sha256 = "sha256-qaGpvEOo1j+3K/YLVFdvVoD6+E3J32U2PmIIb6+FBxw=";
+  } // lib.optionalAttrs (upstreamDate != null) {
+    date = upstreamDate;
+  });
 
-  upstreamRustEnvironment = lib.fix (self: elaborateRustEnvironment (mkDefaultElaborateRustEnvironmentArgs {
-    rustToolchain = upstreamRustToolchain;
+  mkRustEnvironment = rustToolchain: lib.fix (self: elaborateRustEnvironment (mkDefaultElaborateRustEnvironmentArgs {
+    inherit rustToolchain;
   } // {
     channel = upstreamChannel;
+    mkCustomTargetPath = mkMkCustomTargetPathForEnvironment {
+      rustEnvironment = upstreamRustEnvironment;
+    };
   }));
+
+  upstreamRustEnvironment = mkRustEnvironment upstreamRustToolchain;
 
   rustToolchain = mkToolchain {
     inherit hashesFilePath;
@@ -208,14 +211,7 @@ let
     inherit libcManifestDir;
   };
 
-  rustEnvironment = lib.fix (self: elaborateRustEnvironment (mkDefaultElaborateRustEnvironmentArgs {
-    inherit rustToolchain;
-  } // {
-    channel = upstreamChannel;
-    mkCustomTargetPath = mkMkCustomTargetPathForEnvironment {
-      rustEnvironment = upstreamRustEnvironment;
-    };
-  }));
+  rustEnvironment = mkRustEnvironment rustToolchain;
 
 in {
   inherit rustEnvironment;

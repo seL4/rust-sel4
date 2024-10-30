@@ -83,7 +83,20 @@ superCallPackage ../rust-utils {} self //
 
   inherit fenix;
 
-  topLevelRustToolchainFile = ../../../rust-toolchain.toml;
+  topLevelRustToolchainFile = rec {
+    path = ../../../rust-toolchain.toml;
+    attrs = builtins.fromTOML (builtins.readFile path);
+  };
+
+  assembleRustToolchain = args:
+    let
+      toolchain = fenix.toolchainOf args;
+      profile = topLevelRustToolchainFile.attrs.toolchain.profile or "default";
+      explicitComponents = topLevelRustToolchainFile.attrs.toolchain.components;
+      allComponents = toolchain.manifest.profiles.${profile} ++ explicitComponents;
+      filteredComponents = lib.filter (component: toolchain ? ${component}) allComponents;
+    in
+      toolchain.withComponents filteredComponents;
 
   defaultRustEnvironment =
     let
@@ -98,11 +111,11 @@ superCallPackage ../rust-utils {} self //
 
   defaultUpstreamRustEnvironment = elaborateRustEnvironment (mkDefaultElaborateRustEnvironmentArgs {
     rustToolchain = fenix.fromToolchainFile {
-      file = topLevelRustToolchainFile;
+      file = topLevelRustToolchainFile.path;
       sha256 = "sha256-L1F7kAfo8YWrKXHflUaVvCELdvnK2XjcL/lwopFQX2c=";
     };
   } // {
-    channel = (builtins.fromTOML (builtins.readFile topLevelRustToolchainFile)).toolchain.channel;
+    channel = topLevelRustToolchainFile.attrs.toolchain.channel;
     compilerRTSource = mkCompilerRTSource {
       version = "19.1-2024-07-30";
       hash = "sha256-fV51iDAbkRmWJj0twTmQKdZdLueMAKSZR6bBtgVPCbk=";

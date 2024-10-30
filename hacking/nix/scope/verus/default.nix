@@ -12,7 +12,7 @@
 , crateUtils
 , vendorLockfile
 , sources
-, fenix
+, assembleRustToolchain
 , elaborateRustEnvironment
 , mkDefaultElaborateRustEnvironmentArgs
 , mkMkCustomTargetPathForEnvironment
@@ -23,13 +23,8 @@ let
 
   rustToolchainAttrs = builtins.fromTOML (builtins.readFile (src + "/rust-toolchain.toml"));
 
-  rustToolchain = fenix.fromToolchainFile {
-    file = crateUtils.toTOMLFile "rust-toolchain.toml" (crateUtils.clobber [
-      rustToolchainAttrs
-      {
-        toolchain.components = rustToolchainAttrs.toolchain.components ++ [ "rust-src" ];
-      }
-    ]);
+  rustToolchain = assembleRustToolchain {
+    channel = "1.76.0";
     sha256 = "sha256-e4mlaJehWBymYxJGgnbuCObVlqMlQSilZ8FljG9zPHY=";
   };
 
