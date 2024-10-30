@@ -183,5 +183,9 @@ pub fn ipc_buffer_ptr() -> *mut sel4::IpcBuffer {
         static mut __sel4_ipc_buffer_obj: sel4::IpcBuffer;
     }
 
-    ptr::addr_of_mut!(__sel4_ipc_buffer_obj)
+    // Only unsafe until 1.82
+    #[allow(unused_unsafe)]
+    unsafe {
+        ptr::addr_of_mut!(__sel4_ipc_buffer_obj)
+    }
 }
