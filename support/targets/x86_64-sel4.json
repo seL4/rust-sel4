@@ -18,6 +18,7 @@
     "std": null,
     "tier": null
   },
+  "panic-strategy": "abort",
   "plt-by-default": false,
   "relro-level": "full",
   "stack-probes": {

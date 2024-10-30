@@ -23,6 +23,7 @@
     "tier": null
   },
   "os": "linux",
+  "panic-strategy": "abort",
   "relocation-model": "static",
   "supported-sanitizers": [
     "shadow-call-stack",

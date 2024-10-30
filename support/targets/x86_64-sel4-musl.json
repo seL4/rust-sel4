@@ -22,6 +22,7 @@
     "tier": null
   },
   "os": "linux",
+  "panic-strategy": "abort",
   "plt-by-default": false,
   "relro-level": "full",
   "stack-probes": {

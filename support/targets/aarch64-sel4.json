@@ -16,6 +16,7 @@
     "std": null,
     "tier": null
   },
+  "panic-strategy": "abort",
   "pre-link-args": {
     "gnu-lld": [
       "-z",

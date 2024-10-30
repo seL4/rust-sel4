@@ -20,6 +20,7 @@
     "tier": null
   },
   "os": "linux",
+  "panic-strategy": "abort",
   "pre-link-args": {
     "gnu-lld": [
       "-z",
