@@ -172,6 +172,14 @@ superCallPackage ../rust-utils {} self //
       (lib.optionalString musl "-musl")
     ];
 
+  allCustomRustTargetTripleNames =
+    lib.map
+      mkSeL4CustomRustTargetTripleName
+      (lib.cartesianProduct
+        (lib.mapAttrs
+          (_: _: [ true false ])
+          (lib.functionArgs mkSeL4CustomRustTargetTripleName)));
+
   mkSeL4RustTargetTriple = args: mkCustomRustTargetTriple (mkSeL4CustomRustTargetTripleName args);
 
   bareMetalBuiltinRustTargetTriple = {
