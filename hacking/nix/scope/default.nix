@@ -38,12 +38,25 @@ in
 
 let
   elaborateScopeConfig =
-    { runClippyDefault ? false
+    { rustEnvironmentSelector ? {}
+    , runClippyDefault ? false
     }:
-    {
+    let
+      elaborateRustEnvironmentSelector =
+        { tracks ? "upstream"
+        , upstream ? true
+        }:
+        {
+          inherit
+            tracks
+            upstream
+          ;
+        };
+    in {
       inherit
         runClippyDefault
       ;
+      rustEnvironmentSelector = elaborateRustEnvironmentSelector rustEnvironmentSelector;
     };
 in
 
@@ -72,13 +85,22 @@ superCallPackage ../rust-utils {} self //
 
   topLevelRustToolchainFile = ../../../rust-toolchain.toml;
 
-  defaultRustToolchain = fenix.fromToolchainFile {
-    file = topLevelRustToolchainFile;
-    sha256 = "sha256-L1F7kAfo8YWrKXHflUaVvCELdvnK2XjcL/lwopFQX2c=";
-  };
+  defaultRustEnvironment =
+    let
+      inherit (scopeConfig.rustEnvironmentSelector) tracks upstream;
+    in {
+      upstream = assert upstream; defaultUpstreamRustEnvironment;
+      ferrocene = if upstream then ferrocene.upstreamRustEnvironment else ferrocene.rustEnvironment;
+      verus = assert upstream; verus.rustEnvironment;
+    }.${tracks};
 
-  upstreamDefaultRustEnvironment = elaborateRustEnvironment (mkDefaultElaborateRustEnvironmentArgs {
-    rustToolchain = defaultRustToolchain;
+  defaultRustToolchain = defaultRustEnvironment.rustToolchain;
+
+  defaultUpstreamRustEnvironment = elaborateRustEnvironment (mkDefaultElaborateRustEnvironmentArgs {
+    rustToolchain = fenix.fromToolchainFile {
+      file = topLevelRustToolchainFile;
+      sha256 = "sha256-L1F7kAfo8YWrKXHflUaVvCELdvnK2XjcL/lwopFQX2c=";
+    };
   } // {
     channel = (builtins.fromTOML (builtins.readFile topLevelRustToolchainFile)).toolchain.channel;
     compilerRTSource = mkCompilerRTSource {
@@ -93,11 +115,6 @@ superCallPackage ../rust-utils {} self //
           { name = fname; path = sources.srcRoot + "/support/targets/${fname}"; }
         ];
   });
-
-  ferroceneDefaultRustEnvironment = ferrocene.rustEnvironment;
-
-  defaultRustEnvironment = upstreamDefaultRustEnvironment;
-  # defaultRustEnvironment = ferroceneDefaultRustEnvironment;
 
   mkDefaultElaborateRustEnvironmentArgs = { rustToolchain }: rec {
     inherit rustToolchain;
