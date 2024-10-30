@@ -34,8 +34,27 @@ in {
     })
   ];
 
-  withClippy = self.withConfigOverride (super: super // {
+  withClippy = self.withConfigOverride (attrs: attrs // {
     runClippyDefault = true;
+  });
+
+  withFerrocene = self.withConfigOverride (attrs: attrs // {
+    rustEnvironmentSelector = (attrs.rustEnvironmentSelector or {}) // {
+      tracks = "ferrocene";
+      upstream = false;
+    };
+  });
+
+  withVerus = self.withConfigOverride (attrs: attrs // {
+    rustEnvironmentSelector = (attrs.rustEnvironmentSelector or {}) // {
+      tracks = "verus";
+    };
+  });
+
+  withUpstream = self.withConfigOverride (attrs: attrs // {
+    rustEnvironmentSelector = (attrs.rustEnvironmentSelector or {}) // {
+      upstream = true;
+    };
   });
 
   inherit (pkgs.build.this) shellForMakefile shellForHacking;
