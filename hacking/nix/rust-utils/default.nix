@@ -60,7 +60,7 @@ in
     , channel ? null
     , isNightly ?
         if channel != null
-        then lib.hasPrefix "nightly" channel
+        then lib.hasPrefix "nightly-" channel
         else throw "could not determine isNightly automatically"
     , backwardsCompatibilityHacks ? {}
     , mkCustomTargetPath ? customTargetTripleTripleName: throw "unimplemented"
