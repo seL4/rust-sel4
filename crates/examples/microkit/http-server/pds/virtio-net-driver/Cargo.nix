@@ -14,6 +14,7 @@ mk {
     virtio-drivers = virtioDriversWith [ "alloc" ];
 
     inherit (localCrates)
+      sel4-microkit
       sel4-microkit-message
       sel4-microkit-driver-adapters
       sel4
@@ -26,6 +27,5 @@ mk {
     ;
 
     sel4-externally-shared = localCrates.sel4-externally-shared // { features = [ "unstable" ]; };
-    sel4-microkit = localCrates.sel4-microkit // { default-features = false; };
   };
 }

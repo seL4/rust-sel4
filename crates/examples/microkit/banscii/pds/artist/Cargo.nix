@@ -14,7 +14,7 @@ mk {
       sel4-microkit-message
       banscii-artist-interface-types
     ;
-    sel4-microkit = localCrates.sel4-microkit // { default-features = false; features = [ "alloc" ]; };
+    sel4-microkit = localCrates.sel4-microkit // { features = [ "alloc" ]; };
     sel4-externally-shared = localCrates.sel4-externally-shared // { features = [ "unstable" ]; };
   };
   build-dependencies = {

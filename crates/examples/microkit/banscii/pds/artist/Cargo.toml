@@ -20,12 +20,8 @@ license = "BSD-2-Clause"
 banscii-artist-interface-types = { path = "interface-types" }
 rsa = { version = "0.9.6", default-features = false, features = ["pem", "sha2"] }
 sel4-externally-shared = { path = "../../../../../sel4-externally-shared", features = ["unstable"] }
+sel4-microkit = { path = "../../../../../sel4-microkit", features = ["alloc"] }
 sel4-microkit-message = { path = "../../../../../sel4-microkit/message" }
-
-[dependencies.sel4-microkit]
-path = "../../../../../sel4-microkit"
-default-features = false
-features = ["alloc"]
 
 [build-dependencies]
 rsa = "0.9.6"

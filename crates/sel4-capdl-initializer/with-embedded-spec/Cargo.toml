@@ -28,11 +28,7 @@ sel4-capdl-initializer-core = { path = "../core" }
 sel4-capdl-initializer-types = { path = "../types" }
 sel4-capdl-initializer-with-embedded-spec-embedded-spec = { path = "embedded-spec" }
 sel4-logging = { path = "../../sel4-logging" }
-
-[dependencies.sel4-root-task]
-path = "../../sel4-root-task"
-default-features = false
-features = ["single-threaded"]
+sel4-root-task = { path = "../../sel4-root-task", features = ["single-threaded"] }
 
 [build-dependencies.sel4-capdl-initializer-with-embedded-spec-embedded-spec-validate]
 path = "embedded-spec/validate"

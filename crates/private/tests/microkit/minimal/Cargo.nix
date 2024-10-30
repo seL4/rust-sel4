@@ -10,7 +10,7 @@ mk {
   package.name = "tests-microkit-minimal";
   dependencies = {
     inherit (localCrates)
+      sel4-microkit
     ;
-    sel4-microkit = localCrates.sel4-microkit // { default-features = false; };
   };
 }

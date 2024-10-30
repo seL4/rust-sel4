@@ -10,10 +10,10 @@ mk {
   package.name = "banscii-serial-driver";
   dependencies = {
     inherit (localCrates)
+      sel4-microkit
       sel4-microkit-message
       sel4-microkit-driver-adapters
     ;
-    sel4-microkit = localCrates.sel4-microkit // { default-features = false; };
     sel4-pl011-driver = localCrates.sel4-pl011-driver // { optional = true; };
   };
   features = {
