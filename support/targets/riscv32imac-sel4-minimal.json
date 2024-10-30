@@ -9,6 +9,7 @@
   "features": "+m,+a,+c",
   "linker": "rust-lld",
   "linker-flavor": "gnu-lld",
+  "llvm-abiname": "ilp32",
   "llvm-target": "riscv32",
   "max-atomic-width": 32,
   "metadata": {
