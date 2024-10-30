@@ -20,7 +20,7 @@ license = "BSD-2-Clause"
 alloc = ["sel4-panicking/alloc"]
 default = ["unwinding"]
 full = ["default", "alloc"]
-unwinding = ["sel4-panicking/unwinding"]
+unwinding = ["sel4-panicking/unwinding", "sel4-runtime-common/unwinding"]
 
 [dependencies]
 cfg-if = "1.0.0"
@@ -32,5 +32,5 @@ sel4-microkit-base = { path = "base" }
 sel4-microkit-macros = { path = "macros" }
 sel4-panicking = { path = "../sel4-panicking" }
 sel4-panicking-env = { path = "../sel4-panicking/env" }
-sel4-runtime-common = { path = "../sel4-runtime-common", features = ["tls", "unwinding", "start"] }
+sel4-runtime-common = { path = "../sel4-runtime-common", features = ["tls", "start"] }
 sel4-sync = { path = "../sel4-sync" }
