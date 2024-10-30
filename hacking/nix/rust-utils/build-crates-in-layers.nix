@@ -15,15 +15,16 @@
 
 let
   defaultStdenv = stdenv;
+in
+
+let
+  inherit (scopeConfig) runClippyDefault;
 
   # TODO not actually resulting in errors
   denyWarningsDefault =
     # true
     false
   ;
-
-  inherit (scopeConfig) runClippyDefault;
-
 in
 
 { stdenv ? defaultStdenv
