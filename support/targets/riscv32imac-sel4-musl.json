@@ -12,6 +12,7 @@
   "has-thread-local": true,
   "linker": "rust-lld",
   "linker-flavor": "gnu-lld",
+  "llvm-abiname": "ilp32",
   "llvm-target": "riscv32",
   "max-atomic-width": 32,
   "metadata": {
