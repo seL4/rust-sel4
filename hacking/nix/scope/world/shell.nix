@@ -14,7 +14,7 @@
 , sources
 , dummyCapDLSpec, serializeCapDLSpec
 , seL4RustEnvVars
-, mkSeL4RustTargetTriple
+, allCustomRustTargetTripleNames
 , worldConfig
 , seL4ForBoot
 , crateUtils
@@ -38,13 +38,8 @@ let
   libcDir = "${stdenv.cc.libc}/${hostPlatform.config}";
 
   bindgenEnvVars =
-    let
-      targets = lib.flatten (
-        lib.forEach [ true false ] (microkit:
-          lib.forEach [ true false ] (minimal:
-            mkSeL4RustTargetTriple { inherit microkit minimal; })));
-    in lib.listToAttrs (lib.forEach targets (target: {
-      name = "BINDGEN_EXTRA_CLANG_ARGS_${target.name}";
+    lib.listToAttrs (lib.forEach allCustomRustTargetTripleNames (targetName: {
+      name = "BINDGEN_EXTRA_CLANG_ARGS_${targetName}";
       value = [ "-I${libcDir}/include" ];
     }));
 
