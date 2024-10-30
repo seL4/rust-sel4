@@ -18,6 +18,7 @@
 , worldConfig
 , seL4Config
 , callPlatform
+, verus
 
 , maybe
 , canSimulate
@@ -77,6 +78,31 @@ in {
   };
 
   tests = {
+    minimal = maybe isMicrokit (
+      let
+        pd = mkPD rec {
+          inherit (verus) rustEnvironment;
+          rootCrate = crates.tests-microkit-minimal;
+          extraProfile = {
+            panic = "abort";
+          };
+        };
+      in
+        callPlatform {
+          system = microkit.mkSystem {
+            searchPath = [
+              "${pd}/bin"
+            ];
+            systemXML = sources.srcRoot + "/crates/private/tests/microkit/minimal/x.system";
+          };
+          extraPlatformArgs = lib.optionalAttrs canSimulate  {
+            canAutomateSimply = true;
+          };
+        } // {
+          inherit pd;
+        }
+    );
+
     passive-server-with-deferred-action = maybe isMicrokit (
       let
         mkCrateName = role: "tests-microkit-passive-server-with-deferred-action-pds-${role}";

@@ -51,6 +51,7 @@ members = [
     "crates/private/support/sel4-simple-task/threading",
     "crates/private/tests/capdl/threads/components/test",
     "crates/private/tests/capdl/utcover/components/test",
+    "crates/private/tests/microkit/minimal",
     "crates/private/tests/microkit/passive-server-with-deferred-action/pds/client",
     "crates/private/tests/microkit/passive-server-with-deferred-action/pds/server",
     "crates/private/tests/microkit/reset",
