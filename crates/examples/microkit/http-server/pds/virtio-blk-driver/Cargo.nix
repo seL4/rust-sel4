@@ -14,6 +14,7 @@ mk {
     virtio-drivers = virtioDriversWith [];
 
     inherit (localCrates)
+      sel4-microkit
       sel4-microkit-message
       sel4
       sel4-logging
@@ -28,6 +29,5 @@ mk {
     ;
 
     sel4-externally-shared = localCrates.sel4-externally-shared // { features = [ "unstable" ]; };
-    sel4-microkit = localCrates.sel4-microkit // { default-features = false; };
   };
 }

@@ -17,4 +17,4 @@ edition = "2021"
 license = "BSD-2-Clause"
 
 [dependencies]
-sel4-microkit = { path = "../../../../sel4-microkit", default-features = false }
+sel4-microkit = { path = "../../../../sel4-microkit" }

@@ -24,9 +24,5 @@ sel4-capdl-initializer-core = { path = "core" }
 sel4-capdl-initializer-types = { path = "types", features = ["alloc", "serde", "deflate"] }
 sel4-dlmalloc = { path = "../sel4-dlmalloc" }
 sel4-logging = { path = "../sel4-logging" }
+sel4-root-task = { path = "../sel4-root-task", features = ["single-threaded"] }
 sel4-sync = { path = "../sel4-sync" }
-
-[dependencies.sel4-root-task]
-path = "../sel4-root-task"
-default-features = false
-features = ["single-threaded"]
