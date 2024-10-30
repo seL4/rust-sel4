@@ -166,6 +166,9 @@ let
 in
 
 let
+  # DO NOT CHECK IN THIS FILE
+  hashesFilePath = ./SHA256SUMS;
+
   # upstreamChannel = "1.79.0";
   upstreamChannel = "beta";
 
@@ -182,18 +185,6 @@ let
 
   libcManifestDir = "${repo}/ferrocene/library/libc";
 
-  # DO NOT CHECK IN THIS FILE
-  hashesFilePath = ./SHA256SUMS;
-
-  rustToolchain = mkToolchain {
-    inherit hashesFilePath;
-    arch = hostPlatform.config;
-    inherit versionTag versionName;
-    inherit libcManifestDir;
-  };
-in
-
-let
   upstreamRustToolchain = fenix.fromToolchainFile {
     file = crateUtils.toTOMLFile "rust-toolchain.toml" {
       toolchain = {
@@ -209,6 +200,13 @@ let
   } // {
     channel = upstreamChannel;
   }));
+
+  rustToolchain = mkToolchain {
+    inherit hashesFilePath;
+    arch = hostPlatform.config;
+    inherit versionTag versionName;
+    inherit libcManifestDir;
+  };
 
   rustEnvironment = lib.fix (self: elaborateRustEnvironment (mkDefaultElaborateRustEnvironmentArgs {
     inherit rustToolchain;
