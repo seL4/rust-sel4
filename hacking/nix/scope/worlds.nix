@@ -29,6 +29,8 @@ in rec {
     let
     in rec {
       default = qemu-arm-virt.default;
+      microkitDefault = qemu-arm-virt.microkit;
+
       qemu-arm-virt =
         let
           mk =
@@ -263,6 +265,7 @@ in rec {
     let
     in rec {
       default = qemu-riscv-virt.default;
+      microkitDefault = qemu-riscv-virt.microkit;
 
       qemu-riscv-virt =
         let

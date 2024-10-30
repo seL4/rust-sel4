@@ -208,6 +208,11 @@ in {
 
   worlds = lib.fix (self: {
     default = self.aarch64.default;
+    microkit = rec {
+      default = aarch64;
+      aarch64 = self.aarch64.microkitDefault;
+      riscv64 = self.riscv64.microkitDefault;
+    };
   } // lib.mapAttrs (_: arch: arch.none.this.worlds) {
     inherit (pkgs.host) aarch64 aarch32 x86_64 i386;
     riscv64 = pkgs.host.riscv64.default;
