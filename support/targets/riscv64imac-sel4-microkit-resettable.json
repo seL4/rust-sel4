@@ -20,6 +20,7 @@
     "std": null,
     "tier": null
   },
+  "panic-strategy": "abort",
   "relocation-model": "static",
   "supported-sanitizers": [
     "shadow-call-stack",

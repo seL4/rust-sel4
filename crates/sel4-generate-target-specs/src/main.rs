@@ -14,7 +14,7 @@ use std::fs;
 use std::path::Path;
 
 use rustc_target::json::ToJson;
-use rustc_target::spec::{Cc, CodeModel, LinkerFlavor, Lld, PanicStrategy, Target, TargetTriple};
+use rustc_target::spec::{Cc, CodeModel, LinkerFlavor, Lld, Target, TargetTriple};
 
 use clap::{Arg, ArgAction, Command};
 
@@ -107,7 +107,7 @@ impl Config {
             let options = &mut target.options;
             options.is_builtin = false;
             options.exe_suffix = ".elf".into();
-            options.eh_frame_header = !self.minimal;
+            options.eh_frame_header = self.arch.unwinding_support() && !self.minimal;
         }
 
         if let Context::Microkit { resettable } = &self.context {
@@ -120,13 +120,7 @@ impl Config {
             options.link_script = Some(linker_script.into());
         }
 
-        if !self.minimal {
-            let options = &mut target.options;
-            options.has_thread_local = true;
-            if self.arch.unwinding_support() {
-                options.panic_strategy = PanicStrategy::Unwind;
-            }
-        }
+        target.options.has_thread_local = !self.minimal;
 
         if self.musl {
             let options = &mut target.options;

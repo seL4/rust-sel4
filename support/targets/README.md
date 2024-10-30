@@ -13,7 +13,7 @@ them yourself using that utility will ensure that the resulting target specs are
 your Rust toolchain.
 
 The difference between the `*-minimal` targets and the non-minimal ones are that the minimal ones
-have `"panic": "abort"` and `"has-thread-local": false`.
+have `"has-thread-local": false`.
 
 The difference between the `*-sel4-microkit` targets and the `*-sel4` ones is that the
 `*-sel4-microkit` targets include a linker script fragment to add the `__sel4_ipc_buffer_obj` symbol
