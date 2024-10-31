@@ -161,6 +161,7 @@ superCallPackage ../rust-utils {} self //
     { microkit ? false
     , resettable ? false
     , minimal ? false
+    , unwind ? false
     , musl ? false
     }:
     lib.concatStrings [
@@ -169,6 +170,7 @@ superCallPackage ../rust-utils {} self //
       (lib.optionalString microkit "-microkit")
       (lib.optionalString resettable "-resettable")
       (lib.optionalString minimal "-minimal")
+      (lib.optionalString unwind "-unwind")
       (lib.optionalString musl "-musl")
     ];
 

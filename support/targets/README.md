@@ -15,6 +15,9 @@ your Rust toolchain.
 The difference between the `*-minimal` targets and the non-minimal ones are that the minimal ones
 have `"has-thread-local": false`.
 
+The difference between the `*-unwind` targets and the non-unwind ones are that the unwind ones have
+`"panic = "unwind"`.
+
 The difference between the `*-sel4-microkit` targets and the `*-sel4` ones is that the
 `*-sel4-microkit` targets include a linker script fragment to add the `__sel4_ipc_buffer_obj` symbol
 required by the `microkit` tool.

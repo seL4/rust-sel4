@@ -3,11 +3,10 @@
   "crt-objects-fallback": "false",
   "data-layout": "e-m:e-p270:32:32-p271:32:32-p272:64:64-i8:8:32-i16:16:32-i64:64-i128:128-n32:64-S128-Fn32",
   "disable-redzone": true,
-  "eh-frame-header": false,
   "exe-suffix": ".elf",
   "features": "+v8a,+strict-align,+neon,+fp-armv8",
   "has-thread-local": true,
-  "link-script": "SECTIONS {\n    .persistent : {\n        *(.persistent .persistent.*)\n    }\n} INSERT BEFORE .data;\n\nASSERT(DEFINED(_reset), \"_reset is not defined\")\n\nENTRY(_reset)\n__sel4_ipc_buffer_obj = (__ehdr_start & ~(4096 - 1)) - 4096;",
+  "link-script": "__sel4_ipc_buffer_obj = (__ehdr_start & ~(4096 - 1)) - 4096;",
   "linker": "rust-lld",
   "linker-flavor": "gnu-lld",
   "llvm-target": "aarch64-unknown-none",
@@ -18,7 +17,6 @@
     "std": null,
     "tier": null
   },
-  "panic-strategy": "abort",
   "pre-link-args": {
     "gnu-lld": [
       "-z",

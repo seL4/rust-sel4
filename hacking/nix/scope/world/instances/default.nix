@@ -153,8 +153,8 @@ in rec {
             orig = mkTask {
               rootCrate = crates.tests-root-task-backtrace;
               release = false;
+              targetTriple = mkSeL4RustTargetTriple { unwind = true; };
               extraProfile = {
-                panic = "unwind";
                 opt-level = 2;
               };
             };
@@ -344,10 +344,8 @@ in rec {
       threads = maybe (haveFullRuntime && haveCapDLInitializer) (mkInstance rec {
         test = mkTask {
           rootCrate = crates.tests-capdl-threads-components-test;
+          targetTriple = mkSeL4RustTargetTriple { unwind = true; };
           release = true; # test optimizations
-          extraProfile = {
-            panic = "unwind";
-          };
         };
         rootTask = mkCapDLInitializer {
           small = false;
@@ -368,10 +366,8 @@ in rec {
       utcover = maybe (haveFullRuntime && haveCapDLInitializer) (mkInstance rec {
         test = mkTask {
           rootCrate = crates.tests-capdl-utcover-components-test;
+          targetTriple = mkSeL4RustTargetTriple { unwind = true; };
           release = false;
-          extraProfile = {
-            panic = "unwind";
-          };
         };
         rootTask = mkCapDLInitializer {
           small = true;
@@ -418,8 +414,8 @@ in rec {
       example-root-task-without-runtime = maybe haveMinimalRuntime (mkInstance {
         rootTask = mkTask {
           rootCrate = crates.example-root-task-without-runtime;
-          release = false;
           targetTriple = mkSeL4RustTargetTriple { minimal = true; };
+          release = false;
         };
         extraPlatformArgs = lib.optionalAttrs canSimulate {
           canAutomateSimply = true;
