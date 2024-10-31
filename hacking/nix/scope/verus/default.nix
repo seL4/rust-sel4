@@ -23,15 +23,17 @@ let
 
   rustToolchainAttrs = builtins.fromTOML (builtins.readFile (src + "/rust-toolchain.toml"));
 
+  inherit (rustToolchainAttrs.toolchain) channel;
+
   rustToolchain = assembleRustToolchain {
-    channel = "1.76.0";
+    inherit channel;
     sha256 = "sha256-e4mlaJehWBymYxJGgnbuCObVlqMlQSilZ8FljG9zPHY=";
   };
 
   rustEnvironment = lib.fix (self: elaborateRustEnvironment (mkDefaultElaborateRustEnvironmentArgs {
     inherit rustToolchain;
   } // {
-    inherit (rustToolchainAttrs.toolchain) channel;
+    inherit channel;
     backwardsCompatibilityHacks = {
       outDirInsteadOfArtifactDir = true;
       noLibraryWorkspace = true;
