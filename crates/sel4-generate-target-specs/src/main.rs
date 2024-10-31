@@ -14,7 +14,7 @@ use std::fs;
 use std::path::Path;
 
 use rustc_target::json::ToJson;
-use rustc_target::spec::{Cc, CodeModel, LinkerFlavor, Lld, Target, TargetTriple};
+use rustc_target::spec::{Cc, CodeModel, LinkerFlavor, Lld, PanicStrategy, Target, TargetTriple};
 
 use clap::{Arg, ArgAction, Command};
 
@@ -23,6 +23,7 @@ struct Config {
     arch: Arch,
     context: Context,
     minimal: bool,
+    unwind: bool,
     musl: bool,
 }
 
@@ -107,7 +108,7 @@ impl Config {
             let options = &mut target.options;
             options.is_builtin = false;
             options.exe_suffix = ".elf".into();
-            options.eh_frame_header = self.arch.unwinding_support() && !self.minimal;
+            options.eh_frame_header = self.unwinding_support();
         }
 
         if let Context::Microkit { resettable } = &self.context {
@@ -122,6 +123,10 @@ impl Config {
 
         target.options.has_thread_local = !self.minimal;
 
+        if self.unwinding_support() {
+            target.options.panic_strategy = PanicStrategy::Unwind;
+        }
+
         if self.musl {
             let options = &mut target.options;
             options.os = "linux".into();
@@ -134,8 +139,15 @@ impl Config {
         target
     }
 
+    fn unwinding_support(&self) -> bool {
+        self.arch.unwinding_support() && self.unwind
+    }
+
     fn filter(&self) -> bool {
         if self.context.is_microkit() && !self.arch.microkit_support() {
+            return false;
+        }
+        if self.unwinding_support() && self.minimal {
             return false;
         }
         if self.musl && (self.minimal || self.context.is_microkit()) {
@@ -156,6 +168,9 @@ impl Config {
         if self.minimal {
             name.push_str("-minimal");
         }
+        if self.unwind {
+            name.push_str("-unwind");
+        }
         if self.musl {
             name.push_str("-musl");
         }
@@ -167,13 +182,16 @@ impl Config {
         for arch in Arch::all() {
             for context in Context::all() {
                 for minimal in [true, false] {
-                    for musl in [true, false] {
-                        all.push(Self {
-                            arch,
-                            context,
-                            minimal,
-                            musl,
-                        });
+                    for unwind in [true, false] {
+                        for musl in [true, false] {
+                            all.push(Self {
+                                arch,
+                                context,
+                                minimal,
+                                unwind,
+                                musl,
+                            });
+                        }
                     }
                 }
             }

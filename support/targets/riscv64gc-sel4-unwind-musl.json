@@ -1,21 +1,21 @@
 {
-  "arch": "riscv32",
-  "cpu": "generic-rv32",
+  "arch": "riscv64",
+  "code-model": "medium",
+  "cpu": "generic-rv64",
   "crt-objects-fallback": "false",
   "crt-static-default": true,
   "crt-static-respected": true,
-  "data-layout": "e-m:e-p:32:32-i64:64-n32-S128",
-  "eh-frame-header": false,
+  "data-layout": "e-m:e-p:64:64-i64:64-i128:128-n32:64-S128",
   "emit-debug-gdb-scripts": false,
   "env": "musl",
   "exe-suffix": ".elf",
-  "features": "+m,+a,+c",
+  "features": "+m,+a,+f,+d,+c",
   "has-thread-local": true,
   "linker": "rust-lld",
   "linker-flavor": "gnu-lld",
-  "llvm-abiname": "ilp32",
-  "llvm-target": "riscv32",
-  "max-atomic-width": 32,
+  "llvm-abiname": "lp64d",
+  "llvm-target": "riscv64",
+  "max-atomic-width": 64,
   "metadata": {
     "description": null,
     "host_tools": null,
@@ -23,10 +23,13 @@
     "tier": null
   },
   "os": "linux",
-  "panic-strategy": "abort",
   "relocation-model": "static",
+  "supported-sanitizers": [
+    "shadow-call-stack",
+    "kernel-address"
+  ],
   "target-family": [
     "unix"
   ],
-  "target-pointer-width": "32"
+  "target-pointer-width": "64"
 }
