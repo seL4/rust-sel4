@@ -257,7 +257,7 @@ impl Context {
 }
 
 fn builtin(triple: &str) -> Target {
-    #[cfg_attr(not(target_spec_has_metadata), allow(unused_mut))]
+    #[allow(unused_mut)]
     let mut target = Target::expect_builtin(&TargetTriple::from_triple(triple));
     #[cfg(target_spec_has_metadata)]
     {
