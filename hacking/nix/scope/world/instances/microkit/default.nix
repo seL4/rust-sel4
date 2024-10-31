@@ -37,7 +37,7 @@ let
     #     };
     #   }
     # ];
-    targetTriple = mkSeL4RustTargetTriple { microkit = true; minimal = true; };
+    targetTriple = mkSeL4RustTargetTriple { microkit = true; };
   } // args);
 
   inherit (worldConfig) isMicrokit;
@@ -83,9 +83,7 @@ in {
         pd = mkPD rec {
           inherit (verus) rustEnvironment;
           rootCrate = crates.tests-microkit-minimal;
-          extraProfile = {
-            panic = "abort";
-          };
+          targetTriple = mkSeL4RustTargetTriple { microkit = true; minimal = true; };
         };
       in
         callPlatform {
