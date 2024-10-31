@@ -108,7 +108,7 @@ impl Config {
             let options = &mut target.options;
             options.is_builtin = false;
             options.exe_suffix = ".elf".into();
-            options.eh_frame_header = self.unwinding_support();
+            options.eh_frame_header = true;
         }
 
         if let Context::Microkit { resettable } = &self.context {
