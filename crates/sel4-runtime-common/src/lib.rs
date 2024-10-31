@@ -19,10 +19,10 @@ mod tls;
 #[cfg(all(feature = "tls", target_thread_local))]
 pub use tls::{initialize_tls_on_stack_and_continue, ContArg, ContFn};
 
-#[cfg(panic = "unwind")]
+#[cfg(all(feature = "unwinding", panic = "unwind"))]
 mod unwinding;
 
-#[cfg(panic = "unwind")]
+#[cfg(all(feature = "unwinding", panic = "unwind"))]
 pub use self::unwinding::set_eh_frame_finder;
 
 #[allow(dead_code)]
