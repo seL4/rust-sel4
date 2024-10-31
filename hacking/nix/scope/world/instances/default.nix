@@ -153,7 +153,6 @@ in rec {
             orig = mkTask {
               rootCrate = crates.tests-root-task-backtrace;
               release = false;
-              targetTriple = mkSeL4RustTargetTriple { unwind = true; };
               extraProfile = {
                 opt-level = 2;
               };
