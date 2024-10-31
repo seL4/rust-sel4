@@ -1803,6 +1803,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "rustversion"
+version = "1.0.18"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0e819f2bc632f285be6d7cd36e25940d45b2391dd6d9b939e79de557f7014248"
+
+[[package]]
 name = "ruzstd"
 version = "0.7.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2022,7 +2028,7 @@ dependencies = [
 name = "sel4-bitfield-ops"
 version = "0.1.0"
 dependencies = [
- "rustc_version",
+ "rustversion",
 ]
 
 [[package]]
@@ -2260,7 +2266,7 @@ name = "sel4-generate-target-specs"
 version = "0.1.0"
 dependencies = [
  "clap",
- "rustc_version",
+ "rustversion",
  "serde_json",
 ]
 
@@ -2485,7 +2491,7 @@ name = "sel4-panicking"
 version = "0.1.0"
 dependencies = [
  "cfg-if",
- "rustc_version",
+ "rustversion",
  "sel4-immediate-sync-once-cell",
  "sel4-panicking-env",
  "unwinding",

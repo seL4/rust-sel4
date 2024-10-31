@@ -16,7 +16,7 @@ mk {
     ;
   };
   build-dependencies = {
-    inherit (versions) rustc_version;
+    inherit (versions) rustversion;
   };
   target."cfg(all(panic = \"unwind\", not(target_arch = \"arm\")))".dependencies = {
     unwinding = unwindingWith [ "personality" ];

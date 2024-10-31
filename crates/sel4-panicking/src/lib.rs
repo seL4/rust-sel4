@@ -124,10 +124,10 @@ fn do_panic(info: ExternalPanicInfo) -> ! {
 }
 
 cfg_if! {
-    if #[cfg(catch_unwind_intrinsic_still_named_try)] {
-        use core::intrinsics::r#try as catch_unwind_intrinsic;
-    } else {
+    if #[cfg(catch_unwind_intrinsic_so_named)] {
         use core::intrinsics::catch_unwind as catch_unwind_intrinsic;
+    } else {
+        use core::intrinsics::r#try as catch_unwind_intrinsic;
     }
 }
 
