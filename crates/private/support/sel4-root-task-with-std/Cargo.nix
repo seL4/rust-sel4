@@ -14,7 +14,7 @@ mk {
       sel4-panicking-env
       sel4-ctors-dtors
     ;
-    sel4-runtime-common = localCrates.sel4-runtime-common // { features = [ "start" "tls" "unwinding" ]; };
+    sel4-runtime-common = localCrates.sel4-runtime-common // { features = [ "start" "tls" ]; };
   };
   features = {
     single-threaded = [

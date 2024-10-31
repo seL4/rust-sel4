@@ -5,7 +5,7 @@
 //
 
 cfg_if::cfg_if! {
-    if #[cfg(all(feature = "unwinding", panic = "unwind"))] {
+    if #[cfg(panic = "unwind")] {
         mod unwind;
         use unwind as imp;
     } else {

@@ -12,8 +12,8 @@ mk {
     inherit (versions) cfg-if;
     inherit (localCrates)
       sel4
+      sel4-root-task
     ;
-    sel4-root-task = localCrates.sel4-root-task // { features = [ "unwinding" ]; };
   };
   features = {
     alloc = [ "sel4-root-task/alloc" ];

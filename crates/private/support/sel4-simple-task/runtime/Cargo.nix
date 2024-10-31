@@ -25,7 +25,7 @@ mk {
       sel4-sync
       sel4-ctors-dtors
     ;
-    sel4-runtime-common = localCrates.sel4-runtime-common // { features = [ "tls" "unwinding" ]; };
+    sel4-runtime-common = localCrates.sel4-runtime-common // { features = [ "tls" ]; };
   };
   target."cfg(not(target_arch = \"arm\"))".dependencies = {
     sel4-backtrace = localCrates.sel4-backtrace // { features = [ "unwinding" "postcard" ]; };

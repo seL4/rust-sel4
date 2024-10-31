@@ -18,9 +18,8 @@ license = "BSD-2-Clause"
 
 [features]
 alloc = ["sel4-panicking/alloc"]
-full = ["unwinding", "alloc"]
+full = ["alloc"]
 single-threaded = ["sel4/single-threaded"]
-unwinding = ["sel4-panicking/unwinding", "sel4-runtime-common/unwinding"]
 
 [dependencies]
 sel4 = { path = "../sel4" }
