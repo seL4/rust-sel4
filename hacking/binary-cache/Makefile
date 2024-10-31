@@ -5,7 +5,7 @@
 #
 
 P ?= ../..
-A ?= everything
+A ?= withClippy.everything
 
 path := $(P)
 attr := $(A)
