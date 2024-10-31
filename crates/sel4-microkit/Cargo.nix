@@ -25,12 +25,7 @@ mk {
   };
   features = {
     full = [
-      "unwinding"
       "alloc"
-    ];
-    unwinding = [
-      "sel4-panicking/unwinding"
-      "sel4-runtime-common/unwinding"
     ];
     alloc = [
       "sel4-panicking/alloc"

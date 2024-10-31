@@ -21,10 +21,7 @@ cfg-if = "1.0.0"
 sel4 = { path = "../../../../sel4" }
 sel4-ctors-dtors = { path = "../../../../sel4-ctors-dtors" }
 sel4-dlmalloc = { path = "../../../../sel4-dlmalloc" }
-sel4-panicking = { path = "../../../../sel4-panicking", features = ["unwinding", "alloc"] }
+sel4-panicking = { path = "../../../../sel4-panicking", features = ["alloc"] }
 sel4-panicking-env = { path = "../../../../sel4-panicking/env" }
+sel4-runtime-common = { path = "../../../../sel4-runtime-common", features = ["start", "tls"] }
 sel4-sync = { path = "../../../../sel4-sync" }
-
-[dependencies.sel4-runtime-common]
-path = "../../../../sel4-runtime-common"
-features = ["start", "tls", "unwinding"]

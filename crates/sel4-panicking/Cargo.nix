@@ -18,8 +18,8 @@ mk {
   build-dependencies = {
     inherit (versions) rustc_version;
   };
-  target."cfg(not(target_arch = \"arm\"))".dependencies = {
-    unwinding = unwindingWith [ "personality" ] // { optional = true; };
+  target."cfg(all(panic = \"unwind\", not(target_arch = \"arm\")))".dependencies = {
+    unwinding = unwindingWith [ "personality" ];
   };
   features = {
     alloc = [];

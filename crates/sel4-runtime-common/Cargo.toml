@@ -28,8 +28,7 @@ sel4-initialize-tls = { path = "../sel4-initialize-tls", features = ["on-stack"]
 sel4-panicking-env = { path = "../sel4-panicking/env" }
 sel4-stack = { path = "../sel4-stack" }
 
-[target."cfg(not(target_arch = \"arm\"))".dependencies.unwinding]
+[target."cfg(all(panic = \"unwind\", not(target_arch = \"arm\")))".dependencies.unwinding]
 version = "0.2.3"
 default-features = false
 features = ["unwinder", "fde-custom", "hide-trace"]
-optional = true

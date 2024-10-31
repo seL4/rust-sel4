@@ -18,10 +18,10 @@ mk {
       sel4-ctors-dtors
     ;
     sel4-panicking = localCrates.sel4-panicking // {
-      features = [ "unwinding" "alloc" ];
+      features = [ "alloc" ];
     };
     sel4-runtime-common = localCrates.sel4-runtime-common // {
-      features = [ "start" "tls" "unwinding" ];
+      features = [ "start" "tls" ];
     };
   };
 }
