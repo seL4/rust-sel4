@@ -98,6 +98,14 @@ superCallPackage ../rust-utils {} self //
     in
       toolchain.withComponents filteredComponents;
 
+  parseStructuredChannel = unstructuredChannel:
+    let
+      parts = builtins.match ''(nightly)-(.*)'' unstructuredChannel;
+    in
+      if parts == null
+      then { channel = unstructuredChannel; date = null; }
+      else { channel = lib.elemAt parts 0; date = lib.elemAt parts 1; };
+
   defaultRustEnvironment =
     let
       inherit (scopeConfig.rustEnvironmentSelector) tracks upstream;
