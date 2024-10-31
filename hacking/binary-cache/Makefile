@@ -5,7 +5,7 @@
 #
 
 P ?= ../..
-A ?= everythingWithExcess
+A ?= everything
 
 path := $(P)
 attr := $(A)
