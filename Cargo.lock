@@ -3122,6 +3122,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "tests-microkit-unwind"
+version = "0.1.0"
+dependencies = [
+ "sel4-microkit",
+]
+
+[[package]]
 name = "tests-root-task-backtrace"
 version = "0.1.0"
 dependencies = [

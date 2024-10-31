@@ -81,7 +81,6 @@ in {
     minimal = maybe isMicrokit (
       let
         pd = mkPD rec {
-          inherit (verus) rustEnvironment;
           rootCrate = crates.tests-microkit-minimal;
           targetTriple = mkSeL4RustTargetTriple { microkit = true; minimal = true; };
         };
@@ -92,6 +91,28 @@ in {
               "${pd}/bin"
             ];
             systemXML = sources.srcRoot + "/crates/private/tests/microkit/minimal/x.system";
+          };
+          extraPlatformArgs = lib.optionalAttrs canSimulate  {
+            canAutomateSimply = true;
+          };
+        } // {
+          inherit pd;
+        }
+    );
+
+    unwind = maybe isMicrokit (
+      let
+        pd = mkPD rec {
+          rootCrate = crates.tests-microkit-unwind;
+          targetTriple = mkSeL4RustTargetTriple { microkit = true; unwind = true; };
+        };
+      in
+        callPlatform {
+          system = microkit.mkSystem {
+            searchPath = [
+              "${pd}/bin"
+            ];
+            systemXML = sources.srcRoot + "/crates/private/tests/microkit/unwind/x.system";
           };
           extraPlatformArgs = lib.optionalAttrs canSimulate  {
             canAutomateSimply = true;
