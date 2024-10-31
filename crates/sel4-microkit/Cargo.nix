@@ -20,7 +20,7 @@ mk {
       sel4-microkit-base
       sel4-microkit-macros
     ;
-    sel4-runtime-common = localCrates.sel4-runtime-common // { features = [ "tls" "start" ]; };
+    sel4-runtime-common = localCrates.sel4-runtime-common // { features = [ "unwinding" "tls" "start" ]; };
     sel4 = localCrates.sel4 // { features = [ "single-threaded" ]; };
   };
   features = {

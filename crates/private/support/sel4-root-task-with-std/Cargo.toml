@@ -23,4 +23,7 @@ single-threaded = ["sel4/single-threaded"]
 sel4 = { path = "../../../sel4" }
 sel4-ctors-dtors = { path = "../../../sel4-ctors-dtors" }
 sel4-panicking-env = { path = "../../../sel4-panicking/env" }
-sel4-runtime-common = { path = "../../../sel4-runtime-common", features = ["start", "tls"] }
+
+[dependencies.sel4-runtime-common]
+path = "../../../sel4-runtime-common"
+features = ["start", "tls", "unwinding"]

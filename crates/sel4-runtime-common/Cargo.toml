@@ -32,3 +32,4 @@ sel4-stack = { path = "../sel4-stack" }
 version = "0.2.3"
 default-features = false
 features = ["unwinder", "fde-custom", "hide-trace"]
+optional = true

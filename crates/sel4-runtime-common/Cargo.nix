@@ -15,7 +15,7 @@ mk {
     sel4-initialize-tls = localCrates.sel4-initialize-tls // { features = [ "on-stack" ]; optional = true; };
   };
   target."cfg(all(panic = \"unwind\", not(target_arch = \"arm\")))".dependencies = {
-    unwinding = unwindingWith [];
+    unwinding = unwindingWith [] // { optional = true; };
   };
   features = {
     tls = [ "dep:sel4-initialize-tls" "dep:sel4" ];
