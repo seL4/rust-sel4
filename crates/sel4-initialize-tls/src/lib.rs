@@ -126,34 +126,26 @@ impl TlsReservationLayout {
     fn from_segment_layout(segment_layout: Layout) -> Self {
         if cfg!(any(target_arch = "arm", target_arch = "aarch64")) {
             let tcb_size = 2 * mem::size_of::<usize>();
-            let segment_offset = tcb_size.next_multiple_of(segment_layout.align());
+            let tcb_layout = Layout::from_size_align(tcb_size, tcb_size).unwrap();
+            let (footprint, segment_offset) = tcb_layout.extend(segment_layout).unwrap();
             Self {
-                footprint: Layout::from_size_align(
-                    segment_offset + segment_layout.size(),
-                    segment_layout.align().max(tcb_size),
-                )
-                .unwrap(),
+                footprint,
                 segment_offset,
                 thread_pointer_offset: 0,
             }
         } else if cfg!(any(target_arch = "riscv32", target_arch = "riscv64")) {
             Self {
-                footprint: Layout::from_size_align(segment_layout.size(), segment_layout.align())
-                    .unwrap(),
+                footprint: segment_layout,
                 segment_offset: 0,
                 thread_pointer_offset: 0,
             }
         } else if cfg!(target_arch = "x86_64") {
-            let tcb_size = 2 * mem::size_of::<usize>(); // could probably get away with just 1x word size
-            let thread_pointer_offset = segment_layout
-                .size()
-                .next_multiple_of(segment_layout.align());
+            let tcb_layout =
+                Layout::from_size_align(2 * mem::size_of::<usize>(), mem::size_of::<usize>())
+                    .unwrap(); // could probably get away with just 1x word size for size (keeping 2x word size alignment)
+            let (footprint, thread_pointer_offset) = segment_layout.extend(tcb_layout).unwrap();
             Self {
-                footprint: Layout::from_size_align(
-                    thread_pointer_offset + tcb_size,
-                    segment_layout.align(),
-                )
-                .unwrap(),
+                footprint,
                 segment_offset: 0,
                 thread_pointer_offset,
             }
