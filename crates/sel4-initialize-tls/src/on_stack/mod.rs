@@ -44,7 +44,7 @@ impl TlsImage {
         cont_fn: ContFn,
         cont_arg: *mut ContArg,
     ) -> ! {
-        self.initialize_tls_reservation(tls_reservation_start);
+        self.initialize_reservation(tls_reservation_start);
 
         let thread_pointer = tls_reservation_start
             .wrapping_byte_add(self.reservation_layout().thread_pointer_offset());
