@@ -19,6 +19,7 @@
 
 use core::alloc::Layout;
 use core::mem;
+use core::ptr;
 use core::slice;
 
 #[cfg(feature = "alloc")]
@@ -88,25 +89,27 @@ impl TlsImage {
         Layout::from_size_align(self.checked.memsz, self.checked.align).unwrap()
     }
 
+    fn image_data(&self) -> *const [u8] {
+        ptr::slice_from_raw_parts(self.checked.vaddr as *mut u8, self.checked.filesz)
+    }
+
     #[allow(clippy::missing_safety_doc)]
-    pub unsafe fn initialize_tls_reservation(&self, tls_reservation_start: *mut u8) {
+    pub unsafe fn initialize_tls_reservation(&self, reservation_start: *mut u8) {
         let reservation_layout = self.reservation_layout();
-
-        let image_data_window =
-            slice::from_raw_parts(self.checked.vaddr as *mut u8, self.checked.filesz);
-
-        let segment_start =
-            tls_reservation_start.wrapping_byte_add(reservation_layout.segment_offset());
-        let segment_window = slice::from_raw_parts_mut(segment_start, self.checked.memsz);
-        let (tdata, tbss) = segment_window.split_at_mut(self.checked.filesz);
-
-        tdata.copy_from_slice(image_data_window);
+        let reservation =
+            slice::from_raw_parts_mut(reservation_start, reservation_layout.footprint().size());
+        let (tdata, tbss) = reservation[reservation_layout.segment_offset()..]
+            [..self.checked.memsz]
+            .split_at_mut(self.checked.filesz);
+        tdata.copy_from_slice(self.image_data().as_ref().unwrap());
         tbss.fill(0);
-
         if cfg!(target_arch = "x86_64") {
-            let thread_pointer =
-                tls_reservation_start.wrapping_byte_add(reservation_layout.thread_pointer_offset());
-            (thread_pointer.cast::<*mut u8>()).write(thread_pointer);
+            let thread_pointer = (reservation_start as usize)
+                .checked_add(reservation_layout.thread_pointer_offset())
+                .unwrap();
+            let thread_pointer_slice = &mut reservation
+                [reservation_layout.thread_pointer_offset()..][..mem::size_of::<usize>()];
+            thread_pointer_slice.copy_from_slice(&thread_pointer.to_ne_bytes());
         }
     }
 }
