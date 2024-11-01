@@ -28,7 +28,7 @@ pub unsafe fn initialize_tls_on_stack_and_continue(cont_fn: ContFn, cont_arg: *m
     };
     unchecked
         .check()
-        .unwrap_or_else(|| abort!("invalid TLS image: {unchecked:#x?}"))
+        .unwrap_or_else(|_| abort!("invalid TLS image: {unchecked:#x?}"))
         .initialize_on_stack(CHOSEN_SET_THREAD_POINTER_FN, cont_fn, cont_arg)
 }
 

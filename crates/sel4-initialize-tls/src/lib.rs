@@ -52,7 +52,7 @@ mod on_heap;
 #[cfg(feature = "on-heap")]
 pub use on_heap::*;
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub struct UncheckedTlsImage {
     pub vaddr: usize,
     pub filesz: usize,
@@ -61,27 +61,22 @@ pub struct UncheckedTlsImage {
 }
 
 impl UncheckedTlsImage {
-    pub fn check(&self) -> Option<TlsImage> {
+    pub fn check(&self) -> Result<TlsImage, InvalidTlsImageError> {
         if self.memsz >= self.filesz && self.align.is_power_of_two() && self.align > 0 {
-            Some(TlsImage {
-                vaddr: self.vaddr,
-                filesz: self.filesz,
-                memsz: self.memsz,
-                align: self.align,
-            })
+            Ok(TlsImage { checked: *self })
         } else {
-            None
+            Err(InvalidTlsImageError(()))
         }
     }
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct InvalidTlsImageError(());
+
 #[repr(C)]
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct TlsImage {
-    vaddr: usize,
-    filesz: usize,
-    memsz: usize,
-    align: usize,
+    checked: UncheckedTlsImage,
 }
 
 impl TlsImage {
@@ -90,19 +85,20 @@ impl TlsImage {
     }
 
     fn segment_layout(&self) -> Layout {
-        Layout::from_size_align(self.memsz, self.align).unwrap()
+        Layout::from_size_align(self.checked.memsz, self.checked.align).unwrap()
     }
 
     #[allow(clippy::missing_safety_doc)]
     pub unsafe fn initialize_tls_reservation(&self, tls_reservation_start: *mut u8) {
         let reservation_layout = self.reservation_layout();
 
-        let image_data_window = slice::from_raw_parts(self.vaddr as *mut u8, self.filesz);
+        let image_data_window =
+            slice::from_raw_parts(self.checked.vaddr as *mut u8, self.checked.filesz);
 
         let segment_start =
             tls_reservation_start.wrapping_byte_add(reservation_layout.segment_offset());
-        let segment_window = slice::from_raw_parts_mut(segment_start, self.memsz);
-        let (tdata, tbss) = segment_window.split_at_mut(self.filesz);
+        let segment_window = slice::from_raw_parts_mut(segment_start, self.checked.memsz);
+        let (tdata, tbss) = segment_window.split_at_mut(self.checked.filesz);
 
         tdata.copy_from_slice(image_data_window);
         tbss.fill(0);
