@@ -32,13 +32,12 @@ in
 
   symlinkToRegularFile = callBuildBuildPackage ./symlink-to-regular-file.nix {};
 
-  mkCompilerRTSource = { version, hash }:
+  mkCompilerRTSource = { rev, hash }:
     let
       llvmProject = fetchFromGitHub {
         owner = "rust-lang";
         repo = "llvm-project";
-        rev = "rustc/${version}";
-        inherit hash;
+        inherit rev hash;
       };
     in
       runCommand "compiler-rt" {} ''

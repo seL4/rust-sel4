@@ -125,8 +125,8 @@ superCallPackage ../rust-utils {} self //
   } // {
     channel = topLevelRustToolchainFile.attrs.toolchain.channel;
     compilerRTSource = mkCompilerRTSource {
-      version = "19.1-2024-07-30";
-      hash = "sha256-fV51iDAbkRmWJj0twTmQKdZdLueMAKSZR6bBtgVPCbk=";
+      rev = "rustc-1.81.0";
+      hash = "sha256-55kUrNucrs9JSlTP8nxY8bZQGx7u6xMCbJe63fN5uU8=";
     };
     mkCustomTargetPath = customTargetTripleTripleName:
       let
