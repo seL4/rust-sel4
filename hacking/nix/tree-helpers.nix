@@ -6,39 +6,21 @@
 
 { lib }:
 
-rec {
+let
+  mapLeafNodes = f: lib.mapAttrs (k: v:
+    assert lib.isAttrs v;
+    if v ? __leaf
+    then f v
+    else mapLeafNodes f v
+  );
+
+in rec {
   mkLeaf = value: {
     __leaf = null;
     inherit value;
   };
 
-  untree = lib.mapAttrs (k: v:
-    if lib.isAttrs v
-    then (
-      if v ? __leaf
-      then v.value
-      else untree v
-    )
-    else v
-  );
+  untree = mapLeafNodes (leafNode: leafNode.value);
 
-  mapLeaves = f: lib.mapAttrs (k: v:
-    if lib.isAttrs v
-    then (
-      if v ? __leaf
-      then mkLeaf (f v.value)
-      else mapLeaves f v
-    )
-    else v
-  );
-
-  leaves =
-    let
-      f = acc: v:
-        if lib.isAttrs v
-        then lib.mapAttrsToList (k': f (acc ++ [k']))
-        else acc
-      ;
-    in
-      f [];
+  mapLeaves = f: mapLeafNodes (leafNode: mkLeaf (f leafNode.value));
 }

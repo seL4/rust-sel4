@@ -30,23 +30,25 @@ let
 
   treeHelpers = import ./tree-helpers.nix { inherit lib; };
 
-  makeOverridableWith = f: g: x: lib.fix (self: (g self x) // {
-    override = x': makeOverridableWith f g (f x' x);
+  makeOverridableWith = modifyArg: f: arg: lib.fix (self: (f self arg) // {
+    override = argModification: makeOverridableWith modifyArg f (modifyArg argModification arg);
   });
 
-  crossSystems =
+  isCrossSystemActuallyCross = crossSystem:
+    crossSystem != builtins.intersectAttrs crossSystem (nixpkgsFn {}).hostPlatform;
+
+  crossSystemTree =
     with treeHelpers;
     {
       build = mkLeaf null;
       host =
         let
           # Avoid cache misses in cases where buildPlatform == hostPlatform
-          guard = attrs:
-            if attrs == builtins.intersectAttrs attrs this.pkgs.build.hostPlatform
-            then null
-            else attrs
-          ;
-          mkLeafWithGuard = attrs: mkLeaf (guard attrs);
+          guard = crossSystem:
+            if isCrossSystemActuallyCross crossSystem
+            then crossSystem
+            else null;
+          mkLeafWithGuard = crossSystem: mkLeaf (guard crossSystem);
         in {
           aarch64 = {
             none = mkLeafWithGuard {
@@ -146,31 +148,28 @@ let
         };
     };
 
-  baseArgs = selfThis: {
-    nixpkgsArgsFor = crossSystem: {
+  f = self: arg:
+    let
+      concreteArg = arg self;
+      pkgs = treeHelpers.untree (treeHelpers.mapLeaves (crossSystem:
+        nixpkgsFn (concreteArg.nixpkgsArgsForCrossSystem crossSystem)
+      ) crossSystemTree);
+    in {
+      inherit lib pkgs;
+    } // import ./top-level self // concreteArg.extraAttrs;
+
+  baseArg = self: {
+    nixpkgsArgsForCrossSystem = crossSystem: {
       inherit crossSystem;
       overlays = [
         (self: super: {
-          thisTopLevel = selfThis;
-          inherit treeHelpers;
+          thisTopLevel = self;
         })
         (import ./overlay)
       ];
     };
-    attrs = {};
+    extraAttrs = {};
   };
 
-  mkThis = self: args:
-    let
-      concreteArgs = args self;
-      pkgs = treeHelpers.untree (treeHelpers.mapLeaves (crossSystem:
-        nixpkgsFn (concreteArgs.nixpkgsArgsFor crossSystem)
-      ) crossSystems);
-    in {
-      inherit lib pkgs;
-    } // import ./top-level self // concreteArgs.attrs;
-
-  this = makeOverridableWith lib.id mkThis baseArgs;
-
 in
-  this
+  makeOverridableWith lib.id f baseArg
