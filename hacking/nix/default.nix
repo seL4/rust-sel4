@@ -162,9 +162,6 @@ let
     nixpkgsArgsForCrossSystem = crossSystem: {
       inherit crossSystem;
       overlays = [
-        (self: super: {
-          thisTopLevel = self;
-        })
         (import ./overlay)
       ];
     };
