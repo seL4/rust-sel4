@@ -7,7 +7,7 @@
 self: with self;
 
 import ./overriding.nix self //
-import ./aggregating.nix self //
+import ./aggregates.nix self //
 {
 
   inherit (pkgs.build.this) shellForMakefile shellForHacking;
