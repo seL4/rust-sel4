@@ -28,7 +28,23 @@ in
 
 let
 
-  treeHelpers = import ./tree-helpers.nix { inherit lib; };
+  treeHelpers = rec {
+    mapLeafNodes = f: lib.mapAttrs (k: v:
+      assert lib.isAttrs v;
+      if v ? __leaf
+      then f v
+      else mapLeafNodes f v
+    );
+
+    mkLeaf = value: {
+      __leaf = null;
+      inherit value;
+    };
+
+    untree = mapLeafNodes (leafNode: leafNode.value);
+
+    mapLeaves = f: mapLeafNodes (leafNode: mkLeaf (f leafNode.value));
+  };
 
   makeOverridable' = f: arg: lib.fix (self: (f self arg) // {
     override = modifyArg: makeOverridable' f (modifyArg arg);
