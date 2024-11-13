@@ -34,8 +34,11 @@ let
     override = argModification: makeOverridableWith modifyArg f (modifyArg argModification arg);
   });
 
-  isCrossSystemActuallyCross = crossSystem:
-    crossSystem != builtins.intersectAttrs crossSystem (nixpkgsFn {}).hostPlatform;
+  isCrossSystemActuallyCross =
+    let
+      inherit (nixpkgsFn {}) hostPlatform;
+    in
+      crossSystem: crossSystem != builtins.intersectAttrs crossSystem hostPlatform;
 
   crossSystemTree =
     with treeHelpers;
