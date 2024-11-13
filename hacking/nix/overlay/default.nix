@@ -18,17 +18,17 @@ assert !(super ? scopeName);
     let
       otherSplices = generateSplicesForMkScope scopeName;
     in
-      lib.makeScopeWithSplicing
-        splicePackages
-        newScope
-        otherSplices
-        (_: {})
-        (_: {})
-        (self: callPackage ../scope {} self // {
-          __dontMashWhenSplicingChildren = true;
-          inherit otherSplices; # for child spliced scopes
-        })
-      ;
+      lib.makeScopeWithSplicing'
+        {
+          inherit splicePackages newScope;
+        }
+        {
+          inherit otherSplices;
+          f = self: callPackage ../scope {} self // {
+            __dontMashWhenSplicingChildren = true;
+            inherit otherSplices; # for child spliced scopes
+          };
+        };
 
   # Add Python packages needed by the seL4 ecosystem
   pythonPackagesExtensions = super.pythonPackagesExtensions ++ [
