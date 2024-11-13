@@ -30,8 +30,8 @@ let
 
   treeHelpers = import ./tree-helpers.nix { inherit lib; };
 
-  makeOverridableWith = f: arg: lib.fix (self: (f self arg) // {
-    override = modifyArg: makeOverridableWith f (modifyArg arg);
+  makeOverridable' = f: arg: lib.fix (self: (f self arg) // {
+    override = modifyArg: makeOverridable' f (modifyArg arg);
   });
 
   isCrossSystemActuallyCross =
@@ -172,4 +172,4 @@ let
   };
 
 in
-  makeOverridableWith f baseArg
+  makeOverridable' f baseArg
