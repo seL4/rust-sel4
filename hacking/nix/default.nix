@@ -50,6 +50,8 @@ let
     override = modifyArg: makeOverridable' f (modifyArg arg);
   });
 
+in let
+
   isCrossSystemActuallyCross =
     let
       inherit (nixpkgsFn {}) hostPlatform;
@@ -166,6 +168,8 @@ let
           };
         };
     };
+
+in let
 
   f = self: arg:
     let
