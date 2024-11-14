@@ -88,7 +88,7 @@ in rec {
     tests.root-task.config
     tests.root-task.tls
     tests.root-task.backtrace
-    # tests.root-task.panicking
+    tests.root-task.panicking
     tests.root-task.c
     tests.root-task.verus
     tests.root-task.dafny
@@ -192,19 +192,21 @@ in rec {
                 (_: allocFeatures:
                   lib.flip lib.mapAttrs profile
                     (_: release:
-                      maybe (haveFullRuntime && haveUnwindingSupport) (mkInstance {
-                        rootTask = mkTask {
-                          rootCrate = crates.tests-root-task-panicking;
-                          inherit release;
-                          features = allocFeatures ++ [ "panic-${panicStrategyName}" ];
-                          extraProfile = {
-                            panic = panicStrategyName;
+                      let
+                        isUnwind = panicStrategyName == "unwind";
+                      in
+                        maybe (haveFullRuntime && haveUnwindingSupport) (mkInstance {
+                          rootTask = mkTask {
+                            rootCrate = crates.tests-root-task-panicking;
+                            targetTriple = mkSeL4RustTargetTriple { unwind = isUnwind; };
+                            inherit release;
+                            features = allocFeatures ++ [ "panic-${panicStrategyName}" ];
                           };
-                        };
-                        extraPlatformArgs = lib.optionalAttrs canSimulate {
-                          canAutomateSimply = panicStrategyName == "unwind";
-                        };
-                }))));
+                          extraPlatformArgs = lib.optionalAttrs canSimulate {
+                            canAutomateSimply = isUnwind;
+                          };
+                        })
+                    )));
 
           paths = lib.mapCartesianProduct
             ({ panicStrategyName, allocName, profileName }: [ panicStrategyName allocName profileName ])
@@ -224,9 +226,11 @@ in rec {
                 value = config.automate;
               }));
 
-          simulate = writeText "all-panicking-scripts" (toString (lib.forEach paths (path:
-            (lib.attrByPath path (throw "x") byConfig).simulate
-          )));
+          simulate = writeText "all-panicking-scripts" (toString (lib.forEach
+            (lib.filter
+              (config: config != null)
+              (lib.forEach paths (path: lib.attrByPath path (throw "x") byConfig)))
+            (config: config.simulate)));
 
           links = linkFarm "links" {
             inherit simulate;
