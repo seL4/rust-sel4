@@ -296,6 +296,7 @@ in rec {
         let
           rootTask = lib.makeOverridable mkTask {
             rootCrate = crates.ring;
+            targetTriple = mkSeL4RustTargetTriple { unwind = true; };
             test = true;
             justBuildTests = true;
             features = [
