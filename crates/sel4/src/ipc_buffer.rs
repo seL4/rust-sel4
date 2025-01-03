@@ -66,7 +66,7 @@ impl IpcBuffer {
         let inner = self.inner();
         cap::CNode::from_bits(inner.receiveCNode).absolute_cptr_from_bits_with_depth(
             inner.receiveIndex,
-            inner.receiveCNode.try_into().unwrap(),
+            inner.receiveDepth.try_into().unwrap(),
         )
     }
 
