@@ -28,6 +28,6 @@ sel4-panicking-env = { path = "env" }
 rustversion = "1.0.18"
 
 [target."cfg(all(panic = \"unwind\", not(target_arch = \"arm\")))".dependencies.unwinding]
-version = "0.2.3"
+version = "=0.2.3"
 default-features = false
 features = ["unwinder", "fde-custom", "hide-trace", "personality"]

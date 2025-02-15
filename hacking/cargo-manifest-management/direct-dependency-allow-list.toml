@@ -68,7 +68,7 @@ stable_deref_trait = "1.1.0" # for gimli dep of sel4-backtrace-addr2line-context
 syn = "2.0.85"
 thiserror = "1.0"
 tock-registers = "0.9.0"
-unwinding = "0.2.3"
+unwinding = "=0.2.3" # TODO
 virtio-drivers = "0.7.2"
 webpki-roots = "0.26"
 xmltree = "0.11.0"
