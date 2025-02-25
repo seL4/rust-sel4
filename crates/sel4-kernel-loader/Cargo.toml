@@ -25,7 +25,9 @@ postcard = { version = "1.0.2", default-features = false }
 sel4-config = { path = "../sel4/config" }
 sel4-immutable-cell = { path = "../sel4-immutable-cell" }
 sel4-kernel-loader-embed-page-tables-runtime = { path = "embed-page-tables/runtime" }
-sel4-kernel-loader-payload-types = { path = "payload-types", features = ["serde"] }
+sel4-kernel-loader-payload-types = { path = "payload-types", features = [
+    "serde",
+] }
 sel4-logging = { path = "../sel4-logging" }
 sel4-platform-info = { path = "../sel4-platform-info" }
 sel4-stack = { path = "../sel4-stack" }
@@ -50,6 +52,7 @@ syn = { version = "2.0.85", features = ["parsing"] }
 
 [target."cfg(any(target_arch = \"arm\", target_arch = \"aarch64\"))".dependencies]
 sel4-bcm2835-aux-uart-driver = { path = "../drivers/bcm2835-aux-uart" }
+sel4-zynqmp-xuartps-driver = { path = "../drivers/zynqmp-xuartps" }
 sel4-pl011-driver = { path = "../drivers/pl011" }
 
 [target."cfg(any(target_arch = \"riscv32\", target_arch = \"riscv64\"))".dependencies]
