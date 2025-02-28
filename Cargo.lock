@@ -249,7 +249,7 @@ dependencies = [
  "regex",
  "rustc-hash",
  "shlex",
- "syn 2.0.98",
+ "syn",
 ]
 
 [[package]]
@@ -288,17 +288,17 @@ dependencies = [
 [[package]]
 name = "builtin"
 version = "0.1.0"
-source = "git+https://github.com/coliasgroup/verus.git?tag=keep/c1d8b986315b1d7fcaa0bf63c2e0497f#c1d8b986315b1d7fcaa0bf63c2e0497fbebab231"
+source = "git+https://github.com/coliasgroup/verus.git?tag=keep/a60b3b7e08d514dc8e0ac3b30236db0c#a60b3b7e08d514dc8e0ac3b30236db0c3023c17a"
 
 [[package]]
 name = "builtin_macros"
 version = "0.1.0"
-source = "git+https://github.com/coliasgroup/verus.git?tag=keep/c1d8b986315b1d7fcaa0bf63c2e0497f#c1d8b986315b1d7fcaa0bf63c2e0497fbebab231"
+source = "git+https://github.com/coliasgroup/verus.git?tag=keep/a60b3b7e08d514dc8e0ac3b30236db0c#a60b3b7e08d514dc8e0ac3b30236db0c3023c17a"
 dependencies = [
  "prettyplease_verus",
  "proc-macro2",
  "quote",
- "syn 1.0.109",
+ "syn",
  "syn_verus",
  "synstructure",
 ]
@@ -320,7 +320,7 @@ checksum = "3fa76293b4f7bb636ab88fd78228235b5248b4d05cc589aed610f954af5d7c7a"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.98",
+ "syn",
 ]
 
 [[package]]
@@ -519,7 +519,7 @@ dependencies = [
  "proc-macro-error2",
  "proc-macro2",
  "quote",
- "syn 2.0.98",
+ "syn",
 ]
 
 [[package]]
@@ -634,7 +634,7 @@ checksum = "2f9ed6b3789237c8a0c1c505af1c7eb2c560df6186f01b098c3a1064ea532f38"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.98",
+ "syn",
 ]
 
 [[package]]
@@ -754,7 +754,7 @@ checksum = "162ee34ebcb7c64a8abebc059ce0fee27c2262618d7b60ed8faf72fef13c3650"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.98",
+ "syn",
 ]
 
 [[package]]
@@ -851,6 +851,12 @@ dependencies = [
 
 [[package]]
 name = "hashbrown"
+version = "0.12.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8a9ee70c43aaf417c914396645a0fa852624801b24ebb7ae78fe8272889ac888"
+
+[[package]]
+name = "hashbrown"
 version = "0.14.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e5274423e17b7c9fc20b6e7e208532f9b19825d82dfd615708b70edd83df41f1"
@@ -919,6 +925,16 @@ name = "humantime"
 version = "2.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9a3a5bfb195931eeb336b2a7b4d761daec841b97f947d34394601737a7bba5e4"
+
+[[package]]
+name = "indexmap"
+version = "1.9.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bd070e393353796e801d209ad339e89596eb4c8d430d18ede6a1cced8fafbd99"
+dependencies = [
+ "autocfg",
+ "hashbrown 0.12.3",
+]
 
 [[package]]
 name = "indexmap"
@@ -1352,7 +1368,7 @@ checksum = "af1844ef2428cc3e1cb900be36181049ef3d3193c63e43026cfe202983b27a56"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.98",
+ "syn",
 ]
 
 [[package]]
@@ -1364,7 +1380,7 @@ dependencies = [
  "crc32fast",
  "flate2",
  "hashbrown 0.15.2",
- "indexmap",
+ "indexmap 2.7.1",
  "memchr",
  "ruzstd",
  "wasmparser",
@@ -1441,7 +1457,7 @@ dependencies = [
  "pest_meta",
  "proc-macro2",
  "quote",
- "syn 2.0.98",
+ "syn",
 ]
 
 [[package]]
@@ -1472,7 +1488,7 @@ checksum = "f6e859e6e5bd50440ab63c47e3ebabc90f26251f7c73c3d3e837b74a1cc3fa67"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.98",
+ "syn",
 ]
 
 [[package]]
@@ -1542,13 +1558,13 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6924ced06e1f7dfe3fa48d57b9f74f55d8915f5036121bef647ef4b204895fac"
 dependencies = [
  "proc-macro2",
- "syn 2.0.98",
+ "syn",
 ]
 
 [[package]]
 name = "prettyplease_verus"
-version = "0.1.15"
-source = "git+https://github.com/coliasgroup/verus.git?tag=keep/c1d8b986315b1d7fcaa0bf63c2e0497f#c1d8b986315b1d7fcaa0bf63c2e0497fbebab231"
+version = "0.2.29"
+source = "git+https://github.com/coliasgroup/verus.git?tag=keep/a60b3b7e08d514dc8e0ac3b30236db0c#a60b3b7e08d514dc8e0ac3b30236db0c3023c17a"
 dependencies = [
  "proc-macro2",
  "syn_verus",
@@ -1573,7 +1589,7 @@ dependencies = [
  "proc-macro-error-attr2",
  "proc-macro2",
  "quote",
- "syn 2.0.98",
+ "syn",
 ]
 
 [[package]]
@@ -1700,7 +1716,7 @@ checksum = "f265be5d634272320a7de94cea15c22a3bfdd4eb42eb43edc528415f066a1f25"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.98",
+ "syn",
 ]
 
 [[package]]
@@ -2107,7 +2123,7 @@ dependencies = [
  "sel4-capdl-initializer-types",
  "serde",
  "serde_json",
- "syn 2.0.98",
+ "syn",
 ]
 
 [[package]]
@@ -2129,7 +2145,7 @@ version = "0.1.0"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.98",
+ "syn",
 ]
 
 [[package]]
@@ -2164,7 +2180,7 @@ dependencies = [
  "sel4-capdl-initializer-types",
  "sel4-capdl-initializer-with-embedded-spec-build-env",
  "serde_json",
- "syn 2.0.98",
+ "syn",
 ]
 
 [[package]]
@@ -2184,7 +2200,7 @@ dependencies = [
  "sel4-config-data",
  "sel4-config-generic",
  "sel4-config-macros",
- "syn 2.0.98",
+ "syn",
 ]
 
 [[package]]
@@ -2205,7 +2221,7 @@ dependencies = [
  "proc-macro2",
  "quote",
  "sel4-config-generic-types",
- "syn 2.0.98",
+ "syn",
 ]
 
 [[package]]
@@ -2317,7 +2333,7 @@ dependencies = [
  "serde",
  "smccc",
  "spin",
- "syn 2.0.98",
+ "syn",
 ]
 
 [[package]]
@@ -2434,7 +2450,7 @@ version = "0.1.0"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.98",
+ "syn",
 ]
 
 [[package]]
@@ -2461,7 +2477,7 @@ name = "sel4-mod-in-out-dir"
 version = "0.1.0"
 dependencies = [
  "quote",
- "syn 2.0.98",
+ "syn",
 ]
 
 [[package]]
@@ -2582,7 +2598,7 @@ version = "0.1.0"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.98",
+ "syn",
 ]
 
 [[package]]
@@ -2726,7 +2742,7 @@ version = "0.1.0"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.98",
+ "syn",
 ]
 
 [[package]]
@@ -2790,7 +2806,7 @@ dependencies = [
  "sel4-build-env",
  "sel4-config",
  "sel4-config-data",
- "syn 2.0.98",
+ "syn",
  "xmltree",
 ]
 
@@ -2856,7 +2872,7 @@ checksum = "5a9bf7cf98d04a2b28aead066b7496853d4779c9cc183c440dbac457641e19a0"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.98",
+ "syn",
 ]
 
 [[package]]
@@ -2877,7 +2893,7 @@ version = "0.9.34+deprecated"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6a8b1a1a2ebf674015cc02edccce75287f1a0130d394307b36743c2f5d504b47"
 dependencies = [
- "indexmap",
+ "indexmap 2.7.1",
  "itoa",
  "ryu",
  "serde",
@@ -3008,6 +3024,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a8f112729512f8e442d81f95a8a7ddf2b7c6b8a1a6f509a95864142b30cab2d3"
 
 [[package]]
+name = "state_machines_macros"
+version = "0.1.0"
+source = "git+https://github.com/coliasgroup/verus.git?tag=keep/a60b3b7e08d514dc8e0ac3b30236db0c#a60b3b7e08d514dc8e0ac3b30236db0c3023c17a"
+dependencies = [
+ "indexmap 1.9.3",
+ "proc-macro2",
+ "quote",
+ "syn_verus",
+]
+
+[[package]]
 name = "static_assertions"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3027,17 +3054,6 @@ checksum = "13c2bddecc57b384dee18652358fb23172facb8a2c51ccc10d74c157bdea3292"
 
 [[package]]
 name = "syn"
-version = "1.0.109"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "72b64191b275b66ffe2469e8af2c1cfe3bafa67b529ead792a6d0160888b4237"
-dependencies = [
- "proc-macro2",
- "quote",
- "unicode-ident",
-]
-
-[[package]]
-name = "syn"
 version = "2.0.98"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "36147f1a48ae0ec2b5b3bc5b537d267457555a10dc06f3dbc8cb11ba3006d3b1"
@@ -3049,8 +3065,8 @@ dependencies = [
 
 [[package]]
 name = "syn_verus"
-version = "1.0.95"
-source = "git+https://github.com/coliasgroup/verus.git?tag=keep/c1d8b986315b1d7fcaa0bf63c2e0497f#c1d8b986315b1d7fcaa0bf63c2e0497fbebab231"
+version = "2.0.96"
+source = "git+https://github.com/coliasgroup/verus.git?tag=keep/a60b3b7e08d514dc8e0ac3b30236db0c#a60b3b7e08d514dc8e0ac3b30236db0c3023c17a"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -3059,13 +3075,12 @@ dependencies = [
 
 [[package]]
 name = "synstructure"
-version = "0.12.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f36bdaa60a83aca3921b5259d5400cbf5e90fc51931376a9bd4a0eb79aa7210f"
+version = "0.13.0"
+source = "git+https://github.com/mystor/synstructure.git?rev=1079497eb2bea252433dac53afe41291d8779641#1079497eb2bea252433dac53afe41291d8779641"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 1.0.109",
+ "syn",
  "unicode-xid",
 ]
 
@@ -3281,7 +3296,7 @@ checksum = "4fee6c4efc90059e10f81e6d42c60a18f76588c3d74cb83a0b242a2b6c7504c1"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.98",
+ "syn",
 ]
 
 [[package]]
@@ -3292,7 +3307,7 @@ checksum = "26afc1baea8a989337eeb52b6e72a039780ce45c3edfcc9c5b9d112feeb173c2"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.98",
+ "syn",
 ]
 
 [[package]]
@@ -3434,10 +3449,11 @@ source = "git+https://github.com/coliasgroup/volatile.git?tag=keep/aa7512906e9b7
 [[package]]
 name = "vstd"
 version = "0.1.0"
-source = "git+https://github.com/coliasgroup/verus.git?tag=keep/c1d8b986315b1d7fcaa0bf63c2e0497f#c1d8b986315b1d7fcaa0bf63c2e0497fbebab231"
+source = "git+https://github.com/coliasgroup/verus.git?tag=keep/a60b3b7e08d514dc8e0ac3b30236db0c#a60b3b7e08d514dc8e0ac3b30236db0c3023c17a"
 dependencies = [
  "builtin",
  "builtin_macros",
+ "state_machines_macros",
 ]
 
 [[package]]
@@ -3597,7 +3613,7 @@ checksum = "fa4f8080344d4671fb4e831a13ad1e68092748387dfc4f55e356242fae12ce3e"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.98",
+ "syn",
 ]
 
 [[package]]
@@ -3608,7 +3624,7 @@ checksum = "76331675d372f91bf8d17e13afbd5fe639200b73d01f0fc748bb059f9cca2db7"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.98",
+ "syn",
 ]
 
 [[package]]
