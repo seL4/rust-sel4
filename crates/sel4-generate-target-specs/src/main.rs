@@ -14,7 +14,17 @@ use std::fs;
 use std::path::Path;
 
 use rustc_target::json::ToJson;
-use rustc_target::spec::{Cc, CodeModel, LinkerFlavor, Lld, PanicStrategy, Target, TargetTriple};
+use rustc_target::spec::{Cc, CodeModel, LinkerFlavor, Lld, PanicStrategy, Target};
+
+use cfg_if::cfg_if;
+
+cfg_if! {
+    if #[cfg(target_tuple)] {
+        use rustc_target::spec::TargetTuple;
+    } else {
+        use rustc_target::spec::TargetTriple;
+    }
+}
 
 use clap::{Arg, ArgAction, Command};
 
@@ -106,9 +116,13 @@ impl Config {
 
         {
             let options = &mut target.options;
-            options.is_builtin = false;
             options.exe_suffix = ".elf".into();
             options.eh_frame_header = true;
+
+            #[cfg(target_spec_has_is_builtin)]
+            {
+                options.is_builtin = false;
+            }
         }
 
         if let Context::Microkit { resettable } = &self.context {
@@ -256,9 +270,16 @@ impl Context {
     }
 }
 
-fn builtin(triple: &str) -> Target {
+fn builtin(tuple: &str) -> Target {
+    cfg_if! {
+        if #[cfg(target_tuple)] {
+            let target_tuple = TargetTuple::from_tuple(tuple);
+        } else {
+            let target_tuple = TargetTriple::from_triple(tuple);
+        }
+    };
     #[allow(unused_mut)]
-    let mut target = Target::expect_builtin(&TargetTriple::from_triple(triple));
+    let mut target = Target::expect_builtin(&target_tuple);
     #[cfg(target_spec_has_metadata)]
     {
         target.metadata = Default::default();
