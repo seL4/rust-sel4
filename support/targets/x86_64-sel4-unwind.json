@@ -20,6 +20,7 @@
   },
   "plt-by-default": false,
   "relro-level": "full",
+  "rustc-abi": "x86-softfloat",
   "stack-probes": {
     "kind": "inline"
   },

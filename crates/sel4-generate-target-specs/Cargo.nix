@@ -9,7 +9,7 @@
 mk {
   package.name = "sel4-generate-target-specs";
   dependencies = {
-    inherit (versions) serde_json clap;
+    inherit (versions) cfg-if serde_json clap;
   };
   build-dependencies = {
     inherit (versions) rustversion;

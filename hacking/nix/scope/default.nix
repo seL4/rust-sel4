@@ -120,13 +120,13 @@ superCallPackage ../rust-utils {} self //
   defaultUpstreamRustEnvironment = elaborateRustEnvironment (mkDefaultElaborateRustEnvironmentArgs {
     rustToolchain = fenix.fromToolchainFile {
       file = topLevelRustToolchainFile.path;
-      sha256 = "sha256-L1F7kAfo8YWrKXHflUaVvCELdvnK2XjcL/lwopFQX2c=";
+      sha256 = "sha256-frXQAACBsfofKDEg6nSD0k+F3wDzfqM1ZxQKZVMtWCA=";
     };
   } // {
     channel = topLevelRustToolchainFile.attrs.toolchain.channel;
     compilerRTSource = mkCompilerRTSource {
-      rev = "rustc-1.81.0";
-      hash = "sha256-55kUrNucrs9JSlTP8nxY8bZQGx7u6xMCbJe63fN5uU8=";
+      rev = "rustc-1.84.0";
+      hash = "sha256-B+6FvM1kimdRqSh3nRDoVkditZH8q/jqYY01khSspLA=";
     };
     mkCustomTargetPath = customTargetTripleTripleName:
       let

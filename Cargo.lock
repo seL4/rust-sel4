@@ -2280,6 +2280,7 @@ dependencies = [
 name = "sel4-generate-target-specs"
 version = "0.1.0"
 dependencies = [
+ "cfg-if",
  "clap",
  "rustversion",
  "serde_json",
@@ -3410,9 +3411,9 @@ checksum = "8ecb6da28b8a351d773b68d5825ac39017e680750f980f3a1a85cd8dd28a47c1"
 
 [[package]]
 name = "unwinding"
-version = "0.2.3"
+version = "0.2.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "637d511437df708cee34bdec7ba2f1548d256b7acf3ff20e0a1c559f9bf3a987"
+checksum = "51f06a05848f650946acef3bf525fe96612226b61f74ae23ffa4e98bfbb8ab3c"
 dependencies = [
  "gimli",
 ]

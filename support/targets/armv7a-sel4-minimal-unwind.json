@@ -10,6 +10,7 @@
   "features": "+v7,+thumb2,+soft-float,-neon,+strict-align",
   "linker": "rust-lld",
   "linker-flavor": "gnu-lld",
+  "llvm-floatabi": "soft",
   "llvm-target": "armv7a-none-eabi",
   "max-atomic-width": 64,
   "metadata": {
