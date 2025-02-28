@@ -170,25 +170,26 @@ let
   # DO NOT CHECK IN THIS FILE
   hashesFilePath = ./SHA256SUMS;
 
-  upstreamChannel = "1.83.0-beta.2";
+  upstreamChannel = "1.83.0";
   upstreamDate = null;
 
-  versionTag = builtins.substring 0 9 versionRev;
-  versionRev = "eecd617bc6f3c693099a1ba900abb93ab9db9196";
-  versionName = "nightly-2024-10-30";
+  # versionTag = builtins.substring 0 9 versionRev;
+  versionTag = "25.02.0";
+  versionRev = "bd79e35e736899c87f46719491933af8224903bf";
+  versionName = "stable-${versionTag}";
 
   repo = fetchFromGitHub {
     owner = "ferrocene";
     repo = "ferrocene";
     rev = versionRev;
-    hash = "sha256-HZBJOESd2O0IGX80YmgjLduO1S8CM7VSQxf85FwJw/8=";
+    hash = "sha256-YR3shBZMpRpK3qkLO43Yz2Qcev/KQjeeErSDmAT2tBw=";
   };
 
   libcManifestDir = "${repo}/ferrocene/library/libc";
 
   upstreamRustToolchain = assembleRustToolchain ({
     channel = upstreamChannel;
-    sha256 = "sha256-qaGpvEOo1j+3K/YLVFdvVoD6+E3J32U2PmIIb6+FBxw=";
+    sha256 = "sha256-s1RPtyvDGJaX/BisLT+ifVfuhDT1nZkZ1NcK8sbwELM=";
   } // lib.optionalAttrs (upstreamDate != null) {
     date = upstreamDate;
   });
