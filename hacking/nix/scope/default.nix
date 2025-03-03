@@ -31,7 +31,7 @@ let
 in
 
 let
-  fenixRev = "dc19afc39af5f5e69fca78ebae59170e61017df8";
+  fenixRev = "14bd053c7f2a5437ca84c2c76eb7a68154dc30bb";
   fenixSource = fetchTarball "https://github.com/nix-community/fenix/archive/${fenixRev}.tar.gz";
   fenix = import fenixSource {};
 in
