@@ -10,6 +10,12 @@ self: super: with self;
 
 {
 
+  simpleeval = super.simpleeval.overrideAttrs (attrs: {
+    nativeBuildInputs = (attrs.nativeBuildInputs or []) ++ [
+      hatchling
+    ];
+  });
+
   pyfdt = buildPythonPackage rec {
     pname = "pyfdt";
     version = "0.3";
@@ -55,9 +61,7 @@ self: super: with self;
       inherit pname version;
       sha256 = "0sr7c1f9mh2vp6pkw3bgpd7crldmaksjfafy8wp5vphxk98ix2f7";
     };
-    buildInputs = [
-      nose
-    ];
+    doCheck = false;
   };
 
   concurrencytest = buildPythonPackage rec {

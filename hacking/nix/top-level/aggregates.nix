@@ -71,7 +71,7 @@ in {
     ])
 
     pkgs.host.aarch32.none.this.worlds.default.seL4
-    pkgs.host.ia32.none.this.worlds.default.seL4
+    pkgs.host.ia32.linux.this.worlds.default.seL4 # pkgs.host.ia32.none newlib is currently broken in nixpkgs
 
     pkgs.host.riscv64.imac.none.stdenv
     pkgs.host.riscv64.gc.none.stdenv
