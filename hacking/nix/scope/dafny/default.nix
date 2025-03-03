@@ -8,6 +8,7 @@
 , buildDotnetModule
 , fetchFromGitHub
 , writeScript
+, dotnet-sdk_6
 , jdk11
 , z3
 , sources
@@ -42,6 +43,8 @@ let
         --replace TargetFrameworks TargetFramework \
         --replace "netstandard2.0;net452" net6.0
     '';
+
+    dotnet-sdk = dotnet-sdk_6;
 
     nativeBuildInputs = [
       jdk11
