@@ -13,7 +13,8 @@ self:
       concreteSuperArgs = superArgs selfBase;
     in
       concreteSuperArgs // {
-        nixpkgsArgsFor = crossSystem: f (concreteSuperArgs.nixpkgsArgsFor crossSystem);
+        nixpkgsArgsForCrossSystem = crossSystem:
+          f (concreteSuperArgs.nixpkgsArgsForCrossSystem crossSystem);
       }
   );
 
