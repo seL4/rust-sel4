@@ -187,8 +187,16 @@ in let
       overlays = [
         (import ./overlay)
       ];
+      config = baseConfig;
     };
     extraAttrs = {};
+  };
+
+  baseConfig = {
+    permittedInsecurePackages = [
+      "dotnet-sdk-6.0.428"
+      "dotnet-runtime-6.0.36"
+    ];
   };
 
 in
