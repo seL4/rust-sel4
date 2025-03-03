@@ -71,7 +71,7 @@ impl<T: SlotStateTypes> SlotTracker<T> {
     where
         T: SlotStateTypes<Common: Clone, Free: Clone>,
     {
-        Self::new(iter::repeat((common, free)).take(capacity))
+        Self::new(iter::repeat_n((common, free), capacity))
     }
 
     pub fn new_occupied(iter: impl Iterator<Item = (T::Common, T::Occupied)>) -> Self {
@@ -96,7 +96,7 @@ impl<T: SlotStateTypes> SlotTracker<T> {
     where
         T: SlotStateTypes<Common: Clone, Occupied: Clone>,
     {
-        Self::new_occupied(iter::repeat((common, occupied)).take(capacity))
+        Self::new_occupied(iter::repeat_n((common, occupied), capacity))
     }
 
     pub fn capacity(&self) -> usize {

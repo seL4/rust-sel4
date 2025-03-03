@@ -275,7 +275,7 @@ impl<A: AbstractBounceBufferAllocator> Inner<A> {
             .unwrap()
             .as_occupied()
             .unwrap();
-        assert!(matches!(occupied, TxOccupied::Claimed { .. }));
+        assert!(matches!(occupied, TxOccupied::Claimed));
         *occupied = TxOccupied::Sent {
             range: range.clone(),
         };
