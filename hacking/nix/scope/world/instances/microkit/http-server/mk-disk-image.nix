@@ -82,5 +82,6 @@ vmTools.runInLinuxVM (runCommand "disk-image" {
 
   losetup -d $dev
 
+  mkdir -p $out
   mv $real_img $out/disk.img
 '')
