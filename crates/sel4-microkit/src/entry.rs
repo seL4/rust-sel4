@@ -40,7 +40,7 @@ fn inner_entry() -> ! {
     let ipc_buffer = unsafe { ipc_buffer_ptr().as_mut().unwrap() };
     sel4::set_ipc_buffer(ipc_buffer);
 
-    sel4_ctors_dtors::run_ctors();
+    sel4_ctors_dtors::run_ctors().unwrap_or_else(|err| abort!("{err:?}"));
 
     unsafe {
         __sel4_microkit__main();

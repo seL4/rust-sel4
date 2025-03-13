@@ -47,7 +47,7 @@ fn inner_entry() -> ! {
 
     unsafe {
         sel4::set_ipc_buffer(get_ipc_buffer().as_mut().unwrap());
-        sel4_ctors_dtors::run_ctors();
+        sel4_ctors_dtors::run_ctors().unwrap_or_else(|err| abort!("{err:?}"));
     }
 
     match catch_unwind(main) {

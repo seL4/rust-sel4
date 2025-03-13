@@ -39,12 +39,21 @@ mod _weak {
     extern "C" fn _fini() {}
 }
 
-unsafe fn run_array(start_addr: usize, end_addr: usize, section_name: &str) {
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub enum Error {
+    Misaligned { section_name: &'static str },
+}
+
+unsafe fn run_array(
+    start_addr: usize,
+    end_addr: usize,
+    section_name: &'static str,
+) -> Result<(), Error> {
     if start_addr != end_addr {
         if start_addr % mem::size_of::<ArrayEntry>() != 0
             || end_addr % mem::size_of::<ArrayEntry>() != 0
         {
-            panic!("{section_name:?} section is not properly aligned");
+            return Err(Error::Misaligned { section_name });
         }
 
         let len = (end_addr - start_addr) / mem::size_of::<ArrayEntry>();
@@ -53,9 +62,10 @@ unsafe fn run_array(start_addr: usize, end_addr: usize, section_name: &str) {
             (entry)();
         }
     }
+    Ok(())
 }
 
-fn run_preinit_array() {
+fn run_preinit_array() -> Result<(), Error> {
     unsafe {
         run_array(
             ptr::addr_of!(__preinit_array_start) as usize,
@@ -65,7 +75,7 @@ fn run_preinit_array() {
     }
 }
 
-fn run_init_array() {
+fn run_init_array() -> Result<(), Error> {
     unsafe {
         run_array(
             ptr::addr_of!(__init_array_start) as usize,
@@ -75,7 +85,7 @@ fn run_init_array() {
     }
 }
 
-fn run_fini_array() {
+fn run_fini_array() -> Result<(), Error> {
     unsafe {
         run_array(
             ptr::addr_of!(__fini_array_start) as usize,
@@ -93,13 +103,15 @@ fn run_fini() {
     unsafe { _fini() }
 }
 
-pub fn run_ctors() {
-    run_preinit_array();
+pub fn run_ctors() -> Result<(), Error> {
+    run_preinit_array()?;
     run_init();
-    run_init_array();
+    run_init_array()?;
+    Ok(())
 }
 
-pub fn run_dtors() {
-    run_fini_array();
+pub fn run_dtors() -> Result<(), Error> {
+    run_fini_array()?;
     run_fini();
+    Ok(())
 }
