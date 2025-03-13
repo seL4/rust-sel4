@@ -217,7 +217,7 @@ fn get_tls_image() -> TlsImage {
         static __ehdr_start: ElfHeader;
     }
     let phdrs = unsafe {
-        assert!(__ehdr_start.check_magic());
+        assert!(__ehdr_start.is_magic_valid());
         __ehdr_start.locate_phdrs()
     };
     let phdr = phdrs.iter().find(|phdr| phdr.p_type == PT_TLS).unwrap();
