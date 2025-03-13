@@ -11,7 +11,7 @@ use syn::parse::{Parse, ParseStream, Parser, Result as ParseResult};
 use syn::spanned::Spanned;
 use syn::Token;
 
-use sel4_config_generic_types::{Configuration, Value};
+use sel4_config_types::{Configuration, Value};
 
 pub(crate) enum Condition {
     Key(syn::Ident),

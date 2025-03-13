@@ -25,6 +25,6 @@ mk {
       sel4-synthetic-elf
     ;
     sel4-kernel-loader-payload-types = localCrates.sel4-kernel-loader-payload-types // { features = [ "serde" ]; };
-    sel4-config-generic-types = localCrates.sel4-config-generic-types // { features = [ "serde" ]; };
+    sel4-config-types = localCrates.sel4-config-types // { features = [ "serde" ]; };
   };
 }

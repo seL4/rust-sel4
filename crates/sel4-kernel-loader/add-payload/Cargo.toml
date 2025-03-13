@@ -23,7 +23,7 @@ heapless = "0.8.0"
 num = "0.4.1"
 object = { version = "0.36.5", features = ["all"] }
 postcard = { version = "1.0.2", default-features = false, features = ["alloc"] }
-sel4-config-generic-types = { path = "../../sel4/config/generic/types", features = ["serde"] }
+sel4-config-types = { path = "../../sel4/config/types", features = ["serde"] }
 sel4-kernel-loader-config-types = { path = "../config-types" }
 sel4-kernel-loader-payload-types = { path = "../payload-types", features = ["serde"] }
 sel4-synthetic-elf = { path = "../../sel4-synthetic-elf" }

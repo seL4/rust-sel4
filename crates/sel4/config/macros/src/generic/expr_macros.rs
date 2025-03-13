@@ -13,7 +13,7 @@ use proc_macro2::TokenStream;
 use quote::{quote, quote_spanned, ToTokens};
 use syn::{parse2, spanned::Spanned};
 
-use sel4_config_generic_types::{Key, Value};
+use sel4_config_types::{Key, Value};
 
 use super::{parse_or_return, MacroImpls};
 

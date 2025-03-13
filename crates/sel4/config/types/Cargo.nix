@@ -7,7 +7,7 @@
 { mk, serdeWith }:
 
 mk {
-  package.name = "sel4-config-generic-types";
+  package.name = "sel4-config-types";
   dependencies = {
     serde = serdeWith [ "alloc" "derive" ] // { optional = true; };
   };

@@ -6,7 +6,7 @@
 
 #![allow(unused_imports)]
 
-pub use sel4_config_generic_types::Configuration;
+pub use sel4_config_types::Configuration;
 
 pub fn get_kernel_config() -> &'static Configuration {
     &KERNEL_CONFIG
