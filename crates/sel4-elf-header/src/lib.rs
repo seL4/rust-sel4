@@ -45,7 +45,7 @@ pub struct ElfHeaderIdent {
 pub const ELFMAG: [u8; 4] = [0x7f, b'E', b'L', b'F'];
 
 impl ElfHeader {
-    pub fn check_magic(&self) -> bool {
+    pub fn is_magic_valid(&self) -> bool {
         self.e_ident.magic == ELFMAG
     }
 
