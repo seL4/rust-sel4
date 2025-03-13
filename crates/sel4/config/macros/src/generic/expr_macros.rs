@@ -15,7 +15,7 @@ use syn::{parse2, spanned::Spanned};
 
 use sel4_config_generic_types::{Key, Value};
 
-use crate::{parse_or_return, MacroImpls};
+use super::{parse_or_return, MacroImpls};
 
 impl MacroImpls<'_> {
     pub fn cfg_generic_impl<T>(
