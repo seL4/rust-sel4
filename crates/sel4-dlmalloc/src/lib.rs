@@ -11,10 +11,12 @@ use core::cell::{RefCell, UnsafeCell};
 use core::mem;
 use core::ptr;
 
-use dlmalloc::{Allocator as DlmallocAllocator, Dlmalloc};
+use dlmalloc::{Allocator, Dlmalloc};
 use lock_api::{Mutex, RawMutex};
 
-pub type StaticDlmallocGlobalAlloc<R, T> = DlmallocGlobalAlloc<R, StaticDlmallocAllocator<T>>;
+pub struct StaticDlmallocGlobalAlloc<R, T> {
+    dlmalloc: Mutex<R, Dlmalloc<StaticDlmallocAllocator<T>>>,
+}
 
 impl<R, T> StaticDlmallocGlobalAlloc<R, T> {
     pub const fn new(raw_mutex: R, get_bounds: T) -> Self {
@@ -25,17 +27,18 @@ impl<R, T> StaticDlmallocGlobalAlloc<R, T> {
             ),
         }
     }
+}
 
-    pub const fn mutex(&self) -> &Mutex<R, Dlmalloc<StaticDlmallocAllocator<T>>> {
-        &self.dlmalloc
+impl<R: RawMutex, T> StaticDlmallocGlobalAlloc<R, T> {
+    #[allow(clippy::missing_safety_doc)]
+    pub unsafe fn raw_mutex(&self) -> &R {
+        self.dlmalloc.raw()
     }
 }
 
-pub struct DlmallocGlobalAlloc<R, T> {
-    dlmalloc: Mutex<R, Dlmalloc<T>>,
-}
-
-unsafe impl<R: RawMutex, T: DlmallocAllocator> GlobalAlloc for DlmallocGlobalAlloc<R, T> {
+unsafe impl<R: RawMutex, T: GetStaticHeapBounds + Send> GlobalAlloc
+    for StaticDlmallocGlobalAlloc<R, T>
+{
     #[inline]
     unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
         self.dlmalloc.lock().malloc(layout.size(), layout.align())
@@ -61,7 +64,7 @@ unsafe impl<R: RawMutex, T: DlmallocAllocator> GlobalAlloc for DlmallocGlobalAll
     }
 }
 
-pub struct StaticDlmallocAllocator<T> {
+struct StaticDlmallocAllocator<T> {
     state: RefCell<StaticDlmallocAllocatorState<T>>,
 }
 
@@ -129,7 +132,7 @@ impl<T: GetStaticHeapBounds> StaticDlmallocAllocatorState<T> {
     }
 }
 
-unsafe impl<T: GetStaticHeapBounds + Send> DlmallocAllocator for StaticDlmallocAllocator<T> {
+unsafe impl<T: GetStaticHeapBounds + Send> Allocator for StaticDlmallocAllocator<T> {
     fn alloc(&self, size: usize) -> (*mut u8, usize, u32) {
         match self.state.borrow_mut().as_free().alloc(size) {
             Some(start) => (start, size, 0),
@@ -167,6 +170,7 @@ pub trait GetStaticHeapBounds {
     fn bounds(self) -> StaticHeapBounds;
 }
 
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub struct StaticHeapBounds {
     ptr: *mut u8,
     size: usize,
