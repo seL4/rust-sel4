@@ -7,7 +7,7 @@
 use std::collections::BTreeSet;
 use std::ops::Range;
 
-use sel4_bitfield_parser::ast;
+use super::parser::ast;
 
 pub fn simplify(orig: &ast::File) -> File {
     File::simplify(orig)

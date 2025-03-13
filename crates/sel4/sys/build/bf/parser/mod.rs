@@ -13,7 +13,7 @@ pub mod ast;
 use ast::*;
 
 #[derive(Parser)]
-#[grammar = "grammar.pest"]
+#[grammar = "build/bf/parser/grammar.pest"]
 struct BitfieldParser;
 
 pub fn parse(text: &str) -> File {
@@ -32,10 +32,6 @@ fn remove_comments(text: &str) -> String {
 }
 
 impl File {
-    pub fn parse_from_str(text: &str) -> Self {
-        parse(text)
-    }
-
     fn parse(pair: Pair<Rule>) -> Self {
         assert_eq!(pair.as_rule(), Rule::file);
 

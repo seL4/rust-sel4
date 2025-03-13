@@ -25,10 +25,12 @@ sel4-config = { path = "../config" }
 [build-dependencies]
 bindgen = "0.70.1"
 glob = "0.3.0"
+pest = "2.4.1"
+pest_derive = "2.4.1"
 prettyplease = "0.2.25"
 proc-macro2 = "1.0.89"
 quote = "1.0.37"
-sel4-bitfield-parser = { path = "../bitfield-parser" }
+regex = "1.7.0"
 sel4-build-env = { path = "../build-env" }
 sel4-config = { path = "../config" }
 sel4-config-data = { path = "../config/data" }

@@ -148,8 +148,6 @@ members = [
     "crates/sel4-synthetic-elf",
     "crates/sel4-test-harness",
     "crates/sel4/bitfield-ops",
-    "crates/sel4/bitfield-parser",
-    "crates/sel4/bitfield-parser/test",
     "crates/sel4/build-env",
     "crates/sel4/config",
     "crates/sel4/config/data",
