@@ -22,7 +22,7 @@ mk {
     syn = { version = versions.syn; features = [ "parsing" ]; };
     inherit (localCrates)
       sel4-config-data
-      sel4-config-generic-types
+      sel4-config-types
     ;
   };
 }

@@ -10,7 +10,7 @@
 #
 
 [package]
-name = "sel4-config-generic-types"
+name = "sel4-config-types"
 version = "0.1.0"
 authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
 edition = "2021"

@@ -10,11 +10,11 @@ mk {
   package.name = "sel4-config-data";
   dependencies = {
     inherit (versions) serde_json lazy_static;
-    sel4-config-generic-types = localCrates.sel4-config-generic-types // { features = [ "serde" ]; };
+    sel4-config-types = localCrates.sel4-config-types // { features = [ "serde" ]; };
   };
   build-dependencies = {
     inherit (versions) serde_json;
     inherit (localCrates) sel4-build-env;
-    sel4-config-generic-types = localCrates.sel4-config-generic-types // { features = [ "serde" ]; };
+    sel4-config-types = localCrates.sel4-config-types // { features = [ "serde" ]; };
   };
 }

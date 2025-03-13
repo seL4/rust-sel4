@@ -15,7 +15,7 @@ use object::{
 };
 use serde::Serialize;
 
-use sel4_config_generic_types::Configuration;
+use sel4_config_types::Configuration;
 use sel4_synthetic_elf::PatchValue;
 
 mod args;

@@ -2182,8 +2182,8 @@ dependencies = [
  "proc-macro2",
  "quote",
  "sel4-config-data",
- "sel4-config-generic-types",
  "sel4-config-macros",
+ "sel4-config-types",
  "syn",
 ]
 
@@ -2193,15 +2193,8 @@ version = "0.1.0"
 dependencies = [
  "lazy_static",
  "sel4-build-env",
- "sel4-config-generic-types",
+ "sel4-config-types",
  "serde_json",
-]
-
-[[package]]
-name = "sel4-config-generic-types"
-version = "0.1.0"
-dependencies = [
- "serde",
 ]
 
 [[package]]
@@ -2212,8 +2205,15 @@ dependencies = [
  "proc-macro2",
  "quote",
  "sel4-config-data",
- "sel4-config-generic-types",
+ "sel4-config-types",
  "syn",
+]
+
+[[package]]
+name = "sel4-config-types"
+version = "0.1.0"
+dependencies = [
+ "serde",
 ]
 
 [[package]]
@@ -2324,7 +2324,7 @@ dependencies = [
  "num",
  "object",
  "postcard",
- "sel4-config-generic-types",
+ "sel4-config-types",
  "sel4-kernel-loader-config-types",
  "sel4-kernel-loader-payload-types",
  "sel4-synthetic-elf",
