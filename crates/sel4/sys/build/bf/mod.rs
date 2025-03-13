@@ -11,7 +11,9 @@ use proc_macro2::{Literal, TokenStream};
 use quote::{format_ident, quote};
 use syn::Ident;
 
+mod parser;
 mod simplified;
+
 use simplified::*;
 
 pub fn generate_rust(
@@ -19,7 +21,7 @@ pub fn generate_rust(
     bf_path: impl AsRef<Path>,
 ) -> TokenStream {
     let text = fs::read_to_string(bf_path).unwrap();
-    let file = sel4_bitfield_parser::parse(&text);
+    let file = parser::parse(&text);
     let file = simplify(&file);
     let mut generator = BitfieldGenerator::new(blocklist_for_bindgen);
     for block in file.blocks.iter() {

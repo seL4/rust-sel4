@@ -20,11 +20,12 @@ mk {
     inherit (versions)
       proc-macro2 quote prettyplease
       bindgen xmltree glob
+      regex pest
     ;
+    pest_derive = versions.pest;
     syn = { version = versions.syn; features = [ "parsing" ]; };
     inherit (localCrates)
       sel4-build-env
-      sel4-bitfield-parser
       sel4-config
       sel4-config-data
     ;
