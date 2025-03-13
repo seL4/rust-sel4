@@ -151,7 +151,6 @@ members = [
     "crates/sel4/build-env",
     "crates/sel4/config",
     "crates/sel4/config/data",
-    "crates/sel4/config/generic",
     "crates/sel4/config/generic/types",
     "crates/sel4/config/macros",
     "crates/sel4/sys",

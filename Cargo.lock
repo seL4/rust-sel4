@@ -2179,8 +2179,10 @@ name = "sel4-config"
 version = "0.1.0"
 dependencies = [
  "prettyplease",
+ "proc-macro2",
+ "quote",
  "sel4-config-data",
- "sel4-config-generic",
+ "sel4-config-generic-types",
  "sel4-config-macros",
  "syn",
 ]
@@ -2196,17 +2198,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "sel4-config-generic"
-version = "0.1.0"
-dependencies = [
- "fallible-iterator",
- "proc-macro2",
- "quote",
- "sel4-config-generic-types",
- "syn",
-]
-
-[[package]]
 name = "sel4-config-generic-types"
 version = "0.1.0"
 dependencies = [
@@ -2217,8 +2208,12 @@ dependencies = [
 name = "sel4-config-macros"
 version = "0.1.0"
 dependencies = [
+ "fallible-iterator",
+ "proc-macro2",
+ "quote",
  "sel4-config-data",
- "sel4-config-generic",
+ "sel4-config-generic-types",
+ "syn",
 ]
 
 [[package]]

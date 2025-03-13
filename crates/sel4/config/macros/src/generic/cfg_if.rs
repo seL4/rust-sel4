@@ -12,7 +12,7 @@ use syn::{
     Token,
 };
 
-use crate::{Condition, MacroImpls};
+use super::{Condition, MacroImpls};
 
 impl MacroImpls<'_> {
     pub fn cfg_if_impl(&self, toks: TokenStream) -> TokenStream {

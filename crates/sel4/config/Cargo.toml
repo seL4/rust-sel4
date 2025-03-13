@@ -21,6 +21,8 @@ sel4-config-macros = { path = "macros" }
 
 [build-dependencies]
 prettyplease = "0.2.25"
+proc-macro2 = "1.0.89"
+quote = "1.0.37"
 sel4-config-data = { path = "data" }
-sel4-config-generic = { path = "generic" }
+sel4-config-generic-types = { path = "generic/types" }
 syn = { version = "2.0.85", features = ["parsing"] }

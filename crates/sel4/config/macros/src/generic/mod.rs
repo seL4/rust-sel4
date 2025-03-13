@@ -11,12 +11,9 @@ mod cfg_if;
 mod common_helpers;
 mod condition;
 mod expr_macros;
-mod generate_consts;
 
 use common_helpers::parse_or_return;
 use condition::{Condition, EvalError};
-
-pub use generate_consts::generate_consts;
 
 pub struct MacroImpls<'a> {
     config: &'a Configuration,

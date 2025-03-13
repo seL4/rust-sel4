@@ -8,7 +8,7 @@ use proc_macro2::TokenStream;
 use quote::{quote, quote_spanned, ToTokens};
 use syn::{parse2, spanned::Spanned, Token};
 
-use crate::{parse_or_return, Condition, MacroImpls};
+use super::{parse_or_return, Condition, MacroImpls};
 
 macro_rules! ensure_empty {
     ($tokenstream:ident) => {
