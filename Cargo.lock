@@ -1864,6 +1864,13 @@ name = "sel4-abstract-rc"
 version = "0.1.0"
 
 [[package]]
+name = "sel4-alloca"
+version = "0.1.0"
+dependencies = [
+ "cfg-if",
+]
+
+[[package]]
 name = "sel4-async-block-io"
 version = "0.1.0"
 dependencies = [
@@ -2276,6 +2283,7 @@ name = "sel4-initialize-tls"
 version = "0.1.0"
 dependencies = [
  "cfg-if",
+ "sel4-alloca",
 ]
 
 [[package]]

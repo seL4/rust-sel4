@@ -14,7 +14,6 @@
 extern crate alloc;
 
 use core::panic::PanicInfo;
-use core::ptr;
 use core::slice;
 
 use sel4_dlmalloc::StaticHeapBounds;
@@ -48,27 +47,11 @@ static THREAD_INDEX: ImmediateSyncOnceCell<usize> = ImmediateSyncOnceCell::new()
 #[allow(clippy::missing_safety_doc)]
 pub unsafe extern "C" fn _start(config: *const u8, config_size: usize, thread_index: usize) -> ! {
     let config = RuntimeConfig::new(slice::from_raw_parts(config, config_size));
-    let mut cont_arg = ContArg {
-        config,
-        thread_index,
-    };
-    sel4_runtime_common::initialize_tls_on_stack_and_continue(
-        cont_fn,
-        ptr::addr_of_mut!(cont_arg).cast(),
-    )
-}
-
-pub struct ContArg {
-    config: RuntimeConfig<'static>,
-    thread_index: usize,
+    sel4_runtime_common::with_or_without_tls(|| cont_fn(config, thread_index))
 }
 
 #[allow(clippy::missing_safety_doc)]
-pub fn cont_fn(cont_arg: *mut sel4_runtime_common::ContArg) -> ! {
-    let cont_arg: &ContArg = unsafe { &*cont_arg.cast_const().cast() };
-
-    let config = &cont_arg.config;
-    let thread_index = cont_arg.thread_index;
+pub fn cont_fn(config: RuntimeConfig<'static>, thread_index: usize) -> ! {
     let thread_config = &config.threads()[thread_index];
 
     THREAD_INDEX.set(thread_index).unwrap();

@@ -16,6 +16,7 @@
 // [3] https://github.com/riscv-non-isa/riscv-elf-psabi-doc/blob/master/riscv-elf.adoc#thread-local-storage
 
 #![no_std]
+#![feature(never_type)] // TODO
 
 use core::alloc::Layout;
 use core::mem;
@@ -43,9 +44,6 @@ pub use static_allocation::*;
 
 #[cfg(feature = "on-stack")]
 mod on_stack;
-
-#[cfg(feature = "on-stack")]
-pub use on_stack::*;
 
 #[cfg(feature = "on-heap")]
 mod on_heap;
