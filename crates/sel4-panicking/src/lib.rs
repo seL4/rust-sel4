@@ -10,21 +10,16 @@
 #![feature(lang_items)]
 #![feature(panic_can_unwind)]
 #![feature(thread_local)]
-#![cfg_attr(not(panic_info_message_stable), feature(panic_info_message))]
 #![allow(internal_features)]
 
 #[cfg(feature = "alloc")]
 extern crate alloc;
 
 use core::fmt;
+use core::intrinsics::catch_unwind as catch_unwind_intrinsic;
 use core::mem::ManuallyDrop;
 use core::panic::Location;
-use core::panic::{PanicInfo, UnwindSafe};
-
-#[cfg(panic_info_message_stable)]
-pub use core::panic::PanicMessage;
-
-use cfg_if::cfg_if;
+use core::panic::{PanicInfo, PanicMessage, UnwindSafe};
 
 use sel4_panicking_env::abort;
 
@@ -40,9 +35,6 @@ use strategy::{panic_cleanup, start_panic};
 
 pub use hook::{set_hook, PanicHook};
 pub use payload::{Payload, SmallPayload, UpcastIntoPayload, SMALL_PAYLOAD_MAX_SIZE};
-
-#[cfg(not(panic_info_message_stable))]
-pub type PanicMessage<'a> = &'a fmt::Arguments<'a>;
 
 /// Information passed to a [`PanicHook`].
 ///
@@ -92,10 +84,7 @@ impl fmt::Display for ExternalPanicInfo<'_> {
 fn panic(info: &PanicInfo) -> ! {
     do_panic(ExternalPanicInfo {
         payload: NoPayload.upcast_into_payload(),
-        #[cfg(panic_info_message_stable)]
         message: Some(info.message()),
-        #[cfg(not(panic_info_message_stable))]
-        message: info.message(),
         location: info.location(),
         can_unwind: info.can_unwind(),
     })
@@ -120,14 +109,6 @@ fn do_panic(info: ExternalPanicInfo) -> ! {
         abort!("failed to initiate panic, error {}", code)
     } else {
         abort!("can't unwind this panic")
-    }
-}
-
-cfg_if! {
-    if #[cfg(catch_unwind_intrinsic_so_named)] {
-        use core::intrinsics::catch_unwind as catch_unwind_intrinsic;
-    } else {
-        use core::intrinsics::r#try as catch_unwind_intrinsic;
     }
 }
 
