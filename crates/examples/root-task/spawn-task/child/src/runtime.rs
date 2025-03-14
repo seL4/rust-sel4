@@ -30,29 +30,23 @@ sel4_panicking_env::register_debug_put_char!(sel4::debug_put_char);
 
 #[no_mangle]
 unsafe extern "C" fn sel4_runtime_rust_entry() -> ! {
-    fn cont_fn(_cont_arg: *mut sel4_runtime_common::ContArg) -> ! {
-        inner_entry()
-    }
+    sel4_runtime_common::with_or_without_tls(|| {
+        #[cfg(panic = "unwind")]
+        {
+            sel4_runtime_common::set_eh_frame_finder().unwrap();
+        }
 
-    sel4_runtime_common::initialize_tls_on_stack_and_continue(cont_fn, ptr::null_mut())
-}
+        unsafe {
+            sel4::set_ipc_buffer(get_ipc_buffer().as_mut().unwrap());
+            sel4_ctors_dtors::run_ctors().unwrap_or_else(|err| abort!("{err:?}"));
+        }
 
-fn inner_entry() -> ! {
-    #[cfg(panic = "unwind")]
-    {
-        sel4_runtime_common::set_eh_frame_finder().unwrap();
-    }
-
-    unsafe {
-        sel4::set_ipc_buffer(get_ipc_buffer().as_mut().unwrap());
-        sel4_ctors_dtors::run_ctors().unwrap_or_else(|err| abort!("{err:?}"));
-    }
-
-    match catch_unwind(main) {
-        #[allow(unreachable_patterns)]
-        Ok(never) => never,
-        Err(_) => abort!("main() panicked"),
-    }
+        match catch_unwind(main) {
+            #[allow(unreachable_patterns)]
+            Ok(never) => never,
+            Err(_) => abort!("main() panicked"),
+        }
+    })
 }
 
 fn get_ipc_buffer() -> *mut sel4::IpcBuffer {

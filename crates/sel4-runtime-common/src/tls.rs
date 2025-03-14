@@ -10,12 +10,10 @@ use sel4_panicking_env::abort;
 #[allow(unused_imports)]
 use sel4_initialize_tls::{SetThreadPointerFn, UncheckedTlsImage, DEFAULT_SET_THREAD_POINTER_FN};
 
-pub use sel4_initialize_tls::{ContArg, ContFn};
-
 use crate::locate_phdrs;
 
 #[allow(clippy::missing_safety_doc)]
-pub unsafe fn initialize_tls_on_stack_and_continue(cont_fn: ContFn, cont_arg: *mut ContArg) -> ! {
+pub unsafe fn with_tls(f: impl FnOnce() -> !) -> ! {
     let phdr = locate_phdrs()
         .iter()
         .find(|phdr| phdr.p_type == PT_TLS)
@@ -29,7 +27,7 @@ pub unsafe fn initialize_tls_on_stack_and_continue(cont_fn: ContFn, cont_arg: *m
     unchecked
         .check()
         .unwrap_or_else(|_| abort!("invalid TLS image: {unchecked:#x?}"))
-        .initialize_on_stack(CHOSEN_SET_THREAD_POINTER_FN, cont_fn, cont_arg)
+        .with_initialize_on_stack(CHOSEN_SET_THREAD_POINTER_FN, f)
 }
 
 sel4::sel4_cfg_if! {

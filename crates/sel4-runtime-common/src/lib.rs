@@ -5,6 +5,7 @@
 //
 
 #![no_std]
+#![feature(never_type)]
 #![feature(cfg_target_thread_local)]
 
 use sel4_elf_header::{ElfHeader, ProgramHeader};
@@ -13,11 +14,21 @@ use sel4_panicking_env::abort;
 #[cfg(feature = "start")]
 mod start;
 
-#[cfg(all(feature = "tls", target_thread_local))]
-mod tls;
+cfg_if::cfg_if! {
+    if #[cfg(all(feature = "tls", target_thread_local))] {
+        mod tls;
 
-#[cfg(all(feature = "tls", target_thread_local))]
-pub use tls::{initialize_tls_on_stack_and_continue, ContArg, ContFn};
+        #[allow(clippy::missing_safety_doc)]
+        pub unsafe fn with_or_without_tls(f: impl FnOnce() -> !) -> ! {
+            tls::with_tls(f)
+        }
+    } else {
+        #[allow(clippy::missing_safety_doc)]
+        pub unsafe fn with_or_without_tls(f: impl FnOnce() -> !) -> ! {
+            f()
+        }
+    }
+}
 
 #[cfg(all(feature = "unwinding", panic = "unwind"))]
 mod unwinding;

@@ -12,41 +12,28 @@ use sel4_panicking_env::abort;
 
 use crate::{panicking::init_panicking, Handler};
 
-#[cfg(target_thread_local)]
-#[no_mangle]
-unsafe extern "C" fn sel4_runtime_rust_entry() -> ! {
-    fn cont_fn(_cont_arg: *mut sel4_runtime_common::ContArg) -> ! {
-        inner_entry()
-    }
-
-    sel4_runtime_common::initialize_tls_on_stack_and_continue(cont_fn, core::ptr::null_mut())
-}
-
-#[cfg(not(target_thread_local))]
-#[no_mangle]
-unsafe extern "C" fn sel4_runtime_rust_entry() -> ! {
-    inner_entry()
-}
-
 #[allow(unreachable_code)]
-fn inner_entry() -> ! {
-    #[cfg(panic = "unwind")]
-    {
-        sel4_runtime_common::set_eh_frame_finder().unwrap();
-    }
+#[no_mangle]
+unsafe extern "C" fn sel4_runtime_rust_entry() -> ! {
+    sel4_runtime_common::with_or_without_tls(|| {
+        #[cfg(panic = "unwind")]
+        {
+            sel4_runtime_common::set_eh_frame_finder().unwrap();
+        }
 
-    init_panicking();
+        init_panicking();
 
-    let ipc_buffer = unsafe { ipc_buffer_ptr().as_mut().unwrap() };
-    sel4::set_ipc_buffer(ipc_buffer);
+        let ipc_buffer = unsafe { ipc_buffer_ptr().as_mut().unwrap() };
+        sel4::set_ipc_buffer(ipc_buffer);
 
-    sel4_ctors_dtors::run_ctors().unwrap_or_else(|err| abort!("{err:?}"));
+        sel4_ctors_dtors::run_ctors().unwrap_or_else(|err| abort!("{err:?}"));
 
-    unsafe {
-        __sel4_microkit__main();
-    }
+        unsafe {
+            __sel4_microkit__main();
+        }
 
-    abort!("__sel4_microkit__main returned")
+        abort!("__sel4_microkit__main returned")
+    })
 }
 
 extern "C" {

@@ -1,27 +1,72 @@
 //
-// Copyright 2024, Colias Group, LLC
+// Copyright 2023, Colias Group, LLC
 //
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
+#![no_std]
+#![feature(never_type)] // TODO (see below)
+
 use core::alloc::Layout;
 use core::arch::global_asm;
+use core::mem::{ManuallyDrop, MaybeUninit};
+use core::slice;
 
 use cfg_if::cfg_if;
 
-pub(crate) type ReserveOnStackContFn =
+// TODO:
+// - return generic instead of just !
+
+pub fn with_alloca_bytes<F: FnOnce(&mut [MaybeUninit<u8>]) -> !>(layout: Layout, f: F) -> ! {
+    with_alloca_ptr(layout, |p| {
+        f(unsafe { slice::from_raw_parts_mut(p.cast(), layout.size()) })
+    })
+}
+
+pub fn with_alloca<T, F: FnOnce(&mut MaybeUninit<T>) -> !>(f: F) -> ! {
+    with_alloca_ptr(Layout::new::<T>(), |p| f(unsafe { &mut *p.cast() }))
+}
+
+pub fn with_alloca_slice<T, F: FnOnce(&mut [MaybeUninit<T>]) -> !>(n: usize, f: F) -> ! {
+    with_alloca_ptr(Layout::array::<T>(n).unwrap(), |p| {
+        f(unsafe { slice::from_raw_parts_mut(p.cast(), n) })
+    })
+}
+
+pub fn with_alloca_ptr<F: FnOnce(*mut u8) -> !>(layout: Layout, f: F) -> ! {
+    unsafe extern "C" fn cont_fn<F: FnOnce(*mut u8) -> !>(
+        reservation_start: *mut u8,
+        cont_arg: *mut ReserveOnStackContArg,
+    ) -> ! {
+        let f = ManuallyDrop::take(&mut *(cont_arg as *mut ManuallyDrop<F>));
+        f(reservation_start)
+    }
+
+    let mut closure_data = ManuallyDrop::new(f);
+
+    unsafe {
+        reserve_on_stack(
+            layout,
+            cont_fn::<F>,
+            &mut closure_data as *mut _ as *mut ReserveOnStackContArg,
+        )
+    }
+}
+
+type ReserveOnStackContFn =
     unsafe extern "C" fn(reservation_start: *mut u8, cont_arg: *mut ReserveOnStackContArg) -> !;
 
-pub(crate) enum ReserveOnStackContArg {}
+enum ReserveOnStackContArg {}
 
-pub(crate) unsafe fn reserve_on_stack(
+#[allow(clippy::missing_safety_doc)]
+unsafe fn reserve_on_stack(
     layout: Layout,
     cont_fn: ReserveOnStackContFn,
     cont_arg: *mut ReserveOnStackContArg,
 ) -> ! {
     let reservation_size = layout.size();
     let reservation_align_down_mask = !(layout.align() - 1);
-    __sel4_reserve_on_stack(
+    __sel4_alloca__reserve_on_stack(
         reservation_size,
         reservation_align_down_mask,
         cont_fn,
@@ -30,7 +75,7 @@ pub(crate) unsafe fn reserve_on_stack(
 }
 
 extern "C" {
-    fn __sel4_reserve_on_stack(
+    fn __sel4_alloca__reserve_on_stack(
         reservation_size: usize,
         reservation_align_down_mask: usize,
         cont_fn: ReserveOnStackContFn,
@@ -42,8 +87,8 @@ macro_rules! common_asm {
     () => {
         r#"
             .section .text
-            .global __sel4_reserve_on_stack
-            __sel4_reserve_on_stack:
+            .global __sel4_alloca__reserve_on_stack
+            __sel4_alloca__reserve_on_stack:
         "#
     };
 }
