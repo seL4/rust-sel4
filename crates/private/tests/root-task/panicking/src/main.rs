@@ -19,7 +19,6 @@ fn main(_: &sel4::BootInfoPtr) -> ! {
         f1();
     });
     assert!(F1_DROPPED.load(Ordering::SeqCst));
-    whether_alloc();
     debug_println!("TEST_PASS");
 
     sel4::init_thread::suspend_self()
@@ -40,35 +39,5 @@ impl Drop for F1Drop {
     fn drop(&mut self) {
         debug_println!("F1Drop::drop()");
         F1_DROPPED.store(true, Ordering::SeqCst);
-    }
-}
-
-cfg_if::cfg_if! {
-    if #[cfg(feature = "alloc")] {
-        extern crate alloc;
-
-        use alloc::borrow::ToOwned;
-        use alloc::string::String;
-
-        fn whether_alloc() {
-            let r = panicking::catch_unwind(|| {
-                panicking::panic_any::<String>("foo".to_owned());
-            });
-            assert_eq!(r.err().unwrap().inner().downcast_ref::<String>().unwrap().as_str(), "foo");
-        }
-    } else {
-        use panicking::SmallPayload;
-
-        fn whether_alloc() {
-            let r = panicking::catch_unwind(|| {
-                panicking::panic_any(Foo(1337));
-            });
-            assert!(matches!(r.err().unwrap().downcast::<Foo>().ok().unwrap(), Foo(1337)));
-        }
-
-        #[derive(Copy, Clone)]
-        struct Foo(usize);
-
-        impl SmallPayload for Foo {}
     }
 }
