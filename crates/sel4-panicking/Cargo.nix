@@ -15,9 +15,6 @@ mk {
       sel4-immediate-sync-once-cell
     ;
   };
-  build-dependencies = {
-    inherit (versions) rustversion;
-  };
   target."cfg(all(panic = \"unwind\", not(target_arch = \"arm\")))".dependencies = {
     unwinding = unwindingWith [ "personality" ];
   };

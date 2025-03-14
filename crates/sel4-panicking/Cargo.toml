@@ -24,9 +24,6 @@ cfg-if = "1.0.0"
 sel4-immediate-sync-once-cell = { path = "../sel4-immediate-sync-once-cell" }
 sel4-panicking-env = { path = "env" }
 
-[build-dependencies]
-rustversion = "1.0.18"
-
 [target."cfg(all(panic = \"unwind\", not(target_arch = \"arm\")))".dependencies.unwinding]
 version = "0.2.5"
 default-features = false
