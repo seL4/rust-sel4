@@ -12,7 +12,7 @@ static PANICKING: AtomicBool = AtomicBool::new(false);
 
 pub(crate) fn count_panic() {
     if PANICKING.load(Ordering::SeqCst) {
-        abort!("recursive panic encountered");
+        abort!("program is already panicking");
     }
 }
 
