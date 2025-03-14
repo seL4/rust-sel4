@@ -8,37 +8,204 @@
 
 use core::alloc::{GlobalAlloc, Layout};
 use core::cell::{RefCell, UnsafeCell};
-use core::mem;
 use core::ptr;
+use core::sync::atomic::{AtomicUsize, Ordering};
 
 use dlmalloc::{Allocator, Dlmalloc};
 use lock_api::{Mutex, RawMutex};
 
-pub struct StaticDlmallocGlobalAlloc<R, T> {
-    dlmalloc: Mutex<R, Dlmalloc<StaticDlmallocAllocator<T>>>,
+// TODO implement core::alloc::Allocator for StaticDlmalloc once stable
+
+pub struct StaticDlmalloc<R>(
+    SyncDlmalloc<R, SimpleDlmallocAllocatorWrapper<StaticDlmallocAllocator>>,
+);
+
+impl<R> StaticDlmalloc<R> {
+    pub const fn new(raw_mutex: R, bounds: StaticHeapBounds) -> Self {
+        Self(SyncDlmalloc::new(
+            raw_mutex,
+            SimpleDlmallocAllocatorWrapper::new(StaticDlmallocAllocator::new(bounds)),
+        ))
+    }
 }
 
-impl<R, T> StaticDlmallocGlobalAlloc<R, T> {
-    pub const fn new(raw_mutex: R, get_bounds: T) -> Self {
+impl<R: RawMutex> StaticDlmalloc<R> {
+    #[allow(clippy::missing_safety_doc)]
+    pub unsafe fn raw_mutex(&self) -> &R {
+        self.0.raw_mutex()
+    }
+}
+
+unsafe impl<R: RawMutex> GlobalAlloc for StaticDlmalloc<R> {
+    #[inline]
+    unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
+        self.0.alloc(layout)
+    }
+
+    #[inline]
+    unsafe fn alloc_zeroed(&self, layout: Layout) -> *mut u8 {
+        self.0.alloc_zeroed(layout)
+    }
+
+    #[inline]
+    unsafe fn dealloc(&self, ptr: *mut u8, layout: Layout) {
+        self.0.dealloc(ptr, layout)
+    }
+
+    #[inline]
+    unsafe fn realloc(&self, ptr: *mut u8, layout: Layout, new_size: usize) -> *mut u8 {
+        self.0.realloc(ptr, layout, new_size)
+    }
+}
+
+pub struct DeferredStaticDlmalloc<R>(
+    SyncDlmalloc<
+        R,
+        SimpleDlmallocAllocatorWrapper<DeferredStaticDlmallocAllocator<StaticDlmallocAllocator>>,
+    >,
+);
+
+impl<R> DeferredStaticDlmalloc<R> {
+    pub const fn new(raw_mutex: R) -> Self {
+        Self(SyncDlmalloc::new(
+            raw_mutex,
+            SimpleDlmallocAllocatorWrapper::new(DeferredStaticDlmallocAllocator::new()),
+        ))
+    }
+}
+
+impl<R: RawMutex> DeferredStaticDlmalloc<R> {
+    #[allow(clippy::missing_safety_doc)]
+    pub unsafe fn raw_mutex(&self) -> &R {
+        self.0.raw_mutex()
+    }
+
+    pub fn set_bounds(&self, bounds: StaticHeapBounds) -> Result<(), BoundsAlreadySetError> {
+        self.0
+            .dlmalloc
+            .lock()
+            .allocator()
+            .0
+            .set(StaticDlmallocAllocator::new(bounds))
+    }
+}
+
+unsafe impl<R: RawMutex> GlobalAlloc for DeferredStaticDlmalloc<R> {
+    #[inline]
+    unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
+        self.0.alloc(layout)
+    }
+
+    #[inline]
+    unsafe fn alloc_zeroed(&self, layout: Layout) -> *mut u8 {
+        self.0.alloc_zeroed(layout)
+    }
+
+    #[inline]
+    unsafe fn dealloc(&self, ptr: *mut u8, layout: Layout) {
+        self.0.dealloc(ptr, layout)
+    }
+
+    #[inline]
+    unsafe fn realloc(&self, ptr: *mut u8, layout: Layout, new_size: usize) -> *mut u8 {
+        self.0.realloc(ptr, layout, new_size)
+    }
+}
+
+// // //
+
+struct StaticDlmallocAllocator {
+    bounds: StaticHeapBounds,
+    watermark: AtomicUsize,
+}
+
+impl StaticDlmallocAllocator {
+    const fn new(bounds: StaticHeapBounds) -> Self {
         Self {
-            dlmalloc: Mutex::from_raw(
-                raw_mutex,
-                Dlmalloc::new_with_allocator(StaticDlmallocAllocator::new(get_bounds)),
-            ),
+            bounds,
+            watermark: AtomicUsize::new(0),
         }
     }
 }
 
-impl<R: RawMutex, T> StaticDlmallocGlobalAlloc<R, T> {
+impl SimpleDlmallocAllocator for StaticDlmallocAllocator {
+    fn alloc_simple(&self, size: usize) -> Option<*mut u8> {
+        let old_watermark = self
+            .watermark
+            .fetch_update(Ordering::SeqCst, Ordering::SeqCst, |old_watermark| {
+                let new_watermark = old_watermark.checked_add(size)?;
+                if new_watermark > self.bounds.size {
+                    return None;
+                }
+                Some(new_watermark)
+            })
+            .ok()?;
+        Some(
+            self.bounds
+                .ptr
+                .wrapping_offset(old_watermark.try_into().unwrap()),
+        )
+    }
+}
+
+// TODO remove RefCell once this lands:
+// https://github.com/alexcrichton/dlmalloc-rs/pull/49
+struct DeferredStaticDlmallocAllocator<T> {
+    state: RefCell<Option<T>>,
+}
+
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub struct BoundsAlreadySetError(());
+
+impl<T> DeferredStaticDlmallocAllocator<T> {
+    const fn new() -> Self {
+        Self {
+            state: RefCell::new(None),
+        }
+    }
+
+    fn set(&self, state: T) -> Result<(), BoundsAlreadySetError> {
+        let mut state_opt = self.state.borrow_mut();
+        if state_opt.is_none() {
+            *state_opt = Some(state);
+            Ok(())
+        } else {
+            Err(BoundsAlreadySetError(()))
+        }
+    }
+}
+
+impl<T: SimpleDlmallocAllocator> SimpleDlmallocAllocator for DeferredStaticDlmallocAllocator<T> {
+    fn alloc_simple(&self, size: usize) -> Option<*mut u8> {
+        self.state
+            .borrow()
+            .as_ref()
+            .and_then(|state| state.alloc_simple(size))
+    }
+}
+
+// // //
+
+struct SyncDlmalloc<R, T> {
+    dlmalloc: Mutex<R, Dlmalloc<T>>,
+}
+
+impl<R, T> SyncDlmalloc<R, T> {
+    const fn new(raw_mutex: R, state: T) -> Self {
+        Self {
+            dlmalloc: Mutex::from_raw(raw_mutex, Dlmalloc::new_with_allocator(state)),
+        }
+    }
+}
+
+impl<R: RawMutex, T> SyncDlmalloc<R, T> {
     #[allow(clippy::missing_safety_doc)]
-    pub unsafe fn raw_mutex(&self) -> &R {
+    unsafe fn raw_mutex(&self) -> &R {
         self.dlmalloc.raw()
     }
 }
 
-unsafe impl<R: RawMutex, T: GetStaticHeapBounds + Send> GlobalAlloc
-    for StaticDlmallocGlobalAlloc<R, T>
-{
+unsafe impl<R: RawMutex, T: Allocator> GlobalAlloc for SyncDlmalloc<R, T> {
     #[inline]
     unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
         self.dlmalloc.lock().malloc(layout.size(), layout.align())
@@ -64,77 +231,21 @@ unsafe impl<R: RawMutex, T: GetStaticHeapBounds + Send> GlobalAlloc
     }
 }
 
-struct StaticDlmallocAllocator<T> {
-    state: RefCell<StaticDlmallocAllocatorState<T>>,
+trait SimpleDlmallocAllocator: Send {
+    fn alloc_simple(&self, size: usize) -> Option<*mut u8>;
 }
 
-unsafe impl<T: Send> Send for StaticDlmallocAllocatorState<T> {}
+struct SimpleDlmallocAllocatorWrapper<T>(T);
 
-enum StaticDlmallocAllocatorState<T> {
-    Uninitialized { get_initial_bounds: T },
-    Initializing,
-    Initialized { free: Free },
-}
-
-// TODO: ptr, watermark: usize, size: usize
-struct Free {
-    watermark: *mut u8,
-    end: *mut u8,
-}
-
-impl Free {
-    fn new(bounds: StaticHeapBounds) -> Self {
-        let end = bounds.ptr.wrapping_add(bounds.size);
-        Self {
-            watermark: bounds.ptr,
-            end,
-        }
-    }
-
-    fn alloc(&mut self, size: usize) -> Option<*mut u8> {
-        let start = self.watermark;
-        let end = start.wrapping_offset(size.try_into().unwrap());
-        if end < start || end > self.end {
-            None
-        } else {
-            self.watermark = end;
-            Some(start)
-        }
+impl<T> SimpleDlmallocAllocatorWrapper<T> {
+    const fn new(inner: T) -> Self {
+        Self(inner)
     }
 }
 
-impl<T> StaticDlmallocAllocator<T> {
-    pub const fn new(get_initial_bounds: T) -> Self {
-        Self {
-            state: RefCell::new(StaticDlmallocAllocatorState::Uninitialized { get_initial_bounds }),
-        }
-    }
-}
-
-impl<T: GetStaticHeapBounds> StaticDlmallocAllocatorState<T> {
-    fn as_free(&mut self) -> &mut Free {
-        if matches!(self, Self::Uninitialized { .. }) {
-            if let Self::Uninitialized { get_initial_bounds } =
-                mem::replace(self, Self::Initializing)
-            {
-                *self = Self::Initialized {
-                    free: Free::new(get_initial_bounds.bounds()),
-                };
-            } else {
-                unreachable!()
-            }
-        }
-        if let Self::Initialized { free } = self {
-            free
-        } else {
-            unreachable!()
-        }
-    }
-}
-
-unsafe impl<T: GetStaticHeapBounds + Send> Allocator for StaticDlmallocAllocator<T> {
+unsafe impl<T: SimpleDlmallocAllocator> Allocator for SimpleDlmallocAllocatorWrapper<T> {
     fn alloc(&self, size: usize) -> (*mut u8, usize, u32) {
-        match self.state.borrow_mut().as_free().alloc(size) {
+        match self.0.alloc_simple(size) {
             Some(start) => (start, size, 0),
             None => (ptr::null_mut(), 0, 0),
         }
@@ -166,9 +277,7 @@ unsafe impl<T: GetStaticHeapBounds + Send> Allocator for StaticDlmallocAllocator
     }
 }
 
-pub trait GetStaticHeapBounds {
-    fn bounds(self) -> StaticHeapBounds;
-}
+// // //
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub struct StaticHeapBounds {
@@ -176,15 +285,11 @@ pub struct StaticHeapBounds {
     size: usize,
 }
 
-impl StaticHeapBounds {
-    pub fn new(ptr: *mut u8, size: usize) -> Self {
-        Self { ptr, size }
-    }
-}
+unsafe impl Send for StaticHeapBounds {}
 
-impl<T: FnOnce() -> StaticHeapBounds> GetStaticHeapBounds for T {
-    fn bounds(self) -> StaticHeapBounds {
-        (self)()
+impl StaticHeapBounds {
+    pub const fn new(ptr: *mut u8, size: usize) -> Self {
+        Self { ptr, size }
     }
 }
 
@@ -203,16 +308,14 @@ impl<const N: usize, A> StaticHeap<N, A> {
             space: UnsafeCell::new([0; N]),
         }
     }
+
+    pub const fn bounds(&self) -> StaticHeapBounds {
+        StaticHeapBounds::new(self.space.get().cast(), N)
+    }
 }
 
 impl<const N: usize, A> Default for StaticHeap<N, A> {
     fn default() -> Self {
         Self::new()
-    }
-}
-
-impl<const N: usize> GetStaticHeapBounds for &StaticHeap<N> {
-    fn bounds(self) -> StaticHeapBounds {
-        StaticHeapBounds::new(self.space.get().cast(), N)
     }
 }

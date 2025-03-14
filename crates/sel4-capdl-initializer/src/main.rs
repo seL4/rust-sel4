@@ -19,9 +19,10 @@ use sel4_capdl_initializer_types::{
     IndirectDeflatedBytesContent, IndirectEmbeddedFrame, IndirectObjectName, SpecWithIndirection,
     SpecWithSources,
 };
-use sel4_dlmalloc::StaticHeapBounds;
+use sel4_dlmalloc::{DeferredStaticDlmalloc, StaticHeapBounds};
 use sel4_logging::{LevelFilter, Logger, LoggerBuilder};
 use sel4_root_task::{debug_print, root_task};
+use sel4_sync::PanickingRawMutex;
 
 const LOG_LEVEL: LevelFilter = {
     // LevelFilter::Trace
@@ -35,8 +36,13 @@ static LOGGER: Logger = LoggerBuilder::const_default()
     .write(|s| debug_print!("{}", s))
     .build();
 
+#[global_allocator]
+static GLOBAL_ALLOCATOR: DeferredStaticDlmalloc<PanickingRawMutex> =
+    DeferredStaticDlmalloc::new(PanickingRawMutex::new());
+
 #[root_task(stack_size = 0x10000)]
 fn main(bootinfo: &sel4::BootInfoPtr) -> ! {
+    let _ = GLOBAL_ALLOCATOR.set_bounds(static_heap_bounds());
     LOGGER.set().unwrap();
     let spec_with_sources = get_spec_with_sources();
     let mut buffers = InitializerBuffers::new(vec![
@@ -109,17 +115,4 @@ fn static_heap_bounds() -> StaticHeapBounds {
             sel4_capdl_initializer_heap_size,
         )
     }
-}
-
-mod heap {
-    use sel4_dlmalloc::{StaticDlmallocGlobalAlloc, StaticHeapBounds};
-    use sel4_sync::PanickingRawMutex;
-
-    use super::static_heap_bounds;
-
-    #[global_allocator]
-    static GLOBAL_ALLOCATOR: StaticDlmallocGlobalAlloc<
-        PanickingRawMutex,
-        fn() -> StaticHeapBounds,
-    > = StaticDlmallocGlobalAlloc::new(PanickingRawMutex::new(), static_heap_bounds);
 }
