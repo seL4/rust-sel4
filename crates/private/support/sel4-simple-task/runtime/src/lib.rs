@@ -82,6 +82,11 @@ pub fn cont_fn(cont_arg: *mut sel4_runtime_common::ContArg) -> ! {
     if thread_index == 0 {
         CONFIG.set(config.clone()).unwrap();
 
+        #[cfg(feature = "alloc")]
+        {
+            global_allocator::init(get_static_heap_bounds());
+        }
+
         #[cfg(not(target_arch = "arm"))]
         {
             sel4_runtime_common::set_eh_frame_finder().unwrap();

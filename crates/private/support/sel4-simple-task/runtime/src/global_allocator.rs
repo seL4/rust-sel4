@@ -4,20 +4,19 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use sel4_dlmalloc::{StaticDlmallocGlobalAlloc, StaticHeapBounds};
+use sel4_dlmalloc::{DeferredStaticDlmalloc, StaticHeapBounds};
 use sel4_sync::{GenericRawMutex, MutexSyncOps};
 
-use crate::{get_static_heap_bounds, get_static_heap_mutex_notification};
+use crate::get_static_heap_mutex_notification;
 
 #[global_allocator]
 #[allow(clippy::type_complexity)]
-static GLOBAL_ALLOCATOR: StaticDlmallocGlobalAlloc<
-    GenericRawMutex<MutexSyncOpsImpl>,
-    fn() -> StaticHeapBounds,
-> = StaticDlmallocGlobalAlloc::new(
-    GenericRawMutex::new(MutexSyncOpsImpl),
-    get_static_heap_bounds,
-);
+static GLOBAL_ALLOCATOR: DeferredStaticDlmalloc<GenericRawMutex<MutexSyncOpsImpl>> =
+    DeferredStaticDlmalloc::new(GenericRawMutex::new(MutexSyncOpsImpl));
+
+pub(crate) fn init(bounds: StaticHeapBounds) {
+    let _ = GLOBAL_ALLOCATOR.set_bounds(bounds);
+}
 
 struct MutexSyncOpsImpl;
 

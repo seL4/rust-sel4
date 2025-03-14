@@ -22,10 +22,8 @@ macro_rules! declare_heap {
                     static STATIC_HEAP: StaticHeap<{ $size }> = StaticHeap::new();
 
                     #[global_allocator]
-                    static GLOBAL_ALLOCATOR: StaticDlmallocGlobalAlloc<
-                        PanickingRawMutex,
-                        &'static StaticHeap<{ $size }>,
-                    > = StaticDlmallocGlobalAlloc::new(PanickingRawMutex::new(), &STATIC_HEAP);
+                    static GLOBAL_ALLOCATOR: StaticDlmalloc<PanickingRawMutex> =
+                        StaticDlmalloc::new(PanickingRawMutex::new(), STATIC_HEAP.bounds());
                 }
             }
         };
@@ -33,6 +31,6 @@ macro_rules! declare_heap {
 }
 
 pub mod _private {
-    pub use sel4_dlmalloc::{StaticDlmallocGlobalAlloc, StaticHeap};
+    pub use sel4_dlmalloc::{StaticDlmalloc, StaticHeap};
     pub use sel4_sync::PanickingRawMutex;
 }
