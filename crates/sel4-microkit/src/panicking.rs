@@ -4,13 +4,13 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
+use core::panic::PanicInfo;
+
 use sel4_immediate_sync_once_cell::ImmediateSyncOnceCell;
 use sel4_panicking::set_hook as set_outer_hook;
 use sel4_panicking_env::debug_println;
 
-pub use sel4_panicking::{
-    catch_unwind, panic_any, ExternalPanicInfo, PanicHook, Payload, SmallPayload, UpcastIntoPayload,
-};
+pub use sel4_panicking::{catch_unwind, PanicHook};
 
 use crate::pd_name;
 
@@ -25,11 +25,11 @@ fn get_hook() -> &'static PanicHook {
     PANIC_HOOK.get().unwrap_or(&DEFAULT_HOOK)
 }
 
-fn default_hook(info: &ExternalPanicInfo) {
+fn default_hook(info: &PanicInfo) {
     debug_println!("{}: {}", pd_name().unwrap_or("?"), info);
 }
 
-fn outer_hook(info: &ExternalPanicInfo) {
+fn outer_hook(info: &PanicInfo) {
     (get_hook())(info)
 }
 

@@ -4,13 +4,11 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use core::cell::RefCell;
 use core::mem::{self, MaybeUninit};
 
 use unwinding::abi::*;
 
 use super::{drop_panic, foreign_exception, RUST_EXCEPTION_CLASS};
-use crate::Payload;
 
 struct CurrentException {
     exception_present: bool,
@@ -21,15 +19,12 @@ struct CurrentException {
 compile_error!("");
 
 #[thread_local]
-static CURRENT_PAYLOAD: RefCell<Option<Payload>> = RefCell::new(None);
-
-#[thread_local]
 static mut CURRENT_EXCEPTION: CurrentException = CurrentException {
     exception_present: false,
     exception: MaybeUninit::uninit(),
 };
 
-pub(crate) fn panic_cleanup(exception: *mut u8) -> Payload {
+pub(crate) fn panic_cleanup(exception: *mut u8) {
     let exception = exception as *mut UnwindException;
     unsafe {
         if (*exception).exception_class != RUST_EXCEPTION_CLASS {
@@ -37,12 +32,11 @@ pub(crate) fn panic_cleanup(exception: *mut u8) -> Payload {
             foreign_exception()
         } else {
             CURRENT_EXCEPTION.exception_present = false;
-            CURRENT_PAYLOAD.replace(None).unwrap()
         }
     }
 }
 
-pub(crate) fn start_panic(payload: Payload) -> i32 {
+pub(crate) fn start_panic() -> i32 {
     extern "C" fn exception_cleanup(
         _unwind_code: UnwindReasonCode,
         _exception: *mut UnwindException,
@@ -53,8 +47,6 @@ pub(crate) fn start_panic(payload: Payload) -> i32 {
     let mut exception = unsafe { mem::zeroed::<UnwindException>() };
     exception.exception_class = RUST_EXCEPTION_CLASS;
     exception.exception_cleanup = Some(exception_cleanup);
-
-    assert!(CURRENT_PAYLOAD.replace(Some(payload)).is_none());
 
     #[allow(static_mut_refs)]
     unsafe {

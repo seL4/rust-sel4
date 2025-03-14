@@ -13,12 +13,12 @@
 #[cfg(feature = "alloc")]
 extern crate alloc;
 
+use core::panic::PanicInfo;
 use core::ptr;
 use core::slice;
 
 use sel4_dlmalloc::StaticHeapBounds;
 use sel4_immediate_sync_once_cell::ImmediateSyncOnceCell;
-use sel4_panicking::ExternalPanicInfo;
 use sel4_panicking_env::{abort, AbortInfo};
 use sel4_simple_task_runtime_config_types::RuntimeConfig;
 use sel4_simple_task_threading::StaticThread;
@@ -146,7 +146,7 @@ sel4_panicking_env::register_abort_hook!(abort_hook);
 
 sel4_panicking_env::register_debug_put_char!(sel4::debug_put_char);
 
-fn panic_hook(info: &ExternalPanicInfo<'_>) {
+fn panic_hook(info: &PanicInfo<'_>) {
     debug_println!("{}", info);
 
     #[cfg(not(target_arch = "arm"))]
