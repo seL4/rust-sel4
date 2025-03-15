@@ -23,7 +23,7 @@ macro_rules! declare_heap {
 
                     #[global_allocator]
                     static GLOBAL_ALLOCATOR: StaticDlmalloc<PanickingRawMutex> =
-                        StaticDlmalloc::new(PanickingRawMutex::new(), STATIC_HEAP.bounds());
+                        StaticDlmalloc::new(STATIC_HEAP.bounds());
                 }
             }
         };

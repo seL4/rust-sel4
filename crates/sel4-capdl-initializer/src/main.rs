@@ -37,8 +37,7 @@ static LOGGER: Logger = LoggerBuilder::const_default()
     .build();
 
 #[global_allocator]
-static GLOBAL_ALLOCATOR: DeferredStaticDlmalloc<PanickingRawMutex> =
-    DeferredStaticDlmalloc::new(PanickingRawMutex::new());
+static GLOBAL_ALLOCATOR: DeferredStaticDlmalloc<PanickingRawMutex> = DeferredStaticDlmalloc::new();
 
 #[root_task(stack_size = 0x10000)]
 fn main(bootinfo: &sel4::BootInfoPtr) -> ! {

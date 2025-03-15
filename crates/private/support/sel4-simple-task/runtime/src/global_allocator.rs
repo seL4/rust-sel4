@@ -12,7 +12,7 @@ use crate::get_static_heap_mutex_notification;
 #[global_allocator]
 #[allow(clippy::type_complexity)]
 static GLOBAL_ALLOCATOR: DeferredStaticDlmalloc<GenericRawMutex<MutexSyncOpsImpl>> =
-    DeferredStaticDlmalloc::new(GenericRawMutex::new(MutexSyncOpsImpl));
+    DeferredStaticDlmalloc::new_with(GenericRawMutex::new(MutexSyncOpsImpl));
 
 pub(crate) fn init(bounds: StaticHeapBounds) {
     let _ = GLOBAL_ALLOCATOR.set_bounds(bounds);
