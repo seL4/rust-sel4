@@ -11,6 +11,7 @@
 
 use core::alloc::GlobalAlloc;
 use core::alloc::Layout;
+use core::ffi::c_char;
 use core::ptr;
 
 use sel4_dlmalloc::{StaticDlmalloc, StaticHeap};
@@ -83,14 +84,14 @@ fn handle_known_syscall(syscall: Syscall) -> SyscallReturnValue {
         Lseek { fd, offset, whence } => {
             assert!(whence == SEEK_CUR);
             assert!(offset == 0);
-            assert!(0 <= fd && fd <= 2);
+            assert!((0..=2).contains(&fd));
             0
         }
         Write { fd, buf, count } => {
             assert!(fd == 1 || fd == 2);
             for i in 0..(count as isize) {
-                let c: u8 = unsafe { *buf.offset(i) };
-                debug_print!("{}", c as char);
+                let c: c_char = unsafe { *buf.offset(i) };
+                debug_print!("{}", c as u8 as char);
             }
             count as SyscallReturnValue
         }

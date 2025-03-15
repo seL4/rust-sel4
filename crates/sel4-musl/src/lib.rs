@@ -37,11 +37,13 @@ unsafe extern "C" fn handle_syscall(sysnum: isize, mut args: ...) -> isize {
     }))
 }
 
+#[allow(clippy::missing_safety_doc)]
 pub unsafe fn set_syscall_handler(handler: SyscallHandler) {
     SYSCALL_HANDLER.set(handler).unwrap();
     set_raw_syscall_handler(handle_syscall);
 }
 
+#[allow(clippy::missing_safety_doc)]
 pub unsafe fn set_raw_syscall_handler(handler: RawSyscallHandler) {
     __sysinfo = handler;
 }
