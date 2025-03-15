@@ -90,6 +90,7 @@ in rec {
     tests.root-task.backtrace
     tests.root-task.panicking
     tests.root-task.c
+    tests.root-task.musl
     tests.root-task.verus
     tests.root-task.dafny
     tests.root-task.default-test-harness

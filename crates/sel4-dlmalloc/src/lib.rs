@@ -134,7 +134,7 @@ impl SimpleDlmallocAllocator for StaticDlmallocAllocator {
             .watermark
             .fetch_update(Ordering::SeqCst, Ordering::SeqCst, |old_watermark| {
                 let new_watermark = old_watermark.checked_add(size)?;
-                if new_watermark > self.bounds.size {
+                if new_watermark > self.bounds.size() {
                     return None;
                 }
                 Some(new_watermark)
@@ -142,7 +142,7 @@ impl SimpleDlmallocAllocator for StaticDlmallocAllocator {
             .ok()?;
         Some(
             self.bounds
-                .ptr
+                .start()
                 .wrapping_offset(old_watermark.try_into().unwrap()),
         )
     }
@@ -290,6 +290,19 @@ unsafe impl Send for StaticHeapBounds {}
 impl StaticHeapBounds {
     pub const fn new(ptr: *mut u8, size: usize) -> Self {
         Self { ptr, size }
+    }
+
+    pub const fn start(&self) -> *mut u8 {
+        self.ptr
+    }
+
+    pub fn end(&self) -> *mut u8 {
+        self.start()
+            .wrapping_offset(self.size().try_into().unwrap())
+    }
+
+    pub const fn size(&self) -> usize {
+        self.size
     }
 }
 
