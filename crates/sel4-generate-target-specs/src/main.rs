@@ -158,10 +158,13 @@ impl Config {
     }
 
     fn filter(&self) -> bool {
-        if self.context.is_microkit() && !self.arch.microkit_support() {
+        if self.unwind && !self.arch.unwinding_support() {
             return false;
         }
         if self.unwinding_support() && self.minimal {
+            return false;
+        }
+        if self.context.is_microkit() && !self.arch.microkit_support() {
             return false;
         }
         if self.musl && (self.minimal || self.context.is_microkit()) {

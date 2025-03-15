@@ -15,26 +15,33 @@ use sel4_panicking_env::abort;
 mod start;
 
 cfg_if::cfg_if! {
-    if #[cfg(all(feature = "tls", target_thread_local))] {
+    if #[cfg(target_thread_local)] {
         mod tls;
 
         #[allow(clippy::missing_safety_doc)]
-        pub unsafe fn with_or_without_tls(f: impl FnOnce() -> !) -> ! {
+        pub unsafe fn maybe_with_tls(f: impl FnOnce() -> !) -> ! {
             tls::with_tls(f)
         }
     } else {
         #[allow(clippy::missing_safety_doc)]
-        pub unsafe fn with_or_without_tls(f: impl FnOnce() -> !) -> ! {
+        pub unsafe fn maybe_with_tls(f: impl FnOnce() -> !) -> ! {
             f()
         }
     }
 }
 
-#[cfg(all(feature = "unwinding", panic = "unwind"))]
-mod unwinding;
+cfg_if::cfg_if! {
+    if #[cfg(panic = "unwind")] {
+        mod unwinding;
 
-#[cfg(all(feature = "unwinding", panic = "unwind"))]
-pub use self::unwinding::set_eh_frame_finder;
+        pub use self::unwinding::set_eh_frame_finder as maybe_set_eh_frame_finder;
+    } else {
+        #[allow(clippy::result_unit_err)]
+        pub fn maybe_set_eh_frame_finder() -> Result<(), ()> {
+            Ok(())
+        }
+    }
+}
 
 #[allow(dead_code)]
 pub(crate) fn locate_phdrs() -> &'static [ProgramHeader] {

@@ -15,7 +15,7 @@ mk {
       sel4-immediate-sync-once-cell
     ;
   };
-  target."cfg(all(panic = \"unwind\", not(target_arch = \"arm\")))".dependencies = {
+  target."cfg(panic = \"unwind\")".dependencies = {
     unwinding = unwindingWith [ "personality" ];
   };
   features = {

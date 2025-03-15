@@ -30,15 +30,12 @@ sel4_panicking_env::register_debug_put_char!(sel4::debug_put_char);
 
 #[no_mangle]
 unsafe extern "C" fn sel4_runtime_rust_entry() -> ! {
-    sel4_runtime_common::with_or_without_tls(|| {
-        #[cfg(panic = "unwind")]
-        {
-            sel4_runtime_common::set_eh_frame_finder().unwrap();
-        }
+    sel4_runtime_common::maybe_with_tls(|| {
+        sel4_runtime_common::maybe_set_eh_frame_finder().unwrap();
+        sel4_ctors_dtors::run_ctors().unwrap();
 
         unsafe {
             sel4::set_ipc_buffer(get_ipc_buffer().as_mut().unwrap());
-            sel4_ctors_dtors::run_ctors().unwrap_or_else(|err| abort!("{err:?}"));
         }
 
         match catch_unwind(main) {
