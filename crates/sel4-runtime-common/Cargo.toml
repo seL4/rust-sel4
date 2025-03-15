@@ -18,18 +18,18 @@ license = "BSD-2-Clause"
 
 [features]
 start = []
-tls = ["dep:sel4-initialize-tls", "dep:sel4"]
 
 [dependencies]
 cfg-if = "1.0.0"
-sel4 = { path = "../sel4", default-features = false, optional = true }
 sel4-elf-header = { path = "../sel4-elf-header" }
-sel4-initialize-tls = { path = "../sel4-initialize-tls", features = ["on-stack"], optional = true }
 sel4-panicking-env = { path = "../sel4-panicking/env" }
 sel4-stack = { path = "../sel4-stack" }
 
-[target."cfg(all(panic = \"unwind\", not(target_arch = \"arm\")))".dependencies.unwinding]
+[target."cfg(panic = \"unwind\")".dependencies.unwinding]
 version = "0.2.5"
 default-features = false
 features = ["unwinder", "fde-custom", "hide-trace"]
-optional = true
+
+[target."cfg(target_thread_local)".dependencies]
+sel4 = { path = "../sel4", default-features = false }
+sel4-initialize-tls = { path = "../sel4-initialize-tls", features = ["on-stack"] }

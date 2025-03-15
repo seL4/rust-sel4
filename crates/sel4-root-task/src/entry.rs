@@ -11,18 +11,14 @@ use crate::{abort, panicking::catch_unwind, Termination};
 #[allow(unreachable_code)]
 #[no_mangle]
 unsafe extern "C" fn sel4_runtime_rust_entry(bootinfo: *const sel4::BootInfo) -> ! {
-    sel4_runtime_common::with_or_without_tls(|| {
-        #[cfg(panic = "unwind")]
-        {
-            sel4_runtime_common::set_eh_frame_finder().unwrap();
-        }
+    sel4_runtime_common::maybe_with_tls(|| {
+        sel4_runtime_common::maybe_set_eh_frame_finder().unwrap();
+        sel4_ctors_dtors::run_ctors().unwrap();
 
         let bootinfo = unsafe { sel4::BootInfoPtr::new(bootinfo) };
 
         let ipc_buffer = unsafe { bootinfo.ipc_buffer().as_mut().unwrap() };
         sel4::set_ipc_buffer(ipc_buffer);
-
-        sel4_ctors_dtors::run_ctors().unwrap_or_else(|err| abort!("{err:?}"));
 
         unsafe {
             __sel4_root_task__main(&bootinfo);

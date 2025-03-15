@@ -282,7 +282,7 @@ in rec {
       default-test-harness = maybe (haveFullRuntime && haveUnwindingSupport) (mkInstance {
         rootTask = mkTask {
           rootCrate = crates.tests-root-task-default-test-harness;
-          targetTriple = mkSeL4RustTargetTriple { unwind = true; };
+          targetTriple = mkSeL4RustTargetTriple { unwind = haveUnwindingSupport; };
           test = true;
           justBuildTests = true;
         };
@@ -296,7 +296,7 @@ in rec {
         let
           rootTask = lib.makeOverridable mkTask {
             rootCrate = crates.ring;
-            targetTriple = mkSeL4RustTargetTriple { unwind = true; };
+            targetTriple = mkSeL4RustTargetTriple { unwind = haveUnwindingSupport; };
             test = true;
             justBuildTests = true;
             features = [
@@ -348,7 +348,7 @@ in rec {
       threads = maybe (haveFullRuntime && haveCapDLInitializer) (mkInstance rec {
         test = mkTask {
           rootCrate = crates.tests-capdl-threads-components-test;
-          targetTriple = mkSeL4RustTargetTriple { unwind = true; };
+          targetTriple = mkSeL4RustTargetTriple { unwind = haveUnwindingSupport; };
           release = true; # test optimizations
         };
         rootTask = mkCapDLInitializer {
@@ -370,7 +370,7 @@ in rec {
       utcover = maybe (haveFullRuntime && haveCapDLInitializer) (mkInstance rec {
         test = mkTask {
           rootCrate = crates.tests-capdl-utcover-components-test;
-          targetTriple = mkSeL4RustTargetTriple { unwind = true; };
+          targetTriple = mkSeL4RustTargetTriple { unwind = haveUnwindingSupport; };
           release = false;
         };
         rootTask = mkCapDLInitializer {

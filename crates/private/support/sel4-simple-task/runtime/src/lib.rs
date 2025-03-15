@@ -47,7 +47,7 @@ static THREAD_INDEX: ImmediateSyncOnceCell<usize> = ImmediateSyncOnceCell::new()
 #[allow(clippy::missing_safety_doc)]
 pub unsafe extern "C" fn _start(config: *const u8, config_size: usize, thread_index: usize) -> ! {
     let config = RuntimeConfig::new(slice::from_raw_parts(config, config_size));
-    sel4_runtime_common::with_or_without_tls(|| cont_fn(config, thread_index))
+    sel4_runtime_common::maybe_with_tls(|| cont_fn(config, thread_index))
 }
 
 #[allow(clippy::missing_safety_doc)]
@@ -65,18 +65,15 @@ pub fn cont_fn(config: RuntimeConfig<'static>, thread_index: usize) -> ! {
     if thread_index == 0 {
         CONFIG.set(config.clone()).unwrap();
 
+        sel4_runtime_common::maybe_set_eh_frame_finder().unwrap();
+        sel4_ctors_dtors::run_ctors().unwrap();
+
         #[cfg(feature = "alloc")]
         {
             global_allocator::init(get_static_heap_bounds());
         }
 
-        #[cfg(not(target_arch = "arm"))]
-        {
-            sel4_runtime_common::set_eh_frame_finder().unwrap();
-        }
-
         sel4_panicking::set_hook(&panic_hook);
-        sel4_ctors_dtors::run_ctors().unwrap_or_else(|err| abort!("{err:?}"));
 
         unsafe {
             __sel4_simple_task_main(config.arg());
