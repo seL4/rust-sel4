@@ -117,5 +117,4 @@ const MMAP_HEAP_SIZE: usize = 2 * 1024 * 1024;
 
 static MMAP_HEAP: StaticHeap<MMAP_HEAP_SIZE> = StaticHeap::new();
 
-static MMAP_DLMALLOC: StaticDlmalloc<PanickingRawMutex> =
-    StaticDlmalloc::new(PanickingRawMutex::new(), MMAP_HEAP.bounds());
+static MMAP_DLMALLOC: StaticDlmalloc<PanickingRawMutex> = StaticDlmalloc::new(MMAP_HEAP.bounds());

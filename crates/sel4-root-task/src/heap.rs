@@ -49,7 +49,7 @@ macro_rules! declare_heap {
                     #[global_allocator]
                     static GLOBAL_ALLOCATOR: StaticDlmalloc<
                         GenericRawMutex<fn() -> sel4::cap::Notification>,
-                    > = StaticDlmalloc::new(
+                    > = StaticDlmalloc::new_with(
                         GenericRawMutex::new(get_global_allocator_mutex_notification),
                         STATIC_HEAP.bounds(),
                     );

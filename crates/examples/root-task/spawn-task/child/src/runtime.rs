@@ -24,7 +24,7 @@ static STATIC_HEAP: StaticHeap<HEAP_SIZE> = StaticHeap::new();
 
 #[global_allocator]
 static GLOBAL_ALLOCATOR: StaticDlmalloc<PanickingRawMutex> =
-    StaticDlmalloc::new(PanickingRawMutex::new(), STATIC_HEAP.bounds());
+    StaticDlmalloc::new(STATIC_HEAP.bounds());
 
 sel4_panicking_env::register_debug_put_char!(sel4::debug_put_char);
 
