@@ -76,6 +76,22 @@ pub enum Syscall {
     },
 }
 
+cfg_if::cfg_if! {
+    if #[cfg(target_pointer_width = "64")] {
+        const NR_MMAP: SyscallNumber = syscall_number::MMAP;
+    } else {
+        const NR_MMAP: SyscallNumber = syscall_number::MMAP2;
+    }
+}
+
+cfg_if::cfg_if! {
+    if #[cfg(target_arch = "riscv32")] {
+        const NR_LSEEK: SyscallNumber = syscall_number::_LLSEEK;
+    } else {
+        const NR_LSEEK: SyscallNumber = syscall_number::LSEEK;
+    }
+}
+
 impl Syscall {
     pub fn parse<T: SyscallArgs>(
         sysnum: SyscallNumber,
@@ -101,7 +117,7 @@ impl Syscall {
         use Syscall::*;
 
         Ok(match sysnum {
-            LSEEK => Lseek {
+            NR_LSEEK => Lseek {
                 fd: next(args)?,
                 offset: next(args)?,
                 whence: next(args)?,
@@ -121,7 +137,7 @@ impl Syscall {
             GETGID => Getgid,
             GETEGID => Getegid,
             BRK => Brk { addr: next(args)? },
-            MMAP => Mmap {
+            NR_MMAP => Mmap {
                 addr: next(args)?,
                 len: next(args)?,
                 prot: next(args)?,

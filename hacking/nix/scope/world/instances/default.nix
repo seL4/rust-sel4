@@ -246,7 +246,7 @@ in rec {
         inherit mkInstance canSimulate;
       });
 
-      musl = maybe haveFullRuntime (mkInstance {
+      musl = maybe (haveFullRuntime && !hostPlatform.isRiscV /* TODO riscv linking broken */) (mkInstance {
         rootTask =
           let
             targetTriple = mkSeL4RustTargetTriple { musl = true; };

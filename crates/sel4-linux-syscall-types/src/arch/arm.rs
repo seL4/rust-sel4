@@ -418,6 +418,8 @@ pub mod syscall_number {
 }
 
 pub mod arm_syscall_number {
+    use crate::SyscallNumber;
+
     pub const BREAKPOINT: SyscallNumber = 0x0f0001;
     pub const CACHEFLUSH: SyscallNumber = 0x0f0002;
     pub const USR26: SyscallNumber = 0x0f0003;

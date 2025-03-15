@@ -306,8 +306,8 @@ pub mod syscall_number {
     pub const CACHESTAT: SyscallNumber = 451;
     pub const FCHMODAT2: SyscallNumber = 452;
 
-    pub const FUTEX: SyscallNumber = futex_time64;
+    pub const FUTEX: SyscallNumber = FUTEX_TIME64;
 
-    pub const SYSRISCV: SyscallNumber = arch_specific_syscall;
-    pub const RISCV_FLUSH_ICACHE: SyscallNumber = sysriscv + 15;
+    pub const SYSRISCV: SyscallNumber = ARCH_SPECIFIC_SYSCALL;
+    pub const RISCV_FLUSH_ICACHE: SyscallNumber = SYSRISCV + 15;
 }

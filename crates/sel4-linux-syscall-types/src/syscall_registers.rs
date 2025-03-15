@@ -85,12 +85,13 @@ impl<T: Iterator<Item = SyscallWordArg>> SyscallArgs for IteratorAsSyscallArgs<T
 pub struct VaListAsSyscallArgs<'a, 'f>(VaList<'a, 'f>);
 
 impl<'a, 'f> VaListAsSyscallArgs<'a, 'f> {
+    #[allow(clippy::missing_safety_doc)]
     pub unsafe fn new(va_list: VaList<'a, 'f>) -> Self {
         Self(va_list)
     }
 }
 
-impl<'a, 'f> SyscallArgs for VaListAsSyscallArgs<'a, 'f> {
+impl SyscallArgs for VaListAsSyscallArgs<'_, '_> {
     fn next_word_arg(&mut self) -> Option<SyscallWordArg> {
         Some(unsafe { self.0.arg() })
     }
