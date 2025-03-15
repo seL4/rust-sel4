@@ -6,15 +6,14 @@
 
 #![no_main]
 #![feature(thread_local)]
+#![allow(unreachable_patterns)]
+#![allow(unused_variables)]
 
-use core::mem::MaybeUninit;
-use core::ops::Range;
+use core::alloc::GlobalAlloc;
+use core::alloc::Layout;
 use core::ptr;
 
-use lock_api::Mutex;
-
-use dlmalloc::Dlmalloc;
-use sel4_dlmalloc::{StaticDlmallocAllocator, StaticHeap};
+use sel4_dlmalloc::{StaticDlmalloc, StaticHeap};
 use sel4_linux_syscall_types::{ENOMEM, ENOSYS, MAP_ANONYMOUS, SEEK_CUR};
 use sel4_musl::{
     set_syscall_handler, ParseSyscallError, Syscall, SyscallReturnValue, VaListAsSyscallArgs,
@@ -57,9 +56,10 @@ fn handle_known_syscall(syscall: Syscall) -> SyscallReturnValue {
     match syscall {
         Getuid | Geteuid | Getgid | Getegid => -ENOSYS,
         Brk { addr } => {
+            let bounds = BRK_HEAP.bounds();
             (if addr.is_null() {
-                BRK_HEAP.start()
-            } else if (BRK_HEAP.start()..BRK_HEAP.end()).contains(&addr.cast()) {
+                bounds.start()
+            } else if (bounds.start()..bounds.end()).contains(&addr.cast()) {
                 addr.cast()
             } else {
                 ptr::null()
@@ -74,7 +74,8 @@ fn handle_known_syscall(syscall: Syscall) -> SyscallReturnValue {
             offset,
         } => {
             if flag & MAP_ANONYMOUS != 0 {
-                (unsafe { MMAP_DLMALLOC.lock().malloc(len, 4096) }) as SyscallReturnValue
+                (unsafe { MMAP_DLMALLOC.alloc(Layout::from_size_align(len, 4096).unwrap()) })
+                    as SyscallReturnValue
             } else {
                 -ENOMEM
             }
@@ -116,9 +117,5 @@ const MMAP_HEAP_SIZE: usize = 2 * 1024 * 1024;
 
 static MMAP_HEAP: StaticHeap<MMAP_HEAP_SIZE> = StaticHeap::new();
 
-static MMAP_DLMALLOC: Mutex<
-    PanickingRawMutex,
-    Dlmalloc<StaticDlmallocAllocator<&'static StaticHeap<MMAP_HEAP_SIZE>>>,
-> = Mutex::new(Dlmalloc::new_with_allocator(StaticDlmallocAllocator::new(
-    &MMAP_HEAP,
-)));
+static MMAP_DLMALLOC: StaticDlmalloc<PanickingRawMutex> =
+    StaticDlmalloc::new(PanickingRawMutex::new(), MMAP_HEAP.bounds());
