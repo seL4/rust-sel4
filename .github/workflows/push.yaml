@@ -88,7 +88,7 @@ jobs:
   build-everything:
     name: Build everything
     runs-on: ubuntu-latest
-    needs: [check-licenses, check-source, run-other-tests, build-docs]
+    needs: [check-source, run-other-tests, build-docs]
     steps:
       - name: Prepare to maximize build space
         run: sudo mkdir /nix
