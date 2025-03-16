@@ -5,7 +5,6 @@
 //
 
 #![no_std]
-#![feature(cfg_target_thread_local)]
 
 //! A foundation for pure-Rust [seL4 Microkit](https://github.com/seL4/microkit) protection domains.
 //!

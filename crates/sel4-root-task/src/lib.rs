@@ -29,7 +29,6 @@
 //! Using a GNU linker will likely require a custom linker script.
 
 #![no_std]
-#![feature(cfg_target_thread_local)]
 #![feature(linkage)]
 #![feature(never_type)]
 
