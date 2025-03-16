@@ -56,6 +56,7 @@ members = [
     "crates/private/tests/microkit/passive-server-with-deferred-action/pds/server",
     "crates/private/tests/microkit/reset",
     "crates/private/tests/microkit/unwind",
+    "crates/private/tests/root-task/alloca",
     "crates/private/tests/root-task/backtrace",
     "crates/private/tests/root-task/c",
     "crates/private/tests/root-task/config",
