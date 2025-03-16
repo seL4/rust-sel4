@@ -23,5 +23,5 @@ sel4-ctors-dtors = { path = "../../../../sel4-ctors-dtors" }
 sel4-dlmalloc = { path = "../../../../sel4-dlmalloc" }
 sel4-panicking = { path = "../../../../sel4-panicking", features = ["alloc"] }
 sel4-panicking-env = { path = "../../../../sel4-panicking/env" }
-sel4-runtime-common = { path = "../../../../sel4-runtime-common", features = ["start"] }
+sel4-runtime-common = { path = "../../../../sel4-runtime-common", features = ["full"] }
 sel4-sync = { path = "../../../../sel4-sync" }

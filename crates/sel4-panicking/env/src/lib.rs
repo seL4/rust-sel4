@@ -5,9 +5,7 @@
 //
 
 #![no_std]
-#![feature(core_intrinsics)]
 #![feature(linkage)]
-#![allow(internal_features)]
 
 use core::fmt;
 use core::panic::Location;
@@ -16,6 +14,7 @@ use core::str;
 extern "Rust" {
     fn __sel4_panicking_env__debug_put_char(c: u8);
     fn __sel4_panicking_env__abort_hook(info: Option<&AbortInfo>);
+    fn __sel4_panicking_env__abort_trap() -> !;
 }
 
 /// Registers a function to be used by [`debug_put_char`], [`debug_print!`], and [`debug_println!`].
@@ -76,6 +75,30 @@ fn default_abort_hook(info: Option<&AbortInfo>) {
         Some(info) => debug_println!("{}", info),
         None => debug_println!("(aborted)"),
     }
+}
+
+/// Registers an abort trap to be used by [`abort!`] and [`abort_without_info`].
+///
+/// This macro uses the function `$path` to define the following symbol:
+///
+/// ```rust
+/// extern "Rust" {
+///     fn __sel4_panicking_env__abort_trap() -> !;
+/// }
+/// ```
+#[macro_export]
+macro_rules! register_abort_trap {
+    ($(#[$attrs:meta])* $path:path) => {
+        #[allow(non_snake_case)]
+        const _: () = {
+            $(#[$attrs])*
+            #[no_mangle]
+            fn __sel4_panicking_env__abort_trap() -> ! {
+                const F: fn() -> ! = $path;
+                F()
+            }
+        };
+    };
 }
 
 // // //
@@ -166,8 +189,8 @@ impl fmt::Display for AbortInfo<'_> {
 fn abort(info: Option<&AbortInfo>) -> ! {
     unsafe {
         __sel4_panicking_env__abort_hook(info);
+        __sel4_panicking_env__abort_trap()
     }
-    core::intrinsics::abort()
 }
 
 /// Aborts without any [`AbortInfo`].

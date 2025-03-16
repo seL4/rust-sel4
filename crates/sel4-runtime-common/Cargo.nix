@@ -20,6 +20,8 @@ mk {
     sel4-initialize-tls = localCrates.sel4-initialize-tls // { features = [ "on-stack" ]; };
   };
   features = {
+    full = [ "start" "abort" ];
     start = [];
+    abort = [];
   };
 }

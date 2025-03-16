@@ -19,7 +19,7 @@ mk {
       sel4-ctors-dtors
       sel4-root-task-macros
     ;
-    sel4-runtime-common = localCrates.sel4-runtime-common // { features = [ "start" ]; };
+    sel4-runtime-common = localCrates.sel4-runtime-common // { features = [ "full" ]; };
   };
   features = {
     full = [

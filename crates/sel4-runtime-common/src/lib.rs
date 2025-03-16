@@ -5,11 +5,16 @@
 //
 
 #![no_std]
-#![feature(never_type)]
 #![feature(cfg_target_thread_local)]
+#![feature(core_intrinsics)]
+#![feature(never_type)]
+#![allow(internal_features)]
 
 use sel4_elf_header::{ElfHeader, ProgramHeader};
 use sel4_panicking_env::abort;
+
+#[cfg(feature = "abort")]
+mod abort;
 
 #[cfg(feature = "start")]
 mod start;
