@@ -59,15 +59,15 @@ impl<T> AtomicPtr<'_, T> {
 }
 
 #[allow(clippy::missing_safety_doc)]
-pub unsafe trait Atomic: AtomicSealed + Copy {
-    const ALIGNMENT: usize;
-    const IS_SIGNED: bool;
-}
+pub unsafe trait Atomic: AtomicSealed + Copy {}
 
 use sealing::AtomicSealed;
 
 mod sealing {
-    pub trait AtomicSealed {}
+    pub trait AtomicSealed {
+        const ALIGNMENT: usize;
+        const IS_SIGNED: bool;
+    }
 }
 
 macro_rules! impl_atomic {
@@ -79,12 +79,12 @@ macro_rules! impl_atomic {
     ) => {
         // TODO these attributes are overly conservative
         #[cfg(target_has_atomic = $target_has_atomic_key)]
-        unsafe impl Atomic for $t {
+        unsafe impl Atomic for $t {}
+
+        impl AtomicSealed for $t {
             const ALIGNMENT: usize = mem::align_of::<$analog_for_alignment>();
             const IS_SIGNED: bool = $is_signed;
         }
-
-        impl AtomicSealed for $t {}
     };
 }
 
