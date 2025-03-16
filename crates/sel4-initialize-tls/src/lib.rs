@@ -16,7 +16,6 @@
 // [3] https://github.com/riscv-non-isa/riscv-elf-psabi-doc/blob/master/riscv-elf.adoc#thread-local-storage
 
 #![no_std]
-#![feature(never_type)] // TODO
 
 use core::alloc::Layout;
 use core::mem;

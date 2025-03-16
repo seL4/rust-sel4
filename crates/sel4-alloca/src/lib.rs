@@ -5,7 +5,6 @@
 //
 
 #![no_std]
-#![feature(never_type)] // TODO (see below)
 
 use core::alloc::Layout;
 use core::arch::global_asm;
@@ -17,44 +16,56 @@ use cfg_if::cfg_if;
 // TODO:
 // - return generic instead of just !
 
-pub fn with_alloca_bytes<F: FnOnce(&mut [MaybeUninit<u8>]) -> !>(layout: Layout, f: F) -> ! {
+pub fn with_alloca_bytes<R, F: FnOnce(&mut [MaybeUninit<u8>]) -> R>(layout: Layout, f: F) -> R {
     with_alloca_ptr(layout, |p| {
         f(unsafe { slice::from_raw_parts_mut(p.cast(), layout.size()) })
     })
 }
 
-pub fn with_alloca<T, F: FnOnce(&mut MaybeUninit<T>) -> !>(f: F) -> ! {
+pub fn with_alloca<R, T, F: FnOnce(&mut MaybeUninit<T>) -> R>(f: F) -> R {
     with_alloca_ptr(Layout::new::<T>(), |p| f(unsafe { &mut *p.cast() }))
 }
 
-pub fn with_alloca_slice<T, F: FnOnce(&mut [MaybeUninit<T>]) -> !>(n: usize, f: F) -> ! {
+pub fn with_alloca_slice<R, T, F: FnOnce(&mut [MaybeUninit<T>]) -> R>(n: usize, f: F) -> R {
     with_alloca_ptr(Layout::array::<T>(n).unwrap(), |p| {
         f(unsafe { slice::from_raw_parts_mut(p.cast(), n) })
     })
 }
 
-pub fn with_alloca_ptr<F: FnOnce(*mut u8) -> !>(layout: Layout, f: F) -> ! {
-    unsafe extern "C" fn cont_fn<F: FnOnce(*mut u8) -> !>(
+pub fn with_alloca_ptr<R, F: FnOnce(*mut u8) -> R>(layout: Layout, f: F) -> R {
+    unsafe extern "C" fn cont_fn<F: FnOnce(*mut u8)>(
         reservation_start: *mut u8,
         cont_arg: *mut ReserveOnStackContArg,
-    ) -> ! {
+    ) {
         let f = ManuallyDrop::take(&mut *(cont_arg as *mut ManuallyDrop<F>));
         f(reservation_start)
     }
 
-    let mut closure_data = ManuallyDrop::new(f);
+    #[inline(always)]
+    fn get_cont_fn<F: FnOnce(*mut u8)>(_closure: &F) -> ReserveOnStackContFn {
+        cont_fn::<F>
+    }
+
+    let mut ret = MaybeUninit::uninit();
+
+    let closure = |p| {
+        ret.write(f(p));
+    };
+
+    let mut closure_data = ManuallyDrop::new(&closure);
 
     unsafe {
         reserve_on_stack(
             layout,
-            cont_fn::<F>,
+            get_cont_fn(&closure),
             &mut closure_data as *mut _ as *mut ReserveOnStackContArg,
-        )
+        );
+        ret.assume_init()
     }
 }
 
 type ReserveOnStackContFn =
-    unsafe extern "C" fn(reservation_start: *mut u8, cont_arg: *mut ReserveOnStackContArg) -> !;
+    unsafe extern "C" fn(reservation_start: *mut u8, cont_arg: *mut ReserveOnStackContArg);
 
 enum ReserveOnStackContArg {}
 
@@ -63,7 +74,7 @@ unsafe fn reserve_on_stack(
     layout: Layout,
     cont_fn: ReserveOnStackContFn,
     cont_arg: *mut ReserveOnStackContArg,
-) -> ! {
+) {
     let reservation_size = layout.size();
     let reservation_align_down_mask = !(layout.align() - 1);
     __sel4_alloca__reserve_on_stack(
@@ -80,7 +91,7 @@ extern "C" {
         reservation_align_down_mask: usize,
         cont_fn: ReserveOnStackContFn,
         cont_arg: *mut ReserveOnStackContArg,
-    ) -> !;
+    );
 }
 
 macro_rules! common_asm {
