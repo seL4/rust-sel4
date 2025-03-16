@@ -138,6 +138,17 @@ in rec {
         };
       });
 
+      alloca = maybe haveFullRuntime (mkInstance {
+        rootTask = mkTask {
+          rootCrate = crates.tests-root-task-alloca;
+          targetTriple = mkSeL4RustTargetTriple { minimal = true; };
+          release = true; # test optimizations
+        };
+        extraPlatformArgs = lib.optionalAttrs canSimulate {
+          canAutomateSimply = true;
+        };
+      });
+
       tls = maybe haveFullRuntime (mkInstance {
         rootTask = mkTask {
           rootCrate = crates.tests-root-task-tls;

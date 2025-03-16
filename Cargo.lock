@@ -3130,6 +3130,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "tests-root-task-alloca"
+version = "0.1.0"
+dependencies = [
+ "sel4",
+ "sel4-alloca",
+ "sel4-root-task",
+]
+
+[[package]]
 name = "tests-root-task-backtrace"
 version = "0.1.0"
 dependencies = [
