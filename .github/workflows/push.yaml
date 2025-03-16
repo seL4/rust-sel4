@@ -12,11 +12,9 @@ on:
   pull_request:
   workflow_dispatch:
 jobs:
-  check-licenses:
-    name: Check licenses
-    runs-on: ubuntu-latest
-    steps:
-      - uses: seL4/ci-actions/license-check@master
+  push-checks:
+    name: Push
+    uses: seL4/ci-actions/.github/workflows/push.yml@master
   check-source:
     name: Check source
     runs-on: ubuntu-latest
