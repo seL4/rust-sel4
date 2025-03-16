@@ -17,6 +17,8 @@ edition = "2021"
 license = "BSD-2-Clause"
 
 [features]
+abort = []
+full = ["start", "abort"]
 start = []
 
 [dependencies]
