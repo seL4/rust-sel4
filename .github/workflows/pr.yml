@@ -1,0 +1,14 @@
+# Copyright 2025, Proofcraft Pty Ltd
+#
+# SPDX-License-Identifier: BSD-2-Clause
+
+# Actions to run on pull requests
+
+name: PR
+
+on: [pull_request, workflow_dispatch]
+
+jobs:
+  pr-checks:
+    name: Checks
+    uses: seL4/ci-actions/.github/workflows/pr.yml@master
