@@ -52,12 +52,13 @@ pub fn with_alloca_ptr<R, F: FnOnce(*mut u8) -> R>(layout: Layout, f: F) -> R {
         ret.write(f(p));
     };
 
-    let mut closure_data = ManuallyDrop::new(&closure);
+    let inst_cont_fn = get_cont_fn(&closure);
+    let mut closure_data = ManuallyDrop::new(closure);
 
     unsafe {
         reserve_on_stack(
             layout,
-            get_cont_fn(&closure),
+            inst_cont_fn,
             &mut closure_data as *mut _ as *mut ReserveOnStackContArg,
         );
         ret.assume_init()
