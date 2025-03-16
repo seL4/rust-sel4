@@ -80,3 +80,18 @@ pub fn catch_unwind<R, F: FnOnce() -> R + UnwindSafe>(f: F) -> Result<R, ()> {
         count_panic_caught();
     }
 }
+
+/// Like `std::panic::abort_unwind`.
+pub fn abort_unwind<F, R>(f: F) -> R
+where
+    F: FnOnce() -> R,
+{
+    extern "C" fn wrap<F, R>(f: F) -> R
+    where
+        F: FnOnce() -> R,
+    {
+        f()
+    }
+
+    wrap(f)
+}
