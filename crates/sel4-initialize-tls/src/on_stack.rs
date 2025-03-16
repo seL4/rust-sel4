@@ -10,11 +10,11 @@ use crate::{SetThreadPointerFn, TlsImage};
 
 impl TlsImage {
     #[allow(clippy::missing_safety_doc)]
-    pub unsafe fn with_initialize_on_stack(
+    pub unsafe fn with_initialize_on_stack<R>(
         &self,
         set_thread_pointer_fn: SetThreadPointerFn,
-        f: impl FnOnce() -> !,
-    ) -> ! {
+        f: impl FnOnce() -> R,
+    ) -> R {
         with_alloca_ptr(
             self.reservation_layout().footprint(),
             |tls_reservation_start| {
