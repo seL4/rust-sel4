@@ -74,7 +74,7 @@ cfg_if::cfg_if! {
                     .option pop
 
                         la sp, __sel4_runtime_common__stack_bottom
-                        lx sp, (sp)
+                        __sel4_runtime_common__lx sp, (sp)
                         jal sel4_runtime_rust_entry
 
                     1:  j 1b
@@ -85,7 +85,7 @@ cfg_if::cfg_if! {
         #[cfg(target_arch = "riscv64")]
         global_asm! {
             r#"
-                .macro lx dst, src
+                .macro __sel4_runtime_common__lx dst, src
                     ld \dst, \src
                 .endm
             "#,
@@ -96,7 +96,7 @@ cfg_if::cfg_if! {
         #[cfg(target_arch = "riscv32")]
         global_asm! {
             r#"
-                .macro lx dst, src
+                .macro __sel4_runtime_common__lx dst, src
                     lw \dst, \src
                 .endm
             "#,
