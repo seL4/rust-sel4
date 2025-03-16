@@ -19,7 +19,7 @@ use core::intrinsics::catch_unwind as catch_unwind_intrinsic;
 use core::mem::ManuallyDrop;
 use core::panic::{PanicInfo, UnwindSafe};
 
-use sel4_panicking_env::abort;
+use sel4_panicking_env::{abort, debug_println};
 
 mod count;
 mod hook;
@@ -33,7 +33,10 @@ pub use hook::{set_hook, PanicHook};
 
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
-    count_panic();
+    if let Some(must_abort) = count_panic() {
+        debug_println!("{}", info);
+        abort!("{}", must_abort);
+    }
     (get_hook())(info);
     if info.can_unwind() {
         let code = start_panic();
