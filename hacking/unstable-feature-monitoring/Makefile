@@ -15,6 +15,10 @@ clean:
 used:
 	./enumerate-used-unstable-features.sh
 
+.PHONY: crates-using
+crates-using:
+	./enumerate-crates-using-unstable-features.sh
+
 .PHONY: wishlist
 wishlist:
 	cargo build --manifest-path wishlist/Cargo.toml
