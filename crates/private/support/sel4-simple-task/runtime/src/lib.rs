@@ -70,7 +70,10 @@ pub fn cont_fn(config: RuntimeConfig<'static>, thread_index: usize) -> ! {
 
         #[cfg(feature = "alloc")]
         {
-            global_allocator::init(get_static_heap_bounds());
+            global_allocator::init(
+                get_static_heap_mutex_notification(),
+                get_static_heap_bounds(),
+            );
         }
 
         sel4_panicking::set_hook(&panic_hook);

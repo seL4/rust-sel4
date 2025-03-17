@@ -12,7 +12,4 @@ pub use sel4_sync_trivial::*;
 
 mod mutex;
 
-pub use mutex::{
-    DeferredNotificationMutexSyncOps, GenericRawMutex, MutexSyncOps,
-    MutexSyncOpsWithInteriorMutability, MutexSyncOpsWithNotification,
-};
+pub use mutex::{DeferredRawNotificationMutex, LazyRawNotificationMutex, RawNotificationMutex};
