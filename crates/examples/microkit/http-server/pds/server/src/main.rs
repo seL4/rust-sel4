@@ -27,7 +27,6 @@ use sel4_bounce_buffer_allocator::{Basic, BounceBufferAllocator};
 use sel4_driver_interfaces::block::GetBlockDeviceLayout;
 use sel4_driver_interfaces::net::GetNetDeviceMeta;
 use sel4_driver_interfaces::timer::{Clock, DefaultTimer};
-use sel4_shared_memory::ExternallySharedRef;
 use sel4_logging::{LevelFilter, Logger, LoggerBuilder};
 use sel4_microkit::{memory_region_symbol, protection_domain, Handler};
 use sel4_microkit_driver_adapters::block::client::Client as BlockClient;
@@ -35,6 +34,7 @@ use sel4_microkit_driver_adapters::net::client::Client as NetClient;
 use sel4_microkit_driver_adapters::rtc::client::Client as RtcClient;
 use sel4_microkit_driver_adapters::timer::client::Client as TimerClient;
 use sel4_newlib as _;
+use sel4_shared_memory::SharedMemoryRef;
 use sel4_shared_ring_buffer::RingBuffers;
 use sel4_shared_ring_buffer_block_io::SharedRingBufferBlockIO;
 use sel4_shared_ring_buffer_smoltcp::DeviceImpl;
@@ -101,7 +101,7 @@ fn init() -> impl Handler {
 
     let net_device = {
         let dma_region = unsafe {
-            ExternallySharedRef::<'static, _>::new(
+            SharedMemoryRef::<'static, _>::new(
                 memory_region_symbol!(virtio_net_client_dma_vaddr: *mut [u8], n = config::VIRTIO_NET_CLIENT_DMA_SIZE),
             )
         };
@@ -114,21 +114,13 @@ fn init() -> impl Handler {
             dma_region,
             bounce_buffer_allocator,
             RingBuffers::from_ptrs_using_default_initialization_strategy_for_role(
-                unsafe {
-                    ExternallySharedRef::new(memory_region_symbol!(virtio_net_rx_free: *mut _))
-                },
-                unsafe {
-                    ExternallySharedRef::new(memory_region_symbol!(virtio_net_rx_used: *mut _))
-                },
+                unsafe { SharedMemoryRef::new(memory_region_symbol!(virtio_net_rx_free: *mut _)) },
+                unsafe { SharedMemoryRef::new(memory_region_symbol!(virtio_net_rx_used: *mut _)) },
                 notify_net,
             ),
             RingBuffers::from_ptrs_using_default_initialization_strategy_for_role(
-                unsafe {
-                    ExternallySharedRef::new(memory_region_symbol!(virtio_net_tx_free: *mut _))
-                },
-                unsafe {
-                    ExternallySharedRef::new(memory_region_symbol!(virtio_net_tx_used: *mut _))
-                },
+                unsafe { SharedMemoryRef::new(memory_region_symbol!(virtio_net_tx_free: *mut _)) },
+                unsafe { SharedMemoryRef::new(memory_region_symbol!(virtio_net_tx_used: *mut _)) },
                 notify_net,
             ),
             16,
@@ -158,7 +150,7 @@ fn init() -> impl Handler {
 
     let shared_block_io = {
         let dma_region = unsafe {
-            ExternallySharedRef::<'static, _>::new(
+            SharedMemoryRef::<'static, _>::new(
                 memory_region_symbol!(virtio_blk_client_dma_vaddr: *mut [u8], n = config::VIRTIO_BLK_CLIENT_DMA_SIZE),
             )
         };
@@ -172,8 +164,8 @@ fn init() -> impl Handler {
             dma_region,
             bounce_buffer_allocator,
             RingBuffers::from_ptrs_using_default_initialization_strategy_for_role(
-                unsafe { ExternallySharedRef::new(memory_region_symbol!(virtio_blk_free: *mut _)) },
-                unsafe { ExternallySharedRef::new(memory_region_symbol!(virtio_blk_used: *mut _)) },
+                unsafe { SharedMemoryRef::new(memory_region_symbol!(virtio_blk_free: *mut _)) },
+                unsafe { SharedMemoryRef::new(memory_region_symbol!(virtio_blk_used: *mut _)) },
                 notify_block,
             ),
         )

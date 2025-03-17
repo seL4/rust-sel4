@@ -14,7 +14,7 @@ use smoltcp::time::Instant;
 
 use sel4_abstract_rc::{AbstractRcT, RcT};
 use sel4_bounce_buffer_allocator::{AbstractBounceBufferAllocator, BounceBufferAllocator};
-use sel4_shared_memory::ExternallySharedRef;
+use sel4_shared_memory::SharedMemoryRef;
 use sel4_shared_ring_buffer::{roles::Provide, RingBuffers};
 use sel4_sync_trivial::UnsyncPanickingRawMutex;
 
@@ -39,7 +39,7 @@ impl<A: AbstractBounceBufferAllocator, R: RawMutex, P: AbstractRcT> DeviceImpl<A
     #[allow(clippy::too_many_arguments)]
     pub fn new(
         raw_mutex: R,
-        dma_region: ExternallySharedRef<'static, [u8]>,
+        dma_region: SharedMemoryRef<'static, [u8]>,
         bounce_buffer_allocator: BounceBufferAllocator<A>,
         rx_ring_buffers: RingBuffers<'static, Provide, fn()>,
         tx_ring_buffers: RingBuffers<'static, Provide, fn()>,

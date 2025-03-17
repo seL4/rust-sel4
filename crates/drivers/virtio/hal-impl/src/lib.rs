@@ -12,15 +12,15 @@ use core::ptr::{self, NonNull};
 use virtio_drivers::{BufferDirection, Hal, PhysAddr, PAGE_SIZE};
 
 use sel4_bounce_buffer_allocator::{Basic, BounceBufferAllocator};
-use sel4_shared_memory::ExternallySharedRef;
 use sel4_immediate_sync_once_cell::ImmediateSyncOnceCell;
+use sel4_shared_memory::SharedMemoryRef;
 use sel4_sync::{lock_api::Mutex, PanickingRawMutex};
 
 static GLOBAL_STATE: ImmediateSyncOnceCell<Mutex<PanickingRawMutex, State>> =
     ImmediateSyncOnceCell::new();
 
 struct State {
-    dma_region: ExternallySharedRef<'static, [u8]>,
+    dma_region: SharedMemoryRef<'static, [u8]>,
     dma_region_paddr: usize,
     bounce_buffer_allocator: BounceBufferAllocator<Basic>,
 }
@@ -45,7 +45,7 @@ impl HalImpl {
         ))
         .unwrap();
 
-        let dma_region = unsafe { ExternallySharedRef::new(dma_region_ptr) };
+        let dma_region = unsafe { SharedMemoryRef::new(dma_region_ptr) };
 
         let max_alignment = 1
             << dma_region_vaddr

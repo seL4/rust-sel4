@@ -17,9 +17,9 @@ use virtio_drivers::{
     },
 };
 
-use sel4_shared_memory::ExternallySharedRef;
 use sel4_microkit::{memory_region_symbol, protection_domain, var};
 use sel4_microkit_driver_adapters::net::driver::HandlerImpl;
+use sel4_shared_memory::SharedMemoryRef;
 use sel4_shared_ring_buffer::{roles::Use, RingBuffers};
 use sel4_virtio_hal_impl::HalImpl;
 use sel4_virtio_net::DeviceWrapper;
@@ -53,7 +53,7 @@ fn init() -> HandlerImpl<DeviceWrapper<HalImpl, MmioTransport>> {
     };
 
     let client_region = unsafe {
-        ExternallySharedRef::<'static, _>::new(
+        SharedMemoryRef::<'static, _>::new(
             memory_region_symbol!(virtio_net_client_dma_vaddr: *mut [u8], n = config::VIRTIO_NET_CLIENT_DMA_SIZE),
         )
     };
@@ -62,15 +62,15 @@ fn init() -> HandlerImpl<DeviceWrapper<HalImpl, MmioTransport>> {
 
     let rx_ring_buffers =
         RingBuffers::<'_, Use, fn()>::from_ptrs_using_default_initialization_strategy_for_role(
-            unsafe { ExternallySharedRef::new(memory_region_symbol!(virtio_net_rx_free: *mut _)) },
-            unsafe { ExternallySharedRef::new(memory_region_symbol!(virtio_net_rx_used: *mut _)) },
+            unsafe { SharedMemoryRef::new(memory_region_symbol!(virtio_net_rx_free: *mut _)) },
+            unsafe { SharedMemoryRef::new(memory_region_symbol!(virtio_net_rx_used: *mut _)) },
             notify_client,
         );
 
     let tx_ring_buffers =
         RingBuffers::<'_, Use, fn()>::from_ptrs_using_default_initialization_strategy_for_role(
-            unsafe { ExternallySharedRef::new(memory_region_symbol!(virtio_net_tx_free: *mut _)) },
-            unsafe { ExternallySharedRef::new(memory_region_symbol!(virtio_net_tx_used: *mut _)) },
+            unsafe { SharedMemoryRef::new(memory_region_symbol!(virtio_net_tx_free: *mut _)) },
+            unsafe { SharedMemoryRef::new(memory_region_symbol!(virtio_net_tx_used: *mut _)) },
             notify_client,
         );
 

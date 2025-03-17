@@ -17,10 +17,6 @@ use core::str;
 
 use embedded_hal_nb::serial::{self, Read as _, Write as _};
 
-use sel4_shared_memory::{
-    access::{ReadOnly, ReadWrite},
-    ExternallySharedRef,
-};
 use sel4_microkit::{
     memory_region_symbol, protection_domain, Channel, Handler, Infallible, MessageInfo,
 };
@@ -28,6 +24,10 @@ use sel4_microkit_driver_adapters::serial::client::{
     Client as SerialClient, Error as SerialClientError,
 };
 use sel4_microkit_message::MessageInfoExt as _;
+use sel4_shared_memory::{
+    access::{ReadOnly, ReadWrite},
+    SharedMemoryRef,
+};
 
 use banscii_artist_interface_types as artist;
 use banscii_assistant_core::Draft;
@@ -42,15 +42,13 @@ const MAX_SUBJECT_LEN: usize = 16;
 #[protection_domain(heap_size = 0x10000)]
 fn init() -> impl Handler {
     let region_in = unsafe {
-        ExternallySharedRef::new_read_only(
+        SharedMemoryRef::new_read_only(
             memory_region_symbol!(region_in_start: *mut [u8], n = REGION_SIZE),
         )
     };
 
     let region_out = unsafe {
-        ExternallySharedRef::new(
-            memory_region_symbol!(region_out_start: *mut [u8], n = REGION_SIZE),
-        )
+        SharedMemoryRef::new(memory_region_symbol!(region_out_start: *mut [u8], n = REGION_SIZE))
     };
 
     let mut this = HandlerImpl {
@@ -67,8 +65,8 @@ fn init() -> impl Handler {
 
 struct HandlerImpl {
     serial_client: SerialClient,
-    region_in: ExternallySharedRef<'static, [u8], ReadOnly>,
-    region_out: ExternallySharedRef<'static, [u8], ReadWrite>,
+    region_in: SharedMemoryRef<'static, [u8], ReadOnly>,
+    region_out: SharedMemoryRef<'static, [u8], ReadWrite>,
     buffer: Vec<u8>,
 }
 

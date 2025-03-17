@@ -12,7 +12,7 @@ use core::sync::atomic::Ordering;
 
 use zerocopy::{FromBytes, IntoBytes};
 
-use sel4_shared_memory::{map_field, ExternallySharedPtr, ExternallySharedRef};
+use sel4_shared_memory::{map_field, SharedMemoryPtr, SharedMemoryRef};
 
 pub mod roles;
 
@@ -54,8 +54,8 @@ impl<'a, R: RingBuffersRole, F, T: Copy> RingBuffers<'a, R, F, T> {
     }
 
     pub fn from_ptrs_using_default_initialization_strategy_for_role(
-        free: ExternallySharedRef<'a, RawRingBuffer<T>>,
-        used: ExternallySharedRef<'a, RawRingBuffer<T>>,
+        free: SharedMemoryRef<'a, RawRingBuffer<T>>,
+        used: SharedMemoryRef<'a, RawRingBuffer<T>>,
         notify: F,
     ) -> Self {
         let initialization_strategy = R::default_initialization_strategy();
@@ -104,7 +104,7 @@ pub struct RawRingBuffer<T = Descriptor> {
 }
 
 pub struct RingBuffer<'a, R: RingBufferRole, T = Descriptor> {
-    inner: ExternallySharedRef<'a, RawRingBuffer<T>>,
+    inner: SharedMemoryRef<'a, RawRingBuffer<T>>,
     stored_write_index: Wrapping<u32>,
     stored_read_index: Wrapping<u32>,
     _phantom: PhantomData<R>,
@@ -114,7 +114,7 @@ impl<'a, R: RingBufferRole, T: Copy> RingBuffer<'a, R, T> {
     const SIZE: usize = RING_BUFFER_SIZE;
 
     pub fn new(
-        ptr: ExternallySharedRef<'a, RawRingBuffer<T>>,
+        ptr: SharedMemoryRef<'a, RawRingBuffer<T>>,
         initialization_strategy: InitializationStrategy,
     ) -> Self {
         let mut inner = ptr;
@@ -150,17 +150,17 @@ impl<'a, R: RingBufferRole, T: Copy> RingBuffer<'a, R, T> {
         Self::SIZE - 1
     }
 
-    fn write_index(&mut self) -> ExternallySharedPtr<'_, u32> {
+    fn write_index(&mut self) -> SharedMemoryPtr<'_, u32> {
         let ptr = self.inner.as_mut_ptr();
         map_field!(ptr.write_index)
     }
 
-    fn read_index(&mut self) -> ExternallySharedPtr<'_, u32> {
+    fn read_index(&mut self) -> SharedMemoryPtr<'_, u32> {
         let ptr = self.inner.as_mut_ptr();
         map_field!(ptr.read_index)
     }
 
-    fn descriptor(&mut self, index: Wrapping<u32>) -> ExternallySharedPtr<'_, T> {
+    fn descriptor(&mut self, index: Wrapping<u32>) -> SharedMemoryPtr<'_, T> {
         let residue = self.residue(index);
         let ptr = self.inner.as_mut_ptr();
         map_field!(ptr.descriptors).as_slice().index(residue)
