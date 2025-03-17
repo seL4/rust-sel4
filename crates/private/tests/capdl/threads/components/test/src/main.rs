@@ -16,7 +16,7 @@ use serde::{Deserialize, Serialize};
 
 use sel4_simple_task_config_types::*;
 use sel4_simple_task_runtime::{debug_println, main_json};
-use sel4_sync::{lock_api::Mutex, GenericRawMutex};
+use sel4_sync::{lock_api::Mutex, RawNotificationMutex};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Config {
@@ -33,7 +33,7 @@ fn main(config: Config) {
     debug_println!("{:#?}", config);
 
     let lock = Arc::new(Mutex::from_raw(
-        GenericRawMutex::new(config.lock_nfn.get()),
+        RawNotificationMutex::new(config.lock_nfn.get()),
         INITIAL_VALUE,
     ));
     let barrier_nfn = config.barrier_nfn.get();
