@@ -1058,7 +1058,6 @@ dependencies = [
  "sel4-async-single-threaded-executor",
  "sel4-async-time",
  "sel4-async-unsync",
- "sel4-atomic-ptr",
  "sel4-bcm2835-aux-uart-driver",
  "sel4-bounce-buffer-allocator",
  "sel4-config",
@@ -1968,13 +1967,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "sel4-atomic-ptr"
-version = "0.1.0"
-dependencies = [
- "cfg-if",
-]
-
-[[package]]
 name = "sel4-backtrace"
 version = "0.1.0"
 dependencies = [
@@ -2268,8 +2260,7 @@ name = "sel4-externally-shared"
 version = "0.1.0"
 dependencies = [
  "cfg-if",
- "sel4-atomic-ptr",
- "volatile",
+ "sel4-abstract-ptr",
  "zerocopy 0.8.18",
 ]
 
@@ -3449,11 +3440,6 @@ dependencies = [
  "log",
  "zerocopy 0.7.35",
 ]
-
-[[package]]
-name = "volatile"
-version = "0.5.1"
-source = "git+https://github.com/coliasgroup/volatile.git?tag=keep/aa7512906e9b76066ed928eb6986b0f9#aa7512906e9b76066ed928eb6986b0f9b1750e91"
 
 [[package]]
 name = "vstd"

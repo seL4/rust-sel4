@@ -12,10 +12,10 @@ mk {
     rsa = { version = versions.rsa; default-features = false; features = [ "pem" "sha2" ]; };
     inherit (localCrates)
       sel4-microkit-message
+      sel4-externally-shared
       banscii-artist-interface-types
     ;
     sel4-microkit = localCrates.sel4-microkit // { features = [ "alloc" ]; };
-    sel4-externally-shared = localCrates.sel4-externally-shared // { features = [ "unstable" ]; };
   };
   build-dependencies = {
     inherit (versions) rsa;

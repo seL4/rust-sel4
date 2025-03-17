@@ -1,7 +1,7 @@
 #
 # Copyright 2023, Colias Group, LLC
 #
-# SPDX-License-Identifier: BSD-2-Clause
+# SPDX-License-Identifier: MIT OR Apache-2.0
 #
 #
 # This file is generated from './Cargo.nix'. You can edit this file directly
@@ -14,17 +14,12 @@ name = "sel4-externally-shared"
 version = "0.1.0"
 authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
 edition = "2021"
-license = "BSD-2-Clause"
+license = "MIT OR Apache-2.0"
 
 [features]
-unstable = ["volatile/unstable"]
-very_unstable = ["volatile/very_unstable"]
+atomics = []
 
 [dependencies]
 cfg-if = "1.0.0"
-sel4-atomic-ptr = { path = "../sel4-atomic-ptr" }
+sel4-abstract-ptr = { path = "../sel4-abstract-ptr" }
 zerocopy = "0.8.7"
-
-[dependencies.volatile]
-git = "https://github.com/coliasgroup/volatile.git"
-tag = "keep/aa7512906e9b76066ed928eb6986b0f9"

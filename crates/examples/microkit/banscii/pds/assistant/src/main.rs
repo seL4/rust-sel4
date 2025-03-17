@@ -19,7 +19,7 @@ use embedded_hal_nb::serial::{self, Read as _, Write as _};
 
 use sel4_externally_shared::{
     access::{ReadOnly, ReadWrite},
-    ExternallySharedRef, ExternallySharedRefExt,
+    ExternallySharedRef,
 };
 use sel4_microkit::{
     memory_region_symbol, protection_domain, Channel, Handler, Infallible, MessageInfo,
@@ -42,7 +42,9 @@ const MAX_SUBJECT_LEN: usize = 16;
 #[protection_domain(heap_size = 0x10000)]
 fn init() -> impl Handler {
     let region_in = unsafe {
-        ExternallySharedRef::new(memory_region_symbol!(region_in_start: *mut [u8], n = REGION_SIZE))
+        ExternallySharedRef::new_read_only(
+            memory_region_symbol!(region_in_start: *mut [u8], n = REGION_SIZE),
+        )
     };
 
     let region_out = unsafe {

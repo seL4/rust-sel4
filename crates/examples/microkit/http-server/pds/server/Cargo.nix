@@ -35,6 +35,7 @@ mk {
       sel4-microkit-message
       sel4-microkit-driver-adapters
       sel4-driver-interfaces
+      sel4-externally-shared
       sel4-async-single-threaded-executor
       sel4-async-network
       sel4-async-time
@@ -56,7 +57,6 @@ mk {
     };
 
     sel4-microkit = localCrates.sel4-microkit // { features = [ "alloc" ]; };
-    sel4-externally-shared = localCrates.sel4-externally-shared // { features = [ "unstable" ]; };
 
     microkit-http-server-example-server-core = localCrates.microkit-http-server-example-server-core // {
       features = [

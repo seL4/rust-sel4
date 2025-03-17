@@ -22,7 +22,7 @@ use virtio_drivers::{
     },
 };
 
-use sel4_externally_shared::{ExternallySharedRef, ExternallySharedRefExt};
+use sel4_externally_shared::ExternallySharedRef;
 use sel4_microkit::{
     memory_region_symbol, protection_domain, var, Channel, Handler, Infallible, MessageInfo,
 };

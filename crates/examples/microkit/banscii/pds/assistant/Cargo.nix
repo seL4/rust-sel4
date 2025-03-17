@@ -14,10 +14,10 @@ mk {
     inherit (localCrates)
       sel4-microkit-message
       sel4-microkit-driver-adapters
+      sel4-externally-shared
       banscii-assistant-core
       banscii-artist-interface-types
     ;
-    sel4-externally-shared = localCrates.sel4-externally-shared // { features = [ "unstable" ]; };
     sel4-microkit = localCrates.sel4-microkit // { features = [ "alloc" ]; };
   };
 }

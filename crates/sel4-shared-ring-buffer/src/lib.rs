@@ -12,9 +12,7 @@ use core::sync::atomic::Ordering;
 
 use zerocopy::{FromBytes, IntoBytes};
 
-use sel4_externally_shared::{
-    map_field, ExternallySharedPtr, ExternallySharedPtrExt, ExternallySharedRef,
-};
+use sel4_externally_shared::{map_field, ExternallySharedPtr, ExternallySharedRef};
 
 pub mod roles;
 
@@ -258,8 +256,7 @@ impl<T: Copy + FromBytes + IntoBytes> RingBuffer<'_, Write, T> {
     fn expose_write_index(&mut self) {
         let write_index = self.stored_write_index.0;
         self.write_index()
-            .atomic()
-            .store(write_index, Ordering::Release);
+            .atomic_store(write_index, Ordering::Release);
     }
 }
 
@@ -281,8 +278,7 @@ impl<T: Copy + FromBytes + IntoBytes> RingBuffer<'_, Read, T> {
     fn expose_read_index(&mut self) {
         let read_index = self.stored_read_index.0;
         self.read_index()
-            .atomic()
-            .store(read_index, Ordering::Release);
+            .atomic_store(read_index, Ordering::Release);
     }
 }
 

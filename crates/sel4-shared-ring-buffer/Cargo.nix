@@ -11,6 +11,8 @@ mk {
   dependencies = {
     inherit (versions) log;
     zerocopy = zerocopyWith [ "derive" ];
-    sel4-externally-shared = localCrates.sel4-externally-shared // { features = [ "unstable" ]; };
+    sel4-externally-shared = localCrates.sel4-externally-shared // {
+      features = [ "atomics" ];
+    };
   };
 }

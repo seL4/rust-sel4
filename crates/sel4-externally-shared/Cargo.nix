@@ -4,20 +4,21 @@
 # SPDX-License-Identifier: BSD-2-Clause
 #
 
-{ mk, localCrates, versions, volatileSource }:
+{ mk, localCrates, versions, mkDefaultFrontmatterWithReuseArgs, defaultReuseFrontmatterArgs }:
 
 mk rec {
+  nix.frontmatter = mkDefaultFrontmatterWithReuseArgs (defaultReuseFrontmatterArgs // {
+    licenseID = package.license;
+  });
   package.name = "sel4-externally-shared";
+  package.license = "MIT OR Apache-2.0";
   dependencies = {
     inherit (versions) cfg-if zerocopy;
-    volatile = volatileSource;
     inherit (localCrates)
-      sel4-atomic-ptr
-      # volatile
+      sel4-abstract-ptr
     ;
   };
   features = {
-    "unstable" = [ "volatile/unstable" ];
-    "very_unstable" = [ "volatile/very_unstable" ];
+    "atomics" = [];
   };
 }
