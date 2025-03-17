@@ -9,7 +9,7 @@ use core::task::{Poll, Waker};
 
 use sel4_async_block_io::{access::Access, Operation};
 use sel4_bounce_buffer_allocator::{AbstractBounceBufferAllocator, BounceBufferAllocator};
-use sel4_externally_shared::ExternallySharedRef;
+use sel4_shared_memory::ExternallySharedRef;
 use sel4_shared_ring_buffer::{
     roles::Provide, Descriptor, PeerMisbehaviorError as SharedRingBuffersPeerMisbehaviorError,
     RingBuffers,

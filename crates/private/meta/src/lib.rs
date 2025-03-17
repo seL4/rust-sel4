@@ -22,7 +22,7 @@
 //! - [`sel4_sync`]: Synchronization constructs using seL4 IPC. Currently only supports
 //!   notification-based mutexes.
 //! - [`sel4_logging`]: [`Log`](log::Log) implementation for the [`log`] crate.
-//! - [`sel4_externally_shared`]: Abstractions for interacting with data in shared memory.
+//! - [`sel4_shared_memory`]: Abstractions for interacting with data in shared memory.
 //! - [`sel4_shared_ring_buffer`] and `sel4_shared_ring_buffer_*`: Implementation of shared data structures used in the [seL4 Device
 //!   Driver Framework](https://github.com/au-ts/sddf).
 //! - `sel4_async_*`: Crates for leveraging async Rust in seL4 userspace.
@@ -97,7 +97,7 @@ definitely! {
     sel4_dlmalloc
     sel4_driver_interfaces
     sel4_elf_header
-    sel4_externally_shared
+    sel4_shared_memory
     sel4_immediate_sync_once_cell
     sel4_immutable_cell
     sel4_initialize_tls

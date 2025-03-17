@@ -17,7 +17,7 @@ use core::str;
 
 use embedded_hal_nb::serial::{self, Read as _, Write as _};
 
-use sel4_externally_shared::{
+use sel4_shared_memory::{
     access::{ReadOnly, ReadWrite},
     ExternallySharedRef,
 };

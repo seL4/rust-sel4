@@ -35,7 +35,7 @@ mk {
       sel4-microkit-message
       sel4-microkit-driver-adapters
       sel4-driver-interfaces
-      sel4-externally-shared
+      sel4-shared-memory
       sel4-async-single-threaded-executor
       sel4-async-network
       sel4-async-time

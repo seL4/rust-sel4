@@ -30,13 +30,13 @@ sel4-async-network = { path = "../../../../../sel4-async/network" }
 sel4-async-time = { path = "../../../../../sel4-async/time" }
 sel4-bounce-buffer-allocator = { path = "../../../../../sel4-bounce-buffer-allocator" }
 sel4-driver-interfaces = { path = "../../../../../sel4-driver-interfaces" }
-sel4-externally-shared = { path = "../../../../../sel4-externally-shared" }
 sel4-immediate-sync-once-cell = { path = "../../../../../sel4-immediate-sync-once-cell" }
 sel4-logging = { path = "../../../../../sel4-logging" }
 sel4-microkit = { path = "../../../../../sel4-microkit", features = ["alloc"] }
 sel4-microkit-driver-adapters = { path = "../../../../../sel4-microkit/driver-adapters" }
 sel4-microkit-message = { path = "../../../../../sel4-microkit/message" }
 sel4-newlib = { path = "../../../../../sel4-newlib", features = ["nosys", "all-symbols"] }
+sel4-shared-memory = { path = "../../../../../sel4-shared-memory" }
 sel4-shared-ring-buffer = { path = "../../../../../sel4-shared-ring-buffer" }
 sel4-shared-ring-buffer-block-io = { path = "../../../../../sel4-shared-ring-buffer/block-io" }
 sel4-shared-ring-buffer-smoltcp = { path = "../../../../../sel4-shared-ring-buffer/smoltcp" }

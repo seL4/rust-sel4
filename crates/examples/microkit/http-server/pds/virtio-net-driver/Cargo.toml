@@ -20,12 +20,12 @@ license = "BSD-2-Clause"
 log = "0.4.17"
 sel4 = { path = "../../../../../sel4" }
 sel4-bounce-buffer-allocator = { path = "../../../../../sel4-bounce-buffer-allocator" }
-sel4-externally-shared = { path = "../../../../../sel4-externally-shared" }
 sel4-immediate-sync-once-cell = { path = "../../../../../sel4-immediate-sync-once-cell" }
 sel4-logging = { path = "../../../../../sel4-logging" }
 sel4-microkit = { path = "../../../../../sel4-microkit" }
 sel4-microkit-driver-adapters = { path = "../../../../../sel4-microkit/driver-adapters" }
 sel4-microkit-message = { path = "../../../../../sel4-microkit/message" }
+sel4-shared-memory = { path = "../../../../../sel4-shared-memory" }
 sel4-shared-ring-buffer = { path = "../../../../../sel4-shared-ring-buffer" }
 sel4-virtio-hal-impl = { path = "../../../../../drivers/virtio/hal-impl" }
 sel4-virtio-net = { path = "../../../../../drivers/virtio/net" }
