@@ -29,10 +29,11 @@ macro_rules! impl_atomic {
         $is_signed:literal,
         $analog_for_alignment:path
     ) => {
-        // TODO these attributes are overly conservative
+        // TODO this attribute is overly conservative
         #[cfg(target_has_atomic = $target_has_atomic_key)]
         impl Atomic for $t {}
 
+        #[cfg(target_has_atomic = $target_has_atomic_key)]
         impl AtomicSealed for $t {
             const ALIGNMENT: usize = mem::align_of::<$analog_for_alignment>();
             const IS_SIGNED: bool = $is_signed;
