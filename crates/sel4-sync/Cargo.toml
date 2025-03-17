@@ -20,4 +20,3 @@ license = "MIT"
 lock_api = "0.4.12"
 sel4 = { path = "../sel4" }
 sel4-immediate-sync-once-cell = { path = "../sel4-immediate-sync-once-cell" }
-sel4-sync-trivial = { path = "trivial" }

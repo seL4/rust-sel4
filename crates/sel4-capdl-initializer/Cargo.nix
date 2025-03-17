@@ -9,14 +9,16 @@
 mk {
   package.name = "sel4-capdl-initializer";
   dependencies = {
-    inherit (versions) log;
+    inherit (versions)
+      log
+      one-shot-mutex
+    ;
     postcard = postcardWith [ "alloc" ];
     inherit (localCrates)
       sel4-capdl-initializer-core
       sel4
       sel4-dlmalloc
       sel4-logging
-      sel4-sync
     ;
     sel4-root-task = localCrates.sel4-root-task // { features = [ "single-threaded" ]; };
     sel4-capdl-initializer-types = localCrates.sel4-capdl-initializer-types // { features = [ "alloc" "serde" "deflate" ]; };

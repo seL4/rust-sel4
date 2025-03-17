@@ -14,6 +14,8 @@ use core::ops::Range;
 use core::ptr;
 use core::slice;
 
+use one_shot_mutex::RawOneShotMutex;
+
 use sel4_capdl_initializer_core::{Initializer, InitializerBuffers, PerObjectBuffer};
 use sel4_capdl_initializer_types::{
     IndirectDeflatedBytesContent, IndirectEmbeddedFrame, IndirectObjectName, SpecWithIndirection,
@@ -22,7 +24,6 @@ use sel4_capdl_initializer_types::{
 use sel4_dlmalloc::{DeferredStaticDlmalloc, StaticHeapBounds};
 use sel4_logging::{LevelFilter, Logger, LoggerBuilder};
 use sel4_root_task::{debug_print, root_task};
-use sel4_sync::PanickingRawMutex;
 
 const LOG_LEVEL: LevelFilter = {
     // LevelFilter::Trace
@@ -37,7 +38,7 @@ static LOGGER: Logger = LoggerBuilder::const_default()
     .build();
 
 #[global_allocator]
-static GLOBAL_ALLOCATOR: DeferredStaticDlmalloc<PanickingRawMutex> = DeferredStaticDlmalloc::new();
+static GLOBAL_ALLOCATOR: DeferredStaticDlmalloc<RawOneShotMutex> = DeferredStaticDlmalloc::new();
 
 #[root_task(stack_size = 0x10000)]
 fn main(bootinfo: &sel4::BootInfoPtr) -> ! {

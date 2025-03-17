@@ -19,9 +19,9 @@ license = "BSD-2-Clause"
 [dependencies]
 async-unsync = { version = "0.3.0", default-features = false }
 futures = { version = "0.3.28", default-features = false, features = ["async-await", "alloc"] }
-lock_api = "0.4.12"
 log = "0.4.17"
 microkit-http-server-example-server-core = { path = "core", features = [] }
+one-shot-mutex = "0.1.1"
 rtcc = "0.3.2"
 sel4 = { path = "../../../../../sel4" }
 sel4-async-block-io = { path = "../../../../../sel4-async/block-io" }
@@ -40,7 +40,6 @@ sel4-shared-memory = { path = "../../../../../sel4-shared-memory" }
 sel4-shared-ring-buffer = { path = "../../../../../sel4-shared-ring-buffer" }
 sel4-shared-ring-buffer-block-io = { path = "../../../../../sel4-shared-ring-buffer/block-io" }
 sel4-shared-ring-buffer-smoltcp = { path = "../../../../../sel4-shared-ring-buffer/smoltcp" }
-sel4-sync = { path = "../../../../../sel4-sync" }
 
 [dependencies.sel4-async-single-threaded-executor]
 path = "../../../../../sel4-async/single-threaded-executor"

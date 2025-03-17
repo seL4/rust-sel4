@@ -13,7 +13,7 @@ use alloc::rc::Rc;
 use alloc::sync::Arc;
 use core::time::Duration;
 
-use lock_api::Mutex;
+use one_shot_mutex::OneShotMutex;
 use rtcc::DateTimeAccess;
 use smoltcp::iface::Config;
 use smoltcp::phy::{Device, DeviceCapabilities, Medium};
@@ -77,7 +77,7 @@ fn init() -> impl Handler {
     let mut net_client = NetClient::new(channels::NET_DRIVER);
     let mut block_client = BlockClient::new(channels::BLOCK_DRIVER);
 
-    let timer_client = Arc::new(Mutex::new(DefaultTimer(TimerClient::new(
+    let timer_client = Arc::new(OneShotMutex::new(DefaultTimer(TimerClient::new(
         channels::TIMER_DRIVER,
     ))));
 

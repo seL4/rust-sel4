@@ -18,6 +18,7 @@ license = "BSD-2-Clause"
 
 [dependencies]
 log = "0.4.17"
+one-shot-mutex = "0.1.1"
 postcard = { version = "1.0.2", default-features = false, features = ["alloc"] }
 sel4 = { path = "../sel4" }
 sel4-capdl-initializer-core = { path = "core" }
@@ -25,4 +26,3 @@ sel4-capdl-initializer-types = { path = "types", features = ["alloc", "serde", "
 sel4-dlmalloc = { path = "../sel4-dlmalloc" }
 sel4-logging = { path = "../sel4-logging" }
 sel4-root-task = { path = "../sel4-root-task", features = ["single-threaded"] }
-sel4-sync = { path = "../sel4-sync" }
