@@ -16,6 +16,8 @@ mk {
       sel4-config
       sel4-sys
 
+      sel4-abstract-ptr
+      sel4-abstract-rc
       sel4-async-block-io
       sel4-async-block-io-fat
       sel4-async-io
@@ -43,7 +45,6 @@ mk {
       sel4-stack
       sel4-sync
       sel4-sync-trivial
-      sel4-shared-memory
 
       sel4-bcm2835-aux-uart-driver
       sel4-pl011-driver
@@ -53,6 +54,8 @@ mk {
       sel4-virtio-hal-impl
       sel4-virtio-net
     ;
+
+    sel4-shared-memory = localCrates.sel4-shared-memory // { features = [ "atomics" ]; };
 
     sel4-root-task = localCrates.sel4-root-task // { features = [ "full" ]; optional = true; };
     sel4-microkit = localCrates.sel4-microkit // { features = [ "full" ]; optional = true; };
