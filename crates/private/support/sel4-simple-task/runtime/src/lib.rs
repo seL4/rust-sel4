@@ -19,7 +19,7 @@ use core::slice;
 use sel4_dlmalloc::StaticHeapBounds;
 use sel4_immediate_sync_once_cell::ImmediateSyncOnceCell;
 use sel4_panicking_env::{abort, AbortInfo};
-use sel4_simple_task_runtime_config_types::RuntimeConfig;
+use sel4_simple_task_runtime_config_types::{RuntimeConfig, RuntimeThreadConfig};
 use sel4_simple_task_threading::StaticThread;
 
 #[cfg(not(target_arch = "arm"))]
@@ -46,60 +46,65 @@ static THREAD_INDEX: ImmediateSyncOnceCell<usize> = ImmediateSyncOnceCell::new()
 #[no_mangle]
 #[allow(clippy::missing_safety_doc)]
 pub unsafe extern "C" fn _start(config: *const u8, config_size: usize, thread_index: usize) -> ! {
-    let config = RuntimeConfig::new(slice::from_raw_parts(config, config_size));
-    sel4_runtime_common::maybe_with_tls(|| cont_fn(config, thread_index))
+    sel4_runtime_common::with_local_initialization(|| {
+        if thread_index == 0 {
+            unsafe {
+                sel4_runtime_common::global_initialzation();
+            }
+        }
+
+        let config = RuntimeConfig::new(slice::from_raw_parts(config, config_size));
+
+        let thread_config = &config.threads()[thread_index];
+
+        sel4::set_ipc_buffer(unsafe {
+            (usize::try_from(thread_config.ipc_buffer_addr()).unwrap() as *mut sel4::IpcBuffer)
+                .as_mut()
+                .unwrap()
+        });
+
+        THREAD_INDEX.set(thread_index).unwrap();
+
+        if thread_index == 0 {
+            CONFIG.set(config.clone()).unwrap();
+
+            #[cfg(feature = "alloc")]
+            {
+                global_allocator::init(
+                    get_static_heap_mutex_notification(),
+                    get_static_heap_bounds(),
+                );
+            }
+
+            sel4_panicking::set_hook(&panic_hook);
+
+            unsafe {
+                __sel4_simple_task_main(config.arg());
+            }
+        } else {
+            run_secondary_thread(thread_config)
+        }
+
+        idle()
+    })
 }
 
-#[allow(clippy::missing_safety_doc)]
-pub fn cont_fn(config: RuntimeConfig<'static>, thread_index: usize) -> ! {
-    let thread_config = &config.threads()[thread_index];
-
-    THREAD_INDEX.set(thread_index).unwrap();
-
-    sel4::set_ipc_buffer(unsafe {
-        (usize::try_from(thread_config.ipc_buffer_addr()).unwrap() as *mut sel4::IpcBuffer)
-            .as_mut()
-            .unwrap()
-    });
-
-    if thread_index == 0 {
-        CONFIG.set(config.clone()).unwrap();
-
-        sel4_runtime_common::maybe_set_eh_frame_finder().unwrap();
-        sel4_ctors_dtors::run_ctors().unwrap();
-
-        #[cfg(feature = "alloc")]
-        {
-            global_allocator::init(
-                get_static_heap_mutex_notification(),
-                get_static_heap_bounds(),
-            );
-        }
-
-        sel4_panicking::set_hook(&panic_hook);
-
-        unsafe {
-            __sel4_simple_task_main(config.arg());
-        }
-    } else {
-        let endpoint =
-            sel4::cap::Endpoint::from_bits(thread_config.endpoint().unwrap().try_into().unwrap());
-        let reply_authority = {
-            sel4::sel4_cfg_if! {
-                if #[sel4_cfg(KERNEL_MCS)] {
-                    sel4::cap::Reply::from_bits(thread_config.reply_authority().unwrap().try_into().unwrap())
-                } else {
-                    assert!(thread_config.reply_authority().is_none());
-                    sel4::ImplicitReplyAuthority::default()
-                }
+fn run_secondary_thread(thread_config: &RuntimeThreadConfig) {
+    let endpoint =
+        sel4::cap::Endpoint::from_bits(thread_config.endpoint().unwrap().try_into().unwrap());
+    let reply_authority = {
+        sel4::sel4_cfg_if! {
+            if #[sel4_cfg(KERNEL_MCS)] {
+                sel4::cap::Reply::from_bits(thread_config.reply_authority().unwrap().try_into().unwrap())
+            } else {
+                assert!(thread_config.reply_authority().is_none());
+                sel4::ImplicitReplyAuthority::default()
             }
-        };
-        unsafe {
-            StaticThread::recv_and_run(endpoint, reply_authority);
         }
+    };
+    unsafe {
+        StaticThread::recv_and_run(endpoint, reply_authority);
     }
-
-    idle()
 }
 
 pub fn try_idle() {

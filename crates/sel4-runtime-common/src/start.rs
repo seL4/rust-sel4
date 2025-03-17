@@ -22,10 +22,25 @@ macro_rules! declare_stack {
     };
 }
 
+#[macro_export]
+macro_rules! declare_entrypoint {
+    (($( $i:ident: $t:ty ),* $(,)?) -> ! $body:block) => {
+        #[allow(unreachable_code)]
+        #[no_mangle]
+        unsafe extern "C" fn __sel4_runtime_common__rust_entrypoint($($i: $t,)*) -> ! {
+            $crate::_private::start::with_local_initialization(|| {
+                $crate::_private::start::global_initialzation();
+                $body
+            });
+            $crate::_private::start::abort!("entrypoint returned")
+        }
+    };
+}
+
 macro_rules! common_asm_prefix {
     () => {
         r#"
-            .extern sel4_runtime_rust_entry
+            .extern __sel4_runtime_common__rust_entrypoint
             .extern __sel4_runtime_common__stack_bottom
 
             .global _start
@@ -45,7 +60,7 @@ cfg_if::cfg_if! {
                     ldr x9, =__sel4_runtime_common__stack_bottom
                     ldr x9, [x9]
                     mov sp, x9
-                    b sel4_runtime_rust_entry
+                    b __sel4_runtime_common__rust_entrypoint
 
                 1:  b 1b
             "#
@@ -57,7 +72,7 @@ cfg_if::cfg_if! {
                     ldr r8, =__sel4_runtime_common__stack_bottom
                     ldr r8, [r8]
                     mov sp, r8
-                    b sel4_runtime_rust_entry
+                    b __sel4_runtime_common__rust_entrypoint
 
                 1:  b 1b
             "#
@@ -75,7 +90,7 @@ cfg_if::cfg_if! {
 
                         la sp, __sel4_runtime_common__stack_bottom
                         __sel4_runtime_common__lx sp, (sp)
-                        jal sel4_runtime_rust_entry
+                        jal __sel4_runtime_common__rust_entrypoint
 
                     1:  j 1b
                 "#
@@ -111,7 +126,7 @@ cfg_if::cfg_if! {
                     mov rbp, rsp
                     sub rsp, 0x8 // Stack must be 16-byte aligned before call
                     push rbp
-                    call sel4_runtime_rust_entry
+                    call __sel4_runtime_common__rust_entrypoint
 
                 1:  jmp 1b
             "#
@@ -122,5 +137,7 @@ cfg_if::cfg_if! {
 }
 
 pub mod _private {
+    pub use crate::{global_initialzation, with_local_initialization};
+    pub use sel4_panicking_env::abort;
     pub use sel4_stack::{Stack, StackBottom};
 }

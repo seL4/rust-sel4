@@ -10,7 +10,12 @@ mk {
   package.name = "sel4-runtime-common";
   dependencies = {
     inherit (versions) cfg-if;
-    inherit (localCrates) sel4-panicking-env sel4-elf-header sel4-stack;
+    inherit (localCrates)
+      sel4-panicking-env
+      sel4-elf-header
+      sel4-stack
+      sel4-ctors-dtors
+    ;
   };
   target."cfg(panic = \"unwind\")".dependencies = {
     unwinding = unwindingWith [];

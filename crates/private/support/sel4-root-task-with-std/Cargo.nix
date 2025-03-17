@@ -12,7 +12,6 @@ mk {
     inherit (localCrates)
       sel4
       sel4-panicking-env
-      sel4-ctors-dtors
     ;
     sel4-runtime-common = localCrates.sel4-runtime-common // { features = [ "full" ]; };
   };

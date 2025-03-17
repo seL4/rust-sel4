@@ -34,25 +34,22 @@ pub fn get_global_allocator_mutex_notification() -> sel4::cap::Notification {
 macro_rules! declare_heap {
     ($size:expr) => {
         const _: () = {
-            mod outer_scope {
-                use super::*;
-
-                const _SIZE: usize = $size;
-
-                mod inner_scope {
-                    use $crate::_private::heap::*;
-
-                    use super::_SIZE as SIZE;
-
-                    static STATIC_HEAP: StaticHeap<{ SIZE }> = StaticHeap::new();
-
-                    #[global_allocator]
-                    static GLOBAL_ALLOCATOR: StaticDlmalloc<LazyRawNotificationMutex> =
-                        StaticDlmalloc::new_with(
-                            LazyRawNotificationMutex::new(get_global_allocator_mutex_notification),
-                            STATIC_HEAP.bounds(),
-                        );
+            mod _scope {
+                mod size_scope {
+                    use super::super::*;
+                    pub(super) const SIZE: usize = $size;
                 }
+
+                use $crate::_private::heap::*;
+
+                static STATIC_HEAP: StaticHeap<{ size_scope::SIZE }> = StaticHeap::new();
+
+                #[global_allocator]
+                static GLOBAL_ALLOCATOR: StaticDlmalloc<LazyRawNotificationMutex> =
+                    StaticDlmalloc::new_with(
+                        LazyRawNotificationMutex::new(get_global_allocator_mutex_notification),
+                        STATIC_HEAP.bounds(),
+                    );
             }
         };
     };

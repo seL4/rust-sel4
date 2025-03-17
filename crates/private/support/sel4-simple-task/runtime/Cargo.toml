@@ -29,7 +29,6 @@ serde_json = ["dep:serde_json"]
 [dependencies]
 postcard = { version = "1.0.2", default-features = false }
 sel4 = { path = "../../../../sel4" }
-sel4-ctors-dtors = { path = "../../../../sel4-ctors-dtors" }
 sel4-dlmalloc = { path = "../../../../sel4-dlmalloc" }
 sel4-immediate-sync-once-cell = { path = "../../../../sel4-immediate-sync-once-cell" }
 sel4-panicking = { path = "../../../../sel4-panicking" }

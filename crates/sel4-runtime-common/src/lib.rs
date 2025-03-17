@@ -13,43 +13,41 @@
 use sel4_elf_header::{ElfHeader, ProgramHeader};
 use sel4_panicking_env::abort;
 
+#[cfg(target_thread_local)]
+mod tls;
+
+#[cfg(panic = "unwind")]
+mod unwinding;
+
 #[cfg(feature = "abort")]
 mod abort;
 
 #[cfg(feature = "start")]
 mod start;
 
-cfg_if::cfg_if! {
-    if #[cfg(target_thread_local)] {
-        mod tls;
-
-        #[allow(clippy::missing_safety_doc)]
-        pub unsafe fn maybe_with_tls(f: impl FnOnce() -> !) -> ! {
+#[allow(clippy::missing_safety_doc)]
+pub unsafe fn with_local_initialization(f: impl FnOnce() -> !) -> ! {
+    cfg_if::cfg_if! {
+        if #[cfg(target_thread_local)] {
             tls::with_tls(f)
-        }
-    } else {
-        #[allow(clippy::missing_safety_doc)]
-        pub unsafe fn maybe_with_tls(f: impl FnOnce() -> !) -> ! {
+        } else {
             f()
         }
     }
 }
 
-cfg_if::cfg_if! {
-    if #[cfg(panic = "unwind")] {
-        mod unwinding;
-
-        pub use self::unwinding::set_eh_frame_finder as maybe_set_eh_frame_finder;
-    } else {
-        #[allow(clippy::result_unit_err)]
-        pub fn maybe_set_eh_frame_finder() -> Result<(), ()> {
-            Ok(())
-        }
+#[allow(clippy::missing_safety_doc)]
+pub unsafe fn global_initialzation() {
+    #[cfg(panic = "unwind")]
+    {
+        crate::unwinding::set_eh_frame_finder().unwrap();
     }
+
+    sel4_ctors_dtors::run_ctors().unwrap();
 }
 
 #[allow(dead_code)]
-pub(crate) fn locate_phdrs() -> &'static [ProgramHeader] {
+fn locate_phdrs() -> &'static [ProgramHeader] {
     extern "C" {
         static __ehdr_start: ElfHeader;
     }

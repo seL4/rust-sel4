@@ -17,7 +17,6 @@ mk {
       sel4
       sel4-panicking-env
       sel4-dlmalloc
-      sel4-ctors-dtors
     ;
     sel4-panicking = localCrates.sel4-panicking // {
       features = [ "alloc" ];

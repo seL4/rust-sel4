@@ -12,13 +12,8 @@ use sel4_panicking_env::abort;
 
 use crate::{panicking::init_panicking, Handler};
 
-#[allow(unreachable_code)]
-#[no_mangle]
-unsafe extern "C" fn sel4_runtime_rust_entry() -> ! {
-    sel4_runtime_common::maybe_with_tls(|| {
-        sel4_runtime_common::maybe_set_eh_frame_finder().unwrap();
-        sel4_ctors_dtors::run_ctors().unwrap();
-
+sel4_runtime_common::declare_entrypoint! {
+    () -> ! {
         init_panicking();
 
         let ipc_buffer = unsafe { ipc_buffer_ptr().as_mut().unwrap() };
@@ -27,9 +22,7 @@ unsafe extern "C" fn sel4_runtime_rust_entry() -> ! {
         unsafe {
             __sel4_microkit__main();
         }
-
-        abort!("__sel4_microkit__main returned")
-    })
+    }
 }
 
 extern "C" {

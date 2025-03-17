@@ -43,7 +43,7 @@ unsafe impl EhFrameFinder for EhFrameFinderImpl {
     }
 }
 
-pub fn set_eh_frame_finder() -> Result<(), SetCustomEhFrameFinderError> {
+pub(crate) fn set_eh_frame_finder() -> Result<(), SetCustomEhFrameFinderError> {
     static EH_FRAME_FINDER: &(dyn EhFrameFinder + Sync) = &EhFrameFinderImpl;
     set_custom_eh_frame_finder(EH_FRAME_FINDER)
 }
