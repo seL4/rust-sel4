@@ -12,7 +12,7 @@ use core::sync::atomic::Ordering;
 
 use zerocopy::{FromBytes, IntoBytes};
 
-use sel4_externally_shared::{map_field, ExternallySharedPtr, ExternallySharedRef};
+use sel4_shared_memory::{map_field, ExternallySharedPtr, ExternallySharedRef};
 
 pub mod roles;
 

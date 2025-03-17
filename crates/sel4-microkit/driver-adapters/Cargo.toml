@@ -24,9 +24,9 @@ log = "0.4.17"
 rtcc = "0.3.2"
 sel4-bounce-buffer-allocator = { path = "../../sel4-bounce-buffer-allocator" }
 sel4-driver-interfaces = { path = "../../sel4-driver-interfaces" }
-sel4-externally-shared = { path = "../../sel4-externally-shared" }
 sel4-microkit = { path = ".." }
 sel4-microkit-message = { path = "../message" }
+sel4-shared-memory = { path = "../../sel4-shared-memory" }
 sel4-shared-ring-buffer = { path = "../../sel4-shared-ring-buffer" }
 serde = { version = "1.0.147", default-features = false }
 

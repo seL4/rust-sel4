@@ -10,7 +10,7 @@
 #
 
 [package]
-name = "sel4-externally-shared"
+name = "sel4-shared-memory"
 version = "0.1.0"
 authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
 edition = "2021"

@@ -27,7 +27,7 @@ use sel4_bounce_buffer_allocator::{Basic, BounceBufferAllocator};
 use sel4_driver_interfaces::block::GetBlockDeviceLayout;
 use sel4_driver_interfaces::net::GetNetDeviceMeta;
 use sel4_driver_interfaces::timer::{Clock, DefaultTimer};
-use sel4_externally_shared::ExternallySharedRef;
+use sel4_shared_memory::ExternallySharedRef;
 use sel4_logging::{LevelFilter, Logger, LoggerBuilder};
 use sel4_microkit::{memory_region_symbol, protection_domain, Handler};
 use sel4_microkit_driver_adapters::block::client::Client as BlockClient;

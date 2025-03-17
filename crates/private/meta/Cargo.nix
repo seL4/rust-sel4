@@ -43,7 +43,7 @@ mk {
       sel4-stack
       sel4-sync
       sel4-sync-trivial
-      sel4-externally-shared
+      sel4-shared-memory
 
       sel4-bcm2835-aux-uart-driver
       sel4-pl011-driver

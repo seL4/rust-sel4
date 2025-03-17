@@ -24,7 +24,7 @@ mk {
       sel4-microkit
       sel4-microkit-message
       sel4-shared-ring-buffer
-      sel4-externally-shared
+      sel4-shared-memory
       sel4-bounce-buffer-allocator
     ;
   });

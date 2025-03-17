@@ -27,7 +27,7 @@ mk {
       sel4-shared-ring-buffer-block-io-types
       sel4-bounce-buffer-allocator
       sel4-async-block-io
-      sel4-externally-shared
+      sel4-shared-memory
     ;
 
     sel4-shared-ring-buffer-bookkeeping = localCrates.sel4-shared-ring-buffer-bookkeeping // { features = [ "async-unsync" ]; };

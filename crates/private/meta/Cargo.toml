@@ -37,7 +37,6 @@ sel4-config = { path = "../../sel4/config" }
 sel4-dlmalloc = { path = "../../sel4-dlmalloc" }
 sel4-driver-interfaces = { path = "../../sel4-driver-interfaces" }
 sel4-elf-header = { path = "../../sel4-elf-header" }
-sel4-externally-shared = { path = "../../sel4-externally-shared" }
 sel4-immediate-sync-once-cell = { path = "../../sel4-immediate-sync-once-cell" }
 sel4-immutable-cell = { path = "../../sel4-immutable-cell" }
 sel4-initialize-tls = { path = "../../sel4-initialize-tls" }
@@ -52,6 +51,7 @@ sel4-panicking-env = { path = "../../sel4-panicking/env" }
 sel4-pl011-driver = { path = "../../drivers/pl011" }
 sel4-pl031-driver = { path = "../../drivers/pl031" }
 sel4-root-task = { path = "../../sel4-root-task", features = ["full"], optional = true }
+sel4-shared-memory = { path = "../../sel4-shared-memory" }
 sel4-shared-ring-buffer = { path = "../../sel4-shared-ring-buffer" }
 sel4-shared-ring-buffer-block-io = { path = "../../sel4-shared-ring-buffer/block-io" }
 sel4-shared-ring-buffer-block-io-types = { path = "../../sel4-shared-ring-buffer/block-io/types" }

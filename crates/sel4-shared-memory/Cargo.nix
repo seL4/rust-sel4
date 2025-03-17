@@ -10,7 +10,7 @@ mk rec {
   nix.frontmatter = mkDefaultFrontmatterWithReuseArgs (defaultReuseFrontmatterArgs // {
     licenseID = package.license;
   });
-  package.name = "sel4-externally-shared";
+  package.name = "sel4-shared-memory";
   package.license = "MIT OR Apache-2.0";
   dependencies = {
     inherit (versions) cfg-if zerocopy;

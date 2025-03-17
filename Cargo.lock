@@ -166,9 +166,9 @@ version = "0.1.0"
 dependencies = [
  "banscii-artist-interface-types",
  "rsa",
- "sel4-externally-shared",
  "sel4-microkit",
  "sel4-microkit-message",
+ "sel4-shared-memory",
 ]
 
 [[package]]
@@ -186,10 +186,10 @@ dependencies = [
  "banscii-assistant-core",
  "embedded-hal-nb",
  "hex",
- "sel4-externally-shared",
  "sel4-microkit",
  "sel4-microkit-driver-adapters",
  "sel4-microkit-message",
+ "sel4-shared-memory",
 ]
 
 [[package]]
@@ -1064,7 +1064,6 @@ dependencies = [
  "sel4-dlmalloc",
  "sel4-driver-interfaces",
  "sel4-elf-header",
- "sel4-externally-shared",
  "sel4-immediate-sync-once-cell",
  "sel4-immutable-cell",
  "sel4-initialize-tls",
@@ -1081,6 +1080,7 @@ dependencies = [
  "sel4-platform-info",
  "sel4-reset",
  "sel4-root-task",
+ "sel4-shared-memory",
  "sel4-shared-ring-buffer",
  "sel4-shared-ring-buffer-block-io",
  "sel4-shared-ring-buffer-block-io-types",
@@ -1131,13 +1131,13 @@ dependencies = [
  "sel4-async-time",
  "sel4-bounce-buffer-allocator",
  "sel4-driver-interfaces",
- "sel4-externally-shared",
  "sel4-immediate-sync-once-cell",
  "sel4-logging",
  "sel4-microkit",
  "sel4-microkit-driver-adapters",
  "sel4-microkit-message",
  "sel4-newlib",
+ "sel4-shared-memory",
  "sel4-shared-ring-buffer",
  "sel4-shared-ring-buffer-block-io",
  "sel4-shared-ring-buffer-block-io-types",
@@ -1190,12 +1190,12 @@ dependencies = [
  "sel4",
  "sel4-bounce-buffer-allocator",
  "sel4-driver-interfaces",
- "sel4-externally-shared",
  "sel4-immediate-sync-once-cell",
  "sel4-logging",
  "sel4-microkit",
  "sel4-microkit-driver-adapters",
  "sel4-microkit-message",
+ "sel4-shared-memory",
  "sel4-shared-ring-buffer",
  "sel4-shared-ring-buffer-block-io-types",
  "sel4-virtio-blk",
@@ -1210,12 +1210,12 @@ dependencies = [
  "log",
  "sel4",
  "sel4-bounce-buffer-allocator",
- "sel4-externally-shared",
  "sel4-immediate-sync-once-cell",
  "sel4-logging",
  "sel4-microkit",
  "sel4-microkit-driver-adapters",
  "sel4-microkit-message",
+ "sel4-shared-memory",
  "sel4-shared-ring-buffer",
  "sel4-virtio-hal-impl",
  "sel4-virtio-net",
@@ -2256,15 +2256,6 @@ name = "sel4-elf-header"
 version = "0.1.0"
 
 [[package]]
-name = "sel4-externally-shared"
-version = "0.1.0"
-dependencies = [
- "cfg-if",
- "sel4-abstract-ptr",
- "zerocopy 0.8.18",
-]
-
-[[package]]
 name = "sel4-generate-target-specs"
 version = "0.1.0"
 dependencies = [
@@ -2426,9 +2417,9 @@ dependencies = [
  "rtcc",
  "sel4-bounce-buffer-allocator",
  "sel4-driver-interfaces",
- "sel4-externally-shared",
  "sel4-microkit",
  "sel4-microkit-message",
+ "sel4-shared-memory",
  "sel4-shared-ring-buffer",
  "serde",
  "smoltcp",
@@ -2614,11 +2605,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "sel4-shared-memory"
+version = "0.1.0"
+dependencies = [
+ "cfg-if",
+ "sel4-abstract-ptr",
+ "zerocopy 0.8.18",
+]
+
+[[package]]
 name = "sel4-shared-ring-buffer"
 version = "0.1.0"
 dependencies = [
  "log",
- "sel4-externally-shared",
+ "sel4-shared-memory",
  "zerocopy 0.8.18",
 ]
 
@@ -2631,7 +2631,7 @@ dependencies = [
  "log",
  "sel4-async-block-io",
  "sel4-bounce-buffer-allocator",
- "sel4-externally-shared",
+ "sel4-shared-memory",
  "sel4-shared-ring-buffer",
  "sel4-shared-ring-buffer-block-io-types",
  "sel4-shared-ring-buffer-bookkeeping",
@@ -2661,7 +2661,7 @@ dependencies = [
  "log",
  "sel4-abstract-rc",
  "sel4-bounce-buffer-allocator",
- "sel4-externally-shared",
+ "sel4-shared-memory",
  "sel4-shared-ring-buffer",
  "sel4-shared-ring-buffer-bookkeeping",
  "sel4-sync-trivial",
@@ -2824,8 +2824,8 @@ name = "sel4-virtio-hal-impl"
 version = "0.1.0"
 dependencies = [
  "sel4-bounce-buffer-allocator",
- "sel4-externally-shared",
  "sel4-immediate-sync-once-cell",
+ "sel4-shared-memory",
  "sel4-sync",
  "virtio-drivers",
 ]

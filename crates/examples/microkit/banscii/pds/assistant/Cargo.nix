@@ -14,7 +14,7 @@ mk {
     inherit (localCrates)
       sel4-microkit-message
       sel4-microkit-driver-adapters
-      sel4-externally-shared
+      sel4-shared-memory
       banscii-assistant-core
       banscii-artist-interface-types
     ;
