@@ -13,7 +13,7 @@ use sel4_initialize_tls::{SetThreadPointerFn, UncheckedTlsImage, DEFAULT_SET_THR
 use crate::locate_phdrs;
 
 #[allow(clippy::missing_safety_doc)]
-pub unsafe fn with_tls(f: impl FnOnce() -> !) -> ! {
+pub(crate) unsafe fn with_tls(f: impl FnOnce() -> !) -> ! {
     let phdr = locate_phdrs()
         .iter()
         .find(|phdr| phdr.p_type == PT_TLS)

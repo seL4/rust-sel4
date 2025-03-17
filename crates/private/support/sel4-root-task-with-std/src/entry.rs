@@ -9,13 +9,8 @@ use std::panic::catch_unwind;
 
 use crate::{abort, Termination};
 
-#[allow(unreachable_code)]
-#[no_mangle]
-unsafe extern "C" fn sel4_runtime_rust_entry(bootinfo: *const sel4::BootInfo) -> ! {
-    sel4_runtime_common::maybe_with_tls(|| {
-        sel4_runtime_common::maybe_set_eh_frame_finder().unwrap();
-        sel4_ctors_dtors::run_ctors().unwrap();
-
+sel4_runtime_common::declare_entrypoint! {
+    (bootinfo: *const sel4::BootInfo) -> ! {
         let bootinfo = unsafe { sel4::BootInfoPtr::new(bootinfo) };
 
         let ipc_buffer = unsafe { bootinfo.ipc_buffer().as_mut().unwrap() };
@@ -24,9 +19,7 @@ unsafe extern "C" fn sel4_runtime_rust_entry(bootinfo: *const sel4::BootInfo) ->
         unsafe {
             __sel4_root_task__main(&bootinfo);
         }
-
-        abort!("__sel4_root_task__main returned")
-    })
+    }
 }
 
 extern "Rust" {

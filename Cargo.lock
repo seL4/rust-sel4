@@ -2398,7 +2398,6 @@ dependencies = [
  "cfg-if",
  "one-shot-mutex",
  "sel4",
- "sel4-ctors-dtors",
  "sel4-dlmalloc",
  "sel4-immediate-sync-once-cell",
  "sel4-microkit-base",
@@ -2563,7 +2562,6 @@ name = "sel4-root-task"
 version = "0.1.0"
 dependencies = [
  "sel4",
- "sel4-ctors-dtors",
  "sel4-dlmalloc",
  "sel4-immediate-sync-once-cell",
  "sel4-panicking",
@@ -2596,7 +2594,6 @@ name = "sel4-root-task-with-std"
 version = "0.1.0"
 dependencies = [
  "sel4",
- "sel4-ctors-dtors",
  "sel4-panicking-env",
  "sel4-runtime-common",
 ]
@@ -2607,6 +2604,7 @@ version = "0.1.0"
 dependencies = [
  "cfg-if",
  "sel4",
+ "sel4-ctors-dtors",
  "sel4-elf-header",
  "sel4-initialize-tls",
  "sel4-panicking-env",
@@ -2705,7 +2703,6 @@ dependencies = [
  "sel4",
  "sel4-backtrace",
  "sel4-backtrace-simple",
- "sel4-ctors-dtors",
  "sel4-dlmalloc",
  "sel4-immediate-sync-once-cell",
  "sel4-panicking",
@@ -2979,7 +2976,6 @@ dependencies = [
  "cfg-if",
  "one-shot-mutex",
  "sel4",
- "sel4-ctors-dtors",
  "sel4-dlmalloc",
  "sel4-panicking",
  "sel4-panicking-env",
@@ -3222,7 +3218,7 @@ name = "tests-root-task-musl"
 version = "0.1.0"
 dependencies = [
  "dlmalloc",
- "one-shot-mutex 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "one-shot-mutex",
  "sel4",
  "sel4-dlmalloc",
  "sel4-linux-syscall-types",
