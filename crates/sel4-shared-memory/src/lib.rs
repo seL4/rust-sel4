@@ -14,5 +14,5 @@ mod shared_memory_type;
 
 pub use shared_memory_type::SharedMemory;
 
-pub type ExternallySharedRef<'a, T, A = access::ReadWrite> = AbstractRef<'a, SharedMemory, T, A>;
-pub type ExternallySharedPtr<'a, T, A = access::ReadWrite> = AbstractPtr<'a, SharedMemory, T, A>;
+pub type SharedMemoryRef<'a, T, A = access::ReadWrite> = AbstractRef<'a, SharedMemory, T, A>;
+pub type SharedMemoryPtr<'a, T, A = access::ReadWrite> = AbstractPtr<'a, SharedMemory, T, A>;

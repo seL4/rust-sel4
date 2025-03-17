@@ -11,7 +11,7 @@ use core::ptr::NonNull;
 use smoltcp::phy::DeviceCapabilities;
 
 use sel4_bounce_buffer_allocator::{AbstractBounceBufferAllocator, BounceBufferAllocator};
-use sel4_shared_memory::ExternallySharedRef;
+use sel4_shared_memory::SharedMemoryRef;
 use sel4_shared_ring_buffer::{
     roles::Provide, Descriptor, PeerMisbehaviorError as SharedRingBuffersPeerMisbehaviorError,
     RingBuffers,
@@ -19,7 +19,7 @@ use sel4_shared_ring_buffer::{
 use sel4_shared_ring_buffer_bookkeeping::slot_tracker::*;
 
 pub(crate) struct Inner<A> {
-    dma_region: ExternallySharedRef<'static, [u8]>,
+    dma_region: SharedMemoryRef<'static, [u8]>,
     bounce_buffer_allocator: BounceBufferAllocator<A>,
     rx_ring_buffers: RingBuffers<'static, Provide, fn()>,
     tx_ring_buffers: RingBuffers<'static, Provide, fn()>,
@@ -64,7 +64,7 @@ enum TxOccupied {
 
 impl<A: AbstractBounceBufferAllocator> Inner<A> {
     pub(crate) fn new(
-        dma_region: ExternallySharedRef<'static, [u8]>,
+        dma_region: SharedMemoryRef<'static, [u8]>,
         mut bounce_buffer_allocator: BounceBufferAllocator<A>,
         mut rx_ring_buffers: RingBuffers<'static, Provide, fn()>,
         tx_ring_buffers: RingBuffers<'static, Provide, fn()>,

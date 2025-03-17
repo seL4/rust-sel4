@@ -78,13 +78,13 @@ macro_rules! var {
 ///
 /// ```rust
 /// let region_1 = unsafe {
-///     ExternallySharedRef::<'static, Foo>::new(
+///     SharedMemoryRef::<'static, Foo>::new(
 ///         memory_region_symbol!(region_1_addr: *mut Foo),
 ///     )
 /// };
 ///
 /// let region_2 = unsafe {
-///     ExternallySharedRef::<'static, [u8]>::new_read_only(
+///     SharedMemoryRef::<'static, [u8]>::new_read_only(
 ///         memory_region_symbol!(region_2_addr: *mut [u8], n = REGION_2_SIZE),
 ///     )
 /// };

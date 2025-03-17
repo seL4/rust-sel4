@@ -9,7 +9,7 @@ use core::task::{Poll, Waker};
 
 use sel4_async_block_io::{access::Access, Operation};
 use sel4_bounce_buffer_allocator::{AbstractBounceBufferAllocator, BounceBufferAllocator};
-use sel4_shared_memory::ExternallySharedRef;
+use sel4_shared_memory::SharedMemoryRef;
 use sel4_shared_ring_buffer::{
     roles::Provide, Descriptor, PeerMisbehaviorError as SharedRingBuffersPeerMisbehaviorError,
     RingBuffers,
@@ -22,7 +22,7 @@ use sel4_shared_ring_buffer_bookkeeping::{slot_set_semaphore::*, slot_tracker::*
 pub use crate::errors::{Error, ErrorOrUserError, IOError, PeerMisbehaviorError, UserError};
 
 pub struct OwnedSharedRingBufferBlockIO<S, A, F> {
-    dma_region: ExternallySharedRef<'static, [u8]>,
+    dma_region: SharedMemoryRef<'static, [u8]>,
     bounce_buffer_allocator: BounceBufferAllocator<A>,
     ring_buffers: RingBuffers<'static, Provide, F, BlockIORequest>,
     requests: SlotTracker<StateTypesImpl>,
@@ -101,7 +101,7 @@ impl<S: SlotSemaphore, A: AbstractBounceBufferAllocator, F: FnMut()>
     OwnedSharedRingBufferBlockIO<S, A, F>
 {
     pub fn new(
-        dma_region: ExternallySharedRef<'static, [u8]>,
+        dma_region: SharedMemoryRef<'static, [u8]>,
         bounce_buffer_allocator: BounceBufferAllocator<A>,
         mut ring_buffers: RingBuffers<'static, Provide, F, BlockIORequest>,
     ) -> Self {

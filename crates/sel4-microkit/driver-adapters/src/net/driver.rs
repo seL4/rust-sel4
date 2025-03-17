@@ -14,16 +14,16 @@ use smoltcp::{
 
 use sel4_driver_interfaces::net::GetNetDeviceMeta;
 use sel4_driver_interfaces::HandleInterrupt;
-use sel4_shared_memory::ExternallySharedRef;
 use sel4_microkit::{Channel, Handler, Infallible, MessageInfo};
 use sel4_microkit_message::MessageInfoExt as _;
+use sel4_shared_memory::SharedMemoryRef;
 use sel4_shared_ring_buffer::{roles::Use, RingBuffers};
 
 use super::message_types::*;
 
 pub struct HandlerImpl<Device> {
     dev: Device,
-    client_region: ExternallySharedRef<'static, [u8]>,
+    client_region: SharedMemoryRef<'static, [u8]>,
     rx_ring_buffers: RingBuffers<'static, Use, fn()>,
     tx_ring_buffers: RingBuffers<'static, Use, fn()>,
     device_channel: Channel,
@@ -33,7 +33,7 @@ pub struct HandlerImpl<Device> {
 impl<Device> HandlerImpl<Device> {
     pub fn new(
         dev: Device,
-        client_region: ExternallySharedRef<'static, [u8]>,
+        client_region: SharedMemoryRef<'static, [u8]>,
         rx_ring_buffers: RingBuffers<'static, Use, fn()>,
         tx_ring_buffers: RingBuffers<'static, Use, fn()>,
         device_channel: Channel,

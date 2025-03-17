@@ -22,11 +22,11 @@ use virtio_drivers::{
     },
 };
 
-use sel4_shared_memory::ExternallySharedRef;
 use sel4_microkit::{
     memory_region_symbol, protection_domain, var, Channel, Handler, Infallible, MessageInfo,
 };
 use sel4_microkit_driver_adapters::block::driver::handle_client_request;
+use sel4_shared_memory::SharedMemoryRef;
 use sel4_shared_ring_buffer::{roles::Use, RingBuffers};
 use sel4_shared_ring_buffer_block_io_types::{
     BlockIORequest, BlockIORequestStatus, BlockIORequestType,
@@ -63,7 +63,7 @@ fn init() -> HandlerImpl {
     };
 
     let client_region = unsafe {
-        ExternallySharedRef::<'static, _>::new(
+        SharedMemoryRef::<'static, _>::new(
             memory_region_symbol!(virtio_blk_client_dma_vaddr: *mut [u8], n = config::VIRTIO_BLK_CLIENT_DMA_SIZE),
         )
     };
@@ -72,8 +72,8 @@ fn init() -> HandlerImpl {
 
     let ring_buffers =
         RingBuffers::<'_, Use, fn(), BlockIORequest>::from_ptrs_using_default_initialization_strategy_for_role(
-            unsafe { ExternallySharedRef::new(memory_region_symbol!(virtio_blk_free: *mut _)) },
-            unsafe { ExternallySharedRef::new(memory_region_symbol!(virtio_blk_used: *mut _)) },
+            unsafe { SharedMemoryRef::new(memory_region_symbol!(virtio_blk_free: *mut _)) },
+            unsafe { SharedMemoryRef::new(memory_region_symbol!(virtio_blk_used: *mut _)) },
             notify_client,
         );
 
@@ -90,7 +90,7 @@ fn init() -> HandlerImpl {
 
 struct HandlerImpl {
     dev: VirtIOBlk<HalImpl, MmioTransport>,
-    client_region: ExternallySharedRef<'static, [u8]>,
+    client_region: SharedMemoryRef<'static, [u8]>,
     ring_buffers: RingBuffers<'static, Use, fn(), BlockIORequest>,
     pending: BTreeMap<u16, Pin<Box<PendingEntry>>>,
 }

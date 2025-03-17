@@ -13,14 +13,14 @@ use alloc::vec;
 
 use rsa::signature::SignatureEncoding;
 
-use sel4_shared_memory::{
-    access::{ReadOnly, ReadWrite},
-    ExternallySharedRef,
-};
 use sel4_microkit::{
     memory_region_symbol, protection_domain, Channel, Handler, Infallible, MessageInfo,
 };
 use sel4_microkit_message::MessageInfoExt as _;
+use sel4_shared_memory::{
+    access::{ReadOnly, ReadWrite},
+    SharedMemoryRef,
+};
 
 use banscii_artist_interface_types::*;
 
@@ -36,15 +36,13 @@ const REGION_SIZE: usize = 0x4_000;
 #[protection_domain(heap_size = 0x10000)]
 fn init() -> HandlerImpl {
     let region_in = unsafe {
-        ExternallySharedRef::new_read_only(
+        SharedMemoryRef::new_read_only(
             memory_region_symbol!(region_in_start: *mut [u8], n = REGION_SIZE),
         )
     };
 
     let region_out = unsafe {
-        ExternallySharedRef::new(
-            memory_region_symbol!(region_out_start: *mut [u8], n = REGION_SIZE),
-        )
+        SharedMemoryRef::new(memory_region_symbol!(region_out_start: *mut [u8], n = REGION_SIZE))
     };
 
     HandlerImpl {
@@ -54,8 +52,8 @@ fn init() -> HandlerImpl {
 }
 
 struct HandlerImpl {
-    region_in: ExternallySharedRef<'static, [u8], ReadOnly>,
-    region_out: ExternallySharedRef<'static, [u8], ReadWrite>,
+    region_in: SharedMemoryRef<'static, [u8], ReadOnly>,
+    region_out: SharedMemoryRef<'static, [u8], ReadWrite>,
 }
 
 impl Handler for HandlerImpl {
