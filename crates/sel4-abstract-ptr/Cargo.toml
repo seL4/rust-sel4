@@ -1,0 +1,20 @@
+#
+# Copyright 2023, Colias Group, LLC
+#
+# SPDX-License-Identifier: MIT OR Apache-2.0
+#
+#
+# This file is generated from './Cargo.nix'. You can edit this file directly
+# if you are not using this project's Cargo manifest management tools.
+# See 'hacking/cargo-manifest-management/README.md' for more information.
+#
+
+[package]
+name = "sel4-abstract-ptr"
+version = "0.1.0"
+authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
+edition = "2021"
+license = "MIT OR Apache-2.0"
+
+[dependencies]
+ptr_meta = { version = "0.3", default-features = false }

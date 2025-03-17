@@ -1602,6 +1602,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "ptr_meta"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fe9e76f66d3f9606f44e45598d155cb13ecf09f4a28199e48daf8c8fc937ea90"
+
+[[package]]
 name = "quote"
 version = "1.0.38"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1857,6 +1863,13 @@ dependencies = [
  "cfg-if",
  "sel4-config",
  "sel4-sys",
+]
+
+[[package]]
+name = "sel4-abstract-ptr"
+version = "0.1.0"
+dependencies = [
+ "ptr_meta",
 ]
 
 [[package]]
