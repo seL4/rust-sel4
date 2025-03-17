@@ -15,7 +15,7 @@ use rsa::signature::SignatureEncoding;
 
 use sel4_externally_shared::{
     access::{ReadOnly, ReadWrite},
-    ExternallySharedRef, ExternallySharedRefExt,
+    ExternallySharedRef,
 };
 use sel4_microkit::{
     memory_region_symbol, protection_domain, Channel, Handler, Infallible, MessageInfo,
@@ -36,7 +36,9 @@ const REGION_SIZE: usize = 0x4_000;
 #[protection_domain(heap_size = 0x10000)]
 fn init() -> HandlerImpl {
     let region_in = unsafe {
-        ExternallySharedRef::new(memory_region_symbol!(region_in_start: *mut [u8], n = REGION_SIZE))
+        ExternallySharedRef::new_read_only(
+            memory_region_symbol!(region_in_start: *mut [u8], n = REGION_SIZE),
+        )
     };
 
     let region_out = unsafe {

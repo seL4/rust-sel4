@@ -7,7 +7,7 @@
 
 use core::intrinsics;
 
-use super::OrderingExhaustive as Ordering;
+use super::ordering::OrderingExhaustive as Ordering;
 
 use Ordering::*;
 
@@ -40,7 +40,6 @@ pub(crate) unsafe fn atomic_load<T: Copy>(dst: *const T, order: Ordering) -> T {
 }
 
 #[inline]
-#[cfg(target_has_atomic)]
 pub(crate) unsafe fn atomic_swap<T: Copy>(dst: *mut T, val: T, order: Ordering) -> T {
     // SAFETY: the caller must uphold the safety contract for `atomic_swap`.
     unsafe {
@@ -55,7 +54,6 @@ pub(crate) unsafe fn atomic_swap<T: Copy>(dst: *mut T, val: T, order: Ordering) 
 }
 
 #[inline]
-#[cfg(target_has_atomic)]
 pub(crate) unsafe fn atomic_add<T: Copy>(dst: *mut T, val: T, order: Ordering) -> T {
     // SAFETY: the caller must uphold the safety contract for `atomic_add`.
     unsafe {
@@ -70,7 +68,6 @@ pub(crate) unsafe fn atomic_add<T: Copy>(dst: *mut T, val: T, order: Ordering) -
 }
 
 #[inline]
-#[cfg(target_has_atomic)]
 pub(crate) unsafe fn atomic_sub<T: Copy>(dst: *mut T, val: T, order: Ordering) -> T {
     // SAFETY: the caller must uphold the safety contract for `atomic_sub`.
     unsafe {
@@ -85,7 +82,6 @@ pub(crate) unsafe fn atomic_sub<T: Copy>(dst: *mut T, val: T, order: Ordering) -
 }
 
 #[inline]
-#[cfg(target_has_atomic)]
 pub(crate) unsafe fn atomic_compare_exchange<T: Copy>(
     dst: *mut T,
     old: T,
@@ -123,7 +119,6 @@ pub(crate) unsafe fn atomic_compare_exchange<T: Copy>(
 }
 
 #[inline]
-#[cfg(target_has_atomic)]
 pub(crate) unsafe fn atomic_compare_exchange_weak<T: Copy>(
     dst: *mut T,
     old: T,
@@ -161,7 +156,6 @@ pub(crate) unsafe fn atomic_compare_exchange_weak<T: Copy>(
 }
 
 #[inline]
-#[cfg(target_has_atomic)]
 pub(crate) unsafe fn atomic_and<T: Copy>(dst: *mut T, val: T, order: Ordering) -> T {
     // SAFETY: the caller must uphold the safety contract for `atomic_and`
     unsafe {
@@ -176,7 +170,6 @@ pub(crate) unsafe fn atomic_and<T: Copy>(dst: *mut T, val: T, order: Ordering) -
 }
 
 #[inline]
-#[cfg(target_has_atomic)]
 pub(crate) unsafe fn atomic_nand<T: Copy>(dst: *mut T, val: T, order: Ordering) -> T {
     // SAFETY: the caller must uphold the safety contract for `atomic_nand`
     unsafe {
@@ -191,7 +184,6 @@ pub(crate) unsafe fn atomic_nand<T: Copy>(dst: *mut T, val: T, order: Ordering) 
 }
 
 #[inline]
-#[cfg(target_has_atomic)]
 pub(crate) unsafe fn atomic_or<T: Copy>(dst: *mut T, val: T, order: Ordering) -> T {
     // SAFETY: the caller must uphold the safety contract for `atomic_or`
     unsafe {
@@ -206,7 +198,6 @@ pub(crate) unsafe fn atomic_or<T: Copy>(dst: *mut T, val: T, order: Ordering) ->
 }
 
 #[inline]
-#[cfg(target_has_atomic)]
 pub(crate) unsafe fn atomic_xor<T: Copy>(dst: *mut T, val: T, order: Ordering) -> T {
     // SAFETY: the caller must uphold the safety contract for `atomic_xor`
     unsafe {
@@ -221,7 +212,6 @@ pub(crate) unsafe fn atomic_xor<T: Copy>(dst: *mut T, val: T, order: Ordering) -
 }
 
 #[inline]
-#[cfg(target_has_atomic)]
 pub(crate) unsafe fn atomic_max<T: Copy>(dst: *mut T, val: T, order: Ordering) -> T {
     // SAFETY: the caller must uphold the safety contract for `atomic_max`
     unsafe {
@@ -236,7 +226,6 @@ pub(crate) unsafe fn atomic_max<T: Copy>(dst: *mut T, val: T, order: Ordering) -
 }
 
 #[inline]
-#[cfg(target_has_atomic)]
 pub(crate) unsafe fn atomic_min<T: Copy>(dst: *mut T, val: T, order: Ordering) -> T {
     // SAFETY: the caller must uphold the safety contract for `atomic_min`
     unsafe {
@@ -251,7 +240,6 @@ pub(crate) unsafe fn atomic_min<T: Copy>(dst: *mut T, val: T, order: Ordering) -
 }
 
 #[inline]
-#[cfg(target_has_atomic)]
 pub(crate) unsafe fn atomic_umax<T: Copy>(dst: *mut T, val: T, order: Ordering) -> T {
     // SAFETY: the caller must uphold the safety contract for `atomic_umax`
     unsafe {
@@ -266,7 +254,6 @@ pub(crate) unsafe fn atomic_umax<T: Copy>(dst: *mut T, val: T, order: Ordering) 
 }
 
 #[inline]
-#[cfg(target_has_atomic)]
 pub(crate) unsafe fn atomic_umin<T: Copy>(dst: *mut T, val: T, order: Ordering) -> T {
     // SAFETY: the caller must uphold the safety contract for `atomic_umin`
     unsafe {

@@ -149,11 +149,6 @@ in rec {
     "packetmeta-id" "async"
   ];
 
-  volatileSource = {
-    git = "https://github.com/coliasgroup/volatile.git";
-    tag = mkKeepRef "aa7512906e9b76066ed928eb6986b0f9b1750e91"; # branch coliasgroup
-  };
-
   fatSource = {
     git = "https://github.com/coliasgroup/rust-embedded-fat.git";
     tag = mkKeepRef "e1465a43c9f550ef58701a275b3133105deb9183"; # branch sel4

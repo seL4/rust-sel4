@@ -21,7 +21,7 @@ log = "0.4.17"
 sel4 = { path = "../../../../../sel4" }
 sel4-bounce-buffer-allocator = { path = "../../../../../sel4-bounce-buffer-allocator" }
 sel4-driver-interfaces = { path = "../../../../../sel4-driver-interfaces" }
-sel4-externally-shared = { path = "../../../../../sel4-externally-shared", features = ["unstable"] }
+sel4-externally-shared = { path = "../../../../../sel4-externally-shared" }
 sel4-immediate-sync-once-cell = { path = "../../../../../sel4-immediate-sync-once-cell" }
 sel4-logging = { path = "../../../../../sel4-logging" }
 sel4-microkit = { path = "../../../../../sel4-microkit" }

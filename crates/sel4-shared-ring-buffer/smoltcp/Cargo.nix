@@ -17,7 +17,7 @@ mk {
       sel4-shared-ring-buffer
       sel4-shared-ring-buffer-bookkeeping
       sel4-bounce-buffer-allocator
+      sel4-externally-shared
     ;
-    sel4-externally-shared = localCrates.sel4-externally-shared // { features = [ "unstable" ]; };
   };
 }

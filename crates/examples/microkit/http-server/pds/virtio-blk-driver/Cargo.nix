@@ -16,6 +16,7 @@ mk {
     inherit (localCrates)
       sel4-microkit
       sel4-microkit-message
+      sel4-externally-shared
       sel4
       sel4-logging
       sel4-immediate-sync-once-cell
@@ -27,7 +28,5 @@ mk {
       sel4-driver-interfaces
       sel4-microkit-driver-adapters
     ;
-
-    sel4-externally-shared = localCrates.sel4-externally-shared // { features = [ "unstable" ]; };
   };
 }

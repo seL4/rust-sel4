@@ -23,7 +23,6 @@ mk {
       sel4-async-single-threaded-executor
       sel4-async-time
       sel4-async-unsync
-      sel4-atomic-ptr
       sel4-bounce-buffer-allocator
       sel4-dlmalloc
       sel4-driver-interfaces
@@ -44,6 +43,7 @@ mk {
       sel4-stack
       sel4-sync
       sel4-sync-trivial
+      sel4-externally-shared
 
       sel4-bcm2835-aux-uart-driver
       sel4-pl011-driver
@@ -54,7 +54,6 @@ mk {
       sel4-virtio-net
     ;
 
-    sel4-externally-shared = localCrates.sel4-externally-shared // { features = [ "unstable" ]; };
     sel4-root-task = localCrates.sel4-root-task // { features = [ "full" ]; optional = true; };
     sel4-microkit = localCrates.sel4-microkit // { features = [ "full" ]; optional = true; };
     sel4-microkit-message = localCrates.sel4-microkit-message // { optional = true; };
