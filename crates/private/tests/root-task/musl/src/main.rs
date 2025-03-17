@@ -14,13 +14,14 @@ use core::alloc::Layout;
 use core::ffi::c_char;
 use core::ptr;
 
+use one_shot_mutex::RawOneShotMutex;
+
 use sel4_dlmalloc::{StaticDlmalloc, StaticHeap};
 use sel4_linux_syscall_types::{ENOMEM, ENOSYS, MAP_ANONYMOUS, SEEK_CUR};
 use sel4_musl::{
     set_syscall_handler, ParseSyscallError, Syscall, SyscallReturnValue, VaListAsSyscallArgs,
 };
 use sel4_root_task_with_std::{debug_print, debug_println, declare_root_task};
-use sel4_sync_trivial::PanickingRawMutex;
 
 declare_root_task!(main = main);
 
@@ -118,4 +119,4 @@ const MMAP_HEAP_SIZE: usize = 2 * 1024 * 1024;
 
 static MMAP_HEAP: StaticHeap<MMAP_HEAP_SIZE> = StaticHeap::new();
 
-static MMAP_DLMALLOC: StaticDlmalloc<PanickingRawMutex> = StaticDlmalloc::new(MMAP_HEAP.bounds());
+static MMAP_DLMALLOC: StaticDlmalloc<RawOneShotMutex> = StaticDlmalloc::new(MMAP_HEAP.bounds());

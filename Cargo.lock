@@ -1120,9 +1120,9 @@ version = "0.1.0"
 dependencies = [
  "async-unsync",
  "futures",
- "lock_api",
  "log",
  "microkit-http-server-example-server-core",
+ "one-shot-mutex",
  "rcgen",
  "rtcc",
  "sel4",
@@ -1145,7 +1145,6 @@ dependencies = [
  "sel4-shared-ring-buffer-block-io-types",
  "sel4-shared-ring-buffer-bookkeeping",
  "sel4-shared-ring-buffer-smoltcp",
- "sel4-sync",
  "smoltcp",
 ]
 
@@ -1392,6 +1391,15 @@ name = "once_cell"
 version = "1.20.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "945462a4b81e43c4e3ba96bd7b49d834c6f61198356aa858733bc4acf3cbe62e"
+
+[[package]]
+name = "one-shot-mutex"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3c32f39cf70e43cb1488b67fd6adbc9c0ccaac00fe751ee0d02f82fcfe6267e2"
+dependencies = [
+ "lock_api",
+]
 
 [[package]]
 name = "owned_ttf_parser"
@@ -2076,6 +2084,7 @@ name = "sel4-capdl-initializer"
 version = "0.1.0"
 dependencies = [
  "log",
+ "one-shot-mutex",
  "postcard",
  "sel4",
  "sel4-capdl-initializer-core",
@@ -2083,7 +2092,6 @@ dependencies = [
  "sel4-dlmalloc",
  "sel4-logging",
  "sel4-root-task",
- "sel4-sync",
 ]
 
 [[package]]
@@ -2388,6 +2396,7 @@ name = "sel4-microkit"
 version = "0.1.0"
 dependencies = [
  "cfg-if",
+ "one-shot-mutex",
  "sel4",
  "sel4-ctors-dtors",
  "sel4-dlmalloc",
@@ -2397,7 +2406,6 @@ dependencies = [
  "sel4-panicking",
  "sel4-panicking-env",
  "sel4-runtime-common",
- "sel4-sync",
 ]
 
 [[package]]
@@ -2763,7 +2771,6 @@ dependencies = [
  "lock_api",
  "sel4",
  "sel4-immediate-sync-once-cell",
- "sel4-sync-trivial",
 ]
 
 [[package]]
@@ -2825,10 +2832,10 @@ dependencies = [
 name = "sel4-virtio-hal-impl"
 version = "0.1.0"
 dependencies = [
+ "one-shot-mutex",
  "sel4-bounce-buffer-allocator",
  "sel4-immediate-sync-once-cell",
  "sel4-shared-memory",
- "sel4-sync",
  "virtio-drivers",
 ]
 
@@ -2970,13 +2977,13 @@ name = "spawn-task-child"
 version = "0.1.0"
 dependencies = [
  "cfg-if",
+ "one-shot-mutex",
  "sel4",
  "sel4-ctors-dtors",
  "sel4-dlmalloc",
  "sel4-panicking",
  "sel4-panicking-env",
  "sel4-runtime-common",
- "sel4-sync",
 ]
 
 [[package]]
@@ -3095,7 +3102,6 @@ dependencies = [
  "sel4",
  "sel4-simple-task-config-types",
  "sel4-simple-task-runtime",
- "sel4-sync",
  "serde",
 ]
 
@@ -3216,13 +3222,12 @@ name = "tests-root-task-musl"
 version = "0.1.0"
 dependencies = [
  "dlmalloc",
- "lock_api",
+ "one-shot-mutex 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "sel4",
  "sel4-dlmalloc",
  "sel4-linux-syscall-types",
  "sel4-musl",
  "sel4-root-task-with-std",
- "sel4-sync-trivial",
 ]
 
 [[package]]

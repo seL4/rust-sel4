@@ -11,14 +11,13 @@ mk {
   dependencies = {
     inherit (versions)
       dlmalloc
-      lock_api
+      one-shot-mutex
     ;
     inherit (localCrates)
       sel4
       sel4-root-task-with-std
       sel4-musl
       sel4-linux-syscall-types
-      sel4-sync-trivial
       sel4-dlmalloc
     ;
   };

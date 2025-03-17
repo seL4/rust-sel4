@@ -8,8 +8,6 @@
 
 pub use lock_api;
 
-pub use sel4_sync_trivial::*;
-
 mod mutex;
 
 pub use mutex::{DeferredRawNotificationMutex, LazyRawNotificationMutex, RawNotificationMutex};

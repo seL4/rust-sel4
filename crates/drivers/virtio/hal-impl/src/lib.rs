@@ -9,15 +9,14 @@
 use core::alloc::Layout;
 use core::ptr::{self, NonNull};
 
+use one_shot_mutex::OneShotMutex;
 use virtio_drivers::{BufferDirection, Hal, PhysAddr, PAGE_SIZE};
 
 use sel4_bounce_buffer_allocator::{Basic, BounceBufferAllocator};
 use sel4_immediate_sync_once_cell::ImmediateSyncOnceCell;
 use sel4_shared_memory::SharedMemoryRef;
-use sel4_sync::{lock_api::Mutex, PanickingRawMutex};
 
-static GLOBAL_STATE: ImmediateSyncOnceCell<Mutex<PanickingRawMutex, State>> =
-    ImmediateSyncOnceCell::new();
+static GLOBAL_STATE: ImmediateSyncOnceCell<OneShotMutex<State>> = ImmediateSyncOnceCell::new();
 
 struct State {
     dma_region: SharedMemoryRef<'static, [u8]>,
@@ -56,7 +55,7 @@ impl HalImpl {
             BounceBufferAllocator::new(Basic::new(dma_region_size), max_alignment);
 
         GLOBAL_STATE
-            .set(Mutex::new(State {
+            .set(OneShotMutex::new(State {
                 dma_region,
                 dma_region_paddr,
                 bounce_buffer_allocator,

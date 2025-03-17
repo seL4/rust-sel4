@@ -6,11 +6,12 @@
 
 use core::ptr;
 
+use one_shot_mutex::RawOneShotMutex;
+
 use sel4::CapTypeForFrameObjectOfFixedSize;
 use sel4_dlmalloc::{StaticDlmalloc, StaticHeap};
 use sel4_panicking::catch_unwind;
 use sel4_panicking_env::abort;
-use sel4_sync::PanickingRawMutex;
 
 use crate::main;
 
@@ -23,7 +24,7 @@ const HEAP_SIZE: usize = 1024 * 64;
 static STATIC_HEAP: StaticHeap<HEAP_SIZE> = StaticHeap::new();
 
 #[global_allocator]
-static GLOBAL_ALLOCATOR: StaticDlmalloc<PanickingRawMutex> =
+static GLOBAL_ALLOCATOR: StaticDlmalloc<RawOneShotMutex> =
     StaticDlmalloc::new(STATIC_HEAP.bounds());
 
 sel4_panicking_env::register_debug_put_char!(sel4::debug_put_char);

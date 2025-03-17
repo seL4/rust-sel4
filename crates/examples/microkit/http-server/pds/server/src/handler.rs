@@ -11,7 +11,7 @@ use core::pin::Pin;
 use core::time::Duration;
 
 use futures::future::LocalBoxFuture;
-use lock_api::Mutex;
+use one_shot_mutex::OneShotMutex;
 use smoltcp::iface::Config;
 use smoltcp::time::Instant as SmoltcpInstant;
 
@@ -24,7 +24,6 @@ use sel4_driver_interfaces::timer::{Clock, DefaultTimer, Timer};
 use sel4_microkit::{Channel, Handler, Infallible};
 use sel4_microkit_driver_adapters::timer::client::Client as TimerClient;
 use sel4_shared_ring_buffer_block_io::SharedRingBufferBlockIO;
-use sel4_sync::PanickingRawMutex;
 
 use crate::DeviceImpl;
 
@@ -34,7 +33,7 @@ pub(crate) struct HandlerImpl {
     timer_driver_channel: sel4_microkit::Channel,
     net_driver_channel: sel4_microkit::Channel,
     block_driver_channel: sel4_microkit::Channel,
-    timer: Arc<Mutex<PanickingRawMutex, DefaultTimer<TimerClient>>>,
+    timer: Arc<OneShotMutex<DefaultTimer<TimerClient>>>,
     net_device: DeviceImpl<Basic>,
     shared_block_io: SharedRingBufferBlockIO<BlockSize512, ReadOnly, Basic, fn()>,
     shared_timers: TimerManager,
@@ -49,7 +48,7 @@ impl HandlerImpl {
         timer_driver_channel: sel4_microkit::Channel,
         net_driver_channel: sel4_microkit::Channel,
         block_driver_channel: sel4_microkit::Channel,
-        timer: Arc<Mutex<PanickingRawMutex, DefaultTimer<TimerClient>>>,
+        timer: Arc<OneShotMutex<DefaultTimer<TimerClient>>>,
         mut net_device: DeviceImpl<Basic>,
         net_config: Config,
         shared_block_io: SharedRingBufferBlockIO<BlockSize512, ReadOnly, Basic, fn()>,
@@ -94,9 +93,7 @@ impl HandlerImpl {
         Self::now_with_timer_client(&self.timer)
     }
 
-    fn now_with_timer_client(
-        timer: &Arc<Mutex<PanickingRawMutex, DefaultTimer<TimerClient>>>,
-    ) -> Instant {
+    fn now_with_timer_client(timer: &Arc<OneShotMutex<DefaultTimer<TimerClient>>>) -> Instant {
         Instant::new(timer.lock().get_time().unwrap())
     }
 

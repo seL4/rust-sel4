@@ -9,13 +9,15 @@
 mk {
   package.name = "sel4-microkit";
   dependencies = {
-    inherit (versions) cfg-if;
+    inherit (versions)
+      cfg-if
+      one-shot-mutex
+    ;
     inherit (localCrates)
       sel4-immediate-sync-once-cell
       sel4-panicking-env
       sel4-panicking
       sel4-dlmalloc
-      sel4-sync
       sel4-ctors-dtors
       sel4-microkit-base
       sel4-microkit-macros

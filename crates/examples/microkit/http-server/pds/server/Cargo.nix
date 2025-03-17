@@ -10,7 +10,7 @@ mk {
   package.name = "microkit-http-server-example-server";
 
   dependencies = {
-    inherit (versions) log rtcc lock_api;
+    inherit (versions) log rtcc one-shot-mutex;
 
     futures = {
       version = versions.futures;
@@ -29,7 +29,6 @@ mk {
 
     inherit (localCrates)
       sel4
-      sel4-sync
       sel4-logging
       sel4-immediate-sync-once-cell
       sel4-microkit-message
