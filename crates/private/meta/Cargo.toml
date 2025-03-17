@@ -24,6 +24,8 @@ sel4-root-task = ["dep:sel4-root-task"]
 cfg-if = "1.0.0"
 log = "0.4.17"
 sel4 = { path = "../../sel4" }
+sel4-abstract-ptr = { path = "../../sel4-abstract-ptr" }
+sel4-abstract-rc = { path = "../../sel4-abstract-rc" }
 sel4-async-block-io = { path = "../../sel4-async/block-io" }
 sel4-async-block-io-fat = { path = "../../sel4-async/block-io/fat" }
 sel4-async-io = { path = "../../sel4-async/io" }
@@ -51,7 +53,7 @@ sel4-panicking-env = { path = "../../sel4-panicking/env" }
 sel4-pl011-driver = { path = "../../drivers/pl011" }
 sel4-pl031-driver = { path = "../../drivers/pl031" }
 sel4-root-task = { path = "../../sel4-root-task", features = ["full"], optional = true }
-sel4-shared-memory = { path = "../../sel4-shared-memory" }
+sel4-shared-memory = { path = "../../sel4-shared-memory", features = ["atomics"] }
 sel4-shared-ring-buffer = { path = "../../sel4-shared-ring-buffer" }
 sel4-shared-ring-buffer-block-io = { path = "../../sel4-shared-ring-buffer/block-io" }
 sel4-shared-ring-buffer-block-io-types = { path = "../../sel4-shared-ring-buffer/block-io/types" }

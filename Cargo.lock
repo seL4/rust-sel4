@@ -1051,6 +1051,8 @@ dependencies = [
  "cfg-if",
  "log",
  "sel4",
+ "sel4-abstract-ptr",
+ "sel4-abstract-rc",
  "sel4-async-block-io",
  "sel4-async-block-io-fat",
  "sel4-async-io",

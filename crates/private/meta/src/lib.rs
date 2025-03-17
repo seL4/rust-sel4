@@ -84,7 +84,8 @@ definitely! {
     sel4_sys
     sel4_config
 
-    // sel4_abstract_rc
+    sel4_abstract_ptr
+    sel4_abstract_rc
     sel4_async_block_io
     sel4_async_block_io_fat
     sel4_async_io
@@ -92,12 +93,10 @@ definitely! {
     sel4_async_single_threaded_executor
     sel4_async_time
     sel4_async_unsync
-    sel4_atomic_ptr
     sel4_bounce_buffer_allocator
     sel4_dlmalloc
     sel4_driver_interfaces
     sel4_elf_header
-    sel4_shared_memory
     sel4_immediate_sync_once_cell
     sel4_immutable_cell
     sel4_initialize_tls
@@ -114,6 +113,7 @@ maybe! {
 }
 
 definitely! {
+    sel4_shared_memory
     sel4_shared_ring_buffer
     sel4_shared_ring_buffer_block_io
     sel4_shared_ring_buffer_block_io_types
