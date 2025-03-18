@@ -14,13 +14,11 @@ where
 {
     #[inline]
     pub fn atomic_load(self, order: Ordering) -> T {
-        // SAFETY: data races are prevented by atomic intrinsics.
         unsafe { M::atomic_load(self.pointer.as_ptr().cast_const(), order) }
     }
 
     #[inline]
     pub fn atomic_store(self, val: T, order: Ordering) {
-        // SAFETY: data races are prevented by atomic intrinsics.
         unsafe {
             M::atomic_store(self.pointer.as_ptr(), val, order);
         }
@@ -28,7 +26,6 @@ where
 
     #[inline]
     pub fn atomic_swap(self, val: T, order: Ordering) -> T {
-        // SAFETY: data races are prevented by atomic intrinsics.
         unsafe { M::atomic_swap(self.pointer.as_ptr(), val, order) }
     }
 
@@ -40,7 +37,6 @@ where
         success: Ordering,
         failure: Ordering,
     ) -> Result<T, T> {
-        // SAFETY: data races are prevented by atomic intrinsics.
         unsafe { M::atomic_compare_exchange(self.pointer.as_ptr(), current, new, success, failure) }
     }
 
@@ -52,7 +48,6 @@ where
         success: Ordering,
         failure: Ordering,
     ) -> Result<T, T> {
-        // SAFETY: data races are prevented by atomic intrinsics.
         unsafe {
             M::atomic_compare_exchange_weak(self.pointer.as_ptr(), current, new, success, failure)
         }
@@ -60,37 +55,31 @@ where
 
     #[inline]
     pub fn atomic_fetch_add(self, val: T, order: Ordering) -> T {
-        // SAFETY: data races are prevented by atomic intrinsics.
         unsafe { M::atomic_add(self.pointer.as_ptr(), val, order) }
     }
 
     #[inline]
     pub fn atomic_fetch_sub(self, val: T, order: Ordering) -> T {
-        // SAFETY: data races are prevented by atomic intrinsics.
         unsafe { M::atomic_sub(self.pointer.as_ptr(), val, order) }
     }
 
     #[inline]
     pub fn atomic_fetch_and(self, val: T, order: Ordering) -> T {
-        // SAFETY: data races are prevented by atomic intrinsics.
         unsafe { M::atomic_and(self.pointer.as_ptr(), val, order) }
     }
 
     #[inline]
     pub fn atomic_fetch_nand(self, val: T, order: Ordering) -> T {
-        // SAFETY: data races are prevented by atomic intrinsics.
         unsafe { M::atomic_nand(self.pointer.as_ptr(), val, order) }
     }
 
     #[inline]
     pub fn atomic_fetch_or(self, val: T, order: Ordering) -> T {
-        // SAFETY: data races are prevented by atomic intrinsics.
         unsafe { M::atomic_or(self.pointer.as_ptr(), val, order) }
     }
 
     #[inline]
     pub fn atomic_fetch_xor(self, val: T, order: Ordering) -> T {
-        // SAFETY: data races are prevented by atomic intrinsics.
         unsafe { M::atomic_xor(self.pointer.as_ptr(), val, order) }
     }
 
@@ -117,13 +106,11 @@ where
 
     #[inline]
     pub fn atomic_fetch_max(self, val: T, order: Ordering) -> T {
-        // SAFETY: data races are prevented by atomic intrinsics.
         unsafe { M::atomic_max(self.pointer.as_ptr(), val, order) }
     }
 
     #[inline]
     pub fn atomic_fetch_min(self, val: T, order: Ordering) -> T {
-        // SAFETY: data races are prevented by atomic intrinsics.
         unsafe { M::atomic_min(self.pointer.as_ptr(), val, order) }
     }
 }

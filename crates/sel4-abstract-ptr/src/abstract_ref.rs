@@ -5,11 +5,12 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 //
 
+use core::{cmp::Ordering, fmt, hash, marker::PhantomData, ptr::NonNull};
+
 use crate::{
     abstract_ptr::AbstractPtr,
     access::{Access, Copyable, ReadOnly, ReadWrite, RestrictAccess, WriteOnly},
 };
-use core::{cmp::Ordering, fmt, hash, marker::PhantomData, ptr::NonNull};
 
 #[must_use]
 #[repr(transparent)]
@@ -160,7 +161,7 @@ where
     T: ?Sized,
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        fmt::Pointer::fmt(&self.pointer.as_ptr(), f)
+        self.pointer.fmt(f)
     }
 }
 
@@ -169,7 +170,7 @@ where
     T: ?Sized,
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        fmt::Pointer::fmt(&self.pointer.as_ptr(), f)
+        self.pointer.fmt(f)
     }
 }
 
@@ -177,8 +178,9 @@ impl<M, T, A> PartialEq for AbstractRef<'_, M, T, A>
 where
     T: ?Sized,
 {
+    #[allow(ambiguous_wide_pointer_comparisons)]
     fn eq(&self, other: &Self) -> bool {
-        core::ptr::eq(self.pointer.as_ptr(), other.pointer.as_ptr())
+        self.pointer.eq(&other.pointer)
     }
 }
 
@@ -197,9 +199,9 @@ impl<M, T, A> Ord for AbstractRef<'_, M, T, A>
 where
     T: ?Sized,
 {
+    #[allow(ambiguous_wide_pointer_comparisons)]
     fn cmp(&self, other: &Self) -> Ordering {
-        #[allow(ambiguous_wide_pointer_comparisons)]
-        Ord::cmp(&self.pointer.as_ptr(), &other.pointer.as_ptr())
+        self.pointer.cmp(&other.pointer)
     }
 }
 
@@ -208,6 +210,6 @@ where
     T: ?Sized,
 {
     fn hash<H: hash::Hasher>(&self, state: &mut H) {
-        self.pointer.as_ptr().hash(state);
+        self.pointer.hash(state);
     }
 }
