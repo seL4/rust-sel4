@@ -6,7 +6,9 @@
 
 use core::alloc::Layout;
 
-use crate::{AbstractBounceBufferAllocator, Offset, Size};
+use crate::{
+    AbstractBounceBufferAllocator, AbstractBounceBufferAllocatorWithRangeTracking, Offset, Size,
+};
 
 pub struct Bump {
     watermark: Offset,
@@ -35,3 +37,5 @@ impl AbstractBounceBufferAllocator for Bump {
 
     fn deallocate(&mut self, _offset: Offset, _size: Size) {}
 }
+
+impl AbstractBounceBufferAllocatorWithRangeTracking for Bump {}

@@ -5,12 +5,14 @@
 //
 
 use core::alloc::Layout;
-use core::ops::Range;
+use core::marker::PhantomData;
 use core::ptr::NonNull;
 
 use smoltcp::phy::DeviceCapabilities;
 
-use sel4_bounce_buffer_allocator::{AbstractBounceBufferAllocator, BounceBufferAllocator};
+use sel4_bounce_buffer_allocator::{
+    AbstractBounceBufferAllocator, BounceBufferAllocation, BounceBufferAllocator,
+};
 use sel4_shared_memory::SharedMemoryRef;
 use sel4_shared_ring_buffer::{
     roles::Provide, Descriptor, PeerMisbehaviorError as SharedRingBuffersPeerMisbehaviorError,
@@ -24,7 +26,7 @@ pub(crate) struct Inner<A> {
     rx_ring_buffers: RingBuffers<'static, Provide, fn()>,
     tx_ring_buffers: RingBuffers<'static, Provide, fn()>,
     rx_buffers: SlotTracker<RxStateTypesImpl>,
-    tx_buffers: SlotTracker<TxStateTypesImpl>,
+    tx_buffers: SlotTracker<TxStateTypesImpl<A>>,
     caps: DeviceCapabilities,
 }
 
@@ -49,17 +51,21 @@ enum RxOccupied {
 
 pub(crate) type TxBufferIndex = usize;
 
-enum TxStateTypesImpl {}
-
-impl SlotStateTypes for TxStateTypesImpl {
-    type Common = ();
-    type Free = ();
-    type Occupied = TxOccupied;
+struct TxStateTypesImpl<A> {
+    _phantom: PhantomData<A>,
 }
 
-enum TxOccupied {
+impl<A> SlotStateTypes for TxStateTypesImpl<A> {
+    type Common = ();
+    type Free = ();
+    type Occupied = TxOccupied<A>;
+}
+
+enum TxOccupied<A> {
     Claimed,
-    Sent { range: Range<usize> },
+    Sent {
+        allocation: BounceBufferAllocation<A>,
+    },
 }
 
 impl<A: AbstractBounceBufferAllocator> Inner<A> {
@@ -73,11 +79,11 @@ impl<A: AbstractBounceBufferAllocator> Inner<A> {
         caps: DeviceCapabilities,
     ) -> Result<Self, Error> {
         let rx_buffers = SlotTracker::new_occupied((0..num_rx_buffers).map(|i| {
-            let range = bounce_buffer_allocator
+            let allocation = bounce_buffer_allocator
                 .allocate(Layout::from_size_align(rx_buffer_size, 1).unwrap())
                 .map_err(|_| Error::BounceBufferAllocationError)
                 .unwrap();
-            let desc = Descriptor::from_encoded_addr_range(range, i);
+            let desc = Descriptor::from_encoded_addr_range(allocation.range(), i);
             rx_ring_buffers
                 .free_mut()
                 .enqueue_and_commit(desc)
@@ -147,21 +153,20 @@ impl<A: AbstractBounceBufferAllocator> Inner<A> {
         while let Some(desc) = self.tx_ring_buffers.used_mut().dequeue()? {
             let ix = desc.cookie();
 
-            let state_value = self
-                .tx_buffers
-                .get_state_value(ix)
-                .map_err(|_| PeerMisbehaviorError::OutOfBoundsCookie)?;
-
-            match state_value {
-                SlotStateValueRef::Occupied(TxOccupied::Sent { range }) => {
-                    self.bounce_buffer_allocator.deallocate(range.clone());
+            match self.tx_buffers.free(ix, ()) {
+                Ok(TxOccupied::Sent { allocation }) => {
+                    self.bounce_buffer_allocator.deallocate(allocation);
+                }
+                Err(err) => {
+                    return Err(match err {
+                        SlotTrackerError::OutOfBounds => PeerMisbehaviorError::OutOfBoundsCookie,
+                        SlotTrackerError::StateMismatch => PeerMisbehaviorError::StateMismatch,
+                    })
                 }
                 _ => {
                     return Err(PeerMisbehaviorError::StateMismatch);
                 }
             }
-
-            self.tx_buffers.free(ix, ()).unwrap();
 
             notify_tx = true;
         }
@@ -264,10 +269,12 @@ impl<A: AbstractBounceBufferAllocator> Inner<A> {
     where
         F: FnOnce(&mut [u8]) -> R,
     {
-        let range = self
+        let allocation = self
             .bounce_buffer_allocator
             .allocate(Layout::from_size_align(len, 1).unwrap())
             .map_err(|_| Error::BounceBufferAllocationError)?;
+
+        let range = allocation.range();
 
         let occupied = self
             .tx_buffers
@@ -276,9 +283,7 @@ impl<A: AbstractBounceBufferAllocator> Inner<A> {
             .as_occupied()
             .unwrap();
         assert!(matches!(occupied, TxOccupied::Claimed));
-        *occupied = TxOccupied::Sent {
-            range: range.clone(),
-        };
+        *occupied = TxOccupied::Sent { allocation };
 
         let mut ptr = self
             .dma_region
