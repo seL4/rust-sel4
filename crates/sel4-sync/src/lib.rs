@@ -10,4 +10,4 @@ pub use lock_api;
 
 mod mutex;
 
-pub use mutex::{DeferredRawNotificationMutex, LazyRawNotificationMutex, RawNotificationMutex};
+pub use mutex::{RawDeferredNotificationMutex, RawLazyNotificationMutex, RawNotificationMutex};
