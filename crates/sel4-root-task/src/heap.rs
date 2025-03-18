@@ -46,7 +46,7 @@ macro_rules! declare_heap {
 
                 #[global_allocator]
                 static GLOBAL_ALLOCATOR: StaticDlmalloc<LazyRawNotificationMutex> =
-                    StaticDlmalloc::new_with(
+                    StaticDlmalloc::new_with_raw_mutex(
                         LazyRawNotificationMutex::new(get_global_allocator_mutex_notification),
                         STATIC_HEAP.bounds(),
                     );
