@@ -48,35 +48,31 @@ unsafe impl<_T> lock_api::RawMutex for RawNotificationMutex<_T> {
     }
 }
 
-pub struct DeferredRawNotificationMutex(GenericRawMutex<DeferredNotificationMutexSyncOps>);
+pub struct RawDeferredNotificationMutex(GenericRawMutex<DeferredNotification>);
 
-impl DeferredRawNotificationMutex {
+impl RawDeferredNotificationMutex {
     pub const fn new() -> Self {
-        Self(GenericRawMutex::new(DeferredNotificationMutexSyncOps::new()))
+        Self(GenericRawMutex::new(DeferredNotification::new()))
     }
 
     pub fn set_notification(
         &self,
         nfn: sel4::cap::Notification,
     ) -> Result<(), NotificationAlreadySetError> {
-        self.0
-            .sync_ops
-            .inner
-            .set(nfn)
-            .map_err(|_| NotificationAlreadySetError(()))
+        self.0.nfn.set_notification(nfn)
     }
 }
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub struct NotificationAlreadySetError(());
 
-impl Default for DeferredRawNotificationMutex {
+impl Default for RawDeferredNotificationMutex {
     fn default() -> Self {
         Self::new()
     }
 }
 
-unsafe impl lock_api::RawMutex for DeferredRawNotificationMutex {
+unsafe impl lock_api::RawMutex for RawDeferredNotificationMutex {
     type GuardMarker = lock_api::GuardNoSend; // TODO
 
     #[allow(clippy::declare_interior_mutable_const)]
@@ -95,17 +91,17 @@ unsafe impl lock_api::RawMutex for DeferredRawNotificationMutex {
     }
 }
 
-pub struct LazyRawNotificationMutex<F = fn() -> sel4::cap::Notification>(
-    GenericRawMutex<LazyNotificationMutexSyncOps<F>>,
+pub struct RawLazyNotificationMutex<F = fn() -> sel4::cap::Notification>(
+    GenericRawMutex<LazyNotification<F>>,
 );
 
-impl<F> LazyRawNotificationMutex<F> {
+impl<F> RawLazyNotificationMutex<F> {
     pub const fn new(f: F) -> Self {
-        Self(GenericRawMutex::new(LazyNotificationMutexSyncOps::new(f)))
+        Self(GenericRawMutex::new(LazyNotification::new(f)))
     }
 }
 
-unsafe impl<F: Fn() -> sel4::cap::Notification> lock_api::RawMutex for LazyRawNotificationMutex<F> {
+unsafe impl<F: Fn() -> sel4::cap::Notification> lock_api::RawMutex for RawLazyNotificationMutex<F> {
     type GuardMarker = lock_api::GuardNoSend; // TODO
 
     #[allow(clippy::declare_interior_mutable_const)]
@@ -126,35 +122,29 @@ unsafe impl<F: Fn() -> sel4::cap::Notification> lock_api::RawMutex for LazyRawNo
 
 // // //
 
-struct GenericRawMutex<O> {
-    sync_ops: O,
+struct GenericRawMutex<T> {
+    nfn: T,
     value: AtomicIsize,
 }
 
-impl<O> GenericRawMutex<O> {
-    const fn new(sync_ops: O) -> Self {
+impl<T> GenericRawMutex<T> {
+    const fn new(nfn: T) -> Self {
         Self {
-            sync_ops,
+            nfn,
             value: AtomicIsize::new(1),
         }
     }
 }
 
-trait MutexSyncOps {
-    fn signal(&self);
-    fn wait(&self);
+trait GetNotification {
+    fn get_notification(&self) -> sel4::cap::Notification;
 }
 
-unsafe impl<O: MutexSyncOps> lock_api::RawMutex for GenericRawMutex<O> {
-    type GuardMarker = lock_api::GuardNoSend; // TODO
-
-    #[allow(clippy::declare_interior_mutable_const)]
-    const INIT: Self = unimplemented!();
-
+impl<T: GetNotification> GenericRawMutex<T> {
     fn lock(&self) {
         let old_value = self.value.fetch_sub(1, Ordering::Acquire);
         if old_value <= 0 {
-            self.sync_ops.wait();
+            let _badge = self.nfn.get_notification().wait();
             fence(Ordering::Acquire);
         }
     }
@@ -166,55 +156,50 @@ unsafe impl<O: MutexSyncOps> lock_api::RawMutex for GenericRawMutex<O> {
     unsafe fn unlock(&self) {
         let old_value = self.value.fetch_add(1, Ordering::Release);
         if old_value < 0 {
-            self.sync_ops.signal();
+            self.nfn.get_notification().signal();
         }
     }
 }
 
-trait MutexSyncOpsWithNotification {
-    fn notification(&self) -> sel4::cap::Notification;
-}
-
-impl<O: MutexSyncOpsWithNotification> MutexSyncOps for O {
-    fn signal(&self) {
-        self.notification().signal()
-    }
-
-    fn wait(&self) {
-        let _badge = self.notification().wait();
-    }
-}
-
-impl MutexSyncOpsWithNotification for sel4::cap::Notification {
-    fn notification(&self) -> sel4::cap::Notification {
+impl GetNotification for sel4::cap::Notification {
+    fn get_notification(&self) -> sel4::cap::Notification {
         *self
     }
 }
 
-struct DeferredNotificationMutexSyncOps {
+struct DeferredNotification {
     inner: ImmediateSyncOnceCell<sel4::cap::Notification>,
 }
 
-impl DeferredNotificationMutexSyncOps {
+impl DeferredNotification {
     const fn new() -> Self {
         Self {
             inner: ImmediateSyncOnceCell::new(),
         }
     }
+
+    fn set_notification(
+        &self,
+        nfn: sel4::cap::Notification,
+    ) -> Result<(), NotificationAlreadySetError> {
+        self.inner
+            .set(nfn)
+            .map_err(|_| NotificationAlreadySetError(()))
+    }
 }
 
-impl MutexSyncOpsWithNotification for DeferredNotificationMutexSyncOps {
-    fn notification(&self) -> sel4::cap::Notification {
+impl GetNotification for DeferredNotification {
+    fn get_notification(&self) -> sel4::cap::Notification {
         *self.inner.get().unwrap()
     }
 }
 
-struct LazyNotificationMutexSyncOps<F> {
+struct LazyNotification<F> {
     f: F,
     state: ImmediateSyncOnceCell<sel4::cap::Notification>,
 }
 
-impl<F> LazyNotificationMutexSyncOps<F> {
+impl<F> LazyNotification<F> {
     const fn new(f: F) -> Self {
         Self {
             f,
@@ -223,10 +208,8 @@ impl<F> LazyNotificationMutexSyncOps<F> {
     }
 }
 
-impl<F: Fn() -> sel4::cap::Notification> MutexSyncOpsWithNotification
-    for LazyNotificationMutexSyncOps<F>
-{
-    fn notification(&self) -> sel4::cap::Notification {
+impl<F: Fn() -> sel4::cap::Notification> GetNotification for LazyNotification<F> {
+    fn get_notification(&self) -> sel4::cap::Notification {
         match self.state.get() {
             Some(nfn) => *nfn,
             None => {
