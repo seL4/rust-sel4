@@ -7,6 +7,8 @@
 use core::mem;
 use core::sync::atomic::{self, Ordering};
 
+use zerocopy::{FromBytes, IntoBytes};
+
 use sel4_abstract_ptr::memory_type::AtomicOps;
 
 use crate::SharedMemory;
@@ -15,9 +17,9 @@ mod generic;
 mod ordering;
 
 #[allow(private_bounds)]
-pub trait Atomic: AtomicSealed + Copy {}
+pub trait HasAtomics: Copy + FromBytes + IntoBytes + HasAtomicsSealed {}
 
-trait AtomicSealed {
+trait HasAtomicsSealed {
     const ALIGNMENT: usize;
     const IS_SIGNED: bool;
 }
@@ -29,12 +31,11 @@ macro_rules! impl_atomic {
         $is_signed:literal,
         $analog_for_alignment:path
     ) => {
-        // TODO this attribute is overly conservative
         #[cfg(target_has_atomic = $target_has_atomic_key)]
-        impl Atomic for $t {}
+        impl HasAtomics for $t {}
 
         #[cfg(target_has_atomic = $target_has_atomic_key)]
-        impl AtomicSealed for $t {
+        impl HasAtomicsSealed for $t {
             const ALIGNMENT: usize = mem::align_of::<$analog_for_alignment>();
             const IS_SIGNED: bool = $is_signed;
         }
@@ -75,7 +76,7 @@ impl_atomic_for_each_signedness!(usize, isize, "32", atomic::AtomicUsize, atomic
 #[cfg(target_pointer_width = "64")]
 impl_atomic_for_each_signedness!(usize, isize, "64", atomic::AtomicUsize, atomic::AtomicIsize);
 
-impl<T: Atomic> AtomicOps<T> for SharedMemory {
+impl<T: HasAtomics> AtomicOps<T> for SharedMemory {
     #[inline]
     unsafe fn atomic_store(dst: *mut T, val: T, order: Ordering) {
         unsafe { generic::atomic_store(dst, val, order.into()) }
