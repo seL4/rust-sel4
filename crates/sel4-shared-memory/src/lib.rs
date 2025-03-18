@@ -18,7 +18,7 @@ mod ops;
 mod atomic_ops;
 
 #[cfg(feature = "atomics")]
-pub use atomic_ops::HasAtomics;
+pub use atomic_ops::Atomic;
 
 pub struct SharedMemory(());
 

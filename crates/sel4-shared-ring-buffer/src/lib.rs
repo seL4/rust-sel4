@@ -8,7 +8,7 @@
 
 use core::marker::PhantomData;
 use core::num::Wrapping;
-use core::sync::atomic::Ordering;
+use core::sync::atomic::{AtomicU32, Ordering};
 
 use zerocopy::{FromBytes, IntoBytes};
 
@@ -96,10 +96,10 @@ impl<U, R: RingBuffersRole, F: FnMut() -> U, T> RingBuffers<'_, R, F, T> {
 }
 
 #[repr(C)]
-#[derive(Copy, Clone, Debug)]
+#[derive(Debug)]
 pub struct RawRingBuffer<T = Descriptor> {
-    pub write_index: u32,
-    pub read_index: u32,
+    pub write_index: AtomicU32,
+    pub read_index: AtomicU32,
     pub descriptors: [T; RING_BUFFER_SIZE],
 }
 
@@ -122,15 +122,15 @@ impl<'a, R: RingBufferRole, T: Copy> RingBuffer<'a, R, T> {
             InitializationStrategy::ReadState => {
                 let ptr = inner.as_ptr();
                 InitialState {
-                    write_index: map_field!(ptr.write_index).read(),
-                    read_index: map_field!(ptr.read_index).read(),
+                    write_index: map_field!(ptr.write_index).read().into_inner(),
+                    read_index: map_field!(ptr.read_index).read().into_inner(),
                 }
             }
             InitializationStrategy::UseState(initial_state) => initial_state,
             InitializationStrategy::UseAndWriteState(initial_state) => {
                 let ptr = inner.as_mut_ptr();
-                map_field!(ptr.write_index).write(initial_state.write_index);
-                map_field!(ptr.read_index).write(initial_state.read_index);
+                map_field!(ptr.write_index).write(initial_state.write_index.into());
+                map_field!(ptr.read_index).write(initial_state.read_index.into());
                 initial_state
             }
         };
@@ -150,12 +150,12 @@ impl<'a, R: RingBufferRole, T: Copy> RingBuffer<'a, R, T> {
         Self::SIZE - 1
     }
 
-    fn write_index(&mut self) -> SharedMemoryPtr<'_, u32> {
+    fn write_index(&mut self) -> SharedMemoryPtr<'_, AtomicU32> {
         let ptr = self.inner.as_mut_ptr();
         map_field!(ptr.write_index)
     }
 
-    fn read_index(&mut self) -> SharedMemoryPtr<'_, u32> {
+    fn read_index(&mut self) -> SharedMemoryPtr<'_, AtomicU32> {
         let ptr = self.inner.as_mut_ptr();
         map_field!(ptr.read_index)
     }
@@ -168,7 +168,7 @@ impl<'a, R: RingBufferRole, T: Copy> RingBuffer<'a, R, T> {
 
     fn update_stored_write_index(&mut self) -> Result<(), PeerMisbehaviorError> {
         debug_assert!(self.role().is_read());
-        let observed_write_index = Wrapping(self.write_index().read());
+        let observed_write_index = Wrapping(self.write_index().read().into_inner());
         let observed_num_filled_slots = self.residue(observed_write_index - self.stored_read_index);
         if observed_num_filled_slots < self.stored_num_filled_slots() {
             return Err(PeerMisbehaviorError::new());
@@ -179,7 +179,7 @@ impl<'a, R: RingBufferRole, T: Copy> RingBuffer<'a, R, T> {
 
     fn update_stored_read_index(&mut self) -> Result<(), PeerMisbehaviorError> {
         debug_assert!(self.role().is_write());
-        let observed_read_index = Wrapping(self.read_index().read());
+        let observed_read_index = Wrapping(self.read_index().read().into_inner());
         let observed_num_filled_slots = self.residue(self.stored_write_index - observed_read_index);
         if observed_num_filled_slots > self.stored_num_filled_slots() {
             return Err(PeerMisbehaviorError::new());
