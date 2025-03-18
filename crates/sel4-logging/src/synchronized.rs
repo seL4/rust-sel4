@@ -16,7 +16,7 @@ impl<R: RawMutex, T> SynchronizedLogger<R, T> {
 }
 
 impl<R, T> SynchronizedLogger<R, T> {
-    pub const fn from_raw(raw_mutex: R, inner: T) -> Self {
+    pub const fn new_with_raw_mutex(raw_mutex: R, inner: T) -> Self {
         Self(Mutex::from_raw(raw_mutex, inner))
     }
 
