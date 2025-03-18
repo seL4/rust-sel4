@@ -62,7 +62,7 @@ impl<A: RestrictAccess<ReadOnly, Restricted = ReadOnly>> Readable for A {}
 pub trait Writable: Access {}
 impl<A: RestrictAccess<WriteOnly, Restricted = WriteOnly>> Writable for A {}
 
-/// Implemented for access types that permit copying of `VolatileRef`.
+/// Implemented for access types that permit copying of `AbstractRef`.
 pub trait Copyable: Access {}
 impl<A: RestrictAccess<ReadOnly, Restricted = Self>> Copyable for A {}
 

@@ -96,8 +96,6 @@ impl<'a, M, T, A> AbstractPtr<'a, M, [T], A> {
         } = range(src, ..len);
         let count = src_end - src_start;
         assert!(dest <= len - count, "dest is out of bounds");
-        // SAFETY: the conditions for `volatile_copy_memory` have all been checked above,
-        // as have those for `ptr::add`.
         unsafe {
             M::memmove(
                 non_null_slice_as_mut_ptr(self.pointer).add(dest),
