@@ -8,13 +8,21 @@
 #![cfg_attr(feature = "atomics", feature(core_intrinsics))]
 #![cfg_attr(feature = "atomics", allow(internal_features))]
 
-use sel4_abstract_ptr::{access::ReadWrite, AbstractPtr, AbstractRef};
+use sel4_abstract_ptr::{access::ReadWrite, memory_type::MemoryType, AbstractPtr, AbstractRef};
 
 pub use sel4_abstract_ptr::{access, map_field};
 
-mod shared_memory_type;
+mod ops;
 
-pub use shared_memory_type::SharedMemory;
+#[cfg(feature = "atomics")]
+mod atomic_ops;
+
+#[cfg(feature = "atomics")]
+pub use atomic_ops::HasAtomics;
+
+pub struct SharedMemory(());
+
+impl MemoryType for SharedMemory {}
 
 pub type SharedMemoryRef<'a, T, A = ReadWrite> = AbstractRef<'a, SharedMemory, T, A>;
 pub type SharedMemoryPtr<'a, T, A = ReadWrite> = AbstractPtr<'a, SharedMemory, T, A>;

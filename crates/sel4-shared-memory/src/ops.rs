@@ -8,14 +8,9 @@ use core::ptr;
 
 use zerocopy::{FromBytes, IntoBytes};
 
-use sel4_abstract_ptr::memory_type::*;
+use sel4_abstract_ptr::memory_type::{BulkOps, UnitaryOps};
 
-#[cfg(feature = "atomics")]
-mod atomics;
-
-pub struct SharedMemory(());
-
-impl MemoryType for SharedMemory {}
+use crate::SharedMemory;
 
 impl<T: FromBytes + IntoBytes> UnitaryOps<T> for SharedMemory {
     unsafe fn read(src: *const T) -> T {
