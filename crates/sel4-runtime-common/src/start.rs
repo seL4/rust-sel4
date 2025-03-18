@@ -137,7 +137,8 @@ cfg_if::cfg_if! {
 }
 
 pub mod _private {
-    pub use crate::{global_initialzation, with_local_initialization};
     pub use sel4_panicking_env::abort;
     pub use sel4_stack::{Stack, StackBottom};
+
+    pub use crate::{global_initialzation, with_local_initialization};
 }
