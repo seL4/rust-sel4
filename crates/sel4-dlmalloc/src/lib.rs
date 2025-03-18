@@ -21,7 +21,7 @@ pub struct StaticDlmalloc<R>(
 );
 
 impl<R> StaticDlmalloc<R> {
-    pub const fn new_with(raw_mutex: R, bounds: StaticHeapBounds) -> Self {
+    pub const fn new_with_raw_mutex(raw_mutex: R, bounds: StaticHeapBounds) -> Self {
         Self(SyncDlmalloc::new(
             raw_mutex,
             SimpleDlmallocAllocatorWrapper::new(StaticDlmallocAllocator::new(bounds)),
@@ -31,7 +31,7 @@ impl<R> StaticDlmalloc<R> {
 
 impl<R: RawMutex> StaticDlmalloc<R> {
     pub const fn new(bounds: StaticHeapBounds) -> Self {
-        Self::new_with(R::INIT, bounds)
+        Self::new_with_raw_mutex(R::INIT, bounds)
     }
 }
 
@@ -72,7 +72,7 @@ pub struct DeferredStaticDlmalloc<R>(
 );
 
 impl<R> DeferredStaticDlmalloc<R> {
-    pub const fn new_with(raw_mutex: R) -> Self {
+    pub const fn new_with_raw_mutex(raw_mutex: R) -> Self {
         Self(SyncDlmalloc::new(
             raw_mutex,
             SimpleDlmallocAllocatorWrapper::new(DeferredStaticDlmallocAllocator::new()),
@@ -82,7 +82,7 @@ impl<R> DeferredStaticDlmalloc<R> {
 
 impl<R: RawMutex> DeferredStaticDlmalloc<R> {
     pub const fn new() -> Self {
-        Self::new_with(R::INIT)
+        Self::new_with_raw_mutex(R::INIT)
     }
 }
 
@@ -166,7 +166,7 @@ impl SimpleDlmallocAllocator for StaticDlmallocAllocator {
     }
 }
 
-// TODO remove RefCell once this lands:
+// TODO remove RefCell once this is released:
 // https://github.com/alexcrichton/dlmalloc-rs/pull/49
 struct DeferredStaticDlmallocAllocator<T> {
     state: RefCell<Option<T>>,
