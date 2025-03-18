@@ -25,41 +25,43 @@ pub trait BulkOps<T>: MemoryType {
 }
 
 pub trait AtomicOps<T>: MemoryType {
-    unsafe fn atomic_store(dst: *mut T, val: T, order: Ordering);
+    type Value;
 
-    unsafe fn atomic_load(dst: *const T, order: Ordering) -> T;
+    unsafe fn atomic_store(dst: *mut T, val: Self::Value, order: Ordering);
 
-    unsafe fn atomic_swap(dst: *mut T, val: T, order: Ordering) -> T;
+    unsafe fn atomic_load(dst: *const T, order: Ordering) -> Self::Value;
 
-    unsafe fn atomic_add(dst: *mut T, val: T, order: Ordering) -> T;
+    unsafe fn atomic_swap(dst: *mut T, val: Self::Value, order: Ordering) -> Self::Value;
 
-    unsafe fn atomic_sub(dst: *mut T, val: T, order: Ordering) -> T;
+    unsafe fn atomic_add(dst: *mut T, val: Self::Value, order: Ordering) -> Self::Value;
+
+    unsafe fn atomic_sub(dst: *mut T, val: Self::Value, order: Ordering) -> Self::Value;
 
     unsafe fn atomic_compare_exchange(
         dst: *mut T,
-        old: T,
-        new: T,
+        old: Self::Value,
+        new: Self::Value,
         success: Ordering,
         failure: Ordering,
-    ) -> Result<T, T>;
+    ) -> Result<Self::Value, Self::Value>;
 
     unsafe fn atomic_compare_exchange_weak(
         dst: *mut T,
-        old: T,
-        new: T,
+        old: Self::Value,
+        new: Self::Value,
         success: Ordering,
         failure: Ordering,
-    ) -> Result<T, T>;
+    ) -> Result<Self::Value, Self::Value>;
 
-    unsafe fn atomic_and(dst: *mut T, val: T, order: Ordering) -> T;
+    unsafe fn atomic_and(dst: *mut T, val: Self::Value, order: Ordering) -> Self::Value;
 
-    unsafe fn atomic_nand(dst: *mut T, val: T, order: Ordering) -> T;
+    unsafe fn atomic_nand(dst: *mut T, val: Self::Value, order: Ordering) -> Self::Value;
 
-    unsafe fn atomic_or(dst: *mut T, val: T, order: Ordering) -> T;
+    unsafe fn atomic_or(dst: *mut T, val: Self::Value, order: Ordering) -> Self::Value;
 
-    unsafe fn atomic_xor(dst: *mut T, val: T, order: Ordering) -> T;
+    unsafe fn atomic_xor(dst: *mut T, val: Self::Value, order: Ordering) -> Self::Value;
 
-    unsafe fn atomic_max(dst: *mut T, val: T, order: Ordering) -> T;
+    unsafe fn atomic_max(dst: *mut T, val: Self::Value, order: Ordering) -> Self::Value;
 
-    unsafe fn atomic_min(dst: *mut T, val: T, order: Ordering) -> T;
+    unsafe fn atomic_min(dst: *mut T, val: Self::Value, order: Ordering) -> Self::Value;
 }

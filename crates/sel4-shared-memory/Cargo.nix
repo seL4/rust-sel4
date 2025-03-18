@@ -14,11 +14,12 @@ mk rec {
   package.license = "MIT OR Apache-2.0";
   dependencies = {
     inherit (versions) cfg-if zerocopy;
+    aligned = { version = versions.aligned; optional = true; };
     inherit (localCrates)
       sel4-abstract-ptr
     ;
   };
   features = {
-    "atomics" = [];
+    "atomics" = [ "dep:aligned" ];
   };
 }
