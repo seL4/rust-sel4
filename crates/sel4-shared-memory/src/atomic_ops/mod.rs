@@ -4,8 +4,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 //
 
-use core::mem;
-use core::sync::atomic::{self, Ordering};
+use core::sync::atomic::Ordering;
 
 use zerocopy::{FromBytes, IntoBytes};
 
@@ -20,7 +19,6 @@ mod ordering;
 pub trait HasAtomics: Copy + FromBytes + IntoBytes + HasAtomicsSealed {}
 
 trait HasAtomicsSealed {
-    const ALIGNMENT: usize;
     const IS_SIGNED: bool;
 }
 
@@ -36,7 +34,6 @@ macro_rules! impl_atomic {
 
         #[cfg(target_has_atomic = $target_has_atomic_key)]
         impl HasAtomicsSealed for $t {
-            const ALIGNMENT: usize = mem::align_of::<$analog_for_alignment>();
             const IS_SIGNED: bool = $is_signed;
         }
     };
