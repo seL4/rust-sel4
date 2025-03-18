@@ -5,10 +5,13 @@
 //
 
 use core::alloc::Layout;
+use core::marker::PhantomData;
 use core::task::{Poll, Waker};
 
 use sel4_async_block_io::{access::Access, Operation};
-use sel4_bounce_buffer_allocator::{AbstractBounceBufferAllocator, BounceBufferAllocator};
+use sel4_bounce_buffer_allocator::{
+    AbstractBounceBufferAllocator, BounceBufferAllocation, BounceBufferAllocator,
+};
 use sel4_shared_memory::SharedMemoryRef;
 use sel4_shared_ring_buffer::{
     roles::Provide, Descriptor, PeerMisbehaviorError as SharedRingBuffersPeerMisbehaviorError,
@@ -25,7 +28,7 @@ pub struct OwnedSharedRingBufferBlockIO<S, A, F> {
     dma_region: SharedMemoryRef<'static, [u8]>,
     bounce_buffer_allocator: BounceBufferAllocator<A>,
     ring_buffers: RingBuffers<'static, Provide, F, BlockIORequest>,
-    requests: SlotTracker<StateTypesImpl>,
+    requests: SlotTracker<StateTypesImpl<A>>,
     slot_set_semaphore: SlotSetSemaphore<S, NUM_SLOT_POOLS>,
 }
 
@@ -33,17 +36,20 @@ const RING_BUFFERS_SLOT_POOL_INDEX: usize = 0;
 const REQUESTS_SLOT_POOL_INDEX: usize = 1;
 const NUM_SLOT_POOLS: usize = 2;
 
-enum StateTypesImpl {}
-
-impl SlotStateTypes for StateTypesImpl {
-    type Common = ();
-    type Free = ();
-    type Occupied = Occupied;
+struct StateTypesImpl<A> {
+    _phantom: PhantomData<A>,
 }
 
-struct Occupied {
+impl<A> SlotStateTypes for StateTypesImpl<A> {
+    type Common = ();
+    type Free = ();
+    type Occupied = Occupied<A>;
+}
+
+struct Occupied<A> {
     req: BlockIORequest,
     state: OccupiedState,
+    allocation: BounceBufferAllocation<A>,
 }
 
 enum OccupiedState {
@@ -190,7 +196,7 @@ impl<S: SlotSemaphore, A: AbstractBounceBufferAllocator, F: FnMut()>
 
         let request_index = self.requests.peek_next_free_index().unwrap();
 
-        let range = self
+        let allocation = self
             .bounce_buffer_allocator
             .allocate(Layout::from_size_align(buf.len(), 1).unwrap())
             .map_err(|_| Error::BounceBufferAllocationError)?;
@@ -198,7 +204,7 @@ impl<S: SlotSemaphore, A: AbstractBounceBufferAllocator, F: FnMut()>
         if let IssueRequestBuf::Write { buf } = buf {
             self.dma_region
                 .as_mut_ptr()
-                .index(range.clone())
+                .index(allocation.range())
                 .copy_from_slice(buf);
         }
 
@@ -206,13 +212,14 @@ impl<S: SlotSemaphore, A: AbstractBounceBufferAllocator, F: FnMut()>
             BlockIORequestStatus::Pending,
             buf.ty(),
             start_block_idx.try_into().unwrap(),
-            Descriptor::from_encoded_addr_range(range, request_index),
+            Descriptor::from_encoded_addr_range(allocation.range(), request_index),
         );
 
         self.requests
             .occupy(Occupied {
                 req,
                 state: OccupiedState::Pending { waker: None },
+                allocation,
             })
             .unwrap();
 
@@ -236,9 +243,8 @@ impl<S: SlotSemaphore, A: AbstractBounceBufferAllocator, F: FnMut()>
                 occupied.state = OccupiedState::Canceled;
             }
             OccupiedState::Complete { .. } => {
-                let range = occupied.req.buf().encoded_addr_range();
-                self.bounce_buffer_allocator.deallocate(range);
-                self.requests.free(request_index, ()).unwrap();
+                let occupied = self.requests.free(request_index, ()).unwrap();
+                self.bounce_buffer_allocator.deallocate(occupied.allocation);
                 self.report_current_num_free_current_num_free_requests_slots()?;
             }
             _ => {
@@ -301,9 +307,8 @@ impl<S: SlotSemaphore, A: AbstractBounceBufferAllocator, F: FnMut()>
                     PollRequestBuf::Write => {}
                 }
 
-                self.bounce_buffer_allocator.deallocate(range);
-
-                self.requests.free(request_index, ()).unwrap();
+                let occupied = self.requests.free(request_index, ()).unwrap();
+                self.bounce_buffer_allocator.deallocate(occupied.allocation);
                 self.report_current_num_free_current_num_free_requests_slots()?;
 
                 Poll::Ready(val)
@@ -362,9 +367,8 @@ impl<S: SlotSemaphore, A: AbstractBounceBufferAllocator, F: FnMut()>
                     }
                 }
                 OccupiedState::Canceled => {
-                    let range = occupied.req.buf().encoded_addr_range();
-                    self.bounce_buffer_allocator.deallocate(range);
-                    self.requests.free(request_index, ()).unwrap();
+                    let occupied = self.requests.free(request_index, ()).unwrap();
+                    self.bounce_buffer_allocator.deallocate(occupied.allocation);
                     self.report_current_num_free_current_num_free_requests_slots()?;
                 }
                 _ => {

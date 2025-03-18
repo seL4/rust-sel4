@@ -70,14 +70,14 @@ unsafe impl Hal for HalImpl {
         let mut state = GLOBAL_STATE.get().unwrap().lock();
         assert!(pages > 0);
         let layout = Layout::from_size_align(pages * PAGE_SIZE, PAGE_SIZE).unwrap();
-        let bounce_buffer_range = state.bounce_buffer_allocator.allocate(layout).unwrap();
+        let bounce_buffer_allocation = state.bounce_buffer_allocator.allocate(layout).unwrap();
         let bounce_buffer_ptr = state
             .dma_region
             .as_mut_ptr()
-            .index(bounce_buffer_range.clone());
+            .index(bounce_buffer_allocation.range());
         bounce_buffer_ptr.fill(0);
         let vaddr = bounce_buffer_ptr.as_raw_ptr().cast::<u8>();
-        let paddr = state.offset_to_paddr(bounce_buffer_range.start);
+        let paddr = state.offset_to_paddr(bounce_buffer_allocation.range().start);
         (paddr, vaddr)
     }
 
@@ -90,7 +90,7 @@ unsafe impl Hal for HalImpl {
         };
         state
             .bounce_buffer_allocator
-            .deallocate(bounce_buffer_range);
+            .deallocate_by_range(bounce_buffer_range);
         0
     }
 
@@ -102,13 +102,13 @@ unsafe impl Hal for HalImpl {
         let mut state = GLOBAL_STATE.get().unwrap().lock();
         assert!(!buffer.is_empty());
         let layout = Layout::from_size_align(buffer.len(), 1).unwrap();
-        let bounce_buffer_range = state.bounce_buffer_allocator.allocate(layout).unwrap();
+        let bounce_buffer_allocation = state.bounce_buffer_allocator.allocate(layout).unwrap();
         state
             .dma_region
             .as_mut_ptr()
-            .index(bounce_buffer_range.clone())
+            .index(bounce_buffer_allocation.range())
             .copy_from_slice(buffer.as_ref());
-        state.offset_to_paddr(bounce_buffer_range.start)
+        state.offset_to_paddr(bounce_buffer_allocation.range().start)
     }
 
     unsafe fn unshare(paddr: PhysAddr, mut buffer: NonNull<[u8]>, direction: BufferDirection) {
@@ -126,6 +126,6 @@ unsafe impl Hal for HalImpl {
         }
         state
             .bounce_buffer_allocator
-            .deallocate(bounce_buffer_range);
+            .deallocate_by_range(bounce_buffer_range);
     }
 }

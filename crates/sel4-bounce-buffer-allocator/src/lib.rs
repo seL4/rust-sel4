@@ -10,6 +10,7 @@ extern crate alloc;
 
 use core::alloc::Layout;
 use core::fmt;
+use core::marker::PhantomData;
 use core::ops::Range;
 
 type Offset = usize;
@@ -24,6 +25,8 @@ pub use bump::Bump;
 
 const MIN_ALLOCATION_SIZE: Size = 1;
 
+// TODO use u64 instead of usize, or abstract
+
 pub trait AbstractBounceBufferAllocator {
     type Error: fmt::Debug;
 
@@ -32,9 +35,31 @@ pub trait AbstractBounceBufferAllocator {
     fn deallocate(&mut self, offset: Offset, size: Size);
 }
 
+pub trait AbstractBounceBufferAllocatorWithRangeTracking: AbstractBounceBufferAllocator {
+    // fn deallocate_by_range(&mut self, offset: Offset, size: Size);
+}
+
 pub struct BounceBufferAllocator<T> {
     abstract_allocator: T,
     max_alignment: Align,
+}
+
+pub struct BounceBufferAllocation<T> {
+    range: Range<Offset>,
+    _phantom: PhantomData<T>,
+}
+
+impl<T> BounceBufferAllocation<T> {
+    const fn new(range: Range<Offset>) -> Self {
+        Self {
+            range,
+            _phantom: PhantomData,
+        }
+    }
+
+    pub fn range(&self) -> Range<Offset> {
+        self.range.clone()
+    }
 }
 
 impl<T> BounceBufferAllocator<T> {
@@ -56,16 +81,23 @@ impl<T> BounceBufferAllocator<T> {
 }
 
 impl<T: AbstractBounceBufferAllocator> BounceBufferAllocator<T> {
-    pub fn allocate(&mut self, layout: Layout) -> Result<Range<Offset>, T::Error> {
+    pub fn allocate(&mut self, layout: Layout) -> Result<BounceBufferAllocation<T>, T::Error> {
         assert!(layout.align() <= self.max_alignment);
         assert!(layout.size() >= MIN_ALLOCATION_SIZE);
         let start = self.abstract_allocator.allocate(layout)?;
         let end = start + layout.size();
-        Ok(start..end)
+        Ok(BounceBufferAllocation::new(start..end))
     }
 
-    pub fn deallocate(&mut self, buffer: Range<Offset>) {
+    pub fn deallocate(&mut self, allocation: BounceBufferAllocation<T>) {
         self.abstract_allocator
-            .deallocate(buffer.start, buffer.len())
+            .deallocate(allocation.range.start, allocation.range.len())
+    }
+}
+
+impl<T: AbstractBounceBufferAllocatorWithRangeTracking> BounceBufferAllocator<T> {
+    pub fn deallocate_by_range(&mut self, allocation_range: Range<usize>) {
+        self.abstract_allocator
+            .deallocate(allocation_range.start, allocation_range.len())
     }
 }

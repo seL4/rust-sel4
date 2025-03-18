@@ -7,7 +7,9 @@
 use alloc::collections::BTreeMap;
 use core::alloc::Layout;
 
-use crate::{AbstractBounceBufferAllocator, Offset, Size};
+use crate::{
+    AbstractBounceBufferAllocator, AbstractBounceBufferAllocatorWithRangeTracking, Offset, Size,
+};
 
 const GRANULE_SIZE: usize = 2048;
 
@@ -120,6 +122,8 @@ impl AbstractBounceBufferAllocator for Basic {
         }
     }
 }
+
+impl AbstractBounceBufferAllocatorWithRangeTracking for Basic {}
 
 fn copy_typle_fields<T: Copy, U: Copy>((&t, &u): (&T, &U)) -> (T, U) {
     (t, u)
