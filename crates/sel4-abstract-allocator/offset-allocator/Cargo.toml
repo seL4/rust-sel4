@@ -1,0 +1,24 @@
+#
+# Copyright 2023, Colias Group, LLC
+#
+# SPDX-License-Identifier: BSD-2-Clause
+#
+#
+# This file is generated from './Cargo.nix'. You can edit this file directly
+# if you are not using this project's Cargo manifest management tools.
+# See 'hacking/cargo-manifest-management/README.md' for more information.
+#
+
+[package]
+name = "sel4-abstract-allocator-offset-allocator"
+version = "0.1.0"
+authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
+edition = "2021"
+license = "BSD-2-Clause"
+
+[dependencies]
+sel4-abstract-allocator = { path = ".." }
+
+[dependencies.offset-allocator]
+git = "https://github.com/coliasgroup/offset-allocator.git"
+tag = "keep/ae15c9cbf352c1eb12b6be377324d100"

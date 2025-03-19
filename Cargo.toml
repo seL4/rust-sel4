@@ -72,6 +72,7 @@ members = [
     "crates/private/tests/root-task/verus/task",
     "crates/sel4",
     "crates/sel4-abstract-allocator",
+    "crates/sel4-abstract-allocator/offset-allocator",
     "crates/sel4-abstract-ptr",
     "crates/sel4-abstract-rc",
     "crates/sel4-alloca",

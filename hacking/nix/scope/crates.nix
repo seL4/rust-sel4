@@ -56,6 +56,12 @@ let
         ".git/HEAD"
       ];
     };
+    offset-allocator = {
+      resolveLinks = true;
+      extraPaths = [
+        "README.md"
+      ];
+    };
   };
 
   unAugmentedCrates = lib.listToAttrs (lib.forEach workspaceMemberPaths (cratePath: rec {

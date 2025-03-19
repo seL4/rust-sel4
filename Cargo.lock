@@ -1273,6 +1273,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "nonmax"
+version = "0.5.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "610a5acd306ec67f907abe5567859a3c693fb9886eb1f012ab8f2a47bef3db51"
+
+[[package]]
 name = "num"
 version = "0.4.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1402,6 +1408,15 @@ dependencies = [
  "memchr",
  "ruzstd",
  "wasmparser",
+]
+
+[[package]]
+name = "offset-allocator"
+version = "0.2.0"
+source = "git+https://github.com/coliasgroup/offset-allocator.git?tag=keep/ae15c9cbf352c1eb12b6be377324d100#ae15c9cbf352c1eb12b6be377324d100fd064f13"
+dependencies = [
+ "log",
+ "nonmax",
 ]
 
 [[package]]
@@ -1897,6 +1912,14 @@ name = "sel4-abstract-allocator"
 version = "0.1.0"
 dependencies = [
  "log",
+]
+
+[[package]]
+name = "sel4-abstract-allocator-offset-allocator"
+version = "0.1.0"
+dependencies = [
+ "offset-allocator",
+ "sel4-abstract-allocator",
 ]
 
 [[package]]
