@@ -10,9 +10,7 @@ use core::ptr::NonNull;
 
 use smoltcp::phy::DeviceCapabilities;
 
-use sel4_abstract_allocator::{
-    AbstractBounceBufferAllocator, BounceBufferAllocation, BounceBufferAllocator,
-};
+use sel4_abstract_allocator::{AbstractAllocator, AbstractAllocatorAllocation};
 use sel4_shared_memory::SharedMemoryRef;
 use sel4_shared_ring_buffer::{
     roles::Provide, Descriptor, PeerMisbehaviorError as SharedRingBuffersPeerMisbehaviorError,
@@ -20,9 +18,9 @@ use sel4_shared_ring_buffer::{
 };
 use sel4_shared_ring_buffer_bookkeeping::slot_tracker::*;
 
-pub(crate) struct Inner<A> {
+pub(crate) struct Inner<A: AbstractAllocator> {
     dma_region: SharedMemoryRef<'static, [u8]>,
-    bounce_buffer_allocator: BounceBufferAllocator<A>,
+    bounce_buffer_allocator: A,
     rx_ring_buffers: RingBuffers<'static, Provide, fn()>,
     tx_ring_buffers: RingBuffers<'static, Provide, fn()>,
     rx_buffers: SlotTracker<RxStateTypesImpl>,
@@ -55,23 +53,21 @@ struct TxStateTypesImpl<A> {
     _phantom: PhantomData<A>,
 }
 
-impl<A> SlotStateTypes for TxStateTypesImpl<A> {
+impl<A: AbstractAllocator> SlotStateTypes for TxStateTypesImpl<A> {
     type Common = ();
     type Free = ();
     type Occupied = TxOccupied<A>;
 }
 
-enum TxOccupied<A> {
+enum TxOccupied<A: AbstractAllocator> {
     Claimed,
-    Sent {
-        allocation: BounceBufferAllocation<A>,
-    },
+    Sent { allocation: A::Allocation },
 }
 
-impl<A: AbstractBounceBufferAllocator> Inner<A> {
+impl<A: AbstractAllocator> Inner<A> {
     pub(crate) fn new(
         dma_region: SharedMemoryRef<'static, [u8]>,
-        mut bounce_buffer_allocator: BounceBufferAllocator<A>,
+        mut bounce_buffer_allocator: A,
         mut rx_ring_buffers: RingBuffers<'static, Provide, fn()>,
         tx_ring_buffers: RingBuffers<'static, Provide, fn()>,
         num_rx_buffers: usize,

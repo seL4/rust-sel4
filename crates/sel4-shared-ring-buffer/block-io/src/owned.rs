@@ -8,9 +8,7 @@ use core::alloc::Layout;
 use core::marker::PhantomData;
 use core::task::{Poll, Waker};
 
-use sel4_abstract_allocator::{
-    AbstractBounceBufferAllocator, BounceBufferAllocation, BounceBufferAllocator,
-};
+use sel4_abstract_allocator::{AbstractAllocator, AbstractAllocatorAllocation};
 use sel4_async_block_io::{access::Access, Operation};
 use sel4_shared_memory::SharedMemoryRef;
 use sel4_shared_ring_buffer::{
@@ -24,9 +22,9 @@ use sel4_shared_ring_buffer_bookkeeping::{slot_set_semaphore::*, slot_tracker::*
 
 pub use crate::errors::{Error, ErrorOrUserError, IOError, PeerMisbehaviorError, UserError};
 
-pub struct OwnedSharedRingBufferBlockIO<S, A, F> {
+pub struct OwnedSharedRingBufferBlockIO<S, A: AbstractAllocator, F> {
     dma_region: SharedMemoryRef<'static, [u8]>,
-    bounce_buffer_allocator: BounceBufferAllocator<A>,
+    bounce_buffer_allocator: A,
     ring_buffers: RingBuffers<'static, Provide, F, BlockIORequest>,
     requests: SlotTracker<StateTypesImpl<A>>,
     slot_set_semaphore: SlotSetSemaphore<S, NUM_SLOT_POOLS>,
@@ -40,16 +38,16 @@ struct StateTypesImpl<A> {
     _phantom: PhantomData<A>,
 }
 
-impl<A> SlotStateTypes for StateTypesImpl<A> {
+impl<A: AbstractAllocator> SlotStateTypes for StateTypesImpl<A> {
     type Common = ();
     type Free = ();
     type Occupied = Occupied<A>;
 }
 
-struct Occupied<A> {
+struct Occupied<A: AbstractAllocator> {
     req: BlockIORequest,
     state: OccupiedState,
-    allocation: BounceBufferAllocation<A>,
+    allocation: A::Allocation,
 }
 
 enum OccupiedState {
@@ -103,12 +101,10 @@ impl<'a> PollRequestBuf<'a> {
     }
 }
 
-impl<S: SlotSemaphore, A: AbstractBounceBufferAllocator, F: FnMut()>
-    OwnedSharedRingBufferBlockIO<S, A, F>
-{
+impl<S: SlotSemaphore, A: AbstractAllocator, F: FnMut()> OwnedSharedRingBufferBlockIO<S, A, F> {
     pub fn new(
         dma_region: SharedMemoryRef<'static, [u8]>,
-        bounce_buffer_allocator: BounceBufferAllocator<A>,
+        bounce_buffer_allocator: A,
         mut ring_buffers: RingBuffers<'static, Provide, F, BlockIORequest>,
     ) -> Self {
         assert!(ring_buffers.free_mut().is_empty().unwrap());

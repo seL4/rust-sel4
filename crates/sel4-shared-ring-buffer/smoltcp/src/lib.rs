@@ -12,7 +12,7 @@ use lock_api::{Mutex, RawMutex};
 use smoltcp::phy::{self, Device, DeviceCapabilities};
 use smoltcp::time::Instant;
 
-use sel4_abstract_allocator::{AbstractBounceBufferAllocator, BounceBufferAllocator};
+use sel4_abstract_allocator::AbstractAllocator;
 use sel4_abstract_rc::{AbstractRcT, RcT};
 use sel4_shared_memory::SharedMemoryRef;
 use sel4_shared_ring_buffer::{roles::Provide, RingBuffers};
@@ -23,11 +23,15 @@ mod inner;
 pub use inner::{Error, PeerMisbehaviorError};
 use inner::{Inner, RxBufferIndex, TxBufferIndex};
 
-pub struct DeviceImpl<A, R: RawMutex = UnsyncPanickingRawMutex, P: AbstractRcT = RcT> {
+pub struct DeviceImpl<
+    A: AbstractAllocator,
+    R: RawMutex = UnsyncPanickingRawMutex,
+    P: AbstractRcT = RcT,
+> {
     inner: P::Rc<Mutex<R, Inner<A>>>,
 }
 
-impl<A, R: RawMutex, P: AbstractRcT> Clone for DeviceImpl<A, R, P> {
+impl<A: AbstractAllocator, R: RawMutex, P: AbstractRcT> Clone for DeviceImpl<A, R, P> {
     fn clone(&self) -> Self {
         Self {
             inner: self.inner.clone(),
@@ -35,12 +39,12 @@ impl<A, R: RawMutex, P: AbstractRcT> Clone for DeviceImpl<A, R, P> {
     }
 }
 
-impl<A: AbstractBounceBufferAllocator, R: RawMutex, P: AbstractRcT> DeviceImpl<A, R, P> {
+impl<A: AbstractAllocator, R: RawMutex, P: AbstractRcT> DeviceImpl<A, R, P> {
     #[allow(clippy::too_many_arguments)]
     pub fn new(
         raw_mutex: R,
         dma_region: SharedMemoryRef<'static, [u8]>,
-        bounce_buffer_allocator: BounceBufferAllocator<A>,
+        bounce_buffer_allocator: A,
         rx_ring_buffers: RingBuffers<'static, Provide, fn()>,
         tx_ring_buffers: RingBuffers<'static, Provide, fn()>,
         num_rx_buffers: usize,
@@ -94,7 +98,7 @@ impl<A: AbstractBounceBufferAllocator, R: RawMutex, P: AbstractRcT> DeviceImpl<A
     }
 }
 
-impl<A: AbstractBounceBufferAllocator, R: RawMutex, P: AbstractRcT> Device for DeviceImpl<A, R, P> {
+impl<A: AbstractAllocator, R: RawMutex, P: AbstractRcT> Device for DeviceImpl<A, R, P> {
     type RxToken<'a>
         = RxToken<A, R, P>
     where
@@ -127,14 +131,12 @@ impl<A: AbstractBounceBufferAllocator, R: RawMutex, P: AbstractRcT> Device for D
     }
 }
 
-pub struct RxToken<A: AbstractBounceBufferAllocator, R: RawMutex, P: AbstractRcT> {
+pub struct RxToken<A: AbstractAllocator, R: RawMutex, P: AbstractRcT> {
     buffer: RxBufferIndex,
     shared: DeviceImpl<A, R, P>,
 }
 
-impl<A: AbstractBounceBufferAllocator, R: RawMutex, P: AbstractRcT> phy::RxToken
-    for RxToken<A, R, P>
-{
+impl<A: AbstractAllocator, R: RawMutex, P: AbstractRcT> phy::RxToken for RxToken<A, R, P> {
     fn consume<T, F>(self, f: F) -> T
     where
         F: FnOnce(&mut [u8]) -> T,
@@ -146,20 +148,18 @@ impl<A: AbstractBounceBufferAllocator, R: RawMutex, P: AbstractRcT> phy::RxToken
     }
 }
 
-impl<A: AbstractBounceBufferAllocator, R: RawMutex, P: AbstractRcT> Drop for RxToken<A, R, P> {
+impl<A: AbstractAllocator, R: RawMutex, P: AbstractRcT> Drop for RxToken<A, R, P> {
     fn drop(&mut self) {
         self.shared.inner().lock().drop_rx(self.buffer).unwrap()
     }
 }
 
-pub struct TxToken<A: AbstractBounceBufferAllocator, R: RawMutex, P: AbstractRcT> {
+pub struct TxToken<A: AbstractAllocator, R: RawMutex, P: AbstractRcT> {
     buffer: TxBufferIndex,
     shared: DeviceImpl<A, R, P>,
 }
 
-impl<A: AbstractBounceBufferAllocator, R: RawMutex, P: AbstractRcT> phy::TxToken
-    for TxToken<A, R, P>
-{
+impl<A: AbstractAllocator, R: RawMutex, P: AbstractRcT> phy::TxToken for TxToken<A, R, P> {
     fn consume<T, F>(self, len: usize, f: F) -> T
     where
         F: FnOnce(&mut [u8]) -> T,
@@ -172,7 +172,7 @@ impl<A: AbstractBounceBufferAllocator, R: RawMutex, P: AbstractRcT> phy::TxToken
     }
 }
 
-impl<A: AbstractBounceBufferAllocator, R: RawMutex, P: AbstractRcT> Drop for TxToken<A, R, P> {
+impl<A: AbstractAllocator, R: RawMutex, P: AbstractRcT> Drop for TxToken<A, R, P> {
     fn drop(&mut self) {
         self.shared.inner().lock().drop_tx(self.buffer)
     }

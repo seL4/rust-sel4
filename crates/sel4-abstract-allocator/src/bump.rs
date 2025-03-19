@@ -5,37 +5,58 @@
 //
 
 use core::alloc::Layout;
+use core::ops::Range;
 
-use crate::{
-    AbstractBounceBufferAllocator, AbstractBounceBufferAllocatorWithRangeTracking, Offset, Size,
-};
+use crate::{AbstractAllocator, AbstractAllocatorAllocation};
 
-pub struct Bump {
-    watermark: Offset,
-    end: Offset,
+pub struct BumpAllocator {
+    watermark: usize,
+    size: usize,
 }
 
-impl Bump {
-    pub fn new(size: Size) -> Self {
-        Self {
-            watermark: 0,
-            end: size,
+impl BumpAllocator {
+    pub fn new(size: usize) -> Self {
+        Self { watermark: 0, size }
+    }
+}
+
+impl AbstractAllocator for BumpAllocator {
+    type AllocationError = InsufficientResources;
+
+    type Allocation = Allocation;
+
+    fn allocate(&mut self, layout: Layout) -> Result<Self::Allocation, Self::AllocationError> {
+        let start = self.watermark.next_multiple_of(layout.align());
+        let end = start + layout.size();
+        if end > self.size {
+            return Err(InsufficientResources::new());
         }
+        self.watermark = end;
+        Ok(Allocation::new(start..end))
+    }
+
+    fn deallocate(&mut self, _allocation: Self::Allocation) {}
+}
+
+pub struct Allocation(Range<usize>);
+
+impl Allocation {
+    fn new(range: Range<usize>) -> Self {
+        Self(range)
     }
 }
 
-impl AbstractBounceBufferAllocator for Bump {
-    type Error = ();
-
-    fn allocate(&mut self, layout: Layout) -> Result<Offset, Self::Error> {
-        let offset = self.watermark.next_multiple_of(layout.align());
-        let new_watermark = offset + layout.size();
-        assert!(new_watermark <= self.end);
-        self.watermark = new_watermark;
-        Ok(offset)
+impl AbstractAllocatorAllocation for Allocation {
+    fn range(&self) -> Range<usize> {
+        self.0.clone()
     }
-
-    fn deallocate(&mut self, _offset: Offset, _size: Size) {}
 }
 
-impl AbstractBounceBufferAllocatorWithRangeTracking for Bump {}
+#[derive(Debug, Copy, Clone, Ord, PartialOrd, Eq, PartialEq, Hash)]
+pub struct InsufficientResources(());
+
+impl InsufficientResources {
+    fn new() -> Self {
+        Self(())
+    }
+}

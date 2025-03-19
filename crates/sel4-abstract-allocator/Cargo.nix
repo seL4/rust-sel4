@@ -11,4 +11,8 @@ mk {
   dependencies = {
     inherit (versions) log;
   };
+  features = {
+    default = [ "alloc" ];
+    alloc = [];
+  };
 }

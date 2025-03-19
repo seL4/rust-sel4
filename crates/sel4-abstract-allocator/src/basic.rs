@@ -6,10 +6,12 @@
 
 use alloc::collections::BTreeMap;
 use core::alloc::Layout;
+use core::ops::Range;
 
-use crate::{
-    AbstractBounceBufferAllocator, AbstractBounceBufferAllocatorWithRangeTracking, Offset, Size,
-};
+use crate::{AbstractAllocator, AbstractAllocatorAllocation};
+
+type Offset = usize;
+type Size = usize;
 
 const GRANULE_SIZE: usize = 2048;
 
@@ -24,11 +26,11 @@ const GRANULE_SIZE: usize = 2048;
 // #![feature(btree_cursors)] would make this stand-in implementation simpler and more efficient.
 // See git history.
 
-pub struct Basic {
+pub struct BasicAllocator {
     holes: BTreeMap<Offset, Size>,
 }
 
-impl Basic {
+impl BasicAllocator {
     pub fn new(size: Size) -> Self {
         assert_eq!(size % GRANULE_SIZE, 0);
         let offset = 0;
@@ -38,13 +40,15 @@ impl Basic {
     }
 }
 
-impl AbstractBounceBufferAllocator for Basic {
-    type Error = ();
+impl AbstractAllocator for BasicAllocator {
+    type AllocationError = InsufficientResources;
 
-    fn allocate(&mut self, layout: Layout) -> Result<Offset, Self::Error> {
+    type Allocation = Allocation;
+
+    fn allocate(&mut self, orig_layout: Layout) -> Result<Self::Allocation, Self::AllocationError> {
         let layout = Layout::from_size_align(
-            layout.size().next_multiple_of(GRANULE_SIZE),
-            layout.align().max(GRANULE_SIZE),
+            orig_layout.size().next_multiple_of(GRANULE_SIZE),
+            orig_layout.align().max(GRANULE_SIZE),
         )
         .unwrap();
 
@@ -59,7 +63,7 @@ impl AbstractBounceBufferAllocator for Basic {
                     None
                 }
             })
-            .ok_or(())?;
+            .ok_or(InsufficientResources::new())?;
 
         self.holes.remove(&hole_offset).unwrap();
 
@@ -67,17 +71,24 @@ impl AbstractBounceBufferAllocator for Basic {
             self.holes.insert(hole_offset, buffer_offset - hole_offset);
         }
 
-        if buffer_offset + layout.size() < hole_offset + hole_size {
-            self.holes.insert(
-                buffer_offset + layout.size(),
-                (hole_offset + hole_size) - (buffer_offset + layout.size()),
-            );
+        let hole_end_offset = hole_offset + hole_size;
+        let buffer_end_offset = buffer_offset + layout.size();
+
+        if buffer_end_offset < hole_end_offset {
+            self.holes
+                .insert(buffer_end_offset, hole_end_offset - buffer_end_offset);
         }
 
-        Ok(buffer_offset)
+        Ok(Allocation::new(
+            buffer_offset..(buffer_offset + orig_layout.size()),
+        ))
     }
 
-    fn deallocate(&mut self, offset: Offset, size: Size) {
+    fn deallocate(&mut self, allocation: Self::Allocation) {
+        let range = allocation.range();
+        let offset = range.start;
+        let size = range.len();
+
         assert_eq!(offset % GRANULE_SIZE, 0);
         let size = size.next_multiple_of(GRANULE_SIZE);
 
@@ -123,7 +134,28 @@ impl AbstractBounceBufferAllocator for Basic {
     }
 }
 
-impl AbstractBounceBufferAllocatorWithRangeTracking for Basic {}
+pub struct Allocation(Range<usize>);
+
+impl Allocation {
+    fn new(range: Range<usize>) -> Self {
+        Self(range)
+    }
+}
+
+impl AbstractAllocatorAllocation for Allocation {
+    fn range(&self) -> Range<usize> {
+        self.0.clone()
+    }
+}
+
+#[derive(Debug, Copy, Clone, Ord, PartialOrd, Eq, PartialEq, Hash)]
+pub struct InsufficientResources(());
+
+impl InsufficientResources {
+    fn new() -> Self {
+        Self(())
+    }
+}
 
 fn copy_typle_fields<T: Copy, U: Copy>((&t, &u): (&T, &U)) -> (T, U) {
     (t, u)

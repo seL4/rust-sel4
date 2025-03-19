@@ -19,7 +19,8 @@ use smoltcp::iface::Config;
 use smoltcp::phy::{Device, DeviceCapabilities, Medium};
 use smoltcp::wire::{EthernetAddress, HardwareAddress};
 
-use sel4_abstract_allocator::{Basic, BounceBufferAllocator};
+use sel4_abstract_allocator::basic::BasicAllocator;
+use sel4_abstract_allocator::WithAlignmentBound;
 use sel4_async_block_io::{
     constant_block_sizes::BlockSize512, disk::Disk, BlockSize, CachedBlockIO, ConstantBlockSize,
 };
@@ -107,7 +108,7 @@ fn init() -> impl Handler {
         };
 
         let bounce_buffer_allocator =
-            BounceBufferAllocator::new(Basic::new(dma_region.as_ptr().len()), 1);
+            WithAlignmentBound::new(BasicAllocator::new(dma_region.as_ptr().len()), 1);
 
         DeviceImpl::new(
             Default::default(),
@@ -156,7 +157,7 @@ fn init() -> impl Handler {
         };
 
         let bounce_buffer_allocator =
-            BounceBufferAllocator::new(Basic::new(dma_region.as_ptr().len()), 1);
+            WithAlignmentBound::new(BasicAllocator::new(dma_region.as_ptr().len()), 1);
 
         SharedRingBufferBlockIO::new(
             BlockSize512::BLOCK_SIZE,
