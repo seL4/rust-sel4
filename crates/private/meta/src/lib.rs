@@ -93,7 +93,7 @@ definitely! {
     sel4_async_single_threaded_executor
     sel4_async_time
     sel4_async_unsync
-    sel4_bounce_buffer_allocator
+    sel4_abstract_allocator
     sel4_dlmalloc
     sel4_driver_interfaces
     sel4_elf_header

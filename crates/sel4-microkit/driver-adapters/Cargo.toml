@@ -22,7 +22,7 @@ embedded-hal-nb = "1.0"
 heapless = "0.8.0"
 log = "0.4.17"
 rtcc = "0.3.2"
-sel4-bounce-buffer-allocator = { path = "../../sel4-bounce-buffer-allocator" }
+sel4-abstract-allocator = { path = "../../sel4-abstract-allocator" }
 sel4-driver-interfaces = { path = "../../sel4-driver-interfaces" }
 sel4-microkit = { path = ".." }
 sel4-microkit-message = { path = "../message" }

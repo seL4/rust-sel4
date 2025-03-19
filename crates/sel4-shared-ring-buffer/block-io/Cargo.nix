@@ -25,7 +25,7 @@ mk {
     inherit (localCrates)
       sel4-shared-ring-buffer
       sel4-shared-ring-buffer-block-io-types
-      sel4-bounce-buffer-allocator
+      sel4-abstract-allocator
       sel4-async-block-io
       sel4-shared-memory
     ;

@@ -7,7 +7,7 @@
 { mk, versions }:
 
 mk {
-  package.name = "sel4-bounce-buffer-allocator";
+  package.name = "sel4-abstract-allocator";
   dependencies = {
     inherit (versions) log;
   };

@@ -39,7 +39,7 @@ mk {
       sel4-async-network
       sel4-async-time
       sel4-shared-ring-buffer-bookkeeping
-      sel4-bounce-buffer-allocator
+      sel4-abstract-allocator
       sel4-shared-ring-buffer
       sel4-shared-ring-buffer-smoltcp
       sel4-shared-ring-buffer-block-io

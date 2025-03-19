@@ -10,7 +10,7 @@ use core::ptr::NonNull;
 
 use smoltcp::phy::DeviceCapabilities;
 
-use sel4_bounce_buffer_allocator::{
+use sel4_abstract_allocator::{
     AbstractBounceBufferAllocator, BounceBufferAllocation, BounceBufferAllocator,
 };
 use sel4_shared_memory::SharedMemoryRef;
