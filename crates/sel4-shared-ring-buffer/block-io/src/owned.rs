@@ -8,10 +8,10 @@ use core::alloc::Layout;
 use core::marker::PhantomData;
 use core::task::{Poll, Waker};
 
-use sel4_async_block_io::{access::Access, Operation};
-use sel4_bounce_buffer_allocator::{
+use sel4_abstract_allocator::{
     AbstractBounceBufferAllocator, BounceBufferAllocation, BounceBufferAllocator,
 };
+use sel4_async_block_io::{access::Access, Operation};
 use sel4_shared_memory::SharedMemoryRef;
 use sel4_shared_ring_buffer::{
     roles::Provide, Descriptor, PeerMisbehaviorError as SharedRingBuffersPeerMisbehaviorError,

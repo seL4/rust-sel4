@@ -19,11 +19,11 @@ use smoltcp::iface::Config;
 use smoltcp::phy::{Device, DeviceCapabilities, Medium};
 use smoltcp::wire::{EthernetAddress, HardwareAddress};
 
+use sel4_abstract_allocator::{Basic, BounceBufferAllocator};
 use sel4_async_block_io::{
     constant_block_sizes::BlockSize512, disk::Disk, BlockSize, CachedBlockIO, ConstantBlockSize,
 };
 use sel4_async_time::Instant;
-use sel4_bounce_buffer_allocator::{Basic, BounceBufferAllocator};
 use sel4_driver_interfaces::block::GetBlockDeviceLayout;
 use sel4_driver_interfaces::net::GetNetDeviceMeta;
 use sel4_driver_interfaces::timer::{Clock, DefaultTimer};

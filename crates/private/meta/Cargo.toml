@@ -24,6 +24,7 @@ sel4-root-task = ["dep:sel4-root-task"]
 cfg-if = "1.0.0"
 log = "0.4.17"
 sel4 = { path = "../../sel4" }
+sel4-abstract-allocator = { path = "../../sel4-abstract-allocator" }
 sel4-abstract-ptr = { path = "../../sel4-abstract-ptr" }
 sel4-abstract-rc = { path = "../../sel4-abstract-rc" }
 sel4-async-block-io = { path = "../../sel4-async/block-io" }
@@ -34,7 +35,6 @@ sel4-async-single-threaded-executor = { path = "../../sel4-async/single-threaded
 sel4-async-time = { path = "../../sel4-async/time" }
 sel4-async-unsync = { path = "../../sel4-async/unsync" }
 sel4-bcm2835-aux-uart-driver = { path = "../../drivers/bcm2835-aux-uart" }
-sel4-bounce-buffer-allocator = { path = "../../sel4-bounce-buffer-allocator" }
 sel4-config = { path = "../../sel4/config" }
 sel4-dlmalloc = { path = "../../sel4-dlmalloc" }
 sel4-driver-interfaces = { path = "../../sel4-driver-interfaces" }

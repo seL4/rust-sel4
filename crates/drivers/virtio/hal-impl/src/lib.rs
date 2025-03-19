@@ -12,7 +12,7 @@ use core::ptr::{self, NonNull};
 use one_shot_mutex::OneShotMutex;
 use virtio_drivers::{BufferDirection, Hal, PhysAddr, PAGE_SIZE};
 
-use sel4_bounce_buffer_allocator::{Basic, BounceBufferAllocator};
+use sel4_abstract_allocator::{Basic, BounceBufferAllocator};
 use sel4_immediate_sync_once_cell::ImmediateSyncOnceCell;
 use sel4_shared_memory::SharedMemoryRef;
 

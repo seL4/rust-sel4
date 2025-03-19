@@ -16,7 +16,7 @@ mk {
     inherit (localCrates)
       sel4-immediate-sync-once-cell
       sel4-shared-memory
-      sel4-bounce-buffer-allocator
+      sel4-abstract-allocator
     ;
   };
 }
