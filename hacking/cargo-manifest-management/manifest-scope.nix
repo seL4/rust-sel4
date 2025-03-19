@@ -149,6 +149,11 @@ in rec {
     "packetmeta-id" "async"
   ];
 
+  offsetAllocatorSource = {
+    git = "https://github.com/coliasgroup/offset-allocator.git";
+    tag = mkKeepRef "ae15c9cbf352c1eb12b6be377324d100fd064f13"; # branch sel4
+  };
+
   fatSource = {
     git = "https://github.com/coliasgroup/rust-embedded-fat.git";
     tag = mkKeepRef "e1465a43c9f550ef58701a275b3133105deb9183"; # branch sel4
