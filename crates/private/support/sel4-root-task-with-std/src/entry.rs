@@ -4,8 +4,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use core::panic::UnwindSafe;
-use std::panic::catch_unwind;
+use std::panic::{catch_unwind, UnwindSafe};
 
 use crate::{abort, Termination};
 
