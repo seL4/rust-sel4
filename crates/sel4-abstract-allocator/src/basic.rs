@@ -10,33 +10,44 @@ use core::ops::Range;
 
 use crate::{AbstractAllocator, AbstractAllocatorAllocation};
 
-type Offset = usize;
-type Size = usize;
-
-const GRANULE_SIZE: usize = 2048;
-
 // TODO
-// This is just a temporary implementation to serve as a stand-in.
+// This is basically just a free list. Should use a more efficient implementation.
 
 // NOTE
-// Once #![feature(allocator_api)] and #![feature(btreemap_alloc)] land, Should be parameterized
-// with an allocator A, to enable this type to be used without a global allocator.
+// Once #![feature(allocator_api)] and #![feature(btreemap_alloc)] land, this should be
+// parameterized with an allocator A, to enable this type to be used without a global allocator.
 
 // NOTE
 // #![feature(btree_cursors)] would make this stand-in implementation simpler and more efficient.
 // See git history.
 
+const DEFAULT_GRANULE_SIZE: usize = 512;
+
+type Offset = usize;
+type Size = usize;
+
 pub struct BasicAllocator {
+    granule_size: usize,
     holes: BTreeMap<Offset, Size>,
 }
 
 impl BasicAllocator {
     pub fn new(size: Size) -> Self {
-        assert_eq!(size % GRANULE_SIZE, 0);
-        let offset = 0;
+        Self::with_granule_size(size, DEFAULT_GRANULE_SIZE)
+    }
+
+    pub fn with_granule_size(size: usize, granule_size: usize) -> Self {
+        assert_eq!(size % granule_size, 0);
         let mut holes = BTreeMap::new();
-        holes.insert(offset, size);
-        Self { holes }
+        holes.insert(0, size);
+        Self {
+            granule_size,
+            holes,
+        }
+    }
+
+    fn granule_size(&self) -> usize {
+        self.granule_size
     }
 }
 
@@ -47,8 +58,8 @@ impl AbstractAllocator for BasicAllocator {
 
     fn allocate(&mut self, orig_layout: Layout) -> Result<Self::Allocation, Self::AllocationError> {
         let layout = Layout::from_size_align(
-            orig_layout.size().next_multiple_of(GRANULE_SIZE),
-            orig_layout.align().max(GRANULE_SIZE),
+            orig_layout.size().next_multiple_of(self.granule_size()),
+            orig_layout.align().max(self.granule_size()),
         )
         .unwrap();
 
@@ -89,8 +100,8 @@ impl AbstractAllocator for BasicAllocator {
         let offset = range.start;
         let size = range.len();
 
-        assert_eq!(offset % GRANULE_SIZE, 0);
-        let size = size.next_multiple_of(GRANULE_SIZE);
+        assert_eq!(offset % self.granule_size(), 0);
+        let size = size.next_multiple_of(self.granule_size());
 
         let holes = self
             .holes
