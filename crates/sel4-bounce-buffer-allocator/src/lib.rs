@@ -75,8 +75,9 @@ impl<T> BounceBufferAllocator<T> {
         self.max_alignment
     }
 
-    pub fn check_alignment(&self, region: *mut u8) {
-        assert_eq!(region.cast::<()>().align_offset(self.max_alignment()), 0); // sanity check
+    #[must_use]
+    pub fn is_suitably_aligned(&self, region: *mut u8) -> bool {
+        region.cast::<()>().align_offset(self.max_alignment()) == 0
     }
 }
 
