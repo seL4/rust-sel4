@@ -6,72 +6,56 @@
 
 #![no_std]
 
+#[cfg(feature = "alloc")]
 extern crate alloc;
 
 use core::alloc::Layout;
 use core::fmt;
-use core::marker::PhantomData;
 use core::ops::Range;
 
-type Offset = usize;
-type Size = usize;
-type Align = usize;
+pub mod bump;
 
-mod basic;
-mod bump;
+#[cfg(feature = "alloc")]
+pub mod basic;
 
-pub use basic::Basic;
-pub use bump::Bump;
+#[cfg(feature = "alloc")]
+mod by_range;
 
-const MIN_ALLOCATION_SIZE: Size = 1;
+#[cfg(feature = "alloc")]
+pub use by_range::ByRange;
 
-// TODO use u64 instead of usize, or abstract
+// TODO consider using u64 instead of usize, or abstract
 
-pub trait AbstractBounceBufferAllocator {
-    type Error: fmt::Debug;
-
-    fn allocate(&mut self, layout: Layout) -> Result<Offset, Self::Error>;
-
-    fn deallocate(&mut self, offset: Offset, size: Size);
+pub trait AbstractAllocatorAllocation {
+    fn range(&self) -> Range<usize>;
 }
 
-pub trait AbstractBounceBufferAllocatorWithRangeTracking: AbstractBounceBufferAllocator {
-    // fn deallocate_by_range(&mut self, offset: Offset, size: Size);
+pub trait AbstractAllocator {
+    type AllocationError: fmt::Debug;
+
+    type Allocation: AbstractAllocatorAllocation;
+
+    fn allocate(&mut self, layout: Layout) -> Result<Self::Allocation, Self::AllocationError>;
+
+    fn deallocate(&mut self, allocation: Self::Allocation);
 }
 
-pub struct BounceBufferAllocator<T> {
-    abstract_allocator: T,
-    max_alignment: Align,
+// // //
+
+pub struct WithAlignmentBound<A> {
+    inner: A,
+    max_alignment: usize,
 }
 
-pub struct BounceBufferAllocation<T> {
-    range: Range<Offset>,
-    _phantom: PhantomData<T>,
-}
-
-impl<T> BounceBufferAllocation<T> {
-    const fn new(range: Range<Offset>) -> Self {
+impl<A> WithAlignmentBound<A> {
+    pub const fn new(inner: A, max_alignment: usize) -> Self {
         Self {
-            range,
-            _phantom: PhantomData,
-        }
-    }
-
-    pub fn range(&self) -> Range<Offset> {
-        self.range.clone()
-    }
-}
-
-impl<T> BounceBufferAllocator<T> {
-    pub fn new(abstract_allocator: T, max_alignment: Align) -> Self {
-        assert!(max_alignment.is_power_of_two());
-        Self {
-            abstract_allocator,
+            inner,
             max_alignment,
         }
     }
 
-    pub fn max_alignment(&self) -> Align {
+    pub const fn max_alignment(&self) -> usize {
         self.max_alignment
     }
 
@@ -81,24 +65,27 @@ impl<T> BounceBufferAllocator<T> {
     }
 }
 
-impl<T: AbstractBounceBufferAllocator> BounceBufferAllocator<T> {
-    pub fn allocate(&mut self, layout: Layout) -> Result<BounceBufferAllocation<T>, T::Error> {
-        assert!(layout.align() <= self.max_alignment);
-        assert!(layout.size() >= MIN_ALLOCATION_SIZE);
-        let start = self.abstract_allocator.allocate(layout)?;
-        let end = start + layout.size();
-        Ok(BounceBufferAllocation::new(start..end))
-    }
-
-    pub fn deallocate(&mut self, allocation: BounceBufferAllocation<T>) {
-        self.abstract_allocator
-            .deallocate(allocation.range.start, allocation.range.len())
-    }
+#[derive(Debug, Copy, Clone, Ord, PartialOrd, Eq, PartialEq, Hash)]
+pub enum WithAlignmentBoundAllocationError<E> {
+    InnerError(E),
+    AlignmentExceedsBound,
 }
 
-impl<T: AbstractBounceBufferAllocatorWithRangeTracking> BounceBufferAllocator<T> {
-    pub fn deallocate_by_range(&mut self, allocation_range: Range<usize>) {
-        self.abstract_allocator
-            .deallocate(allocation_range.start, allocation_range.len())
+impl<A: AbstractAllocator> AbstractAllocator for WithAlignmentBound<A> {
+    type AllocationError = WithAlignmentBoundAllocationError<A::AllocationError>;
+
+    type Allocation = A::Allocation;
+
+    fn allocate(&mut self, layout: Layout) -> Result<Self::Allocation, Self::AllocationError> {
+        if layout.align() > self.max_alignment() {
+            return Err(WithAlignmentBoundAllocationError::AlignmentExceedsBound);
+        }
+        self.inner
+            .allocate(layout)
+            .map_err(WithAlignmentBoundAllocationError::InnerError)
+    }
+
+    fn deallocate(&mut self, allocation: Self::Allocation) {
+        self.inner.deallocate(allocation)
     }
 }

@@ -12,7 +12,8 @@ use core::ptr::{self, NonNull};
 use one_shot_mutex::OneShotMutex;
 use virtio_drivers::{BufferDirection, Hal, PhysAddr, PAGE_SIZE};
 
-use sel4_abstract_allocator::{Basic, BounceBufferAllocator};
+use sel4_abstract_allocator::basic::BasicAllocator;
+use sel4_abstract_allocator::{ByRange, WithAlignmentBound};
 use sel4_immediate_sync_once_cell::ImmediateSyncOnceCell;
 use sel4_shared_memory::SharedMemoryRef;
 
@@ -21,7 +22,7 @@ static GLOBAL_STATE: ImmediateSyncOnceCell<OneShotMutex<State>> = ImmediateSyncO
 struct State {
     dma_region: SharedMemoryRef<'static, [u8]>,
     dma_region_paddr: usize,
-    bounce_buffer_allocator: BounceBufferAllocator<Basic>,
+    bounce_buffer_allocator: ByRange<WithAlignmentBound<BasicAllocator>>,
 }
 
 impl State {
@@ -51,8 +52,10 @@ impl HalImpl {
                 .trailing_zeros()
                 .min(dma_region_paddr.trailing_zeros());
 
-        let bounce_buffer_allocator =
-            BounceBufferAllocator::new(Basic::new(dma_region_size), max_alignment);
+        let bounce_buffer_allocator = ByRange::new(WithAlignmentBound::new(
+            BasicAllocator::new(dma_region_size),
+            max_alignment,
+        ));
 
         GLOBAL_STATE
             .set(OneShotMutex::new(State {
@@ -70,14 +73,14 @@ unsafe impl Hal for HalImpl {
         let mut state = GLOBAL_STATE.get().unwrap().lock();
         assert!(pages > 0);
         let layout = Layout::from_size_align(pages * PAGE_SIZE, PAGE_SIZE).unwrap();
-        let bounce_buffer_allocation = state.bounce_buffer_allocator.allocate(layout).unwrap();
+        let bounce_buffer_range = state.bounce_buffer_allocator.allocate(layout).unwrap();
         let bounce_buffer_ptr = state
             .dma_region
             .as_mut_ptr()
-            .index(bounce_buffer_allocation.range());
+            .index(bounce_buffer_range.clone());
         bounce_buffer_ptr.fill(0);
         let vaddr = bounce_buffer_ptr.as_raw_ptr().cast::<u8>();
-        let paddr = state.offset_to_paddr(bounce_buffer_allocation.range().start);
+        let paddr = state.offset_to_paddr(bounce_buffer_range.start);
         (paddr, vaddr)
     }
 
@@ -90,7 +93,7 @@ unsafe impl Hal for HalImpl {
         };
         state
             .bounce_buffer_allocator
-            .deallocate_by_range(bounce_buffer_range);
+            .deallocate(bounce_buffer_range);
         0
     }
 
@@ -102,13 +105,13 @@ unsafe impl Hal for HalImpl {
         let mut state = GLOBAL_STATE.get().unwrap().lock();
         assert!(!buffer.is_empty());
         let layout = Layout::from_size_align(buffer.len(), 1).unwrap();
-        let bounce_buffer_allocation = state.bounce_buffer_allocator.allocate(layout).unwrap();
+        let bounce_buffer_range = state.bounce_buffer_allocator.allocate(layout).unwrap();
         state
             .dma_region
             .as_mut_ptr()
-            .index(bounce_buffer_allocation.range())
+            .index(bounce_buffer_range.clone())
             .copy_from_slice(buffer.as_ref());
-        state.offset_to_paddr(bounce_buffer_allocation.range().start)
+        state.offset_to_paddr(bounce_buffer_range.start)
     }
 
     unsafe fn unshare(paddr: PhysAddr, mut buffer: NonNull<[u8]>, direction: BufferDirection) {
@@ -126,6 +129,6 @@ unsafe impl Hal for HalImpl {
         }
         state
             .bounce_buffer_allocator
-            .deallocate_by_range(bounce_buffer_range);
+            .deallocate(bounce_buffer_range);
     }
 }

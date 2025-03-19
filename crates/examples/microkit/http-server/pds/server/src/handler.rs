@@ -15,7 +15,8 @@ use one_shot_mutex::OneShotMutex;
 use smoltcp::iface::Config;
 use smoltcp::time::Instant as SmoltcpInstant;
 
-use sel4_abstract_allocator::Basic;
+use sel4_abstract_allocator::basic::BasicAllocator;
+use sel4_abstract_allocator::WithAlignmentBound;
 use sel4_async_block_io::{access::ReadOnly, constant_block_sizes::BlockSize512};
 use sel4_async_network::{DhcpOverrides, ManagedInterface};
 use sel4_async_single_threaded_executor::{LocalPool, LocalSpawner};
@@ -34,8 +35,9 @@ pub(crate) struct HandlerImpl {
     net_driver_channel: sel4_microkit::Channel,
     block_driver_channel: sel4_microkit::Channel,
     timer: Arc<OneShotMutex<DefaultTimer<TimerClient>>>,
-    net_device: DeviceImpl<Basic>,
-    shared_block_io: SharedRingBufferBlockIO<BlockSize512, ReadOnly, Basic, fn()>,
+    net_device: DeviceImpl<WithAlignmentBound<BasicAllocator>>,
+    shared_block_io:
+        SharedRingBufferBlockIO<BlockSize512, ReadOnly, WithAlignmentBound<BasicAllocator>, fn()>,
     shared_timers: TimerManager,
     shared_network: ManagedInterface,
     local_pool: LocalPool,
@@ -49,9 +51,14 @@ impl HandlerImpl {
         net_driver_channel: sel4_microkit::Channel,
         block_driver_channel: sel4_microkit::Channel,
         timer: Arc<OneShotMutex<DefaultTimer<TimerClient>>>,
-        mut net_device: DeviceImpl<Basic>,
+        mut net_device: DeviceImpl<WithAlignmentBound<BasicAllocator>>,
         net_config: Config,
-        shared_block_io: SharedRingBufferBlockIO<BlockSize512, ReadOnly, Basic, fn()>,
+        shared_block_io: SharedRingBufferBlockIO<
+            BlockSize512,
+            ReadOnly,
+            WithAlignmentBound<BasicAllocator>,
+            fn(),
+        >,
         f: impl FnOnce(TimerManager, ManagedInterface, LocalSpawner) -> T,
     ) -> Self {
         let now = Self::now_with_timer_client(&timer);
