@@ -9,6 +9,8 @@ use sel4::sel4_cfg_if;
 sel4_cfg_if! {
     if #[sel4_cfg(PRINTING)] {
         use sel4::debug_put_char;
+
+        pub use sel4_panicking_env::{debug_print, debug_println};
     } else {
         fn debug_put_char(_: u8) {}
 
