@@ -165,9 +165,23 @@ pub fn pd_is_passive() -> bool {
     *maybe_extern_var!(microkit_passive: bool = false)
 }
 
+pub(crate) fn pd_irqs() -> usize {
+    *maybe_extern_var!(microkit_irqs: usize = 0)
+}
+
+pub(crate) fn pd_notifications() -> usize {
+    *maybe_extern_var!(microkit_notifications: usize = 0)
+}
+
+pub(crate) fn pd_pps() -> usize {
+    *maybe_extern_var!(microkit_pps: usize = 0)
+}
+
+const PD_NAME_LENGTH: usize = 64;
+
 /// Returns the name of this protection domain without converting to unicode.
 pub fn pd_name_bytes() -> &'static [u8] {
-    let all_bytes = maybe_extern_var!(microkit_name: [u8; 16] = [0; 16]);
+    let all_bytes = maybe_extern_var!(microkit_name: [u8; PD_NAME_LENGTH] = [0; PD_NAME_LENGTH]);
     let n = all_bytes.iter().take_while(|b| **b != 0).count();
     &all_bytes[..n]
 }

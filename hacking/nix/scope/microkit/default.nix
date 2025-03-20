@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
 #
 
-{ lib, stdenv, buildPlatform
+{ lib, stdenv, buildPlatform, hostPlatform
 , buildPackages, pkgsBuildBuild
 , linkFarm, writeScript, runCommand
 , callPackage
@@ -44,6 +44,11 @@ let
     '';
   };
 
+  sdkArch =
+    if hostPlatform.isAarch64 then "aarch64"
+    else if hostPlatform.isRiscV64 then "riscv64"
+    else throw "unkown arch";
+
   sdk = stdenv.mkDerivation {
     name = "microkit-sdk-without-tool";
 
@@ -68,18 +73,12 @@ let
     dontConfigure = true;
     dontFixup = true;
 
-    # TODO make PR upstream to improve flexibility
-    postPatch = ''
-      substituteInPlace build_sdk.py --replace \
-        '"riscv64-unknown-elf-"' \
-        '"${stdenv.cc.targetPrefix}"'
-    '';
-
     buildPhase = ''
       python3 build_sdk.py \
         --sel4 ${kernelSourcePatched} \
         --boards ${board} \
         --configs ${config} \
+        --toolchain-prefix-${sdkArch} ${lib.removeSuffix "-" stdenv.cc.targetPrefix} \
         --skip-tool \
         --skip-docs \
         --skip-tar
@@ -122,9 +121,7 @@ let
         dontFixup = true;
 
         configurePhase = ''
-          d=.cargo
-          mkdir $d
-          cp ${cargoConfigFile} $d/config.toml
+          cat ${cargoConfigFile} >> .cargo/config.toml
         '';
 
         buildPhase = ''
