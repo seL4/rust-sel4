@@ -14,16 +14,29 @@ sel4_cfg_if! {
     } else {
         fn debug_put_char(_: u8) {}
 
-        /// No-op for this configuration
+        // Create new no-op macros instead of re-exporting from sel4_panicking_env for the sake of
+        // performance.
+
+        /// No-op for this configuration.
         #[macro_export]
         macro_rules! debug_print {
-            ($($arg:tt)*) => {};
+            ($($arg:tt)*) => {
+                // Avoid unused argument warnings without runtime cost
+                if false {
+                    drop(format_args!($($arg)*))
+                }
+            };
         }
 
-        /// No-op for this configuration
+        /// No-op for this configuration.
         #[macro_export]
         macro_rules! debug_println {
-            ($($arg:tt)*) => {};
+            ($($arg:tt)*) => {
+                // Avoid unused argument warnings without runtime cost
+                if false {
+                    drop(format_args!($($arg)*))
+                }
+            };
         }
     }
 }
