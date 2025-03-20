@@ -31,6 +31,9 @@ sel4_cfg_if! {
         /// No-op for this configuration.
         #[macro_export]
         macro_rules! debug_println {
+            () => {
+                ()
+            };
             ($($arg:tt)*) => {
                 // Avoid unused argument warnings without runtime cost
                 if false {
