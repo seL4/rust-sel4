@@ -114,37 +114,42 @@ in rec {
             mkLoaderQEMUArgs = loader: [ "-device" "loader,file=${loader},addr=0x70000000,cpu-num=0" ];
           };
 
-          forBuildTests = {
-            noPrinting = mk {
-              debugBuild = true;
-              printing = false;
+          forBuildTests =
+            let
+              mkForBuildTest = args: mk ({
+                hypervisor = true; # HACK around sel4-kernel-loader's config limitations
+              } // args);
+            in {
+              noPrinting = mkForBuildTest {
+                debugBuild = true;
+                printing = false;
+              };
+              noDebug = mkForBuildTest {
+                debugBuild = false;
+                printing = true;
+              };
+              verification = mkForBuildTest {
+                verificationBuild = true;
+              };
+              bench = mkForBuildTest {
+                verificationBuild = true;
+                benchmarks = "track_utilisation";
+              };
+              debugBench = mkForBuildTest {
+                debugBuild = true;
+                benchmarks = "track_utilisation";
+              };
+              mcs = mkForBuildTest {
+                mcs = true;
+              };
+              ukitRelease = mk {
+                el2 = true;
+                mcs = true;
+                isMicrokit = true;
+                microkitBoard = "qemu_virt_aarch64";
+                debugBuild = false;
+              };
             };
-            noDebug = mk {
-              debugBuild = false;
-              printing = true;
-            };
-            verification = mk {
-              verificationBuild = true;
-            };
-            bench = mk {
-              verificationBuild = true;
-              benchmarks = "track_utilisation";
-            };
-            debugBench = mk {
-              debugBuild = true;
-              benchmarks = "track_utilisation";
-            };
-            mcs = mk {
-              mcs = true;
-            };
-            ukitRelease = mk {
-              el2 = true;
-              mcs = true;
-              isMicrokit = true;
-              microkitBoard = "qemu_virt_aarch64";
-              debugBuild = false;
-            };
-          };
         };
 
       bcm2711 = mkWorld {
