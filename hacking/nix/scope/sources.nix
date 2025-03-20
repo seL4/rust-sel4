@@ -10,6 +10,7 @@
 let
   fetchGit =
     { url, rev
+    , ref ? mkKeepRef rev
     , local ? null
     , useLocal ? false
     , andThen ? ""
@@ -19,8 +20,7 @@ let
 
     let
       remote = builtins.fetchGit rec {
-        inherit url rev;
-        ref = mkKeepRef rev;
+        inherit url rev ref;
       };
       base = if useLocal then (lib.cleanSource local) else remote;
     in
@@ -64,6 +64,13 @@ in rec {
     url = "https://github.com/coliasgroup/microkit.git";
     rev = "58ef533a399b916ab39df0c93e2741993614ba4f"; # branch "rust-nix", based on 2.0.1
     local = localRoot + "/microkit";
+  };
+
+  sdfgen = fetchGit {
+    url = "https://github.com/au-ts/microkit_sdf_gen";
+    rev = "232ad1a5425899b0fb017dfd19ff626b0223f812";
+    ref = "0.23.1";
+    local = localRoot + "/microkit_sdf_gen";
   };
 
   capdlTool = fetchGit (capdlCommon // {
