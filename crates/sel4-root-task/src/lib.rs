@@ -46,7 +46,7 @@ pub use heap::set_global_allocator_mutex_notification;
 pub use termination::{Never, Termination};
 
 #[sel4::sel4_cfg(PRINTING)]
-pub use sel4_panicking_env::{debug_print, debug_println};
+pub use printing::{debug_print, debug_println};
 
 /// Declares a function to be the root task's main function.
 ///
