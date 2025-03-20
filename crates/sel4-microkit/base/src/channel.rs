@@ -6,7 +6,10 @@
 
 use core::fmt;
 
-use crate::MessageInfo;
+use crate::{
+    symbols::{pd_irqs, pd_notifications, pd_pps},
+    MessageInfo,
+};
 
 const BASE_OUTPUT_NOTIFICATION_SLOT: usize = 10;
 const BASE_ENDPOINT_SLOT: usize = BASE_OUTPUT_NOTIFICATION_SLOT + 64;
@@ -31,23 +34,26 @@ impl Channel {
         self.index
     }
 
-    fn cap<T: sel4::CapType>(&self, base_slot: usize) -> sel4::Cap<T> {
-        sel4::Cap::from_bits((base_slot + self.index) as sel4::CPtrBits)
+    fn cap<T: ChannelFacet>(&self) -> sel4::Cap<T> {
+        if T::mask() & (1 << self.index) == 0 {
+            panic!("{}: not valid for channel '{}'", T::METHOD_NAME, self.index);
+        }
+        sel4::Cap::from_bits((T::BASE_SLOT + self.index) as sel4::CPtrBits)
     }
 
     #[doc(hidden)]
     pub fn notification(&self) -> sel4::cap::Notification {
-        self.cap::<sel4::cap_type::Notification>(BASE_OUTPUT_NOTIFICATION_SLOT)
+        self.cap::<sel4::cap_type::Notification>()
     }
 
     #[doc(hidden)]
     pub fn irq_handler(&self) -> sel4::cap::IrqHandler {
-        self.cap::<sel4::cap_type::IrqHandler>(BASE_IRQ_SLOT)
+        self.cap::<sel4::cap_type::IrqHandler>()
     }
 
     #[doc(hidden)]
     pub fn endpoint(&self) -> sel4::cap::Endpoint {
-        self.cap::<sel4::cap_type::Endpoint>(BASE_ENDPOINT_SLOT)
+        self.cap::<sel4::cap_type::Endpoint>()
     }
 
     pub fn notify(&self) {
@@ -62,6 +68,40 @@ impl Channel {
 
     pub fn pp_call(&self, msg_info: MessageInfo) -> MessageInfo {
         MessageInfo::from_inner(self.endpoint().call(msg_info.into_inner()))
+    }
+}
+
+trait ChannelFacet: sel4::CapType {
+    const METHOD_NAME: &str;
+    const BASE_SLOT: usize;
+
+    fn mask() -> usize;
+}
+
+impl ChannelFacet for sel4::cap_type::Notification {
+    const METHOD_NAME: &str = "pp_call";
+    const BASE_SLOT: usize = BASE_OUTPUT_NOTIFICATION_SLOT;
+
+    fn mask() -> usize {
+        pd_notifications()
+    }
+}
+
+impl ChannelFacet for sel4::cap_type::IrqHandler {
+    const METHOD_NAME: &str = "irq_ack";
+    const BASE_SLOT: usize = BASE_IRQ_SLOT;
+
+    fn mask() -> usize {
+        pd_irqs()
+    }
+}
+
+impl ChannelFacet for sel4::cap_type::Endpoint {
+    const METHOD_NAME: &str = "notify";
+    const BASE_SLOT: usize = BASE_ENDPOINT_SLOT;
+
+    fn mask() -> usize {
+        pd_pps()
     }
 }
 
