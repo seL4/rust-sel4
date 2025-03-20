@@ -306,9 +306,11 @@ superCallPackage ../rust-utils {} self //
 
   mkSeL4 = callPackage ./sel4 {};
 
+  cmakeConfigHelpers = callPackage ./cmake-config-helpers.nix {};
+
   mkMicrokit = callPackage ./microkit {};
 
-  cmakeConfigHelpers = callPackage ./cmake-config-helpers.nix {};
+  sdfgen = callPackage ./microkit/sdfgen.nix {};
 
   ### worlds
 
