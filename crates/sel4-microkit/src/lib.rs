@@ -34,8 +34,6 @@
 #[cfg(feature = "alloc")]
 extern crate alloc;
 
-use sel4::sel4_cfg;
-
 pub use sel4_microkit_base::*;
 
 mod entry;
@@ -44,7 +42,7 @@ mod printing;
 
 pub mod panicking;
 
-#[sel4_cfg(PRINTING)]
+#[sel4::sel4_cfg(PRINTING)]
 pub use printing::{debug_print, debug_println};
 
 /// Declares a function to be the the protection domain's initialization function.
