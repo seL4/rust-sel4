@@ -41,4 +41,6 @@ sel4_cfg_if! {
     }
 }
 
-sel4_panicking_env::register_debug_put_char!(debug_put_char);
+sel4_panicking_env::register_debug_put_char! {
+    debug_put_char
+}
