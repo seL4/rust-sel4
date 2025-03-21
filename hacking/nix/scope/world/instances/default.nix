@@ -408,6 +408,11 @@ in rec {
     inherit canSimulate;
   };
 
+  lionsos = callPackage ./lionsos {
+    inherit maybe;
+    inherit canSimulate;
+  };
+
   examples = {
     root-task = {
       hello = maybe haveFullRuntime (mkInstance {
