@@ -5,6 +5,7 @@
 //
 
 #![no_std]
+#![cfg_attr(feature = "atomics", feature(cfg_target_has_atomic_equal_alignment))]
 #![cfg_attr(feature = "atomics", feature(core_intrinsics))]
 #![cfg_attr(feature = "atomics", allow(internal_features))]
 
