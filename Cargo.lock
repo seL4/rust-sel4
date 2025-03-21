@@ -2812,13 +2812,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "sel4-sync-trivial"
-version = "0.1.0"
-dependencies = [
- "lock_api",
-]
-
-[[package]]
 name = "sel4-synthetic-elf"
 version = "0.1.0"
 dependencies = [
