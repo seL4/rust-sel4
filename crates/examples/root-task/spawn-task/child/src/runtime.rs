@@ -6,7 +6,7 @@
 
 use core::ptr;
 
-use one_shot_mutex::RawOneShotMutex;
+use one_shot_mutex::sync::RawOneShotMutex;
 
 use sel4::CapTypeForFrameObjectOfFixedSize;
 use sel4_dlmalloc::{StaticDlmalloc, StaticHeap};

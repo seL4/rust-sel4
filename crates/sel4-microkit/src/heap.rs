@@ -28,6 +28,6 @@ macro_rules! declare_heap {
 }
 
 pub mod _private {
-    pub use one_shot_mutex::RawOneShotMutex;
+    pub use one_shot_mutex::sync::RawOneShotMutex;
     pub use sel4_dlmalloc::{StaticDlmalloc, StaticHeap};
 }

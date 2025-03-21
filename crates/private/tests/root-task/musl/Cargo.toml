@@ -18,7 +18,7 @@ license = "BSD-2-Clause"
 
 [dependencies]
 dlmalloc = "0.2.3"
-one-shot-mutex = "0.1.1"
+one-shot-mutex = "0.2.1"
 sel4 = { path = "../../../../sel4" }
 sel4-dlmalloc = { path = "../../../../sel4-dlmalloc" }
 sel4-linux-syscall-types = { path = "../../../../sel4-linux-syscall-types" }

@@ -14,7 +14,7 @@ use core::ops::Range;
 use core::ptr;
 use core::slice;
 
-use one_shot_mutex::RawOneShotMutex;
+use one_shot_mutex::sync::RawOneShotMutex;
 
 use sel4_capdl_initializer_core::{Initializer, InitializerBuffers, PerObjectBuffer};
 use sel4_capdl_initializer_types::{

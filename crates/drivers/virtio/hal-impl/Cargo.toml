@@ -17,7 +17,7 @@ edition = "2021"
 license = "BSD-2-Clause"
 
 [dependencies]
-one-shot-mutex = "0.1.1"
+one-shot-mutex = "0.2.1"
 sel4-abstract-allocator = { path = "../../../sel4-abstract-allocator" }
 sel4-immediate-sync-once-cell = { path = "../../../sel4-immediate-sync-once-cell" }
 sel4-shared-memory = { path = "../../../sel4-shared-memory" }
