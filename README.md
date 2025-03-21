@@ -41,8 +41,8 @@ following versions of those related projects:
   [`968d8f6f97a37ea315243510348e933b612319f1`](https://github.com/seL4/seL4/tree/968d8f6f97a37ea315243510348e933b612319f1)
   (on [github.com/seL4/seL4:microkit](https://github.com/seL4/seL4/tree/microkit))
 - seL4 Microkit:
-  [`8aeb9f9006cf61180dea11a0a00a084a49833066`](https://github.com/seL4/microkit/tree/8aeb9f9006cf61180dea11a0a00a084a49833066)
-  (version 2.0.0, on [github.com/seL4/microkit:main](https://github.com/seL4/microkit/tree/main))
+  [`3f71a5e4effed7551a02fda77151223822060c46`](https://github.com/seL4/microkit/tree/3f71a5e4effed7551a02fda77151223822060c46)
+  (version 2.0.1, on [github.com/seL4/microkit:main](https://github.com/seL4/microkit/tree/main))
 
 ### Demos
 
