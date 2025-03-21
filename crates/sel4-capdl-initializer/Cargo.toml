@@ -18,7 +18,7 @@ license = "BSD-2-Clause"
 
 [dependencies]
 log = "0.4.17"
-one-shot-mutex = "0.1.1"
+one-shot-mutex = "0.2.1"
 postcard = { version = "1.0.2", default-features = false, features = ["alloc"] }
 sel4 = { path = "../sel4" }
 sel4-capdl-initializer-core = { path = "core" }

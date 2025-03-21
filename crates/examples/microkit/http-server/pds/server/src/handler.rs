@@ -11,7 +11,7 @@ use core::pin::Pin;
 use core::time::Duration;
 
 use futures::future::LocalBoxFuture;
-use one_shot_mutex::OneShotMutex;
+use one_shot_mutex::sync::OneShotMutex;
 use smoltcp::iface::Config;
 use smoltcp::time::Instant as SmoltcpInstant;
 

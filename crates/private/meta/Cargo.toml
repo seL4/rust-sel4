@@ -62,7 +62,6 @@ sel4-shared-ring-buffer-smoltcp = { path = "../../sel4-shared-ring-buffer/smoltc
 sel4-sp804-driver = { path = "../../drivers/sp804" }
 sel4-stack = { path = "../../sel4-stack" }
 sel4-sync = { path = "../../sel4-sync" }
-sel4-sync-trivial = { path = "../../sel4-sync/trivial" }
 sel4-sys = { path = "../../sel4/sys" }
 sel4-virtio-blk = { path = "../../drivers/virtio/blk" }
 sel4-virtio-hal-impl = { path = "../../drivers/virtio/hal-impl" }

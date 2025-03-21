@@ -14,7 +14,7 @@ use core::alloc::Layout;
 use core::ffi::c_char;
 use core::ptr;
 
-use one_shot_mutex::RawOneShotMutex;
+use one_shot_mutex::sync::RawOneShotMutex;
 
 use sel4_dlmalloc::{StaticDlmalloc, StaticHeap};
 use sel4_linux_syscall_types::{ENOMEM, ENOSYS, MAP_ANONYMOUS, SEEK_CUR};

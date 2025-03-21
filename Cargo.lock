@@ -1109,7 +1109,6 @@ dependencies = [
  "sel4-sp804-driver",
  "sel4-stack",
  "sel4-sync",
- "sel4-sync-trivial",
  "sel4-sys",
  "sel4-virtio-blk",
  "sel4-virtio-hal-impl",
@@ -1427,9 +1426,9 @@ checksum = "945462a4b81e43c4e3ba96bd7b49d834c6f61198356aa858733bc4acf3cbe62e"
 
 [[package]]
 name = "one-shot-mutex"
-version = "0.1.1"
+version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3c32f39cf70e43cb1488b67fd6adbc9c0ccaac00fe751ee0d02f82fcfe6267e2"
+checksum = "cbb10614a03e671fcbb7f1421656788f9a761aab44563b83b07140c354fa9334"
 dependencies = [
  "lock_api",
 ]
@@ -2709,12 +2708,12 @@ version = "0.1.0"
 dependencies = [
  "lock_api",
  "log",
+ "one-shot-mutex",
  "sel4-abstract-allocator",
  "sel4-abstract-rc",
  "sel4-shared-memory",
  "sel4-shared-ring-buffer",
  "sel4-shared-ring-buffer-bookkeeping",
- "sel4-sync-trivial",
  "smoltcp",
 ]
 

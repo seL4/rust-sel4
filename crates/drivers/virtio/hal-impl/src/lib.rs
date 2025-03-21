@@ -9,7 +9,7 @@
 use core::alloc::Layout;
 use core::ptr::{self, NonNull};
 
-use one_shot_mutex::OneShotMutex;
+use one_shot_mutex::sync::OneShotMutex;
 use virtio_drivers::{BufferDirection, Hal, PhysAddr, PAGE_SIZE};
 
 use sel4_abstract_allocator::basic::BasicAllocator;

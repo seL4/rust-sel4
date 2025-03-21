@@ -13,7 +13,7 @@ use alloc::rc::Rc;
 use alloc::sync::Arc;
 use core::time::Duration;
 
-use one_shot_mutex::OneShotMutex;
+use one_shot_mutex::sync::OneShotMutex;
 use rtcc::DateTimeAccess;
 use smoltcp::iface::Config;
 use smoltcp::phy::{Device, DeviceCapabilities, Medium};

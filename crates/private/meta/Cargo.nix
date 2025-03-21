@@ -44,7 +44,6 @@ mk {
       sel4-shared-ring-buffer-smoltcp
       sel4-stack
       sel4-sync
-      sel4-sync-trivial
 
       sel4-bcm2835-aux-uart-driver
       sel4-pl011-driver
