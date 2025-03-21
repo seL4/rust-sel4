@@ -7,6 +7,7 @@
 { lib, stdenv, buildPlatform, hostPlatform
 , buildPackages, pkgsBuildBuild
 , linkFarm, writeScript, runCommand
+, buildEnv
 , callPackage
 , cmake, ninja
 , dtc, libxml2
@@ -129,6 +130,14 @@ let
         '';
       });
 
+  sdkWithTool = buildEnv {
+    name = "microkit-sdk-with-tool";
+    paths = [
+      sdk
+      tool
+    ];
+  };
+
   mkLoader =
     { systemXML
     , searchPath
@@ -173,6 +182,7 @@ let
 in rec {
   inherit
     sdk tool
+    sdkWithTool
     mkSystem
   ;
 }

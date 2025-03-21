@@ -73,6 +73,20 @@ in rec {
     local = localRoot + "/microkit_sdf_gen";
   };
 
+  sddf = fetchGit (lionsosAttrs // {
+    andThen = "/dep/sddf";
+  });
+
+  lionsosAttrs = {
+    url = "https://github.com/au-ts/lionsos";
+    rev = "xxx";
+    ref = "HEAD";
+    local = localRoot + "/lionsos";
+    useLocal = true;
+  };
+
+  lionsos = fetchGit lionsosAttrs;
+
   capdlTool = fetchGit (capdlCommon // {
     andThen = "/capDL-tool";
   });
