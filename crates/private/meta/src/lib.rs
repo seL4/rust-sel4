@@ -121,7 +121,6 @@ definitely! {
     sel4_shared_ring_buffer_smoltcp
     sel4_stack
     sel4_sync
-    sel4_sync_trivial
 
     sel4_bcm2835_aux_uart_driver
     sel4_pl011_driver
