@@ -8,7 +8,7 @@ use core::fmt;
 
 use crate::{
     defer::{DeferredAction, PreparedDeferredAction},
-    ipc::{self, Event},
+    ipc::{self, ChannelSet, Event},
     pd_is_passive, Channel, Child, MessageInfo,
 };
 
@@ -22,8 +22,11 @@ pub trait Handler {
     /// This method has the same meaning and type as its analog in `libmicrokit`.
     ///
     /// The default implementation just panics.
-    fn notified(&mut self, channel: Channel) -> Result<(), Self::Error> {
-        panic!("unexpected notification from channel {channel:?}")
+    fn notified(&mut self, channels: ChannelSet) -> Result<(), Self::Error> {
+        panic!(
+            "unexpected notification from channels {}",
+            channels.display()
+        )
     }
 
     /// This method has the same meaning and type as its analog in `libmicrokit`.
@@ -76,10 +79,8 @@ pub trait Handler {
             };
 
             match event {
-                Event::Notified(notified_event) => {
-                    for channel in notified_event.iter() {
-                        self.notified(channel)?;
-                    }
+                Event::Notified(channels) => {
+                    self.notified(channels)?;
                 }
                 Event::Protected(channel, msg_info) => {
                     reply_tag = Some(self.protected(channel, msg_info)?);
