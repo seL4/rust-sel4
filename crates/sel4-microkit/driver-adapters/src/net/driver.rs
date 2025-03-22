@@ -14,7 +14,7 @@ use smoltcp::{
 
 use sel4_driver_interfaces::net::GetNetDeviceMeta;
 use sel4_driver_interfaces::HandleInterrupt;
-use sel4_microkit::{Channel, Handler, Infallible, MessageInfo};
+use sel4_microkit::{Channel, ChannelSet, Handler, Infallible, MessageInfo};
 use sel4_microkit_message::MessageInfoExt as _;
 use sel4_shared_memory::SharedMemoryRef;
 use sel4_shared_ring_buffer::{roles::Use, RingBuffers};
@@ -53,8 +53,8 @@ impl<Device> HandlerImpl<Device> {
 impl<Device: phy::Device + HandleInterrupt + GetNetDeviceMeta> Handler for HandlerImpl<Device> {
     type Error = Infallible;
 
-    fn notified(&mut self, channel: Channel) -> Result<(), Self::Error> {
-        if channel == self.device_channel || channel == self.client_channel {
+    fn notified(&mut self, channels: ChannelSet) -> Result<(), Self::Error> {
+        if channels.contains(self.device_channel) || channels.contains(self.client_channel) {
             let mut notify_rx = false;
 
             while !self.rx_ring_buffers.free_mut().is_empty().unwrap() {
