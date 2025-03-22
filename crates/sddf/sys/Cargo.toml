@@ -20,5 +20,5 @@ license = "BSD-2-Clause"
 sel4-sys = { path = "../../sel4/sys" }
 
 [build-dependencies]
-bindgen = "0.70.1"
+bindgen = "0.71.1"
 sel4-build-env = { path = "../../sel4/build-env" }
