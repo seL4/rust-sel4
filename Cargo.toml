@@ -70,6 +70,7 @@ members = [
     "crates/private/tests/root-task/tls",
     "crates/private/tests/root-task/verus/core",
     "crates/private/tests/root-task/verus/task",
+    "crates/sddf/sys",
     "crates/sel4",
     "crates/sel4-abstract-allocator",
     "crates/sel4-abstract-allocator/offset-allocator",
