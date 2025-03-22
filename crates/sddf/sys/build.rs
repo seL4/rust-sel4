@@ -99,7 +99,6 @@ fn main() {
         .derive_default(true)
         .generate_comments(false)
         .use_core()
-        .rust_target(bindgen::RustTarget::Stable_1_73) // NOTE tracks verus
         .generate()
         .unwrap();
 
