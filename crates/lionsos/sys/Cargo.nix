@@ -7,11 +7,12 @@
 { mk, localCrates, versions }:
 
 mk {
-  package.name = "sddf-sys";
-  package.links = "sddf";
+  package.name = "lionsos-sys";
+  package.links = "lions";
   dependencies = {
     inherit (localCrates)
       sel4-sys
+      sddf-sys
     ;
   };
   build-dependencies = {
