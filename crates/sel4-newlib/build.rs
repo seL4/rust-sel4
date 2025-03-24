@@ -9,9 +9,9 @@ use std::process::Stdio;
 use std::str;
 
 fn main() {
-    println!("cargo:rustc-link-lib=static=c");
+    println!("cargo::rustc-link-lib=static=c");
     if cfg!(feature = "nosys") {
-        println!("cargo:rustc-link-lib=static=nosys");
+        println!("cargo::rustc-link-lib=static=nosys");
     }
     #[cfg(feature = "detect-libc")]
     {
@@ -44,5 +44,5 @@ fn detect_libc() {
 
     assert!(lib_path.has_root());
 
-    println!("cargo:rustc-link-search=native={}", lib_path.display());
+    println!("cargo::rustc-link-search=native={}", lib_path.display());
 }
