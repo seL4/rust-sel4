@@ -16,6 +16,7 @@ authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
 build = "build/main.rs"
 edition = "2021"
 license = "BSD-2-Clause"
+links = "sel4"
 
 [dependencies]
 log = "0.4.17"

@@ -8,6 +8,7 @@
 
 mk {
   package.name = "sel4-sys";
+  package.links = "sel4";
   package.build = "build/main.rs";
   dependencies = {
     inherit (versions) log;

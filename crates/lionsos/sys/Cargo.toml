@@ -10,14 +10,15 @@
 #
 
 [package]
-name = "sddf-sys"
+name = "lionsos-sys"
 version = "0.1.0"
 authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
 edition = "2021"
 license = "BSD-2-Clause"
-links = "sddf"
+links = "lions"
 
 [dependencies]
+sddf-sys = { path = "../../sddf/sys" }
 sel4-sys = { path = "../../sel4/sys" }
 
 [build-dependencies]
