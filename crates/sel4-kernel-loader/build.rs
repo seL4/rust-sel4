@@ -76,7 +76,7 @@ fn main() {
             .compile("asm");
 
         for path in &asm_files {
-            println!("cargo:rerun-if-changed={}", path.display());
+            println!("cargo::rerun-if-changed={}", path.display());
         }
     }
 
@@ -107,16 +107,16 @@ fn main() {
     // just bad output. See the "Default program headers" section of:
     // https://maskray.me/blog/2020-12-19-lld-and-gnu-linker-incompatibilities
     println!(
-        "cargo:rustc-link-arg=--image-base=0x{:x}",
+        "cargo::rustc-link-arg=--image-base=0x{:x}",
         loader_phys_start
     );
 
-    println!("cargo:rustc-link-arg=-z");
-    println!("cargo:rustc-link-arg=max-page-size=4096");
+    println!("cargo::rustc-link-arg=-z");
+    println!("cargo::rustc-link-arg=max-page-size=4096");
 
     // No use in loader.
     // Remove unnecessary alignment gap between segments.
-    println!("cargo:rustc-link-arg=--no-rosegment");
+    println!("cargo::rustc-link-arg=--no-rosegment");
 }
 
 // // //

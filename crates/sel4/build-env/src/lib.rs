@@ -20,7 +20,7 @@ fn get_asserting_valid_unicode(var: &str) -> Option<String> {
         })
         .ok()
         .inspect(|_| {
-            println!("cargo:rerun-if-env-changed={var}");
+            println!("cargo::rerun-if-env-changed={var}");
         })
 }
 
@@ -40,7 +40,7 @@ pub fn try_get_with_sel4_prefix_relative_fallback(
         .map(PathBuf::from)
         .or_else(|| get_sel4_prefix().map(|fallback| fallback.join(relative_path_from_fallback)))
         .inspect(|path| {
-            println!("cargo:rerun-if-changed={}", path.display());
+            println!("cargo::rerun-if-changed={}", path.display());
         })
 }
 
@@ -55,7 +55,7 @@ pub fn get_libsel4_include_dirs() -> impl Iterator<Item = PathBuf> {
         .unwrap_or_else(|| panic!("{SEL4_INCLUDE_DIRS_ENV} or {SEL4_PREFIX_ENV} must be set"))
         .into_iter()
         .inspect(|path| {
-            println!("cargo:rerun-if-changed={}", path.display());
+            println!("cargo::rerun-if-changed={}", path.display());
         })
 }
 

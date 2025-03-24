@@ -20,5 +20,5 @@ fn main() {
     fs::write(out_path, &priv_key_pem).unwrap();
 
     // No external dependencies
-    println!("cargo:rerun-if-changed=build.rs");
+    println!("cargo::rerun-if-changed=build.rs");
 }

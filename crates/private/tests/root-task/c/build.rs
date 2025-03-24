@@ -13,6 +13,6 @@ fn main() {
     cc::Build::new().files(&c_files).compile("cbits");
 
     for path in &c_files {
-        println!("cargo:rerun-if-changed={}", path.display());
+        println!("cargo::rerun-if-changed={}", path.display());
     }
 }
