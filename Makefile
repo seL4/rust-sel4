@@ -93,6 +93,10 @@ check-dependencies:
 	lockfile=$$($(nix_build) -A pkgs.build.this.publicCratesCargoLock --no-out-link) && \
 		$(run_in_nix_shell) "cargo-audit audit -f $$lockfile"
 
+.PHONY: check-links
+check-links:
+	git ls-files | grep '\(.md\|.html\)$$' | xargs lychee -n
+
 rustc_target_spec_dir := support/targets
 
 .PHONY: generate-target-specs

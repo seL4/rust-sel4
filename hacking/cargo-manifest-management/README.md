@@ -86,7 +86,7 @@ the top-level `Cargo.lock`.
 `localCrates` is an attribute set which maps local crate names to partial Cargo manifest dependency
 tables. Currently, these tables only include the `path` attribute. Paths are relative to the current
 `Cargo.nix`. Thus, the value of the `localCrates` argument depends on the current `Cargo.nix` file.
-For example, in [`../../crates/sel4-microkit/Crate.nix`](../../crates/sel4-microkit/Crate.nix), the
+For example, in [`../../crates/sel4-microkit/Cargo.nix`](../../crates/sel4-microkit/Cargo.nix), the
 value of `localCrates` is:
 
 ```nix
