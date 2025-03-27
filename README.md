@@ -67,7 +67,7 @@ following versions of those related projects:
   supports notification-based mutexes.
 - [`sel4-logging`](./crates/sel4-logging): [`Log`](https://docs.rs/log/latest/log/trait.Log.html)
   implementation for the [`log`](https://crates.io/crates/log) crate.
-- [`sel4-externally-shared`](./crates/sel4-externally-shared): Abstractions for interacting with
+- [`sel4-shared-memory`](./crates/sel4-shared-memory): Abstractions for interacting with
   data in shared memory.
 - [`sel4-shared-ring-buffer`](./crates/sel4-shared-ring-buffer): Implementation of shared data
   structures used in the [seL4 Device Driver Framework](https://github.com/au-ts/sddf).

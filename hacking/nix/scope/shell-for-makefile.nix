@@ -9,6 +9,7 @@
 , python3
 , reuse
 , cargo-audit
+, lychee
 , kani
 }:
 
@@ -23,6 +24,7 @@ let
       python3
       reuse
       cargo-audit
+      lychee
     ] ++ lib.optionals hostPlatform.isx86_64 [
       kani
     ];
