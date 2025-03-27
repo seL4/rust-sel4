@@ -106,6 +106,24 @@ impl<C: InvocationContext> Tcb<C> {
         )
     }
 
+    /// Corresponds to `seL4_TCB_SetPriority`.
+    pub fn tcb_set_priority(self, authority: Tcb, priority: Word) -> Result<()> {
+        Error::wrap(self.invoke(|cptr, ipc_buffer| {
+            ipc_buffer
+                .inner_mut()
+                .seL4_TCB_SetPriority(cptr.bits(), authority.bits(), priority)
+        }))
+    }
+
+    /// Corresponds to `seL4_TCB_SetMCPriority`.
+    pub fn tcb_set_mc_priority(self, authority: Tcb, mcp: Word) -> Result<()> {
+        Error::wrap(self.invoke(|cptr, ipc_buffer| {
+            ipc_buffer
+                .inner_mut()
+                .seL4_TCB_SetMCPriority(cptr.bits(), authority.bits(), mcp)
+        }))
+    }
+
     sel4_cfg_if! {
         if #[sel4_cfg(KERNEL_MCS)] {
             /// Corresponds to `seL4_TCB_Configure`.
