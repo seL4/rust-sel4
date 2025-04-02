@@ -14,7 +14,7 @@ pub struct MessageValueUsingPostcard<T>(pub T);
 impl<T: Serialize> MessageValueSend for MessageValueUsingPostcard<T> {
     type Error = postcard::Error;
 
-    fn write_message_value(self, buf: &mut [u8]) -> Result<usize, Self::Error> {
+    fn write_message_value(&self, buf: &mut [u8]) -> Result<usize, Self::Error> {
         postcard::to_slice(&self.0, buf).map(|used| used.len())
     }
 }
