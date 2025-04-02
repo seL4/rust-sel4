@@ -17,6 +17,7 @@ edition = "2021"
 license = "BSD-2-Clause"
 
 [dependencies]
+num_enum = { version = "0.7.3", default-features = false }
 ptr_meta = { version = "0.3", default-features = false }
 sddf-sys = { path = "sys" }
 sel4-config = { path = "../sel4/config" }

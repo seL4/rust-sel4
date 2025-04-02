@@ -10,7 +10,6 @@ mk {
   package.name = "sel4-microkit-message-types";
   dependencies = {
     inherit (versions) zerocopy;
-    num_enum = { version = versions.num_enum; default-features = false; };
     serde = serdeWith [] // {
       optional = true;
     };

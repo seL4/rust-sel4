@@ -76,11 +76,27 @@ impl<'a> MessageRegistersMut<'a> {
             .as_mut_bytes())?)))
     }
 
+    pub fn with_bytes_around_label<T, E>(
+        self,
+        f: impl FnOnce(&mut [u8]) -> Result<(T, usize), E>,
+    ) -> Result<(T, MessageRegistersPrefixLength), E> {
+        let (label, num_bytes) = f(self.registers.as_mut_bytes())?;
+        Ok((label, MessageRegistersPrefixLength(bytes_to_mrs(num_bytes))))
+    }
+
     pub fn with_words<E>(
         self,
         f: impl FnOnce(&mut [MessageRegisterValue]) -> Result<usize, E>,
     ) -> Result<MessageRegistersPrefixLength, E> {
         Ok(MessageRegistersPrefixLength(f(self.registers)?))
+    }
+
+    pub fn with_words_around_label<T, E>(
+        self,
+        f: impl FnOnce(&mut [MessageRegisterValue]) -> Result<(T, usize), E>,
+    ) -> Result<(T, MessageRegistersPrefixLength), E> {
+        let (label, num_words) = f(self.registers)?;
+        Ok((label, MessageRegistersPrefixLength(num_words)))
     }
 }
 

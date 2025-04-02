@@ -10,6 +10,7 @@ mk {
   package.name = "sddf";
   dependencies = {
     ptr_meta = { version = versions.ptr_meta; default-features = false; };
+    num_enum = { version = versions.num_enum; default-features = false; };
     inherit (localCrates)
       sddf-sys
       sel4-config
