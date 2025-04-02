@@ -59,7 +59,13 @@ pub trait MessageRecv: Sized {
 // // //
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-pub struct EmptyMessageValue;
+pub struct EmptyMessageValue(());
+
+impl EmptyMessageValue {
+    pub const fn new() -> Self {
+        Self(())
+    }
+}
 
 impl MessageValueSend for EmptyMessageValue {
     type Error = Infallible;
@@ -74,7 +80,7 @@ impl MessageValueRecv for EmptyMessageValue {
 
     fn read_message_value(buf: &[u8]) -> Result<Self, Self::Error> {
         if buf.is_empty() {
-            Ok(Self)
+            Ok(Self::new())
         } else {
             Err(Self::Error::MessageIsNotEmpty)
         }
@@ -164,7 +170,13 @@ impl<T: MessageValueRecv, const LABEL: MessageLabel> MessageRecv for TriviallyLa
 // // //
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-pub struct EmptyMessage;
+pub struct EmptyMessage(());
+
+impl EmptyMessage {
+    pub const fn new() -> Self {
+        Self(())
+    }
+}
 
 impl MessageSend for EmptyMessage {
     type Label = <TriviallyLabeled<EmptyMessageValue> as MessageSend>::Label;
