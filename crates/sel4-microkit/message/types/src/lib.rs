@@ -166,25 +166,13 @@ impl<T: MessageValueRecv, const LABEL: MessageLabel> MessageRecv for TriviallyLa
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 pub struct EmptyMessage;
 
-impl From<TriviallyLabeled<EmptyMessageValue>> for EmptyMessage {
-    fn from(_: TriviallyLabeled<EmptyMessageValue>) -> Self {
-        Default::default()
-    }
-}
-
-impl From<EmptyMessage> for TriviallyLabeled<EmptyMessageValue> {
-    fn from(_: EmptyMessage) -> Self {
-        Default::default()
-    }
-}
-
 impl MessageSend for EmptyMessage {
     type Label = <TriviallyLabeled<EmptyMessageValue> as MessageSend>::Label;
 
     type Error = <TriviallyLabeled<EmptyMessageValue> as MessageSend>::Error;
 
     fn write_message(&self, buf: &mut [u8]) -> Result<(Self::Label, usize), Self::Error> {
-        <TriviallyLabeled<EmptyMessageValue>>::from(*self).write_message(buf)
+        <TriviallyLabeled<EmptyMessageValue>>::default().write_message(buf)
     }
 }
 
@@ -194,7 +182,7 @@ impl MessageRecv for EmptyMessage {
     type Error = <TriviallyLabeled<EmptyMessageValue> as MessageRecv>::Error;
 
     fn read_message(label: Self::Label, buf: &[u8]) -> Result<Self, Self::Error> {
-        <TriviallyLabeled<EmptyMessageValue>>::read_message(label, buf).map(Into::into)
+        <TriviallyLabeled<EmptyMessageValue>>::read_message(label, buf).map(|_| Default::default())
     }
 }
 
