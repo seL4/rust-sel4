@@ -4,21 +4,16 @@
 # SPDX-License-Identifier: BSD-2-Clause
 #
 
-{ mk, localCrates, serdeWith }:
+{ mk, localCrates, versions, serdeWith, postcardWith }:
 
 mk {
   package.name = "sel4-microkit-message";
   dependencies = {
-    serde = serdeWith [] // {
-      optional = true;
-    };
+    inherit (versions) zerocopy;
+    serde = serdeWith [];
+    postcard = postcardWith [];
     inherit (localCrates)
       sel4-microkit-base
-      sel4-microkit-message-types
     ;
-  };
-  features = {
-    default = [ "postcard" ];
-    postcard = [ "dep:serde" "sel4-microkit-message-types/postcard" ];
   };
 }

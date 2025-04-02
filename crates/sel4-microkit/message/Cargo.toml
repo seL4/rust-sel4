@@ -16,11 +16,8 @@ authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
 edition = "2021"
 license = "BSD-2-Clause"
 
-[features]
-default = ["postcard"]
-postcard = ["dep:serde", "sel4-microkit-message-types/postcard"]
-
 [dependencies]
+postcard = { version = "1.0.2", default-features = false }
 sel4-microkit-base = { path = "../base" }
-sel4-microkit-message-types = { path = "types" }
-serde = { version = "1.0.147", default-features = false, optional = true }
+serde = { version = "1.0.147", default-features = false }
+zerocopy = "0.8.7"

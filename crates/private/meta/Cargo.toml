@@ -17,7 +17,7 @@ edition = "2021"
 license = "BSD-2-Clause"
 
 [features]
-sel4-microkit = ["dep:sel4-microkit", "sel4-microkit-message", "sel4-microkit-message-types"]
+sel4-microkit = ["dep:sel4-microkit", "sel4-microkit-message"]
 sel4-root-task = ["dep:sel4-root-task"]
 
 [dependencies]
@@ -45,7 +45,6 @@ sel4-initialize-tls = { path = "../../sel4-initialize-tls" }
 sel4-logging = { path = "../../sel4-logging" }
 sel4-microkit = { path = "../../sel4-microkit", features = ["full"], optional = true }
 sel4-microkit-message = { path = "../../sel4-microkit/message", optional = true }
-sel4-microkit-message-types = { path = "../../sel4-microkit/message/types", optional = true }
 sel4-newlib = { path = "../../sel4-newlib" }
 sel4-one-ref-cell = { path = "../../sel4-one-ref-cell" }
 sel4-panicking = { path = "../../sel4-panicking" }
