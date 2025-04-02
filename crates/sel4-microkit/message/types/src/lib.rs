@@ -132,10 +132,8 @@ impl<const LABEL: MessageLabel> fmt::Display for TryFromConstMessageLabelError<L
 
 // // //
 
-pub const DEFAULT_TRIVIAL_MESSAGE_LABEL: MessageLabel = 0;
-
 #[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-pub struct TriviallyLabeled<T, const LABEL: MessageLabel = DEFAULT_TRIVIAL_MESSAGE_LABEL>(T);
+pub struct TriviallyLabeled<T, const LABEL: MessageLabel = 0>(T);
 
 impl<T, const LABEL: MessageLabel> TriviallyLabeled<T, LABEL> {
     pub const fn new(value: T) -> Self {
