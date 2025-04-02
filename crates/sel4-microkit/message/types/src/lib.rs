@@ -10,7 +10,6 @@ use core::convert::Infallible;
 use core::fmt;
 use core::mem;
 
-use num_enum::{IntoPrimitive, TryFromPrimitive};
 use zerocopy::{FromBytes, Immutable, IntoBytes, Unalign};
 
 #[cfg(feature = "postcard")]
@@ -230,56 +229,4 @@ pub enum SendIntoBytesError {
 #[derive(Copy, Clone, Debug)]
 pub enum RecvFromBytesError {
     MessageTooShort,
-}
-
-// // //
-
-impl<T: MessageValueSend, E: MessageValueSend> MessageSend for Result<T, E> {
-    type Label = ResultMessageLabel;
-
-    type Error = ResultMessageValueError<T::Error, E::Error>;
-
-    fn write_message(&self, buf: &mut [u8]) -> Result<(Self::Label, usize), Self::Error> {
-        Ok(match self {
-            Ok(ok) => (
-                Self::Label::Ok,
-                ok.write_message_value(buf).map_err(Self::Error::Ok)?,
-            ),
-            Err(err) => (
-                Self::Label::Err,
-                err.write_message_value(buf).map_err(Self::Error::Err)?,
-            ),
-        })
-    }
-}
-
-impl<T: MessageValueRecv, E: MessageValueRecv> MessageRecv for Result<T, E> {
-    type Label = ResultMessageLabel;
-
-    type Error = ResultMessageValueError<T::Error, E::Error>;
-
-    fn read_message(label: Self::Label, buf: &[u8]) -> Result<Self, Self::Error> {
-        match label {
-            Self::Label::Ok => MessageValueRecv::read_message_value(buf)
-                .map(Ok)
-                .map_err(Self::Error::Ok),
-            Self::Label::Err => MessageValueRecv::read_message_value(buf)
-                .map(Err)
-                .map_err(Self::Error::Err),
-        }
-    }
-}
-
-#[derive(IntoPrimitive, TryFromPrimitive)]
-#[cfg_attr(target_pointer_width = "32", repr(u32))]
-#[cfg_attr(target_pointer_width = "64", repr(u64))]
-pub enum ResultMessageLabel {
-    Ok = 0,
-    Err = 1,
-}
-
-#[derive(Debug, Copy, Clone, PartialOrd, Ord, PartialEq, Eq, Hash)]
-pub enum ResultMessageValueError<E1, E2> {
-    Ok(E1),
-    Err(E2),
 }
