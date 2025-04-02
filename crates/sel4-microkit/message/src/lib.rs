@@ -86,11 +86,11 @@ pub trait MessageInfoExt: Sized {
     }
 
     fn send_empty() -> Self {
-        Self::send(EmptyMessage).unwrap_or_else(|absurdity| match absurdity {})
+        Self::send(EmptyMessage::new()).unwrap_or_else(|absurdity| match absurdity {})
     }
 
     fn recv_empty(self) -> Result<(), MessageRecvErrorFor<EmptyMessage>> {
-        self.recv().map(|EmptyMessage| ())
+        self.recv().map(|_: EmptyMessage| ())
     }
 
     fn send_with_trivial_label<T: MessageValueSend>(val: T) -> Result<Self, T::Error> {
