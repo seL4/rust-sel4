@@ -12,10 +12,11 @@ use core::mem;
 #[cfg(feature = "postcard")]
 use serde::{Deserialize, Serialize};
 
-use sel4_microkit_base::{with_msg_bytes, with_msg_bytes_mut, MessageInfo, MessageRegisterValue};
+use sel4_microkit_base::{with_msg_regs, with_msg_regs_mut, MessageInfo};
 
 use sel4_microkit_message_types::{
-    EmptyMessage, EmptyMessageValue, MessageLabel, MessageRecv, MessageSend, MessageValueRecv,
+    EmptyMessage, EmptyMessageValue, MessageLabel, MessageRecv, MessageRegisters,
+    MessageRegistersMut, MessageRegistersPrefixLength, MessageSend, MessageValueRecv,
     MessageValueSend, TriviallyLabeled,
 };
 
@@ -55,9 +56,12 @@ impl MessageSend for UnspecifiedErrorMessage {
 
     type Error = <TriviallyLabeled<EmptyMessageValue, UNSPECIFIED_ERROR_MESSAGE_LABEL> as MessageSend>::Error;
 
-    fn write_message(&self, buf: &mut [u8]) -> Result<(Self::Label, usize), Self::Error> {
+    fn write_message(
+        &self,
+        regs: MessageRegistersMut,
+    ) -> Result<(Self::Label, MessageRegistersPrefixLength), Self::Error> {
         <TriviallyLabeled<EmptyMessageValue, UNSPECIFIED_ERROR_MESSAGE_LABEL>>::from(*self)
-            .write_message(buf)
+            .write_message(regs)
     }
 }
 
@@ -66,9 +70,9 @@ impl MessageRecv for UnspecifiedErrorMessage {
 
     type Error = <TriviallyLabeled<EmptyMessageValue, UNSPECIFIED_ERROR_MESSAGE_LABEL> as MessageRecv>::Error;
 
-    fn read_message(label: Self::Label, buf: &[u8]) -> Result<Self, Self::Error> {
+    fn read_message(label: Self::Label, regs: &MessageRegisters) -> Result<Self, Self::Error> {
         <TriviallyLabeled<EmptyMessageValue, UNSPECIFIED_ERROR_MESSAGE_LABEL>>::read_message(
-            label, buf,
+            label, regs,
         )
         .map(Into::into)
     }
@@ -122,11 +126,12 @@ pub trait MessageInfoExt: Sized {
 
 impl MessageInfoExt for MessageInfo {
     fn send<T: MessageSend>(val: T) -> Result<Self, T::Error> {
-        let (label, num_bytes) = with_msg_bytes_mut(|buf| val.write_message(buf))?;
+        let (label, prefix_len) =
+            with_msg_regs_mut(|buf| val.write_message(MessageRegistersMut::new(buf)))?;
         let label = label.into();
         assert!(label <= MAX_MESSAGE_LABEL);
         // assert!(label != UNSPECIFIED_ERROR_MESSAGE_LABEL);
-        Ok(Self::new(label, bytes_to_mrs(num_bytes)))
+        Ok(Self::new(label, prefix_len.into_inner()))
     }
 
     fn recv<T: MessageRecv>(self) -> Result<T, MessageRecvErrorFor<T>> {
@@ -137,7 +142,7 @@ impl MessageInfoExt for MessageInfo {
             .label()
             .try_into()
             .map_err(MessageRecvError::LabelError)?;
-        with_msg_bytes(|buf| T::read_message(label, &buf[..mrs_to_bytes(self.count())]))
+        with_msg_regs(|buf| T::read_message(label, &MessageRegisters::new(&buf[..self.count()])))
             .map_err(MessageRecvError::ValueError)
     }
 
@@ -166,13 +171,4 @@ impl<E1: fmt::Display, E2: fmt::Display> fmt::Display for MessageRecvError<E1, E
             // Self::Unspecified => write!(f, "unspecified error"),
         }
     }
-}
-
-fn mrs_to_bytes(num_mrs: usize) -> usize {
-    num_mrs * mem::size_of::<MessageRegisterValue>()
-}
-
-fn bytes_to_mrs(num_bytes: usize) -> usize {
-    let d = mem::size_of::<MessageRegisterValue>();
-    num_bytes.next_multiple_of(d) / d
 }
