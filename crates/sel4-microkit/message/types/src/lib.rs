@@ -20,10 +20,14 @@ mod when_postcard;
 pub use when_postcard::MessageValueUsingPostcard;
 
 #[cfg(target_pointer_width = "32")]
-pub type MessageLabel = u32;
+type Word = u32;
 
 #[cfg(target_pointer_width = "64")]
-pub type MessageLabel = u64;
+type Word = u64;
+
+pub type MessageLabel = Word;
+
+pub type MessageRegisterValue = Word;
 
 pub trait MessageValueSend {
     type Error;
