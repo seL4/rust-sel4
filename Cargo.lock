@@ -1107,7 +1107,6 @@ dependencies = [
  "sel4-logging",
  "sel4-microkit",
  "sel4-microkit-message",
- "sel4-microkit-message-types",
  "sel4-newlib",
  "sel4-one-ref-cell",
  "sel4-panicking",
@@ -1923,7 +1922,8 @@ dependencies = [
  "sddf-sys",
  "sel4-config",
  "sel4-immutable-cell",
- "sel4-microkit-message-types",
+ "sel4-ipc-types",
+ "sel4-microkit-base",
  "sel4-shared-memory",
 ]
 
@@ -2371,6 +2371,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "sel4-ipc-types"
+version = "0.1.0"
+dependencies = [
+ "postcard",
+ "sel4-microkit-base",
+ "serde",
+ "zerocopy 0.8.18",
+]
+
+[[package]]
 name = "sel4-kernel-loader"
 version = "0.1.0"
 dependencies = [
@@ -2526,16 +2536,8 @@ dependencies = [
 name = "sel4-microkit-message"
 version = "0.1.0"
 dependencies = [
- "sel4-microkit-base",
- "sel4-microkit-message-types",
- "serde",
-]
-
-[[package]]
-name = "sel4-microkit-message-types"
-version = "0.1.0"
-dependencies = [
  "postcard",
+ "sel4-microkit-base",
  "serde",
  "zerocopy 0.8.18",
 ]

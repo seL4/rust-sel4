@@ -12,9 +12,9 @@ use core::convert::Infallible;
 use num_enum::{IntoPrimitive, TryFromPrimitive};
 
 use sddf_sys as sys;
-use sel4_microkit_message_types::*;
+use sel4_ipc_types::*;
 
-use crate::{common::*, Config};
+use crate::Config;
 
 #[repr(transparent)]
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
@@ -55,40 +55,41 @@ pub enum TimerRequestMessageLabel {
     SetTimeout = 1,
 }
 
-impl MessageSend for TimerRequest {
-    type Label = TimerRequestMessageLabel;
-
+impl MessageWriter for TimerRequest {
     type Error = Infallible;
 
     fn write_message(
         &self,
-        regs: MessageRegistersMut,
-    ) -> Result<(Self::Label, MessageRegistersPrefixLength), Self::Error> {
-        regs.with_words_around_label(|buf| {
-            Ok(match self {
-                Self::GetTime => (TimerRequestMessageLabel::GetTime, 0),
-                Self::SetTimeout { nanoseconds } => {
-                    buf[0] = *nanoseconds;
-                    (TimerRequestMessageLabel::SetTimeout, 1)
-                }
-            })
-        })
+        buf: &mut [MessageRegisterValue],
+    ) -> Result<(MessageLabel, usize), Self::Error> {
+        let mut builder = MessageBuilder::new(buf);
+        match self {
+            Self::GetTime => {
+                builder.set_label(TimerRequestMessageLabel::GetTime.into());
+            }
+            Self::SetTimeout { nanoseconds } => {
+                builder.set_label(TimerRequestMessageLabel::SetTimeout.into());
+                builder.set_next_mr(*nanoseconds);
+            }
+        }
+        Ok(builder.build())
     }
 }
 
-impl MessageRecv for TimerRequest {
-    type Label = TimerRequestMessageLabel;
+impl ReadFromMessage for TimerRequest {
+    type Error = MessagParseError;
 
-    type Error = PeerMisbehaviorError;
-
-    fn read_message(label: Self::Label, regs: &MessageRegisters) -> Result<Self, Self::Error> {
-        Ok(match label {
-            Self::Label::GetTime => Self::GetTime,
-            Self::Label::SetTimeout => {
-                let nanoseconds = regs.as_words().get(0).ok_or(PeerMisbehaviorError::new())?;
-                Self::SetTimeout {
-                    nanoseconds: *nanoseconds,
-                }
+    fn read_from_message(
+        label: MessageLabel,
+        buf: &[MessageRegisterValue],
+    ) -> Result<Self, Self::Error> {
+        let parser = MessageParser::new(label, buf);
+        Ok(match parser.label_try_into()? {
+            TimerRequestMessageLabel::GetTime => Self::GetTime,
+            TimerRequestMessageLabel::SetTimeout => {
+                let mut i = 0..;
+                let nanoseconds = parser.get_mr(i.next().unwrap())?;
+                Self::SetTimeout { nanoseconds }
             }
         })
     }
