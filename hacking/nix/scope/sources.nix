@@ -11,6 +11,7 @@ let
   fetchGit =
     { url, rev
     , ref ? mkKeepRef rev
+    , submodules ? false
     , local ? null
     , useLocal ? false
     , andThen ? ""
@@ -19,8 +20,8 @@ let
     assert useLocal -> local != null;
 
     let
-      remote = builtins.fetchGit rec {
-        inherit url rev ref;
+      remote = builtins.fetchGit {
+        inherit url rev ref submodules;
       };
       base = if useLocal then (lib.cleanSource local) else remote;
     in
@@ -73,16 +74,24 @@ in rec {
     local = localRoot + "/microkit_sdf_gen";
   };
 
-  sddf = fetchGit (lionsosAttrs // {
-    andThen = "/dep/sddf";
-  });
+  # sddf = fetchGit (lionsosAttrs // {
+  #   andThen = "/dep/sddf";
+  # });
+
+  sddf = fetchGit {
+    url = "https://github.com/au-ts/sddf";
+    rev = "50c4eb17a7dfc65b4111e4770227c3919bdaa1c3";
+    ref = "0.6.0";
+    local = localRoot + "/lionsos/dep/sddf";
+    # useLocal = true;
+  };
 
   lionsosAttrs = {
     url = "https://github.com/au-ts/lionsos";
-    rev = "xxx";
-    ref = "HEAD";
+    rev = "681143753fc8c7b91153a8fe1486674a70fbb0eb";
+    ref = "0.3.0";
     local = localRoot + "/lionsos";
-    useLocal = true;
+    # useLocal = true;
   };
 
   lionsos = fetchGit lionsosAttrs;
