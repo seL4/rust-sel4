@@ -28,16 +28,75 @@ pub type MessageLabel = Word;
 
 pub type MessageRegisterValue = Word;
 
+pub struct MessageRegisters<'a> {
+    registers: &'a [MessageRegisterValue],
+}
+
+pub struct MessageRegistersMut<'a> {
+    registers: &'a mut [MessageRegisterValue],
+}
+
+pub struct MessageRegistersPrefixLength(usize);
+
+impl MessageRegistersPrefixLength {
+    pub const fn empty() -> Self {
+        Self(0)
+    }
+
+    pub const fn into_inner(self) -> usize {
+        self.0
+    }
+}
+
+impl<'a> MessageRegisters<'a> {
+    pub fn new(registers: &'a [MessageRegisterValue]) -> Self {
+        Self { registers }
+    }
+
+    pub fn as_bytes(&self) -> &[u8] {
+        self.registers.as_bytes()
+    }
+
+    pub fn as_words(&self) -> &[MessageRegisterValue] {
+        &self.registers
+    }
+}
+
+impl<'a> MessageRegistersMut<'a> {
+    pub fn new(registers: &'a mut [MessageRegisterValue]) -> Self {
+        Self { registers }
+    }
+
+    pub fn with_bytes<E>(
+        self,
+        f: impl FnOnce(&mut [u8]) -> Result<usize, E>,
+    ) -> Result<MessageRegistersPrefixLength, E> {
+        Ok(MessageRegistersPrefixLength(bytes_to_mrs(f(self
+            .registers
+            .as_mut_bytes())?)))
+    }
+
+    pub fn with_words<E>(
+        self,
+        f: impl FnOnce(&mut [MessageRegisterValue]) -> Result<usize, E>,
+    ) -> Result<MessageRegistersPrefixLength, E> {
+        Ok(MessageRegistersPrefixLength(f(self.registers)?))
+    }
+}
+
 pub trait MessageValueSend {
     type Error;
 
-    fn write_message_value(&self, buf: &mut [u8]) -> Result<usize, Self::Error>;
+    fn write_message_value(
+        &self,
+        regs: MessageRegistersMut,
+    ) -> Result<MessageRegistersPrefixLength, Self::Error>;
 }
 
 pub trait MessageValueRecv: Sized {
     type Error;
 
-    fn read_message_value(buf: &[u8]) -> Result<Self, Self::Error>;
+    fn read_message_value(regs: &MessageRegisters) -> Result<Self, Self::Error>;
 }
 
 pub trait MessageSend {
@@ -45,7 +104,10 @@ pub trait MessageSend {
 
     type Error;
 
-    fn write_message(&self, buf: &mut [u8]) -> Result<(Self::Label, usize), Self::Error>;
+    fn write_message(
+        &self,
+        regs: MessageRegistersMut,
+    ) -> Result<(Self::Label, MessageRegistersPrefixLength), Self::Error>;
 }
 
 pub trait MessageRecv: Sized {
@@ -53,7 +115,7 @@ pub trait MessageRecv: Sized {
 
     type Error;
 
-    fn read_message(label: Self::Label, buf: &[u8]) -> Result<Self, Self::Error>;
+    fn read_message(label: Self::Label, regs: &MessageRegisters) -> Result<Self, Self::Error>;
 }
 
 // // //
@@ -70,16 +132,19 @@ impl EmptyMessageValue {
 impl MessageValueSend for EmptyMessageValue {
     type Error = Infallible;
 
-    fn write_message_value(&self, _buf: &mut [u8]) -> Result<usize, Self::Error> {
-        Ok(0)
+    fn write_message_value(
+        &self,
+        _regs: MessageRegistersMut,
+    ) -> Result<MessageRegistersPrefixLength, Self::Error> {
+        Ok(MessageRegistersPrefixLength::empty())
     }
 }
 
 impl MessageValueRecv for EmptyMessageValue {
     type Error = RecvEmptyMessageValueError;
 
-    fn read_message_value(buf: &[u8]) -> Result<Self, Self::Error> {
-        if buf.is_empty() {
+    fn read_message_value(regs: &MessageRegisters) -> Result<Self, Self::Error> {
+        if regs.as_bytes().is_empty() {
             Ok(Self::new())
         } else {
             Err(Self::Error::MessageIsNotEmpty)
@@ -150,8 +215,11 @@ impl<T: MessageValueSend, const LABEL: MessageLabel> MessageSend for TriviallyLa
 
     type Error = <T as MessageValueSend>::Error;
 
-    fn write_message(&self, buf: &mut [u8]) -> Result<(Self::Label, usize), Self::Error> {
-        Ok((ConstMessageLabel::new(), self.0.write_message_value(buf)?))
+    fn write_message(
+        &self,
+        regs: MessageRegistersMut,
+    ) -> Result<(Self::Label, MessageRegistersPrefixLength), Self::Error> {
+        Ok((ConstMessageLabel::new(), self.0.write_message_value(regs)?))
     }
 }
 
@@ -160,8 +228,8 @@ impl<T: MessageValueRecv, const LABEL: MessageLabel> MessageRecv for TriviallyLa
 
     type Error = <T as MessageValueRecv>::Error;
 
-    fn read_message(_: Self::Label, buf: &[u8]) -> Result<Self, Self::Error> {
-        T::read_message_value(buf).map(TriviallyLabeled::new)
+    fn read_message(_: Self::Label, regs: &MessageRegisters) -> Result<Self, Self::Error> {
+        T::read_message_value(regs).map(TriviallyLabeled::new)
     }
 }
 
@@ -181,8 +249,11 @@ impl MessageSend for EmptyMessage {
 
     type Error = <TriviallyLabeled<EmptyMessageValue> as MessageSend>::Error;
 
-    fn write_message(&self, buf: &mut [u8]) -> Result<(Self::Label, usize), Self::Error> {
-        <TriviallyLabeled<EmptyMessageValue>>::default().write_message(buf)
+    fn write_message(
+        &self,
+        regs: MessageRegistersMut,
+    ) -> Result<(Self::Label, MessageRegistersPrefixLength), Self::Error> {
+        <TriviallyLabeled<EmptyMessageValue>>::default().write_message(regs)
     }
 }
 
@@ -191,8 +262,8 @@ impl MessageRecv for EmptyMessage {
 
     type Error = <TriviallyLabeled<EmptyMessageValue> as MessageRecv>::Error;
 
-    fn read_message(label: Self::Label, buf: &[u8]) -> Result<Self, Self::Error> {
-        <TriviallyLabeled<EmptyMessageValue>>::read_message(label, buf).map(|_| Default::default())
+    fn read_message(label: Self::Label, regs: &MessageRegisters) -> Result<Self, Self::Error> {
+        <TriviallyLabeled<EmptyMessageValue>>::read_message(label, regs).map(|_| Default::default())
     }
 }
 
@@ -201,18 +272,23 @@ impl MessageRecv for EmptyMessage {
 impl<T: IntoBytes + Immutable> MessageValueSend for T {
     type Error = SendIntoBytesError;
 
-    fn write_message_value(&self, buf: &mut [u8]) -> Result<usize, Self::Error> {
-        self.write_to_prefix(buf)
-            .map_err(|_| SendIntoBytesError::ValueTooLarge)?;
-        Ok(mem::size_of_val(&self))
+    fn write_message_value(
+        &self,
+        regs: MessageRegistersMut,
+    ) -> Result<MessageRegistersPrefixLength, Self::Error> {
+        regs.with_bytes(|buf| {
+            self.write_to_prefix(buf)
+                .map_err(|_| SendIntoBytesError::ValueTooLarge)?;
+            Ok(mem::size_of_val(&self))
+        })
     }
 }
 
 impl<T: FromBytes + Copy> MessageValueRecv for T {
     type Error = RecvFromBytesError;
 
-    fn read_message_value(buf: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Unalign::<T>::read_from_prefix(buf)
+    fn read_message_value(regs: &MessageRegisters) -> Result<Self, Self::Error> {
+        Ok(Unalign::<T>::read_from_prefix(regs.as_bytes())
             .map_err(|_| RecvFromBytesError::MessageTooShort)?
             .0
             .get())
@@ -227,4 +303,11 @@ pub enum SendIntoBytesError {
 #[derive(Copy, Clone, Debug)]
 pub enum RecvFromBytesError {
     MessageTooShort,
+}
+
+// // //
+
+fn bytes_to_mrs(num_bytes: usize) -> usize {
+    let d = mem::size_of::<MessageRegisterValue>();
+    num_bytes.next_multiple_of(d) / d
 }
