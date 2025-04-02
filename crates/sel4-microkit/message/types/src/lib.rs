@@ -32,7 +32,7 @@ pub type MessageRegisterValue = Word;
 pub trait MessageValueSend {
     type Error;
 
-    fn write_message_value(self, buf: &mut [u8]) -> Result<usize, Self::Error>;
+    fn write_message_value(&self, buf: &mut [u8]) -> Result<usize, Self::Error>;
 }
 
 pub trait MessageValueRecv: Sized {
@@ -46,7 +46,7 @@ pub trait MessageSend {
 
     type Error;
 
-    fn write_message(self, buf: &mut [u8]) -> Result<(Self::Label, usize), Self::Error>;
+    fn write_message(&self, buf: &mut [u8]) -> Result<(Self::Label, usize), Self::Error>;
 }
 
 pub trait MessageRecv: Sized {
@@ -65,7 +65,7 @@ pub struct EmptyMessageValue;
 impl MessageValueSend for EmptyMessageValue {
     type Error = Infallible;
 
-    fn write_message_value(self, _buf: &mut [u8]) -> Result<usize, Self::Error> {
+    fn write_message_value(&self, _buf: &mut [u8]) -> Result<usize, Self::Error> {
         Ok(0)
     }
 }
@@ -147,7 +147,7 @@ impl<T: MessageValueSend, const LABEL: MessageLabel> MessageSend for TriviallyLa
 
     type Error = <T as MessageValueSend>::Error;
 
-    fn write_message(self, buf: &mut [u8]) -> Result<(Self::Label, usize), Self::Error> {
+    fn write_message(&self, buf: &mut [u8]) -> Result<(Self::Label, usize), Self::Error> {
         Ok((ConstMessageLabel::new(), self.0.write_message_value(buf)?))
     }
 }
@@ -184,8 +184,8 @@ impl MessageSend for EmptyMessage {
 
     type Error = <TriviallyLabeled<EmptyMessageValue> as MessageSend>::Error;
 
-    fn write_message(self, buf: &mut [u8]) -> Result<(Self::Label, usize), Self::Error> {
-        <TriviallyLabeled<EmptyMessageValue>>::from(self).write_message(buf)
+    fn write_message(&self, buf: &mut [u8]) -> Result<(Self::Label, usize), Self::Error> {
+        <TriviallyLabeled<EmptyMessageValue>>::from(*self).write_message(buf)
     }
 }
 
@@ -204,7 +204,7 @@ impl MessageRecv for EmptyMessage {
 impl<T: IntoBytes + Immutable> MessageValueSend for T {
     type Error = SendIntoBytesError;
 
-    fn write_message_value(self, buf: &mut [u8]) -> Result<usize, Self::Error> {
+    fn write_message_value(&self, buf: &mut [u8]) -> Result<usize, Self::Error> {
         self.write_to_prefix(buf)
             .map_err(|_| SendIntoBytesError::ValueTooLarge)?;
         Ok(mem::size_of_val(&self))
@@ -239,7 +239,7 @@ impl<T: MessageValueSend, E: MessageValueSend> MessageSend for Result<T, E> {
 
     type Error = ResultMessageValueError<T::Error, E::Error>;
 
-    fn write_message(self, buf: &mut [u8]) -> Result<(Self::Label, usize), Self::Error> {
+    fn write_message(&self, buf: &mut [u8]) -> Result<(Self::Label, usize), Self::Error> {
         Ok(match self {
             Ok(ok) => (
                 Self::Label::Ok,

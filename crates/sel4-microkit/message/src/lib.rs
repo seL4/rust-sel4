@@ -55,8 +55,8 @@ impl MessageSend for UnspecifiedErrorMessage {
 
     type Error = <TriviallyLabeled<EmptyMessageValue, UNSPECIFIED_ERROR_MESSAGE_LABEL> as MessageSend>::Error;
 
-    fn write_message(self, buf: &mut [u8]) -> Result<(Self::Label, usize), Self::Error> {
-        <TriviallyLabeled<EmptyMessageValue, UNSPECIFIED_ERROR_MESSAGE_LABEL>>::from(self)
+    fn write_message(&self, buf: &mut [u8]) -> Result<(Self::Label, usize), Self::Error> {
+        <TriviallyLabeled<EmptyMessageValue, UNSPECIFIED_ERROR_MESSAGE_LABEL>>::from(*self)
             .write_message(buf)
     }
 }
