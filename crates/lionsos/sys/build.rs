@@ -12,49 +12,6 @@ pub const SDDF_INCLUDE_DIRS_ENV: &str = "DEP_SDDF_INCLUDE";
 
 pub const LIONSOS_INCLUDE_DIRS_ENV: &str = "LIONSOS_INCLUDE_DIRS";
 
-pub fn get_libsel4_include_dirs() -> impl Iterator<Item = PathBuf> {
-    get_asserting_valid_unicode(SEL4_INCLUDE_DIRS_ENV)
-        .map(|val| val.split(':').map(PathBuf::from).collect::<Vec<_>>())
-        .unwrap_or_else(|| panic!("{SEL4_INCLUDE_DIRS_ENV} must be set"))
-        .into_iter()
-        .inspect(|path| {
-            println!("cargo::rerun-if-changed={}", path.display());
-        })
-}
-
-pub fn get_libsddf_include_dirs() -> impl Iterator<Item = PathBuf> {
-    get_asserting_valid_unicode(SDDF_INCLUDE_DIRS_ENV)
-        .map(|val| val.split(':').map(PathBuf::from).collect::<Vec<_>>())
-        .unwrap_or_else(|| panic!("{SDDF_INCLUDE_DIRS_ENV} must be set"))
-        .into_iter()
-        .inspect(|path| {
-            println!("cargo::rerun-if-changed={}", path.display());
-        })
-}
-
-pub fn get_liblions_include_dirs() -> impl Iterator<Item = PathBuf> {
-    get_asserting_valid_unicode(LIONSOS_INCLUDE_DIRS_ENV)
-        .map(|val| val.split(':').map(PathBuf::from).collect::<Vec<_>>())
-        .unwrap_or_else(|| panic!("{LIONSOS_INCLUDE_DIRS_ENV} must be set"))
-        .into_iter()
-        .inspect(|path| {
-            println!("cargo::rerun-if-changed={}", path.display());
-        })
-}
-
-fn get_asserting_valid_unicode(var: &str) -> Option<String> {
-    env::var(var)
-        .map_err(|err| {
-            if let VarError::NotUnicode(val) = err {
-                panic!("the value of environment variable {var:?} is not valid unicode: {val:?}");
-            }
-        })
-        .ok()
-        .inspect(|_| {
-            println!("cargo::rerun-if-env-changed={var}");
-        })
-}
-
 const HEADER_CONTENTS: &str = r#"
     #include <lions/fs/config.h>
     #include <lions/fs/protocol.h>
@@ -68,6 +25,10 @@ const ALLOWLIST: &[&str] = &[
 ];
 
 fn main() {
+    let libsel4_include_dirs = get_dirs(SEL4_INCLUDE_DIRS_ENV);
+    let libsddf_include_dirs = get_dirs(SDDF_INCLUDE_DIRS_ENV);
+    let liblions_include_dirs = get_dirs(LIONSOS_INCLUDE_DIRS_ENV);
+
     let target_arch = env::var("CARGO_CFG_TARGET_ARCH").unwrap();
     let clang_target = match target_arch.as_str() {
         "aarch64" => "aarch64-unknown-none",
@@ -79,13 +40,17 @@ fn main() {
     let mut builder = bindgen::Builder::default()
         .header_contents("wrapper.h", HEADER_CONTENTS)
         .detect_include_paths(false)
-        .clang_args(
-            get_libsel4_include_dirs()
-                .chain(get_libsddf_include_dirs())
-                .chain(get_liblions_include_dirs())
-                .map(|d| format!("-I{}", d.as_path().display())),
-        )
         .clang_arg(format!("--target={clang_target}"))
+        .clang_args(
+            [
+                libsel4_include_dirs.iter(),
+                libsddf_include_dirs.iter(),
+                liblions_include_dirs.iter(),
+            ]
+            .into_iter()
+            .flatten()
+            .map(|d| format!("-I{}", d.as_path().display())),
+        )
         .ignore_functions()
         .allowlist_recursively(false);
 
@@ -109,9 +74,34 @@ fn main() {
 
     println!(
         "cargo::metadata=include={}",
-        get_liblions_include_dirs()
+        liblions_include_dirs
+            .iter()
             .map(|p| p.to_str().unwrap().to_owned())
             .collect::<Vec<_>>()
             .join(":")
     );
+}
+
+fn get_dirs(var: &str) -> Vec<PathBuf> {
+    get_asserting_valid_unicode(var)
+        .map(|val| val.split(':').map(PathBuf::from).collect::<Vec<_>>())
+        .unwrap_or_else(|| panic!("{var} must be set"))
+        .into_iter()
+        .inspect(|path| {
+            println!("cargo::rerun-if-changed={}", path.display());
+        })
+        .collect()
+}
+
+fn get_asserting_valid_unicode(var: &str) -> Option<String> {
+    env::var(var)
+        .map_err(|err| {
+            if let VarError::NotUnicode(val) = err {
+                panic!("the value of environment variable {var:?} is not valid unicode: {val:?}");
+            }
+        })
+        .ok()
+        .inspect(|_| {
+            println!("cargo::rerun-if-env-changed={var}");
+        })
 }

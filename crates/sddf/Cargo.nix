@@ -7,17 +7,17 @@
 { mk, versions, localCrates }:
 
 mk {
-  package.name = "sddf-sys";
-  package.links = "sddf";
+  package.name = "sddf";
   dependencies = {
     ptr_meta = { version = versions.ptr_meta; default-features = false; };
     inherit (localCrates)
-      sel4-sys
+      sddf-sys
+      sel4-config
+      sel4-immutable-cell
+      sel4-microkit-message-types
     ;
-  };
-  build-dependencies = {
-    inherit (versions)
-      bindgen
-    ;
+    sel4-shared-memory = localCrates.sel4-shared-memory // {
+      features = [ "atomics" ];
+    };
   };
 }
