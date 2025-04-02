@@ -7,46 +7,17 @@
 use std::env::{self, VarError};
 use std::path::PathBuf;
 
-pub const SEL4_INCLUDE_DIRS_ENV: &str = "DEP_SEL4_INCLUDE";
+const SEL4_INCLUDE_DIRS_ENV: &str = "DEP_SEL4_INCLUDE";
 
-pub const SDDF_INCLUDE_DIRS_ENV: &str = "SDDF_INCLUDE_DIRS";
-
-pub fn get_libsel4_include_dirs() -> impl Iterator<Item = PathBuf> {
-    get_asserting_valid_unicode(SEL4_INCLUDE_DIRS_ENV)
-        .map(|val| val.split(':').map(PathBuf::from).collect::<Vec<_>>())
-        .unwrap_or_else(|| panic!("{SEL4_INCLUDE_DIRS_ENV} must be set"))
-        .into_iter()
-        .inspect(|path| {
-            println!("cargo::rerun-if-changed={}", path.display());
-        })
-}
-
-pub fn get_libsddf_include_dirs() -> impl Iterator<Item = PathBuf> {
-    get_asserting_valid_unicode(SDDF_INCLUDE_DIRS_ENV)
-        .map(|val| val.split(':').map(PathBuf::from).collect::<Vec<_>>())
-        .unwrap_or_else(|| panic!("{SDDF_INCLUDE_DIRS_ENV} must be set"))
-        .into_iter()
-        .inspect(|path| {
-            println!("cargo::rerun-if-changed={}", path.display());
-        })
-}
-
-fn get_asserting_valid_unicode(var: &str) -> Option<String> {
-    env::var(var)
-        .map_err(|err| {
-            if let VarError::NotUnicode(val) = err {
-                panic!("the value of environment variable {var:?} is not valid unicode: {val:?}");
-            }
-        })
-        .ok()
-        .inspect(|_| {
-            println!("cargo::rerun-if-env-changed={var}");
-        })
-}
+const SDDF_INCLUDE_DIRS_ENV: &str = "SDDF_INCLUDE_DIRS";
 
 const HEADER_CONTENTS: &str = r#"
-    // #include <sddf/benchmark/queue.h>
-    // #include <sddf/benchmark/config.h>
+    // HACK shouldn't be necessary
+    #include <stdint.h>
+
+    #include <sddf/benchmark/bench.h>
+    #include <sddf/benchmark/config.h>
+    #include <sddf/benchmark/sel4bench.h>
     #include <sddf/blk/config.h>
     #include <sddf/blk/queue.h>
     #include <sddf/gpu/events.h>
@@ -77,7 +48,16 @@ const ALLOWLIST: &[&str] = &[
     "SDDF_TIMER_.*",
 ];
 
+#[rustfmt::skip]
+const BLOCKLIST: &[&str] = &[
+    // TODO
+    "SDDF_.*_MAGIC",
+];
+
 fn main() {
+    let libsel4_include_dirs = get_dirs(SEL4_INCLUDE_DIRS_ENV);
+    let libsddf_include_dirs = get_dirs(SDDF_INCLUDE_DIRS_ENV);
+
     let target_arch = env::var("CARGO_CFG_TARGET_ARCH").unwrap();
     let clang_target = match target_arch.as_str() {
         "aarch64" => "aarch64-unknown-none",
@@ -89,17 +69,22 @@ fn main() {
     let mut builder = bindgen::Builder::default()
         .header_contents("wrapper.h", HEADER_CONTENTS)
         .detect_include_paths(false)
+        .clang_arg(format!("--target={clang_target}"))
         .clang_args(
-            get_libsel4_include_dirs()
-                .chain(get_libsddf_include_dirs())
+            [libsel4_include_dirs.iter(), libsddf_include_dirs.iter()]
+                .into_iter()
+                .flatten()
                 .map(|d| format!("-I{}", d.as_path().display())),
         )
-        .clang_arg(format!("--target={clang_target}"))
         .ignore_functions()
         .allowlist_recursively(false);
 
     for item in ALLOWLIST.iter() {
         builder = builder.allowlist_item(item);
+    }
+
+    for item in BLOCKLIST.iter() {
+        builder = builder.blocklist_item(item);
     }
 
     let bindings = builder
@@ -118,9 +103,34 @@ fn main() {
 
     println!(
         "cargo::metadata=include={}",
-        get_libsddf_include_dirs()
+        libsddf_include_dirs
+            .iter()
             .map(|p| p.to_str().unwrap().to_owned())
             .collect::<Vec<_>>()
             .join(":")
     );
+}
+
+fn get_dirs(var: &str) -> Vec<PathBuf> {
+    get_asserting_valid_unicode(var)
+        .map(|val| val.split(':').map(PathBuf::from).collect::<Vec<_>>())
+        .unwrap_or_else(|| panic!("{var} must be set"))
+        .into_iter()
+        .inspect(|path| {
+            println!("cargo::rerun-if-changed={}", path.display());
+        })
+        .collect()
+}
+
+fn get_asserting_valid_unicode(var: &str) -> Option<String> {
+    env::var(var)
+        .map_err(|err| {
+            if let VarError::NotUnicode(val) = err {
+                panic!("the value of environment variable {var:?} is not valid unicode: {val:?}");
+            }
+        })
+        .ok()
+        .inspect(|_| {
+            println!("cargo::rerun-if-env-changed={var}");
+        })
 }

@@ -10,16 +10,16 @@
 #
 
 [package]
-name = "sddf-sys"
+name = "sddf"
 version = "0.1.0"
 authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
 edition = "2021"
 license = "BSD-2-Clause"
-links = "sddf"
 
 [dependencies]
 ptr_meta = { version = "0.3", default-features = false }
-sel4-sys = { path = "../../sel4/sys" }
-
-[build-dependencies]
-bindgen = "0.71.1"
+sddf-sys = { path = "sys" }
+sel4-config = { path = "../sel4/config" }
+sel4-immutable-cell = { path = "../sel4-immutable-cell" }
+sel4-microkit-message-types = { path = "../sel4-microkit/message/types" }
+sel4-shared-memory = { path = "../sel4-shared-memory", features = ["atomics"] }
