@@ -128,7 +128,7 @@ members = [
     "crates/sel4-microkit/base",
     "crates/sel4-microkit/driver-adapters",
     "crates/sel4-microkit/macros",
-    "crates/sel4-microkit/message",
+    "crates/sel4-microkit/simple-ipc",
     "crates/sel4-mod-in-out-dir",
     "crates/sel4-musl",
     "crates/sel4-newlib",

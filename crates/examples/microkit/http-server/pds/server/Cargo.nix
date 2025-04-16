@@ -31,7 +31,6 @@ mk {
       sel4
       sel4-logging
       sel4-immediate-sync-once-cell
-      sel4-microkit-message
       sel4-microkit-driver-adapters
       sel4-driver-interfaces
       sel4-shared-memory

@@ -58,7 +58,7 @@ mk {
 
     sel4-root-task = localCrates.sel4-root-task // { features = [ "full" ]; optional = true; };
     sel4-microkit = localCrates.sel4-microkit // { features = [ "full" ]; optional = true; };
-    sel4-microkit-message = localCrates.sel4-microkit-message // { optional = true; };
+    sel4-microkit-simple-ipc = localCrates.sel4-microkit-simple-ipc // { optional = true; };
   };
   target."cfg(not(target_thread_local))".dependencies = {
     sel4 = localCrates.sel4 // { features = [ "single-threaded" ]; };
@@ -77,7 +77,7 @@ mk {
     ];
     sel4-microkit = [
       "dep:sel4-microkit"
-      "sel4-microkit-message"
+      "sel4-microkit-simple-ipc"
     ];
   };
 }

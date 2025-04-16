@@ -15,7 +15,6 @@ mk {
 
     inherit (localCrates)
       sel4-microkit
-      sel4-microkit-message
       sel4-shared-memory
       sel4
       sel4-logging
