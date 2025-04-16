@@ -151,10 +151,5 @@ maybe! {
 
 maybe! {
     #[cfg(feature = "sel4-microkit")]
-    sel4_microkit_message
-}
-
-maybe! {
-    #[cfg(feature = "sel4-microkit")]
-    sel4_microkit_message_types
+    sel4_microkit_simple_ipc
 }

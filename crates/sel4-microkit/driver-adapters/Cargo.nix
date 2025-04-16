@@ -22,7 +22,7 @@ mk {
     inherit
       sel4-driver-interfaces
       sel4-microkit
-      sel4-microkit-message
+      sel4-microkit-simple-ipc
       sel4-shared-ring-buffer
       sel4-shared-memory
       sel4-abstract-allocator

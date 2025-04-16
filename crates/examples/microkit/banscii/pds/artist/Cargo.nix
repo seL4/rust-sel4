@@ -11,7 +11,7 @@ mk {
   dependencies = {
     rsa = { version = versions.rsa; default-features = false; features = [ "pem" "sha2" ]; };
     inherit (localCrates)
-      sel4-microkit-message
+      sel4-microkit-simple-ipc
       sel4-shared-memory
       banscii-artist-interface-types
     ;

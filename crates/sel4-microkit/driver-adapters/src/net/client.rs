@@ -6,8 +6,8 @@
 //
 
 use sel4_driver_interfaces::net::{GetNetDeviceMeta, MacAddress};
-use sel4_microkit::{Channel, MessageInfo};
-use sel4_microkit_message::MessageInfoExt as _;
+use sel4_microkit::Channel;
+use sel4_microkit_simple_ipc as simple_ipc;
 
 use super::message_types::*;
 
@@ -21,9 +21,7 @@ impl Client {
     }
 
     fn request(&self, req: Request) -> Result<SuccessResponse, Error> {
-        self.channel
-            .pp_call(MessageInfo::send_using_postcard(req).unwrap())
-            .recv_using_postcard::<Response>()
+        simple_ipc::call::<_, Response>(self.channel, req)
             .map_err(|_| Error::InvalidResponse)?
             .map_err(Error::ErrorResponse)
     }

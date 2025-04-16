@@ -11,7 +11,6 @@ mk {
   dependencies = {
     inherit (localCrates)
       sel4-microkit
-      sel4-microkit-message
       sel4-microkit-driver-adapters
     ;
     sel4-pl011-driver = localCrates.sel4-pl011-driver // { optional = true; };

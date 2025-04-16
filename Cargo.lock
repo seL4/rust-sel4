@@ -185,7 +185,7 @@ dependencies = [
  "banscii-artist-interface-types",
  "rsa",
  "sel4-microkit",
- "sel4-microkit-message",
+ "sel4-microkit-simple-ipc",
  "sel4-shared-memory",
 ]
 
@@ -206,7 +206,7 @@ dependencies = [
  "hex",
  "sel4-microkit",
  "sel4-microkit-driver-adapters",
- "sel4-microkit-message",
+ "sel4-microkit-simple-ipc",
  "sel4-shared-memory",
 ]
 
@@ -234,7 +234,6 @@ version = "0.1.0"
 dependencies = [
  "sel4-microkit",
  "sel4-microkit-driver-adapters",
- "sel4-microkit-message",
  "sel4-pl011-driver",
 ]
 
@@ -1106,7 +1105,7 @@ dependencies = [
  "sel4-initialize-tls",
  "sel4-logging",
  "sel4-microkit",
- "sel4-microkit-message",
+ "sel4-microkit-simple-ipc",
  "sel4-newlib",
  "sel4-one-ref-cell",
  "sel4-panicking",
@@ -1170,7 +1169,6 @@ dependencies = [
  "sel4-logging",
  "sel4-microkit",
  "sel4-microkit-driver-adapters",
- "sel4-microkit-message",
  "sel4-newlib",
  "sel4-shared-memory",
  "sel4-shared-ring-buffer",
@@ -1212,7 +1210,6 @@ dependencies = [
  "sel4-driver-interfaces",
  "sel4-microkit",
  "sel4-microkit-driver-adapters",
- "sel4-microkit-message",
  "sel4-sp804-driver",
 ]
 
@@ -1228,7 +1225,6 @@ dependencies = [
  "sel4-logging",
  "sel4-microkit",
  "sel4-microkit-driver-adapters",
- "sel4-microkit-message",
  "sel4-shared-memory",
  "sel4-shared-ring-buffer",
  "sel4-shared-ring-buffer-block-io-types",
@@ -1248,7 +1244,6 @@ dependencies = [
  "sel4-logging",
  "sel4-microkit",
  "sel4-microkit-driver-adapters",
- "sel4-microkit-message",
  "sel4-shared-memory",
  "sel4-shared-ring-buffer",
  "sel4-virtio-hal-impl",
@@ -2516,7 +2511,7 @@ dependencies = [
  "sel4-abstract-allocator",
  "sel4-driver-interfaces",
  "sel4-microkit",
- "sel4-microkit-message",
+ "sel4-microkit-simple-ipc",
  "sel4-shared-memory",
  "sel4-shared-ring-buffer",
  "serde",
@@ -2533,7 +2528,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "sel4-microkit-message"
+name = "sel4-microkit-simple-ipc"
 version = "0.1.0"
 dependencies = [
  "postcard",
