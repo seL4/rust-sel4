@@ -31,9 +31,15 @@ let
 in
 
 let
-  fenixRev = "14bd053c7f2a5437ca84c2c76eb7a68154dc30bb";
-  fenixSource = fetchTarball "https://github.com/nix-community/fenix/archive/${fenixRev}.tar.gz";
-  fenix = import fenixSource {};
+  fenix =
+    let
+      rev = "14bd053c7f2a5437ca84c2c76eb7a68154dc30bb";
+      source = builtins.fetchTarball {
+        url = "https://github.com/nix-community/fenix/archive/${rev}.tar.gz";
+        sha256 = "sha256:1l7ra0p8y6bgdlcj5sbj9m6g7ka1zl23kxr8kjw5qhynwhqk7x1v";
+      };
+    in
+      import source {};
 in
 
 let
