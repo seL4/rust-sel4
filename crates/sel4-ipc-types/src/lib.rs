@@ -23,21 +23,6 @@ pub use message_parser::{MessagParseError, MessageParser, TryFromMessageRegister
 #[cfg(feature = "sel4-microkit-base")]
 mod when_microkit;
 
-#[cfg(feature = "zerocopy")]
-mod when_zerocopy;
-
-#[cfg(feature = "zerocopy")]
-pub use when_zerocopy::{
-    ZerocopyMessageReader, ZerocopyMessageReaderError, ZerocopyMessageWriter,
-    ZerocopyMessageWriterError,
-};
-
-#[cfg(feature = "postcard")]
-mod when_postcard;
-
-#[cfg(feature = "postcard")]
-pub use when_postcard::{PostcardMessageReader, PostcardMessageReaderError, PostcardMessageWriter};
-
 // // //
 
 #[cfg(target_pointer_width = "32")]

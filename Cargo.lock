@@ -2369,10 +2369,7 @@ dependencies = [
 name = "sel4-ipc-types"
 version = "0.1.0"
 dependencies = [
- "postcard",
  "sel4-microkit-base",
- "serde",
- "zerocopy 0.8.18",
 ]
 
 [[package]]
