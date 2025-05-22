@@ -79,7 +79,7 @@ trait ChannelFacet: sel4::CapType {
 }
 
 impl ChannelFacet for sel4::cap_type::Notification {
-    const METHOD_NAME: &str = "pp_call";
+    const METHOD_NAME: &str = "notify";
     const BASE_SLOT: usize = BASE_OUTPUT_NOTIFICATION_SLOT;
 
     fn mask() -> usize {
@@ -97,7 +97,7 @@ impl ChannelFacet for sel4::cap_type::IrqHandler {
 }
 
 impl ChannelFacet for sel4::cap_type::Endpoint {
-    const METHOD_NAME: &str = "notify";
+    const METHOD_NAME: &str = "pp_call";
     const BASE_SLOT: usize = BASE_ENDPOINT_SLOT;
 
     fn mask() -> usize {
