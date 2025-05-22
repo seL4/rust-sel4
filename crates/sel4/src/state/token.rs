@@ -72,7 +72,7 @@ pub(crate) trait Token {
         F: FnOnce(Result<U, BorrowError>) -> T,
         G: FnOnce() -> U,
     {
-        let (_, r) = take_ok(self.try_borrow());
+        let (_tok, r) = take_ok(self.try_borrow());
         f(r.map(|_| access_resource()))
     }
 
@@ -81,7 +81,7 @@ pub(crate) trait Token {
         F: FnOnce(Result<U, BorrowMutError>) -> T,
         G: FnOnce() -> U,
     {
-        let (_, r) = take_ok(self.try_borrow_mut());
+        let (_tok, r) = take_ok(self.try_borrow_mut());
         f(r.map(|_| access_resource()))
     }
 }
