@@ -134,7 +134,12 @@ pub fn with_ipc_buffer<F, T>(f: F) -> T
 where
     F: FnOnce(&IpcBuffer) -> T,
 {
-    try_with_ipc_buffer_slot(|buf| f(buf.unwrap().as_ref().unwrap()))
+    try_with_ipc_buffer_slot(|buf| {
+        f(buf
+            .expect("IPC buffer already mutably borrowed")
+            .as_ref()
+            .expect("IPC buffer not set"))
+    })
 }
 
 /// Provides mutable access to this thread's IPC buffer.
@@ -144,7 +149,12 @@ pub fn with_ipc_buffer_mut<F, T>(f: F) -> T
 where
     F: FnOnce(&mut IpcBuffer) -> T,
 {
-    try_with_ipc_buffer_slot_mut(|buf| f(buf.unwrap().as_mut().unwrap()))
+    try_with_ipc_buffer_slot_mut(|buf| {
+        f(buf
+            .expect("IPC buffer already borrowed")
+            .as_mut()
+            .expect("IPC buffer not set"))
+    })
 }
 
 /// Sets the IPC buffer that this crate will use for this thread.
