@@ -304,6 +304,16 @@ impl<C: InvocationContext> SchedControl<C> {
     }
 }
 
+#[sel4_cfg(KERNEL_MCS)]
+impl<C: InvocationContext> SchedContext<C> {
+    /// Corresponds to `seL4_SchedContext_Unbind`.
+    pub fn unbind(self) -> Result<()> {
+        Error::wrap(self.invoke(|cptr, ipc_buffer| {
+            ipc_buffer.inner_mut().seL4_SchedContext_Unbind(cptr.bits())
+        }))
+    }
+}
+
 impl<C: InvocationContext> IrqControl<C> {
     /// Corresponds to `seL4_IRQControl_Get`.
     pub fn irq_control_get(self, irq: Word, dst: &AbsoluteCPtr) -> Result<()> {
