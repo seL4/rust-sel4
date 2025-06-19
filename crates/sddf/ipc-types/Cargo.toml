@@ -10,11 +10,11 @@
 #
 
 [package]
-name = "sel4-ipc-types"
+name = "sddf-ipc-types"
 version = "0.1.0"
 authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
 edition = "2021"
 license = "BSD-2-Clause"
 
 [dependencies]
-sel4-microkit-base = { path = "../sel4-microkit/base", optional = true }
+sel4-microkit-base = { path = "../../sel4-microkit/base", optional = true }

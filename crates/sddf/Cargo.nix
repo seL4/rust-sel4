@@ -15,7 +15,7 @@ mk {
       sddf-sys
       sel4-config
       sel4-immutable-cell
-      sel4-ipc-types
+      sddf-ipc-types
     ;
     sel4-shared-memory = localCrates.sel4-shared-memory // {
       features = [ "atomics" ];
@@ -25,6 +25,6 @@ mk {
     };
   };
   features = {
-    "sel4-microkit-base" = [ "dep:sel4-microkit-base" "sel4-ipc-types/sel4-microkit-base" ];
+    "sel4-microkit-base" = [ "dep:sel4-microkit-base" "sddf-ipc-types/sel4-microkit-base" ];
   };
 }

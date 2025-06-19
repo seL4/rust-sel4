@@ -17,14 +17,14 @@ edition = "2021"
 license = "BSD-2-Clause"
 
 [features]
-sel4-microkit-base = ["dep:sel4-microkit-base", "sel4-ipc-types/sel4-microkit-base"]
+sel4-microkit-base = ["dep:sel4-microkit-base", "sddf-ipc-types/sel4-microkit-base"]
 
 [dependencies]
 num_enum = { version = "0.7.3", default-features = false }
 ptr_meta = { version = "0.3", default-features = false }
+sddf-ipc-types = { path = "ipc-types" }
 sddf-sys = { path = "sys" }
 sel4-config = { path = "../sel4/config" }
 sel4-immutable-cell = { path = "../sel4-immutable-cell" }
-sel4-ipc-types = { path = "../sel4-ipc-types" }
 sel4-microkit-base = { path = "../sel4-microkit/base", optional = true }
 sel4-shared-memory = { path = "../sel4-shared-memory", features = ["atomics"] }
