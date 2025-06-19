@@ -20,14 +20,14 @@ license = "BSD-2-Clause"
 verify = true
 
 [dependencies.builtin]
-git = "https://github.com/coliasgroup/verus.git"
-tag = "keep/a60b3b7e08d514dc8e0ac3b30236db0c"
+git = "https://github.com/verus-lang/verus.git"
+rev = "91be9dfa7609463973107093ed97f8ad1640d9ed"
 
 [dependencies.builtin_macros]
-git = "https://github.com/coliasgroup/verus.git"
-tag = "keep/a60b3b7e08d514dc8e0ac3b30236db0c"
+git = "https://github.com/verus-lang/verus.git"
+rev = "91be9dfa7609463973107093ed97f8ad1640d9ed"
 
 [dependencies.vstd]
-git = "https://github.com/coliasgroup/verus.git"
-tag = "keep/a60b3b7e08d514dc8e0ac3b30236db0c"
+git = "https://github.com/verus-lang/verus.git"
+rev = "91be9dfa7609463973107093ed97f8ad1640d9ed"
 default-features = false

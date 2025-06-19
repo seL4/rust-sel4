@@ -188,7 +188,7 @@ in rec {
   };
 
   verusSource = {
-    git = "https://github.com/coliasgroup/verus.git";
-    tag = mkKeepRef "a60b3b7e08d514dc8e0ac3b30236db0c3023c17a"; # branch dev
+    git = "https://github.com/verus-lang/verus.git";
+    rev = "91be9dfa7609463973107093ed97f8ad1640d9ed";
   };
 }

@@ -155,11 +155,11 @@ let
 
   cargoSubcommand =
     if test
-    then "test"
+    then ["test"]
     else (
       if verifyWithVerus
-      then "verus"
-      else "build"
+      then ["verus" "build"]
+      else ["build"]
     );
 
   mkCargoInvocation = isLastLayer: runClippy: commonArgs: subcommandArgs:
@@ -174,7 +174,7 @@ let
       ${lib.optionalString runClippy ''
         cargo clippy ${joinedCommonArgs} -- -D warnings
       ''}
-      cargo ${cargoSubcommand} ${joinedCommonArgs} ${joinedSubcommandArgs}
+      cargo ${lib.concatStringsSep " " cargoSubcommand} ${joinedCommonArgs} ${joinedSubcommandArgs}
     '';
 
   findTestsCommandPrefix = targetDir: [
