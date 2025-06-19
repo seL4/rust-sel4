@@ -5,8 +5,10 @@
 #
 
 { lib, stdenv
+, buildPlatform
 , callPackage
 , makeWrapper
+, writeShellScriptBin
 , singular
 
 , crateUtils
@@ -27,7 +29,7 @@ let
 
   rustToolchain = assembleRustToolchain {
     inherit channel;
-    sha256 = "sha256-yMuSb5eQPO/bHv+Bcf/US8LVMbf/G/0MSfiPwBhiPpk=";
+    sha256 = "sha256-Hn2uaQzRLidAWpfmRwSRdImifGUCAb9HeAqTYFXWeQk=";
   };
 
   rustEnvironment = lib.fix (self: elaborateRustEnvironment (mkDefaultElaborateRustEnvironmentArgs {
@@ -39,9 +41,11 @@ let
     };
   }));
 
+  toolchainName = "${rustEnvironment.channel}-${buildPlatform.config}";
+
   src = sources.fetchGit {
-    url = "https://github.com/coliasgroup/verus.git";
-    rev = "85249163e18625abaf1e0822c81d0839cc348ac4"; # branch dev
+    url = "https://github.com/verus-lang/verus.git";
+    rev = "91be9dfa7609463973107093ed97f8ad1640d9ed";
   };
 
   lockfile = vendorLockfile {
@@ -49,7 +53,65 @@ let
     lockfile = src + "/source/Cargo.lock";
   };
 
+  vargoLockfile = vendorLockfile {
+    inherit rustToolchain;
+    lockfile = src + "/tools/vargo/Cargo.lock";
+  };
+
   config = crateUtils.toTOMLFile "config" lockfile.configFragment;
+
+  vargoConfig = crateUtils.toTOMLFile "config" vargoLockfile.configFragment;
+
+  buildtimeDummyRustup = writeShellScriptBin "rustup" ''
+    set -eu -o pipefail
+
+    args="$@"
+
+    die() {
+      echo "unexpected args: $args" >&2
+      exit 1
+    }
+
+    [ "$1" == "show" ] || die
+    shift
+
+    [ "$1" == "active-toolchain" ] || die
+    shift
+
+    echo "${toolchainName}"
+  '';
+
+  runtimeDummyRustup = writeShellScriptBin "rustup" ''
+    set -eu -o pipefail
+
+    args="$@"
+
+    die() {
+      echo "unexpected args: $args" >&2
+      exit 1
+    }
+
+    case "$1" in
+      run)
+          [ "$1" == "run" ] || die
+          shift
+          shift
+          [ "$1" == "--" ] || die
+          shift
+          exec "$@"
+        ;;
+      toolchain)
+          [ "$1" == "toolchain" ] || die
+          shift
+          [ "$1" == "list" ] || die
+          shift
+          echo "${toolchainName}"
+        ;;
+      *)
+        die
+        ;;
+    esac
+  '';
 
 in
 stdenv.mkDerivation {
@@ -57,34 +119,43 @@ stdenv.mkDerivation {
 
   inherit src;
 
-  sourceRoot = "source/source"; # looks funny
-
   nativeBuildInputs = [
     rustToolchain
     makeWrapper
+    buildtimeDummyRustup
   ];
 
-  dontConfigure = true;
+  VERUS_Z3_PATH = "${z3}/bin/z3";
+  VERUS_SINGULAR_PATH = "${singular}/bin/Singular";
+
+  patchPhase = ''
+    substituteInPlace tools/activate --replace-fail 'cargo build' 'cargo build --offline'
+  '';
+
+  configurePhase = ''
+    cat ${vargoConfig} >> tools/vargo/.cargo/config.toml
+    mkdir source/.cargo
+    cp ${config} source/.cargo/config.toml
+  '';
 
   buildPhase = ''
-    RUSTC_BOOTSTRAP=1 \
-      cargo build \
-        -Z unstable-options \
-        --config ${config} \
-        -p verus-driver -p cargo-verus \
-        --features=verus-driver/singular \
-        --release \
-        ${rustEnvironment.artifactDirFlag} $out/bin
+    cd source
+    source ../tools/activate
+    vargo build --release
   '';
 
   installPhase = ''
-    # wrap cargo-verus with these so that it can properly assess whether verus-driver fingerprints are dirty
-    wrapProgram $out/bin/cargo-verus \
-      --set-default VERUS_Z3_PATH ${z3}/bin/z3 \
-      --set-default VERUS_SINGULAR_PATH ${singular}/bin/Singular
+    mkdir -p $out/lib $out/bin
+    cp -r target-verus/release $out/lib/verus-root
+    ln -s ../lib/verus-root/cargo-verus $out/bin
 
-    wrapProgram $out/bin/verus-driver \
-      --prefix LD_LIBRARY_PATH : ${lib.makeLibraryPath [ rustToolchain ]} # HACK
+    wrapProgram $out/lib/verus-root/verus \
+      --prefix PATH : ${
+        lib.makeBinPath [
+          runtimeDummyRustup
+        ]
+      } \
+      --prefix LD_LIBRARY_PATH : ${rustToolchain}/lib/rustlib/x86_64-unknown-linux-gnu/lib
   '';
 
   passthru = {
