@@ -1914,12 +1914,19 @@ version = "0.1.0"
 dependencies = [
  "num_enum",
  "ptr_meta",
+ "sddf-ipc-types",
  "sddf-sys",
  "sel4-config",
  "sel4-immutable-cell",
- "sel4-ipc-types",
  "sel4-microkit-base",
  "sel4-shared-memory",
+]
+
+[[package]]
+name = "sddf-ipc-types"
+version = "0.1.0"
+dependencies = [
+ "sel4-microkit-base",
 ]
 
 [[package]]
@@ -2363,13 +2370,6 @@ version = "0.1.0"
 dependencies = [
  "cfg-if",
  "sel4-alloca",
-]
-
-[[package]]
-name = "sel4-ipc-types"
-version = "0.1.0"
-dependencies = [
- "sel4-microkit-base",
 ]
 
 [[package]]

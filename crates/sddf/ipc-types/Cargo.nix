@@ -7,7 +7,7 @@
 { mk, versions, localCrates }:
 
 mk {
-  package.name = "sel4-ipc-types";
+  package.name = "sddf-ipc-types";
   dependencies = {
     sel4-microkit-base = localCrates.sel4-microkit-base // {
       optional = true;

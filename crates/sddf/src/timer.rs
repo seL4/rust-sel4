@@ -11,8 +11,8 @@ use core::convert::Infallible;
 
 use num_enum::{IntoPrimitive, TryFromPrimitive};
 
+use sddf_ipc_types::*;
 use sddf_sys as sys;
-use sel4_ipc_types::*;
 
 use crate::Config;
 
