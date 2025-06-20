@@ -174,7 +174,7 @@ pub fn set_bits<T: UnsignedPrimInt, U: UnsignedPrimInt + TryInto<T>>(
             offset_into_first_primitive
                 ..(offset_into_first_primitive + num_bits_for_first_primitive),
         ))
-        | checked_cast(bits_for_first_primitive) << offset_into_first_primitive;
+        | (checked_cast(bits_for_first_primitive) << offset_into_first_primitive);
 
     let mut num_bits_so_far = num_bits_for_first_primitive;
     let mut index_of_cur_primitive = index_of_first_primitive + 1;
