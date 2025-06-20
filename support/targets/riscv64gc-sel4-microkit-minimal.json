@@ -6,7 +6,7 @@
   "data-layout": "e-m:e-p:64:64-i64:64-i128:128-n32:64-S128",
   "emit-debug-gdb-scripts": false,
   "exe-suffix": ".elf",
-  "features": "+m,+a,+f,+d,+c",
+  "features": "+m,+a,+f,+d,+c,+zicsr,+zifencei",
   "link-script": "__sel4_ipc_buffer_obj = (__ehdr_start & ~(4096 - 1)) - 4096;",
   "linker": "rust-lld",
   "linker-flavor": "gnu-lld",
