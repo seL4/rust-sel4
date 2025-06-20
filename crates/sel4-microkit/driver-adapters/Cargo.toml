@@ -25,7 +25,7 @@ rtcc = "0.3.2"
 sel4-abstract-allocator = { path = "../../sel4-abstract-allocator" }
 sel4-driver-interfaces = { path = "../../sel4-driver-interfaces" }
 sel4-microkit = { path = ".." }
-sel4-microkit-message = { path = "../message" }
+sel4-microkit-simple-ipc = { path = "../simple-ipc" }
 sel4-shared-memory = { path = "../../sel4-shared-memory" }
 sel4-shared-ring-buffer = { path = "../../sel4-shared-ring-buffer" }
 serde = { version = "1.0.147", default-features = false }

@@ -8,7 +8,7 @@
 #![no_main]
 
 use sel4_microkit::{
-    protection_domain, Channel, DeferredAction, DeferredActionSlot, Handler, Infallible,
+    protection_domain, Channel, ChannelSet, DeferredAction, DeferredActionSlot, Handler, Infallible,
 };
 
 const CLIENT: Channel = Channel::new(0);
@@ -27,7 +27,7 @@ struct HandlerImpl {
 impl Handler for HandlerImpl {
     type Error = Infallible;
 
-    fn notified(&mut self, _channel: Channel) -> Result<(), Self::Error> {
+    fn notified(&mut self, _channels: ChannelSet) -> Result<(), Self::Error> {
         self.deferred_action.defer_notify(CLIENT).unwrap();
         Ok(())
     }

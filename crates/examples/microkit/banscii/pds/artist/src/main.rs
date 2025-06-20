@@ -16,7 +16,7 @@ use rsa::signature::SignatureEncoding;
 use sel4_microkit::{
     memory_region_symbol, protection_domain, Channel, Handler, Infallible, MessageInfo,
 };
-use sel4_microkit_message::MessageInfoExt as _;
+use sel4_microkit_simple_ipc as simple_ipc;
 use sel4_shared_memory::{
     access::{ReadOnly, ReadWrite},
     SharedMemoryRef,
@@ -65,7 +65,7 @@ impl Handler for HandlerImpl {
         msg_info: MessageInfo,
     ) -> Result<MessageInfo, Self::Error> {
         Ok(match channel {
-            ASSISTANT => match msg_info.recv_using_postcard::<Request>() {
+            ASSISTANT => match simple_ipc::recv::<Request>(msg_info) {
                 Ok(req) => {
                     let draft_height = req.height;
                     let draft_width = req.width;
@@ -100,7 +100,7 @@ impl Handler for HandlerImpl {
                         .index(signature_start..signature_end)
                         .copy_from_slice(&signature);
 
-                    MessageInfo::send_using_postcard(Response {
+                    simple_ipc::send(Response {
                         height: masterpiece.height,
                         width: masterpiece.width,
                         masterpiece_start,
@@ -108,9 +108,8 @@ impl Handler for HandlerImpl {
                         signature_start,
                         signature_size,
                     })
-                    .unwrap()
                 }
-                Err(_) => MessageInfo::send_unspecified_error(),
+                Err(_) => simple_ipc::send_unspecified_error(),
             },
             _ => {
                 unreachable!()

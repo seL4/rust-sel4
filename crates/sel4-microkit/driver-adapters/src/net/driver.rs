@@ -14,8 +14,8 @@ use smoltcp::{
 
 use sel4_driver_interfaces::net::GetNetDeviceMeta;
 use sel4_driver_interfaces::HandleInterrupt;
-use sel4_microkit::{Channel, Handler, Infallible, MessageInfo};
-use sel4_microkit_message::MessageInfoExt as _;
+use sel4_microkit::{Channel, ChannelSet, Handler, Infallible, MessageInfo};
+use sel4_microkit_simple_ipc as simple_ipc;
 use sel4_shared_memory::SharedMemoryRef;
 use sel4_shared_ring_buffer::{roles::Use, RingBuffers};
 
@@ -53,8 +53,8 @@ impl<Device> HandlerImpl<Device> {
 impl<Device: phy::Device + HandleInterrupt + GetNetDeviceMeta> Handler for HandlerImpl<Device> {
     type Error = Infallible;
 
-    fn notified(&mut self, channel: Channel) -> Result<(), Self::Error> {
-        if channel == self.device_channel || channel == self.client_channel {
+    fn notified(&mut self, channels: ChannelSet) -> Result<(), Self::Error> {
+        if channels.contains(self.device_channel) || channels.contains(self.client_channel) {
             let mut notify_rx = false;
 
             while !self.rx_ring_buffers.free_mut().is_empty().unwrap() {
@@ -150,7 +150,7 @@ pub fn handle_client_request<T: GetNetDeviceMeta>(
     dev: &mut T,
     msg_info: MessageInfo,
 ) -> MessageInfo {
-    match msg_info.recv_using_postcard::<Request>() {
+    match simple_ipc::recv::<Request>(msg_info) {
         Ok(req) => {
             let resp: Response = match req {
                 Request::GetMacAddress => dev
@@ -158,8 +158,8 @@ pub fn handle_client_request<T: GetNetDeviceMeta>(
                     .map(SuccessResponse::GetMacAddress)
                     .map_err(|_| ErrorResponse::Unspecified),
             };
-            MessageInfo::send_using_postcard(resp).unwrap()
+            simple_ipc::send(resp)
         }
-        Err(_) => MessageInfo::send_unspecified_error(),
+        Err(_) => simple_ipc::send_unspecified_error(),
     }
 }

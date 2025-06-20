@@ -49,6 +49,18 @@ macro_rules! impl_atomic {
         impl AtomicSealed for $atomic {
             const IS_SIGNED: bool = $is_signed;
         }
+
+        #[cfg(target_has_atomic = $target_has_atomic_key)]
+        #[cfg(target_has_atomic_equal_alignment = $target_has_atomic_key)]
+        impl Atomic for $value {
+            type Value = $value;
+        }
+
+        #[cfg(target_has_atomic = $target_has_atomic_key)]
+        #[cfg(target_has_atomic_equal_alignment = $target_has_atomic_key)]
+        impl AtomicSealed for $value {
+            const IS_SIGNED: bool = $is_signed;
+        }
     };
 }
 

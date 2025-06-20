@@ -6,7 +6,7 @@
 
 use sel4_driver_interfaces::block::GetBlockDeviceLayout;
 use sel4_microkit::MessageInfo;
-use sel4_microkit_message::MessageInfoExt as _;
+use sel4_microkit_simple_ipc as simple_ipc;
 
 use super::message_types::*;
 
@@ -14,7 +14,7 @@ pub fn handle_client_request<T: GetBlockDeviceLayout>(
     dev: &mut T,
     msg_info: MessageInfo,
 ) -> MessageInfo {
-    match msg_info.recv_using_postcard::<Request>() {
+    match simple_ipc::recv::<Request>(msg_info) {
         Ok(req) => {
             let resp: Response = match req {
                 Request::GetNumBlocks => dev
@@ -26,8 +26,8 @@ pub fn handle_client_request<T: GetBlockDeviceLayout>(
                     .map(SuccessResponse::GetBlockSize)
                     .map_err(|_| ErrorResponse::Unspecified),
             };
-            MessageInfo::send_using_postcard(resp).unwrap()
+            simple_ipc::send(resp)
         }
-        Err(_) => MessageInfo::send_unspecified_error(),
+        Err(_) => simple_ipc::send_unspecified_error(),
     }
 }

@@ -18,12 +18,12 @@ use core::str;
 use embedded_hal_nb::serial::{self, Read as _, Write as _};
 
 use sel4_microkit::{
-    memory_region_symbol, protection_domain, Channel, Handler, Infallible, MessageInfo,
+    memory_region_symbol, protection_domain, Channel, ChannelSet, Handler, Infallible,
 };
 use sel4_microkit_driver_adapters::serial::client::{
     Client as SerialClient, Error as SerialClientError,
 };
-use sel4_microkit_message::MessageInfoExt as _;
+use sel4_microkit_simple_ipc as simple_ipc;
 use sel4_shared_memory::{
     access::{ReadOnly, ReadWrite},
     SharedMemoryRef,
@@ -73,33 +73,30 @@ struct HandlerImpl {
 impl Handler for HandlerImpl {
     type Error = Infallible;
 
-    fn notified(&mut self, channel: Channel) -> Result<(), Self::Error> {
-        match channel {
-            SERIAL_DRIVER => {
-                while let Ok(b) = self.serial_client.read() {
-                    if let b'\n' | b'\r' = b {
-                        self.newline();
-                        if !self.buffer.is_empty() {
+    fn notified(&mut self, channels: ChannelSet) -> Result<(), Self::Error> {
+        if channels.contains(SERIAL_DRIVER) {
+            while let Ok(b) = self.serial_client.read() {
+                if let b'\n' | b'\r' = b {
+                    self.newline();
+                    if !self.buffer.is_empty() {
+                        self.try_create();
+                    }
+                    self.prompt();
+                } else {
+                    let c = char::from(b);
+                    if c.is_ascii() && !c.is_ascii_control() {
+                        if self.buffer.len() == MAX_SUBJECT_LEN {
+                            writeln!(self.writer(), "\n(char limit reached)").unwrap();
                             self.try_create();
+                            self.prompt();
                         }
-                        self.prompt();
-                    } else {
-                        let c = char::from(b);
-                        if c.is_ascii() && !c.is_ascii_control() {
-                            if self.buffer.len() == MAX_SUBJECT_LEN {
-                                writeln!(self.writer(), "\n(char limit reached)").unwrap();
-                                self.try_create();
-                                self.prompt();
-                            }
-                            self.serial_client.write(b).unwrap();
-                            self.buffer.push(b);
-                        }
+                        self.serial_client.write(b).unwrap();
+                        self.buffer.push(b);
                     }
                 }
             }
-            _ => {
-                unreachable!()
-            }
+        } else {
+            unreachable!()
         }
         Ok(())
     }
@@ -139,10 +136,7 @@ impl HandlerImpl {
             draft_size,
         };
 
-        let resp: artist::Response = ARTIST
-            .pp_call(MessageInfo::send_using_postcard(req).unwrap())
-            .recv_using_postcard()
-            .unwrap();
+        let resp: artist::Response = simple_ipc::call(ARTIST, req).unwrap();
 
         let height = resp.height;
         let width = resp.width;

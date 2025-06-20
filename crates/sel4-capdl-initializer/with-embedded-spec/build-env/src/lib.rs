@@ -30,11 +30,11 @@ pub struct Footprint {
 impl Footprint {
     pub fn tell_cargo(&self) {
         for env_var in self.env_vars.iter() {
-            println!("cargo:rerun-if-env-changed={env_var}");
+            println!("cargo::rerun-if-env-changed={env_var}");
         }
 
         for path in self.paths.iter() {
-            println!("cargo:rerun-if-env-changed={}", path.display());
+            println!("cargo::rerun-if-env-changed={}", path.display());
         }
     }
 }

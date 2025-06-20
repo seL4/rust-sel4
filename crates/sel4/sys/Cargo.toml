@@ -16,6 +16,7 @@ authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
 build = "build/main.rs"
 edition = "2021"
 license = "BSD-2-Clause"
+links = "sel4"
 
 [dependencies]
 log = "0.4.17"
@@ -23,7 +24,7 @@ sel4-bitfield-ops = { path = "../bitfield-ops" }
 sel4-config = { path = "../config" }
 
 [build-dependencies]
-bindgen = "0.70.1"
+bindgen = "0.71.1"
 glob = "0.3.0"
 pest = "2.4.1"
 pest_derive = "2.4.1"

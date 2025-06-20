@@ -10,18 +10,16 @@
 #
 
 [package]
-name = "sel4-microkit-message-types"
+name = "lionsos-sys"
 version = "0.1.0"
 authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
 edition = "2021"
 license = "BSD-2-Clause"
-
-[features]
-default = ["postcard"]
-postcard = ["dep:postcard", "dep:serde"]
+links = "lions"
 
 [dependencies]
-num_enum = { version = "0.7.3", default-features = false }
-postcard = { version = "1.0.2", default-features = false, optional = true }
-serde = { version = "1.0.147", default-features = false, optional = true }
-zerocopy = "0.8.7"
+sddf-sys = { path = "../../sddf/sys" }
+sel4-sys = { path = "../../sel4/sys" }
+
+[build-dependencies]
+bindgen = "0.71.1"

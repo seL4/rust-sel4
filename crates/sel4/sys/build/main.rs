@@ -64,6 +64,14 @@ fn main() {
         let out_path = out_dir.path.join("bindings.rs");
         bindings.write_to_file(out_path).unwrap();
     }
+
+    println!(
+        "cargo::metadata=include={}",
+        get_libsel4_include_dirs()
+            .map(|p| p.to_str().unwrap().to_owned())
+            .collect::<Vec<_>>()
+            .join(":")
+    );
 }
 
 #[allow(clippy::assertions_on_constants)]

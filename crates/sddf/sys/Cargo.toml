@@ -10,17 +10,16 @@
 #
 
 [package]
-name = "sel4-microkit-message"
+name = "sddf-sys"
 version = "0.1.0"
 authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
 edition = "2021"
 license = "BSD-2-Clause"
-
-[features]
-default = ["postcard"]
-postcard = ["dep:serde", "sel4-microkit-message-types/postcard"]
+links = "sddf"
 
 [dependencies]
-sel4-microkit-base = { path = "../base" }
-sel4-microkit-message-types = { path = "types" }
-serde = { version = "1.0.147", default-features = false, optional = true }
+ptr_meta = { version = "0.3", default-features = false }
+sel4-sys = { path = "../../sel4/sys" }
+
+[build-dependencies]
+bindgen = "0.71.1"

@@ -9,6 +9,6 @@ fn main() {
         all(not(nightly), since(1.80)),
         all(nightly, since(2024 - 05 - 05))
     )) {
-        println!("cargo:rustc-check-cfg=cfg(kani)");
+        println!("cargo::rustc-check-cfg=cfg(kani)");
     }
 }

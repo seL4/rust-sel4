@@ -12,8 +12,8 @@ use embedded_hal_nb::serial;
 use heapless::Deque;
 
 use sel4_driver_interfaces::HandleInterrupt;
-use sel4_microkit::{Channel, Handler, MessageInfo};
-use sel4_microkit_message::MessageInfoExt;
+use sel4_microkit::{Channel, ChannelSet, Handler, MessageInfo};
+use sel4_microkit_simple_ipc as simple_ipc;
 
 use super::message_types::*;
 
@@ -53,8 +53,8 @@ where
 {
     type Error = Infallible;
 
-    fn notified(&mut self, channel: Channel) -> Result<(), Self::Error> {
-        if channel == self.serial {
+    fn notified(&mut self, channels: ChannelSet) -> Result<(), Self::Error> {
+        if channels.contains(self.serial) {
             while !self.buffer.is_full() {
                 match self.driver.read() {
                     Ok(v) => {
@@ -76,7 +76,7 @@ where
                 self.notify = false;
             }
         } else {
-            panic!("unexpected channel: {channel:?}");
+            panic!("unexpected channels: {}", channels.display());
         }
         Ok(())
     }
@@ -87,7 +87,7 @@ where
         msg_info: MessageInfo,
     ) -> Result<MessageInfo, Self::Error> {
         if channel == self.client {
-            Ok(match msg_info.recv_using_postcard::<Request>() {
+            Ok(match simple_ipc::recv::<Request>(msg_info) {
                 Ok(req) => {
                     let resp = match req {
                         Request::Read => {
@@ -104,9 +104,9 @@ where
                             .map(SuccessResponse::Flush)
                             .map_err(|_| ErrorResponse::FlushError),
                     };
-                    MessageInfo::send_using_postcard(resp).unwrap()
+                    simple_ipc::send(resp)
                 }
-                Err(_) => MessageInfo::send_unspecified_error(),
+                Err(_) => simple_ipc::send_unspecified_error(),
             })
         } else {
             panic!("unexpected channel: {channel:?}");

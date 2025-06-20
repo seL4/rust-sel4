@@ -4,16 +4,16 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use crate::MessageInfo;
+use core::fmt;
 
-use crate::{defer::PreparedDeferredAction, Channel, Child};
+use crate::{defer::PreparedDeferredAction, Channel, Child, MessageInfo};
 
 const INPUT_CAP: sel4::cap::Endpoint = sel4::Cap::from_bits(1);
 const REPLY_CAP: sel4::cap::Reply = sel4::Cap::from_bits(4);
 const MONITOR_EP_CAP: sel4::cap::Endpoint = sel4::Cap::from_bits(5);
 
-const CHANNEL_BADGE_BIT: usize = 63;
-const PD_BADGE_BIT: usize = 62;
+const IS_ENDPOINT_BADGE_BIT: usize = 63;
+const IS_FAULT_BADGE_BIT: usize = 62;
 
 fn strip_flag(badge: sel4::Badge, bit: usize) -> Option<sel4::Word> {
     let mask = 1 << bit;
@@ -27,25 +27,25 @@ fn strip_flag(badge: sel4::Badge, bit: usize) -> Option<sel4::Word> {
 #[doc(hidden)]
 #[derive(Debug, Clone)]
 pub enum Event {
-    Notified(NotifiedEvent),
+    Notified(ChannelSet),
     Protected(Channel, MessageInfo),
     Fault(Child, MessageInfo),
 }
 
 impl Event {
     fn new(tag: sel4::MessageInfo, badge: sel4::Badge) -> Self {
-        if let Some(channel_index) = strip_flag(badge, CHANNEL_BADGE_BIT) {
+        if let Some(channel_index) = strip_flag(badge, IS_ENDPOINT_BADGE_BIT) {
             Self::Protected(
                 Channel::new(channel_index.try_into().unwrap()),
                 MessageInfo::from_inner(tag),
             )
-        } else if let Some(pd_index) = strip_flag(badge, PD_BADGE_BIT) {
+        } else if let Some(pd_index) = strip_flag(badge, IS_FAULT_BADGE_BIT) {
             Self::Fault(
                 Child::new(pd_index.try_into().unwrap()),
                 MessageInfo::from_inner(tag),
             )
         } else {
-            Self::Notified(NotifiedEvent(badge))
+            Self::Notified(ChannelSet(badge))
         }
     }
 
@@ -56,18 +56,26 @@ impl Event {
 
 #[doc(hidden)]
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct NotifiedEvent(sel4::Badge);
+pub struct ChannelSet(sel4::Badge);
 
-impl NotifiedEvent {
-    pub fn iter(&self) -> NotifiedEventIter {
-        NotifiedEventIter(self.0)
+impl ChannelSet {
+    pub fn contains(&self, channel: Channel) -> bool {
+        self.0 | (1 << channel.index()) != 0
+    }
+
+    pub fn iter(&self) -> ChannelSetIter {
+        ChannelSetIter(self.0)
+    }
+
+    pub fn display(&self) -> DisplayChannelSet<'_> {
+        DisplayChannelSet(self)
     }
 }
 
 #[doc(hidden)]
-pub struct NotifiedEventIter(sel4::Badge);
+pub struct ChannelSetIter(sel4::Badge);
 
-impl Iterator for NotifiedEventIter {
+impl Iterator for ChannelSetIter {
     type Item = Channel;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -80,6 +88,24 @@ impl Iterator for NotifiedEventIter {
                 Some(Channel::new(i.try_into().unwrap()))
             }
         }
+    }
+}
+
+pub struct DisplayChannelSet<'a>(&'a ChannelSet);
+
+impl fmt::Display for DisplayChannelSet<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{{")?;
+        let mut first = true;
+        for channel in self.0.iter() {
+            if !first {
+                write!(f, ", ")?;
+            }
+            write!(f, "{}", channel.index())?;
+            first = false;
+        }
+        write!(f, "}}")?;
+        Ok(())
     }
 }
 
