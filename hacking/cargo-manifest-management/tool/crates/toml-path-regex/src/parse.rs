@@ -44,7 +44,7 @@ pub struct IndexRange {
     pub end: Option<usize>,
 }
 
-pub fn parse(s: &str) -> Result<Expr, Error<Rule>> {
+pub fn parse(s: &str) -> Result<Expr<'_>, Error<Rule>> {
     let mut top_level_pairs = PathRegexParser::parse(Rule::path_regex, &s)?;
     assert_eq!(top_level_pairs.len(), 1);
     let path_regex_pair = top_level_pairs.next().unwrap();

@@ -9,7 +9,7 @@
   "emit-debug-gdb-scripts": false,
   "env": "musl",
   "exe-suffix": ".elf",
-  "features": "+m,+a,+f,+d,+c",
+  "features": "+m,+a,+f,+d,+c,+zicsr,+zifencei",
   "has-thread-local": true,
   "linker": "rust-lld",
   "linker-flavor": "gnu-lld",
