@@ -34,104 +34,161 @@ let
     in
       lib.listToAttrs (map parseLine lines);
 
+  mkToolchain = { hashesFilePath, arch, versionTag, versionName, componentNames ? defaultComponentNames }:
+    let
+      ferroceneSrc = mkFerroceneSrc {
+        inherit hashesFilePath arch versionTag versionName;
+      };
+
+      byName = lib.fix (self: lib.listToAttrs (lib.forEach componentNames (componentName:
+        let
+          component = mkComponent {
+            inherit componentName;
+            inherit hashesFilePath arch versionTag versionName;
+            inherit ferroceneSrc;
+            inherit (self) rustc;
+          };
+        in
+          lib.nameValuePair componentName component
+      )));
+    in
+      fenix.combine (lib.attrValues byName);
+
   mkFiles = versionName: lib.mapAttrs (fname: sha256: requireFile {
     name = fname;
     url = "https://releases.ferrocene.dev/ferrocene/files/${versionName}/index.html";
     inherit sha256;
   });
 
+  unpackComponent = { hashesFilePath, arch, versionTag, versionName, componentName }:
+    let
+      files = mkFiles versionName (parseHashesFile (builtins.readFile hashesFilePath));
+      nameSuffix = "${
+        lib.optionalString (!(lib.elem componentName [ "rust-src" "ferrocene-src" ])) "-${arch}"
+      }-${versionTag}";
+      fname = "${componentName}${nameSuffix}.tar.xz";
+    in
+      stdenv.mkDerivation {
+        name = "${componentName}${nameSuffix}";
+        src = files.${fname};
+        sourceRoot = ".";
+        installPhase = ''
+          cp -r . $out
+        '';
+      }
+  ;
+
+  mkFerroceneSrc = { hashesFilePath, arch, versionTag, versionName }:
+    (unpackComponent {
+      inherit hashesFilePath arch versionTag versionName;
+      componentName = "ferrocene-src";
+    }).overrideAttrs (attrs: {
+      dontConfigure = true;
+      dontFixup = true;
+      patchPhase = ''
+        shopt -s extglob
+        rm -r !(ferrocene)
+      '';
+    });
+
   rpath = "${zlib}/lib:$out/lib";
 
-  mkComponent = { componentName, nameSuffix, src, rustc, libcManifestDir }: stdenv.mkDerivation {
-    name = "${componentName}${nameSuffix}";
-    inherit src;
-    sourceRoot = ".";
-    installPhase = ''
-      cp -r . $out
+  mkComponent = { componentName, hashesFilePath, arch, versionTag, versionName, rustc, ferroceneSrc }:
+    (unpackComponent {
+      inherit componentName hashesFilePath arch versionTag versionName;
+    }).overrideAttrs (attrs: {
+      dontStrip = true;
+      patchPhase = ''
+        rm lib/rustlib/{components,install.log,manifest-*,rust-installer-version,uninstall.sh} || true
 
-      rm $out/lib/rustlib/{components,install.log,manifest-*,rust-installer-version,uninstall.sh} || true
+        ${lib.optionalString stdenv.isLinux ''
+          if [ -d bin ]; then
+            for file in $(find bin -type f); do
+              if isELF "$file"; then
+                patchelf \
+                  --set-interpreter ${stdenv.cc.bintools.dynamicLinker} \
+                  --set-rpath ${rpath} \
+                  "$file" || true
+              fi
+            done
+          fi
 
-      ${lib.optionalString stdenv.isLinux ''
-        if [ -d $out/bin ]; then
-          for file in $(find $out/bin -type f); do
-            if isELF "$file"; then
+          if [ -d lib ]; then
+            for file in $(find lib -type f); do
+              if isELF "$file"; then
+                patchelf --set-rpath ${rpath} "$file" || true
+              fi
+            done
+          fi
+
+          if [ -d libexec ]; then
+            for file in $(find libexec -type f); do
+              if isELF "$file"; then
+                patchelf \
+                  --set-interpreter ${stdenv.cc.bintools.dynamicLinker} \
+                  --set-rpath ${rpath} \
+                  "$file" || true
+              fi
+            done
+          fi
+
+          ${lib.optionalString (componentName == "rustc") ''
+            for file in $(find lib/rustlib/*/bin -type f); do
+              if isELF "$file"; then
+                patchelf \
+                  --set-interpreter ${stdenv.cc.bintools.dynamicLinker} \
+                  --set-rpath ${stdenv.cc.cc.lib}/lib:${rpath} \
+                  "$file" || true
+              fi
+            done
+          ''}
+
+          ${lib.optionalString (componentName == "llvm-tools") ''
+            for file in lib/rustlib/*/bin/*; do
               patchelf \
                 --set-interpreter ${stdenv.cc.bintools.dynamicLinker} \
-                --set-rpath ${rpath} \
+                --set-rpath lib/rustlib/*/lib \
                 "$file" || true
-            fi
-          done
-        fi
-
-        if [ -d $out/lib ]; then
-          for file in $(find $out/lib -type f); do
-            if isELF "$file"; then
-              patchelf --set-rpath ${rpath} "$file" || true
-            fi
-          done
-        fi
-
-        if [ -d $out/libexec ]; then
-          for file in $(find $out/libexec -type f); do
-            if isELF "$file"; then
-              patchelf \
-                --set-interpreter ${stdenv.cc.bintools.dynamicLinker} \
-                --set-rpath ${rpath} \
-                "$file" || true
-            fi
-          done
-        fi
-
-        ${lib.optionalString (componentName == "rustc") ''
-          for file in $(find $out/lib/rustlib/*/bin -type f); do
-            if isELF "$file"; then
-              patchelf \
-                --set-interpreter ${stdenv.cc.bintools.dynamicLinker} \
-                --set-rpath ${stdenv.cc.cc.lib}/lib:${rpath} \
-                "$file" || true
-            fi
-          done
+            done
+          ''}
         ''}
 
-        ${lib.optionalString (componentName == "llvm-tools") ''
-          for file in $out/lib/rustlib/*/bin/*; do
+        ${lib.optionalString (componentName == "rustfmt") ''
+          ${lib.optionalString stdenv.isLinux ''
             patchelf \
-              --set-interpreter ${stdenv.cc.bintools.dynamicLinker} \
-              --set-rpath $out/lib/rustlib/*/lib \
-              "$file" || true
-          done
+              --set-rpath ${rustc}/lib bin/rustfmt || true
+          ''}
+          ${lib.optionalString stdenv.isDarwin ''
+            install_name_tool \
+              -add_rpath ${rustc}/lib bin/rustfmt || true
+          ''}
         ''}
-      ''}
 
-      ${lib.optionalString (componentName == "rustfmt") ''
-        ${lib.optionalString stdenv.isLinux ''
-          patchelf \
-            --set-rpath ${rustc}/lib $out/bin/rustfmt || true
+        ${lib.optionalString (componentName == "rust-analyzer") ''
+          ${lib.optionalString stdenv.isLinux ''
+            patchelf \
+              --set-rpath ${rustc}/lib bin/rust-analyzer || true
+          ''}
+          ${lib.optionalString stdenv.isDarwin ''
+            install_name_tool \
+              -add_rpath ${rustc}/lib bin/rust-analyzer || true
+          ''}
         ''}
-        ${lib.optionalString stdenv.isDarwin ''
-          install_name_tool \
-            -add_rpath ${rustc}/lib $out/bin/rustfmt || true
-        ''}
-      ''}
 
-      ${lib.optionalString (componentName == "rust-analyzer") ''
-        ${lib.optionalString stdenv.isLinux ''
-          patchelf \
-            --set-rpath ${rustc}/lib $out/bin/rust-analyzer || true
-        ''}
-        ${lib.optionalString stdenv.isDarwin ''
-          install_name_tool \
-            -add_rpath ${rustc}/lib $out/bin/rust-analyzer || true
-        ''}
-      ''}
+        ${lib.optionalString (componentName == "rust-src") ''
+          substituteInPlace lib/rustlib/src/rust/library/Cargo.toml \
+            --replace \
+              ../ferrocene/library/libc \
+              ${ferroceneSrc}/ferrocene/library/libc
 
-      ${lib.optionalString (componentName == "rust-src") ''
-        substituteInPlace $out/lib/rustlib/src/rust/library/Cargo.toml \
-          --replace ../ferrocene/library/libc ${libcManifestDir}
-      ''}
-    '';
-    dontStrip = true;
-  };
+          substituteInPlace lib/rustlib/src/rust/library/std/src/lib.rs \
+            --replace \
+              ../../../ferrocene/library/backtrace-rs/src/lib.rs \
+              ${ferroceneSrc}/ferrocene/library/backtrace-rs/src/lib.rs
+        ''}
+      '';
+    });
+
 
   defaultComponentNames = [
     "rustc"
@@ -143,27 +200,6 @@ let
     "rustfmt"
   ];
 
-  mkToolchain = { hashesFilePath, arch, versionTag, versionName, libcManifestDir, componentNames ? defaultComponentNames }:
-    let
-      files = mkFiles versionName (parseHashesFile (builtins.readFile hashesFilePath));
-      byName = lib.fix (self: lib.listToAttrs (lib.forEach componentNames (componentName:
-        let
-          nameSuffix = "${
-            lib.optionalString (componentName != "rust-src") "-${arch}"
-          }-${versionTag}";
-          fname = "${componentName}${nameSuffix}.tar.xz";
-          component = mkComponent {
-            inherit componentName;
-            inherit nameSuffix;
-            src = files.${fname};
-            inherit (self) rustc;
-            inherit libcManifestDir;
-          };
-        in
-          lib.nameValuePair componentName component
-      )));
-    in
-      fenix.combine (lib.attrValues byName);
 in
 
 let
@@ -177,15 +213,6 @@ let
   # versionTag = "25.05.0";
   versionRev = "1dd41c98e7dc69ceaaca67392924671f59a1b79e";
   versionName = "stable-${versionTag}";
-
-  repo = fetchFromGitHub {
-    owner = "ferrocene";
-    repo = "ferrocene";
-    rev = versionRev;
-    hash = "sha256-QpkXKzNPG7jbWANKT2PST6l+WB7kDg1ZpsnT9LRkv84=";
-  };
-
-  libcManifestDir = "${repo}/ferrocene/library/libc";
 
   upstreamRustToolchain = assembleRustToolchain ({
     channel = upstreamChannel;
@@ -209,7 +236,6 @@ let
     inherit hashesFilePath;
     arch = hostPlatform.config;
     inherit versionTag versionName;
-    inherit libcManifestDir;
   };
 
   rustEnvironment = mkRustEnvironment rustToolchain;
