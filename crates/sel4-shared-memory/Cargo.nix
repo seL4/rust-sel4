@@ -19,6 +19,9 @@ mk rec {
       sel4-abstract-ptr
     ;
   };
+  build-dependencies = {
+    inherit (versions) rustversion;
+  };
   features = {
     "atomics" = [ "dep:aligned" ];
   };

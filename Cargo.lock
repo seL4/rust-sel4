@@ -2691,6 +2691,7 @@ dependencies = [
  "aligned",
  "cfg-if",
  "paste",
+ "rustversion",
  "sel4-abstract-ptr",
  "zerocopy 0.8.18",
 ]
