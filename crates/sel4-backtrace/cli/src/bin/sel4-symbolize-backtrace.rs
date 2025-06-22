@@ -25,8 +25,8 @@ fn main() {
     let elf_file_contents = fs::read(elf_file_path).unwrap();
     let obj = object::File::parse(&*elf_file_contents).unwrap();
     let ctx = new_context(&obj).unwrap();
-    println!("backtrace: {}", elf_file_path);
+    println!("backtrace: {elf_file_path}");
     let mut s = String::new();
     bt.symbolize(&ctx, &mut s).unwrap();
-    print!("{}", s);
+    print!("{s}");
 }

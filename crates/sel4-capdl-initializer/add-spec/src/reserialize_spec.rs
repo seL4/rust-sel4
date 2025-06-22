@@ -46,7 +46,7 @@ pub fn reserialize_spec<'a>(
         });
 
     if verbose {
-        eprintln!("embedded frames count: {}", num_embedded_frames);
+        eprintln!("embedded frames count: {num_embedded_frames}");
     }
 
     let mut blob = postcard::to_allocvec(&final_spec).unwrap();

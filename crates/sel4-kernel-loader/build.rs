@@ -106,10 +106,7 @@ fn main() {
     // Note that -Ttext={} is incompatible with --no-rosegment (no error),
     // just bad output. See the "Default program headers" section of:
     // https://maskray.me/blog/2020-12-19-lld-and-gnu-linker-incompatibilities
-    println!(
-        "cargo::rustc-link-arg=--image-base=0x{:x}",
-        loader_phys_start
-    );
+    println!("cargo::rustc-link-arg=--image-base=0x{loader_phys_start:x}");
 
     println!("cargo::rustc-link-arg=-z");
     println!("cargo::rustc-link-arg=max-page-size=4096");

@@ -197,8 +197,8 @@ impl From<object::write::Error> for SegmentsError {
 impl fmt::Display for SegmentsError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            Self::ReadError(err) => write!(f, "read error: {}", err),
-            Self::WriteError(err) => write!(f, "write error: {}", err),
+            Self::ReadError(err) => write!(f, "read error: {err}"),
+            Self::WriteError(err) => write!(f, "write error: {err}"),
             Self::FileDataError => write!(f, "file data error"),
         }
     }

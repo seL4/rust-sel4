@@ -23,7 +23,7 @@ fn main() -> Result<()> {
     let args = Args::parse()?;
 
     if args.verbose {
-        eprintln!("{:#?}", args);
+        eprintln!("{args:#?}");
     }
 
     let in_file = fs::File::open(&args.in_file_path)?;

@@ -52,10 +52,7 @@ pub fn get_embedding<'a>() -> (Embedding<'a>, Footprint) {
             0 => ObjectNamesLevel::None,
             1 => ObjectNamesLevel::JustTcbs,
             2 => ObjectNamesLevel::All,
-            n => panic!(
-                "unexpected value for {}: {}",
-                CAPDL_OBJECT_NAMES_LEVEL_ENV, n
-            ),
+            n => panic!("unexpected value for {CAPDL_OBJECT_NAMES_LEVEL_ENV}: {n}"),
         })
         .unwrap_or(ObjectNamesLevel::JustTcbs);
 
@@ -67,7 +64,7 @@ pub fn get_embedding<'a>() -> (Embedding<'a>, Footprint) {
         .map(|val| match val.parse::<usize>().unwrap() {
             0 => false,
             1 => true,
-            n => panic!("unexpected value for {}: {}", CAPDL_DEFLATE_FILL_ENV, n),
+            n => panic!("unexpected value for {CAPDL_DEFLATE_FILL_ENV}: {n}"),
         })
         .unwrap_or(false);
 
@@ -77,7 +74,7 @@ pub fn get_embedding<'a>() -> (Embedding<'a>, Footprint) {
         .map(|val| match val.parse::<usize>().unwrap() {
             0 => false,
             1 => true,
-            n => panic!("unexpected value for {}: {}", CAPDL_EMBED_FRAMES_ENV, n),
+            n => panic!("unexpected value for {CAPDL_EMBED_FRAMES_ENV}: {n}"),
         })
         .unwrap_or(false);
 
@@ -86,7 +83,7 @@ pub fn get_embedding<'a>() -> (Embedding<'a>, Footprint) {
     let spec = {
         footprint.env_vars.push(CAPDL_SPEC_FILE_ENV.to_owned());
         let json_path = env::var(CAPDL_SPEC_FILE_ENV)
-            .unwrap_or_else(|_| panic!("{} must be set", CAPDL_SPEC_FILE_ENV));
+            .unwrap_or_else(|_| panic!("{CAPDL_SPEC_FILE_ENV} must be set"));
         footprint.paths.push(PathBuf::from_str(&json_path).unwrap());
         InputSpec::parse(&fs::read_to_string(json_path).unwrap())
     };
@@ -94,7 +91,7 @@ pub fn get_embedding<'a>() -> (Embedding<'a>, Footprint) {
     let fill_map = {
         footprint.env_vars.push(CAPDL_FILL_DIR_ENV.to_owned());
         let fill_dir = env::var(CAPDL_FILL_DIR_ENV)
-            .unwrap_or_else(|_| panic!("{} must be set", CAPDL_FILL_DIR_ENV));
+            .unwrap_or_else(|_| panic!("{CAPDL_FILL_DIR_ENV} must be set"));
         footprint.paths.push(PathBuf::from_str(&fill_dir).unwrap());
         spec.collect_fill([fill_dir])
     };

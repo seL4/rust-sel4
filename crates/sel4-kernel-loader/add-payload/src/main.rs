@@ -28,7 +28,7 @@ fn main() -> Result<()> {
     let args = Args::parse()?;
 
     if args.verbose {
-        eprintln!("{:#?}", args);
+        eprintln!("{args:#?}");
     }
 
     let sel4_config: Configuration =
