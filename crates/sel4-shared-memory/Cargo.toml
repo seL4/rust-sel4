@@ -25,3 +25,6 @@ cfg-if = "1.0.0"
 paste = "1.0"
 sel4-abstract-ptr = { path = "../sel4-abstract-ptr" }
 zerocopy = "0.8.7"
+
+[build-dependencies]
+rustversion = "1.0.18"
