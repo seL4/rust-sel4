@@ -25,6 +25,6 @@ sel4-immediate-sync-once-cell = { path = "../sel4-immediate-sync-once-cell" }
 sel4-panicking-env = { path = "env" }
 
 [target."cfg(panic = \"unwind\")".dependencies.unwinding]
-version = "0.2.5"
+version = "0.2.7"
 default-features = false
 features = ["unwinder", "fde-custom", "hide-trace", "personality"]
