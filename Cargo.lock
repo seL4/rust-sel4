@@ -39,7 +39,7 @@ checksum = "dfbe277e56a376000877090da837660b4427aad530e3028d44e0bffe4f89a1c1"
 dependencies = [
  "cpp_demangle",
  "fallible-iterator",
- "gimli",
+ "gimli 0.31.1",
  "rustc-demangle",
  "smallvec",
 ]
@@ -837,6 +837,12 @@ checksum = "07e28edb80900c19c28f1072f2e8aeca7fa06b23cd4169cefe1af5aa3260783f"
 dependencies = [
  "stable_deref_trait",
 ]
+
+[[package]]
+name = "gimli"
+version = "0.32.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "93563d740bc9ef04104f9ed6f86f1e3275c2cdafb95664e26584b9ca807a8ffe"
 
 [[package]]
 name = "glob"
@@ -2080,7 +2086,7 @@ name = "sel4-backtrace-addr2line-context-helper"
 version = "0.1.0"
 dependencies = [
  "addr2line",
- "gimli",
+ "gimli 0.31.1",
  "object",
  "stable_deref_trait",
 ]
@@ -3481,11 +3487,11 @@ checksum = "8ecb6da28b8a351d773b68d5825ac39017e680750f980f3a1a85cd8dd28a47c1"
 
 [[package]]
 name = "unwinding"
-version = "0.2.5"
+version = "0.2.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "51f06a05848f650946acef3bf525fe96612226b61f74ae23ffa4e98bfbb8ab3c"
+checksum = "7d80f6c2bfede213d9a90b4a14f3eb99b84e33c52df6c1a15de0a100f5a88751"
 dependencies = [
- "gimli",
+ "gimli 0.32.0",
 ]
 
 [[package]]
