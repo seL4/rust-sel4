@@ -160,12 +160,12 @@ pub struct AbortInfo<'a> {
 
 impl AbortInfo<'_> {
     /// The `core::fmt::Arguments` with which [`abort!`] was called.
-    pub fn message(&self) -> Option<&fmt::Arguments> {
+    pub fn message(&self) -> Option<&fmt::Arguments<'_>> {
         self.message
     }
 
     /// The location at which [`abort!`] was called.
-    pub fn location(&self) -> Option<&Location> {
+    pub fn location(&self) -> Option<&Location<'_>> {
         self.location
     }
 }

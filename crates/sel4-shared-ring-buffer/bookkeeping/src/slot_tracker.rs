@@ -142,14 +142,14 @@ impl<T: SlotStateTypes> SlotTracker<T> {
         Ok(self.get_entry(index)?.state.project())
     }
 
-    pub fn get_state_value(&self, index: usize) -> Result<SlotStateValueRef<T>> {
+    pub fn get_state_value(&self, index: usize) -> Result<SlotStateValueRef<'_, T>> {
         Ok(match self.get_entry(index)?.state {
             StateInternal::Free { ref value, .. } => SlotStateValueRef::Free(value),
             StateInternal::Occupied { ref value, .. } => SlotStateValueRef::Occupied(value),
         })
     }
 
-    pub fn get_state_value_mut(&mut self, index: usize) -> Result<SlotStateValueRefMut<T>> {
+    pub fn get_state_value_mut(&mut self, index: usize) -> Result<SlotStateValueRefMut<'_, T>> {
         Ok(match self.get_entry_mut(index)?.state {
             StateInternal::Free { ref mut value, .. } => SlotStateValueRefMut::Free(value),
             StateInternal::Occupied { ref mut value, .. } => SlotStateValueRefMut::Occupied(value),
