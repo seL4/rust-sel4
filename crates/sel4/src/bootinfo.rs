@@ -49,7 +49,7 @@ impl BootInfoPtr {
         unsafe { slice::from_raw_parts(self.extra_ptr(), self.extra_len()) }
     }
 
-    pub fn extra(&self) -> BootInfoExtraIter {
+    pub fn extra(&self) -> BootInfoExtraIter<'_> {
         BootInfoExtraIter::new(self)
     }
 

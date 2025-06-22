@@ -28,7 +28,7 @@ pub trait HandleInterrupt {
 pub struct WrappedRefCell<T>(pub T);
 
 impl<T> WrappedRefCell<T> {
-    pub(crate) fn try_borrow_mut<E, U>(&self) -> Result<RefMut<U>, WrappedRefCellError<E>>
+    pub(crate) fn try_borrow_mut<E, U>(&self) -> Result<RefMut<'_, U>, WrappedRefCellError<E>>
     where
         T: Deref<Target = RefCell<U>>,
     {
