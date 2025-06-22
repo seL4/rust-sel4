@@ -2690,6 +2690,7 @@ version = "0.1.0"
 dependencies = [
  "aligned",
  "cfg-if",
+ "paste",
  "sel4-abstract-ptr",
  "zerocopy 0.8.18",
 ]

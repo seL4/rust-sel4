@@ -13,7 +13,7 @@ mk rec {
   package.name = "sel4-shared-memory";
   package.license = "MIT OR Apache-2.0";
   dependencies = {
-    inherit (versions) cfg-if zerocopy;
+    inherit (versions) cfg-if paste zerocopy;
     aligned = { version = versions.aligned; optional = true; };
     inherit (localCrates)
       sel4-abstract-ptr
