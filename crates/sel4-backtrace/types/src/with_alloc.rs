@@ -117,7 +117,7 @@ impl<T> Builder<T> {
 
 #[cfg(feature = "postcard")]
 impl<T> Backtrace<T> {
-    pub fn display_hex(&self) -> DisplayHex<T> {
+    pub fn display_hex(&self) -> DisplayHex<'_, T> {
         DisplayHex(self)
     }
 }
@@ -129,7 +129,7 @@ pub struct DisplayHex<'a, T>(&'a Backtrace<T>);
 impl<T: Serialize> fmt::Display for DisplayHex<'_, T> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         for b in self.0.send_to_vec().map_err(|_| fmt::Error)? {
-            write!(f, "{:02x}", b)?;
+            write!(f, "{b:02x}")?;
         }
         Ok(())
     }

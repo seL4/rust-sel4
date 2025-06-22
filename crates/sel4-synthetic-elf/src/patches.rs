@@ -144,9 +144,9 @@ impl From<object::read::Error> for PatchesAddFromSymbolError {
 impl fmt::Display for PatchesAddFromSymbolError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            Self::ReadError(err) => write!(f, "read error: {}", err),
-            Self::SymbolMissing(name) => write!(f, "symbol missing: {:?}", name),
-            Self::SymbolSizeMismatch(name) => write!(f, "symbol size mismatch: {:?}", name),
+            Self::ReadError(err) => write!(f, "read error: {err}"),
+            Self::SymbolMissing(name) => write!(f, "symbol missing: {name:?}"),
+            Self::SymbolSizeMismatch(name) => write!(f, "symbol size mismatch: {name:?}"),
         }
     }
 }
@@ -166,11 +166,10 @@ impl From<object::read::Error> for PatchesApplyError {
 impl fmt::Display for PatchesApplyError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            Self::ReadError(err) => write!(f, "read error: {}", err),
+            Self::ReadError(err) => write!(f, "read error: {err}"),
             Self::AddrRangeNotMappedWithData(start, size) => write!(
                 f,
-                "address range not mapped with file data: {:?}({:?})",
-                start, size
+                "address range not mapped with file data: {start:?}({size:?})",
             ),
         }
     }

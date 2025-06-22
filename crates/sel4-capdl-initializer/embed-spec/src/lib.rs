@@ -29,7 +29,7 @@ pub struct Embedding<'a> {
 pub type SpecForEmbedding<'a> = Spec<'a, String, FileContentRange, Fill<'a, FileContentRange>>;
 
 fn to_tokens_via_debug(value: impl fmt::Debug) -> TokenStream {
-    format!("{:?}", value).parse::<TokenStream>().unwrap()
+    format!("{value:?}").parse::<TokenStream>().unwrap()
 }
 
 impl<'a> Embedding<'a> {
@@ -327,8 +327,8 @@ impl<'a> Embedding<'a> {
                     data.file_range().end,
                     data.file
                 ));
-                let ident = format_ident!("CHUNK_{}", id);
-                let fname = format!("chunk.{}.bin", id);
+                let ident = format_ident!("CHUNK_{id}");
+                let fname = format!("chunk.{id}.bin");
                 files_for_inclusion.entry(fname.clone()).or_insert_with(|| {
                     file_inclusion_toks.extend(quote! {
                         const #ident: &[u8] = include_bytes!(concat!(env!("OUT_DIR"), "/", #fname));
@@ -338,8 +338,8 @@ impl<'a> Embedding<'a> {
                 ident
             })
             .traverse_embedded_frames(|fill| {
-                let ident = format_ident!("FRAME_{}", embedded_frame_count);
-                let fname = format!("frame.{}.bin", embedded_frame_count);
+                let ident = format_ident!("FRAME_{embedded_frame_count}");
+                let fname = format!("frame.{embedded_frame_count}.bin");
                 file_inclusion_toks.extend(quote! {
                     const #ident: #prefix SelfContained<#prefix EmbeddedFrame> = #prefix SelfContained::new(
                         #prefix embed_frame!(4096, *include_bytes!(concat!(env!("OUT_DIR"), "/", #fname)))

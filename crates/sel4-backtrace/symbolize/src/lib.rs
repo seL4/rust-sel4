@@ -22,12 +22,12 @@ use addr2line::{Context, Location};
 fn print_loc(w: &mut impl fmt::Write, loc: Option<&Location<'_>>) -> Result<(), fmt::Error> {
     if let Some(loc) = loc {
         if let Some(ref file) = loc.file.as_ref() {
-            write!(w, "{}:", file)?;
+            write!(w, "{file}:")?;
         } else {
             write!(w, "??:")?;
         }
         if let Some(line) = loc.line {
-            write!(w, "{}", line)?;
+            write!(w, "{line}")?;
         } else {
             write!(w, "?")?;
         }
@@ -48,7 +48,7 @@ fn print_function(
         if demangle {
             write!(w, "{}", addr2line::demangle_auto(Cow::from(name), language))?;
         } else {
-            write!(w, "{}", name)?;
+            write!(w, "{name}")?;
         }
     } else {
         write!(w, "??")?;
@@ -80,7 +80,7 @@ pub fn symbolize(
     addrs: impl Iterator<Item = u64>,
 ) -> Result<(), fmt::Error> {
     for probe in addrs {
-        write!(w, "{:#018x}  ", probe)?;
+        write!(w, "{probe:#018x}  ")?;
 
         if opts.do_functions || opts.do_inlines {
             let mut printed_anything = false;

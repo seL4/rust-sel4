@@ -17,5 +17,5 @@ fn main() {
     fs::copy(&translated_src, translated_dst).unwrap();
 
     println!("cargo::rerun-if-env-changed={TRANSLATED_ENV}");
-    println!("cargo::rerun-if-changed={}", translated_src);
+    println!("cargo::rerun-if-changed={translated_src}");
 }

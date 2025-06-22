@@ -128,7 +128,7 @@ impl object::IrqIOApic<'_> {
 // // //
 
 impl object::PageTable<'_> {
-    pub fn entries(&self) -> impl Iterator<Item = (CapSlot, PageTableEntry)> {
+    pub fn entries(&self) -> impl Iterator<Item = (CapSlot, PageTableEntry<'_>)> {
         self.slots_as()
     }
 

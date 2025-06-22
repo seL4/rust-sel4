@@ -24,7 +24,7 @@ impl<T> Backtrace<T> {
         w: &mut impl fmt::Write,
     ) -> Result<(), Error> {
         if let Some(ref err) = self.postamble.error {
-            writeln!(w, "    error: {:?}", err).unwrap();
+            writeln!(w, "    error: {err:?}").unwrap();
         }
         symbolize(
             w,

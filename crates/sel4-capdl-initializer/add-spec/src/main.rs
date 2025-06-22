@@ -23,7 +23,7 @@ fn main() -> Result<()> {
     let args = Args::parse()?;
 
     if args.verbose {
-        eprintln!("{:#?}", args);
+        eprintln!("{args:#?}");
     }
 
     let initializer_elf_buf = fs::read(&args.initializer_elf_path)?;
@@ -50,7 +50,7 @@ fn main() -> Result<()> {
     let heap_size = footprint * 2 + 16 * 4096;
 
     if args.verbose {
-        eprintln!("footprint: {}", footprint);
+        eprintln!("footprint: {footprint}");
         eprintln!("heap size: {}", heap_size / 4096);
     }
 

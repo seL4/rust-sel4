@@ -281,7 +281,7 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
 
         // Ensure that we've created every root object
         for bits in 0..sel4::WORD_SIZE {
-            assert_eq!(by_size_start[bits], by_size_end[bits], "!!! {}", bits);
+            assert_eq!(by_size_start[bits], by_size_end[bits], "!!! {bits}",);
         }
 
         // Create child objects

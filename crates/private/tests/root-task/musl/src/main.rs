@@ -31,7 +31,7 @@ fn main(_: &sel4::BootInfoPtr) -> ! {
     }
 
     let x = vec![1, 2, 3];
-    println!("x: {:?}", x);
+    println!("x: {x:?}");
 
     debug_println!("TEST_PASS");
     sel4::init_thread::suspend_self()
