@@ -82,12 +82,19 @@ let
     registryURL = registrySource;
   };
 
+  unencodeRefVal = encoded:
+    let
+      candidate = lib.replaceStrings [ "%2F" ] [ "/" ] encoded;
+      valid = !(lib.hasInfix "%" candidate);
+    in
+      if valid then candidate else throw ("unable to unencode ref val: " + encoded);
+
   parseGitSource = gitSource:
     let
       parts = builtins.match ''([^?]*)(\?(rev|tag|branch)=([^#&]*))?#(.*)'' gitSource;
       url = builtins.elemAt parts 0;
       refType = builtins.elemAt parts 2;
-      refValue = builtins.elemAt parts 3;
+      refValue = unencodeRefVal (builtins.elemAt parts 3);
       rev = builtins.elemAt parts 4;
     in {
       inherit url rev;

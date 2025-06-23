@@ -12,7 +12,7 @@ mk rec {
   });
   package.name = "sel4";
   package.license = "MIT";
-  package.rust-version = "1.76"; # tracks verus
+  package.rust-version = "1.85"; # tracks Ferrous and Verus
   dependencies = {
     inherit (versions) cfg-if;
     inherit (localCrates)
