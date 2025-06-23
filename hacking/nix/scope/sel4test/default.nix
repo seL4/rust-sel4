@@ -10,7 +10,7 @@
 , fetchRepoProject
 , cmake, ninja
 , libxml2, dtc, cpio, protobuf
-, python3Packages
+, python312Packages
 , qemuForSeL4
 , git
 , sources
@@ -72,10 +72,10 @@ let
       cmake ninja
       libxml2 dtc cpio protobuf
       git
-    ] ++ (with python3Packages; [
+    ] ++ (with python312Packages; [
       aenum plyplus pyelftools simpleeval
       sel4-deps
-      buildPackages.python3Packages.protobuf
+      buildPackages.python312Packages.protobuf
     ]);
 
     hardeningDisable = [ "all" ];

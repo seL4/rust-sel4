@@ -11,7 +11,7 @@
 , callPackage
 , cmake, ninja
 , dtc, libxml2
-, python3Packages
+, python312Packages
 , qemuForSeL4
 , sources
 , vendorLockfile
@@ -32,7 +32,7 @@ let
     src = kernelSource;
     phases = [ "unpackPhase" "patchPhase" "installPhase" ];
     nativeBuildInputs = [
-      python3Packages.sel4-deps
+      python312Packages.sel4-deps
     ];
     postPatch = ''
       # patchShebangs can't handle env -S
@@ -63,7 +63,7 @@ let
     nativeBuildInputs = [
       cmake ninja
       dtc libxml2
-      python3Packages.sel4-deps
+      python312Packages.sel4-deps
     ];
 
     depsBuildBuild = [

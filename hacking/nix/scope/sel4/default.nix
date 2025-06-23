@@ -7,7 +7,7 @@
 { lib, stdenv, writeText, buildPackages
 , cmake, ninja
 , dtc, libxml2
-, python3Packages
+, python312Packages
 , qemuForSeL4
 , sources
 }:
@@ -32,7 +32,7 @@ stdenv.mkDerivation {
   nativeBuildInputs = [
     cmake ninja
     dtc libxml2
-    python3Packages.sel4-deps
+    python312Packages.sel4-deps
   ];
 
   depsBuildBuild = [
