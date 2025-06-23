@@ -413,7 +413,7 @@ impl ManagedInterfaceShared {
 
     fn set_address(&mut self, address: Ipv4Cidr) {
         let address = IpCidr::Ipv4(address);
-        info!("IP address: {}", address);
+        info!("IP address: {address}");
         self.iface.update_ip_addrs(|addrs| {
             if let Some(dest) = addrs.iter_mut().next() {
                 *dest = address;
@@ -434,7 +434,7 @@ impl ManagedInterfaceShared {
 
     fn set_router(&mut self, router: Option<Ipv4Address>) {
         if let Some(router) = router {
-            info!("Default gateway: {}", router);
+            info!("Default gateway: {router}");
             self.iface
                 .routes_mut()
                 .add_default_ipv4_route(router)
@@ -451,7 +451,7 @@ impl ManagedInterfaceShared {
 
     fn set_dns_servers(&mut self, dns_servers: &[IpAddress]) {
         for (i, s) in dns_servers.iter().enumerate() {
-            info!("DNS server {}: {}", i, s);
+            info!("DNS server {i}: {s}");
         }
         self.dns_socket_mut().update_servers(dns_servers);
     }

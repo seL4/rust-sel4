@@ -10,6 +10,6 @@ use crate::arch::{Arch, ArchImpl};
 
 #[panic_handler]
 fn panic_handler(info: &PanicInfo) -> ! {
-    log::error!("{}", info);
+    log::error!("{info}");
     ArchImpl::idle()
 }
