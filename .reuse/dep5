@@ -17,6 +17,7 @@ Files:
   hacking/nix/scope/capdl-tool/capDL-tool.nix
   hacking/nix/scope/capdl-tool/base-compat-0-12-2.nix
   hacking/nix/scope/capdl-tool/base-compat-batteries-0-12-2.nix
+  hacking/nix/scope/capdl-tool/network-3.1.4.0.nix
   hacking/nix/scope/capdl-tool/MissingH-1.5.0.1.nix
 Copyright: 2023, Colias Group, LLC
 License: BSD-2-Clause
