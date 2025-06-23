@@ -31,7 +31,7 @@ let
   inherit (rustToolchainAttrs.toolchain) channel;
 
   rustToolchain = assembleRustToolchain (parseStructuredChannel channel // {
-    sha256 = "sha256-0KH921T9N+rkk6QlKPrpa0B0TkF7IeJbjuB7rToI3hM=";
+    sha256 = "sha256-59z2kaZuAkdS5jl/mrK0mN5f8T7llcJVeGO+MQBhaJo=";
   });
 
   rustEnvironment = lib.fix (self: elaborateRustEnvironment (mkDefaultElaborateRustEnvironmentArgs {
@@ -46,8 +46,8 @@ let
   src = fetchFromGitHub {
     owner = "model-checking";
     repo = "kani";
-    rev = "kani-0.59.0";
-    sha256 = "sha256-Z5EptXgMPT0G66FQpuvDvo8W0wIgfQzKAC3ZrwTUtTc=";
+    rev = "kani-0.63.0";
+    sha256 = "sha256-SCiptYoUPSw9tIEzl+htqD8KDBbL4wNLrv38BSlpJmY=";
     fetchSubmodules = true;
   };
 

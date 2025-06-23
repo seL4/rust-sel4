@@ -136,7 +136,6 @@ witness-fast-tests:
 check-kani-proofs:
 	$(run_in_nix_shell) "\
 		cargo kani \
-			--enable-unstable \
 			--output-format=terse \
 			$(jobs_args) \
 			-p sel4-bitfield-ops \
