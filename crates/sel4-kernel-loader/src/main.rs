@@ -51,8 +51,8 @@ fn main(per_core: <ArchImpl as Arch>::PerCore) -> ! {
 
     let own_footprint = this_image::get_user_image_bounds();
 
-    log::debug!("Platform info: {:#x?}", PLATFORM_INFO);
-    log::debug!("Loader footprint: {:#x?}", own_footprint);
+    log::debug!("Platform info: {PLATFORM_INFO:#x?}");
+    log::debug!("Loader footprint: {own_footprint:#x?}");
     log::debug!("Payload info: {:#x?}", payload.info);
     log::debug!("Payload regions:");
     for region in payload.data.iter() {
@@ -80,14 +80,14 @@ fn main(per_core: <ArchImpl as Arch>::PerCore) -> ! {
                 barrier: Barrier::new(2),
             });
         }
-        log::debug!("Primary core: starting core {}", core_id);
+        log::debug!("Primary core: starting core {core_id}");
         PlatImpl::start_secondary_core(core_id, sp);
         {
             let init_info = SECONDARY_CORE_INIT_INFO.read();
             let init_info = init_info.as_ref().unwrap();
             init_info.barrier.wait();
         }
-        log::debug!("Primary core: core {} up", core_id);
+        log::debug!("Primary core: core {core_id} up");
     }
 
     common_epilogue(0, &payload.info, per_core)
@@ -103,7 +103,7 @@ fn secondary_main(per_core: <ArchImpl as Arch>::PerCore) -> ! {
         core_id = init_info.core_id;
         payload_info = init_info.payload_info.clone();
     }
-    log::debug!("Core {}: up", core_id);
+    log::debug!("Core {core_id}: up");
     common_epilogue(core_id, &payload_info, per_core)
 }
 

@@ -10,6 +10,7 @@
 #![allow(non_upper_case_globals)]
 #![allow(clippy::complexity)]
 #![allow(clippy::new_without_default)]
+#![allow(clippy::uninlined_format_args)]
 
 mod bf;
 mod c;

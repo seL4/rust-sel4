@@ -236,9 +236,7 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
                         if target_is_obj_with_paddr {
                             let hold_slot = hold_slots.get_slot()?;
                             trace!(
-                                "Creating dummy: paddr=0x{:x}, size_bits={}",
-                                cur_paddr,
-                                max_size_bits
+                                "Creating dummy: paddr=0x{cur_paddr:x}, size_bits={max_size_bits}"
                             );
                             self.ut_cap(*i_ut).untyped_retype(
                                 &sel4::ObjectBlueprint::Untyped {
