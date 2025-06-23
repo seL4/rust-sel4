@@ -6,7 +6,7 @@
 
 { lib, buildPackages, runCommand, writeText, linkFarm
 , hostPlatform
-, python3Packages
+, python312Packages
 
 , sources
 
@@ -54,7 +54,7 @@ lib.fix (self: runCommand "manifest" {
 
   nativeBuildInputs = [
     sel4-simple-task-runtime-config-cli
-  ] ++ (with python3Packages; [
+  ] ++ (with python312Packages; [
     future six
     aenum sortedcontainers
     pyyaml pyelftools pyfdt
