@@ -9,7 +9,7 @@
 , runCommand, linkFarm, writeText, writeScript
 
 , cpio
-, cmake, perl, python3Packages
+, cmake, perl
 , breakpointHook, bashInteractive
 
 , sources

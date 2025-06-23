@@ -10,7 +10,7 @@
 , callPackage
 , runCommand, linkFarm
 , makeWrapper
-, overrideCC, libcCross
+, overrideCC
 , fetchurl
 , qemu
 }:
