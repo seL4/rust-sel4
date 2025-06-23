@@ -5,7 +5,7 @@
 #
 
 { lib, stdenv, hostPlatform
-, cmake, perl, python3Packages
+, cmake, perl
 
 , crateUtils, crates
 , mkTask, seL4Modifications
