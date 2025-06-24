@@ -16,15 +16,6 @@ self: super: with self;
     ];
   });
 
-  pyfdt = buildPythonPackage rec {
-    pname = "pyfdt";
-    version = "0.3";
-    src = fetchPypi {
-      inherit pname version;
-      sha256 = "1w7lp421pssfgv901103521qigwb12i6sk68lqjllfgz0lh1qq31";
-    };
-  };
-
   autopep8_1_4_3 = buildPythonPackage rec {
     pname = "autopep8";
     version = "1.4.3";
