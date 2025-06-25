@@ -60,7 +60,7 @@ pub struct ChannelSet(sel4::Badge);
 
 impl ChannelSet {
     pub fn contains(&self, channel: Channel) -> bool {
-        self.0 | (1 << channel.index()) != 0
+        (self.0 & (1 << channel.index())) != 0
     }
 
     pub fn iter(&self) -> ChannelSetIter {
