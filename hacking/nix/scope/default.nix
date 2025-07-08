@@ -126,13 +126,13 @@ superCallPackage ../rust-utils {} self //
   defaultUpstreamRustEnvironment = elaborateRustEnvironment (mkDefaultElaborateRustEnvironmentArgs {
     rustToolchain = fenix.fromToolchainFile {
       file = topLevelRustToolchainFile.path;
-      sha256 = "sha256-SISBvV1h7Ajhs8g0pNezC1/KGA0hnXnApQ/5//STUbs=";
+      sha256 = "sha256-fevIArrPM30mz+SmnilxDiIdFSYVVVOJStVblAnu5Yk=";
     };
   } // {
     channel = topLevelRustToolchainFile.attrs.toolchain.channel;
     compilerRTSource = mkCompilerRTSource {
-      rev = "ed6566573eb21b00a3f87815e14ff766fd56ef42"; # matches rust:src/llvm-project
-      hash = "sha256-w31A0k9qqAID8RHA663GlFp0kdL+KKi+cE/TsoopFjY=";
+      rev = "9b1bf4cf041c1c1fe62cf03891ac90431615e780"; # matches rust:src/llvm-project
+      hash = "sha256-OpWA36j2rws2nkooSIgx3PigWpv+Q6uEb6GQuDBi26U=";
     };
     mkCustomTargetPath = customTargetTripleTripleName:
       let
