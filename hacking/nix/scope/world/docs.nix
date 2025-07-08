@@ -88,7 +88,7 @@ let
       ];
 
       manifest = crateUtils.toTOMLFile "Cargo.toml" ({
-        workspace.resolver = "2";
+        workspace.resolver = "3";
         workspace.members = [ "src/${rootCrate.name}" ];
       });
 

@@ -11,7 +11,7 @@
 
 [workspace]
 default-members = []
-resolver = "2"
+resolver = "3"
 members = [
     "crates/drivers/bcm2835-aux-uart",
     "crates/drivers/pl011",

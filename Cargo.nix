@@ -19,7 +19,7 @@
     }
   ];
   workspace = {
-    resolver = "2";
+    resolver = "3";
     default-members = [];
     members = lib.naturalSort (lib.mapAttrsToList (_: v: v.path) localCrates);
   };
