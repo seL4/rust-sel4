@@ -20,7 +20,7 @@ let
 
   manifest = crateUtils.toTOMLFile "Cargo.toml" (crateUtils.clobber [
     {
-      workspace.resolver = "2";
+      workspace.resolver = "3";
       workspace.members = map (crate: "src/${crate.name}") rootCrates;
     }
     extraManifest

@@ -119,7 +119,7 @@ let
   };
 
   baseManifest = {
-    workspace.resolver = "2";
+    workspace.resolver = "3";
     workspace.members = lib.forEach rootCrates (crate: "src/${crate.name}");
   };
 
