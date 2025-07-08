@@ -50,8 +50,8 @@ unsafe fn run_array(
     section_name: &'static str,
 ) -> Result<(), Error> {
     if start_addr != end_addr {
-        if start_addr % mem::size_of::<ArrayEntry>() != 0
-            || end_addr % mem::size_of::<ArrayEntry>() != 0
+        if !start_addr.is_multiple_of(mem::size_of::<ArrayEntry>())
+            || !end_addr.is_multiple_of(mem::size_of::<ArrayEntry>())
         {
             return Err(Error::Misaligned { section_name });
         }

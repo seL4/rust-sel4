@@ -299,7 +299,7 @@ fn all_target_specs() -> BTreeMap<String, Target> {
 
 fn do_list() {
     for target_name in all_target_specs().keys() {
-        println!("{}", target_name)
+        println!("{target_name}")
     }
 }
 
@@ -322,7 +322,7 @@ fn write_one(
     target_name: &str,
     target_spec: &Target,
 ) -> std::io::Result<()> {
-    let path = target_dir.as_ref().join(format!("{}.json", target_name));
+    let path = target_dir.as_ref().join(format!("{target_name}.json"));
     let contents = format!("{:#}\n", target_spec.to_json());
     fs::write(path, contents)
 }
