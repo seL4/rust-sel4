@@ -42,6 +42,7 @@ impl<'a, N, D, M> Spec<'a, N, D, M> {
                             Object::ArmIrq(obj) => Object::ArmIrq(obj.clone()),
                             Object::IrqMsi(obj) => Object::IrqMsi(obj.clone()),
                             Object::IrqIOApic(obj) => Object::IrqIOApic(obj.clone()),
+                            Object::RiscvIrq(obj) => Object::RiscvIrq(obj.clone()),
                             Object::IOPorts(obj) => Object::IOPorts(obj.clone()),
                             Object::SchedContext(obj) => Object::SchedContext(obj.clone()),
                             Object::Reply => Object::Reply,

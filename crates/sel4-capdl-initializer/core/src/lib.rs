@@ -369,6 +369,14 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
                                 &cslot_to_absolute_cptr(slot),
                             )?;
                         }
+                        #[sel4_cfg(any(ARCH_RISCV64, ARCH_RISCV32))]
+                        Object::RiscvIrq(obj) => {
+                            init_thread::slot::IRQ_CONTROL.cap().irq_control_get_trigger(
+                                *irq,
+                                obj.extra.trigger != 0,
+                                &cslot_to_absolute_cptr(slot),
+                            )?;
+                        }
                         _ => {
                             panic!();
                         }
@@ -449,11 +457,16 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
             .spec()
             .filter_objects::<&object::IrqIOApic>()
             .map(|(obj_id, obj)| (obj_id, obj.notification()));
+        let riscv_irq_notifications = self
+            .spec()
+            .filter_objects::<&object::RiscvIrq>()
+            .map(|(obj_id, obj)| (obj_id, obj.notification()));
 
         let all_irq_notifications = irq_notifications
             .chain(arm_irq_notifications)
             .chain(msi_irq_notifications)
-            .chain(ioapic_irq_notifications);
+            .chain(ioapic_irq_notifications)
+            .chain(riscv_irq_notifications);
         for (obj_id, notification) in all_irq_notifications {
             let irq_handler = self.orig_cap::<cap_type::IrqHandler>(obj_id);
             if let Some(logical_nfn_cap) = notification {
