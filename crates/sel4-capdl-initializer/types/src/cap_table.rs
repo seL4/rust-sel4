@@ -125,6 +125,14 @@ impl object::IrqIOApic<'_> {
     }
 }
 
+impl object::RiscvIrq<'_> {
+    pub const SLOT_NOTIFICATION: CapSlot = 0;
+
+    pub fn notification(&self) -> Option<&cap::Notification> {
+        self.maybe_slot_as(Self::SLOT_NOTIFICATION)
+    }
+}
+
 // // //
 
 impl object::PageTable<'_> {

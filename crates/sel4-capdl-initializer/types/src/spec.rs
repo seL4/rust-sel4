@@ -81,6 +81,7 @@ pub enum Object<'a, D, M> {
     ArmIrq(object::ArmIrq<'a>),
     IrqMsi(object::IrqMsi<'a>),
     IrqIOApic(object::IrqIOApic<'a>),
+    RiscvIrq(object::RiscvIrq<'a>),
     IOPorts(object::IOPorts),
     SchedContext(object::SchedContext),
     Reply,
@@ -113,6 +114,7 @@ pub enum Cap {
     ArmIrqHandler(cap::ArmIrqHandler),
     IrqMsiHandler(cap::IrqMsiHandler),
     IrqIOApicHandler(cap::IrqIOApicHandler),
+    RiscvIrqHandler(cap::RiscvIrqHandler),
     IOPorts(cap::IOPorts),
     SchedContext(cap::SchedContext),
     Reply(cap::Reply),
@@ -135,6 +137,7 @@ impl Cap {
             Cap::ArmIrqHandler(cap) => cap.object,
             Cap::IrqMsiHandler(cap) => cap.object,
             Cap::IrqIOApicHandler(cap) => cap.object,
+            Cap::RiscvIrqHandler(cap) => cap.object,
             Cap::IOPorts(cap) => cap.object,
             Cap::SchedContext(cap) => cap.object,
             Cap::Reply(cap) => cap.object,
@@ -268,6 +271,19 @@ pub mod object {
         pub polarity: Word,
     }
 
+    #[derive(Debug, Clone, Eq, PartialEq, IsObject, IsObjectWithCapTable)]
+    #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+    pub struct RiscvIrq<'a> {
+        pub slots: Indirect<'a, [CapTableEntry]>,
+        pub extra: RiscvIrqExtraInfo,
+    }
+
+    #[derive(Debug, Clone, Eq, PartialEq)]
+    #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+    pub struct RiscvIrqExtraInfo {
+        pub trigger: Word,
+    }
+
     #[derive(Debug, Clone, Eq, PartialEq, IsObject)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
     pub struct IOPorts {
@@ -382,6 +398,12 @@ pub mod cap {
     #[derive(Debug, Clone, Eq, PartialEq, IsCap)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
     pub struct IrqIOApicHandler {
+        pub object: ObjectId,
+    }
+
+    #[derive(Debug, Clone, Eq, PartialEq, IsCap)]
+    #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+    pub struct RiscvIrqHandler {
         pub object: ObjectId,
     }
 
