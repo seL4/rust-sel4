@@ -6,6 +6,8 @@
 
 use core::ffi::c_uint;
 
+use sel4_config::{sel4_cfg_enum, sel4_cfg_wrap_match};
+
 use crate::{
     const_helpers::u32_into_usize, sys, ObjectBlueprint, ObjectBlueprintSeL4Arch, ObjectType,
     ObjectTypeSeL4Arch,
@@ -15,23 +17,30 @@ pub type ObjectTypeArch = ObjectTypeX86;
 
 pub type ObjectBlueprintArch = ObjectBlueprintX86;
 
+#[sel4_cfg_enum]
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum ObjectTypeX86 {
     _4k,
     LargePage,
     PageTable,
     PageDirectory,
+    #[sel4_cfg(VTX)]
+    VCpu,
     SeL4Arch(ObjectTypeSeL4Arch),
 }
 
 impl ObjectTypeX86 {
     pub(crate) const fn into_sys(self) -> c_uint {
-        match self {
-            Self::_4k => sys::_object::seL4_X86_4K,
-            Self::LargePage => sys::_object::seL4_X86_LargePageObject,
-            Self::PageTable => sys::_object::seL4_X86_PageTableObject,
-            Self::PageDirectory => sys::_object::seL4_X86_PageDirectoryObject,
-            Self::SeL4Arch(sel4_arch) => sel4_arch.into_sys(),
+        sel4_cfg_wrap_match! {
+            match self {
+                Self::_4k => sys::_object::seL4_X86_4K,
+                Self::LargePage => sys::_object::seL4_X86_LargePageObject,
+                Self::PageTable => sys::_object::seL4_X86_PageTableObject,
+                Self::PageDirectory => sys::_object::seL4_X86_PageDirectoryObject,
+                #[sel4_cfg(VTX)]
+                Self::VCpu => sys::_object::seL4_X86_VCPUObject,
+                Self::SeL4Arch(sel4_arch) => sel4_arch.into_sys(),
+            }
         }
     }
 }
@@ -48,33 +57,44 @@ impl From<ObjectTypeSeL4Arch> for ObjectType {
     }
 }
 
+#[sel4_cfg_enum]
 #[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub enum ObjectBlueprintX86 {
     _4k,
     LargePage,
     PageTable,
     PageDirectory,
+    #[sel4_cfg(VTX)]
+    VCpu,
     SeL4Arch(ObjectBlueprintSeL4Arch),
 }
 
 impl ObjectBlueprintX86 {
     pub(crate) const fn ty(self) -> ObjectTypeX86 {
-        match self {
-            Self::_4k => ObjectTypeX86::_4k,
-            Self::LargePage => ObjectTypeX86::LargePage,
-            Self::PageTable => ObjectTypeX86::PageTable,
-            Self::PageDirectory => ObjectTypeX86::PageDirectory,
-            Self::SeL4Arch(sel4_arch) => ObjectTypeX86::SeL4Arch(sel4_arch.ty()),
+        sel4_cfg_wrap_match! {
+            match self {
+                Self::_4k => ObjectTypeX86::_4k,
+                Self::LargePage => ObjectTypeX86::LargePage,
+                Self::PageTable => ObjectTypeX86::PageTable,
+                Self::PageDirectory => ObjectTypeX86::PageDirectory,
+                #[sel4_cfg(VTX)]
+                Self::VCpu => ObjectTypeX86::VCpu,
+                Self::SeL4Arch(sel4_arch) => ObjectTypeX86::SeL4Arch(sel4_arch.ty()),
+            }
         }
     }
 
     pub(crate) const fn physical_size_bits(self) -> usize {
-        match self {
-            Self::_4k => u32_into_usize(sys::seL4_PageBits),
-            Self::LargePage => u32_into_usize(sys::seL4_LargePageBits),
-            Self::PageTable => u32_into_usize(sys::seL4_PageTableBits),
-            Self::PageDirectory => u32_into_usize(sys::seL4_PageDirBits),
-            Self::SeL4Arch(sel4_arch) => sel4_arch.physical_size_bits(),
+        sel4_cfg_wrap_match! {
+            match self {
+                Self::_4k => u32_into_usize(sys::seL4_PageBits),
+                Self::LargePage => u32_into_usize(sys::seL4_LargePageBits),
+                Self::PageTable => u32_into_usize(sys::seL4_PageTableBits),
+                Self::PageDirectory => u32_into_usize(sys::seL4_PageDirBits),
+                #[sel4_cfg(VTX)]
+                Self::VCpu => u32_into_usize(sys::seL4_VCPUBits),
+                Self::SeL4Arch(sel4_arch) => sel4_arch.physical_size_bits(),
+            }
         }
     }
 }
