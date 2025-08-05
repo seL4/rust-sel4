@@ -4,10 +4,24 @@
 // SPDX-License-Identifier: MIT
 //
 
+use sel4_config::sel4_cfg;
+
 use crate::{
     cap::*, cap_type, sel4_cfg_wrap_match, AbsoluteCPtr, Cap, CapRights, CapTypeForFrameObject,
     Error, InvocationContext, Result, TranslationTableObjectType, VmAttributes, Word,
 };
+
+#[sel4_cfg(VTX)]
+impl<C: InvocationContext> VCpu<C> {
+    /// Corresponds to `seL4_X86_VCPU_SetTCB`.
+    pub fn vcpu_set_tcb(self, tcb: Tcb) -> Result<()> {
+        Error::wrap(self.invoke(|cptr, ipc_buffer| {
+            ipc_buffer
+                .inner_mut()
+                .seL4_X86_VCPU_SetTCB(cptr.bits(), tcb.bits())
+        }))
+    }
+}
 
 impl<T: CapTypeForFrameObject, C: InvocationContext> Cap<T, C> {
     /// Corresponds to `seL4_X86_Page_Map`.
