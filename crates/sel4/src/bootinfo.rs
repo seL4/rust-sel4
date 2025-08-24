@@ -165,6 +165,7 @@ impl BootInfoExtra<'_> {
 
 /// Corresponds to `seL4_BootInfoID`.
 #[derive(Clone, Debug, PartialEq, Eq)]
+#[non_exhaustive]
 pub enum BootInfoExtraId {
     Padding,
     Fdt,
