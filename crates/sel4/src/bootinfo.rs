@@ -168,14 +168,25 @@ impl BootInfoExtra<'_> {
 #[non_exhaustive]
 pub enum BootInfoExtraId {
     Padding,
-    Fdt,
+    X86VBE,          // VESA BIOS Extensions info
+    X86MBMMap,       // Multiboot Memory Map
+    X86_ACPI_RSDP,   // ACPI Root System Description Pointer
+    X86_Framebuffer, // Framebuffer info
+    X86_TSC_Freq,    // TSC frequency (in MHz)
+    FDT,             // Flattened Device Tree
 }
 
 impl BootInfoExtraId {
     pub fn from_sys(id: sys::seL4_BootInfoID::Type) -> Option<Self> {
+        use sys::seL4_BootInfoID::*;
         match id {
-            sys::seL4_BootInfoID::SEL4_BOOTINFO_HEADER_PADDING => Some(BootInfoExtraId::Padding),
-            sys::seL4_BootInfoID::SEL4_BOOTINFO_HEADER_FDT => Some(BootInfoExtraId::Fdt),
+            SEL4_BOOTINFO_HEADER_PADDING => Some(Self::Padding),
+            SEL4_BOOTINFO_HEADER_X86_VBE => Some(Self::X86VBE),
+            SEL4_BOOTINFO_HEADER_X86_MBMMAP => Some(Self::X86MBMMap),
+            SEL4_BOOTINFO_HEADER_X86_ACPI_RSDP => Some(Self::X86_ACPI_RSDP),
+            SEL4_BOOTINFO_HEADER_X86_FRAMEBUFFER => Some(Self::X86_Framebuffer),
+            SEL4_BOOTINFO_HEADER_X86_TSC_FREQ => Some(Self::X86_TSC_Freq),
+            SEL4_BOOTINFO_HEADER_FDT => Some(Self::FDT),
             _ => None,
         }
     }
