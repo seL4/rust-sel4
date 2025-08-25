@@ -635,7 +635,7 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
             }
 
             sel4::sel4_cfg_if! {
-                if #[sel4_cfg(all(ARCH_AARCH64, ARM_HYPERVISOR_SUPPORT))] {
+                if #[sel4_cfg(any(all(ARCH_AARCH64, ARM_HYPERVISOR_SUPPORT), all(ARCH_X86_64, VTX)))] {
                     if let Some(vcpu) = obj.vcpu() {
                         let vcpu = self.orig_cap::<cap_type::VCpu>(vcpu.object);
                         vcpu.vcpu_set_tcb(tcb)?;
