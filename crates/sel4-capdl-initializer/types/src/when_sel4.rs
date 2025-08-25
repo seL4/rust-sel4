@@ -120,8 +120,8 @@ impl HasVmAttributes for cap::PageTable {
 
 sel4::sel4_cfg_if! {
     if #[sel4_cfg(any(ARCH_AARCH64, ARCH_AARCH32))] {
-        const CACHED: VmAttributes = VmAttributes::PAGE_CACHEABLE;
-        const UNCACHED: VmAttributes = VmAttributes::DEFAULT;
+        const CACHED: VmAttributes = VmAttributes::DEFAULT;
+        const UNCACHED: VmAttributes = VmAttributes::NONE;
     } else if #[sel4_cfg(any(ARCH_RISCV64, ARCH_RISCV32))] {
         const CACHED: VmAttributes = VmAttributes::DEFAULT;
         const UNCACHED: VmAttributes = VmAttributes::NONE;
