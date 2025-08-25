@@ -147,19 +147,48 @@ impl UntypedDesc {
 
 /// An extra bootinfo chunk along with its ID.
 #[derive(Clone, Debug, PartialEq, Eq)]
+#[repr(C)]
 pub struct BootInfoExtra<'a> {
-    pub id: BootInfoExtraId,
-    pub content_with_header: &'a [u8],
+    pub header: BootInfoHeader,
+    pub chunk: &'a [u8],
 }
 
-impl BootInfoExtra<'_> {
-    pub fn content_with_header(&self) -> &[u8] {
-        self.content_with_header
+/// Common header for all additional bootinfo chunks.
+#[repr(C)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct BootInfoHeader {
+    id: sys::seL4_BootInfoID::Type,
+    len: sys::seL4_Word,
+}
+
+impl BootInfoHeader {
+    /// Create a new `BootInfoHeader`.
+    pub fn new(id: BootInfoExtraId, len: sys::seL4_Word) -> Self {
+        let id = id as sys::seL4_BootInfoID::Type;
+        Self { id, len }
     }
 
-    pub fn content(&self) -> &[u8] {
-        let content_with_header = self.content_with_header();
-        &content_with_header[mem::size_of::<sys::seL4_BootInfoHeader>()..]
+    /// Get the ID of this extra bootinfo chunk.
+    pub fn id(&self) -> BootInfoExtraId {
+        BootInfoExtraId::from_sys(self.id).unwrap()
+    }
+
+    /// Get the raw ID value of this extra bootinfo chunk.
+    pub fn id_raw(&self) -> sys::seL4_BootInfoID::Type {
+        self.id
+    }
+
+    /// Get the length of this extra bootinfo chunk, including the header.
+    pub fn len(&self) -> usize {
+        self.len.try_into().unwrap()
+    }
+
+    /// Get the length of the payload of this extra bootinfo chunk, excluding the header.
+    pub fn payload_len(&self) -> usize {
+        self.len()
+            .saturating_sub(mem::size_of::<Self>().try_into().unwrap())
+            .try_into()
+            .unwrap()
     }
 }
 
@@ -211,29 +240,35 @@ impl<'a> Iterator for BootInfoExtraIter<'a> {
     type Item = BootInfoExtra<'a>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        while self.cursor < self.bootinfo.extra_slice().len() {
-            let header = {
-                let mut it = self.bootinfo.extra_slice()[self.cursor..]
-                    .chunks(mem::size_of::<sys::seL4_Word>());
-                let mut munch_word =
-                    || sys::seL4_Word::from_ne_bytes(it.next().unwrap().try_into().unwrap());
-                let id = munch_word();
-                let len = munch_word();
-                sys::seL4_BootInfoHeader { id, len }
-            };
-            let id = BootInfoExtraId::from_sys(header.id);
-            let len = usize::try_from(header.len).unwrap();
-            let content_with_header_start = self.cursor;
-            let content_with_header_end = content_with_header_start + len;
-            self.cursor = content_with_header_end;
-            if let Some(id) = id {
-                return Some(BootInfoExtra {
-                    id,
-                    content_with_header: &self.bootinfo.extra_slice()
-                        [content_with_header_start..content_with_header_end],
-                });
+        let slice = self.bootinfo.extra_slice();
+        const HEADER_SIZE: usize = mem::size_of::<BootInfoHeader>();
+
+        let header: &BootInfoHeader = {
+            // SAFETY: Bounds check before dereferencing
+            if self.cursor + HEADER_SIZE > slice.len() {
+                return None;
             }
-        }
-        None
+
+            let bytes = &slice[self.cursor..self.cursor + HEADER_SIZE];
+            unsafe { &*(bytes.as_ptr() as *const BootInfoHeader) }
+        };
+
+        let chunk = {
+            let chunk_start = self.cursor + HEADER_SIZE;
+            let chunk_end = chunk_start + header.payload_len();
+
+            // SAFETY: Bounds check before dereferencing
+            if chunk_end > slice.len() || header.len() < HEADER_SIZE {
+                return None;
+            }
+
+            &slice[chunk_start..chunk_end]
+        };
+
+        self.cursor += header.len();
+        Some(BootInfoExtra {
+            header: *header,
+            chunk,
+        })
     }
 }
