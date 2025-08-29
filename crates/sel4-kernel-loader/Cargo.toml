@@ -49,6 +49,7 @@ syn = { version = "2.0.108", features = ["parsing"] }
 
 [target."cfg(any(target_arch = \"arm\", target_arch = \"aarch64\"))".dependencies]
 sel4-bcm2835-aux-uart-driver = { path = "../drivers/bcm2835-aux-uart" }
+sel4-meson-uart-driver = { path = "../drivers/meson" }
 sel4-pl011-driver = { path = "../drivers/pl011" }
 
 [target."cfg(any(target_arch = \"riscv32\", target_arch = \"riscv64\"))".dependencies]
