@@ -2587,6 +2587,7 @@ dependencies = [
  "sel4-kernel-loader-embed-page-tables-runtime",
  "sel4-kernel-loader-payload-types",
  "sel4-logging",
+ "sel4-meson-uart-driver",
  "sel4-pl011-driver",
  "sel4-platform-info",
  "sel4-stack",
@@ -2650,6 +2651,15 @@ version = "0.1.0"
 dependencies = [
  "lock_api",
  "log",
+]
+
+[[package]]
+name = "sel4-meson-uart-driver"
+version = "0.1.0"
+dependencies = [
+ "embedded-hal-nb",
+ "sel4-driver-interfaces",
+ "tock-registers",
 ]
 
 [[package]]

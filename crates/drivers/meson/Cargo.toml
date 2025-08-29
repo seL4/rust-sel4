@@ -8,7 +8,7 @@
 name = "sel4-meson-uart-driver"
 version = "0.1.0"
 authors = ["Alwin Joshy <joshyalwin@gmail.com>, Szymon Duchniewicz <s.duchniewicz@unsw.edu.au"]
-edition = "2025"
+edition = "2021"
 license = "BSD-2-Clause"
 
 [dependencies]

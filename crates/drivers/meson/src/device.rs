@@ -31,16 +31,16 @@ register_structs! {
 }
 
 pub(crate) struct Device {
-    base_addr: usize
+    ptr: *mut MesonRegisterBlock,
 }
 
 impl Device {
-    pub(crate) const unsafe fn new(base_addr:  usize) -> Self {
-        Self {base_addr}
+    pub(crate) const unsafe fn new(ptr: *mut MesonRegisterBlock) -> Self {
+        Self { ptr }
     }
 
     fn ptr(&self) -> *const MesonRegisterBlock {
-        self.base_addr as *const _
+        self.ptr
     }
 
     pub(crate) fn init(&self) {

@@ -7,6 +7,8 @@
 
 use spin::Mutex;
 
+use embedded_hal_nb::nb;
+use embedded_hal_nb::serial::Write;
 use sel4_config::sel4_cfg_bool;
 use sel4_meson_uart_driver::Driver as MesonDriver;
 use crate::{
@@ -19,7 +21,7 @@ const SERIAL_DEVICE_BASE_ADDR: usize =  0xc81004c0;
 static SERIAL_DEVICE: Mutex<MesonDriver> = Mutex::new(get_serial_device());
 
 const fn get_serial_device() -> MesonDriver {
-    unsafe { MesonDriver::new(SERIAL_DEVICE_BASE_ADDR) }
+    unsafe { MesonDriver::new_uninit(SERIAL_DEVICE_BASE_ADDR as *mut _) }
 }
 
 pub(crate) enum PlatImpl {}
@@ -38,11 +40,11 @@ impl Plat for PlatImpl {
     }
 
     fn put_char(c: u8) {
-        SERIAL_DEVICE.lock().put_char(c);
+        nb::block!(SERIAL_DEVICE.lock().write(c)).unwrap_or_else(|err| match err {});
     }
 
     fn put_char_without_synchronization(c: u8) {
-        get_serial_device().put_char(c);
+        nb::block!(get_serial_device().write(c)).unwrap_or_else(|err| match err {});
     }
 
     // TODO: fix to use : https://github.com/au-ts/rust-sel4/blob/main/crates/sel4-kernel-loader/src/plat/bcm2711/mod.rs#L58
