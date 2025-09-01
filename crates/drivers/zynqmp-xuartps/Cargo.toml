@@ -1,0 +1,10 @@
+[package]
+name = "sel4-zynqmp-xuartps-driver"
+version = "0.1.0"
+edition = "2021"
+license = "BSD-2-Clause"
+
+[dependencies]
+embedded-hal-nb = "1.0"
+sel4-driver-interfaces = { path = "../../sel4-driver-interfaces" }
+tock-registers = "0.9.0"
