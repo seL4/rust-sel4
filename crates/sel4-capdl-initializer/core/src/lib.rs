@@ -398,6 +398,23 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
             }
         }
 
+        // Set initial ARM SMC cap
+        sel4::sel4_cfg_if! {
+            if #[sel4_cfg(all(ARCH_AARCH64, ALLOW_SMC_CALLS))] {
+                let arm_smc_maybe = self
+                    .spec()
+                    .objects()
+                    .enumerate()
+                    .find(|(_, obj)| {
+                        matches!(obj, Object::ArmSmc)
+                    });
+                if let Some((arm_smc_obj_id, _)) = arm_smc_maybe {
+                    let arm_smc_slot_idx = init_thread::slot::SMC.index();
+                    self.set_orig_cslot(arm_smc_obj_id, Slot::from_index(arm_smc_slot_idx));
+                }
+            }
+        }
+
         Ok(())
     }
 

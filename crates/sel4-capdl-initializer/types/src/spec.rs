@@ -84,6 +84,7 @@ pub enum Object<'a, D, M> {
     IOPorts(object::IOPorts),
     SchedContext(object::SchedContext),
     Reply,
+    ArmSmc,
 }
 
 impl<D, M> Object<'_, D, M> {
@@ -115,6 +116,7 @@ pub enum Cap {
     IOPorts(cap::IOPorts),
     SchedContext(cap::SchedContext),
     Reply(cap::Reply),
+    ArmSmc(cap::ArmSmc),
 }
 
 impl Cap {
@@ -136,6 +138,7 @@ impl Cap {
             Cap::IOPorts(cap) => cap.object,
             Cap::SchedContext(cap) => cap.object,
             Cap::Reply(cap) => cap.object,
+            Cap::ArmSmc(cap) => cap.object,
         }
     }
 }
@@ -397,6 +400,12 @@ pub mod cap {
     #[derive(Debug, Clone, Eq, PartialEq, IsCap)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
     pub struct Reply {
+        pub object: ObjectId,
+    }
+
+    #[derive(Debug, Clone, Eq, PartialEq, IsCap)]
+    #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+    pub struct ArmSmc {
         pub object: ObjectId,
     }
 }

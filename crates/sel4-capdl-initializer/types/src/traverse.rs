@@ -45,6 +45,7 @@ impl<'a, N, D, M> Spec<'a, N, D, M> {
                             Object::IOPorts(obj) => Object::IOPorts(obj.clone()),
                             Object::SchedContext(obj) => Object::SchedContext(obj.clone()),
                             Object::Reply => Object::Reply,
+                            Object::ArmSmc => Object::ArmSmc,
                         },
                     })
                 })
