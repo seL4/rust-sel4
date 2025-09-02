@@ -640,7 +640,8 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
             .filter_objects_with::<&object::PageTable>(|obj| obj.is_root)
         {
             let vspace = self.orig_cap::<cap_type::VSpace>(obj_id);
-            self.init_vspace(vspace, 0, 0, obj)?;
+            let root_level = obj.level.unwrap_or(0).into();
+            self.init_vspace(vspace, root_level, 0, obj)?;
         }
         Ok(())
     }
