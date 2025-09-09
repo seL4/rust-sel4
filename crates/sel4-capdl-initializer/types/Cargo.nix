@@ -9,7 +9,7 @@
 mk {
   package.name = "sel4-capdl-initializer-types";
   dependencies = {
-    inherit (versions) cfg-if log;
+    inherit (versions) cfg-if;
     miniz_oxide = { version = versions.miniz_oxide; default-features = false; optional = true; };
     serde = serdeWith [ "derive" "alloc" ] // { optional = true; };
     serde_json = { version = versions.serde_json; optional = true; };

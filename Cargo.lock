@@ -2347,7 +2347,6 @@ name = "sel4-capdl-initializer-types"
 version = "0.1.0"
 dependencies = [
  "cfg-if",
- "log",
  "miniz_oxide",
  "sel4",
  "sel4-capdl-initializer-types-derive",
