@@ -15,6 +15,7 @@ let
     , local ? null
     , useLocal ? false
     , andThen ? ""
+    , extraFilter ? _: _: true
     }:
 
     assert useLocal -> local != null;
@@ -23,14 +24,20 @@ let
       remote = builtins.fetchGit {
         inherit url rev ref submodules;
       };
-      base = if useLocal then (lib.cleanSource local) else remote;
+      cleanedSource = lib.cleanSourceWith {
+        src = local;
+        filter = path: type: lib.cleanSourceFilter path type || extraFilter path type;
+      };
+      base = if useLocal then cleanedSource else remote;
     in
       base + andThen;
 
   capdlCommon = {
     url = "https://github.com/coliasgroup/capdl.git";
-    rev = "6ea203e8ebbcf8d786939aa706262b5073aae676"; # branch rust-testing
+    rev = "0125aeb757f8a1714c2f22a0eaa1c966d6f9b7b0"; # branch nspin/wip/draft-xn
     local = localRoot + "/capdl";
+    extraFilter = path: type:
+      lib.hasSuffix "/.stack-work" path || lib.hasSuffix "/stack.yaml.lock" path;
   };
 
   srcRoot = ../../..;
