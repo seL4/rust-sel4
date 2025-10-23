@@ -13,5 +13,5 @@
 name = "sel4-build-env"
 version = "0.1.0"
 authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
-edition = "2021"
+edition = "2024"
 license = "BSD-2-Clause"

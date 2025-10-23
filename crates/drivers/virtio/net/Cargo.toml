@@ -13,7 +13,7 @@
 name = "sel4-virtio-net"
 version = "0.1.0"
 authors = ["Nick Spinale <nick.spinale@coliasgroup.com>", "Runji Wang <wangrunji0408@163.com>"]
-edition = "2021"
+edition = "2024"
 license = "MIT"
 
 [dependencies]

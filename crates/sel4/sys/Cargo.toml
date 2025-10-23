@@ -14,7 +14,7 @@ name = "sel4-sys"
 version = "0.1.0"
 authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
 build = "build/main.rs"
-edition = "2021"
+edition = "2024"
 license = "BSD-2-Clause"
 links = "sel4"
 
