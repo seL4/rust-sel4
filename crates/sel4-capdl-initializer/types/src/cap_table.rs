@@ -8,7 +8,7 @@ use core::fmt;
 use core::iter;
 use core::slice;
 
-use crate::{cap, object, Cap, CapSlot, CapTableEntry, TryFromCapError};
+use crate::{Cap, CapSlot, CapTableEntry, TryFromCapError, cap, object};
 
 // NOTE
 // Magic constants must be kept in sync with capDL-tool.

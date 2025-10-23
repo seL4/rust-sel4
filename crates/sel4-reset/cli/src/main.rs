@@ -13,7 +13,7 @@ use object::elf::{PF_W, PT_LOAD};
 use object::read::elf::{ElfFile, FileHeader, ProgramHeader};
 use object::{Endian, File, Object, ObjectSection, ReadCache, ReadRef};
 
-use sel4_synthetic_elf::{object, Builder, PatchValue, Segment};
+use sel4_synthetic_elf::{Builder, PatchValue, Segment, object};
 
 mod args;
 

@@ -8,7 +8,7 @@ use sel4_elf_header::PT_TLS;
 use sel4_panicking_env::abort;
 
 #[allow(unused_imports)]
-use sel4_initialize_tls::{SetThreadPointerFn, UncheckedTlsImage, DEFAULT_SET_THREAD_POINTER_FN};
+use sel4_initialize_tls::{DEFAULT_SET_THREAD_POINTER_FN, SetThreadPointerFn, UncheckedTlsImage};
 
 use crate::locate_phdrs;
 

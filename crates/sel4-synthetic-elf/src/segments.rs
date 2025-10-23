@@ -9,8 +9,8 @@ use std::fmt;
 use std::ops::Range;
 
 use object::elf::{PF_R, PT_LOAD};
-use object::read::elf::{ElfFile, FileHeader, ProgramHeader};
 use object::read::ReadRef;
+use object::read::elf::{ElfFile, FileHeader, ProgramHeader};
 use object::{Endian, Endianness, Object};
 use thiserror::Error;
 

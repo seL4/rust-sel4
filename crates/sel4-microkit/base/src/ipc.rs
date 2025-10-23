@@ -6,7 +6,7 @@
 
 use core::fmt;
 
-use crate::{defer::PreparedDeferredAction, Channel, Child, MessageInfo};
+use crate::{Channel, Child, MessageInfo, defer::PreparedDeferredAction};
 
 const INPUT_CAP: sel4::cap::Endpoint = sel4::Cap::from_bits(1);
 const REPLY_CAP: sel4::cap::Reply = sel4::Cap::from_bits(4);

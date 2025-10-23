@@ -10,7 +10,7 @@ use sel4_microkit_base::ipc_buffer_ptr;
 use sel4_panicking::catch_unwind;
 use sel4_panicking_env::abort;
 
-use crate::{panicking::init_panicking, Handler};
+use crate::{Handler, panicking::init_panicking};
 
 sel4_runtime_common::declare_entrypoint! {
     () -> ! {

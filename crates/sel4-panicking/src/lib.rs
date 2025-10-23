@@ -29,7 +29,7 @@ use count::{count_panic, count_panic_caught};
 use hook::get_hook;
 use strategy::{panic_cleanup, start_panic};
 
-pub use hook::{set_hook, PanicHook};
+pub use hook::{PanicHook, set_hook};
 
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {

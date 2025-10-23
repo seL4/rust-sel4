@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use sel4_microkit_base::{with_msg_regs, with_msg_regs_mut, Channel, MessageInfo};
+use sel4_microkit_base::{Channel, MessageInfo, with_msg_regs, with_msg_regs_mut};
 
 use crate::{CallError, CallTarget, MessageReader, MessageWriter};
 

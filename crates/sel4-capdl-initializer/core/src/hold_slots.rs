@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use sel4::{init_thread::Slot, AbsoluteCPtr};
+use sel4::{AbsoluteCPtr, init_thread::Slot};
 
 use crate::{CSlotAllocator, CapDLInitializerError};
 

@@ -8,8 +8,8 @@ use alloc::vec::Vec;
 use core::ops::Range;
 
 use object::{
-    elf::{PF_R, PF_W, PF_X},
     Object, ObjectSegment, SegmentFlags,
+    elf::{PF_R, PF_W, PF_X},
 };
 
 use crate::ObjectAllocator;

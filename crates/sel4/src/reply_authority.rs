@@ -6,7 +6,7 @@
 
 use sel4_config::{sel4_cfg, sel4_cfg_if};
 
-use crate::{sys, NoExplicitInvocationContext};
+use crate::{NoExplicitInvocationContext, sys};
 
 #[sel4_cfg(KERNEL_MCS)]
 use crate::cap;

@@ -12,12 +12,12 @@ use smoltcp::{
     time::Instant,
 };
 
-use sel4_driver_interfaces::net::GetNetDeviceMeta;
 use sel4_driver_interfaces::HandleInterrupt;
+use sel4_driver_interfaces::net::GetNetDeviceMeta;
 use sel4_microkit::{Channel, ChannelSet, Handler, Infallible, MessageInfo};
 use sel4_microkit_simple_ipc as simple_ipc;
 use sel4_shared_memory::SharedMemoryRef;
-use sel4_shared_ring_buffer::{roles::Use, RingBuffers};
+use sel4_shared_ring_buffer::{RingBuffers, roles::Use};
 
 use super::message_types::*;
 

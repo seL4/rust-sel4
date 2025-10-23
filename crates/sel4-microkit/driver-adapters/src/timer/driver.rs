@@ -6,8 +6,8 @@
 
 use core::convert::Infallible;
 
-use sel4_driver_interfaces::timer::{NumTimers, Timers};
 use sel4_driver_interfaces::HandleInterrupt;
+use sel4_driver_interfaces::timer::{NumTimers, Timers};
 use sel4_microkit::{Channel, ChannelSet, Handler, MessageInfo};
 use sel4_microkit_simple_ipc as simple_ipc;
 

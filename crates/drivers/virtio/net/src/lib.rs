@@ -14,12 +14,12 @@ use core::cell::RefCell;
 use core::convert::Infallible;
 
 use log::trace;
-use sel4_driver_interfaces::net::{GetNetDeviceMeta, MacAddress};
 use sel4_driver_interfaces::HandleInterrupt;
+use sel4_driver_interfaces::net::{GetNetDeviceMeta, MacAddress};
 use smoltcp::phy::{Device, DeviceCapabilities, Medium, RxToken, TxToken};
 use smoltcp::time::Instant;
 use virtio_drivers::device::net::{RxBuffer, VirtIONet};
-use virtio_drivers::{transport::Transport, Error, Hal};
+use virtio_drivers::{Error, Hal, transport::Transport};
 
 pub const NET_QUEUE_SIZE: usize = 16;
 

@@ -6,7 +6,7 @@
 
 use std::fs;
 
-use clap::{arg, Command};
+use clap::{Command, arg};
 
 use sel4_backtrace_addr2line_context_helper::new_context;
 use sel4_backtrace_types::Backtrace;

@@ -16,7 +16,7 @@ use smoltcp::time::Instant;
 use sel4_abstract_allocator::AbstractAllocator;
 use sel4_abstract_rc::{AbstractRcT, RcT};
 use sel4_shared_memory::SharedMemoryRef;
-use sel4_shared_ring_buffer::{roles::Provide, RingBuffers};
+use sel4_shared_ring_buffer::{RingBuffers, roles::Provide};
 
 mod inner;
 

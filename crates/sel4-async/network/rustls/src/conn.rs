@@ -21,13 +21,13 @@ use rustls::server::{ServerConnectionData, UnbufferedServerConnection};
 use rustls::unbuffered::{
     AppDataRecord, ConnectionState, EncodeError, EncryptError, UnbufferedStatus,
 };
-use rustls::{unbuffered::UnbufferedConnectionCommon, ClientConfig, ServerConfig, SideData};
+use rustls::{ClientConfig, ServerConfig, SideData, unbuffered::UnbufferedConnectionCommon};
 
 use sel4_async_io::{ErrorType, Read, Write};
 
 use crate::{
-    utils::{poll_read, poll_write, try_or_resize_and_retry, Buffer, WriteCursor},
     Error,
+    utils::{Buffer, WriteCursor, poll_read, poll_write, try_or_resize_and_retry},
 };
 
 pub struct ClientConnector {

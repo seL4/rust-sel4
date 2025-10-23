@@ -7,7 +7,7 @@
 #![no_std]
 #![feature(c_variadic)]
 
-use core::ffi::{c_char, CStr};
+use core::ffi::{CStr, c_char};
 
 use sel4_immediate_sync_once_cell::ImmediateSyncOnceCell;
 

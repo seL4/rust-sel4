@@ -22,8 +22,8 @@ pub use defer::{DeferredAction, DeferredActionInterface, DeferredActionSlot};
 pub use handler::{Handler, Infallible, Never, NullHandler};
 pub use ipc::{ChannelSet, DisplayChannelSet};
 pub use message::{
-    get_mr, set_mr, with_msg_bytes, with_msg_bytes_mut, with_msg_regs, with_msg_regs_mut,
-    MessageInfo, MessageLabel, MessageRegisterValue,
+    MessageInfo, MessageLabel, MessageRegisterValue, get_mr, set_mr, with_msg_bytes,
+    with_msg_bytes_mut, with_msg_regs, with_msg_regs_mut,
 };
 pub use symbols::{ipc_buffer_ptr, pd_is_passive, pd_name};
 

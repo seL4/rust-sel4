@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-pub use sel4::{cap::*, CPtr};
+pub use sel4::{CPtr, cap::*};
 pub use sel4_simple_task_threading::StaticThread;
 
 use sel4::{Badge, CPtrBits, Cap, CapType};

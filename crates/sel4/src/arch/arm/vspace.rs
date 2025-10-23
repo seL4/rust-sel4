@@ -7,9 +7,8 @@
 use sel4_config::{sel4_cfg, sel4_cfg_enum, sel4_cfg_wrap_match};
 
 use crate::{
-    cap_type, const_helpers::u32_into_usize, sys, CapTypeForFrameObject,
-    CapTypeForFrameObjectOfFixedSize, CapTypeForTranslationTableObject, ObjectBlueprint,
-    ObjectBlueprintArm,
+    CapTypeForFrameObject, CapTypeForFrameObjectOfFixedSize, CapTypeForTranslationTableObject,
+    ObjectBlueprint, ObjectBlueprintArm, cap_type, const_helpers::u32_into_usize, sys,
 };
 
 #[sel4_cfg(ARCH_AARCH64)]

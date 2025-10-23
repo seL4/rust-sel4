@@ -10,7 +10,7 @@ use core::alloc::Layout;
 use core::ptr::{self, NonNull};
 
 use one_shot_mutex::sync::OneShotMutex;
-use virtio_drivers::{BufferDirection, Hal, PhysAddr, PAGE_SIZE};
+use virtio_drivers::{BufferDirection, Hal, PAGE_SIZE, PhysAddr};
 
 use sel4_abstract_allocator::basic::BasicAllocator;
 use sel4_abstract_allocator::{ByRange, WithAlignmentBound};

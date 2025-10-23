@@ -10,8 +10,8 @@ use core::convert::Infallible;
 use core::ops::Deref;
 
 use sel4_driver_interfaces::block::GetBlockDeviceLayout;
-use virtio_drivers::device::blk::{VirtIOBlk, SECTOR_SIZE};
-use virtio_drivers::{transport::Transport, Hal};
+use virtio_drivers::device::blk::{SECTOR_SIZE, VirtIOBlk};
+use virtio_drivers::{Hal, transport::Transport};
 
 pub struct GetBlockDeviceLayoutWrapper<T>(pub T);
 

@@ -80,11 +80,7 @@ impl FillMapBuilder {
                 .iter()
                 .filter_map(|dir| {
                     let path = dir.join(&key.file);
-                    if path.exists() {
-                        Some(path)
-                    } else {
-                        None
-                    }
+                    if path.exists() { Some(path) } else { None }
                 })
                 .next()
                 .unwrap_or_else(|| panic!("file {:?} not found", key.file));

@@ -63,5 +63,5 @@ pub mod _private {
     pub use sel4::BootInfoPtr;
     pub use sel4_runtime_common::declare_stack;
 
-    pub use crate::{declare_main, declare_root_task, entry::run_main, DEFAULT_STACK_SIZE};
+    pub use crate::{DEFAULT_STACK_SIZE, declare_main, declare_root_task, entry::run_main};
 }

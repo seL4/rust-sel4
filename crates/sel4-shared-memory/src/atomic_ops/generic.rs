@@ -220,11 +220,7 @@ pub(crate) unsafe fn atomic_compare_exchange<T: Copy>(
                 }
         }
     };
-    if ok {
-        Ok(val)
-    } else {
-        Err(val)
-    }
+    if ok { Ok(val) } else { Err(val) }
 }
 
 #[inline]
@@ -262,11 +258,7 @@ pub(crate) unsafe fn atomic_compare_exchange_weak<T: Copy>(
                 }
         }
     };
-    if ok {
-        Ok(val)
-    } else {
-        Err(val)
-    }
+    if ok { Ok(val) } else { Err(val) }
 }
 
 #[inline]

@@ -24,7 +24,7 @@ use log::info;
 use smoltcp::{
     iface::{Config, Context, Interface, SocketHandle, SocketSet},
     phy::Device,
-    socket::{dhcpv4, dns, tcp, AnySocket},
+    socket::{AnySocket, dhcpv4, dns, tcp},
     time::{Duration, Instant},
     wire::{DnsQueryType, IpAddress, IpCidr, IpEndpoint, IpListenEndpoint, Ipv4Address, Ipv4Cidr},
 };

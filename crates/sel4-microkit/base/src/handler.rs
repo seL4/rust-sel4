@@ -7,9 +7,10 @@
 use core::fmt;
 
 use crate::{
+    Channel, Child, MessageInfo,
     defer::{DeferredAction, PreparedDeferredAction},
     ipc::{self, ChannelSet, Event},
-    pd_is_passive, Channel, Child, MessageInfo,
+    pd_is_passive,
 };
 
 pub use core::convert::Infallible;
@@ -37,7 +38,9 @@ pub trait Handler {
         channel: Channel,
         msg_info: MessageInfo,
     ) -> Result<MessageInfo, Self::Error> {
-        panic!("unexpected protected procedure call from channel {channel:?} with msg_info={msg_info:?}")
+        panic!(
+            "unexpected protected procedure call from channel {channel:?} with msg_info={msg_info:?}"
+        )
     }
 
     /// This method has the same meaning and type as its analog in `libmicrokit`.

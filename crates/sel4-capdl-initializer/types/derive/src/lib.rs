@@ -30,7 +30,8 @@ fn derive_cap_impl(ast: &syn::DeriveInput) -> TokenStream {
                 Cap::#name(self)
             }
         }
-    }.into()
+    }
+    .into()
 }
 
 #[proc_macro_derive(IsObject)]
@@ -57,7 +58,8 @@ fn derive_object_impl(ast: &syn::DeriveInput) -> TokenStream {
                 Object::#name(self)
             }
         }
-    }.into()
+    }
+    .into()
 }
 
 #[proc_macro_derive(IsObjectWithCapTable)]
@@ -75,5 +77,6 @@ fn derive_object_with_cap_table_impl(ast: &syn::DeriveInput) -> TokenStream {
                 &*self.slots
             }
         }
-    }.into()
+    }
+    .into()
 }

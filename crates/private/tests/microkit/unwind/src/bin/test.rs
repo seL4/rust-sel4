@@ -9,7 +9,7 @@
 
 use core::sync::atomic::{AtomicBool, Ordering};
 
-use sel4_microkit::{debug_println, panicking, protection_domain, NullHandler};
+use sel4_microkit::{NullHandler, debug_println, panicking, protection_domain};
 
 static F1_DROPPED: AtomicBool = AtomicBool::new(false);
 

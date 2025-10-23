@@ -10,8 +10,9 @@ use core::marker::PhantomData;
 use futures::future;
 
 use sel4_async_block_io::{
+    BlockIO, Operation,
     access::{Access, Witness},
-    constant_block_sizes, BlockIO, Operation,
+    constant_block_sizes,
 };
 
 pub use embedded_fat as fat;

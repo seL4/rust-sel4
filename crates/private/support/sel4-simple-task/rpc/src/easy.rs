@@ -10,7 +10,7 @@ use core::mem;
 
 use serde::{Deserialize, Serialize};
 
-use sel4::{cap::Endpoint, Badge, IpcBuffer, MessageInfo, MessageInfoBuilder, Word};
+use sel4::{Badge, IpcBuffer, MessageInfo, MessageInfoBuilder, Word, cap::Endpoint};
 
 const BYTES_PER_WORD: usize = mem::size_of::<Word>() / mem::size_of::<u8>();
 

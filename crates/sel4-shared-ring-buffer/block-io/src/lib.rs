@@ -19,9 +19,9 @@ use core::task::{Context, Poll};
 use async_unsync::semaphore::Semaphore;
 
 use sel4_abstract_allocator::AbstractAllocator;
-use sel4_async_block_io::{access::Access, BlockIO, BlockIOLayout, BlockSize, Operation};
+use sel4_async_block_io::{BlockIO, BlockIOLayout, BlockSize, Operation, access::Access};
 use sel4_shared_memory::SharedMemoryRef;
-use sel4_shared_ring_buffer::{roles::Provide, RingBuffers};
+use sel4_shared_ring_buffer::{RingBuffers, roles::Provide};
 use sel4_shared_ring_buffer_block_io_types::BlockIORequest;
 
 mod errors;

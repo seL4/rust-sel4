@@ -8,9 +8,9 @@
 use core::{marker::PhantomData, ptr::NonNull};
 
 use crate::{
+    AbstractPtr,
     access::{Access, ReadOnly, ReadWrite, Readable, RestrictAccess, Writable, WriteOnly},
     memory_type::UnitaryOps,
-    AbstractPtr,
 };
 
 /// Constructor functions.

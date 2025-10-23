@@ -7,7 +7,7 @@
 use core::convert::Infallible;
 
 use crate::{
-    object, Fill, FillEntry, FillEntryContent, FrameInit, NamedObject, NeverEmbedded, Object, Spec,
+    Fill, FillEntry, FillEntryContent, FrameInit, NamedObject, NeverEmbedded, Object, Spec, object,
 };
 
 impl<'a, N, D, M> Spec<'a, N, D, M> {

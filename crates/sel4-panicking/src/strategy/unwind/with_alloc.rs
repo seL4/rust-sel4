@@ -9,7 +9,7 @@ use core::mem;
 
 use unwinding::abi::*;
 
-use super::{drop_panic, foreign_exception, RUST_EXCEPTION_CLASS};
+use super::{RUST_EXCEPTION_CLASS, drop_panic, foreign_exception};
 
 pub(crate) fn panic_cleanup(exception: *mut u8) {
     let exception = exception as *mut UnwindException;

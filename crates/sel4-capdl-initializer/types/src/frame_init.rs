@@ -16,7 +16,7 @@ use alloc::{string::String, vec::Vec};
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::{object, Indirect, SelfContained};
+use crate::{Indirect, SelfContained, object};
 
 // // //
 

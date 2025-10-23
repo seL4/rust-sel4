@@ -16,11 +16,11 @@ pub(crate) mod fault;
 
 pub(crate) mod top_level {
     pub use super::{
+        NUM_FAST_MESSAGE_REGISTERS,
         arch::top_level::*,
         object::{ObjectBlueprintArch, ObjectBlueprintX86, ObjectTypeArch, ObjectTypeX86},
         vm_attributes::VmAttributes,
         vspace::{FrameObjectType, TranslationTableObjectType},
-        NUM_FAST_MESSAGE_REGISTERS,
     };
 }
 

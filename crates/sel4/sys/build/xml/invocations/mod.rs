@@ -17,7 +17,7 @@ use quote::{format_ident, quote};
 
 use sel4_config::sel4_cfg_bool;
 
-use super::{parse_xml, Condition};
+use super::{Condition, parse_xml};
 
 mod parse;
 use parse::*;

@@ -119,7 +119,7 @@ pub use bootinfo::{
 pub use cap_rights::{CapRights, CapRightsBuilder};
 pub use cnode_cap_data::CNodeCapData;
 pub use cptr::{
-    cap, cap_type, AbsoluteCPtr, CPtr, CPtrBits, CPtrWithDepth, Cap, CapType, HasCPtrWithDepth,
+    AbsoluteCPtr, CPtr, CPtrBits, CPtrWithDepth, Cap, CapType, HasCPtrWithDepth, cap, cap_type,
 };
 pub use error::{Error, Result};
 pub use fault::*;
@@ -132,11 +132,11 @@ pub use object::{
 };
 pub use reply_authority::{ConveysReplyAuthority, ReplyAuthority};
 pub use syscalls::{
-    r#yield, Badge, CallWithMRs, FastMessages, IpcCapType, RecvWithMRs, NUM_MESSAGE_REGISTERS,
+    Badge, CallWithMRs, FastMessages, IpcCapType, NUM_MESSAGE_REGISTERS, RecvWithMRs, r#yield,
 };
 pub use vspace::{
-    vspace_levels, CapTypeForFrameObject, CapTypeForFrameObjectOfFixedSize,
-    CapTypeForTranslationTableObject,
+    CapTypeForFrameObject, CapTypeForFrameObjectOfFixedSize, CapTypeForTranslationTableObject,
+    vspace_levels,
 };
 
 sel4_cfg_if! {
@@ -207,8 +207,8 @@ mod state;
 
 #[cfg(feature = "state")]
 pub use state::{
-    ipc_buffer_is_thread_local, set_ipc_buffer, try_with_ipc_buffer_slot,
-    try_with_ipc_buffer_slot_mut, with_ipc_buffer, with_ipc_buffer_mut, ImplicitInvocationContext,
+    ImplicitInvocationContext, ipc_buffer_is_thread_local, set_ipc_buffer,
+    try_with_ipc_buffer_slot, try_with_ipc_buffer_slot_mut, with_ipc_buffer, with_ipc_buffer_mut,
 };
 
 /// Corresponds to `seL4_Word`.

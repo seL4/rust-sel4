@@ -9,7 +9,7 @@
 #![cfg_attr(feature = "atomics", feature(core_intrinsics))]
 #![cfg_attr(feature = "atomics", allow(internal_features))]
 
-use sel4_abstract_ptr::{access::ReadWrite, memory_type::MemoryType, AbstractPtr, AbstractRef};
+use sel4_abstract_ptr::{AbstractPtr, AbstractRef, access::ReadWrite, memory_type::MemoryType};
 
 pub use sel4_abstract_ptr::{access, map_field};
 

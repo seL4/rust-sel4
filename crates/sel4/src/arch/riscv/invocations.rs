@@ -5,8 +5,8 @@
 //
 
 use crate::{
-    cap::*, cap_type, AbsoluteCPtr, Cap, CapRights, CapTypeForFrameObject, Error,
-    InvocationContext, Result, TranslationTableObjectType, VmAttributes, Word,
+    AbsoluteCPtr, Cap, CapRights, CapTypeForFrameObject, Error, InvocationContext, Result,
+    TranslationTableObjectType, VmAttributes, Word, cap::*, cap_type,
 };
 
 impl<T: CapTypeForFrameObject, C: InvocationContext> Cap<T, C> {

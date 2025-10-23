@@ -10,7 +10,7 @@ use std::path::Path;
 use proc_macro::TokenStream;
 use quote::quote;
 use syn::parse::{Error, Parse, ParseStream};
-use syn::{parse_macro_input, ItemMod, MetaNameValue, Result};
+use syn::{ItemMod, MetaNameValue, Result, parse_macro_input};
 
 /// Set a module's `#[path]` relative to `$OUT_DIR`.
 ///

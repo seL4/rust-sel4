@@ -9,11 +9,11 @@ use std::ops::Range;
 use std::path::Path;
 
 use heapless::Vec as HeaplessVec;
-use num::{traits::WrappingSub, CheckedAdd, CheckedSub, Integer, NumCast, One, PrimInt};
+use num::{CheckedAdd, CheckedSub, Integer, NumCast, One, PrimInt, traits::WrappingSub};
 use object::{
+    Endianness, Object, ReadCache, ReadRef,
     elf::PT_LOAD,
     read::elf::{ElfFile, FileHeader, ProgramHeader},
-    Endianness, Object, ReadCache, ReadRef,
 };
 
 use serde::{Deserialize, Serialize};

@@ -22,7 +22,7 @@ use cfg_if::cfg_if;
 use sel4_elf_header::{ElfHeader, PT_TLS};
 use sel4_initialize_tls::{TlsImage, UncheckedTlsImage};
 use sel4_root_task::{
-    abort, panicking::catch_unwind, root_task, set_global_allocator_mutex_notification, Never,
+    Never, abort, panicking::catch_unwind, root_task, set_global_allocator_mutex_notification,
 };
 use sel4_stack::Stack;
 

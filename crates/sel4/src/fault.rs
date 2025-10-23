@@ -6,7 +6,7 @@
 
 //! Fault types.
 
-use crate::{sys, IpcBuffer, MessageInfo};
+use crate::{IpcBuffer, MessageInfo, sys};
 
 pub use crate::arch::fault::*;
 
