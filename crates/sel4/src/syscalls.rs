@@ -136,7 +136,7 @@ impl<C: InvocationContext> cap::Endpoint<C> {
 
     pub fn recv_with_mrs(self, reply_authority: impl ConveysReplyAuthority) -> RecvWithMRs {
         let mut msg = [0; NUM_FAST_MESSAGE_REGISTERS];
-        let [ref mut mr0, ref mut mr1, ref mut mr2, ref mut mr3] = &mut msg;
+        let [mr0, mr1, mr2, mr3] = &mut msg;
         let (raw_msg_info, badge) = self.invoke(|cptr, ipc_buffer| {
             ipc_buffer.inner_mut().seL4_RecvWithMRs(
                 cptr.bits(),
@@ -158,7 +158,7 @@ impl<C: InvocationContext> cap::Endpoint<C> {
 
     pub fn call_with_mrs<T: FastMessages>(self, info: MessageInfo, messages: T) -> CallWithMRs {
         let mut msg = messages.prepare_in_out();
-        let [ref mut mr0, ref mut mr1, ref mut mr2, ref mut mr3] = &mut msg;
+        let [mr0, mr1, mr2, mr3] = &mut msg;
         let raw_msg_info = self.invoke(|cptr, ipc_buffer| {
             ipc_buffer.inner_mut().seL4_CallWithMRs(
                 cptr.bits(),
