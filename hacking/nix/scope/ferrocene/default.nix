@@ -206,17 +206,17 @@ let
   # DO NOT CHECK IN THIS FILE
   hashesFilePath = ./SHA256SUMS;
 
-  upstreamChannel = "1.86.0";
+  upstreamChannel = "1.88.0";
   upstreamDate = null;
 
-  versionTag = builtins.substring 0 9 versionRev;
-  # versionTag = "25.05.0";
-  versionRev = "1dd41c98e7dc69ceaaca67392924671f59a1b79e";
+  # versionTag = builtins.substring 0 9 versionRev;
+  versionTag = "25.08.0";
+  versionRev = "4a1d753a836d6f9a622289bb17734204cd70b151";
   versionName = "stable-${versionTag}";
 
   upstreamRustToolchain = assembleRustToolchain ({
     channel = upstreamChannel;
-    sha256 = "sha256-X/4ZBHO3iW0fOenQ3foEvscgAPJYl2abspaBThDOukI=";
+    sha256 = "sha256-Qxt8XAuaUR2OMdKbN4u8dBJOhSHxS+uS06Wl9+flVEk=";
   } // lib.optionalAttrs (upstreamDate != null) {
     date = upstreamDate;
   });
