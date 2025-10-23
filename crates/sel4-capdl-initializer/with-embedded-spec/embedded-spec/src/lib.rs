@@ -7,8 +7,8 @@
 #![no_std]
 #![allow(clippy::type_complexity)]
 
-mod gen {
+mod generated {
     include!(concat!(env!("OUT_DIR"), "/spec.rs"));
 }
 
-pub use gen::SPEC;
+pub use generated::SPEC;

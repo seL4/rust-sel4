@@ -15,7 +15,7 @@ pub fn derive_cap(input: TokenStream) -> TokenStream {
 
 fn derive_cap_impl(ast: &syn::DeriveInput) -> TokenStream {
     let name = &ast.ident;
-    let gen = quote! {
+    quote! {
         impl<'b> TryFrom<&'b Cap> for &'b #name {
             type Error = TryFromCapError;
             fn try_from(cap: &'b Cap) -> Result<Self, Self::Error> {
@@ -30,8 +30,7 @@ fn derive_cap_impl(ast: &syn::DeriveInput) -> TokenStream {
                 Cap::#name(self)
             }
         }
-    };
-    gen.into()
+    }.into()
 }
 
 #[proc_macro_derive(IsObject)]
@@ -43,7 +42,7 @@ pub fn derive_object(input: TokenStream) -> TokenStream {
 fn derive_object_impl(ast: &syn::DeriveInput) -> TokenStream {
     let name = &ast.ident;
     let generics = &ast.generics;
-    let gen = quote! {
+    quote! {
         impl<'a, 'b, D, M> TryFrom<&'b Object<'a, D, M>> for &'b #name #generics {
             type Error = TryFromObjectError;
             fn try_from(obj: &'b Object<'a, D, M>) -> Result<Self, Self::Error> {
@@ -58,8 +57,7 @@ fn derive_object_impl(ast: &syn::DeriveInput) -> TokenStream {
                 Object::#name(self)
             }
         }
-    };
-    gen.into()
+    }.into()
 }
 
 #[proc_macro_derive(IsObjectWithCapTable)]
@@ -71,12 +69,11 @@ pub fn derive_object_with_cap_table(input: TokenStream) -> TokenStream {
 fn derive_object_with_cap_table_impl(ast: &syn::DeriveInput) -> TokenStream {
     let name = &ast.ident;
     let generics = &ast.generics;
-    let gen = quote! {
+    quote! {
         impl #generics HasCapTable for #name #generics {
             fn slots(&self) -> &[CapTableEntry] {
                 &*self.slots
             }
         }
-    };
-    gen.into()
+    }.into()
 }
