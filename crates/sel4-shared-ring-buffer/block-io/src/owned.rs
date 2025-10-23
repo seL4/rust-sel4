@@ -277,9 +277,7 @@ impl<S: SlotSemaphore, A: AbstractAllocator, F: FnMut()> OwnedSharedRingBufferBl
         let occupied = state_value.as_occupied()?;
 
         Ok(match &mut occupied.state {
-            OccupiedState::Pending {
-                waker: ref mut waker_slot,
-            } => {
+            OccupiedState::Pending { waker: waker_slot } => {
                 if let Some(waker) = waker {
                     waker_slot.replace(waker);
                 }
