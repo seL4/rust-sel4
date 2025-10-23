@@ -282,17 +282,12 @@ impl<T: Copy + FromBytes + IntoBytes> RingBuffer<'_, Read, T> {
     }
 }
 
-#[derive(Debug, Copy, Clone, PartialOrd, Ord, PartialEq, Eq, Hash)]
+#[derive(Debug, Copy, Clone, PartialOrd, Ord, PartialEq, Eq, Hash, Default)]
 pub enum InitializationStrategy {
+    #[default]
     ReadState,
     UseState(InitialState),
     UseAndWriteState(InitialState),
-}
-
-impl Default for InitializationStrategy {
-    fn default() -> Self {
-        Self::ReadState
-    }
 }
 
 #[derive(Debug, Copy, Clone, PartialOrd, Ord, PartialEq, Eq, Hash, Default)]
