@@ -146,7 +146,7 @@ impl<'a> Helper<'a> {
         let synthetic_attr = self.impls.synthetic_attr();
         let key = |attr: &syn::Attribute| !attr.path().is_ident(synthetic_attr);
         attrs.sort_by_key(key);
-        let keep = attrs.drain(attrs.partition_point(key)..).all(|attr| {
+        attrs.drain(attrs.partition_point(key)..).all(|attr| {
             match attr.parse_args::<Condition>() {
                 Ok(cond) => {
                     let r = self.impls.eval(&cond);
@@ -163,8 +163,7 @@ impl<'a> Helper<'a> {
                     false
                 }
             }
-        });
-        keep
+        })
     }
 
     fn filter_punctuated<T, P>(
