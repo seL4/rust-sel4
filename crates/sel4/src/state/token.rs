@@ -147,6 +147,7 @@ pub(crate) struct SyncToken(BorrowFlag);
 
 type BorrowFlag = AtomicIsize;
 
+#[allow(dead_code)]
 pub(crate) struct SyncTokenBorrow<'a>(&'a BorrowFlag);
 
 impl Drop for SyncTokenBorrow<'_> {
@@ -155,6 +156,7 @@ impl Drop for SyncTokenBorrow<'_> {
     }
 }
 
+#[allow(dead_code)]
 pub(crate) struct SyncTokenBorrowMut<'a>(&'a BorrowFlag);
 
 impl Drop for SyncTokenBorrowMut<'_> {
