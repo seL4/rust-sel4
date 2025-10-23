@@ -24,10 +24,10 @@ pub(crate) unsafe fn with_tls(f: impl FnOnce() -> !) -> ! {
         memsz: phdr.p_memsz,
         align: phdr.p_align,
     };
-    unchecked
+    let checked = unchecked
         .check()
-        .unwrap_or_else(|_| abort!("invalid TLS image: {unchecked:#x?}"))
-        .with_initialize_on_stack(CHOSEN_SET_THREAD_POINTER_FN, f)
+        .unwrap_or_else(|_| abort!("invalid TLS image: {unchecked:#x?}"));
+    unsafe { checked.with_initialize_on_stack(CHOSEN_SET_THREAD_POINTER_FN, f) }
 }
 
 sel4::sel4_cfg_if! {

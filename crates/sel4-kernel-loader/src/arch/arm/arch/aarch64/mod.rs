@@ -93,10 +93,14 @@ fn get_current_el() -> Option<CurrentEL::EL::Value> {
 
 #[inline(never)] // never inline to work around issues with optimizer
 unsafe fn set_tpidr(tpidr: usize) {
-    asm!("msr tpidr_el1, {tpidr}", tpidr = in(reg) tpidr);
+    unsafe {
+        asm!("msr tpidr_el1, {tpidr}", tpidr = in(reg) tpidr);
+    }
 }
 
 #[inline(never)]
 pub(crate) unsafe fn reset_cntvoff() {
-    asm!("msr cntvoff_el2, xzr");
+    unsafe {
+        asm!("msr cntvoff_el2, xzr");
+    }
 }

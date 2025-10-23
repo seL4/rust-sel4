@@ -99,12 +99,14 @@ impl TlsImage {
     #[allow(clippy::missing_safety_doc)]
     pub unsafe fn initialize_reservation(&self, reservation_start: *mut u8) -> usize {
         let reservation_layout = self.reservation_layout();
-        let reservation =
-            slice::from_raw_parts_mut(reservation_start, reservation_layout.footprint().size());
+        let reservation = unsafe {
+            slice::from_raw_parts_mut(reservation_start, reservation_layout.footprint().size())
+        };
+        let image_data = unsafe { self.image_data().as_ref().unwrap() };
         let (tdata, tbss) = reservation[reservation_layout.segment_offset()..]
             [..self.checked.memsz]
             .split_at_mut(self.checked.filesz);
-        tdata.copy_from_slice(self.image_data().as_ref().unwrap());
+        tdata.copy_from_slice(image_data);
         tbss.fill(0);
         let thread_pointer = (reservation_start as usize)
             .checked_add(reservation_layout.thread_pointer_offset())
@@ -123,7 +125,7 @@ impl TlsImage {
         exact_reservation: &Region,
     ) -> Result<usize, RegionLayoutError> {
         if exact_reservation.fits_exactly(self.reservation_layout().footprint()) {
-            Ok(self.initialize_reservation(exact_reservation.start()))
+            Ok(unsafe { self.initialize_reservation(exact_reservation.start()) })
         } else {
             Err(RegionLayoutError::new())
         }
@@ -137,7 +139,7 @@ impl TlsImage {
         if let Ok(TrimmedRegion { trimmed, .. }) =
             inexact_reservation.trim(self.reservation_layout().footprint())
         {
-            Ok(self.initialize_exact_reservation_region(&trimmed).unwrap())
+            Ok(unsafe { self.initialize_exact_reservation_region(&trimmed).unwrap() })
         } else {
             Err(RegionLayoutError::new())
         }

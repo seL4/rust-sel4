@@ -27,7 +27,7 @@ static CHOSEN_PSCI_FUNC: PsciFunc = if sel4_cfg_bool!(ARM_HYPERVISOR_SUPPORT) {
 const PSCI_FID_CPU_ON: usize = 0x84000003;
 
 unsafe fn psci_cpu_on(target_cpu: usize, entry_point: usize, context_id: usize) {
-    let ret = CHOSEN_PSCI_FUNC(PSCI_FID_CPU_ON, target_cpu, entry_point, context_id);
+    let ret = unsafe { CHOSEN_PSCI_FUNC(PSCI_FID_CPU_ON, target_cpu, entry_point, context_id) };
     assert_eq!(ret, 0);
 }
 

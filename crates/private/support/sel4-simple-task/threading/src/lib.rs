@@ -31,7 +31,7 @@ impl StaticThread {
             msg: [entry_vaddr, entry_arg0, entry_arg1, ..],
             ..
         } = endpoint.recv_with_mrs(reply_authority);
-        let entry_fn: StaticThreadEntryFn = mem::transmute(entry_vaddr);
+        let entry_fn: StaticThreadEntryFn = unsafe { mem::transmute(entry_vaddr) };
         (entry_fn)(entry_arg0, entry_arg1);
     }
 }

@@ -29,7 +29,9 @@ mod start;
 pub unsafe fn with_local_initialization(f: impl FnOnce() -> !) -> ! {
     cfg_if::cfg_if! {
         if #[cfg(target_thread_local)] {
-            tls::with_tls(f)
+            unsafe {
+                tls::with_tls(f)
+            }
         } else {
             f()
         }

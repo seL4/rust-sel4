@@ -38,29 +38,29 @@ impl<R: RawMutex> StaticDlmalloc<R> {
 impl<R: RawMutex> StaticDlmalloc<R> {
     #[allow(clippy::missing_safety_doc)]
     pub unsafe fn raw_mutex(&self) -> &R {
-        self.0.raw_mutex()
+        unsafe { self.0.raw_mutex() }
     }
 }
 
 unsafe impl<R: RawMutex> GlobalAlloc for StaticDlmalloc<R> {
     #[inline]
     unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
-        self.0.alloc(layout)
+        unsafe { self.0.alloc(layout) }
     }
 
     #[inline]
     unsafe fn alloc_zeroed(&self, layout: Layout) -> *mut u8 {
-        self.0.alloc_zeroed(layout)
+        unsafe { self.0.alloc_zeroed(layout) }
     }
 
     #[inline]
     unsafe fn dealloc(&self, ptr: *mut u8, layout: Layout) {
-        self.0.dealloc(ptr, layout)
+        unsafe { self.0.dealloc(ptr, layout) }
     }
 
     #[inline]
     unsafe fn realloc(&self, ptr: *mut u8, layout: Layout, new_size: usize) -> *mut u8 {
-        self.0.realloc(ptr, layout, new_size)
+        unsafe { self.0.realloc(ptr, layout, new_size) }
     }
 }
 
@@ -95,7 +95,7 @@ impl<R: RawMutex> Default for DeferredStaticDlmalloc<R> {
 impl<R: RawMutex> DeferredStaticDlmalloc<R> {
     #[allow(clippy::missing_safety_doc)]
     pub unsafe fn raw_mutex(&self) -> &R {
-        self.0.raw_mutex()
+        unsafe { self.0.raw_mutex() }
     }
 
     pub fn set_bounds(&self, bounds: StaticHeapBounds) -> Result<(), BoundsAlreadySetError> {
@@ -111,22 +111,22 @@ impl<R: RawMutex> DeferredStaticDlmalloc<R> {
 unsafe impl<R: RawMutex> GlobalAlloc for DeferredStaticDlmalloc<R> {
     #[inline]
     unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
-        self.0.alloc(layout)
+        unsafe { self.0.alloc(layout) }
     }
 
     #[inline]
     unsafe fn alloc_zeroed(&self, layout: Layout) -> *mut u8 {
-        self.0.alloc_zeroed(layout)
+        unsafe { self.0.alloc_zeroed(layout) }
     }
 
     #[inline]
     unsafe fn dealloc(&self, ptr: *mut u8, layout: Layout) {
-        self.0.dealloc(ptr, layout)
+        unsafe { self.0.dealloc(ptr, layout) }
     }
 
     #[inline]
     unsafe fn realloc(&self, ptr: *mut u8, layout: Layout, new_size: usize) -> *mut u8 {
-        self.0.realloc(ptr, layout, new_size)
+        unsafe { self.0.realloc(ptr, layout, new_size) }
     }
 }
 
@@ -219,33 +219,37 @@ impl<R, T> SyncDlmalloc<R, T> {
 impl<R: RawMutex, T> SyncDlmalloc<R, T> {
     #[allow(clippy::missing_safety_doc)]
     unsafe fn raw_mutex(&self) -> &R {
-        self.dlmalloc.raw()
+        unsafe { self.dlmalloc.raw() }
     }
 }
 
 unsafe impl<R: RawMutex, T: Allocator> GlobalAlloc for SyncDlmalloc<R, T> {
     #[inline]
     unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
-        self.dlmalloc.lock().malloc(layout.size(), layout.align())
+        unsafe { self.dlmalloc.lock().malloc(layout.size(), layout.align()) }
     }
 
     #[inline]
     unsafe fn alloc_zeroed(&self, layout: Layout) -> *mut u8 {
-        self.dlmalloc.lock().calloc(layout.size(), layout.align())
+        unsafe { self.dlmalloc.lock().calloc(layout.size(), layout.align()) }
     }
 
     #[inline]
     unsafe fn dealloc(&self, ptr: *mut u8, layout: Layout) {
-        self.dlmalloc
-            .lock()
-            .free(ptr, layout.size(), layout.align())
+        unsafe {
+            self.dlmalloc
+                .lock()
+                .free(ptr, layout.size(), layout.align())
+        }
     }
 
     #[inline]
     unsafe fn realloc(&self, ptr: *mut u8, layout: Layout, new_size: usize) -> *mut u8 {
-        self.dlmalloc
-            .lock()
-            .realloc(ptr, layout.size(), layout.align(), new_size)
+        unsafe {
+            self.dlmalloc
+                .lock()
+                .realloc(ptr, layout.size(), layout.align(), new_size)
+        }
     }
 }
 

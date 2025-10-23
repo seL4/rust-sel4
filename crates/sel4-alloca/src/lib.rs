@@ -37,7 +37,7 @@ pub fn with_alloca_ptr<R, F: FnOnce(*mut u8) -> R>(layout: Layout, f: F) -> R {
         reservation_start: *mut u8,
         cont_arg: *mut ReserveOnStackContArg,
     ) {
-        let f = ManuallyDrop::take(&mut *(cont_arg as *mut ManuallyDrop<F>));
+        let f = unsafe { ManuallyDrop::take(&mut *(cont_arg as *mut ManuallyDrop<F>)) };
         f(reservation_start)
     }
 
