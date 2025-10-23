@@ -9,6 +9,7 @@
 , callPackage
 , makeWrapper
 , writeShellScriptBin
+, fetchFromGitHub
 , singular
 
 , crateUtils
@@ -43,9 +44,11 @@ let
 
   toolchainName = "${rustEnvironment.channel}-${buildPlatform.config}";
 
-  src = sources.fetchGit {
-    url = "https://github.com/verus-lang/verus.git";
-    rev = "8bd7c3292aad57d3926ed8024cde13ca53d6e1a7";
+  src = fetchFromGitHub {
+    owner = "verus-lang";
+    repo = "verus";
+    rev = "release/0.2025.06.30.0c71b39";
+    sha256 = "sha256-MwFOZ3dgGc845u1nSSnemldBldwgoV3lR1jMTnXLbFE=";
   };
 
   lockfile = vendorLockfile {
