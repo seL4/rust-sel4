@@ -48,7 +48,7 @@ pub unsafe fn global_initialzation() {
 
 #[allow(dead_code)]
 fn locate_phdrs() -> &'static [ProgramHeader] {
-    extern "C" {
+    unsafe extern "C" {
         static __ehdr_start: ElfHeader;
     }
     unsafe {

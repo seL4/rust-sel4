@@ -78,15 +78,17 @@ unsafe fn reserve_on_stack(
 ) {
     let reservation_size = layout.size();
     let reservation_align_down_mask = !(layout.align() - 1);
-    __sel4_alloca__reserve_on_stack(
-        reservation_size,
-        reservation_align_down_mask,
-        cont_fn,
-        cont_arg,
-    )
+    unsafe {
+        __sel4_alloca__reserve_on_stack(
+            reservation_size,
+            reservation_align_down_mask,
+            cont_fn,
+            cont_arg,
+        )
+    }
 }
 
-extern "C" {
+unsafe extern "C" {
     fn __sel4_alloca__reserve_on_stack(
         reservation_size: usize,
         reservation_align_down_mask: usize,

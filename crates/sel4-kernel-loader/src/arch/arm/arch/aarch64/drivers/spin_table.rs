@@ -34,7 +34,7 @@ pub(crate) fn start_secondary_core(spin_table: &[usize], core_id: usize, sp: usi
 
 type SpinTableSecondaryEntryFn = extern "C" fn() -> !;
 
-extern "C" {
+unsafe extern "C" {
     fn spin_table_secondary_entry() -> !;
 }
 

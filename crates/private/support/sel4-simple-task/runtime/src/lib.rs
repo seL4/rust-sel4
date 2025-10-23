@@ -34,7 +34,7 @@ mod global_allocator;
 pub use sel4_panicking_env::{debug_print, debug_println};
 pub use sel4_simple_task_runtime_macros::{main, main_json, main_postcard};
 
-extern "Rust" {
+unsafe extern "Rust" {
     pub(crate) fn __sel4_simple_task_main(arg: &[u8]);
 }
 

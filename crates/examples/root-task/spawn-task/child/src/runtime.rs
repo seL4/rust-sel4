@@ -44,7 +44,7 @@ sel4_runtime_common::declare_entrypoint! {
 }
 
 fn get_ipc_buffer() -> *mut sel4::IpcBuffer {
-    extern "C" {
+    unsafe extern "C" {
         static _end: usize;
     }
     (ptr::addr_of!(_end) as usize)

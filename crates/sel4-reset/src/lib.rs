@@ -77,7 +77,7 @@ unsafe fn get_regions() -> Regions<'static> {
 // HACK to force variables into .rodata without causing .rodata to end up in a PF_W segment
 macro_rules! rodata {
     ($ident:ident) => {
-        extern "C" {
+        unsafe extern "C" {
             static $ident: usize;
         }
         global_asm! {
@@ -122,7 +122,7 @@ pub fn reset() -> ! {
     unreachable!()
 }
 
-extern "C" {
+unsafe extern "C" {
     fn _reset();
 }
 

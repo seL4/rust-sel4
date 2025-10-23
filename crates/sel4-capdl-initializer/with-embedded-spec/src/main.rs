@@ -44,7 +44,7 @@ fn main(bootinfo: &sel4::BootInfoPtr) -> ! {
     })
 }
 
-extern "C" {
+unsafe extern "C" {
     static __executable_start: usize;
     static _end: usize;
 }

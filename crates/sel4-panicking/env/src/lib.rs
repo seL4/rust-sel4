@@ -11,7 +11,7 @@ use core::fmt;
 use core::panic::Location;
 use core::str;
 
-extern "Rust" {
+unsafe extern "Rust" {
     fn __sel4_panicking_env__debug_put_char(c: u8);
     fn __sel4_panicking_env__abort_hook(info: Option<&AbortInfo>);
     fn __sel4_panicking_env__abort_trap() -> !;

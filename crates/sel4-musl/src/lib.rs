@@ -22,7 +22,7 @@ pub type SyscallHandler =
 
 pub type RawSyscallHandler = unsafe extern "C" fn(isize, ...) -> isize;
 
-extern "C" {
+unsafe extern "C" {
     static mut __sysinfo: RawSyscallHandler;
     static mut __hwcap: usize;
     static mut __progname: *const c_char;

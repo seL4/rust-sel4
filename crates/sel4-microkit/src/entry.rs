@@ -25,7 +25,7 @@ sel4_runtime_common::declare_entrypoint! {
     }
 }
 
-extern "C" {
+unsafe extern "C" {
     fn __sel4_microkit__main() -> !;
 }
 

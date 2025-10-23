@@ -23,7 +23,7 @@ static mut start_core_by_logical_id: i32 = 0;
 #[unsafe(no_mangle)]
 static mut secondary_core_sp: usize = 0;
 
-extern "C" {
+unsafe extern "C" {
     pub(crate) fn secondary_harts();
 }
 

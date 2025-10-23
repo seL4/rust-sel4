@@ -21,7 +21,7 @@ sel4_runtime_common::declare_entrypoint! {
     }
 }
 
-extern "Rust" {
+unsafe extern "Rust" {
     fn __sel4_root_task__main(bootinfo: &sel4::BootInfoPtr) -> !;
 }
 

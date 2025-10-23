@@ -18,7 +18,7 @@ pub(crate) fn start_secondary_core(core_id: usize, sp: usize) {
 
 type PsciSecondaryEntryFn = extern "C" fn() -> !;
 
-extern "C" {
+unsafe extern "C" {
     fn psci_secondary_entry() -> !;
 }
 
