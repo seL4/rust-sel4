@@ -32,7 +32,7 @@ macro_rules! register_debug_put_char {
         #[allow(non_snake_case)]
         const _: () = {
             $(#[$attrs])*
-            #[no_mangle]
+            #[unsafe(no_mangle)]
             fn __sel4_panicking_env__debug_put_char(c: u8) {
                 const F: fn(u8) = $path;
                 F(c)
@@ -56,7 +56,7 @@ macro_rules! register_abort_hook {
         #[allow(non_snake_case)]
         const _: () = {
             $(#[$attrs])*
-            #[no_mangle]
+            #[unsafe(no_mangle)]
             fn __sel4_panicking_env__abort_hook(info: ::core::option::Option<&$crate::AbortInfo>) {
                 const F: fn(::core::option::Option<&$crate::AbortInfo>) = $path;
                 F(info)
@@ -92,7 +92,7 @@ macro_rules! register_abort_trap {
         #[allow(non_snake_case)]
         const _: () = {
             $(#[$attrs])*
-            #[no_mangle]
+            #[unsafe(no_mangle)]
             fn __sel4_panicking_env__abort_trap() -> ! {
                 const F: fn() -> ! = $path;
                 F()

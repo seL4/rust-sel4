@@ -9,7 +9,7 @@ use core::ptr;
 use core::sync::atomic::{AtomicUsize, Ordering};
 
 #[used]
-#[no_mangle]
+#[unsafe(no_mangle)]
 static mut spin_table_secondary_stack_bottom: usize = 0;
 
 pub(crate) fn start_secondary_core(spin_table: &[usize], core_id: usize, sp: usize) {

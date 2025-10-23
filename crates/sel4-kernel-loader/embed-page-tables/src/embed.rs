@@ -77,7 +77,7 @@ impl Embedding {
                 #(#tables,)*
             ]);
 
-            #[no_mangle]
+            #[unsafe(no_mangle)]
             #[allow(unused_unsafe)]
             pub static #symbol_ident: TablePtr = #symbol_access_ident.root();
         }

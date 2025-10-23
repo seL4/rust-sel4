@@ -57,27 +57,27 @@ fn main(bootinfo: &sel4::BootInfoPtr) -> ! {
     )
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 #[link_section = ".data"]
 static mut sel4_capdl_initializer_serialized_spec_start: *mut u8 = ptr::null_mut();
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 #[link_section = ".data"]
 static mut sel4_capdl_initializer_serialized_spec_size: usize = 0;
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 #[link_section = ".data"]
 static mut sel4_capdl_initializer_heap_start: *mut u8 = ptr::null_mut();
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 #[link_section = ".data"]
 static mut sel4_capdl_initializer_heap_size: usize = 0;
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 #[link_section = ".data"]
 static mut sel4_capdl_initializer_image_start: *mut u8 = ptr::null_mut();
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 #[link_section = ".data"]
 static mut sel4_capdl_initializer_image_end: *mut u8 = ptr::null_mut();
 

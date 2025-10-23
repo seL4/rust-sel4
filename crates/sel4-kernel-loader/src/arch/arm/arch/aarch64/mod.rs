@@ -20,12 +20,12 @@ extern "C" {
     fn switch_translation_tables_el2();
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "C" fn arch_main() -> ! {
     main(())
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "C" fn arch_secondary_main() -> ! {
     secondary_main(())
 }

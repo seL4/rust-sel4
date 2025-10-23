@@ -24,12 +24,12 @@ pub(crate) struct PerCoreImpl {
     hart_id: usize,
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "C" fn arch_main(hart_id: usize) -> ! {
     main(PerCoreImpl { hart_id })
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "C" fn arch_secondary_main(hart_id: usize) -> ! {
     secondary_main(PerCoreImpl { hart_id })
 }

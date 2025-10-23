@@ -10,19 +10,19 @@ use core::slice;
 use sel4_immutable_cell::ImmutableCell;
 use sel4_kernel_loader_payload_types::*;
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 #[link_section = ".data"]
 static loader_payload_start: ImmutableCell<usize> = ImmutableCell::new(0);
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 #[link_section = ".data"]
 static loader_payload_size: ImmutableCell<usize> = ImmutableCell::new(0);
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 #[link_section = ".data"]
 static loader_image_start: ImmutableCell<usize> = ImmutableCell::new(0);
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 #[link_section = ".data"]
 static loader_image_end: ImmutableCell<usize> = ImmutableCell::new(0);
 
@@ -59,7 +59,7 @@ pub(crate) mod stacks {
 
     static PRIMARY_STACK: Stack<PRIMARY_STACK_SIZE> = Stack::new();
 
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     static __primary_stack_bottom: StackBottom = PRIMARY_STACK.bottom();
 
     const NUM_SECONDARY_CORES: usize = sel4_cfg_usize!(MAX_NUM_NODES) - 1;

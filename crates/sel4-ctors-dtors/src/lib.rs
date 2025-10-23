@@ -31,11 +31,11 @@ extern "C" {
 
 mod _weak {
     #[linkage = "weak"]
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     extern "C" fn _init() {}
 
     #[linkage = "weak"]
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     extern "C" fn _fini() {}
 }
 

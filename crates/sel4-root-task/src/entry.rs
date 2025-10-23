@@ -30,7 +30,7 @@ extern "Rust" {
 macro_rules! declare_main {
     ($main:expr) => {
         #[allow(non_snake_case)]
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         fn __sel4_root_task__main(bootinfo: &$crate::_private::BootInfoPtr) -> ! {
             $crate::_private::run_main($main, bootinfo);
         }

@@ -11,10 +11,10 @@ use crate::arch::{Arch, ArchImpl};
 use crate::fmt::debug_println_without_synchronization;
 
 #[used]
-#[no_mangle]
+#[unsafe(no_mangle)]
 static mut exception_register_state: Registers = [0; NUM_REGISTERS];
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 unsafe extern "C" fn exception_handler(vector_table_index: usize) {
     let mut esr;
     let mut far;

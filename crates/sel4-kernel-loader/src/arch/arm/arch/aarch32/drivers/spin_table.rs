@@ -8,7 +8,7 @@ use core::arch::{asm, global_asm};
 use core::ptr;
 
 #[used]
-#[no_mangle]
+#[unsafe(no_mangle)]
 static mut spin_table_secondary_stack_bottom: usize = 0;
 
 pub(crate) fn start_secondary_core(spin_table: &[usize], core_id: usize, sp: usize) {

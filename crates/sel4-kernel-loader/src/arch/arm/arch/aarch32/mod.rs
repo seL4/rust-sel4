@@ -13,12 +13,12 @@ use crate::{arch::Arch, main, secondary_main};
 
 pub(crate) mod drivers;
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "C" fn arch_main() -> ! {
     main(())
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "C" fn arch_secondary_main() -> ! {
     secondary_main(())
 }

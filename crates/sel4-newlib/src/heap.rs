@@ -78,7 +78,7 @@ impl<const N: usize> Default for StaticHeap<N> {
 #[macro_export]
 macro_rules! declare_sbrk_with_static_heap {
     ($n:expr) => {
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         extern "C" fn _sbrk(incr: core::ffi::c_int) -> *mut core::ffi::c_void {
             static HEAP: $crate::StaticHeap<{ $n }> = $crate::StaticHeap::new();
             HEAP.sbrk(incr)
