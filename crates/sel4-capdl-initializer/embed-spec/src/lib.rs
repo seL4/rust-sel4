@@ -119,11 +119,10 @@ impl<'a> Embedding<'a> {
 
     fn patch_field(&self, expr_struct: &mut syn::ExprStruct, field_name: &str, value: syn::Expr) {
         for field in expr_struct.fields.iter_mut() {
-            match &field.member {
-                syn::Member::Named(ident) if ident == field_name => {
-                    field.expr = value.clone();
-                }
-                _ => {}
+            if let syn::Member::Named(ident) = &field.member
+                && ident == field_name
+            {
+                field.expr = value.clone();
             }
         }
     }
