@@ -33,10 +33,10 @@ in
 let
   fenix =
     let
-      rev = "14bd053c7f2a5437ca84c2c76eb7a68154dc30bb";
+      rev = "320433651636186ea32b387cff05d6bbfa30cea7";
       source = builtins.fetchTarball {
         url = "https://github.com/nix-community/fenix/archive/${rev}.tar.gz";
-        sha256 = "sha256:1l7ra0p8y6bgdlcj5sbj9m6g7ka1zl23kxr8kjw5qhynwhqk7x1v";
+        sha256 = "sha256:17c0075pcfvlhqn4lzjpacb3k44nfzm7w1qw4ivmmp6w1xmgzsqm";
       };
     in
       import source {};
