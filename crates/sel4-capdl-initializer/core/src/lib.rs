@@ -193,17 +193,17 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
                             let obj_id = &mut by_size_start[size_bits];
                             // Skip embedded frames
                             while *obj_id < by_size_end[size_bits] {
-                                if let Object::Frame(obj) = self.spec().object(*obj_id) {
-                                    if let FrameInit::Embedded(embedded) = &obj.init {
-                                        self.take_cap_for_embedded_frame(
-                                            *obj_id,
-                                            &embedded.get_embedded_frame(
-                                                self.spec_with_sources.embedded_frame_source,
-                                            ),
-                                        )?;
-                                        *obj_id += 1;
-                                        continue;
-                                    }
+                                if let Object::Frame(obj) = self.spec().object(*obj_id)
+                                    && let FrameInit::Embedded(embedded) = &obj.init
+                                {
+                                    self.take_cap_for_embedded_frame(
+                                        *obj_id,
+                                        &embedded.get_embedded_frame(
+                                            self.spec_with_sources.embedded_frame_source,
+                                        ),
+                                    )?;
+                                    *obj_id += 1;
+                                    continue;
                                 }
                                 break;
                             }
