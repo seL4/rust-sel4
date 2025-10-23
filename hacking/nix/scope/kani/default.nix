@@ -24,14 +24,12 @@
 }:
 
 let
-  cbmc-viewer = python3Packages.callPackage ./cbmc-viewer.nix {};
-
   rustToolchainAttrs = builtins.fromTOML (builtins.readFile (src + "/rust-toolchain.toml"));
 
   inherit (rustToolchainAttrs.toolchain) channel;
 
   rustToolchain = assembleRustToolchain (parseStructuredChannel channel // {
-    sha256 = "sha256-ebpdXnjnQOQYfGW1Xblkp+T+C5KRgt5ncAkFDWr9gKU=";
+    sha256 = "sha256-6k1KpO4EeeJE65qomJvmJHcwfcK9LlUUaGeQlhA1zbk=";
   });
 
   rustEnvironment = lib.fix (self: elaborateRustEnvironment (mkDefaultElaborateRustEnvironmentArgs {
@@ -46,8 +44,8 @@ let
   src = fetchFromGitHub {
     owner = "model-checking";
     repo = "kani";
-    rev = "kani-0.64.0";
-    sha256 = "sha256-8UyAO9eTwcUtOktSJ9QdYpccgDRefWDTIewjAwvkhdA=";
+    rev = "kani-0.65.0";
+    sha256 = "sha256-xle2JCn0HjrWrIkaWbm5mGm0+hPGClMzt3PEO7OgAqg=";
     fetchSubmodules = true;
   };
 
@@ -71,10 +69,6 @@ let
   };
 
   configFragment = crateUtils.toTOMLFile "config" augmentedLockfile.configFragment;
-
-  pythonEnv = python3.buildEnv.override {
-    extraLibs = [ cbmc-viewer ];
-  };
 
 in
 stdenv.mkDerivation {
@@ -113,7 +107,7 @@ stdenv.mkDerivation {
     for p in $out/bin/*; do
       wrapProgram $p \
         --set KANI_HOME $out/lib/kani \
-        --prefix PATH : ${lib.makeBinPath [ rustToolchain pythonEnv ]}
+        --prefix PATH : ${lib.makeBinPath [ rustToolchain python3 ]}
     done
 
     $out/bin/kani setup \
@@ -123,6 +117,5 @@ stdenv.mkDerivation {
 
   passthru = {
     inherit rustEnvironment;
-    inherit cbmc-viewer;
   };
 }
