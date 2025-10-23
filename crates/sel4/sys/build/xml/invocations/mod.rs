@@ -519,7 +519,7 @@ impl ParameterTypes {
         this.insert_capability("seL4_SchedContext");
         this.insert_capability("seL4_SchedControl");
 
-        if sel4_cfg_bool!(ARCH_AARCH64) | sel4_cfg_bool!(ARCH_AARCH32) {
+        if sel4_cfg_bool!(ARCH_ARM) {
             this.insert_enum("seL4_ARM_VMAttributes", WORD_SIZE);
             this.insert_enum("seL4_VCPUReg", WORD_SIZE);
             this.insert_capability("seL4_ARM_Page");
@@ -537,7 +537,7 @@ impl ParameterTypes {
             this.insert_capability("seL4_ARM_IOPageTable");
         }
 
-        if sel4_cfg_bool!(ARCH_RISCV64) || sel4_cfg_bool!(ARCH_RISCV32) {
+        if sel4_cfg_bool!(ARCH_RISCV) {
             this.insert_enum("seL4_RISCV_VMAttributes", WORD_SIZE);
             this.insert_capability("seL4_RISCV_Page");
             this.insert_capability("seL4_RISCV_PageTable");

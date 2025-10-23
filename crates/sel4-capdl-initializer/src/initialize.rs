@@ -396,7 +396,7 @@ impl<'a> Initializer<'a> {
                             init_thread::slot::IRQ_CONTROL.cap()
                                 .irq_control_get(irq.to_sel4(), &cslot_to_absolute_cptr(slot))?;
                         }
-                        #[sel4_cfg(any(ARCH_AARCH64, ARCH_AARCH32))]
+                        #[sel4_cfg(ARCH_ARM)]
                         ArchivedObject::ArmIrq(obj) => {
                             sel4::sel4_cfg_if! {
                                 if #[sel4_cfg(MAX_NUM_NODES = "1")] {
@@ -720,7 +720,7 @@ impl<'a> Initializer<'a> {
             }
 
             sel4::sel4_cfg_if! {
-                if #[sel4_cfg(any(all(ARCH_AARCH64, ARM_HYPERVISOR_SUPPORT), all(ARCH_X86_64, VTX)))] {
+                if #[sel4_cfg(any(all(ARCH_ARM, ARM_HYPERVISOR_SUPPORT), all(ARCH_X86_64, VTX)))] {
                     if let Some(vcpu) = obj.vcpu() {
                         let vcpu = self.orig_cap::<cap_type::VCpu>(vcpu.object);
                         vcpu.vcpu_set_tcb(tcb)?;
