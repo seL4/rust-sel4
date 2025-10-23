@@ -189,6 +189,6 @@ in rec {
 
   verusSource = {
     git = "https://github.com/verus-lang/verus.git";
-    rev = "8bd7c3292aad57d3926ed8024cde13ca53d6e1a7";
+    rev = "release/0.2025.06.30.0c71b39";
   };
 }
