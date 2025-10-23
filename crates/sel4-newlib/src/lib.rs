@@ -33,7 +33,7 @@ mod impl_exit {
 
     use sel4_panicking_env::abort;
 
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     extern "C" fn _exit(rc: c_int) -> ! {
         abort!("_exit({})", rc)
     }
@@ -47,7 +47,7 @@ mod impl_write {
 
     use sel4_panicking_env::debug_put_char;
 
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     extern "C" fn _write(file: c_int, ptr: *const c_char, len: c_int) -> c_int {
         match file {
             1 | 2 => {

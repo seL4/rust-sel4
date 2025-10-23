@@ -15,7 +15,7 @@ use sel4_root_task::{debug_print, debug_println, root_task};
 #[repr(C, align(8192))]
 struct Y(i32);
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 #[thread_local]
 static X: Y = Y(1337);
 

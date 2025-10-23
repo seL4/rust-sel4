@@ -13,7 +13,7 @@ use core::arch::global_asm;
 macro_rules! declare_stack {
     ($size:expr) => {
         #[allow(non_upper_case_globals)]
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         static __sel4_runtime_common__stack_bottom: $crate::_private::start::StackBottom = {
             static STACK: $crate::_private::start::Stack<{ $size }> =
                 $crate::_private::start::Stack::new();
@@ -26,7 +26,7 @@ macro_rules! declare_stack {
 macro_rules! declare_entrypoint {
     (($( $i:ident: $t:ty ),* $(,)?) -> ! $body:block) => {
         #[allow(unreachable_code)]
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         unsafe extern "C" fn __sel4_runtime_common__rust_entrypoint($($i: $t,)*) -> ! {
             $crate::_private::start::with_local_initialization(|| {
                 $crate::_private::start::global_initialzation();

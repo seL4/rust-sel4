@@ -21,7 +21,7 @@ macro_rules! config {
         use $crate::_private::{ImmutableCell, UncheckedConfig};
 
         #[allow(non_upper_case_globals)]
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         #[link_section = $section]
         static $symbol: ImmutableCell<UncheckedConfig<$ty>> =
             ImmutableCell::new(UncheckedConfig::uninit());

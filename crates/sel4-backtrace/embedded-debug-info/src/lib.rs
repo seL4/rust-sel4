@@ -11,11 +11,11 @@ use core::slice;
 
 use sel4_backtrace_addr2line_context_helper::{new_context, Context, Error};
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 #[link_section = ".data"]
 static mut embedded_debug_info_start: *const u8 = ptr::null();
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 #[link_section = ".data"]
 static mut embedded_debug_info_size: usize = 0;
 

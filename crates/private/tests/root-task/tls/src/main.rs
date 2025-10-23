@@ -17,7 +17,7 @@ const X: i32 = 1337;
 #[repr(C, align(4096))]
 struct T(i32);
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 #[thread_local]
 static Y: T = T(X);
 

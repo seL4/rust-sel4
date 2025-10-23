@@ -109,7 +109,7 @@ mod stack {
 
     static STACK: Stack<STACK_SIZE> = Stack::new();
 
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     static __stack_bottom: StackBottom = STACK.bottom();
 }
 
@@ -221,7 +221,7 @@ cfg_if::cfg_if! {
     }
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 unsafe extern "C" fn __rust_entry(bootinfo: *const sel4::BootInfo) -> ! {
     let bootinfo = sel4::BootInfoPtr::new(bootinfo);
     match main(&bootinfo) {

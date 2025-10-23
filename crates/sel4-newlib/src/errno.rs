@@ -7,7 +7,7 @@
 use core::ffi::c_int;
 
 #[cfg(feature = "errno")]
-#[no_mangle]
+#[unsafe(no_mangle)]
 static mut errno: c_int = 0;
 
 #[cfg(not(feature = "errno"))]

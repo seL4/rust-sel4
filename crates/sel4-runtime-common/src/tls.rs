@@ -43,7 +43,7 @@ sel4::sel4_cfg_if! {
 }
 
 #[cfg(target_arch = "arm")]
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "C" fn __aeabi_read_tp() -> usize {
     let mut val: usize;
     unsafe {

@@ -43,7 +43,7 @@ static CONFIG: ImmediateSyncOnceCell<RuntimeConfig<'static>> = ImmediateSyncOnce
 #[thread_local]
 static THREAD_INDEX: ImmediateSyncOnceCell<usize> = ImmediateSyncOnceCell::new();
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 #[allow(clippy::missing_safety_doc)]
 pub unsafe extern "C" fn _start(config: *const u8, config_size: usize, thread_index: usize) -> ! {
     sel4_runtime_common::with_local_initialization(|| {

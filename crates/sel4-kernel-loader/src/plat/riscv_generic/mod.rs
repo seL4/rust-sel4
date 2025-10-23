@@ -11,16 +11,16 @@ use sel4_config::sel4_cfg_usize;
 
 use crate::plat::Plat;
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 static mut hsm_exists: i32 = 0;
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 static mut next_logical_core_id: i32 = 1;
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 static mut start_core_by_logical_id: i32 = 0;
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 static mut secondary_core_sp: usize = 0;
 
 extern "C" {

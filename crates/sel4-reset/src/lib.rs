@@ -49,12 +49,12 @@ const STACK_SIZE: usize = 4096;
 #[link_section = ".persistent"]
 static STACK: Stack<STACK_SIZE> = Stack::new();
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 static __sel4_reset__stack_bottom: StackBottom = STACK.bottom();
 
 // // //
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 unsafe extern "C" fn __sel4_reset__reset_memory() {
     unsafe {
         get_regions().reset_memory();

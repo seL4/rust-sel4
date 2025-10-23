@@ -55,7 +55,7 @@ pub fn wrap(f: impl FnOnce() + UnwindSafe) {
 #[macro_export]
 macro_rules! declare_main_with {
     ($f:ident, $main:path) => {
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         pub fn __sel4_simple_task_main(arg: &[u8]) {
             $crate::_private::declare_main::wrap(|| {
                 $crate::_private::declare_main::$f($main, arg);
