@@ -46,47 +46,54 @@ static THREAD_INDEX: ImmediateSyncOnceCell<usize> = ImmediateSyncOnceCell::new()
 #[unsafe(no_mangle)]
 #[allow(clippy::missing_safety_doc)]
 pub unsafe extern "C" fn _start(config: *const u8, config_size: usize, thread_index: usize) -> ! {
-    sel4_runtime_common::with_local_initialization(|| {
-        if thread_index == 0 {
-            unsafe {
-                sel4_runtime_common::global_initialzation();
-            }
+    unsafe {
+        sel4_runtime_common::with_local_initialization(|| {
+            start_inner(config, config_size, thread_index)
+        })
+    }
+}
+
+#[allow(clippy::missing_safety_doc)]
+unsafe fn start_inner(config: *const u8, config_size: usize, thread_index: usize) -> ! {
+    if thread_index == 0 {
+        unsafe {
+            sel4_runtime_common::global_initialzation();
+        }
+    }
+
+    let config = RuntimeConfig::new(unsafe { slice::from_raw_parts(config, config_size) });
+
+    let thread_config = &config.threads()[thread_index];
+
+    sel4::set_ipc_buffer(unsafe {
+        (usize::try_from(thread_config.ipc_buffer_addr()).unwrap() as *mut sel4::IpcBuffer)
+            .as_mut()
+            .unwrap()
+    });
+
+    THREAD_INDEX.set(thread_index).unwrap();
+
+    if thread_index == 0 {
+        CONFIG.set(config.clone()).unwrap();
+
+        #[cfg(feature = "alloc")]
+        {
+            global_allocator::init(
+                get_static_heap_mutex_notification(),
+                get_static_heap_bounds(),
+            );
         }
 
-        let config = RuntimeConfig::new(slice::from_raw_parts(config, config_size));
+        sel4_panicking::set_hook(&panic_hook);
 
-        let thread_config = &config.threads()[thread_index];
-
-        sel4::set_ipc_buffer(unsafe {
-            (usize::try_from(thread_config.ipc_buffer_addr()).unwrap() as *mut sel4::IpcBuffer)
-                .as_mut()
-                .unwrap()
-        });
-
-        THREAD_INDEX.set(thread_index).unwrap();
-
-        if thread_index == 0 {
-            CONFIG.set(config.clone()).unwrap();
-
-            #[cfg(feature = "alloc")]
-            {
-                global_allocator::init(
-                    get_static_heap_mutex_notification(),
-                    get_static_heap_bounds(),
-                );
-            }
-
-            sel4_panicking::set_hook(&panic_hook);
-
-            unsafe {
-                __sel4_simple_task_main(config.arg());
-            }
-        } else {
-            run_secondary_thread(thread_config)
+        unsafe {
+            __sel4_simple_task_main(config.arg());
         }
+    } else {
+        run_secondary_thread(thread_config)
+    }
 
-        idle()
-    })
+    idle()
 }
 
 fn run_secondary_thread(thread_config: &RuntimeThreadConfig) {

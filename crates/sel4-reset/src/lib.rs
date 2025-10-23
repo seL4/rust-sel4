@@ -37,7 +37,9 @@ impl Regions<'_> {
             let (dst_data, dst_zero) = dst.split_at_mut(meta.filesz);
             let src_data = &self.data[meta.offset..][..meta.filesz];
             dst_data.copy_from_slice(src_data);
-            ptr::write_bytes(dst_zero.as_mut_ptr(), 0, dst_zero.len());
+            unsafe {
+                ptr::write_bytes(dst_zero.as_mut_ptr(), 0, dst_zero.len());
+            }
         }
     }
 }
@@ -62,15 +64,17 @@ unsafe extern "C" fn __sel4_reset__reset_memory() {
 }
 
 unsafe fn get_regions() -> Regions<'static> {
-    Regions {
-        meta: slice::from_raw_parts(
-            (sel4_reset_regions_start + sel4_reset_regions_meta_offset) as *const _,
-            sel4_reset_regions_meta_count,
-        ),
-        data: slice::from_raw_parts(
-            (sel4_reset_regions_start + sel4_reset_regions_data_offset) as *const _,
-            sel4_reset_regions_data_size,
-        ),
+    unsafe {
+        Regions {
+            meta: slice::from_raw_parts(
+                (sel4_reset_regions_start + sel4_reset_regions_meta_offset) as *const _,
+                sel4_reset_regions_meta_count,
+            ),
+            data: slice::from_raw_parts(
+                (sel4_reset_regions_start + sel4_reset_regions_data_offset) as *const _,
+                sel4_reset_regions_data_size,
+            ),
+        }
     }
 }
 

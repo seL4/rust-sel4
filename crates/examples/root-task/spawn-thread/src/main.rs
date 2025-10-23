@@ -185,7 +185,7 @@ fn riscv_get_gp() -> sel4::Word {
 // // //
 
 unsafe extern "C" fn secondary_thread_entrypoint(arg: sel4::Word) -> ! {
-    let f = SecondaryThreadFn::from_arg(arg);
+    let f = unsafe { SecondaryThreadFn::from_arg(arg) };
     let _ = catch_unwind(|| f.run());
     abort!("secondary thread panicked")
 }
@@ -206,7 +206,7 @@ impl SecondaryThreadFn {
     }
 
     unsafe fn from_arg(arg: sel4::Word) -> Self {
-        *Box::from_raw(arg as *mut Self)
+        unsafe { *Box::from_raw(arg as *mut Self) }
     }
 }
 

@@ -81,7 +81,9 @@ type KernelEntry = extern "C" fn(
 
 #[inline(never)]
 pub(crate) unsafe fn reset_cntvoff() {
-    asm!("mcrr p15, 4, {val}, {val}, c14", val = in(reg) 0);
+    unsafe {
+        asm!("mcrr p15, 4, {val}, {val}, c14", val = in(reg) 0);
+    }
 }
 
 const CPSR_MODE_MASK: usize = 0x1f;

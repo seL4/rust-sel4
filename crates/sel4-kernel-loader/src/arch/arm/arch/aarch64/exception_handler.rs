@@ -19,7 +19,7 @@ unsafe extern "C" fn exception_handler(vector_table_index: usize) {
     let mut esr;
     let mut far;
     let mut tpidr_el1;
-    {
+    unsafe {
         asm!("mrs {}, esr_el2", out(reg) esr);
         asm!("mrs {}, far_el2", out(reg) far);
         asm!("mrs {}, tpidr_el1", out(reg) tpidr_el1);

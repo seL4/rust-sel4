@@ -15,7 +15,7 @@ use core::mem;
 use core::ptr;
 use core::slice;
 
-type ArrayEntry = unsafe extern "C" fn();
+type ArrayEntry = extern "C" fn();
 
 unsafe extern "C" {
     static __preinit_array_start: ArrayEntry;
@@ -57,7 +57,7 @@ unsafe fn run_array(
         }
 
         let len = (end_addr - start_addr) / mem::size_of::<ArrayEntry>();
-        let array = slice::from_raw_parts(start_addr as *const ArrayEntry, len);
+        let array = unsafe { slice::from_raw_parts(start_addr as *const ArrayEntry, len) };
         for entry in array {
             (entry)();
         }

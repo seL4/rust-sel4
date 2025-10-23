@@ -28,7 +28,7 @@ impl Driver {
     #[allow(clippy::missing_safety_doc)]
     pub const unsafe fn new_uninit(ptr: *mut (), freq: u64) -> Self {
         Self {
-            device: Device::new(ptr),
+            device: unsafe { Device::new(ptr) },
             freq,
             high_bits: 0,
             most_recent_value: !0,
@@ -37,7 +37,7 @@ impl Driver {
 
     #[allow(clippy::missing_safety_doc)]
     pub unsafe fn new(ptr: *mut (), freq: u64) -> Self {
-        let mut this = Self::new_uninit(ptr, freq);
+        let mut this = unsafe { Self::new_uninit(ptr, freq) };
         this.init();
         this
     }

@@ -57,5 +57,7 @@ global_asm! {
 // helpers
 
 unsafe fn dc_cvac(vaddr: usize) {
-    asm!("dc cvac, {vaddr}", vaddr = in(reg) vaddr);
+    unsafe {
+        asm!("dc cvac, {vaddr}", vaddr = in(reg) vaddr);
+    }
 }

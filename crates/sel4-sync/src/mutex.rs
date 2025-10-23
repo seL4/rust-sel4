@@ -44,7 +44,7 @@ unsafe impl<_T> lock_api::RawMutex for RawNotificationMutex<_T> {
     }
 
     unsafe fn unlock(&self) {
-        self.inner.unlock()
+        unsafe { self.inner.unlock() }
     }
 }
 
@@ -87,7 +87,7 @@ unsafe impl lock_api::RawMutex for RawDeferredNotificationMutex {
     }
 
     unsafe fn unlock(&self) {
-        self.0.unlock()
+        unsafe { self.0.unlock() }
     }
 }
 
@@ -116,7 +116,7 @@ unsafe impl<F: Fn() -> sel4::cap::Notification> lock_api::RawMutex for RawLazyNo
     }
 
     unsafe fn unlock(&self) {
-        self.0.unlock()
+        unsafe { self.0.unlock() }
     }
 }
 

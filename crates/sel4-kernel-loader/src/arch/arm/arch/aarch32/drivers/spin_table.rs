@@ -53,5 +53,7 @@ global_asm! {
 // helpers
 
 unsafe fn clean_dcache_entry(vaddr: usize) {
-    asm!("mcr p15, 0, {vaddr}, c7, c10, 1", vaddr = in(reg) vaddr);
+    unsafe {
+        asm!("mcr p15, 0, {vaddr}, c7, c10, 1", vaddr = in(reg) vaddr);
+    }
 }

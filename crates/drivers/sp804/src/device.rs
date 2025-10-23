@@ -75,9 +75,11 @@ pub struct Device {
 impl Device {
     pub const unsafe fn new(ptr: *const ()) -> Self {
         let ptr = ptr.cast::<TimerRegisterBlock>();
-        Device {
-            timer_1: Timer::new(ptr.offset(0)),
-            timer_2: Timer::new(ptr.offset(1)),
+        unsafe {
+            Device {
+                timer_1: Timer::new(ptr.offset(0)),
+                timer_2: Timer::new(ptr.offset(1)),
+            }
         }
     }
 

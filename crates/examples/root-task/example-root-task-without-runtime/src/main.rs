@@ -223,7 +223,7 @@ cfg_if::cfg_if! {
 
 #[unsafe(no_mangle)]
 unsafe extern "C" fn __rust_entry(bootinfo: *const sel4::BootInfo) -> ! {
-    let bootinfo = sel4::BootInfoPtr::new(bootinfo);
+    let bootinfo = unsafe { sel4::BootInfoPtr::new(bootinfo) };
     match main(&bootinfo) {
         #[allow(unreachable_patterns)]
         Ok(absurdity) => match absurdity {},

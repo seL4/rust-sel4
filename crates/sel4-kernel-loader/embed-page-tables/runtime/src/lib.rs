@@ -74,7 +74,8 @@ impl<'a> TablePtrs<'a> {
 
     unsafe fn rotate_each_entry_right(&self, n: u32) {
         for table in self.ptrs.iter() {
-            for entry in table.ptr.as_mut().unwrap().iter_mut() {
+            let entries = unsafe { table.ptr.as_mut().unwrap().iter_mut() };
+            for entry in entries {
                 *entry = entry.rotate_right(n);
             }
         }
@@ -82,7 +83,9 @@ impl<'a> TablePtrs<'a> {
 
     #[allow(clippy::missing_safety_doc)]
     pub unsafe fn finish_for_riscv(&self) {
-        self.rotate_each_entry_right(RISCV_ROTATE_RIGHT_FOR_FINISH);
+        unsafe {
+            self.rotate_each_entry_right(RISCV_ROTATE_RIGHT_FOR_FINISH);
+        }
     }
 }
 

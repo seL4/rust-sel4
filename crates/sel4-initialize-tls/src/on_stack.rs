@@ -18,10 +18,12 @@ impl TlsImage {
         with_alloca_ptr(
             self.reservation_layout().footprint(),
             |tls_reservation_start| {
-                self.initialize_reservation(tls_reservation_start);
                 let thread_pointer = tls_reservation_start
                     .wrapping_byte_add(self.reservation_layout().thread_pointer_offset());
-                (set_thread_pointer_fn)(thread_pointer as usize);
+                unsafe {
+                    self.initialize_reservation(tls_reservation_start);
+                    (set_thread_pointer_fn)(thread_pointer as usize);
+                }
                 f()
             },
         )
