@@ -7,7 +7,7 @@
 use num::NumCast;
 use object::read::elf::FileHeader;
 
-use sel4_synthetic_elf::{Builder, PatchValue, Segment, PF_W};
+use sel4_synthetic_elf::{Builder, PF_W, PatchValue, Segment};
 
 pub(crate) struct RenderElfArgs<'a> {
     pub(crate) data: &'a [u8],

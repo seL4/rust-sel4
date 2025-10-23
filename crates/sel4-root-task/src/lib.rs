@@ -133,6 +133,6 @@ pub mod _private {
     pub use crate::heap::_private as heap;
 
     pub use crate::{
-        declare_heap, declare_main, declare_root_task, entry::run_main, DEFAULT_STACK_SIZE,
+        DEFAULT_STACK_SIZE, declare_heap, declare_main, declare_root_task, entry::run_main,
     };
 }

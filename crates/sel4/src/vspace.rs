@@ -6,7 +6,7 @@
 //
 
 use crate::{
-    cap_type, CapType, CapTypeForObjectOfFixedSize, FrameObjectType, TranslationTableObjectType,
+    CapType, CapTypeForObjectOfFixedSize, FrameObjectType, TranslationTableObjectType, cap_type,
 };
 
 impl FrameObjectType {

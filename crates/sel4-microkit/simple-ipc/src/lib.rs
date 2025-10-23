@@ -13,7 +13,7 @@ use serde::{Deserialize, Serialize};
 use zerocopy::IntoBytes;
 
 use sel4_microkit_base::{
-    with_msg_regs, with_msg_regs_mut, Channel, MessageInfo, MessageLabel, MessageRegisterValue,
+    Channel, MessageInfo, MessageLabel, MessageRegisterValue, with_msg_regs, with_msg_regs_mut,
 };
 
 const MAX_MESSAGE_LABEL: MessageLabel =

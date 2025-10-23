@@ -36,7 +36,7 @@ compile_error!("unsupported architecture");
 
 mod set_thread_pointer;
 
-pub use set_thread_pointer::{SetThreadPointerFn, DEFAULT_SET_THREAD_POINTER_FN};
+pub use set_thread_pointer::{DEFAULT_SET_THREAD_POINTER_FN, SetThreadPointerFn};
 
 mod static_allocation;
 pub use static_allocation::*;

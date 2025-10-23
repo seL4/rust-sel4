@@ -18,15 +18,15 @@ use core::str;
 use embedded_hal_nb::serial::{self, Read as _, Write as _};
 
 use sel4_microkit::{
-    memory_region_symbol, protection_domain, Channel, ChannelSet, Handler, Infallible,
+    Channel, ChannelSet, Handler, Infallible, memory_region_symbol, protection_domain,
 };
 use sel4_microkit_driver_adapters::serial::client::{
     Client as SerialClient, Error as SerialClientError,
 };
 use sel4_microkit_simple_ipc as simple_ipc;
 use sel4_shared_memory::{
-    access::{ReadOnly, ReadWrite},
     SharedMemoryRef,
+    access::{ReadOnly, ReadWrite},
 };
 
 use banscii_artist_interface_types as artist;

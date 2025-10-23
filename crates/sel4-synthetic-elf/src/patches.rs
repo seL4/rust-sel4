@@ -6,8 +6,8 @@
 
 use std::fmt;
 
-use object::read::elf::{ElfFile, FileHeader};
 use object::read::ReadRef;
+use object::read::elf::{ElfFile, FileHeader};
 use object::{Endian, File, Object, ObjectSegment, ObjectSymbol};
 use thiserror::Error;
 

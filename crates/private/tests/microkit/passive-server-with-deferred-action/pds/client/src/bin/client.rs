@@ -7,7 +7,7 @@
 #![no_std]
 #![no_main]
 
-use sel4_microkit::{debug_println, protection_domain, Channel, ChannelSet, Handler, Infallible};
+use sel4_microkit::{Channel, ChannelSet, Handler, Infallible, debug_println, protection_domain};
 
 const SERVER: Channel = Channel::new(0);
 

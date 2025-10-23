@@ -4,11 +4,11 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
+use rsa::RsaPrivateKey;
 use rsa::pkcs1::DecodeRsaPrivateKey;
 use rsa::pkcs1v15::{Signature, SigningKey};
 use rsa::sha2::Sha256;
 use rsa::signature::Signer;
-use rsa::RsaPrivateKey;
 
 const PRIV_KEY_PEM: &str = include_str!(concat!(env!("OUT_DIR"), "/priv.pem"));
 

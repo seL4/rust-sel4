@@ -29,7 +29,7 @@ pub trait Timers: Clock {
     fn timer_layout(&mut self) -> Result<Self::TimerLayout, Self::Error>;
 
     fn set_timeout_on(&mut self, timer: Self::Timer, relative: Duration)
-        -> Result<(), Self::Error>;
+    -> Result<(), Self::Error>;
 
     fn clear_timeout_on(&mut self, timer: Self::Timer) -> Result<(), Self::Error>;
 }

@@ -9,8 +9,8 @@
 
 #![no_std]
 
-use core::future::{poll_fn, Future};
-use core::pin::{pin, Pin};
+use core::future::{Future, poll_fn};
+use core::pin::{Pin, pin};
 use core::task::{Context, Poll};
 
 use embedded_io_async as eio;

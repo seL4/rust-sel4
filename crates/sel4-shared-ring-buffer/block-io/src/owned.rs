@@ -9,11 +9,11 @@ use core::marker::PhantomData;
 use core::task::{Poll, Waker};
 
 use sel4_abstract_allocator::{AbstractAllocator, AbstractAllocatorAllocation};
-use sel4_async_block_io::{access::Access, Operation};
+use sel4_async_block_io::{Operation, access::Access};
 use sel4_shared_memory::SharedMemoryRef;
 use sel4_shared_ring_buffer::{
-    roles::Provide, Descriptor, PeerMisbehaviorError as SharedRingBuffersPeerMisbehaviorError,
-    RingBuffers,
+    Descriptor, PeerMisbehaviorError as SharedRingBuffersPeerMisbehaviorError, RingBuffers,
+    roles::Provide,
 };
 use sel4_shared_ring_buffer_block_io_types::{
     BlockIORequest, BlockIORequestStatus, BlockIORequestType,

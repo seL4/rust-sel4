@@ -6,8 +6,8 @@
 
 use core::fmt::Debug;
 
-use rustls::unbuffered::{EncodeError, EncryptError};
 use rustls::Error as TlsError;
+use rustls::unbuffered::{EncodeError, EncryptError};
 
 use sel4_async_io::{Error as AsyncIOError, ErrorKind};
 

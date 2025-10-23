@@ -10,12 +10,12 @@ use std::marker::PhantomData;
 use std::str::FromStr;
 
 use proc_macro2::TokenStream;
-use quote::{quote, quote_spanned, ToTokens};
+use quote::{ToTokens, quote, quote_spanned};
 use syn::{parse2, spanned::Spanned};
 
 use sel4_config_types::{Key, Value};
 
-use super::{parse_or_return, MacroImpls};
+use super::{MacroImpls, parse_or_return};
 
 impl MacroImpls<'_> {
     pub fn cfg_generic_impl<T>(

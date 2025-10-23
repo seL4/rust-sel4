@@ -42,8 +42,8 @@ pub use object_name::{
     IndirectObjectName, ObjectName, ObjectNamesLevel, SelfContainedObjectName, Unnamed,
 };
 pub use spec::{
-    cap, object, AsidSlotEntry, Badge, CPtr, Cap, CapSlot, CapTableEntry, IrqEntry, NamedObject,
-    Object, ObjectId, Rights, Spec, TryFromCapError, TryFromObjectError, UntypedCover, Word,
+    AsidSlotEntry, Badge, CPtr, Cap, CapSlot, CapTableEntry, IrqEntry, NamedObject, Object,
+    ObjectId, Rights, Spec, TryFromCapError, TryFromObjectError, UntypedCover, Word, cap, object,
 };
 
 #[cfg(feature = "alloc")]

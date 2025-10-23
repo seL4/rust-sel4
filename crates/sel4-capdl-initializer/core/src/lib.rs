@@ -16,9 +16,8 @@ use core::slice;
 use log::{debug, info, trace};
 
 use sel4::{
-    cap_type,
+    CapRights, CapTypeForFrameObjectOfFixedSize, cap_type,
     init_thread::{self, Slot},
-    CapRights, CapTypeForFrameObjectOfFixedSize,
 };
 use sel4_capdl_initializer_types::*;
 
@@ -32,7 +31,7 @@ pub use buffers::{InitializerBuffers, PerObjectBuffer};
 use cslot_allocator::{CSlotAllocator, CSlotAllocatorError};
 pub use error::CapDLInitializerError;
 use hold_slots::HoldSlots;
-use memory::{get_user_image_frame_slot, CopyAddrs};
+use memory::{CopyAddrs, get_user_image_frame_slot};
 
 #[sel4::sel4_cfg(all(ARCH_RISCV64, not(PT_LEVELS = "3")))]
 compile_error!("unsupported configuration");

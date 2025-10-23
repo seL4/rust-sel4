@@ -8,7 +8,7 @@ use core::mem;
 use core::ops::Range;
 use core::slice;
 
-use sel4_bitfield_ops::{get_bits, set_bits, set_bits_from_slice, PrimInt, UnsignedPrimInt};
+use sel4_bitfield_ops::{PrimInt, UnsignedPrimInt, get_bits, set_bits, set_bits_from_slice};
 
 use crate::{seL4_CPtr, seL4_IPCBuffer, seL4_Word};
 

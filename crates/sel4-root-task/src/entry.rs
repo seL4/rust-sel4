@@ -6,7 +6,7 @@
 
 use core::panic::UnwindSafe;
 
-use crate::{abort, panicking::catch_unwind, Termination};
+use crate::{Termination, abort, panicking::catch_unwind};
 
 sel4_runtime_common::declare_entrypoint! {
     (bootinfo: *const sel4::BootInfo) -> ! {

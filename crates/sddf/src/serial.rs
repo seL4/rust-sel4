@@ -15,9 +15,9 @@ use core::sync::atomic::Ordering;
 
 use sddf_sys as sys;
 use sel4_shared_memory::access::*;
-use sel4_shared_memory::{map_field, SharedMemoryPtr, SharedMemoryRef};
+use sel4_shared_memory::{SharedMemoryPtr, SharedMemoryRef, map_field};
 
-use crate::{common::*, Config};
+use crate::{Config, common::*};
 
 type Result<T> = core::result::Result<T, PeerMisbehaviorError>;
 

@@ -9,7 +9,7 @@ use core::fmt;
 use core::hash::Hash;
 use core::marker::PhantomData;
 
-use crate::{sys, InvocationContext, IpcBuffer, NoExplicitInvocationContext, WORD_SIZE};
+use crate::{InvocationContext, IpcBuffer, NoExplicitInvocationContext, WORD_SIZE, sys};
 
 /// The raw bits of a capability pointer.
 pub type CPtrBits = sys::seL4_CPtr;

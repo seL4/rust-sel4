@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: MIT
 //
 
-use crate::{newtype_methods, sys, Word, WORD_SIZE};
+use crate::{WORD_SIZE, Word, newtype_methods, sys};
 
 /// Corresponds to `seL4_CNode_CapData`.
 #[derive(Debug, Clone, PartialEq, Eq)]

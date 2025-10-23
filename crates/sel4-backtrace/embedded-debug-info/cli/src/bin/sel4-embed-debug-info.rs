@@ -10,7 +10,7 @@ use std::io;
 use clap::{Arg, Command};
 use num::NumCast;
 
-use sel4_synthetic_elf::{object, Builder, PatchValue, Segment};
+use sel4_synthetic_elf::{Builder, PatchValue, Segment, object};
 
 fn main() -> Result<(), io::Error> {
     let matches = Command::new("")

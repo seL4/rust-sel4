@@ -17,11 +17,11 @@ use core::time::Duration;
 use embedded_io_async::ReadExactError;
 use futures::future::{self, LocalBoxFuture};
 use futures::task::LocalSpawnExt;
+use rustls::ServerConfig;
 use rustls::pki_types::{PrivateKeyDer, UnixTime};
 use rustls::version::TLS12;
-use rustls::ServerConfig;
 
-use sel4_async_block_io::{access::ReadOnly, constant_block_sizes, BlockIO};
+use sel4_async_block_io::{BlockIO, access::ReadOnly, constant_block_sizes};
 use sel4_async_block_io_fat as fat;
 use sel4_async_io::EmbeddedIOAsyncAdapter;
 use sel4_async_network::{ManagedInterface, TcpSocket, TcpSocketError};

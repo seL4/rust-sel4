@@ -5,8 +5,8 @@
 //
 
 use unwinding::custom_eh_frame_finder::{
-    set_custom_eh_frame_finder, EhFrameFinder, FrameInfo, FrameInfoKind,
-    SetCustomEhFrameFinderError,
+    EhFrameFinder, FrameInfo, FrameInfoKind, SetCustomEhFrameFinderError,
+    set_custom_eh_frame_finder,
 };
 
 use sel4_elf_header::{PT_GNU_EH_FRAME, PT_LOAD};

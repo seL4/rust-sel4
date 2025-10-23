@@ -18,7 +18,7 @@ use core::slice;
 
 use sel4_dlmalloc::StaticHeapBounds;
 use sel4_immediate_sync_once_cell::ImmediateSyncOnceCell;
-use sel4_panicking_env::{abort, AbortInfo};
+use sel4_panicking_env::{AbortInfo, abort};
 use sel4_simple_task_runtime_config_types::{RuntimeConfig, RuntimeThreadConfig};
 use sel4_simple_task_threading::StaticThread;
 

@@ -8,7 +8,7 @@
 #![no_main]
 
 use sel4_microkit::{
-    protection_domain, Channel, ChannelSet, DeferredAction, DeferredActionSlot, Handler, Infallible,
+    Channel, ChannelSet, DeferredAction, DeferredActionSlot, Handler, Infallible, protection_domain,
 };
 
 const CLIENT: Channel = Channel::new(0);

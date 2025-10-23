@@ -9,7 +9,7 @@
 use core::ptr;
 use core::slice;
 
-use sel4_backtrace_addr2line_context_helper::{new_context, Context, Error};
+use sel4_backtrace_addr2line_context_helper::{Context, Error, new_context};
 
 #[unsafe(no_mangle)]
 #[unsafe(link_section = ".data")]

@@ -5,9 +5,9 @@
 //
 
 use crate::{
-    cap_type, const_helpers::u32_into_usize, sys, CapTypeForFrameObject,
-    CapTypeForFrameObjectOfFixedSize, CapTypeForTranslationTableObject, ObjectBlueprint,
-    ObjectBlueprintX64, ObjectBlueprintX86,
+    CapTypeForFrameObject, CapTypeForFrameObjectOfFixedSize, CapTypeForTranslationTableObject,
+    ObjectBlueprint, ObjectBlueprintX64, ObjectBlueprintX86, cap_type,
+    const_helpers::u32_into_usize, sys,
 };
 
 /// Frame object types for this kernel configuration.

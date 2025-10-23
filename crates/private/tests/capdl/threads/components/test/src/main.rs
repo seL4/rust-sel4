@@ -16,7 +16,7 @@ use serde::{Deserialize, Serialize};
 
 use sel4_simple_task_config_types::*;
 use sel4_simple_task_runtime::{debug_println, main_json};
-use sel4_sync::{lock_api::Mutex, RawNotificationMutex};
+use sel4_sync::{RawNotificationMutex, lock_api::Mutex};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Config {

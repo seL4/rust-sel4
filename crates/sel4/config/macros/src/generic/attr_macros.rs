@@ -5,10 +5,10 @@
 //
 
 use proc_macro2::TokenStream;
-use quote::{quote, quote_spanned, ToTokens};
-use syn::{parse2, spanned::Spanned, Token};
+use quote::{ToTokens, quote, quote_spanned};
+use syn::{Token, parse2, spanned::Spanned};
 
-use super::{parse_or_return, Condition, MacroImpls};
+use super::{Condition, MacroImpls, parse_or_return};
 
 macro_rules! ensure_empty {
     ($tokenstream:ident) => {
@@ -146,8 +146,9 @@ impl<'a> Helper<'a> {
         let synthetic_attr = self.impls.synthetic_attr();
         let key = |attr: &syn::Attribute| !attr.path().is_ident(synthetic_attr);
         attrs.sort_by_key(key);
-        attrs.drain(attrs.partition_point(key)..).all(|attr| {
-            match attr.parse_args::<Condition>() {
+        attrs
+            .drain(attrs.partition_point(key)..)
+            .all(|attr| match attr.parse_args::<Condition>() {
                 Ok(cond) => {
                     let r = self.impls.eval(&cond);
                     match r {
@@ -162,8 +163,7 @@ impl<'a> Helper<'a> {
                     self.report_err(err.to_compile_error());
                     false
                 }
-            }
-        })
+            })
     }
 
     fn filter_punctuated<T, P>(

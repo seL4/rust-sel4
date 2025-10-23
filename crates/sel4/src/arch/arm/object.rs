@@ -10,8 +10,8 @@ use core::ffi::c_uint;
 use sel4_config::{sel4_cfg_enum, sel4_cfg_wrap_match};
 
 use crate::{
-    const_helpers::u32_into_usize, sys, ObjectBlueprint, ObjectBlueprintSeL4Arch, ObjectType,
-    ObjectTypeSeL4Arch,
+    ObjectBlueprint, ObjectBlueprintSeL4Arch, ObjectType, ObjectTypeSeL4Arch,
+    const_helpers::u32_into_usize, sys,
 };
 
 /// Alias for [`ObjectTypeArm`].

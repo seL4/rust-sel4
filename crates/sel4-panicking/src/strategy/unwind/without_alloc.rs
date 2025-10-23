@@ -8,7 +8,7 @@ use core::mem::{self, MaybeUninit};
 
 use unwinding::abi::*;
 
-use super::{drop_panic, foreign_exception, RUST_EXCEPTION_CLASS};
+use super::{RUST_EXCEPTION_CLASS, drop_panic, foreign_exception};
 
 struct CurrentException {
     exception_present: bool,

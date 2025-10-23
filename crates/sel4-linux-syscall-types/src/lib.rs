@@ -113,8 +113,8 @@ impl Syscall {
             args.next_arg().ok_or(ParseSyscallErrorInner::TooFewValues)
         }
 
-        use syscall_number::*;
         use Syscall::*;
+        use syscall_number::*;
 
         Ok(match sysnum {
             NR_LSEEK => Lseek {

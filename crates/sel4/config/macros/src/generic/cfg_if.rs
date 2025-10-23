@@ -7,9 +7,9 @@
 use proc_macro2::TokenStream;
 use quote::quote;
 use syn::{
+    Token,
     parse::{ParseStream, Parser},
     spanned::Spanned,
-    Token,
 };
 
 use super::{Condition, MacroImpls};
@@ -97,7 +97,7 @@ fn parse_condition(synthetic_attr: &str, input: syn::parse::ParseStream) -> syn:
             return Err(syn::Error::new(
                 attrs[1].span(),
                 "expected just one attribute",
-            ))
+            ));
         }
     };
     if !attr.path().is_ident(synthetic_attr) {

@@ -32,9 +32,5 @@ pub(crate) const fn u32_into_word(x: u32) -> Word {
 
 #[sel4_cfg_attr(not(KERNEL_MCS), allow(dead_code))]
 pub(crate) const fn usize_max(x: usize, y: usize) -> usize {
-    if x >= y {
-        x
-    } else {
-        y
-    }
+    if x >= y { x } else { y }
 }

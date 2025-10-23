@@ -12,7 +12,7 @@ use core::sync::atomic::{AtomicU32, Ordering};
 
 use zerocopy::{FromBytes, IntoBytes};
 
-use sel4_shared_memory::{map_field, SharedMemoryPtr, SharedMemoryRef};
+use sel4_shared_memory::{SharedMemoryPtr, SharedMemoryRef, map_field};
 
 pub mod roles;
 

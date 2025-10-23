@@ -10,7 +10,7 @@
 use core::ptr;
 
 use sel4::CapTypeForObjectOfFixedSize;
-use sel4_root_task::{root_task, Never};
+use sel4_root_task::{Never, root_task};
 
 mod device;
 

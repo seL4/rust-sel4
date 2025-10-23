@@ -129,6 +129,6 @@ pub mod _private {
     pub use crate::heap::_private as heap;
 
     pub use crate::{
-        declare_heap, declare_init, declare_protection_domain, entry::run_main, DEFAULT_STACK_SIZE,
+        DEFAULT_STACK_SIZE, declare_heap, declare_init, declare_protection_domain, entry::run_main,
     };
 }

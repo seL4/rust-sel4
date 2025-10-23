@@ -7,11 +7,11 @@
 use std::fs::{self, File};
 
 use anyhow::Result;
-use num::{traits::WrappingSub, Integer, PrimInt};
+use num::{Integer, PrimInt, traits::WrappingSub};
 use object::{
+    Endianness,
     elf::{FileHeader32, FileHeader64},
     read::elf::FileHeader,
-    Endianness,
 };
 use serde::Serialize;
 
@@ -54,9 +54,9 @@ fn main() -> Result<()> {
 fn continue_with_word_size<T>(args: &Args) -> Result<()>
 where
     T: FileHeader<
-        Word: PrimInt + WrappingSub + Integer + Serialize + PatchValue,
-        Endian = Endianness,
-    >,
+            Word: PrimInt + WrappingSub + Integer + Serialize + PatchValue,
+            Endian = Endianness,
+        >,
 {
     let loader_bytes = fs::read(&args.loader_path)?;
 

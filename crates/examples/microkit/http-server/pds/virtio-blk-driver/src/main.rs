@@ -17,18 +17,18 @@ use core::ptr::NonNull;
 use virtio_drivers::{
     device::blk::*,
     transport::{
-        mmio::{MmioTransport, VirtIOHeader},
         DeviceType, Transport,
+        mmio::{MmioTransport, VirtIOHeader},
     },
 };
 
 use sel4_microkit::{
-    memory_region_symbol, protection_domain, var, Channel, ChannelSet, Handler, Infallible,
-    MessageInfo,
+    Channel, ChannelSet, Handler, Infallible, MessageInfo, memory_region_symbol, protection_domain,
+    var,
 };
 use sel4_microkit_driver_adapters::block::driver::handle_client_request;
 use sel4_shared_memory::SharedMemoryRef;
-use sel4_shared_ring_buffer::{roles::Use, RingBuffers};
+use sel4_shared_ring_buffer::{RingBuffers, roles::Use};
 use sel4_shared_ring_buffer_block_io_types::{
     BlockIORequest, BlockIORequestStatus, BlockIORequestType,
 };

@@ -12,10 +12,10 @@ use std::ops::Range;
 use std::path::PathBuf;
 
 use object::{
+    ReadRef,
     elf::PT_LOAD,
     endian::Endianness,
     read::elf::{ElfFile, ProgramHeader},
-    ReadRef,
 };
 use proc_macro2::TokenStream;
 use quote::format_ident;
@@ -23,7 +23,7 @@ use quote::format_ident;
 use sel4_build_env::{get_libsel4_include_dirs, get_with_sel4_prefix_relative_fallback};
 use sel4_config::{sel4_cfg, sel4_cfg_if, sel4_cfg_str, sel4_cfg_usize};
 use sel4_kernel_loader_embed_page_tables::{
-    schemes, LeafLocation, Region, RegionsBuilder, Scheme, SchemeHelpers,
+    LeafLocation, Region, RegionsBuilder, Scheme, SchemeHelpers, schemes,
 };
 use sel4_platform_info::PLATFORM_INFO;
 

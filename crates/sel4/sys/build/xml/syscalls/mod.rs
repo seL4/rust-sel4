@@ -9,7 +9,7 @@ use std::path::Path;
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
 
-use super::{parse_xml, Condition};
+use super::{Condition, parse_xml};
 
 mod parse;
 

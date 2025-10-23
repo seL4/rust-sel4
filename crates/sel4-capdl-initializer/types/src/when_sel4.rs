@@ -6,7 +6,7 @@
 
 use sel4::{ObjectBlueprint, VmAttributes};
 
-use crate::{cap, Badge, Cap, FillEntryContentBootInfoId, Object, Rights};
+use crate::{Badge, Cap, FillEntryContentBootInfoId, Object, Rights, cap};
 
 impl<D, M> Object<'_, D, M> {
     pub fn blueprint(&self) -> Option<ObjectBlueprint> {
@@ -132,11 +132,7 @@ sel4::sel4_cfg_if! {
 }
 
 pub fn vm_attributes_from_whether_cached(cached: bool) -> VmAttributes {
-    if cached {
-        CACHED
-    } else {
-        UNCACHED
-    }
+    if cached { CACHED } else { UNCACHED }
 }
 
 fn default_vm_attributes_for_page_table() -> VmAttributes {
