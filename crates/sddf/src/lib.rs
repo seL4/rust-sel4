@@ -22,7 +22,7 @@ macro_rules! config {
 
         #[allow(non_upper_case_globals)]
         #[unsafe(no_mangle)]
-        #[link_section = $section]
+        #[unsafe(link_section = $section)]
         static $symbol: ImmutableCell<UncheckedConfig<$ty>> =
             ImmutableCell::new(UncheckedConfig::uninit());
 
