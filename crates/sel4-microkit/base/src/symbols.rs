@@ -59,7 +59,7 @@ macro_rules! var {
         #[allow(non_upper_case_globals)]
         $(#[$attrs])*
         #[unsafe(no_mangle)]
-        #[link_section = ".data"]
+        #[unsafe(link_section = ".data")]
         static $symbol: ImmutableCell<$ty> = ImmutableCell::new($default);
 
         $symbol.get()

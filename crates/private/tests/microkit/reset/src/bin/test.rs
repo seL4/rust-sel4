@@ -15,10 +15,10 @@ const INIT: usize = 1337;
 
 static mut NOT_PERSISTENT: usize = INIT;
 
-#[link_section = ".persistent"]
+#[unsafe(link_section = ".persistent")]
 static mut PERSISTENT: usize = INIT;
 
-#[link_section = ".persistent"]
+#[unsafe(link_section = ".persistent")]
 static mut RESET_COUNT: usize = 0;
 
 #[protection_domain]

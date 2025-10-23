@@ -11,19 +11,19 @@ use sel4_immutable_cell::ImmutableCell;
 use sel4_kernel_loader_payload_types::*;
 
 #[unsafe(no_mangle)]
-#[link_section = ".data"]
+#[unsafe(link_section = ".data")]
 static loader_payload_start: ImmutableCell<usize> = ImmutableCell::new(0);
 
 #[unsafe(no_mangle)]
-#[link_section = ".data"]
+#[unsafe(link_section = ".data")]
 static loader_payload_size: ImmutableCell<usize> = ImmutableCell::new(0);
 
 #[unsafe(no_mangle)]
-#[link_section = ".data"]
+#[unsafe(link_section = ".data")]
 static loader_image_start: ImmutableCell<usize> = ImmutableCell::new(0);
 
 #[unsafe(no_mangle)]
-#[link_section = ".data"]
+#[unsafe(link_section = ".data")]
 static loader_image_end: ImmutableCell<usize> = ImmutableCell::new(0);
 
 pub(crate) fn get_payload() -> (Payload<usize>, &'static [u8]) {
