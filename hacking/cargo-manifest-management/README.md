@@ -65,7 +65,7 @@ Here is an example `Cargo.nix`:
 [package]
 name = "foo"
 version = "1.2.3"
-edition = 2021
+edition = 2024
 
 [dependencies]
 log = { version = "0.4", default-features = false }

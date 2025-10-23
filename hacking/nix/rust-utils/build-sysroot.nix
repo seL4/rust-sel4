@@ -37,7 +37,7 @@ let
   manifest = crateUtils.toTOMLFile "Cargo.toml" (crateUtils.clobber [
     {
       package = package // {
-        edition = "2021";
+        edition = "2024";
       };
       lib.path = crateUtils.dummyLibWithoutStdInSrc;
     }
