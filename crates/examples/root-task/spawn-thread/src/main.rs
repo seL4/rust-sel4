@@ -213,7 +213,7 @@ impl SecondaryThreadFn {
 // // //
 
 fn get_tls_image() -> TlsImage {
-    extern "C" {
+    unsafe extern "C" {
         static __ehdr_start: ElfHeader;
     }
     let phdrs = unsafe {
@@ -255,7 +255,7 @@ fn get_user_image_frame_slot(
     bootinfo: &sel4::BootInfo,
     addr: usize,
 ) -> sel4::init_thread::Slot<sel4::cap_type::Granule> {
-    extern "C" {
+    unsafe extern "C" {
         static __executable_start: usize;
     }
     let user_image_addr = ptr::addr_of!(__executable_start) as usize;

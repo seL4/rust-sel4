@@ -10,7 +10,7 @@ pub fn run_test_main() {
     }
 }
 
-extern "C" {
+unsafe extern "C" {
     fn main(argc: isize, argv: *const *const u8);
 }
 

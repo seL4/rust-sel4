@@ -152,7 +152,7 @@ macro_rules! maybe_extern_var {
 #[cfg(feature = "extern-symbols")]
 macro_rules! maybe_extern_var {
     ($symbol:ident: $ty:ty = $default:expr) => {{
-        extern "C" {
+        unsafe extern "C" {
             static $symbol: $ty;
         }
 
@@ -193,7 +193,7 @@ pub fn pd_name() -> Result<&'static str, Utf8Error> {
 
 /// Returns a pointer to the protection domain's [`sel4::IpcBuffer`].
 pub fn ipc_buffer_ptr() -> *mut sel4::IpcBuffer {
-    extern "C" {
+    unsafe extern "C" {
         static mut __sel4_ipc_buffer_obj: sel4::IpcBuffer;
     }
 

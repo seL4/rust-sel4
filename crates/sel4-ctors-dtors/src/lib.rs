@@ -17,7 +17,7 @@ use core::slice;
 
 type ArrayEntry = unsafe extern "C" fn();
 
-extern "C" {
+unsafe extern "C" {
     static __preinit_array_start: ArrayEntry;
     static __preinit_array_end: ArrayEntry;
     static __init_array_start: ArrayEntry;

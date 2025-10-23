@@ -23,7 +23,7 @@ extern "C" fn arch_secondary_main() -> ! {
     secondary_main(())
 }
 
-extern "C" {
+unsafe extern "C" {
     fn switch_translation_tables();
 }
 

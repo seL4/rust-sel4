@@ -62,7 +62,7 @@ macro_rules! maybe_extern {
     { $ident:ident: $ty:ty = $init:expr; } => {
         cfg_if::cfg_if! {
             if #[cfg(feature = "extern-state")] {
-                extern "C" {
+                unsafe extern "C" {
                     maybe_add_thread_local_attr! {
                         static $ident: $ty;
                     }

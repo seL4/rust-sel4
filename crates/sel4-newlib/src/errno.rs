@@ -11,7 +11,7 @@ use core::ffi::c_int;
 static mut errno: c_int = 0;
 
 #[cfg(not(feature = "errno"))]
-extern "C" {
+unsafe extern "C" {
     static mut errno: c_int;
 }
 

@@ -16,7 +16,7 @@ use crate::{arch::Arch, main, secondary_main};
 pub(crate) mod drivers;
 pub(crate) mod exception_handler;
 
-extern "C" {
+unsafe extern "C" {
     fn switch_translation_tables_el2();
 }
 

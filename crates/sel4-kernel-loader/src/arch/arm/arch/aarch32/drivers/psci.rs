@@ -10,7 +10,7 @@ use sel4_config::sel4_cfg_bool;
 
 type PsciFunc = unsafe extern "C" fn(id: usize, param1: usize, param2: usize, param3: usize) -> i32;
 
-extern "C" {
+unsafe extern "C" {
     fn smc_psci_func(id: usize, param1: usize, param2: usize, param3: usize) -> i32;
     fn hvc_psci_func(id: usize, param1: usize, param2: usize, param3: usize) -> i32;
 }
@@ -40,7 +40,7 @@ pub(crate) fn start_secondary_core(core_id: usize, sp: usize) {
 
 type PsciSecondaryEntryFn = extern "C" fn() -> !;
 
-extern "C" {
+unsafe extern "C" {
     fn psci_secondary_entry() -> !;
 }
 

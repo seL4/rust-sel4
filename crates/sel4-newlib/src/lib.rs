@@ -16,7 +16,7 @@ mod heap;
 
 pub use heap::StaticHeap;
 
-extern "C" {
+unsafe extern "C" {
     #[link_name = "srand"]
     fn newlib_srand(seed: c_uint);
 }
