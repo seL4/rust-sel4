@@ -144,10 +144,8 @@ impl<'a> Helper<'a> {
 
     fn process_attrs(&mut self, attrs: &mut Vec<syn::Attribute>) -> bool /* keep */ {
         let synthetic_attr = self.impls.synthetic_attr();
-        let key = |attr: &syn::Attribute| !attr.path().is_ident(synthetic_attr);
-        attrs.sort_by_key(key);
         attrs
-            .drain(attrs.partition_point(key)..)
+            .extract_if(.., |attr| attr.path().is_ident(synthetic_attr))
             .all(|attr| match attr.parse_args::<Condition>() {
                 Ok(cond) => {
                     let r = self.impls.eval(&cond);
