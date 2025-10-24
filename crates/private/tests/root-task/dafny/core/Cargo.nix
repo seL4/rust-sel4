@@ -16,6 +16,6 @@ mk {
     num = { version = versions.num; default-features = false; features = ["alloc"]; };
   };
   build-dependencies = {
-    inherit (versions) quote;
+    inherit (versions) proc-macro2 quote;
   };
 }

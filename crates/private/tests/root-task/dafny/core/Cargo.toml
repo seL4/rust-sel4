@@ -24,4 +24,5 @@ git = "https://github.com/coliasgroup/dafny.git"
 tag = "keep/02d0a578fdf594a38c7c72d7ad56e1a6"
 
 [build-dependencies]
+proc-macro2 = "1.0.89"
 quote = "1.0.37"
