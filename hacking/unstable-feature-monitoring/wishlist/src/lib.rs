@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-#![feature(cell_update)]
 #![feature(exclusive_wrapper)]
 #![feature(exposed_provenance)]
 #![feature(extract_if)]

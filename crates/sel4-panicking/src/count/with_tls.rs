@@ -30,17 +30,10 @@ pub(crate) fn count_panic() -> Option<MustAbort> {
     if PANIC_COUNT.get() == MAX_PANIC_DEPTH {
         return Some(MustAbort::MaxDepthExceeded);
     }
-    update(&PANIC_COUNT, |count| count + 1);
+    PANIC_COUNT.update(|count| count + 1);
     None
 }
 
 pub(crate) fn count_panic_caught() {
-    update(&PANIC_COUNT, |count| count - 1);
-}
-
-fn update<T: Copy>(cell: &Cell<T>, f: impl FnOnce(T) -> T) -> T {
-    let old = cell.get();
-    let new = f(old);
-    cell.set(new);
-    new
+    PANIC_COUNT.update(|count| count - 1);
 }

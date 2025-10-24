@@ -22,10 +22,6 @@ Replace:
 
 Simplify type of `sel4::init_thread::suspend_self`
 
-# `#![feature(cell_update)]`
-
-Remove `sel4_panicking::count::with_tls::update`
-
 # `#![feature(extract_if)]`
 
 Improve implementation of `sel4_config_generic::attr_macros::Helper::process_attrs` (see git blame)
