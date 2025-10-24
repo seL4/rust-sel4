@@ -44,6 +44,7 @@
 
 // Without these, the more invasive sel4_cfg_if! and sel4_cfg_wrap_match! must be used instead of
 // #[sel4_cfg] and #[sel4_cfg_match] on expressions and non-inline module declarations.
+// Also, proc_macro_hygiene will enable the use of sel4-mod-in-out-dir in tests-root-task-dafny-core.
 #![feature(proc_macro_hygiene)]
 #![feature(stmt_expr_attributes)]
 

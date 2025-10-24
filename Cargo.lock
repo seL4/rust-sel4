@@ -3340,7 +3340,7 @@ version = "0.1.0"
 dependencies = [
  "dafny_runtime",
  "num",
- "sel4-mod-in-out-dir",
+ "quote",
 ]
 
 [[package]]

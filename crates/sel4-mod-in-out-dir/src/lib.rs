@@ -31,6 +31,8 @@ use syn::{ItemMod, MetaNameValue, Result, parse_macro_input};
 /// #[in_out_dir(relative_path = "path/to/bar.rs")]
 /// mod foo;
 /// ```
+///
+/// Note that using this macro requires #[feature(proc_macro_hygiene)].
 #[proc_macro_attribute]
 pub fn in_out_dir(attr: TokenStream, item: TokenStream) -> TokenStream {
     let input = parse_macro_input!(attr as Input);
