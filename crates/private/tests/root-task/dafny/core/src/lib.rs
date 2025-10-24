@@ -11,7 +11,7 @@ use num::traits::cast::ToPrimitive;
 
 #[rustfmt::skip]
 mod translated {
-    include!(env!("TRANSLATED_CONTENTS_DST"));
+    include!(env!("TRANSLATED_OUT"));
 }
 
 pub fn max(a: usize, b: usize) -> usize {

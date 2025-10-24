@@ -3332,6 +3332,7 @@ version = "0.1.0"
 dependencies = [
  "dafny_runtime",
  "num",
+ "proc-macro2",
  "quote",
 ]
 
