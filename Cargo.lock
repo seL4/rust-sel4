@@ -2607,14 +2607,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "sel4-mod-in-out-dir"
-version = "0.1.0"
-dependencies = [
- "quote",
- "syn",
-]
-
-[[package]]
 name = "sel4-musl"
 version = "0.1.0"
 dependencies = [
