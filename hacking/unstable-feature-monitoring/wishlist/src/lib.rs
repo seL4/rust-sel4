@@ -29,9 +29,6 @@
     feature(riscv_ext_intrinsics),
 )]
 
-// For pointer::is_aligned_to. Stabilizes in 1.80.0.
-#![feature(pointer_is_aligned)]
-
 // For pointer::is_aligned_to
 //
 // For now, use:
