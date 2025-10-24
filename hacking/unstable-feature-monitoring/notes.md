@@ -22,10 +22,6 @@ Replace:
 
 Simplify type of `sel4::init_thread::suspend_self`
 
-# `#![feature(extract_if)]`
-
-Improve implementation of `sel4_config_generic::attr_macros::Helper::process_attrs` (see git blame)
-
 # `#![feature(array_try_from_fn)]`
 
 Improve implementation of `sel4_capdl_initializer_core::hold_slots::HoldSlots::new` (see git blame)
