@@ -18,8 +18,10 @@ license = "BSD-2-Clause"
 
 [dependencies]
 num = { version = "0.4.1", default-features = false, features = ["alloc"] }
-sel4-mod-in-out-dir = { path = "../../../../../sel4-mod-in-out-dir" }
 
 [dependencies.dafny_runtime]
 git = "https://github.com/coliasgroup/dafny.git"
 tag = "keep/02d0a578fdf594a38c7c72d7ad56e1a6"
+
+[build-dependencies]
+quote = "1.0.37"
