@@ -218,15 +218,14 @@ impl<A: AbstractAllocator> Inner<A> {
     pub(crate) fn consume_rx_start(&mut self, index: RxBufferIndex) -> NonNull<[u8]> {
         let desc = self.rx_buffers.get_common_value(index).unwrap();
         let start = desc.encoded_addr_range().start;
-        let len = match self
+        let RxOccupied::Claimed { len } = self
             .rx_buffers
             .get_state_value(index)
             .unwrap()
             .as_occupied()
             .unwrap()
-        {
-            RxOccupied::Claimed { len } => len,
-            _ => panic!(),
+        else {
+            panic!()
         };
         self.dma_region
             .as_mut_ptr()

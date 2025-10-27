@@ -153,13 +153,13 @@ fn mk_tls_config(
     now_unix_time: Duration,
     now_fn: impl 'static + Send + Sync + Fn() -> Instant,
 ) -> ServerConfig {
-    let cert_der = match rustls_pemfile::read_one_from_slice(cert_pem.as_bytes())
-        .unwrap()
-        .unwrap()
-        .0
-    {
-        rustls_pemfile::Item::X509Certificate(cert) => cert,
-        _ => panic!(),
+    let rustls_pemfile::Item::X509Certificate(cert_der) =
+        rustls_pemfile::read_one_from_slice(cert_pem.as_bytes())
+            .unwrap()
+            .unwrap()
+            .0
+    else {
+        panic!()
     };
 
     let key_der = match rustls_pemfile::read_one_from_slice(priv_pem.as_bytes())
