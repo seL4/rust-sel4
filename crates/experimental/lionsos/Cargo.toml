@@ -10,11 +10,13 @@
 #
 
 [package]
-name = "sddf-ipc-types"
+name = "lionsos"
 version = "0.1.0"
 authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
 edition = "2024"
 license = "BSD-2-Clause"
 
 [dependencies]
-sel4-microkit-base = { path = "../../../sel4-microkit/base", optional = true }
+lionsos-sys = { path = "sys" }
+sddf = { path = "../sddf" }
+sddf-sys = { path = "../sddf/sys" }

@@ -11,13 +11,13 @@ mk {
   package.links = "lions";
   dependencies = {
     inherit (localCrates)
-      sel4-sys
       sddf-sys
     ;
   };
   build-dependencies = {
     inherit (versions)
       bindgen
+      cc
     ;
   };
 }

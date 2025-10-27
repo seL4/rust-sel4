@@ -5,14 +5,13 @@
 //
 
 use std::env::{self, VarError};
+use std::fs;
 use std::path::PathBuf;
 
-const SEL4_INCLUDE_DIRS_ENV: &str = "DEP_SEL4_INCLUDE";
-
+const SEL4_INCLUDE_DIRS_ENV: &str = "SEL4_INCLUDE_DIRS";
 const SDDF_INCLUDE_DIRS_ENV: &str = "SDDF_INCLUDE_DIRS";
 
 const HEADER_CONTENTS: &str = r#"
-    // HACK shouldn't be necessary
     #include <stdint.h>
 
     #include <sddf/benchmark/bench.h>
@@ -27,36 +26,49 @@ const HEADER_CONTENTS: &str = r#"
     #include <sddf/network/queue.h>
     #include <sddf/serial/config.h>
     #include <sddf/serial/queue.h>
+    #include <sddf/timer/client.h>
     #include <sddf/timer/config.h>
     #include <sddf/timer/protocol.h>
 "#;
 
 #[rustfmt::skip]
 const ALLOWLIST: &[&str] = &[
-    "blk_.*",
-    "BLK_.*",
-    "SDDF_BLK_.*",
-    "net_.*",
-    "gpu_.*",
-    "GPU_.*",
+    "sddf_.*",
+
     "region_.*",
     "device_.*",
     "DEVICE_.*",
-    "serial_.*",
-    "SDDF_SERIAL_.*",
+
     "timer_.*",
     "SDDF_TIMER_.*",
+
+    "serial_.*",
+    "SDDF_SERIAL_.*",
+
+    "blk_.*",
+    "BLK_.*",
+    "SDDF_BLK_.*",
+
+    "net_.*",
+
+    "gpu_.*",
+    "GPU_.*",
 ];
 
 #[rustfmt::skip]
 const BLOCKLIST: &[&str] = &[
-    // TODO
-    "SDDF_.*_MAGIC",
 ];
 
 fn main() {
+    let out_dir = env::var("OUT_DIR").unwrap();
+
     let libsel4_include_dirs = get_dirs(SEL4_INCLUDE_DIRS_ENV);
     let libsddf_include_dirs = get_dirs(SDDF_INCLUDE_DIRS_ENV);
+
+    let include_dirs = [libsel4_include_dirs.iter(), libsddf_include_dirs.iter()]
+        .into_iter()
+        .flatten()
+        .collect::<Vec<_>>();
 
     let target_arch = env::var("CARGO_CFG_TARGET_ARCH").unwrap();
     let clang_target = match target_arch.as_str() {
@@ -66,25 +78,37 @@ fn main() {
         arch => arch,
     };
 
+    let static_fns_path = PathBuf::from(&out_dir).join("static_fns.c");
+    let static_fns_with_header_path = PathBuf::from(&out_dir).join("static_fns_with_header.c");
+    let static_fns_with_header_contents = format!(
+        "{HEADER_CONTENTS}\n#include \"{}\"\n",
+        static_fns_path.display()
+    );
+    fs::write(
+        &static_fns_with_header_path,
+        static_fns_with_header_contents,
+    )
+    .unwrap();
+
     let mut builder = bindgen::Builder::default()
         .header_contents("wrapper.h", HEADER_CONTENTS)
         .detect_include_paths(false)
         .clang_arg(format!("--target={clang_target}"))
         .clang_args(
-            [libsel4_include_dirs.iter(), libsddf_include_dirs.iter()]
-                .into_iter()
-                .flatten()
+            include_dirs
+                .iter()
                 .map(|d| format!("-I{}", d.as_path().display())),
         )
-        .ignore_functions()
-        .allowlist_recursively(false);
+        .generate_inline_functions(true)
+        .wrap_static_fns(true)
+        .wrap_static_fns_path(&static_fns_path);
 
-    for item in ALLOWLIST.iter() {
-        builder = builder.allowlist_item(item);
+    for pattern in ALLOWLIST.iter() {
+        builder = builder.allowlist_item(pattern);
     }
 
-    for item in BLOCKLIST.iter() {
-        builder = builder.blocklist_item(item);
+    for pattern in BLOCKLIST.iter() {
+        builder = builder.blocklist_item(pattern);
     }
 
     let bindings = builder
@@ -97,7 +121,6 @@ fn main() {
         .generate()
         .unwrap();
 
-    let out_dir = env::var("OUT_DIR").unwrap();
     let bindings_path = PathBuf::from(&out_dir).join("bindings.rs");
     bindings.write_to_file(bindings_path).unwrap();
 
@@ -109,6 +132,13 @@ fn main() {
             .collect::<Vec<_>>()
             .join(":")
     );
+
+    cc::Build::new()
+        .file(&static_fns_with_header_path)
+        .includes(include_dirs)
+        .flag("-Wno-sign-compare") // TODO
+        .flag("-Wno-unused-function") // TODO
+        .compile("sddf");
 }
 
 fn get_dirs(var: &str) -> Vec<PathBuf> {
