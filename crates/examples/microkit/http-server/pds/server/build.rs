@@ -17,5 +17,5 @@ fn main() {
     let cert_path = PathBuf::from(&out_dir).join("cert.pem");
     fs::write(cert_path, cert.cert.pem()).unwrap();
     let priv_path = PathBuf::from(&out_dir).join("priv.pem");
-    fs::write(priv_path, cert.key_pair.serialize_pem()).unwrap();
+    fs::write(priv_path, cert.signing_key.serialize_pem()).unwrap();
 }

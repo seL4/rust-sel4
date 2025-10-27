@@ -20,4 +20,4 @@ license = "BSD-2-Clause"
 sel4 = { path = "../../../../../../sel4" }
 sel4-simple-task-config-types = { path = "../../../../../support/sel4-simple-task/config-types" }
 sel4-simple-task-runtime = { path = "../../../../../support/sel4-simple-task/runtime" }
-serde = { version = "1.0.147", default-features = false, features = ["alloc", "derive"] }
+serde = { version = "1.0.228", default-features = false, features = ["alloc", "derive"] }

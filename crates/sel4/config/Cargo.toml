@@ -20,9 +20,9 @@ license = "BSD-2-Clause"
 sel4-config-macros = { path = "macros" }
 
 [build-dependencies]
-prettyplease = "0.2.25"
-proc-macro2 = "1.0.89"
-quote = "1.0.37"
+prettyplease = "0.2.37"
+proc-macro2 = "1.0.103"
+quote = "1.0.41"
 sel4-config-data = { path = "data" }
 sel4-config-types = { path = "types" }
-syn = { version = "2.0.85", features = ["parsing"] }
+syn = { version = "2.0.108", features = ["parsing"] }

@@ -17,6 +17,7 @@ mk rec {
       sel4-async-io
     ;
     inherit (versions) log embedded-io-async;
+    thiserror = { version = versions.thiserror; default-features = false; };
     rustls = rustlsWith [] // (localCrates.rustls or {});
   };
 }

@@ -19,21 +19,21 @@ license = "BSD-2-Clause"
 links = "sel4"
 
 [dependencies]
-log = "0.4.17"
+log = "0.4.28"
 sel4-bitfield-ops = { path = "../bitfield-ops" }
 sel4-config = { path = "../config" }
 
 [build-dependencies]
-bindgen = "0.71.1"
-glob = "0.3.0"
-pest = "2.4.1"
-pest_derive = "2.4.1"
-prettyplease = "0.2.25"
-proc-macro2 = "1.0.89"
-quote = "1.0.37"
-regex = "1.7.0"
+bindgen = "0.72.1"
+glob = "0.3.3"
+pest = "2.8.3"
+pest_derive = "2.8.3"
+prettyplease = "0.2.37"
+proc-macro2 = "1.0.103"
+quote = "1.0.41"
+regex = "1.12.2"
 sel4-build-env = { path = "../build-env" }
 sel4-config = { path = "../config" }
 sel4-config-data = { path = "../config/data" }
-syn = { version = "2.0.85", features = ["parsing"] }
+syn = { version = "2.0.108", features = ["parsing"] }
 xmltree = "0.11.0"

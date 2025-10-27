@@ -17,8 +17,8 @@ edition = "2024"
 license = "BSD-2-Clause"
 
 [dependencies]
-lock_api = "0.4.12"
-log = "0.4.17"
+lock_api = "0.4.14"
+log = "0.4.28"
 one-shot-mutex = "0.2.1"
 sel4-abstract-allocator = { path = "../../sel4-abstract-allocator" }
 sel4-abstract-rc = { path = "../../sel4-abstract-rc" }
@@ -27,6 +27,6 @@ sel4-shared-ring-buffer = { path = ".." }
 sel4-shared-ring-buffer-bookkeeping = { path = "../bookkeeping" }
 
 [dependencies.smoltcp]
-version = "0.11.0"
+version = "0.12.0"
 default-features = false
 features = ["proto-ipv4", "proto-dhcpv4", "proto-dns", "socket-dhcpv4", "socket-dns", "socket-tcp"]

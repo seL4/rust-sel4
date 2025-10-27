@@ -34,7 +34,7 @@ const NET_BUFFER_LEN: usize = 2048;
 #[protection_domain(
     heap_size = 512 * 1024,
 )]
-fn init() -> HandlerImpl<DeviceWrapper<HalImpl, MmioTransport>> {
+fn init() -> HandlerImpl<DeviceWrapper<HalImpl, MmioTransport<'static>>> {
     HalImpl::init(
         config::VIRTIO_NET_DRIVER_DMA_SIZE,
         *var!(virtio_net_driver_dma_vaddr: usize = 0),
@@ -47,7 +47,8 @@ fn init() -> HandlerImpl<DeviceWrapper<HalImpl, MmioTransport>> {
                 as *mut VirtIOHeader,
         )
         .unwrap();
-        let transport = unsafe { MmioTransport::new(header) }.unwrap();
+        let transport =
+            unsafe { MmioTransport::new(header, config::VIRTIO_NET_MMIO_SIZE) }.unwrap();
         assert_eq!(transport.device_type(), DeviceType::Network);
         VirtIONet::<HalImpl, MmioTransport, NET_QUEUE_SIZE>::new(transport, NET_BUFFER_LEN).unwrap()
     };

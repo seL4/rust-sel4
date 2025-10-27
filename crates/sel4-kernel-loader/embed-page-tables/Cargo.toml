@@ -17,6 +17,6 @@ edition = "2024"
 license = "BSD-2-Clause"
 
 [dependencies]
-bitfield = "0.17.0"
-proc-macro2 = "1.0.89"
-quote = "1.0.37"
+bitfield = "0.19.3"
+proc-macro2 = "1.0.103"
+quote = "1.0.41"

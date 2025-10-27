@@ -17,6 +17,6 @@ edition = "2024"
 license = "BSD-2-Clause"
 
 [dependencies]
-num = "0.4.1"
-object = { version = "0.36.5", features = ["all"] }
-thiserror = "1.0"
+num = "0.4.3"
+object = { version = "0.37.3", features = ["all"] }
+thiserror = "2.0.17"

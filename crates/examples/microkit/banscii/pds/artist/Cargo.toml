@@ -18,10 +18,10 @@ license = "BSD-2-Clause"
 
 [dependencies]
 banscii-artist-interface-types = { path = "interface-types" }
-rsa = { version = "0.9.6", default-features = false, features = ["pem", "sha2"] }
+rsa = { version = "0.9.8", default-features = false, features = ["pem", "sha2"] }
 sel4-microkit = { path = "../../../../../sel4-microkit", features = ["alloc"] }
 sel4-microkit-simple-ipc = { path = "../../../../../sel4-microkit/simple-ipc" }
 sel4-shared-memory = { path = "../../../../../sel4-shared-memory" }
 
 [build-dependencies]
-rsa = "0.9.6"
+rsa = "0.9.8"

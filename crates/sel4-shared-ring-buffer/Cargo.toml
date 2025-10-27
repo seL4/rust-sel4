@@ -17,6 +17,6 @@ edition = "2024"
 license = "BSD-2-Clause"
 
 [dependencies]
-log = "0.4.17"
+log = "0.4.28"
 sel4-shared-memory = { path = "../sel4-shared-memory", features = ["atomics"] }
-zerocopy = { version = "0.8.7", features = ["derive"] }
+zerocopy = { version = "0.8.27", features = ["derive"] }

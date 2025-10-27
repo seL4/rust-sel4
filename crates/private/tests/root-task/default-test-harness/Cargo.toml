@@ -17,7 +17,7 @@ edition = "2024"
 license = "BSD-2-Clause"
 
 [dependencies]
-log = "0.4.17"
+log = "0.4.28"
 
 [dev-dependencies.test]
 path = "../../../../sel4-root-task/default-test-harness"

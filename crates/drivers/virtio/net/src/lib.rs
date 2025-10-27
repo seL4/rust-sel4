@@ -90,7 +90,7 @@ pub struct VirtioRxToken<H: Hal, T: Transport>(Rc<RefCell<DeviceImpl<H, T>>>, Rx
 impl<H: Hal, T: Transport> RxToken for VirtioRxToken<H, T> {
     fn consume<R, F>(self, f: F) -> R
     where
-        F: FnOnce(&mut [u8]) -> R,
+        F: FnOnce(&[u8]) -> R,
     {
         let mut rx_buf = self.1;
         trace!(

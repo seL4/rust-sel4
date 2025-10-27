@@ -18,8 +18,8 @@ license = "BSD-2-Clause"
 links = "sddf"
 
 [dependencies]
-ptr_meta = { version = "0.3", default-features = false }
+ptr_meta = { version = "0.3.1", default-features = false }
 sel4-sys = { path = "../../sel4/sys" }
 
 [build-dependencies]
-bindgen = "0.71.1"
+bindgen = "0.72.1"

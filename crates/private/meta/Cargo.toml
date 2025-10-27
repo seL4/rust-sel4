@@ -21,8 +21,8 @@ sel4-microkit = ["dep:sel4-microkit", "sel4-microkit-simple-ipc"]
 sel4-root-task = ["dep:sel4-root-task"]
 
 [dependencies]
-cfg-if = "1.0.0"
-log = "0.4.17"
+cfg-if = "1.0.4"
+log = "0.4.28"
 sel4 = { path = "../../sel4" }
 sel4-abstract-allocator = { path = "../../sel4-abstract-allocator" }
 sel4-abstract-ptr = { path = "../../sel4-abstract-ptr" }

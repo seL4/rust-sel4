@@ -17,6 +17,6 @@ edition = "2024"
 license = "BSD-2-Clause"
 
 [dependencies]
-num_enum = { version = "0.7.3", default-features = false }
+num_enum = { version = "0.7.5", default-features = false }
 sel4-shared-ring-buffer = { path = "../.." }
-zerocopy = { version = "0.8.7", features = ["derive"] }
+zerocopy = { version = "0.8.27", features = ["derive"] }

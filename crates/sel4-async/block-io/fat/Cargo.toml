@@ -17,11 +17,11 @@ edition = "2024"
 license = "BSD-2-Clause"
 
 [dependencies]
-futures = { version = "0.3.28", default-features = false, features = ["alloc"] }
-heapless = "0.8.0"
+futures = { version = "0.3.31", default-features = false, features = ["alloc"] }
+heapless = "0.9.1"
 hex = { version = "0.4.3", default-features = false }
-log = "0.4.17"
-lru = "0.12.5"
+log = "0.4.28"
+lru = "0.16.2"
 sel4-async-block-io = { path = ".." }
 
 [dependencies.embedded-fat]

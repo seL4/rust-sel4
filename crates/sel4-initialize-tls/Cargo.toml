@@ -22,5 +22,5 @@ on-heap = ["alloc"]
 on-stack = ["sel4-alloca"]
 
 [dependencies]
-cfg-if = "1.0.0"
+cfg-if = "1.0.4"
 sel4-alloca = { path = "../sel4-alloca", optional = true }

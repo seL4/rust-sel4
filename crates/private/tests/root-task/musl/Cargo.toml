@@ -17,7 +17,7 @@ edition = "2024"
 license = "BSD-2-Clause"
 
 [dependencies]
-dlmalloc = "0.2.8"
+dlmalloc = "0.2.11"
 one-shot-mutex = "0.2.1"
 sel4 = { path = "../../../../sel4" }
 sel4-dlmalloc = { path = "../../../../sel4-dlmalloc" }

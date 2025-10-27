@@ -17,4 +17,4 @@ edition = "2024"
 license = "BSD-2-Clause"
 
 [build-dependencies]
-rustversion = "1.0.18"
+rustversion = "1.0.22"

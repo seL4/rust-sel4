@@ -17,7 +17,7 @@ edition = "2024"
 license = "BSD-2-Clause"
 
 [dependencies]
-heapless = { version = "0.8.0", features = ["serde"] }
-num-traits = { version = "0.2.16", default-features = false }
+heapless = { version = "0.9.1", features = ["serde"] }
+num-traits = { version = "0.2.19", default-features = false }
 sel4-platform-info-types = { path = "../../sel4-platform-info/types" }
-serde = { version = "1.0.147", default-features = false, features = ["derive"], optional = true }
+serde = { version = "1.0.228", default-features = false, features = ["derive"], optional = true }

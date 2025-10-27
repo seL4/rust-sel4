@@ -19,4 +19,4 @@ license = "BSD-2-Clause"
 [dependencies]
 sel4 = { path = "../../../sel4" }
 sel4-root-task = { path = "../../../sel4-root-task" }
-tock-registers = "0.9.0"
+tock-registers = "0.10.0"

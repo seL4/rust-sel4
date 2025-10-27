@@ -21,9 +21,9 @@ alloc = ["futures/alloc", "lru"]
 default = ["alloc"]
 
 [dependencies]
-bytemuck = { version = "1.4.0", default-features = false }
-futures = { version = "0.3.28", default-features = false }
-gpt_disk_types = { version = "0.16.0", features = ["bytemuck"] }
-log = "0.4.17"
-lru = { version = "0.12.5", optional = true }
-num_enum = { version = "0.7.3", default-features = false }
+bytemuck = { version = "1.24.0", default-features = false }
+futures = { version = "0.3.31", default-features = false }
+gpt_disk_types = { version = "0.16.1", features = ["bytemuck"] }
+log = "0.4.28"
+lru = { version = "0.16.2", optional = true }
+num_enum = { version = "0.7.5", default-features = false }
