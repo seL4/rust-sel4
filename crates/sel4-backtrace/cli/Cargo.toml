@@ -17,8 +17,8 @@ edition = "2024"
 license = "BSD-2-Clause"
 
 [dependencies]
-clap = "4.4.6"
+clap = "4.5.50"
 hex = "0.4.3"
-object = "0.36.5"
+object = "0.37.3"
 sel4-backtrace-addr2line-context-helper = { path = "../addr2line-context-helper" }
 sel4-backtrace-types = { path = "../types", features = ["full"] }

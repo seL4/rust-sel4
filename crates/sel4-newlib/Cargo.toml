@@ -26,8 +26,8 @@ errno = []
 nosys = []
 
 [dependencies]
-log = { version = "0.4.17", optional = true }
+log = { version = "0.4.28", optional = true }
 sel4-panicking-env = { path = "../sel4-panicking/env" }
 
 [build-dependencies]
-cc = { version = "1.0.76", optional = true }
+cc = { version = "1.2.43", optional = true }

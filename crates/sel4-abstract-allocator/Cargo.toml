@@ -21,4 +21,4 @@ alloc = []
 default = ["alloc"]
 
 [dependencies]
-log = "0.4.17"
+log = "0.4.28"

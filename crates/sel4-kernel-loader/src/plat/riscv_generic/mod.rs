@@ -59,7 +59,13 @@ fn get_hsm_exists() -> bool {
 fn start_all_harts() {
     for i in 0..sel4_cfg_usize!(MAX_NUM_NODES) {
         if i != sel4_cfg_usize!(FIRST_HART_ID) {
-            let _ = sbi::hart_state_management::hart_start(i, secondary_harts as usize, i);
+            let _ = unsafe {
+                sbi::hart_state_management::hart_start(
+                    i,
+                    sbi::PhysicalAddress::new(secondary_harts as usize),
+                    i,
+                )
+            };
         }
     }
 }

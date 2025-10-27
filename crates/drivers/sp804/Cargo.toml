@@ -18,4 +18,4 @@ license = "BSD-2-Clause"
 
 [dependencies]
 sel4-driver-interfaces = { path = "../../sel4-driver-interfaces" }
-tock-registers = "0.9.0"
+tock-registers = "0.10.0"

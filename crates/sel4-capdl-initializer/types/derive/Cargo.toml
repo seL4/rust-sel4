@@ -20,6 +20,6 @@ license = "BSD-2-Clause"
 proc-macro = true
 
 [dependencies]
-proc-macro2 = "1.0.89"
-quote = "1.0.37"
-syn = "2.0.85"
+proc-macro2 = "1.0.103"
+quote = "1.0.41"
+syn = "2.0.108"

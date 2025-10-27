@@ -17,11 +17,12 @@ edition = "2024"
 license = "BSD-2-Clause"
 
 [dependencies]
-log = "0.4.17"
+log = "0.4.28"
 sel4-async-io = { path = "../io" }
+thiserror = { version = "2.0.17", default-features = false }
 
 [dependencies.smoltcp]
-version = "0.11.0"
+version = "0.12.0"
 default-features = false
 features = [
     "proto-ipv4",

@@ -17,6 +17,6 @@ edition = "2024"
 license = "MIT OR Apache-2.0"
 
 [dependencies.addr2line]
-version = "0.24.2"
+version = "0.25.1"
 default-features = false
 features = ["rustc-demangle", "cpp_demangle", "fallible-iterator", "smallvec"]

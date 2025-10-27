@@ -17,4 +17,4 @@ edition = "2024"
 license = "MIT OR Apache-2.0"
 
 [dependencies]
-futures = { version = "0.3.28", default-features = false, features = ["alloc"] }
+futures = { version = "0.3.31", default-features = false, features = ["alloc"] }

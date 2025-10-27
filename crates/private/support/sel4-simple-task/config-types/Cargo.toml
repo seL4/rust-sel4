@@ -17,8 +17,8 @@ edition = "2024"
 license = "BSD-2-Clause"
 
 [dependencies]
-cfg-if = "1.0.0"
-serde = { version = "1.0.147", default-features = false, features = ["derive"] }
+cfg-if = "1.0.4"
+serde = { version = "1.0.228", default-features = false, features = ["derive"] }
 
 [target."cfg(target_os = \"none\")".dependencies]
 sel4 = { path = "../../../../sel4" }

@@ -18,11 +18,11 @@ license = "BSD-2-Clause"
 
 [dependencies]
 async-unsync = { version = "0.3.0", default-features = false }
-futures = { version = "0.3.28", default-features = false, features = ["async-await", "alloc"] }
-log = "0.4.17"
+futures = { version = "0.3.31", default-features = false, features = ["async-await", "alloc"] }
+log = "0.4.28"
 microkit-http-server-example-server-core = { path = "core", features = [] }
 one-shot-mutex = "0.2.1"
-rtcc = "0.3.2"
+rtcc = "0.4.0"
 sel4 = { path = "../../../../../sel4" }
 sel4-abstract-allocator = { path = "../../../../../sel4-abstract-allocator" }
 sel4-async-block-io = { path = "../../../../../sel4-async/block-io" }
@@ -50,7 +50,7 @@ path = "../../../../../sel4-shared-ring-buffer/block-io/types"
 path = "../../../../../sel4-shared-ring-buffer/bookkeeping"
 
 [dependencies.smoltcp]
-version = "0.11.0"
+version = "0.12.0"
 default-features = false
 features = [
     "proto-ipv4",
@@ -63,4 +63,4 @@ features = [
 ]
 
 [build-dependencies]
-rcgen = "0.13.1"
+rcgen = "0.14.5"

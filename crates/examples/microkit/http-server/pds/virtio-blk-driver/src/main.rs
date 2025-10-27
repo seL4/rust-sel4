@@ -58,7 +58,8 @@ fn init() -> HandlerImpl {
                 as *mut VirtIOHeader,
         )
         .unwrap();
-        let transport = unsafe { MmioTransport::new(header) }.unwrap();
+        let transport =
+            unsafe { MmioTransport::new(header, config::VIRTIO_BLK_MMIO_SIZE) }.unwrap();
         assert_eq!(transport.device_type(), DeviceType::Block);
         VirtIOBlk::<HalImpl, MmioTransport>::new(transport).unwrap()
     };
@@ -90,7 +91,7 @@ fn init() -> HandlerImpl {
 }
 
 struct HandlerImpl {
-    dev: VirtIOBlk<HalImpl, MmioTransport>,
+    dev: VirtIOBlk<HalImpl, MmioTransport<'static>>,
     client_region: SharedMemoryRef<'static, [u8]>,
     ring_buffers: RingBuffers<'static, Use, fn(), BlockIORequest>,
     pending: BTreeMap<u16, Pin<Box<PendingEntry>>>,

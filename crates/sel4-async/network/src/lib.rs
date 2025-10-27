@@ -20,9 +20,11 @@ use core::marker::PhantomData;
 use core::pin::Pin;
 use core::task::{self, Poll};
 
+use thiserror::Error;
+
 use log::info;
 use smoltcp::{
-    iface::{Config, Context, Interface, SocketHandle, SocketSet},
+    iface::{Config, Context, Interface, PollResult, SocketHandle, SocketSet},
     phy::Device,
     socket::{AnySocket, dhcpv4, dns, tcp},
     time::{Duration, Instant},
@@ -72,13 +74,19 @@ impl<T> Drop for Socket<T> {
     }
 }
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Error)]
 pub enum TcpSocketError {
+    #[error("invalid state")]
     InvalidState(tcp::State), // TODO just use InvalidState variants of below errors?
+    #[error("recv error: {0}")]
     RecvError(tcp::RecvError),
+    #[error("send error: {0}")]
     SendError(tcp::SendError),
+    #[error("listen error: {0}")]
     ListenError(tcp::ListenError),
+    #[error("connect error: {0}")]
     ConnectError(tcp::ConnectError),
+    #[error("connection reset during connect")]
     ConnectionResetDuringConnect,
 }
 
@@ -371,7 +379,8 @@ impl ManagedInterfaceShared {
     }
 
     fn poll<D: Device + ?Sized>(&mut self, timestamp: Instant, device: &mut D) -> bool {
-        let activity = self.iface.poll(timestamp, device, &mut self.socket_set);
+        let activity = self.iface.poll(timestamp, device, &mut self.socket_set)
+            == PollResult::SocketStateChanged;
         if activity {
             self.poll_dhcp();
         }

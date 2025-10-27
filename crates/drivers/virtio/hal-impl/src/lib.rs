@@ -27,11 +27,18 @@ struct State {
 
 impl State {
     fn offset_to_paddr(&self, offset: usize) -> PhysAddr {
-        self.dma_region_paddr.checked_add(offset).unwrap()
+        self.dma_region_paddr
+            .checked_add(offset)
+            .unwrap()
+            .try_into()
+            .unwrap()
     }
 
     fn paddr_to_offset(&self, paddr: PhysAddr) -> usize {
-        paddr.checked_sub(self.dma_region_paddr).unwrap()
+        usize::try_from(paddr)
+            .unwrap()
+            .checked_sub(self.dma_region_paddr)
+            .unwrap()
     }
 }
 

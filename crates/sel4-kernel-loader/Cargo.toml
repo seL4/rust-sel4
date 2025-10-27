@@ -17,11 +17,11 @@ edition = "2024"
 license = "BSD-2-Clause AND GPL-2.0-only"
 
 [dependencies]
-cfg-if = "1.0.0"
+cfg-if = "1.0.4"
 embedded-hal-nb = "1.0"
-heapless = { version = "0.8.0", features = ["serde"] }
-log = "0.4.17"
-postcard = { version = "1.0.2", default-features = false }
+heapless = { version = "0.9.1", features = ["serde"] }
+log = "0.4.28"
+postcard = { version = "1.1.3", default-features = false }
 sel4-config = { path = "../sel4/config" }
 sel4-immutable-cell = { path = "../sel4-immutable-cell" }
 sel4-kernel-loader-embed-page-tables-runtime = { path = "embed-page-tables/runtime" }
@@ -29,33 +29,33 @@ sel4-kernel-loader-payload-types = { path = "payload-types", features = ["serde"
 sel4-logging = { path = "../sel4-logging" }
 sel4-platform-info = { path = "../sel4-platform-info" }
 sel4-stack = { path = "../sel4-stack" }
-spin = { version = "0.9.4", features = ["lock_api"] }
+spin = { version = "0.10.0", features = ["lock_api"] }
 
 [build-dependencies]
-cc = "1.0.76"
-glob = "0.3.0"
-object = "0.36.5"
-postcard = { version = "1.0.2", default-features = false, features = ["alloc"] }
-prettyplease = "0.2.25"
-proc-macro2 = "1.0.89"
-quote = "1.0.37"
+cc = "1.2.43"
+glob = "0.3.3"
+object = "0.37.3"
+postcard = { version = "1.1.3", default-features = false, features = ["alloc"] }
+prettyplease = "0.2.37"
+proc-macro2 = "1.0.103"
+quote = "1.0.41"
 sel4-build-env = { path = "../sel4/build-env" }
 sel4-config = { path = "../sel4/config" }
 sel4-kernel-loader-config-types = { path = "config-types" }
 sel4-kernel-loader-embed-page-tables = { path = "embed-page-tables" }
 sel4-kernel-loader-payload-types = { path = "payload-types" }
 sel4-platform-info = { path = "../sel4-platform-info" }
-serde = "1.0.147"
-syn = { version = "2.0.85", features = ["parsing"] }
+serde = "1.0.228"
+syn = { version = "2.0.108", features = ["parsing"] }
 
 [target."cfg(any(target_arch = \"arm\", target_arch = \"aarch64\"))".dependencies]
 sel4-bcm2835-aux-uart-driver = { path = "../drivers/bcm2835-aux-uart" }
 sel4-pl011-driver = { path = "../drivers/pl011" }
 
 [target."cfg(any(target_arch = \"riscv32\", target_arch = \"riscv64\"))".dependencies]
-riscv = "0.12.1"
-sbi = "0.2.0"
+riscv = "0.15.0"
+sbi = "0.3.0"
 
 [target."cfg(target_arch = \"aarch64\")".dependencies]
-aarch64-cpu = "10.0.0"
-smccc = "0.1.1"
+aarch64-cpu = "11.1.0"
+smccc = "0.2.2"

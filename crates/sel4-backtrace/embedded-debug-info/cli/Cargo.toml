@@ -17,6 +17,6 @@ edition = "2024"
 license = "BSD-2-Clause"
 
 [dependencies]
-clap = "4.4.6"
-num = "0.4.1"
+clap = "4.5.50"
+num = "0.4.3"
 sel4-synthetic-elf = { path = "../../../sel4-synthetic-elf" }

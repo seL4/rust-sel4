@@ -20,9 +20,9 @@ license = "BSD-2-Clause"
 rustc_private = true
 
 [dependencies]
-cfg-if = "1.0.0"
-clap = "4.4.6"
-serde_json = "1.0.87"
+cfg-if = "1.0.4"
+clap = "4.5.50"
+serde_json = "1.0.145"
 
 [build-dependencies]
-rustversion = "1.0.18"
+rustversion = "1.0.22"

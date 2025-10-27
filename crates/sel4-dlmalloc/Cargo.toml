@@ -17,5 +17,5 @@ edition = "2024"
 license = "BSD-2-Clause"
 
 [dependencies]
-dlmalloc = "0.2.8"
-lock_api = "0.4.12"
+dlmalloc = "0.2.11"
+lock_api = "0.4.14"

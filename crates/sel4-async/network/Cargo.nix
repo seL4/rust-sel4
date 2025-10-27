@@ -11,6 +11,7 @@ mk {
   dependencies = {
     inherit (localCrates) sel4-async-io;
     inherit (versions) log;
+    thiserror = { version = versions.thiserror; default-features = false; };
     smoltcp = smoltcpWith [
       "async"
       "alloc"

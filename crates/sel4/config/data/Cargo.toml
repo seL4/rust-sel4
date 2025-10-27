@@ -17,11 +17,10 @@ edition = "2024"
 license = "BSD-2-Clause"
 
 [dependencies]
-lazy_static = "1.4.0"
 sel4-config-types = { path = "../types", features = ["serde"] }
-serde_json = "1.0.87"
+serde_json = "1.0.145"
 
 [build-dependencies]
 sel4-build-env = { path = "../../build-env" }
 sel4-config-types = { path = "../types", features = ["serde"] }
-serde_json = "1.0.87"
+serde_json = "1.0.145"

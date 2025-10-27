@@ -17,7 +17,8 @@ edition = "2024"
 license = "Apache-2.0 OR ISC OR MIT"
 
 [dependencies]
-embedded-io-async = "0.6.1"
-log = "0.4.17"
+embedded-io-async = "0.7.0"
+log = "0.4.28"
 rustls = { version = "0.23.5", default-features = false, features = ["logging", "ring", "tls12"] }
 sel4-async-io = { path = "../../io" }
+thiserror = { version = "2.0.17", default-features = false }

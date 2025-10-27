@@ -17,5 +17,5 @@ edition = "2024"
 license = "BSD-2-Clause"
 
 [dependencies]
-rtcc = "0.3.2"
-tock-registers = "0.9.0"
+rtcc = "0.4.0"
+tock-registers = "0.10.0"

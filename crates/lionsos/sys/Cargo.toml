@@ -22,4 +22,4 @@ sddf-sys = { path = "../../sddf/sys" }
 sel4-sys = { path = "../../sel4/sys" }
 
 [build-dependencies]
-bindgen = "0.71.1"
+bindgen = "0.72.1"

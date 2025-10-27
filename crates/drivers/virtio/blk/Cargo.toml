@@ -17,6 +17,6 @@ edition = "2024"
 license = "BSD-2-Clause"
 
 [dependencies]
-log = "0.4.17"
+log = "0.4.28"
 sel4-driver-interfaces = { path = "../../../sel4-driver-interfaces" }
-virtio-drivers = { version = "0.7.2", default-features = false }
+virtio-drivers = { version = "0.12.0", default-features = false }

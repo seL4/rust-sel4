@@ -17,12 +17,12 @@ edition = "2024"
 license = "BSD-2-Clause"
 
 [dependencies]
-num = { version = "0.4.1", default-features = false, features = ["alloc"] }
+num = { version = "0.4.3", default-features = false, features = ["alloc"] }
 
 [dependencies.dafny_runtime]
 git = "https://github.com/coliasgroup/dafny.git"
 tag = "keep/02d0a578fdf594a38c7c72d7ad56e1a6"
 
 [build-dependencies]
-proc-macro2 = "1.0.89"
-quote = "1.0.37"
+proc-macro2 = "1.0.103"
+quote = "1.0.41"

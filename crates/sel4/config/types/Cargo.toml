@@ -17,7 +17,7 @@ edition = "2024"
 license = "BSD-2-Clause"
 
 [dependencies.serde]
-version = "1.0.147"
+version = "1.0.228"
 default-features = false
 features = ["alloc", "derive"]
 optional = true

@@ -28,6 +28,6 @@ thread-local-state = []
 tls = []
 
 [dependencies]
-cfg-if = "1.0.0"
+cfg-if = "1.0.4"
 sel4-config = { path = "config" }
 sel4-sys = { path = "sys" }

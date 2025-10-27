@@ -135,7 +135,7 @@ pub struct RxToken<A: AbstractAllocator, R: RawMutex, P: AbstractRcT> {
 impl<A: AbstractAllocator, R: RawMutex, P: AbstractRcT> phy::RxToken for RxToken<A, R, P> {
     fn consume<T, F>(self, f: F) -> T
     where
-        F: FnOnce(&mut [u8]) -> T,
+        F: FnOnce(&[u8]) -> T,
     {
         let mut ptr = self.shared.inner().lock().consume_rx_start(self.buffer);
         let r = f(unsafe { ptr.as_mut() });

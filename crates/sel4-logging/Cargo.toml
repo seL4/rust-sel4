@@ -17,5 +17,5 @@ edition = "2024"
 license = "BSD-2-Clause"
 
 [dependencies]
-lock_api = "0.4.12"
-log = "0.4.17"
+lock_api = "0.4.14"
+log = "0.4.28"
