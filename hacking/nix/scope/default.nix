@@ -51,11 +51,13 @@ let
       elaborateRustEnvironmentSelector =
         { tracks ? "upstream"
         , upstream ? true
+        , custom ? null
         }:
         {
           inherit
             tracks
             upstream
+            custom
           ;
         };
     in {
@@ -114,12 +116,27 @@ superCallPackage ../rust-utils {} self //
 
   defaultRustEnvironment =
     let
-      inherit (scopeConfig.rustEnvironmentSelector) tracks upstream;
-    in {
-      upstream = assert upstream; defaultUpstreamRustEnvironment;
-      ferrocene = if upstream then ferrocene.upstreamRustEnvironment else ferrocene.rustEnvironment;
-      verus = assert upstream; verus.rustEnvironment;
-    }.${tracks};
+      inherit (scopeConfig.rustEnvironmentSelector) tracks upstream custom;
+    in
+      if custom != null
+      then
+        let
+          inherit (custom) channel sha256;
+        in
+          lib.fix (self: elaborateRustEnvironment (mkDefaultElaborateRustEnvironmentArgs {
+            rustToolchain = assembleRustToolchain
+              (parseStructuredChannel channel // builtins.removeAttrs custom ["channel"]);
+          } // {
+            inherit channel;
+            mkCustomTargetPath = mkMkCustomTargetPathForEnvironment {
+              rustEnvironment = self;
+            };
+          }))
+      else {
+        upstream = assert upstream; defaultUpstreamRustEnvironment;
+        ferrocene = if upstream then ferrocene.upstreamRustEnvironment else ferrocene.rustEnvironment;
+        verus = assert upstream; verus.rustEnvironment;
+      }.${tracks};
 
   defaultRustToolchain = defaultRustEnvironment.rustToolchain;
 
@@ -216,21 +233,9 @@ superCallPackage ../rust-utils {} self //
 
   mkMkCustomTargetPathForEnvironment = { rustEnvironment }:
     let
-      tool = buildCratesInLayers rec {
+      tool = mkGenerateTargetSpecs {
         inherit rustEnvironment;
-        rootCrate = crates.sel4-generate-target-specs;
-        lastLayerModifications = crateUtils.elaborateModifications {
-          # HACK
-          modifyDerivation = drv: drv.overrideAttrs (self: super: {
-            nativeBuildInputs = (super.nativeBuildInputs or []) ++ [ makeWrapper ];
-            postBuild = ''
-              wrapProgram $out/bin/${rootCrate.name} \
-                --prefix LD_LIBRARY_PATH : ${lib.makeLibraryPath [ rustEnvironment.rustToolchain ]}
-            '';
-          });
-        };
       };
-
       dir = runCommand "target" {
         nativeBuildInputs = [ tool ];
       } ''
@@ -286,6 +291,8 @@ superCallPackage ../rust-utils {} self //
   sel4-simple-task-runtime-config-cli = mkTool crates.sel4-simple-task-runtime-config-cli;
   sel4-kernel-loader-add-payload = mkTool crates.sel4-kernel-loader-add-payload;
   sel4-reset-cli = mkTool crates.sel4-reset-cli;
+
+  mkGenerateTargetSpecs = callBuildBuildPackage ./generate-target-specs.nix {};
 
   prepareResettable = callPackage ./prepare-resettable.nix {};
   embedDebugInfo = callPackage ./embed-debug-info.nix {};

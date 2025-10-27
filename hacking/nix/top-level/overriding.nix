@@ -6,7 +6,7 @@
 
 self:
 
-{
+rec {
 
   overrideNixpkgsArgs = f: self.override (superArgs: selfBase:
     let
@@ -52,6 +52,12 @@ self:
   withUpstream = self.withConfigOverride (attrs: attrs // {
     rustEnvironmentSelector = (attrs.rustEnvironmentSelector or {}) // {
       upstream = true;
+    };
+  });
+
+  mkWithCustom = custom: self.withConfigOverride (attrs: attrs // {
+    rustEnvironmentSelector = (attrs.rustEnvironmentSelector or {}) // {
+      inherit custom;
     };
   });
 
