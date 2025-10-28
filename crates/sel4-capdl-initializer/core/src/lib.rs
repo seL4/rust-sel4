@@ -9,11 +9,12 @@
 use core::array;
 use core::borrow::BorrowMut;
 use core::ops::Range;
+use core::panic;
 use core::result;
 use core::slice;
 
 #[allow(unused_imports)]
-use log::{debug, info, trace};
+use log::{debug, error, info, trace};
 
 use sel4::{
     CapRights, CapTypeForFrameObjectOfFixedSize, cap_type,
@@ -277,8 +278,18 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
         }
 
         // Ensure that we've created every root object
+        let mut oom = false;
         for bits in 0..sel4::WORD_SIZE {
-            assert_eq!(by_size_start[bits], by_size_end[bits], "!!! {bits}",);
+            if by_size_start[bits] != by_size_end[bits] {
+                oom = true;
+                let shortfall = by_size_end[bits] - by_size_start[bits];
+                error!(
+                    "Error: ran out of untypeds for allocating objects of size bit {bits}, still need to create {shortfall} more objects."
+                );
+            }
+        }
+        if oom {
+            panic!("Out of untypeds.");
         }
 
         // Create child objects
