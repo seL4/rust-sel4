@@ -9,6 +9,7 @@
 , linkFarm, symlinkJoin, writeText, writeScript, runCommand
 , python3Packages
 , microkit
+, sdfgen
 , mkTask
 , sources
 , crates
@@ -59,11 +60,10 @@ lib.fix (self: callPlatform {
     ];
     systemXML = runCommand "banscii.system" {
       nativeBuildInputs = [
-        python3Packages.jinja2
+        sdfgen
       ];
     } ''
-      python3 ${srcPath "generate_system_description.py"} \
-        --template ${srcPath "banscii.system.template"} \
+      python3 ${srcPath "meta.py"} \
         --board ${board} \
         -o $out
     '';

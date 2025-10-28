@@ -14,7 +14,7 @@ use alloc::vec;
 use rsa::signature::SignatureEncoding;
 
 use sel4_microkit::{
-    Channel, Handler, Infallible, MessageInfo, memory_region_symbol, protection_domain,
+    Channel, Handler, Infallible, MessageInfo, memory_region_symbol, protection_domain, var,
 };
 use sel4_microkit_simple_ipc as simple_ipc;
 use sel4_shared_memory::{
@@ -29,29 +29,33 @@ mod cryptographic_secrets;
 
 use artistic_secrets::Masterpiece;
 
-const ASSISTANT: Channel = Channel::new(0);
-
-const REGION_SIZE: usize = 0x4_000;
-
 #[protection_domain(heap_size = 0x10000)]
 fn init() -> HandlerImpl {
+    let assistant = Channel::new(*var!(assistant_channel_id: usize = usize::MAX));
+
+    let region_in_size = *var!(region_in_size: usize = 0);
     let region_in = unsafe {
         SharedMemoryRef::new_read_only(
-            memory_region_symbol!(region_in_start: *mut [u8], n = REGION_SIZE),
+            memory_region_symbol!(region_in_start: *mut [u8], n = region_in_size),
         )
     };
 
+    let region_out_size = *var!(region_out_size: usize = 0);
     let region_out = unsafe {
-        SharedMemoryRef::new(memory_region_symbol!(region_out_start: *mut [u8], n = REGION_SIZE))
+        SharedMemoryRef::new(
+            memory_region_symbol!(region_out_start: *mut [u8], n = region_out_size),
+        )
     };
 
     HandlerImpl {
+        assistant,
         region_in,
         region_out,
     }
 }
 
 struct HandlerImpl {
+    assistant: Channel,
     region_in: SharedMemoryRef<'static, [u8], ReadOnly>,
     region_out: SharedMemoryRef<'static, [u8], ReadWrite>,
 }
@@ -64,8 +68,8 @@ impl Handler for HandlerImpl {
         channel: Channel,
         msg_info: MessageInfo,
     ) -> Result<MessageInfo, Self::Error> {
-        Ok(match channel {
-            ASSISTANT => match simple_ipc::recv::<Request>(msg_info) {
+        Ok(if channel == self.assistant {
+            match simple_ipc::recv::<Request>(msg_info) {
                 Ok(req) => {
                     let draft_height = req.height;
                     let draft_width = req.width;
@@ -110,10 +114,9 @@ impl Handler for HandlerImpl {
                     })
                 }
                 Err(_) => simple_ipc::send_unspecified_error(),
-            },
-            _ => {
-                unreachable!()
             }
+        } else {
+            unreachable!()
         })
     }
 }

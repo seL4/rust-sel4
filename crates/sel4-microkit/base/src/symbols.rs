@@ -111,24 +111,20 @@ macro_rules! var {
 #[macro_export]
 macro_rules! memory_region_symbol {
     ($(#[$attrs:meta])* $symbol:ident: *mut [$ty:ty], n = $n:expr, bytes = $bytes:expr $(,)?) => {{
-        core::ptr::NonNull::slice_from_raw_parts(
-            $crate::memory_region_symbol!(
-                $(#[$attrs])* $symbol: *mut [$ty; $n], bytes = $bytes
-            ).cast::<$ty>(),
-            $n,
-        )
+        assert!($bytes == $n * core::mem::size_of::<$ty>());
+        $crate::memory_region_symbol!($(#[$attrs])* $symbol: *mut $ty, n = $n)
+    }};
+    ($(#[$attrs:meta])* $symbol:ident: *mut $ty:ty, bytes = $bytes:expr $(,)?) => {{
+        assert!($bytes == core::mem::size_of::<$ty>());
+        $crate::memory_region_symbol!($(#[$attrs])* $symbol: *mut $ty)
     }};
     ($(#[$attrs:meta])* $symbol:ident: *mut [$ty:ty], n = $n:expr $(,)?) => {{
         core::ptr::NonNull::slice_from_raw_parts(
             $crate::memory_region_symbol!(
-                $(#[$attrs])* $symbol: *mut [$ty; $n]
-            ).cast::<$ty>(),
+                $(#[$attrs])* $symbol: *mut $ty
+            ),
             $n,
         )
-    }};
-    ($(#[$attrs:meta])* $symbol:ident: *mut $ty:ty, bytes = $bytes:expr $(,)?) => {{
-        const _: () = assert!($bytes == core::mem::size_of::<$ty>());
-        $crate::memory_region_symbol!($(#[$attrs])* $symbol: *mut $ty)
     }};
     ($(#[$attrs:meta])* $symbol:ident: *mut $ty:ty $(,)?) => {{
         core::ptr::NonNull::new(
