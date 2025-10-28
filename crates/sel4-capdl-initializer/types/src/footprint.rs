@@ -38,7 +38,7 @@ impl Footprint for IndirectDeflatedBytesContent {}
 
 impl<T: Sized + Footprint> Footprint for Indirect<'_, T> {
     fn external_footprint(&self) -> usize {
-        self.inner().total_footprint()
+        self.total_footprint()
     }
 }
 
@@ -53,7 +53,7 @@ impl<T: Footprint> Footprint for Option<T> {
 
 impl<T: Footprint> Footprint for Indirect<'_, [T]> {
     fn external_footprint(&self) -> usize {
-        self.inner().iter().map(Footprint::total_footprint).sum()
+        self.iter().map(Footprint::total_footprint).sum()
     }
 }
 
