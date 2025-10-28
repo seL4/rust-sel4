@@ -18,7 +18,7 @@ use core::str;
 use embedded_hal_nb::serial::{self, Read as _, Write as _};
 
 use sel4_microkit::{
-    Channel, ChannelSet, Handler, Infallible, memory_region_symbol, protection_domain,
+    Channel, ChannelSet, Handler, Infallible, memory_region_symbol, protection_domain, var,
 };
 use sel4_microkit_driver_adapters::serial::client::{
     Client as SerialClient, Error as SerialClientError,
@@ -32,27 +32,31 @@ use sel4_shared_memory::{
 use banscii_artist_interface_types as artist;
 use banscii_assistant_core::Draft;
 
-const SERIAL_DRIVER: Channel = Channel::new(0);
-const ARTIST: Channel = Channel::new(1);
-
-const REGION_SIZE: usize = 0x4_000;
-
 const MAX_SUBJECT_LEN: usize = 16;
 
 #[protection_domain(heap_size = 0x10000)]
 fn init() -> impl Handler {
+    let serial_driver = Channel::new(*var!(serial_driver_channel_id: usize = usize::MAX));
+    let artist = Channel::new(*var!(artist_channel_id: usize = usize::MAX));
+
+    let region_in_size = *var!(region_in_size: usize = 0);
     let region_in = unsafe {
         SharedMemoryRef::new_read_only(
-            memory_region_symbol!(region_in_start: *mut [u8], n = REGION_SIZE),
+            memory_region_symbol!(region_in_start: *mut [u8], n = region_in_size),
         )
     };
 
+    let region_out_size = *var!(region_out_size: usize = 0);
     let region_out = unsafe {
-        SharedMemoryRef::new(memory_region_symbol!(region_out_start: *mut [u8], n = REGION_SIZE))
+        SharedMemoryRef::new(
+            memory_region_symbol!(region_out_start: *mut [u8], n = region_out_size),
+        )
     };
 
     let mut this = HandlerImpl {
-        serial_client: SerialClient::new(SERIAL_DRIVER),
+        serial_client: SerialClient::new(serial_driver),
+        serial_driver,
+        artist,
         region_in,
         region_out,
         buffer: Vec::new(),
@@ -65,6 +69,8 @@ fn init() -> impl Handler {
 
 struct HandlerImpl {
     serial_client: SerialClient,
+    serial_driver: Channel,
+    artist: Channel,
     region_in: SharedMemoryRef<'static, [u8], ReadOnly>,
     region_out: SharedMemoryRef<'static, [u8], ReadWrite>,
     buffer: Vec<u8>,
@@ -74,7 +80,7 @@ impl Handler for HandlerImpl {
     type Error = Infallible;
 
     fn notified(&mut self, channels: ChannelSet) -> Result<(), Self::Error> {
-        if channels.contains(SERIAL_DRIVER) {
+        if channels.contains(self.serial_driver) {
             while let Ok(b) = self.serial_client.read() {
                 if let b'\n' | b'\r' = b {
                     self.newline();
@@ -136,7 +142,7 @@ impl HandlerImpl {
             draft_size,
         };
 
-        let resp: artist::Response = simple_ipc::call(ARTIST, req).unwrap();
+        let resp: artist::Response = simple_ipc::call(self.artist, req).unwrap();
 
         let height = resp.height;
         let width = resp.width;

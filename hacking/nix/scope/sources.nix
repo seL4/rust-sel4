@@ -70,15 +70,18 @@ in rec {
 
   microkit = fetchGit {
     url = "https://github.com/coliasgroup/microkit.git";
-    rev = "58ef533a399b916ab39df0c93e2741993614ba4f"; # branch "rust-nix", based on 2.0.1
+    rev = "55a972479f81a1a706d6eb4e8fbfd6daa88b603f"; # branch "rust-nix", based on 2.0.1
     local = localRoot + "/microkit";
+    extraFilter = path: type:
+      lib.hasSuffix "/target" path;
   };
 
   sdfgen = fetchGit {
-    url = "https://github.com/au-ts/microkit_sdf_gen";
-    rev = "232ad1a5425899b0fb017dfd19ff626b0223f812";
-    ref = "0.23.1";
+    url = "https://github.com/coliasgroup/microkit_sdf_gen";
+    rev = "7f9977d2c6ccefd374d7c43b2dddfb05f7f9c975"; # branch "rust", based on 0.24.0
     local = localRoot + "/microkit_sdf_gen";
+    extraFilter = path: type:
+      lib.hasSuffix "/.zig-cache" path || lib.hasSuffix "/zig-out" path || lib.hasSuffix "/result" path;
   };
 
   # sddf = fetchGit (lionsosAttrs // {
