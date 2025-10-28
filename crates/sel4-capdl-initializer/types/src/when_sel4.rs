@@ -108,7 +108,7 @@ pub trait HasVmAttributes {
 
 impl HasVmAttributes for cap::Frame {
     fn vm_attributes(&self) -> VmAttributes {
-        vm_attributes_from_whether_cached(self.cached)
+        vm_attributes_from_whether_cached_and_exec(self.cached, self.executable)
     }
 }
 
@@ -122,17 +122,36 @@ sel4::sel4_cfg_if! {
     if #[sel4_cfg(any(ARCH_AARCH64, ARCH_AARCH32))] {
         const CACHED: VmAttributes = VmAttributes::DEFAULT;
         const UNCACHED: VmAttributes = VmAttributes::NONE;
+        const NO_EXEC: VmAttributes = VmAttributes::EXECUTE_NEVER;
     } else if #[sel4_cfg(any(ARCH_RISCV64, ARCH_RISCV32))] {
         const CACHED: VmAttributes = VmAttributes::DEFAULT;
         const UNCACHED: VmAttributes = VmAttributes::NONE;
+        const NO_EXEC: VmAttributes = VmAttributes::EXECUTE_NEVER;
     } else if #[sel4_cfg(ARCH_X86_64)] {
         const CACHED: VmAttributes = VmAttributes::DEFAULT;
         const UNCACHED: VmAttributes = VmAttributes::CACHE_DISABLED;
     }
 }
 
-pub fn vm_attributes_from_whether_cached(cached: bool) -> VmAttributes {
-    if cached { CACHED } else { UNCACHED }
+// Allow these because on some architectures, certain variables are not touched.
+#[allow(unused_variables, unused_assignments)]
+pub fn vm_attributes_from_whether_cached_and_exec(cached: bool, executable: bool) -> VmAttributes {
+    let mut vmattr = VmAttributes::NONE;
+    if cached {
+        vmattr = CACHED;
+    } else {
+        vmattr = UNCACHED;
+    }
+
+    sel4::sel4_cfg_if! {
+        if #[sel4_cfg(any(ARCH_AARCH64, ARCH_AARCH32, ARCH_RISCV64, ARCH_RISCV32))] {
+            if !executable {
+                vmattr |= NO_EXEC
+            }
+        }
+    }
+
+    vmattr
 }
 
 fn default_vm_attributes_for_page_table() -> VmAttributes {
