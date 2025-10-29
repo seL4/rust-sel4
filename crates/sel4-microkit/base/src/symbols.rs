@@ -110,43 +110,43 @@ macro_rules! var {
 /// ```
 #[macro_export]
 macro_rules! memory_region_symbol {
-    ($(#[$attrs:meta])* $symbol:ident: *mut [$ty:ty], n = $n:expr, bytes = $bytes:expr $(,)?) => {
+    ($(#[$attrs:meta])* $symbol:ident: *mut [$ty:ty], n = $n:expr, bytes = $bytes:expr $(,)?) => {{
         core::ptr::NonNull::slice_from_raw_parts(
             $crate::memory_region_symbol!(
                 $(#[$attrs])* $symbol: *mut [$ty; $n], bytes = $bytes
             ).cast::<$ty>(),
             $n,
         )
-    };
-    ($(#[$attrs:meta])* $symbol:ident: *mut [$ty:ty], n = $n:expr $(,)?) => {
+    }};
+    ($(#[$attrs:meta])* $symbol:ident: *mut [$ty:ty], n = $n:expr $(,)?) => {{
         core::ptr::NonNull::slice_from_raw_parts(
             $crate::memory_region_symbol!(
                 $(#[$attrs])* $symbol: *mut [$ty; $n]
             ).cast::<$ty>(),
             $n,
         )
-    };
+    }};
     ($(#[$attrs:meta])* $symbol:ident: *mut $ty:ty, bytes = $bytes:expr $(,)?) => {{
         const _: () = assert!($bytes == core::mem::size_of::<$ty>());
         $crate::memory_region_symbol!($(#[$attrs])* $symbol: *mut $ty)
     }};
-    ($(#[$attrs:meta])* $symbol:ident: *mut $ty:ty $(,)?) => {
+    ($(#[$attrs:meta])* $symbol:ident: *mut $ty:ty $(,)?) => {{
         core::ptr::NonNull::new(
             *$crate::var!($(#[$attrs])* $symbol: usize = 0) as *mut $ty
         ).unwrap_or_else(|| {
             panic!("{} is null", stringify!($symbol))
         })
-    };
+    }};
 }
 
 #[cfg(not(feature = "extern-symbols"))]
 macro_rules! maybe_extern_var {
-    ($symbol:ident: $ty:ty = $default:expr) => {
+    ($symbol:ident: $ty:ty = $default:expr) => {{
         var! {
             #[used(linker)]
             $symbol: $ty = $default
         }
-    };
+    }};
 }
 
 #[cfg(feature = "extern-symbols")]
