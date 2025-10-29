@@ -144,6 +144,29 @@ impl Cap {
             Cap::ArmSmc(cap) => cap.object,
         }
     }
+
+    pub fn set_obj(&mut self, new_id: ObjectId) {
+        match self {
+            Cap::Untyped(cap) => cap.object = new_id,
+            Cap::Endpoint(cap) => cap.object = new_id,
+            Cap::Notification(cap) => cap.object = new_id,
+            Cap::CNode(cap) => cap.object = new_id,
+            Cap::Frame(cap) => cap.object = new_id,
+            Cap::Tcb(cap) => cap.object = new_id,
+            Cap::IrqHandler(cap) => cap.object = new_id,
+            Cap::VCpu(cap) => cap.object = new_id,
+            Cap::PageTable(cap) => cap.object = new_id,
+            Cap::AsidPool(cap) => cap.object = new_id,
+            Cap::ArmIrqHandler(cap) => cap.object = new_id,
+            Cap::IrqMsiHandler(cap) => cap.object = new_id,
+            Cap::IrqIOApicHandler(cap) => cap.object = new_id,
+            Cap::RiscvIrqHandler(cap) => cap.object = new_id,
+            Cap::IOPorts(cap) => cap.object = new_id,
+            Cap::SchedContext(cap) => cap.object = new_id,
+            Cap::Reply(cap) => cap.object = new_id,
+            Cap::ArmSmc(cap) => cap.object = new_id,
+        }
+    }
 }
 
 // TODO Would packing have an actual effect on memory footprint?
