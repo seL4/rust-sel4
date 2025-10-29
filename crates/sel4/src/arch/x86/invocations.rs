@@ -43,6 +43,26 @@ impl<T: CapTypeForFrameObject, C: InvocationContext> Cap<T, C> {
         }))
     }
 
+    /// Corresponds to `seL4_X86_Page_MapEPT`.
+    #[sel4_cfg(VTX)]
+    pub fn ept_frame_map(
+        self,
+        eptmpl4: EPTPML4,
+        vaddr: usize,
+        rights: CapRights,
+        attrs: VmAttributes,
+    ) -> Result<()> {
+        Error::wrap(self.invoke(|cptr, ipc_buffer| {
+            ipc_buffer.inner_mut().seL4_X86_Page_MapEPT(
+                cptr.bits(),
+                eptmpl4.bits(),
+                vaddr.try_into().unwrap(),
+                rights.into_inner(),
+                attrs.into_inner(),
+            )
+        }))
+    }
+
     /// Corresponds to `seL4_X86_Page_Unmap`.
     pub fn frame_unmap(self) -> Result<()> {
         Error::wrap(
@@ -106,6 +126,70 @@ impl<C: InvocationContext> PageTable<C> {
     }
 }
 
+#[sel4_cfg(VTX)]
+impl<C: InvocationContext> EPTPDPT<C> {
+    pub fn eptpdpt_map(self, eptmpl4: EPTPML4, vaddr: usize, attr: VmAttributes) -> Result<()> {
+        Error::wrap(self.invoke(|cptr, ipc_buffer| {
+            ipc_buffer.inner_mut().seL4_X86_EPTPDPT_Map(
+                cptr.bits(),
+                eptmpl4.bits(),
+                vaddr.try_into().unwrap(),
+                attr.into_inner(),
+            )
+        }))
+    }
+}
+
+#[sel4_cfg(VTX)]
+impl<C: InvocationContext> EPTPageDirectory<C> {
+    pub fn ept_page_directory_map(
+        self,
+        eptmpl4: EPTPML4,
+        vaddr: usize,
+        attr: VmAttributes,
+    ) -> Result<()> {
+        Error::wrap(self.invoke(|cptr, ipc_buffer| {
+            ipc_buffer.inner_mut().seL4_X86_EPTPD_Map(
+                cptr.bits(),
+                eptmpl4.bits(),
+                vaddr.try_into().unwrap(),
+                attr.into_inner(),
+            )
+        }))
+    }
+}
+
+#[sel4_cfg(VTX)]
+impl<C: InvocationContext> EPTPageTable<C> {
+    pub fn ept_page_table_map(
+        self,
+        eptmpl4: EPTPML4,
+        vaddr: usize,
+        attr: VmAttributes,
+    ) -> Result<()> {
+        Error::wrap(self.invoke(|cptr, ipc_buffer| {
+            ipc_buffer.inner_mut().seL4_X86_EPTPT_Map(
+                cptr.bits(),
+                eptmpl4.bits(),
+                vaddr.try_into().unwrap(),
+                attr.into_inner(),
+            )
+        }))
+    }
+}
+
+impl<C: InvocationContext> Tcb<C> {
+    /// Corresponds to `seL4_TCB_SetEPTRoot`
+    #[sel4_cfg(VTX)]
+    pub fn tcb_set_ept_root(self, eptmpl4: EPTPML4) -> Result<()> {
+        Error::wrap(self.invoke(|cptr, ipc_buffer| {
+            ipc_buffer
+                .inner_mut()
+                .seL4_TCB_SetEPTRoot(cptr.bits(), eptmpl4.bits())
+        }))
+    }
+}
+
 impl<C: InvocationContext> UnspecifiedIntermediateTranslationTable<C> {
     pub fn generic_intermediate_translation_table_map(
         self,
@@ -124,6 +208,29 @@ impl<C: InvocationContext> UnspecifiedIntermediateTranslationTable<C> {
                 TranslationTableObjectType::PageTable => self
                     .cast::<cap_type::PageTable>()
                     .page_table_map(vspace, vaddr, attr),
+                _ => panic!(),
+            }
+        }
+    }
+
+    #[sel4_cfg(VTX)]
+    pub fn ept_intermediate_translation_table_map(
+        self,
+        ty: TranslationTableObjectType,
+        vspace: EPTPML4,
+        vaddr: usize,
+        attr: VmAttributes,
+    ) -> Result<()> {
+        sel4_cfg_wrap_match! {
+            match ty {
+                #[sel4_cfg(ARCH_X86_64)]
+                TranslationTableObjectType::EPTPDPT => self.cast::<cap_type::EPTPDPT>().eptpdpt_map(vspace, vaddr, attr),
+                TranslationTableObjectType::EPTPageDirectory => self
+                    .cast::<cap_type::EPTPageDirectory>()
+                    .ept_page_directory_map(vspace, vaddr, attr),
+                TranslationTableObjectType::EPTPageTable => self
+                    .cast::<cap_type::EPTPageTable>()
+                    .ept_page_table_map(vspace, vaddr, attr),
                 _ => panic!(),
             }
         }

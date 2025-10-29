@@ -40,6 +40,8 @@ pub trait CapTypeForTranslationTableObject: CapTypeForObjectOfFixedSize {
 pub mod vspace_levels {
     use crate::{FrameObjectType, TranslationTableObjectType};
 
+    use crate::sel4_cfg;
+
     /// The maximum number of levels of translation tables for this kernel configuration.
     pub use crate::arch::vspace_levels::NUM_LEVELS;
 
@@ -63,6 +65,14 @@ pub mod vspace_levels {
     pub fn step_bits(level: usize) -> usize {
         span_bits(level)
             - TranslationTableObjectType::from_level(level)
+                .unwrap()
+                .index_bits()
+    }
+
+    #[sel4_cfg(all(ARCH_X86_64, VTX))]
+    pub fn ept_step_bits(level: usize) -> usize {
+        span_bits(level)
+            - TranslationTableObjectType::from_level_ept(level)
                 .unwrap()
                 .index_bits()
     }
