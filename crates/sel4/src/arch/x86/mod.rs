@@ -29,12 +29,35 @@ pub(crate) use vspace::vspace_levels;
 pub const NUM_FAST_MESSAGE_REGISTERS: usize = u32_into_usize(sys::seL4_FastMessageRegisters);
 
 pub(crate) mod cap_type_arch {
-    use crate::{declare_cap_type, declare_cap_type_for_object_of_fixed_size, sel4_cfg};
+    use crate::{declare_cap_type, declare_cap_type_for_object_of_fixed_size, sel4_cfg_if};
 
-    #[sel4_cfg(VTX)]
-    declare_cap_type_for_object_of_fixed_size! {
-        /// Corresponds to `seL4_X86_VCPU`.
-        VCpu { ObjectTypeArch, ObjectBlueprintArch }
+    sel4_cfg_if! {
+        if #[sel4_cfg(VTX)] {
+            declare_cap_type_for_object_of_fixed_size!(
+                /// Corresponds to `seL4_X86_VCPU`.
+                VCpu { ObjectTypeArch, ObjectBlueprintArch }
+            );
+
+            declare_cap_type_for_object_of_fixed_size!(
+                /// Corresponds to `seL4_X86_EPTPML4`.
+                EPTPML4 { ObjectTypeSeL4Arch, ObjectBlueprintSeL4Arch }
+            );
+
+            declare_cap_type_for_object_of_fixed_size!(
+                /// Corresponds to `seL4_X86_EPTPDPT`.
+                EPTPDPT { ObjectTypeSeL4Arch, ObjectBlueprintSeL4Arch }
+            );
+
+            declare_cap_type_for_object_of_fixed_size!(
+                /// Corresponds to `seL4_X86_EPTPD`.
+                EPTPageDirectory { ObjectTypeArch, ObjectBlueprintArch }
+            );
+
+            declare_cap_type_for_object_of_fixed_size!(
+                /// Corresponds to `seL4_X86_EPTPT`.
+                EPTPageTable { ObjectTypeArch, ObjectBlueprintArch }
+            );
+        }
     }
 
     declare_cap_type_for_object_of_fixed_size!(_4k {
@@ -74,10 +97,17 @@ pub(crate) mod cap_type_arch {
 }
 
 pub(crate) mod cap_arch {
-    use crate::{declare_cap_alias, sel4_cfg};
+    use crate::{declare_cap_alias, sel4_cfg_if};
 
-    #[sel4_cfg(VTX)]
-    declare_cap_alias!(VCpu);
+    sel4_cfg_if! {
+        if #[sel4_cfg(VTX)] {
+            declare_cap_alias!(VCpu);
+            declare_cap_alias!(EPTPML4);
+            declare_cap_alias!(EPTPDPT);
+            declare_cap_alias!(EPTPageDirectory);
+            declare_cap_alias!(EPTPageTable);
+        }
+    }
 
     declare_cap_alias!(_4k);
     declare_cap_alias!(LargePage);

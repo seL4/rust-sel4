@@ -4,6 +4,8 @@
 // SPDX-License-Identifier: MIT
 //
 
+use sel4_config::{sel4_cfg, sel4_cfg_enum, sel4_cfg_wrap_match};
+
 use crate::{
     CapTypeForFrameObject, CapTypeForFrameObjectOfFixedSize, CapTypeForTranslationTableObject,
     ObjectBlueprint, ObjectBlueprintX64, ObjectBlueprintX86, cap_type,
@@ -67,34 +69,67 @@ impl CapTypeForFrameObjectOfFixedSize for cap_type::HugePage {
 // // //
 
 /// Translation table object types for this kernel configuration.
+#[sel4_cfg_enum]
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum TranslationTableObjectType {
     PML4,
     PDPT,
     PageDirectory,
     PageTable,
+    #[sel4_cfg(VTX)]
+    EPTPML4,
+    #[sel4_cfg(VTX)]
+    EPTPDPT,
+    #[sel4_cfg(VTX)]
+    EPTPageDirectory,
+    #[sel4_cfg(VTX)]
+    EPTPageTable,
 }
 
 impl TranslationTableObjectType {
     pub const fn blueprint(&self) -> ObjectBlueprint {
-        match self {
-            Self::PML4 => {
-                ObjectBlueprint::Arch(ObjectBlueprintX86::SeL4Arch(ObjectBlueprintX64::PML4))
+        sel4_cfg_wrap_match! {
+            match self {
+                Self::PML4 => {
+                    ObjectBlueprint::Arch(ObjectBlueprintX86::SeL4Arch(ObjectBlueprintX64::PML4))
+                }
+                Self::PDPT => {
+                    ObjectBlueprint::Arch(ObjectBlueprintX86::SeL4Arch(ObjectBlueprintX64::PDPT))
+                }
+                Self::PageDirectory => ObjectBlueprint::Arch(ObjectBlueprintX86::PageDirectory),
+                Self::PageTable => ObjectBlueprint::Arch(ObjectBlueprintX86::PageTable),
+                #[sel4_cfg(VTX)]
+                Self::EPTPML4 => {
+                    ObjectBlueprint::Arch(ObjectBlueprintX86::SeL4Arch(ObjectBlueprintX64::EPTPML4))
+                }
+                #[sel4_cfg(VTX)]
+                Self::EPTPDPT => {
+                    ObjectBlueprint::Arch(ObjectBlueprintX86::SeL4Arch(ObjectBlueprintX64::EPTPDPT))
+                }
+                #[sel4_cfg(VTX)]
+                Self::EPTPageDirectory => ObjectBlueprint::Arch(ObjectBlueprintX86::EPTPageDirectory),
+                #[sel4_cfg(VTX)]
+                Self::EPTPageTable => ObjectBlueprint::Arch(ObjectBlueprintX86::EPTPageTable),
             }
-            Self::PDPT => {
-                ObjectBlueprint::Arch(ObjectBlueprintX86::SeL4Arch(ObjectBlueprintX64::PDPT))
-            }
-            Self::PageDirectory => ObjectBlueprint::Arch(ObjectBlueprintX86::PageDirectory),
-            Self::PageTable => ObjectBlueprint::Arch(ObjectBlueprintX86::PageTable),
         }
     }
 
     pub const fn index_bits(&self) -> usize {
-        match self {
-            Self::PML4 => u32_into_usize(sys::seL4_PML4IndexBits),
-            Self::PDPT => u32_into_usize(sys::seL4_PDPTIndexBits),
-            Self::PageDirectory => u32_into_usize(sys::seL4_PageDirIndexBits),
-            Self::PageTable => u32_into_usize(sys::seL4_PageTableIndexBits),
+        sel4_cfg_wrap_match! {
+            match self {
+                Self::PML4 => u32_into_usize(sys::seL4_PML4IndexBits),
+                Self::PDPT => u32_into_usize(sys::seL4_PDPTIndexBits),
+                Self::PageDirectory => u32_into_usize(sys::seL4_PageDirIndexBits),
+                Self::PageTable => u32_into_usize(sys::seL4_PageTableIndexBits),
+                #[sel4_cfg(VTX)]
+                Self::EPTPML4 => u32_into_usize(sys::seL4_X86_EPTPML4IndexBits),
+                #[sel4_cfg(VTX)]
+                Self::EPTPDPT => u32_into_usize(sys::seL4_X86_EPTPDPTIndexBits),
+                #[sel4_cfg(VTX)]
+                Self::EPTPageDirectory => u32_into_usize(sys::seL4_X86_EPTPDIndexBits),
+                #[sel4_cfg(VTX)]
+                Self::EPTPageTable => u32_into_usize(sys::seL4_X86_EPTPTIndexBits),
+            }
         }
     }
 
@@ -104,6 +139,17 @@ impl TranslationTableObjectType {
             1 => Self::PDPT,
             2 => Self::PageDirectory,
             3 => Self::PageTable,
+            _ => return None,
+        })
+    }
+
+    #[sel4_cfg(VTX)]
+    pub const fn from_level_ept(level: usize) -> Option<Self> {
+        Some(match level {
+            0 => Self::EPTPML4,
+            1 => Self::EPTPDPT,
+            2 => Self::EPTPageDirectory,
+            3 => Self::EPTPageTable,
             _ => return None,
         })
     }

@@ -26,6 +26,10 @@ pub enum ObjectTypeX86 {
     PageDirectory,
     #[sel4_cfg(VTX)]
     VCpu,
+    #[sel4_cfg(VTX)]
+    EPTPageDirectory,
+    #[sel4_cfg(VTX)]
+    EPTPageTable,
     SeL4Arch(ObjectTypeSeL4Arch),
 }
 
@@ -39,6 +43,10 @@ impl ObjectTypeX86 {
                 Self::PageDirectory => sys::_object::seL4_X86_PageDirectoryObject,
                 #[sel4_cfg(VTX)]
                 Self::VCpu => sys::_object::seL4_X86_VCPUObject,
+                #[sel4_cfg(VTX)]
+                Self::EPTPageDirectory => sys::_object::seL4_X86_EPTPDObject,
+                #[sel4_cfg(VTX)]
+                Self::EPTPageTable => sys::_object::seL4_X86_EPTPTObject,
                 Self::SeL4Arch(sel4_arch) => sel4_arch.into_sys(),
             }
         }
@@ -66,6 +74,10 @@ pub enum ObjectBlueprintX86 {
     PageDirectory,
     #[sel4_cfg(VTX)]
     VCpu,
+    #[sel4_cfg(VTX)]
+    EPTPageDirectory,
+    #[sel4_cfg(VTX)]
+    EPTPageTable,
     SeL4Arch(ObjectBlueprintSeL4Arch),
 }
 
@@ -79,6 +91,10 @@ impl ObjectBlueprintX86 {
                 Self::PageDirectory => ObjectTypeX86::PageDirectory,
                 #[sel4_cfg(VTX)]
                 Self::VCpu => ObjectTypeX86::VCpu,
+                #[sel4_cfg(VTX)]
+                Self::EPTPageDirectory => ObjectTypeX86::EPTPageDirectory,
+                #[sel4_cfg(VTX)]
+                Self::EPTPageTable => ObjectTypeX86::EPTPageTable,
                 Self::SeL4Arch(sel4_arch) => ObjectTypeX86::SeL4Arch(sel4_arch.ty()),
             }
         }
@@ -93,6 +109,10 @@ impl ObjectBlueprintX86 {
                 Self::PageDirectory => u32_into_usize(sys::seL4_PageDirBits),
                 #[sel4_cfg(VTX)]
                 Self::VCpu => u32_into_usize(sys::seL4_VCPUBits),
+                #[sel4_cfg(VTX)]
+                Self::EPTPageDirectory => u32_into_usize(sys::seL4_X86_EPTPDBits),
+                #[sel4_cfg(VTX)]
+                Self::EPTPageTable => u32_into_usize(sys::seL4_X86_EPTPTBits),
                 Self::SeL4Arch(sel4_arch) => sel4_arch.physical_size_bits(),
             }
         }
