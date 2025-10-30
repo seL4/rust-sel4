@@ -2330,19 +2330,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "sel4-capdl-initializer-embed-spec"
-version = "0.1.0"
-dependencies = [
- "hex",
- "proc-macro2",
- "quote",
- "sel4-capdl-initializer-types",
- "serde",
- "serde_json",
- "syn",
-]
-
-[[package]]
 name = "sel4-capdl-initializer-types"
 version = "0.1.0"
 dependencies = [
@@ -2361,50 +2348,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn",
-]
-
-[[package]]
-name = "sel4-capdl-initializer-with-embedded-spec"
-version = "0.1.0"
-dependencies = [
- "sel4",
- "sel4-capdl-initializer-core",
- "sel4-capdl-initializer-types",
- "sel4-capdl-initializer-with-embedded-spec-embedded-spec",
- "sel4-capdl-initializer-with-embedded-spec-embedded-spec-validate",
- "sel4-logging",
- "sel4-root-task",
-]
-
-[[package]]
-name = "sel4-capdl-initializer-with-embedded-spec-build-env"
-version = "0.1.0"
-dependencies = [
- "sel4-capdl-initializer-embed-spec",
- "sel4-capdl-initializer-types",
- "serde",
- "serde_json",
-]
-
-[[package]]
-name = "sel4-capdl-initializer-with-embedded-spec-embedded-spec"
-version = "0.1.0"
-dependencies = [
- "prettyplease",
- "sel4-capdl-initializer-embed-spec",
- "sel4-capdl-initializer-types",
- "sel4-capdl-initializer-with-embedded-spec-build-env",
- "serde_json",
- "syn",
-]
-
-[[package]]
-name = "sel4-capdl-initializer-with-embedded-spec-embedded-spec-validate"
-version = "0.1.0"
-dependencies = [
- "sel4-capdl-initializer-types",
- "sel4-capdl-initializer-with-embedded-spec-build-env",
- "sel4-capdl-initializer-with-embedded-spec-embedded-spec",
 ]
 
 [[package]]
