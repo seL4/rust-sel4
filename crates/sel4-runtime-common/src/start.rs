@@ -92,7 +92,7 @@ cfg_if::cfg_if! {
                         __sel4_runtime_common__lx sp, (sp)
                         jal __sel4_runtime_common__rust_entrypoint
 
-                    1:  j 1b
+                    2:  j 2b
                 "#
             }
         }
