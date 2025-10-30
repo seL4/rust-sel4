@@ -61,6 +61,7 @@ impl<T: SelfContainedObjectName> ObjectName for SelfContained<T> {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(rkyv::Archive, rkyv::Deserialize, rkyv::Serialize)]
 pub struct IndirectObjectName {
     pub range: Range<usize>,
 }

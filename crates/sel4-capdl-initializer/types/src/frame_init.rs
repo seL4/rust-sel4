@@ -21,6 +21,7 @@ use crate::{SelfContained, object};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(rkyv::Archive, rkyv::Deserialize, rkyv::Serialize)]
 pub enum FrameInit<D, M> {
     Fill(Fill<D>),
     Embedded(M),
@@ -124,6 +125,7 @@ impl<T: SelfContainedGetEmbeddedFrame> GetEmbeddedFrame for SelfContained<T> {
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(rkyv::Archive, rkyv::Deserialize, rkyv::Serialize)]
 pub struct IndirectEmbeddedFrame {
     offset: usize,
 }
@@ -162,6 +164,7 @@ macro_rules! embed_frame {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(rkyv::Archive, rkyv::Deserialize, rkyv::Serialize)]
 pub struct Fill<D> {
     pub entries: Box<[FillEntry<D>]>,
 }
@@ -178,6 +181,7 @@ impl<D> Fill<D> {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(rkyv::Archive, rkyv::Deserialize, rkyv::Serialize)]
 pub struct FillEntry<D> {
     pub range: Range<usize>,
     pub content: FillEntryContent<D>,
@@ -185,6 +189,7 @@ pub struct FillEntry<D> {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(rkyv::Archive, rkyv::Deserialize, rkyv::Serialize)]
 pub enum FillEntryContent<D> {
     Data(D),
     BootInfo(FillEntryContentBootInfo),
@@ -216,6 +221,7 @@ impl<D> FillEntryContent<D> {
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(rkyv::Archive, rkyv::Deserialize, rkyv::Serialize)]
 pub struct FillEntryContentBootInfo {
     pub id: FillEntryContentBootInfoId,
     pub offset: usize,
@@ -223,6 +229,7 @@ pub struct FillEntryContentBootInfo {
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(rkyv::Archive, rkyv::Deserialize, rkyv::Serialize)]
 pub enum FillEntryContentBootInfoId {
     Fdt,
 }
@@ -231,6 +238,7 @@ pub enum FillEntryContentBootInfoId {
 
 #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(rkyv::Archive, rkyv::Deserialize, rkyv::Serialize)]
 pub struct FileContent {
     pub file: String,
     pub file_offset: usize,
@@ -248,6 +256,7 @@ impl FileContent {
 
 #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(rkyv::Archive, rkyv::Deserialize, rkyv::Serialize)]
 pub struct FileContentRange {
     pub file: String,
     pub file_offset: usize,
@@ -268,6 +277,7 @@ pub trait SelfContainedContent {
 
 #[derive(Clone, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(rkyv::Archive, rkyv::Deserialize, rkyv::Serialize)]
 pub struct BytesContent<'a> {
     pub bytes: &'a [u8],
 }
@@ -295,6 +305,7 @@ impl fmt::Debug for BytesContent<'_> {
 #[cfg(feature = "deflate")]
 #[derive(Clone, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(rkyv::Archive, rkyv::Deserialize, rkyv::Serialize)]
 pub struct DeflatedBytesContent<'a> {
     pub deflated_bytes: &'a [u8],
 }
@@ -347,6 +358,7 @@ impl<T: SelfContainedContent> Content for SelfContained<T> {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(rkyv::Archive, rkyv::Deserialize, rkyv::Serialize)]
 pub struct IndirectBytesContent {
     pub bytes_range: Range<usize>,
 }
@@ -365,6 +377,7 @@ impl Content for IndirectBytesContent {
 #[cfg(feature = "deflate")]
 #[derive(Debug, Clone, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(rkyv::Archive, rkyv::Deserialize, rkyv::Serialize)]
 pub struct IndirectDeflatedBytesContent {
     pub deflated_bytes_range: Range<usize>,
 }
