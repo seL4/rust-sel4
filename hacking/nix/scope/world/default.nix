@@ -127,11 +127,18 @@ self: with self;
   mkCapDLInitializer =
     { spec ? null
     , specAttrs ? spec.specAttrs
+    , embedFrames ? true
+    , deflate ? true
+    , alloc ? true
     , extraDebuggingLinks ? []
     }:
 
     lib.fix (self:
-      mkCapDLInitializerWithSpec spec.specAttrs // {
+      mkCapDLInitializerWithSpec (spec.specAttrs // {
+        inherit embedFrames;
+        inherit deflate;
+        inherit alloc;
+      }) // {
         inherit spec;
         debuggingLinks = [
           { name = "spec.cdl"; path = spec.specAttrs.cdl; }

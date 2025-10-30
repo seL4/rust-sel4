@@ -34,7 +34,7 @@ let
 
   capdlCommon = {
     url = "https://github.com/coliasgroup/capdl.git";
-    rev = "0125aeb757f8a1714c2f22a0eaa1c966d6f9b7b0"; # branch nspin/wip/draft-xn
+    rev = "6a8c249a2afc78c285865c75c3b7cb2664014269"; # branch rust-testing
     local = localRoot + "/capdl";
     extraFilter = path: type:
       lib.hasSuffix "/.stack-work" path || lib.hasSuffix "/stack.yaml.lock" path;

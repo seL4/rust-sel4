@@ -8,83 +8,42 @@
 
 extern crate alloc;
 
-#[cfg(feature = "std")]
-extern crate std;
-
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
+use rkyv::Archive;
+use rkyv::rancor;
+use rkyv::util::AlignedVec;
 
 mod cap_table;
-mod footprint;
 mod frame_init;
-mod inspect;
-mod object_name;
 mod spec;
 
-mod traverse;
-
-#[cfg(feature = "std")]
-mod when_std;
+#[cfg(feature = "fill-utils")]
+mod fill_utils;
 
 #[cfg(feature = "sel4")]
 mod when_sel4;
 
-pub use cap_table::{HasCapTable, PageTableEntry};
-pub use footprint::Footprint;
-pub use frame_init::{
-    BytesContent, Content, EmbeddedFrame, Fill, FillEntry, FillEntryContent,
-    FillEntryContentBootInfo, FillEntryContentBootInfoId, FrameInit, GetEmbeddedFrame,
-    IndirectBytesContent, IndirectEmbeddedFrame, NeverEmbedded, SelfContainedContent,
-    SelfContainedGetEmbeddedFrame,
-};
-pub use object_name::{
-    IndirectObjectName, ObjectName, ObjectNamesLevel, SelfContainedObjectName, Unnamed,
-};
-pub use spec::{
-    AsidSlotEntry, Badge, CPtr, Cap, CapSlot, CapTableEntry, IrqEntry, NamedObject, Object,
-    ObjectId, Rights, Spec, TryFromCapError, TryFromObjectError, UntypedCover, Word, cap, object,
-};
-
-pub use frame_init::{FileContent, FileContentRange};
-
-#[cfg(feature = "deflate")]
-pub use frame_init::{DeflatedBytesContent, IndirectDeflatedBytesContent};
-
-#[cfg(feature = "std")]
-pub use when_std::{FillMap, FillMapBuilder, InputSpec};
+pub use cap_table::{HasArchivedCapTable, HasCapTable};
+pub use frame_init::*;
+pub use spec::*;
 
 #[cfg(feature = "sel4")]
 pub use when_sel4::*;
 
-// // //
+pub type InputSpec = Spec<Fill<FillEntryContentFileOffset>>;
 
-#[derive(Debug, Clone, Eq, PartialEq)]
-pub struct SpecWithSources<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame> {
-    pub spec: Spec<N, D, M>,
-    pub object_name_source: &'a N::Source,
-    pub content_source: &'a D::Source,
-    pub embedded_frame_source: &'a M::Source,
-}
+pub type SpecForInitializer = Spec<FrameInit>;
 
-#[cfg(feature = "deflate")]
-pub type SpecWithIndirection =
-    Spec<Option<IndirectObjectName>, IndirectDeflatedBytesContent, IndirectEmbeddedFrame>;
-
-#[derive(Debug, Copy, Clone, Eq, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-#[derive(rkyv::Archive, rkyv::Deserialize, rkyv::Serialize)]
-pub struct SelfContained<T>(T);
-
-impl<T> SelfContained<T> {
-    pub const fn new(inner: T) -> Self {
-        Self(inner)
+impl SpecForInitializer {
+    pub fn to_bytes(&self) -> Result<AlignedVec, rancor::Error> {
+        rkyv::to_bytes(self)
     }
 
-    pub const fn inner(&self) -> &T {
-        &self.0
+    pub fn access(buf: &[u8]) -> Result<&<Self as Archive>::Archived, rancor::Error> {
+        rkyv::access(buf)
     }
 
-    pub fn into_inner(self) -> T {
-        self.0
+    #[allow(clippy::missing_safety_doc)]
+    pub unsafe fn access_unchecked(buf: &[u8]) -> &<Self as Archive>::Archived {
+        unsafe { rkyv::access_unchecked(buf) }
     }
 }

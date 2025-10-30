@@ -18,14 +18,11 @@ license = "BSD-2-Clause"
 
 [features]
 deflate = ["dep:miniz_oxide"]
-serde_json = ["dep:serde_json", "serde"]
-std = ["serde_json"]
+fill-utils = ["deflate"]
 
 [dependencies]
-cfg-if = "1.0.4"
 sel4 = { path = "../../sel4", default-features = false, optional = true }
 sel4-capdl-initializer-types-derive = { path = "derive" }
-serde_json = { version = "1.0.145", optional = true }
 
 [dependencies.miniz_oxide]
 version = "0.8.9"

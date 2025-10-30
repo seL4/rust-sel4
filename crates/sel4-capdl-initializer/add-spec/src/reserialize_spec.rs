@@ -4,78 +4,87 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use std::ops::Range;
-use std::path::Path;
+use std::{
+    collections::BTreeMap,
+    fs::File,
+    os::unix::fs::FileExt as _,
+    path::{Path, PathBuf},
+};
 
 use sel4_capdl_initializer_types::*;
 
+use super::ObjectNamesLevel;
+
 pub fn reserialize_spec(
     input_spec: &InputSpec,
-    fill_dir_path: impl AsRef<Path>,
+    fill_dirs: &[impl AsRef<Path>],
     object_names_level: &ObjectNamesLevel,
     embed_frames: bool,
-    granule_size_bits: usize,
-    verbose: bool,
-) -> (SpecWithIndirection, Vec<u8>) {
-    let granule_size = 1 << granule_size_bits;
+    deflate: bool,
+    granule_size_bits: u8,
+) -> (SpecForInitializer, Vec<Vec<u8>>) {
+    let mut filler = Filler::new(fill_dirs);
 
-    let fill_map = input_spec.collect_fill(&[fill_dir_path]);
+    let (mut output_spec, embedded_frames_data) = input_spec.embed_fill(
+        granule_size_bits,
+        |_| embed_frames,
+        |d, buf| {
+            filler.read(d, buf);
+            deflate
+        },
+    );
 
-    let mut sources = SourcesBuilder::new();
-    let mut num_embedded_frames = 0;
-    let final_spec: SpecWithIndirection = input_spec
-        .traverse_names_with_context(|named_obj| {
-            object_names_level
-                .apply(named_obj)
-                .map(|s| IndirectObjectName {
-                    range: sources.append(s.as_bytes()),
-                })
-        })
-        .split_embedded_frames(embed_frames, granule_size_bits)
-        .traverse_data(|key| {
-            let compressed = DeflatedBytesContent::pack(fill_map.get(key));
-            IndirectDeflatedBytesContent {
-                deflated_bytes_range: sources.append(&compressed),
-            }
-        })
-        .traverse_embedded_frames(|fill| {
-            num_embedded_frames += 1;
-            sources.align_to(granule_size);
-            let range = sources.append(&fill_map.get_frame(granule_size, fill));
-            IndirectEmbeddedFrame::new(range.start)
-        });
-
-    if verbose {
-        eprintln!("embedded frames count: {num_embedded_frames}");
+    for named_obj in output_spec.objects.iter_mut() {
+        let keep = match object_names_level {
+            ObjectNamesLevel::All => true,
+            ObjectNamesLevel::JustTcbs => matches!(named_obj.object, Object::Tcb(_)),
+            ObjectNamesLevel::None => false,
+        };
+        if !keep {
+            named_obj.name = None;
+        }
     }
 
-    let mut blob = postcard::to_allocvec(&final_spec).unwrap();
-    blob.extend(sources.build());
-    (final_spec, blob)
+    (output_spec, embedded_frames_data)
 }
 
-struct SourcesBuilder {
-    buf: Vec<u8>,
+struct Filler {
+    fill_dirs: Vec<PathBuf>,
+    file_handles: BTreeMap<String, File>,
 }
 
-impl SourcesBuilder {
-    fn new() -> Self {
-        Self { buf: vec![] }
+impl Filler {
+    fn new(fill_dirs: impl IntoIterator<Item = impl AsRef<Path>>) -> Self {
+        Self {
+            fill_dirs: fill_dirs
+                .into_iter()
+                .map(|path| path.as_ref().to_owned())
+                .collect(),
+            file_handles: BTreeMap::new(),
+        }
     }
 
-    fn build(self) -> Vec<u8> {
-        self.buf
+    fn find_path(&self, file: &str) -> PathBuf {
+        self.fill_dirs
+            .iter()
+            .filter_map(|dir| {
+                let path = dir.join(file);
+                if path.exists() { Some(path) } else { None }
+            })
+            .next()
+            .unwrap_or_else(|| panic!("file {:?} not found", file))
     }
 
-    fn align_to(&mut self, align: usize) {
-        assert!(align.is_power_of_two());
-        self.buf.resize(self.buf.len().next_multiple_of(align), 0);
+    fn get_handle(&mut self, file: &str) -> &mut File {
+        let path = self.find_path(file);
+        self.file_handles
+            .entry(file.to_owned())
+            .or_insert_with(|| File::open(path).unwrap())
     }
 
-    fn append(&mut self, bytes: &[u8]) -> Range<usize> {
-        let start = self.buf.len();
-        self.buf.extend(bytes);
-        let end = self.buf.len();
-        start..end
+    fn read(&mut self, key: &FillEntryContentFileOffset, buf: &mut [u8]) {
+        self.get_handle(&key.file)
+            .read_exact_at(buf, key.file_offset)
+            .unwrap();
     }
 }

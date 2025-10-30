@@ -4,181 +4,124 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use core::fmt;
-use core::iter;
-use core::slice;
+use rkyv::Archive;
 
-use crate::{Cap, CapSlot, CapTableEntry, TryFromCapError, cap, object};
-
-// NOTE
-// Magic constants must be kept in sync with capDL-tool.
+use crate::{
+    ArchivedCapSlot, ArchivedCapTableEntry, CapSlot, CapTableEntry, IsArchivedCap, IsCap, cap,
+    object,
+};
 
 pub trait HasCapTable {
     fn slots(&self) -> &[CapTableEntry];
 
-    fn maybe_slot(&self, slot: CapSlot) -> Option<&Cap> {
-        self.slots()
-            .as_ref()
-            .iter()
-            .find_map(|(k, v)| if k == &slot { Some(v) } else { None })
-    }
-
-    fn maybe_slot_as<'a, T: TryFrom<&'a Cap>>(&'a self, slot: CapSlot) -> Option<T>
-    where
-        <T as TryFrom<&'a Cap>>::Error: fmt::Debug,
-    {
-        self.maybe_slot(slot).map(|cap| cap.try_into().unwrap())
-    }
-
-    fn slot_as<'a, T: TryFrom<&'a Cap>>(&'a self, slot: CapSlot) -> T
-    where
-        <T as TryFrom<&'a Cap>>::Error: fmt::Debug,
-    {
-        self.maybe_slot_as(slot).unwrap()
-    }
-
-    #[allow(clippy::type_complexity)]
-    fn slots_as<'a, T: TryFrom<&'a Cap>>(
-        &'a self,
-    ) -> iter::Map<slice::Iter<'a, (usize, Cap)>, fn(&'a (usize, Cap)) -> (usize, T)>
-    where
-        <T as TryFrom<&'a Cap>>::Error: fmt::Debug,
-    {
-        self.slots()
-            .iter()
-            .map(|(k, v)| (*k, T::try_from(v).unwrap()))
-    }
-}
-
-impl object::Tcb {
-    pub const SLOT_CSPACE: CapSlot = 0;
-    pub const SLOT_VSPACE: CapSlot = 1;
-    pub const SLOT_IPC_BUFFER: CapSlot = 4;
-    pub const SLOT_FAULT_EP: CapSlot = 5;
-    pub const SLOT_SC: CapSlot = 6;
-    pub const SLOT_TEMP_FAULT_EP: CapSlot = 7;
-    pub const SLOT_BOUND_NOTIFICATION: CapSlot = 8;
-    pub const SLOT_VCPU: CapSlot = 9;
-
-    pub fn cspace(&self) -> &cap::CNode {
-        self.slot_as(Self::SLOT_CSPACE)
-    }
-
-    pub fn vspace(&self) -> &cap::PageTable {
-        self.slot_as(Self::SLOT_VSPACE)
-    }
-
-    pub fn ipc_buffer(&self) -> &cap::Frame {
-        self.slot_as(Self::SLOT_IPC_BUFFER)
-    }
-
-    pub fn mcs_fault_ep(&self) -> Option<&cap::Endpoint> {
-        self.maybe_slot_as(Self::SLOT_FAULT_EP)
-    }
-
-    pub fn sc(&self) -> Option<&cap::SchedContext> {
-        self.maybe_slot_as(Self::SLOT_SC)
-    }
-
-    pub fn temp_fault_ep(&self) -> Option<&cap::Endpoint> {
-        self.maybe_slot_as(Self::SLOT_TEMP_FAULT_EP)
-    }
-
-    pub fn bound_notification(&self) -> Option<&cap::Notification> {
-        self.maybe_slot_as(Self::SLOT_BOUND_NOTIFICATION)
-    }
-
-    pub fn vcpu(&self) -> Option<&cap::VCpu> {
-        self.maybe_slot_as(Self::SLOT_VCPU)
-    }
-}
-
-impl object::Irq {
-    pub const SLOT_NOTIFICATION: CapSlot = 0;
-
-    pub fn notification(&self) -> Option<&cap::Notification> {
-        self.maybe_slot_as(Self::SLOT_NOTIFICATION)
-    }
-}
-
-impl object::ArmIrq {
-    pub const SLOT_NOTIFICATION: CapSlot = 0;
-
-    pub fn notification(&self) -> Option<&cap::Notification> {
-        self.maybe_slot_as(Self::SLOT_NOTIFICATION)
-    }
-}
-
-impl object::IrqMsi {
-    pub const SLOT_NOTIFICATION: CapSlot = 0;
-
-    pub fn notification(&self) -> Option<&cap::Notification> {
-        self.maybe_slot_as(Self::SLOT_NOTIFICATION)
-    }
-}
-
-impl object::IrqIOApic {
-    pub const SLOT_NOTIFICATION: CapSlot = 0;
-
-    pub fn notification(&self) -> Option<&cap::Notification> {
-        self.maybe_slot_as(Self::SLOT_NOTIFICATION)
-    }
-}
-
-impl object::RiscvIrq {
-    pub const SLOT_NOTIFICATION: CapSlot = 0;
-
-    pub fn notification(&self) -> Option<&cap::Notification> {
-        self.maybe_slot_as(Self::SLOT_NOTIFICATION)
-    }
-}
-
-// // //
-
-impl object::PageTable {
-    pub fn entries(&self) -> impl Iterator<Item = (CapSlot, PageTableEntry<'_>)> {
-        self.slots_as()
-    }
-
-    pub fn frames(&self) -> impl Iterator<Item = (CapSlot, &cap::Frame)> {
-        self.slots_as()
-    }
-
-    pub fn page_tables(&self) -> impl Iterator<Item = (CapSlot, &cap::PageTable)> {
-        self.slots_as()
-    }
-}
-
-#[derive(Debug, Clone, Eq, PartialEq)]
-pub enum PageTableEntry<'a> {
-    PageTable(&'a cap::PageTable),
-    Frame(&'a cap::Frame),
-}
-
-impl<'a> PageTableEntry<'a> {
-    pub fn page_table(&self) -> Option<&'a cap::PageTable> {
-        match self {
-            Self::PageTable(cap) => Some(cap),
-            _ => None,
-        }
-    }
-
-    pub fn frame(&self) -> Option<&'a cap::Frame> {
-        match self {
-            Self::Frame(cap) => Some(cap),
-            _ => None,
-        }
-    }
-}
-
-impl<'a> TryFrom<&'a Cap> for PageTableEntry<'a> {
-    type Error = TryFromCapError;
-
-    fn try_from(cap: &'a Cap) -> Result<Self, Self::Error> {
-        Ok(match cap {
-            Cap::PageTable(cap) => PageTableEntry::PageTable(cap),
-            Cap::Frame(cap) => PageTableEntry::Frame(cap),
-            _ => return Err(TryFromCapError),
+    fn slot_as<T: IsCap>(&self, slot: CapSlot) -> Option<&T> {
+        self.slots().as_ref().iter().find_map(|entry| {
+            if entry.slot == slot {
+                Some(entry.cap.as_().unwrap())
+            } else {
+                None
+            }
         })
+    }
+}
+
+pub trait HasArchivedCapTable {
+    fn slots(&self) -> &[ArchivedCapTableEntry];
+
+    fn slot_as<T: IsArchivedCap>(&self, slot: ArchivedCapSlot) -> Option<&T> {
+        self.slots().as_ref().iter().find_map(|entry| {
+            if entry.slot == slot {
+                Some(entry.cap.as_().unwrap())
+            } else {
+                None
+            }
+        })
+    }
+}
+
+macro_rules! alias_cap_table {
+    ($obj_ty:ty | $archived_obj_ty:ty {
+        $(
+            $accessor_name:ident: $cap_ty:ident = $slot_name:ident($n:expr) $(@$optional:ident)?
+        ),* $(,)?
+    }) => {
+        impl $obj_ty {
+            $(
+                pub const $slot_name: CapSlot = CapSlot($n);
+
+                alias_cap_table_helper! {
+                    $accessor_name: &cap::$cap_ty = $slot_name $(@$optional)?
+                }
+            )*
+        }
+
+        impl $archived_obj_ty {
+            $(
+                pub const $slot_name: ArchivedCapSlot = ArchivedCapSlot(<u32 as Archive>::Archived::from_native($n));
+
+                alias_cap_table_helper! {
+                    $accessor_name: &<cap::$cap_ty as Archive>::Archived = $slot_name $(@$optional)?
+                }
+            )*
+        }
+    };
+}
+
+macro_rules! alias_cap_table_helper {
+    ($accessor_name:ident: $ty:ty = $slot_name:ident) => {
+        pub fn $accessor_name(&self) -> $ty {
+            self.slot_as(Self::$slot_name).unwrap()
+        }
+    };
+    ($accessor_name:ident: $ty:ty = $slot_name:ident @optional) => {
+        pub fn $accessor_name(&self) -> Option<$ty> {
+            self.slot_as(Self::$slot_name)
+        }
+    };
+}
+
+// NOTE
+// Magic constants must be kept in sync with capDL-tool.
+
+alias_cap_table! {
+    object::Tcb | object::ArchivedTcb {
+        cspace: CNode = SLOT_CSPACE(0),
+        vspace: PageTable = SLOT_VSPACE(1),
+        ipc_buffer: Frame = SLOT_IPC_BUFFER(4),
+        mcs_fault_ep: Endpoint = SLOT_FAULT_EP(5) @optional,
+        sc: SchedContext = SLOT_SC(6) @optional,
+        temp_fault_ep: Endpoint = SLOT_TEMP_FAULT_EP(7) @optional,
+        bound_notification: Notification = SLOT_BOUND_NOTIFICATION(8) @optional,
+        vcpu: VCpu = SLOT_VCPU(9) @optional,
+    }
+}
+
+alias_cap_table! {
+    object::Irq | object::ArchivedIrq {
+        notification: Notification = SLOT_NOTIFICATION(0) @optional,
+    }
+}
+
+alias_cap_table! {
+    object::ArmIrq | object::ArchivedArmIrq {
+        notification: Notification = SLOT_NOTIFICATION(0) @optional,
+    }
+}
+
+alias_cap_table! {
+    object::IrqMsi | object::ArchivedIrqMsi {
+        notification: Notification = SLOT_NOTIFICATION(0) @optional,
+    }
+}
+
+alias_cap_table! {
+    object::IrqIOApic | object::ArchivedIrqIOApic {
+        notification: Notification = SLOT_NOTIFICATION(0) @optional,
+    }
+}
+
+alias_cap_table! {
+    object::RiscvIrq | object::ArchivedRiscvIrq {
+        notification: Notification = SLOT_NOTIFICATION(0) @optional,
     }
 }
