@@ -72,6 +72,7 @@ pub type SpecWithIndirection =
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(rkyv::Archive, rkyv::Deserialize, rkyv::Serialize)]
 pub struct SelfContained<T>(T);
 
 impl<T> SelfContained<T> {
