@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
+use alloc::boxed::Box;
 use alloc::{string::String, vec::Vec};
 use core::fmt;
 use core::ops::Range;
@@ -14,19 +15,19 @@ use core::iter;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::{Indirect, SelfContained, object};
+use crate::{SelfContained, object};
 
 // // //
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub enum FrameInit<'a, D, M> {
-    Fill(Fill<'a, D>),
+pub enum FrameInit<D, M> {
+    Fill(Fill<D>),
     Embedded(M),
 }
 
-impl<'a, D, M> FrameInit<'a, D, M> {
-    pub const fn as_fill(&self) -> Option<&Fill<'a, D>> {
+impl<D, M> FrameInit<D, M> {
+    pub const fn as_fill(&self) -> Option<&Fill<D>> {
         match self {
             Self::Fill(fill) => Some(fill),
             _ => None,
@@ -49,9 +50,9 @@ impl<'a, D, M> FrameInit<'a, D, M> {
     }
 }
 
-impl<'a, D> FrameInit<'a, D, NeverEmbedded> {
+impl<D> FrameInit<D, NeverEmbedded> {
     #[allow(clippy::explicit_auto_deref)]
-    pub const fn as_fill_infallible(&self) -> &Fill<'a, D> {
+    pub const fn as_fill_infallible(&self) -> &Fill<D> {
         match self {
             Self::Fill(fill) => fill,
             Self::Embedded(absurdity) => match *absurdity {},
@@ -59,7 +60,7 @@ impl<'a, D> FrameInit<'a, D, NeverEmbedded> {
     }
 }
 
-impl<D> object::Frame<'_, D, NeverEmbedded> {
+impl<D> object::Frame<D, NeverEmbedded> {
     pub fn can_embed(&self, granule_size_bits: usize, is_root: bool) -> bool {
         is_root
             && self.paddr.is_none()
@@ -161,11 +162,11 @@ macro_rules! embed_frame {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub struct Fill<'a, D> {
-    pub entries: Indirect<'a, [FillEntry<D>]>,
+pub struct Fill<D> {
+    pub entries: Box<[FillEntry<D>]>,
 }
 
-impl<D> Fill<'_, D> {
+impl<D> Fill<D> {
     pub fn depends_on_bootinfo(&self) -> bool {
         self.entries.iter().any(|entry| entry.content.is_bootinfo())
     }

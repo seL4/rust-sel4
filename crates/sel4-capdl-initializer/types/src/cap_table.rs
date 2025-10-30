@@ -50,7 +50,7 @@ pub trait HasCapTable {
     }
 }
 
-impl object::Tcb<'_> {
+impl object::Tcb {
     pub const SLOT_CSPACE: CapSlot = 0;
     pub const SLOT_VSPACE: CapSlot = 1;
     pub const SLOT_IPC_BUFFER: CapSlot = 4;
@@ -93,7 +93,7 @@ impl object::Tcb<'_> {
     }
 }
 
-impl object::Irq<'_> {
+impl object::Irq {
     pub const SLOT_NOTIFICATION: CapSlot = 0;
 
     pub fn notification(&self) -> Option<&cap::Notification> {
@@ -101,7 +101,7 @@ impl object::Irq<'_> {
     }
 }
 
-impl object::ArmIrq<'_> {
+impl object::ArmIrq {
     pub const SLOT_NOTIFICATION: CapSlot = 0;
 
     pub fn notification(&self) -> Option<&cap::Notification> {
@@ -109,7 +109,7 @@ impl object::ArmIrq<'_> {
     }
 }
 
-impl object::IrqMsi<'_> {
+impl object::IrqMsi {
     pub const SLOT_NOTIFICATION: CapSlot = 0;
 
     pub fn notification(&self) -> Option<&cap::Notification> {
@@ -117,7 +117,7 @@ impl object::IrqMsi<'_> {
     }
 }
 
-impl object::IrqIOApic<'_> {
+impl object::IrqIOApic {
     pub const SLOT_NOTIFICATION: CapSlot = 0;
 
     pub fn notification(&self) -> Option<&cap::Notification> {
@@ -125,7 +125,7 @@ impl object::IrqIOApic<'_> {
     }
 }
 
-impl object::RiscvIrq<'_> {
+impl object::RiscvIrq {
     pub const SLOT_NOTIFICATION: CapSlot = 0;
 
     pub fn notification(&self) -> Option<&cap::Notification> {
@@ -135,7 +135,7 @@ impl object::RiscvIrq<'_> {
 
 // // //
 
-impl object::PageTable<'_> {
+impl object::PageTable {
     pub fn entries(&self) -> impl Iterator<Item = (CapSlot, PageTableEntry<'_>)> {
         self.slots_as()
     }

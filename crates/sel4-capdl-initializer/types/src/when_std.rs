@@ -17,7 +17,7 @@ use std::path::{Path, PathBuf};
 
 use crate::{FileContent, FileContentRange, Fill, NeverEmbedded, Spec};
 
-pub type InputSpec = Spec<'static, String, FileContentRange, NeverEmbedded>;
+pub type InputSpec = Spec<String, FileContentRange, NeverEmbedded>;
 
 impl InputSpec {
     pub fn parse(s: &str) -> Self {
@@ -44,7 +44,7 @@ impl FillMap {
         self.fill_data.get(key).map(Deref::deref).unwrap()
     }
 
-    pub fn get_frame(&self, frame_size: usize, fill: &Fill<'_, FileContentRange>) -> Vec<u8> {
+    pub fn get_frame(&self, frame_size: usize, fill: &Fill<FileContentRange>) -> Vec<u8> {
         let mut frame = vec![0; frame_size];
         for entry in fill.entries.iter() {
             frame[entry.range.clone()].copy_from_slice(self.get(entry.content.as_data().unwrap()))
