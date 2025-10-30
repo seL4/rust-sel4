@@ -14,6 +14,7 @@ mk {
       one-shot-mutex
     ;
     postcard = postcardWith [ "alloc" ];
+    rkyv = { version = versions.rkyv; default-features = false; };
     inherit (localCrates)
       sel4-capdl-initializer-core
       sel4
