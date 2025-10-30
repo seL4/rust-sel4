@@ -51,9 +51,9 @@ def run(args):
     board = next(filter(lambda b: b.name == args.board, BOARDS))
     sdf = SystemDescription(board.arch, board.paddr_top)
 
-    serial_mmio = MemoryRegion('serial_mmio', 0x1_000, paddr=board.serial_mmio_phys_addr)
-    assistant_to_artist = MemoryRegion('assistant_to_artist', 0x4_000)
-    artist_to_assistant = MemoryRegion('artist_to_assistant', 0x4_000)
+    serial_mmio = MemoryRegion(sdf, 'serial_mmio', 0x1_000, paddr=board.serial_mmio_phys_addr)
+    assistant_to_artist = MemoryRegion(sdf, 'assistant_to_artist', 0x4_000)
+    artist_to_assistant = MemoryRegion(sdf, 'artist_to_assistant', 0x4_000)
 
     mrs = [
         serial_mmio,
