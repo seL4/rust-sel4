@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
+use alloc::boxed::Box;
 use core::fmt;
 use core::ops::Range;
 
@@ -14,7 +15,7 @@ use serde::{Deserialize, Serialize};
 
 use sel4_capdl_initializer_types_derive::{IsCap, IsObject, IsObjectWithCapTable};
 
-use crate::{FrameInit, HasCapTable, Indirect};
+use crate::{FrameInit, HasCapTable};
 
 cfg_if! {
     if #[cfg(feature = "sel4")] {
@@ -34,12 +35,12 @@ pub type CapTableEntry = (CapSlot, Cap);
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub struct Spec<'a, N, D, M> {
-    pub objects: Indirect<'a, [NamedObject<'a, N, D, M>]>,
-    pub irqs: Indirect<'a, [IrqEntry]>,
-    pub asid_slots: Indirect<'a, [AsidSlotEntry]>,
+pub struct Spec<N, D, M> {
+    pub objects: Box<[NamedObject<N, D, M>]>,
+    pub irqs: Box<[IrqEntry]>,
+    pub asid_slots: Box<[AsidSlotEntry]>,
     pub root_objects: Range<ObjectId>,
-    pub untyped_covers: Indirect<'a, [UntypedCover]>,
+    pub untyped_covers: Box<[UntypedCover]>,
 }
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
@@ -60,35 +61,35 @@ pub struct UntypedCover {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub struct NamedObject<'a, N, D, M> {
+pub struct NamedObject<N, D, M> {
     pub name: N,
-    pub object: Object<'a, D, M>,
+    pub object: Object<D, M>,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub enum Object<'a, D, M> {
+pub enum Object<D, M> {
     Untyped(object::Untyped),
     Endpoint,
     Notification,
-    CNode(object::CNode<'a>),
-    Tcb(object::Tcb<'a>),
-    Irq(object::Irq<'a>),
+    CNode(object::CNode),
+    Tcb(object::Tcb),
+    Irq(object::Irq),
     VCpu,
-    Frame(object::Frame<'a, D, M>),
-    PageTable(object::PageTable<'a>),
+    Frame(object::Frame<D, M>),
+    PageTable(object::PageTable),
     AsidPool(object::AsidPool),
-    ArmIrq(object::ArmIrq<'a>),
-    IrqMsi(object::IrqMsi<'a>),
-    IrqIOApic(object::IrqIOApic<'a>),
-    RiscvIrq(object::RiscvIrq<'a>),
+    ArmIrq(object::ArmIrq),
+    IrqMsi(object::IrqMsi),
+    IrqIOApic(object::IrqIOApic),
+    RiscvIrq(object::RiscvIrq),
     IOPorts(object::IOPorts),
     SchedContext(object::SchedContext),
     Reply,
     ArmSmc,
 }
 
-impl<D, M> Object<'_, D, M> {
+impl<D, M> Object<D, M> {
     pub fn paddr(&self) -> Option<usize> {
         match self {
             Object::Untyped(obj) => obj.paddr,
@@ -191,21 +192,21 @@ pub mod object {
 
     #[derive(Debug, Clone, Eq, PartialEq, IsObject, IsObjectWithCapTable)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-    pub struct CNode<'a> {
+    pub struct CNode {
         pub size_bits: usize,
-        pub slots: Indirect<'a, [CapTableEntry]>,
+        pub slots: Box<[CapTableEntry]>,
     }
 
     #[derive(Debug, Clone, Eq, PartialEq, IsObject, IsObjectWithCapTable)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-    pub struct Tcb<'a> {
-        pub slots: Indirect<'a, [CapTableEntry]>,
-        pub extra: Indirect<'a, TcbExtraInfo<'a>>,
+    pub struct Tcb {
+        pub slots: Box<[CapTableEntry]>,
+        pub extra: Box<TcbExtraInfo>,
     }
 
     #[derive(Debug, Clone, Eq, PartialEq)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-    pub struct TcbExtraInfo<'a> {
+    pub struct TcbExtraInfo {
         pub ipc_buffer_addr: Word,
 
         pub affinity: Word,
@@ -215,31 +216,31 @@ pub mod object {
 
         pub ip: Word,
         pub sp: Word,
-        pub gprs: Indirect<'a, [Word]>,
+        pub gprs: Box<[Word]>,
 
         pub master_fault_ep: Option<CPtr>,
     }
 
     #[derive(Debug, Clone, Eq, PartialEq, IsObject, IsObjectWithCapTable)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-    pub struct Irq<'a> {
-        pub slots: Indirect<'a, [CapTableEntry]>,
+    pub struct Irq {
+        pub slots: Box<[CapTableEntry]>,
     }
 
     #[derive(Debug, Clone, Eq, PartialEq, IsObject)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-    pub struct Frame<'a, D, M> {
+    pub struct Frame<D, M> {
         pub size_bits: usize,
         pub paddr: Option<usize>,
-        pub init: FrameInit<'a, D, M>,
+        pub init: FrameInit<D, M>,
     }
 
     #[derive(Debug, Clone, Eq, PartialEq, IsObject, IsObjectWithCapTable)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-    pub struct PageTable<'a> {
+    pub struct PageTable {
         pub is_root: bool,
         pub level: Option<u8>,
-        pub slots: Indirect<'a, [CapTableEntry]>,
+        pub slots: Box<[CapTableEntry]>,
     }
 
     #[derive(Debug, Clone, Eq, PartialEq, IsObject)]
@@ -250,9 +251,9 @@ pub mod object {
 
     #[derive(Debug, Clone, Eq, PartialEq, IsObject, IsObjectWithCapTable)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-    pub struct ArmIrq<'a> {
-        pub slots: Indirect<'a, [CapTableEntry]>,
-        pub extra: Indirect<'a, ArmIrqExtraInfo>,
+    pub struct ArmIrq {
+        pub slots: Box<[CapTableEntry]>,
+        pub extra: Box<ArmIrqExtraInfo>,
     }
 
     #[derive(Debug, Clone, Eq, PartialEq)]
@@ -264,9 +265,9 @@ pub mod object {
 
     #[derive(Debug, Clone, Eq, PartialEq, IsObject, IsObjectWithCapTable)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-    pub struct IrqMsi<'a> {
-        pub slots: Indirect<'a, [CapTableEntry]>,
-        pub extra: Indirect<'a, IrqMsiExtraInfo>,
+    pub struct IrqMsi {
+        pub slots: Box<[CapTableEntry]>,
+        pub extra: Box<IrqMsiExtraInfo>,
     }
 
     #[derive(Debug, Clone, Eq, PartialEq)]
@@ -280,9 +281,9 @@ pub mod object {
 
     #[derive(Debug, Clone, Eq, PartialEq, IsObject, IsObjectWithCapTable)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-    pub struct IrqIOApic<'a> {
-        pub slots: Indirect<'a, [CapTableEntry]>,
-        pub extra: Indirect<'a, IrqIOApicExtraInfo>,
+    pub struct IrqIOApic {
+        pub slots: Box<[CapTableEntry]>,
+        pub extra: Box<IrqIOApicExtraInfo>,
     }
 
     #[derive(Debug, Clone, Eq, PartialEq)]
@@ -296,8 +297,8 @@ pub mod object {
 
     #[derive(Debug, Clone, Eq, PartialEq, IsObject, IsObjectWithCapTable)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-    pub struct RiscvIrq<'a> {
-        pub slots: Indirect<'a, [CapTableEntry]>,
+    pub struct RiscvIrq {
+        pub slots: Box<[CapTableEntry]>,
         pub extra: RiscvIrqExtraInfo,
     }
 

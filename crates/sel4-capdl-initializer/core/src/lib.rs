@@ -79,7 +79,7 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
         init_thread::suspend_self()
     }
 
-    fn spec(&self) -> &'a Spec<'a, N, D, M> {
+    fn spec(&self) -> &'a Spec<N, D, M> {
         &self.spec_with_sources.spec
     }
 
@@ -572,7 +572,7 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
 
     fn init_frames(&mut self) -> Result<()> {
         debug!("Initializing Frames");
-        for (obj_id, obj) in self.spec().filter_objects::<&object::Frame<'a, D, M>>() {
+        for (obj_id, obj) in self.spec().filter_objects::<&object::Frame<D, M>>() {
             // TODO make more platform-agnostic
             if let Some(fill) = obj.init.as_fill() {
                 let entries = &fill.entries;

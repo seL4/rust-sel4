@@ -17,7 +17,6 @@ use serde::{Deserialize, Serialize};
 mod cap_table;
 mod footprint;
 mod frame_init;
-mod indirect;
 mod inspect;
 mod object_name;
 mod spec;
@@ -38,7 +37,6 @@ pub use frame_init::{
     IndirectBytesContent, IndirectEmbeddedFrame, NeverEmbedded, SelfContainedContent,
     SelfContainedGetEmbeddedFrame,
 };
-pub use indirect::Indirect;
 pub use object_name::{
     IndirectObjectName, ObjectName, ObjectNamesLevel, SelfContainedObjectName, Unnamed,
 };
@@ -62,15 +60,15 @@ pub use when_sel4::*;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct SpecWithSources<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame> {
-    pub spec: Spec<'a, N, D, M>,
+    pub spec: Spec<N, D, M>,
     pub object_name_source: &'a N::Source,
     pub content_source: &'a D::Source,
     pub embedded_frame_source: &'a M::Source,
 }
 
 #[cfg(feature = "deflate")]
-pub type SpecWithIndirection<'a> =
-    Spec<'a, Option<IndirectObjectName>, IndirectDeflatedBytesContent, IndirectEmbeddedFrame>;
+pub type SpecWithIndirection =
+    Spec<Option<IndirectObjectName>, IndirectDeflatedBytesContent, IndirectEmbeddedFrame>;
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]

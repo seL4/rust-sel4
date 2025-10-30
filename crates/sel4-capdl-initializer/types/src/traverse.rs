@@ -10,12 +10,12 @@ use crate::{
     Fill, FillEntry, FillEntryContent, FrameInit, NamedObject, NeverEmbedded, Object, Spec, object,
 };
 
-impl<'a, N, D, M> Spec<'a, N, D, M> {
+impl<N, D, M> Spec<N, D, M> {
     pub(crate) fn traverse<N1, D1, M1, E>(
         &self,
-        mut f: impl FnMut(&NamedObject<'a, N, D, M>) -> Result<N1, E>,
-        mut g: impl FnMut(&object::Frame<'a, D, M>, bool) -> Result<FrameInit<'a, D1, M1>, E>,
-    ) -> Result<Spec<'a, N1, D1, M1>, E> {
+        mut f: impl FnMut(&NamedObject<N, D, M>) -> Result<N1, E>,
+        mut g: impl FnMut(&object::Frame<D, M>, bool) -> Result<FrameInit<D1, M1>, E>,
+    ) -> Result<Spec<N1, D1, M1>, E> {
         Ok(Spec {
             objects: self
                 .objects
@@ -59,47 +59,47 @@ impl<'a, N, D, M> Spec<'a, N, D, M> {
     }
 }
 
-impl<'a, N, D: Clone, M: Clone> Spec<'a, N, D, M> {
+impl<N, D: Clone, M: Clone> Spec<N, D, M> {
     pub fn traverse_names_with_context_fallible<N1, E>(
         &self,
-        f: impl FnMut(&NamedObject<'a, N, D, M>) -> Result<N1, E>,
-    ) -> Result<Spec<'a, N1, D, M>, E> {
+        f: impl FnMut(&NamedObject<N, D, M>) -> Result<N1, E>,
+    ) -> Result<Spec<N1, D, M>, E> {
         self.traverse(f, |frame, _is_root| Ok(frame.init.clone()))
     }
 
     pub fn traverse_names_with_context<N1>(
         &self,
-        mut f: impl FnMut(&NamedObject<'a, N, D, M>) -> N1,
-    ) -> Spec<'a, N1, D, M> {
+        mut f: impl FnMut(&NamedObject<N, D, M>) -> N1,
+    ) -> Spec<N1, D, M> {
         unwrap_infallible(self.traverse_names_with_context_fallible(|x| Ok(f(x))))
     }
 
     pub fn traverse_names_fallible<N1, E>(
         &self,
         mut f: impl FnMut(&N) -> Result<N1, E>,
-    ) -> Result<Spec<'a, N1, D, M>, E> {
+    ) -> Result<Spec<N1, D, M>, E> {
         self.traverse_names_with_context_fallible(|named_object| f(&named_object.name))
     }
 
-    pub fn traverse_names<N1>(&self, mut f: impl FnMut(&N) -> N1) -> Spec<'a, N1, D, M> {
+    pub fn traverse_names<N1>(&self, mut f: impl FnMut(&N) -> N1) -> Spec<N1, D, M> {
         unwrap_infallible(self.traverse_names_fallible(|x| Ok(f(x))))
     }
 }
 
-impl<'a, N: Clone, D, M> Spec<'a, N, D, M> {
+impl<N: Clone, D, M> Spec<N, D, M> {
     pub(crate) fn traverse_frame_init<D1, M1, E>(
         &self,
-        f: impl FnMut(&object::Frame<'a, D, M>, bool) -> Result<FrameInit<'a, D1, M1>, E>,
-    ) -> Result<Spec<'a, N, D1, M1>, E> {
+        f: impl FnMut(&object::Frame<D, M>, bool) -> Result<FrameInit<D1, M1>, E>,
+    ) -> Result<Spec<N, D1, M1>, E> {
         self.traverse(|named_object| Ok(named_object.name.clone()), f)
     }
 }
 
-impl<'a, N: Clone, D, M: Clone> Spec<'a, N, D, M> {
+impl<N: Clone, D, M: Clone> Spec<N, D, M> {
     pub fn traverse_data_with_context_fallible<D1, E>(
         &self,
         mut f: impl FnMut(usize, &D) -> Result<D1, E>,
-    ) -> Result<Spec<'a, N, D1, M>, E> {
+    ) -> Result<Spec<N, D1, M>, E> {
         self.traverse_frame_init(|frame, _is_root| {
             Ok(match &frame.init {
                 FrameInit::Fill(fill) => FrameInit::Fill(Fill {
@@ -129,27 +129,27 @@ impl<'a, N: Clone, D, M: Clone> Spec<'a, N, D, M> {
     pub fn traverse_data_with_context<D1>(
         &self,
         mut f: impl FnMut(usize, &D) -> D1,
-    ) -> Spec<'a, N, D1, M> {
+    ) -> Spec<N, D1, M> {
         unwrap_infallible(self.traverse_data_with_context_fallible(|x1, x2| Ok(f(x1, x2))))
     }
 
     pub fn traverse_data_fallible<D1, E>(
         &self,
         mut f: impl FnMut(&D) -> Result<D1, E>,
-    ) -> Result<Spec<'a, N, D1, M>, E> {
+    ) -> Result<Spec<N, D1, M>, E> {
         self.traverse_data_with_context_fallible(|_length, data| f(data))
     }
 
-    pub fn traverse_data<D1>(&self, mut f: impl FnMut(&D) -> D1) -> Spec<'a, N, D1, M> {
+    pub fn traverse_data<D1>(&self, mut f: impl FnMut(&D) -> D1) -> Spec<N, D1, M> {
         unwrap_infallible(self.traverse_data_fallible(|x| Ok(f(x))))
     }
 }
 
-impl<'a, N: Clone, D: Clone, M> Spec<'a, N, D, M> {
+impl<N: Clone, D: Clone, M> Spec<N, D, M> {
     pub fn traverse_embedded_frames_fallible<M1, E>(
         &self,
         mut f: impl FnMut(&M) -> Result<M1, E>,
-    ) -> Result<Spec<'a, N, D, M1>, E> {
+    ) -> Result<Spec<N, D, M1>, E> {
         self.traverse_frame_init(|frame, _is_root| {
             Ok(match &frame.init {
                 FrameInit::Fill(fill) => FrameInit::Fill(fill.clone()),
@@ -158,17 +158,17 @@ impl<'a, N: Clone, D: Clone, M> Spec<'a, N, D, M> {
         })
     }
 
-    pub fn traverse_embedded_frames<M1>(&self, mut f: impl FnMut(&M) -> M1) -> Spec<'a, N, D, M1> {
+    pub fn traverse_embedded_frames<M1>(&self, mut f: impl FnMut(&M) -> M1) -> Spec<N, D, M1> {
         unwrap_infallible(self.traverse_embedded_frames_fallible(|x| Ok(f(x))))
     }
 }
 
-impl<'a, N: Clone, D: Clone> Spec<'a, N, D, NeverEmbedded> {
+impl<N: Clone, D: Clone> Spec<N, D, NeverEmbedded> {
     pub fn split_embedded_frames(
         &self,
         embed_frames: bool,
         granule_size_bits: usize,
-    ) -> Spec<'a, N, D, Fill<'a, D>> {
+    ) -> Spec<N, D, Fill<D>> {
         unwrap_infallible(
             self.traverse_frame_init::<_, _, Infallible>(|frame, is_root| {
                 let fill = frame.init.as_fill_infallible();

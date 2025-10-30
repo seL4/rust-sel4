@@ -9,21 +9,21 @@ use std::path::Path;
 
 use sel4_capdl_initializer_types::*;
 
-pub fn reserialize_spec<'a>(
+pub fn reserialize_spec(
     input_spec: &InputSpec,
     fill_dir_path: impl AsRef<Path>,
     object_names_level: &ObjectNamesLevel,
     embed_frames: bool,
     granule_size_bits: usize,
     verbose: bool,
-) -> (SpecWithIndirection<'a>, Vec<u8>) {
+) -> (SpecWithIndirection, Vec<u8>) {
     let granule_size = 1 << granule_size_bits;
 
     let fill_map = input_spec.collect_fill(&[fill_dir_path]);
 
     let mut sources = SourcesBuilder::new();
     let mut num_embedded_frames = 0;
-    let final_spec: SpecWithIndirection<'a> = input_spec
+    let final_spec: SpecWithIndirection = input_spec
         .traverse_names_with_context(|named_obj| {
             object_names_level
                 .apply(named_obj)

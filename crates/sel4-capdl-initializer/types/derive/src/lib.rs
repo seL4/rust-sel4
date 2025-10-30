@@ -44,17 +44,17 @@ fn derive_object_impl(ast: &syn::DeriveInput) -> TokenStream {
     let name = &ast.ident;
     let generics = &ast.generics;
     quote! {
-        impl<'a, 'b, D, M> TryFrom<&'b Object<'a, D, M>> for &'b #name #generics {
+        impl<'b, D, M> TryFrom<&'b Object<D, M>> for &'b #name #generics {
             type Error = TryFromObjectError;
-            fn try_from(obj: &'b Object<'a, D, M>) -> Result<Self, Self::Error> {
+            fn try_from(obj: &'b Object<D, M>) -> Result<Self, Self::Error> {
                 match obj {
                     Object::#name(cap) => Ok(&cap),
                     _ => Err(TryFromObjectError),
                 }
             }
         }
-        impl<'a, D, M> Into<Object<'a, D, M>> for #name #generics {
-            fn into(self) -> Object<'a, D, M> {
+        impl<D, M> Into<Object<D, M>> for #name #generics {
+            fn into(self) -> Object<D, M> {
                 Object::#name(self)
             }
         }
