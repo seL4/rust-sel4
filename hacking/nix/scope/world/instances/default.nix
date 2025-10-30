@@ -364,7 +364,6 @@ in rec {
           release = true; # test optimizations
         };
         rootTask = mkCapDLInitializer {
-          small = false;
           spec = mkSimpleCompositionCapDLSpec {
             script = sources.srcRoot + "/crates/private/tests/capdl/threads/cdl.py";
             config = {
@@ -386,7 +385,6 @@ in rec {
           release = false;
         };
         rootTask = mkCapDLInitializer {
-          small = true;
           spec = mkSimpleCompositionCapDLSpec {
             script = sources.srcRoot + "/crates/private/tests/capdl/utcover/cdl.py";
             config = {

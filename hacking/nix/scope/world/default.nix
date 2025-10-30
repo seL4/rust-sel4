@@ -120,7 +120,6 @@ self: with self;
 
   sel4-capdl-initializer = callPackage ./capdl/sel4-capdl-initializer.nix {};
   objectSizes = callPackage ./capdl/object-sizes.nix {};
-  mkSmallCapDLInitializer = callPackage ./capdl/mk-small-capdl-initializer.nix {};
   serializeCapDLSpec = callPackage ./capdl/serialize-capdl-spec.nix {};
   dummyCapDLSpec = callPackage ./capdl/dummy-capdl-spec.nix {};
   mkSimpleCompositionCapDLSpec = callPackage ./capdl/mk-simple-composition-capdl-spec.nix {};
@@ -129,20 +128,18 @@ self: with self;
   mkCapDLInitializer =
     { spec ? null
     , specAttrs ? spec.specAttrs
-    , small ? false
     , extraDebuggingLinks ? []
     }:
 
     lib.fix (self:
-      (if small then mkSmallCapDLInitializer else mkCapDLInitializerWithSpec) spec.specAttrs // {
+      mkCapDLInitializerWithSpec spec.specAttrs // {
         inherit spec;
         debuggingLinks = [
           { name = "spec.cdl"; path = spec.specAttrs.cdl; }
           { name = "fill"; path = spec.specAttrs.fill; }
+          { name = "initializer.full.elf"; path = self.split.full; }
         ] ++ lib.optionals (spec != null) [
           { name = "spec"; path = spec; }
-        ] ++ lib.optionals (!small) [
-          { name = "initializer.full.elf"; path = self.split.full; }
         ] ++ extraDebuggingLinks;
       }
     );
