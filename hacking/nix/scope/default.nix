@@ -4,7 +4,9 @@
 # SPDX-License-Identifier: BSD-2-Clause
 #
 
-{ lib, stdenv
+{ lib
+, pkgs
+, stdenv
 , buildPlatform, hostPlatform, targetPlatform
 , pkgsBuildBuild
 , callPackage
@@ -40,6 +42,18 @@ let
       };
     in
       import source {};
+
+  zig-overlay =
+    let
+      rev = "a5150d558dc58769d4309437e1ff3d9d473fb548";
+      source = builtins.fetchTarball {
+        url = "https://github.com/mitchellh/zig-overlay/archive/${rev}.tar.gz";
+        sha256 = "sha256:05cz764hnvf8af1nwrlrss3j521hsly2xwm29xvvrz00yc3ncigk";
+      };
+    in
+      import source {
+        inherit pkgs;
+      };
 in
 
 let
@@ -89,7 +103,7 @@ superCallPackage ../rust-utils {} self //
 
   ### rust
 
-  inherit fenix;
+  inherit fenix zig-overlay;
 
   topLevelRustToolchainFile = rec {
     path = ../../../rust-toolchain.toml;

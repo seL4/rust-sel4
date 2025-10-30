@@ -8,7 +8,7 @@
 , linkFarm
 , fetchzip
 , python312Packages
-, zig
+, zig-overlay
 , sources
 }:
 
@@ -38,5 +38,5 @@ buildPythonPackage rec {
     ln -s ${deps} $ZIG_GLOBAL_CACHE_DIR/p
   '';
 
-  nativeBuildInputs = [ zig ];
+  nativeBuildInputs = [ zig-overlay."0.14.0" ];
 }
