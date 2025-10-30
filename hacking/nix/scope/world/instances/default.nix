@@ -382,7 +382,8 @@ in rec {
         test = mkTask {
           rootCrate = crates.tests-capdl-utcover-components-test;
           targetTriple = mkSeL4RustTargetTriple { unwind = haveUnwindingSupport; };
-          release = false;
+          # release = false;
+          release = true;
         };
         rootTask = mkCapDLInitializer {
           spec = mkSimpleCompositionCapDLSpec {
