@@ -148,18 +148,6 @@ impl GetEmbeddedFrame for IndirectEmbeddedFrame {
     }
 }
 
-#[macro_export]
-macro_rules! embed_frame {
-    ($frame_size:expr, $content:expr) => {{
-        #[repr(C, align($frame_size))]
-        struct Aligned<T: ?Sized>(T);
-
-        const FRAME: &'static Aligned<[u8]> = &Aligned($content);
-
-        $crate::EmbeddedFrame::new(FRAME.0.as_ptr())
-    }};
-}
-
 // // //
 
 #[derive(Debug, Clone, Eq, PartialEq)]
