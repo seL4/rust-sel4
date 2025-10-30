@@ -10,6 +10,7 @@ mk {
   package.name = "sel4-capdl-initializer-core";
   dependencies = {
     inherit (versions) log;
+    rkyv = { version = versions.rkyv; default-features = false; };
     inherit (localCrates)
       sel4
     ;

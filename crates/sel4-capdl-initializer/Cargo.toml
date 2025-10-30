@@ -20,6 +20,7 @@ license = "BSD-2-Clause"
 log = "0.4.28"
 one-shot-mutex = "0.2.1"
 postcard = { version = "1.1.3", default-features = false, features = ["alloc"] }
+rkyv = { version = "0.8.12", default-features = false }
 sel4 = { path = "../sel4" }
 sel4-capdl-initializer-core = { path = "core" }
 sel4-capdl-initializer-types = { path = "types", features = ["serde", "deflate"] }

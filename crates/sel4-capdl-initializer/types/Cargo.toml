@@ -33,6 +33,11 @@ default-features = false
 features = ["with-alloc"]
 optional = true
 
+[dependencies.rkyv]
+version = "0.8.12"
+default-features = false
+features = ["alloc", "bytecheck", "pointer_width_32"]
+
 [dependencies.serde]
 version = "1.0.228"
 default-features = false
