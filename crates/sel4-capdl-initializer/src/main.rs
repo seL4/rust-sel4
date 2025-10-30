@@ -7,23 +7,59 @@
 #![no_std]
 #![no_main]
 
+#[cfg(feature = "alloc")]
 extern crate alloc;
 
-use alloc::vec;
+use core::borrow::BorrowMut;
 use core::ops::Range;
 use core::ptr;
 use core::slice;
 
-use one_shot_mutex::sync::RawOneShotMutex;
+#[cfg(feature = "alloc")]
+use alloc::vec;
+
+use rkyv::Archive;
 
 use sel4_capdl_initializer_core::{Initializer, InitializerBuffers, PerObjectBuffer};
-use sel4_capdl_initializer_types::{
-    IndirectDeflatedBytesContent, IndirectEmbeddedFrame, IndirectObjectName, SpecWithIndirection,
-    SpecWithSources,
-};
-use sel4_dlmalloc::{DeferredStaticDlmalloc, StaticHeapBounds};
+use sel4_capdl_initializer_types::SpecForInitializer;
+use sel4_immutable_cell::ImmutableCell;
 use sel4_logging::{LevelFilter, Logger, LoggerBuilder};
 use sel4_root_task::{debug_print, root_task};
+
+// TODO consolidate core into this crate
+
+#[cfg(not(feature = "alloc"))]
+mod no_allocator;
+
+#[allow(non_upper_case_globals)]
+#[unsafe(no_mangle)]
+#[unsafe(link_section = ".data")]
+static sel4_capdl_initializer_serialized_spec_data_start: ImmutableCell<*mut u8> =
+    ImmutableCell::new(ptr::null_mut());
+
+#[allow(non_upper_case_globals)]
+#[unsafe(no_mangle)]
+#[unsafe(link_section = ".data")]
+static sel4_capdl_initializer_serialized_spec_data_size: ImmutableCell<usize> =
+    ImmutableCell::new(0);
+
+#[allow(non_upper_case_globals)]
+#[unsafe(no_mangle)]
+#[unsafe(link_section = ".data")]
+static sel4_capdl_initializer_embedded_frames_data_start: ImmutableCell<*mut u8> =
+    ImmutableCell::new(ptr::null_mut());
+
+#[allow(non_upper_case_globals)]
+#[unsafe(no_mangle)]
+#[unsafe(link_section = ".data")]
+static sel4_capdl_initializer_image_start: ImmutableCell<*mut u8> =
+    ImmutableCell::new(ptr::null_mut());
+
+#[allow(non_upper_case_globals)]
+#[unsafe(no_mangle)]
+#[unsafe(link_section = ".data")]
+static sel4_capdl_initializer_image_end: ImmutableCell<*mut u8> =
+    ImmutableCell::new(ptr::null_mut());
 
 const LOG_LEVEL: LevelFilter = {
     // LevelFilter::Trace
@@ -37,82 +73,64 @@ static LOGGER: Logger = LoggerBuilder::const_default()
     .write(|s| debug_print!("{}", s))
     .build();
 
-#[global_allocator]
-static GLOBAL_ALLOCATOR: DeferredStaticDlmalloc<RawOneShotMutex> = DeferredStaticDlmalloc::new();
-
-#[root_task(stack_size = 0x10000)]
+#[cfg_attr(
+    feature = "alloc",
+    root_task(stack_size = 0x10_000, heap_size = 0x10_000)
+)]
+#[cfg_attr(not(feature = "alloc"), root_task(stack_size = 0x10_000))]
 fn main(bootinfo: &sel4::BootInfoPtr) -> ! {
-    let _ = GLOBAL_ALLOCATOR.set_bounds(static_heap_bounds());
     LOGGER.set().unwrap();
-    let spec_with_sources = get_spec_with_sources();
-    let mut buffers = InitializerBuffers::new(vec![
-        PerObjectBuffer::const_default();
-        spec_with_sources.spec.objects.len()
-    ]);
+    let spec = access_spec(get_spec_bytes());
+    let mut buffers = InitializerBuffers::new(get_buffers(spec.objects.len()));
     Initializer::initialize(
         bootinfo,
         user_image_bounds(),
-        &spec_with_sources,
+        spec,
+        *sel4_capdl_initializer_embedded_frames_data_start.get() as usize,
         &mut buffers,
     )
 }
 
-#[unsafe(no_mangle)]
-#[unsafe(link_section = ".data")]
-static mut sel4_capdl_initializer_serialized_spec_start: *mut u8 = ptr::null_mut();
-
-#[unsafe(no_mangle)]
-#[unsafe(link_section = ".data")]
-static mut sel4_capdl_initializer_serialized_spec_size: usize = 0;
-
-#[unsafe(no_mangle)]
-#[unsafe(link_section = ".data")]
-static mut sel4_capdl_initializer_heap_start: *mut u8 = ptr::null_mut();
-
-#[unsafe(no_mangle)]
-#[unsafe(link_section = ".data")]
-static mut sel4_capdl_initializer_heap_size: usize = 0;
-
-#[unsafe(no_mangle)]
-#[unsafe(link_section = ".data")]
-static mut sel4_capdl_initializer_image_start: *mut u8 = ptr::null_mut();
-
-#[unsafe(no_mangle)]
-#[unsafe(link_section = ".data")]
-static mut sel4_capdl_initializer_image_end: *mut u8 = ptr::null_mut();
-
-fn get_spec_with_sources<'a>() -> SpecWithSources<
-    'a,
-    Option<IndirectObjectName>,
-    IndirectDeflatedBytesContent,
-    IndirectEmbeddedFrame,
-> {
-    let blob = unsafe {
+fn get_spec_bytes() -> &'static [u8] {
+    unsafe {
         slice::from_raw_parts(
-            sel4_capdl_initializer_serialized_spec_start,
-            sel4_capdl_initializer_serialized_spec_size,
+            *sel4_capdl_initializer_serialized_spec_data_start.get(),
+            *sel4_capdl_initializer_serialized_spec_data_size.get(),
         )
-    };
-    let (spec, source) = postcard::take_from_bytes::<SpecWithIndirection>(blob).unwrap();
-    SpecWithSources {
-        spec,
-        object_name_source: source,
-        content_source: source,
-        embedded_frame_source: source,
     }
 }
 
 fn user_image_bounds() -> Range<usize> {
-    unsafe {
-        (sel4_capdl_initializer_image_start as usize)..(sel4_capdl_initializer_image_end as usize)
-    }
+    (*sel4_capdl_initializer_image_start.get() as usize)
+        ..(*sel4_capdl_initializer_image_end.get() as usize)
 }
 
-fn static_heap_bounds() -> StaticHeapBounds {
-    unsafe {
-        StaticHeapBounds::new(
-            sel4_capdl_initializer_heap_start,
-            sel4_capdl_initializer_heap_size,
-        )
-    }
+#[cfg(feature = "alloc")]
+fn get_buffers(num_objects: usize) -> impl BorrowMut<[PerObjectBuffer]> {
+    vec![PerObjectBuffer::const_default(); num_objects]
+}
+
+#[cfg(not(feature = "alloc"))]
+fn get_buffers(num_objects: usize) -> impl BorrowMut<[PerObjectBuffer]> {
+    use sel4_one_ref_cell::OneRefCell;
+
+    // TODO make configurable
+    const MAX_OBJECTS: usize = 4096;
+
+    static BUFFERS: OneRefCell<[PerObjectBuffer; MAX_OBJECTS]> =
+        OneRefCell::new([PerObjectBuffer::const_default(); _]);
+
+    assert!(num_objects <= MAX_OBJECTS);
+
+    &mut BUFFERS.take().unwrap().as_mut_slice()[..num_objects]
+}
+
+#[cfg(feature = "alloc")]
+fn access_spec(bytes: &[u8]) -> &<SpecForInitializer as Archive>::Archived {
+    SpecForInitializer::access(bytes).unwrap()
+}
+
+#[cfg(not(feature = "alloc"))]
+fn access_spec(bytes: &[u8]) -> &<SpecForInitializer as Archive>::Archived {
+    unsafe { SpecForInitializer::access_unchecked(bytes) }
 }

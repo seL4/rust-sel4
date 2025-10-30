@@ -5,7 +5,7 @@
 //
 
 use proc_macro::TokenStream;
-use quote::quote;
+use quote::{format_ident, quote};
 
 #[proc_macro_derive(IsCap)]
 pub fn derive_cap(input: TokenStream) -> TokenStream {
@@ -15,19 +15,27 @@ pub fn derive_cap(input: TokenStream) -> TokenStream {
 
 fn derive_cap_impl(ast: &syn::DeriveInput) -> TokenStream {
     let name = &ast.ident;
+    let archived_name = format_ident!("Archived{}", name);
     quote! {
-        impl<'b> TryFrom<&'b Cap> for &'b #name {
-            type Error = TryFromCapError;
-            fn try_from(cap: &'b Cap) -> Result<Self, Self::Error> {
+        impl IsCap for #name {
+            fn into_cap(self) -> Cap {
+                Cap::#name(self)
+            }
+
+            fn try_from_cap(cap: &Cap) -> Option<&Self> {
                 match cap {
-                    Cap::#name(cap) => Ok(&cap),
-                    _ => Err(TryFromCapError),
+                    Cap::#name(sub_cap) => Some(&sub_cap),
+                    _ => None,
                 }
             }
         }
-        impl Into<Cap> for #name {
-            fn into(self) -> Cap {
-                Cap::#name(self)
+
+        impl IsArchivedCap for #archived_name {
+            fn try_from_cap(cap: &ArchivedCap) -> Option<&Self> {
+                match cap {
+                    ArchivedCap::#name(sub_cap) => Some(&sub_cap),
+                    _ => None,
+                }
             }
         }
     }
@@ -42,38 +50,53 @@ pub fn derive_object(input: TokenStream) -> TokenStream {
 
 fn derive_object_impl(ast: &syn::DeriveInput) -> TokenStream {
     let name = &ast.ident;
+    let archived_name = format_ident!("Archived{}", name);
     let generics = &ast.generics;
     quote! {
-        impl<'b, D, M> TryFrom<&'b Object<D, M>> for &'b #name #generics {
-            type Error = TryFromObjectError;
-            fn try_from(obj: &'b Object<D, M>) -> Result<Self, Self::Error> {
+        impl<D> IsObject<D> for #name #generics {
+            fn into_object(self) -> Object<D> {
+                Object::#name(self)
+            }
+
+            fn try_from_object(obj: &Object<D>) -> Option<&Self> {
                 match obj {
-                    Object::#name(cap) => Ok(&cap),
-                    _ => Err(TryFromObjectError),
+                    Object::#name(sub_obj) => Some(&sub_obj),
+                    _ => None,
                 }
             }
         }
-        impl<D, M> Into<Object<D, M>> for #name #generics {
-            fn into(self) -> Object<D, M> {
-                Object::#name(self)
+
+        impl<D: Archive> IsArchivedObject<D> for #archived_name #generics {
+            fn try_from_object(obj: &ArchivedObject<D>) -> Option<&Self> {
+                match obj {
+                    ArchivedObject::#name(sub_obj) => Some(&sub_obj),
+                    _ => None,
+                }
             }
         }
     }
     .into()
 }
 
-#[proc_macro_derive(IsObjectWithCapTable)]
-pub fn derive_object_with_cap_table(input: TokenStream) -> TokenStream {
+#[proc_macro_derive(HasCapTable)]
+pub fn derive_has_cap_table(input: TokenStream) -> TokenStream {
     let ast = syn::parse(input).unwrap();
-    derive_object_with_cap_table_impl(&ast)
+    derive_has_cap_table_impl(&ast)
 }
 
-fn derive_object_with_cap_table_impl(ast: &syn::DeriveInput) -> TokenStream {
+fn derive_has_cap_table_impl(ast: &syn::DeriveInput) -> TokenStream {
     let name = &ast.ident;
+    let archived_name = format_ident!("Archived{}", name);
     let generics = &ast.generics;
     quote! {
         impl #generics HasCapTable for #name #generics {
             fn slots(&self) -> &[CapTableEntry] {
+                &*self.slots
+            }
+        }
+
+        impl #generics HasArchivedCapTable for #archived_name #generics {
+            fn slots(&self) -> &[ArchivedCapTableEntry] {
                 &*self.slots
             }
         }

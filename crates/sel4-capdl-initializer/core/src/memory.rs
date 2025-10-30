@@ -10,9 +10,9 @@ use core::ptr;
 use sel4::{CapTypeForFrameObjectOfFixedSize, cap_type, init_thread, sel4_cfg_attr, sel4_cfg_bool};
 
 const SMALL_PAGE_PLACEHOLDER_SIZE: usize = if sel4_cfg_bool!(ARCH_AARCH32) {
-    65536
+    1 << 16
 } else {
-    4096
+    1 << 12
 };
 
 #[repr(C)]
