@@ -21,7 +21,7 @@ mk {
       sel4-logging
     ;
     sel4-root-task = localCrates.sel4-root-task // { features = [ "single-threaded" ]; };
-    sel4-capdl-initializer-types = localCrates.sel4-capdl-initializer-types // { features = [ "alloc" "serde" "deflate" ]; };
+    sel4-capdl-initializer-types = localCrates.sel4-capdl-initializer-types // { features = [ "serde" "deflate" ]; };
   };
   # features = {
   #   deflate = [

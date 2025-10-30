@@ -4,7 +4,11 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use std::collections::BTreeMap;
+use alloc::borrow::ToOwned;
+use alloc::collections::BTreeMap;
+use alloc::string::String;
+use alloc::vec;
+use alloc::vec::Vec;
 use std::fs::File;
 use std::io;
 use std::ops::Deref;

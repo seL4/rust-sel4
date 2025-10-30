@@ -4,10 +4,12 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-#![cfg_attr(not(feature = "std"), no_std)]
+#![no_std]
 
-#[cfg(feature = "alloc")]
 extern crate alloc;
+
+#[cfg(feature = "std")]
+extern crate std;
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
@@ -20,7 +22,6 @@ mod inspect;
 mod object_name;
 mod spec;
 
-#[cfg(feature = "alloc")]
 mod traverse;
 
 #[cfg(feature = "std")]
@@ -46,7 +47,6 @@ pub use spec::{
     ObjectId, Rights, Spec, TryFromCapError, TryFromObjectError, UntypedCover, Word, cap, object,
 };
 
-#[cfg(feature = "alloc")]
 pub use frame_init::{FileContent, FileContentRange};
 
 #[cfg(feature = "deflate")]

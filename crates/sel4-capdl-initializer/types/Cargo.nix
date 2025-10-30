@@ -10,7 +10,7 @@ mk {
   package.name = "sel4-capdl-initializer-types";
   dependencies = {
     inherit (versions) cfg-if;
-    miniz_oxide = { version = versions.miniz_oxide; default-features = false; optional = true; };
+    miniz_oxide = { version = versions.miniz_oxide; default-features = false; features = [ "with-alloc" ]; optional = true; };
     serde = serdeWith [ "derive" "alloc" ] // { optional = true; };
     serde_json = { version = versions.serde_json; optional = true; };
     inherit (localCrates)
@@ -19,10 +19,8 @@ mk {
     sel4 = localCrates.sel4 // { optional = true; default-features = false; };
   };
   features = {
-    std = [ "alloc" "serde" "serde_json" ];
-    alloc = [ "miniz_oxide?/with-alloc" ];
-    serde = [ "alloc" "dep:serde" ];
+    std = [ "serde_json" ];
+    serde_json = [ "dep:serde_json" "serde" ];
     deflate = [ "dep:miniz_oxide" ];
-    borrowed-indirect = [];
   };
 }
