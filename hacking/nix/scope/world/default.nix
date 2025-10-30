@@ -121,7 +121,6 @@ self: with self;
   sel4-capdl-initializer = callPackage ./capdl/sel4-capdl-initializer.nix {};
   objectSizes = callPackage ./capdl/object-sizes.nix {};
   serializeCapDLSpec = callPackage ./capdl/serialize-capdl-spec.nix {};
-  dummyCapDLSpec = callPackage ./capdl/dummy-capdl-spec.nix {};
   mkSimpleCompositionCapDLSpec = callPackage ./capdl/mk-simple-composition-capdl-spec.nix {};
   mkCapDLInitializerWithSpec = callPackage ./capdl/mk-capdl-initializer-with-spec.nix {};
 

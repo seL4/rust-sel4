@@ -12,7 +12,6 @@
 , bareMetalRustTargetTriple
 , libclangPath
 , sources
-, dummyCapDLSpec, serializeCapDLSpec
 , seL4RustEnvVars
 , allCustomRustTargetTripleNames
 , worldConfig
@@ -28,11 +27,6 @@
 let
   kernelLoaderConfigEnvVars = lib.optionalAttrs (!worldConfig.isMicrokit && worldConfig.kernelLoaderConfig != null) {
     SEL4_KERNEL_LOADER_CONFIG = writeText "loader-config.json" (builtins.toJSON worldConfig.kernelLoaderConfig);
-  };
-
-  capdlEnvVars = lib.optionalAttrs (!worldConfig.isMicrokit) {
-    CAPDL_SPEC_FILE = serializeCapDLSpec { inherit (dummyCapDLSpec) cdl; };
-    CAPDL_FILL_DIR = dummyCapDLSpec.fill;
   };
 
   libcDir = "${stdenv.cc.libc}/${hostPlatform.config}";
@@ -53,7 +47,7 @@ let
   ];
 
 in
-mkShell (seL4RustEnvVars // kernelLoaderConfigEnvVars // capdlEnvVars // bindgenEnvVars // miscEnvVars // {
+mkShell (seL4RustEnvVars // kernelLoaderConfigEnvVars // bindgenEnvVars // miscEnvVars // {
   # TODO
   RUST_SEL4_TARGET = defaultRustTargetTriple.name;
 
