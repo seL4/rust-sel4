@@ -12,17 +12,22 @@ use sel4_panicking_env::abort;
 
 use crate::{Handler, panicking::init_panicking};
 
-sel4_runtime_common::declare_entrypoint! {
-    () -> ! {
-        init_panicking();
+#[allow(unreachable_code)]
+#[unsafe(no_mangle)]
+unsafe extern "C" fn __sel4_microkit__rust_entrypoint() -> ! {
+    unsafe {
+        sel4_runtime_common::with_local_initialization(|| {
+            sel4_runtime_common::global_initialzation();
 
-        let ipc_buffer = unsafe { ipc_buffer_ptr().as_mut().unwrap() };
-        sel4::set_ipc_buffer(ipc_buffer);
+            init_panicking();
 
-        unsafe {
+            let ipc_buffer = ipc_buffer_ptr().as_mut().unwrap();
+            sel4::set_ipc_buffer(ipc_buffer);
+
             __sel4_microkit__main();
-        }
+        });
     }
+    abort!("entrypoint returned")
 }
 
 unsafe extern "C" {

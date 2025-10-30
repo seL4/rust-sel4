@@ -5,7 +5,7 @@
      SPDX-License-Identifier: BSD-2-Clause
 -->
 <system>
-    <protection_domain name="test" priority="128">
+    <protection_domain name="test" priority="128" stack_size="0x10_000">
         <program_image path="test.elf" path_for_symbols="test.sup.elf" />
     </protection_domain>
 </system>

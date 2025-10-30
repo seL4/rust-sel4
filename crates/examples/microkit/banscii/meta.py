@@ -36,6 +36,9 @@ BOARDS: List[Board] = [
 ]
 
 
+DEFAULT_STACK_SIZE = 0x10_000
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--board', required=True, choices=[b.name for b in BOARDS])
@@ -61,7 +64,12 @@ def run(args):
     for mr in mrs:
         sdf.add_mr(mr)
 
-    serial_driver = ProtectionDomain('serial_driver', 'banscii-serial-driver.elf', priority=254)
+    serial_driver = ProtectionDomain(
+        'serial_driver',
+        'banscii-serial-driver.elf',
+        priority=254,
+        stack_size=DEFAULT_STACK_SIZE,
+    )
     serial_driver.add_map(
         Map(
             serial_mmio,
@@ -77,7 +85,12 @@ def run(args):
         )
     )
 
-    assistant = ProtectionDomain('assistant', 'banscii-assistant.elf', priority=252)
+    assistant = ProtectionDomain(
+        'assistant',
+        'banscii-assistant.elf',
+        priority=252,
+        stack_size=DEFAULT_STACK_SIZE,
+    )
     assistant.add_map(
         Map(
             artist_to_assistant,
@@ -97,7 +110,12 @@ def run(args):
         )
     )
 
-    artist = ProtectionDomain('artist', 'banscii-artist.elf', priority=253)
+    artist = ProtectionDomain(
+        'artist',
+        'banscii-artist.elf',
+        priority=253,
+        stack_size=DEFAULT_STACK_SIZE,
+    )
     artist.add_map(
         Map(
             assistant_to_artist,

@@ -5,7 +5,7 @@
      SPDX-License-Identifier: BSD-2-Clause
 -->
 <system>
-    <protection_domain name="hello" priority="254">
+    <protection_domain name="hello" priority="254" stack_size="0x10_000">
         <program_image path="microkit-hello.elf" />
     </protection_domain>
 </system>
