@@ -17,18 +17,21 @@ edition = "2024"
 license = "BSD-2-Clause"
 
 [features]
-alloc = ["miniz_oxide?/with-alloc"]
-borrowed-indirect = []
 deflate = ["dep:miniz_oxide"]
-serde = ["alloc", "dep:serde"]
-std = ["alloc", "serde", "serde_json"]
+serde_json = ["dep:serde_json", "serde"]
+std = ["serde_json"]
 
 [dependencies]
 cfg-if = "1.0.4"
-miniz_oxide = { version = "0.8.9", default-features = false, optional = true }
 sel4 = { path = "../../sel4", default-features = false, optional = true }
 sel4-capdl-initializer-types-derive = { path = "derive" }
 serde_json = { version = "1.0.145", optional = true }
+
+[dependencies.miniz_oxide]
+version = "0.8.9"
+default-features = false
+features = ["with-alloc"]
+optional = true
 
 [dependencies.serde]
 version = "1.0.228"

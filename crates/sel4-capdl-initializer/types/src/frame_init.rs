@@ -4,14 +4,12 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
+use alloc::{string::String, vec::Vec};
 use core::fmt;
 use core::ops::Range;
 
 #[cfg(feature = "deflate")]
 use core::iter;
-
-#[cfg(all(feature = "alloc", not(feature = "std")))]
-use alloc::{string::String, vec::Vec};
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
@@ -230,7 +228,6 @@ pub enum FillEntryContentBootInfoId {
 
 // // //
 
-#[cfg(feature = "alloc")]
 #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct FileContent {
@@ -238,7 +235,6 @@ pub struct FileContent {
     pub file_offset: usize,
 }
 
-#[cfg(feature = "alloc")]
 impl FileContent {
     pub fn with_length(&self, length: usize) -> FileContentRange {
         FileContentRange {
@@ -249,7 +245,6 @@ impl FileContent {
     }
 }
 
-#[cfg(feature = "alloc")]
 #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct FileContentRange {
@@ -258,7 +253,6 @@ pub struct FileContentRange {
     pub file_length: usize,
 }
 
-#[cfg(feature = "alloc")]
 impl FileContentRange {
     pub fn file_range(&self) -> Range<usize> {
         self.file_offset..self.file_offset + self.file_length
@@ -277,7 +271,6 @@ pub struct BytesContent<'a> {
     pub bytes: &'a [u8],
 }
 
-#[cfg(feature = "alloc")]
 impl BytesContent<'_> {
     pub fn pack(raw_content: &[u8]) -> Vec<u8> {
         raw_content.to_vec()
@@ -305,7 +298,7 @@ pub struct DeflatedBytesContent<'a> {
     pub deflated_bytes: &'a [u8],
 }
 
-#[cfg(all(feature = "alloc", feature = "deflate"))]
+#[cfg(feature = "deflate")]
 impl DeflatedBytesContent<'_> {
     pub fn pack(raw_content: &[u8]) -> Vec<u8> {
         miniz_oxide::deflate::compress_to_vec(raw_content, 10)

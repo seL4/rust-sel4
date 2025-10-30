@@ -4,11 +4,9 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
+use alloc::string::String;
 use core::ops::Range;
 use core::str;
-
-#[cfg(all(feature = "alloc", not(feature = "std")))]
-use alloc::string::String;
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
@@ -25,7 +23,6 @@ impl SelfContainedObjectName for &str {
     }
 }
 
-#[cfg(feature = "alloc")]
 impl SelfContainedObjectName for String {
     fn self_contained_object_name(&self) -> Option<&str> {
         Some(self)

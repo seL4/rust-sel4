@@ -4,10 +4,8 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use core::mem::size_of_val;
-
-#[cfg(all(feature = "alloc", not(feature = "std")))]
 use alloc::string::String;
+use core::mem::size_of_val;
 
 use crate::frame_init::*;
 use crate::indirect::*;
@@ -115,7 +113,6 @@ impl<D: Footprint> Footprint for FillEntryContent<D> {
     }
 }
 
-#[cfg(feature = "alloc")]
 impl Footprint for String {
     fn external_footprint(&self) -> usize {
         self.len()
