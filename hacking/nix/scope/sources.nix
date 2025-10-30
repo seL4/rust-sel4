@@ -78,7 +78,7 @@ in rec {
 
   sdfgen = fetchGit {
     url = "https://github.com/coliasgroup/microkit_sdf_gen";
-    rev = "7f9977d2c6ccefd374d7c43b2dddfb05f7f9c975"; # branch "rust", based on 0.24.0
+    rev = "16f735ab4954ae8e0490c65787b33f5b0ec87957"; # branch "rust", based on 0.27.0
     local = localRoot + "/microkit_sdf_gen";
     extraFilter = path: type:
       lib.hasSuffix "/.zig-cache" path || lib.hasSuffix "/zig-out" path || lib.hasSuffix "/result" path;
