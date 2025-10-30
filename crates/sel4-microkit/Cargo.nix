@@ -21,7 +21,7 @@ mk {
       sel4-microkit-base
       sel4-microkit-macros
     ;
-    sel4-runtime-common = localCrates.sel4-runtime-common // { features = [ "full" ]; };
+    sel4-runtime-common = localCrates.sel4-runtime-common // { features = [ "abort" ]; };
     sel4 = localCrates.sel4 // { features = [ "single-threaded" ]; };
   };
   features = {

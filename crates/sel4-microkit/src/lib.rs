@@ -39,6 +39,7 @@ pub use sel4_microkit_base::*;
 mod entry;
 mod heap;
 mod printing;
+mod start;
 
 pub mod panicking;
 
@@ -64,22 +65,16 @@ pub use printing::{debug_print, debug_println};
 ///
 /// (See [`Handler`])
 ///
-/// This macro takes two optional parameters, whose values can be any expression of type `usize`:
+/// This macro an optional `heap_size` parameter, whose value can be any expression of type `usize`:
 ///
 /// ```rust
-/// #[protection_domain(
-///     stack_size = <stack_size_expr: usize>,
-///     heap_size = <heap_size_expr: usize>,
-/// )]
+/// #[protection_domain(heap_size = <heap_size_expr: usize>)]
 /// ```
 ///
-/// - `stack_size`: Declares the size of the protection domain's stack, in bytes. Note that this
-///   includes space for thread-local storage. If absent, [`DEFAULT_STACK_SIZE`] will be used.
-/// - `heap_size`: Creates a `#[global_allocator]`, backed by a static heap of the specified size.
-///   If this parameter is not specified, no `#[global_allocator]` will be automatically declared,
-///   and, unless one is manually declared, heap allocations will result in a link-time error.
-///
-/// Note that, if both parameters are provided, they must appear in the order above.
+/// If this parameter is provided, the macro creates a `#[global_allocator]`, backed by a static
+/// heap of the specified size. If this parameter is not specified, no `#[global_allocator]` will be
+/// automatically declared, and, unless one is manually declared, heap allocations will result in a
+/// link-time error.
 pub use sel4_microkit_macros::protection_domain;
 
 #[doc(hidden)]
@@ -88,47 +83,21 @@ macro_rules! declare_protection_domain {
     {
         init = $init:expr $(,)?
     } => {
-        $crate::_private::declare_protection_domain! {
-            init = $init,
-            stack_size = $crate::_private::DEFAULT_STACK_SIZE,
-        }
-    };
-    {
-        init = $init:expr,
-        stack_size = $stack_size:expr $(,)?
-    } => {
         $crate::_private::declare_init!($init);
-        $crate::_private::declare_stack!($stack_size);
     };
     {
         init = $init:expr,
-        $(stack_size = $stack_size:expr,)?
         heap_size = $heap_size:expr $(,)?
     } => {
+        $crate::_private::declare_init!($init);
         $crate::_private::declare_heap!($heap_size);
-        $crate::_private::declare_protection_domain! {
-            init = $init,
-            $(stack_size = $stack_size,)?
-        }
     };
 }
-
-/// The default stack size used by [`#[protection_domain]`](crate::protection_domain).
-pub const DEFAULT_STACK_SIZE: usize = 1024
-    * if cfg!(panic = "unwind") && cfg!(debug_assertions) {
-        128
-    } else {
-        64
-    };
 
 // For macros
 #[doc(hidden)]
 pub mod _private {
-    pub use sel4_runtime_common::declare_stack;
-
     pub use crate::heap::_private as heap;
 
-    pub use crate::{
-        DEFAULT_STACK_SIZE, declare_heap, declare_init, declare_protection_domain, entry::run_main,
-    };
+    pub use crate::{declare_heap, declare_init, declare_protection_domain, entry::run_main};
 }
