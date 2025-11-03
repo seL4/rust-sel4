@@ -11,6 +11,7 @@
 , cargo-audit
 , lychee
 , kani
+, nixfmt-tree
 }:
 
 let
@@ -25,6 +26,7 @@ let
       reuse
       cargo-audit
       lychee
+      nixfmt-tree
     ] ++ lib.optionals hostPlatform.isx86_64 [
       kani
     ];
