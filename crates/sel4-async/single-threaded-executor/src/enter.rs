@@ -44,9 +44,7 @@ impl fmt::Display for EnterError {
 /// execute a task, and drop the returned [`Enter`](Enter) value after
 /// completing task execution:
 ///
-/// ```
-/// use futures::executor::enter;
-///
+/// ```ignore
 /// let enter = enter().expect("...");
 /// /* run task */
 /// drop(enter);

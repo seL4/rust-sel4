@@ -21,8 +21,8 @@ unsafe extern "Rust" {
 ///
 /// This macro uses the function `$path` to define the following symbol:
 ///
-/// ```rust
-/// extern "Rust" {
+/// ```
+/// unsafe extern "Rust" {
 ///     fn __sel4_panicking_env__debug_put_char(c: u8);
 /// }
 /// ```
@@ -45,8 +45,10 @@ macro_rules! register_debug_put_char {
 ///
 /// This macro uses the function `$path` to define the following symbol:
 ///
-/// ```rust
-/// extern "Rust" {
+/// ```no_run
+/// use sel4_panicking_env::AbortInfo;
+///
+/// unsafe extern "Rust" {
 ///     fn __sel4_panicking_env__abort_hook(info: Option<&AbortInfo>);
 /// }
 /// ```
@@ -81,8 +83,8 @@ fn default_abort_hook(info: Option<&AbortInfo>) {
 ///
 /// This macro uses the function `$path` to define the following symbol:
 ///
-/// ```rust
-/// extern "Rust" {
+/// ```
+/// unsafe extern "Rust" {
 ///     fn __sel4_panicking_env__abort_trap() -> !;
 /// }
 /// ```
@@ -107,8 +109,8 @@ macro_rules! register_abort_trap {
 ///
 /// This function uses the following externally defined symbol:
 ///
-/// ```rust
-/// extern "Rust" {
+/// ```
+/// unsafe extern "Rust" {
 ///     fn __sel4_panicking_env__debug_put_char(c: u8);
 /// }
 /// ```
@@ -213,7 +215,9 @@ pub fn __abort_macro_helper(message: Option<fmt::Arguments>) -> ! {
 ///
 /// [`abort!`] accepts the same patterns `core::panic!`:
 ///
-/// ```rust
+/// ```no_run
+/// use sel4_panicking_env::abort;
+///
 /// abort!();
 /// abort!("uh oh!");
 /// abort!("uh {} {}!", 123, "oh");
@@ -224,8 +228,10 @@ pub fn __abort_macro_helper(message: Option<fmt::Arguments>) -> ! {
 ///
 /// The following externally defined symbol is used as the abort hook:
 ///
-/// ```rust
-/// extern "Rust" {
+/// ```
+/// use sel4_panicking_env::AbortInfo;
+///
+/// unsafe extern "Rust" {
 ///     fn __sel4_panicking_env__abort_hook(info: Option<&AbortInfo>);
 /// }
 /// ```
