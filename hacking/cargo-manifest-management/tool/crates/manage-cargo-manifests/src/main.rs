@@ -9,13 +9,13 @@ use std::path::PathBuf;
 use std::result::Result as StdResult;
 use std::str;
 
-use anyhow::{bail, Context, Result};
+use anyhow::{Context, Result, bail};
 use clap::Parser;
 use serde::Deserialize;
 use similar::TextDiff;
 use toml::Table as TomlTable;
 
-use toml_normalize::{builtin_policies, Error as TomlNormalizeError, Formatter, Policy};
+use toml_normalize::{Error as TomlNormalizeError, Formatter, Policy, builtin_policies};
 
 #[derive(Debug, Parser)]
 struct Args {

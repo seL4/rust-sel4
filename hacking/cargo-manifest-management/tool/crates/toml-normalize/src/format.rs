@@ -212,11 +212,7 @@ impl<'a, P: AbstractPolicy> FormatterState<'a, P> {
                     self.current_key().unwrap(),
                     &Value::InlineTable(inline_table.clone()),
                 );
-                if !too_wide {
-                    Some(inline_table)
-                } else {
-                    None
-                }
+                if !too_wide { Some(inline_table) } else { None }
             }
             Err(Error::CannotInlineTable(_)) => None,
         };
