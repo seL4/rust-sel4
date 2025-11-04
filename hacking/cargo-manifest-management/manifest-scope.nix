@@ -6,6 +6,8 @@
 
 { lib }:
 
+{ packages, absolutePath }:
+
 let
 
   filterOutEmptyFeatureList = attrs:
@@ -13,8 +15,43 @@ let
 
   mkKeepRef = rev: "keep/${builtins.substring 0 32 rev}";
 
+  parseSimplePath = path:
+    let
+      isAbsolute = lib.hasPrefix "/" path;
+      pathWithoutLeadingSlash = lib.substring (if isAbsolute then 1 else 0) (lib.stringLength path) path;
+      segments = if pathWithoutLeadingSlash == "" then [] else lib.splitString "/" pathWithoutLeadingSlash;
+    in
+      assert lib.all (seg: seg != "" && seg != "." && seg != "..") segments;
+      {
+        inherit isAbsolute segments;
+      };
+
+  pathBetween = a: b:
+    let
+      aParsed = parseSimplePath a;
+      bParsed = parseSimplePath b;
+    in
+    assert aParsed.isAbsolute == bParsed.isAbsolute;
+    let
+      commonPrefixLen =
+        let
+          zipped = lib.zipListsWith (x: y: x != y) aParsed.segments bParsed.segments;
+        in
+          lib.lists.findFirstIndex lib.id (lib.length zipped) zipped;
+      aDeviatingSegs = lib.drop commonPrefixLen aParsed.segments;
+      bDeviatingSegs = lib.drop commonPrefixLen bParsed.segments;
+      relSegs = lib.genList (lib.const "..") (lib.length aDeviatingSegs) ++ bDeviatingSegs;
+    in
+      lib.concatStringsSep "/" relSegs;
+
 in rec {
   inherit lib;
+
+  localCrates =
+    let
+      rel = pathBetween absolutePath;
+    in
+      lib.mapAttrs (_: package: { path = rel package.absolutePath; }) packages;
 
   mk = args: (lib.recursiveUpdate
     {
