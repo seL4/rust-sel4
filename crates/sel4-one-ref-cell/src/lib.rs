@@ -36,6 +36,7 @@ impl<T> OneRefCell<T> {
         }
     }
 
+    #[allow(clippy::mut_from_ref)]
     pub fn take(&self) -> Result<&mut T, Error> {
         if self.taken.swap(true, Ordering::SeqCst) {
             Err(Error::AlreadyTaken)
