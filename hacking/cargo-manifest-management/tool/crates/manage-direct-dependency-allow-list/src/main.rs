@@ -184,11 +184,12 @@ impl<'a> AllowListUpdateView<'a> {
                 let applies_to = v
                     .get("applies-to")
                     .map(|packages| {
-                        packages.as_array()
-                        .unwrap()
-                        .iter()
-                        .map(|v| v.as_str().unwrap().to_owned())
-                        .collect()
+                        packages
+                            .as_array()
+                            .unwrap()
+                            .iter()
+                            .map(|v| v.as_str().unwrap().to_owned())
+                            .collect()
                     })
                     .unwrap_or_else(|| vec![key.to_owned()]);
                 let auto_update = v

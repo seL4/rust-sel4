@@ -10,7 +10,7 @@ use std::path::PathBuf;
 
 use clap::{CommandFactory, FromArgMatches, Parser};
 
-use toml_normalize::{builtin_policies, Formatter, Policy};
+use toml_normalize::{Formatter, Policy, builtin_policies};
 
 #[derive(Debug, Parser)]
 struct Args {

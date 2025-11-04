@@ -17,7 +17,7 @@ mod path;
 mod path_segment_predicate;
 
 use generic_regex::GenericRegex;
-use parse::{parse, Expr, Rule};
+use parse::{Expr, Rule, parse};
 use path_segment_predicate::PathSegmentPredicate;
 
 pub use path::{Path, PathSegment};
@@ -116,17 +116,21 @@ mod test {
 
     #[test]
     fn it_works() {
-        assert!(PathRegex::new(r#"["package"]"#)
-            .unwrap()
-            .is_match([PathSegment::Key("package".to_owned())].iter()));
-        assert!(PathRegex::new(r#".*["(.*-)?dependencies"]."#)
-            .unwrap()
-            .is_match(
-                [
-                    PathSegment::Key("dependencies".to_owned()),
-                    PathSegment::Key("foo".to_owned())
-                ]
-                .iter()
-            ));
+        assert!(
+            PathRegex::new(r#"["package"]"#)
+                .unwrap()
+                .is_match([PathSegment::Key("package".to_owned())].iter())
+        );
+        assert!(
+            PathRegex::new(r#".*["(.*-)?dependencies"]."#)
+                .unwrap()
+                .is_match(
+                    [
+                        PathSegment::Key("dependencies".to_owned()),
+                        PathSegment::Key("foo".to_owned())
+                    ]
+                    .iter()
+                )
+        );
     }
 }

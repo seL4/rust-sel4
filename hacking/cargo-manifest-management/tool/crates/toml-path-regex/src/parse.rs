@@ -5,10 +5,10 @@
 //
 
 use pest::{
+    Parser, Span,
     error::Error,
     iterators::Pair,
     pratt_parser::{Assoc, Op, PrattParser},
-    Parser, Span,
 };
 use pest_derive::Parser;
 
