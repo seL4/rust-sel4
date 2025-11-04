@@ -7,46 +7,6 @@
 { lib }:
 
 let
-  parseSimplePath = path:
-    let
-      isAbsolute = lib.hasPrefix "/" path;
-      pathWithoutLeadingSlash = lib.substring (if isAbsolute then 1 else 0) (lib.stringLength path) path;
-      segments = if pathWithoutLeadingSlash == "" then [] else lib.splitString "/" pathWithoutLeadingSlash;
-    in
-      assert lib.all (seg: seg != "" && seg != "." && seg != "..") segments;
-      {
-        inherit isAbsolute segments;
-      };
-
-  takeWhile = pred:
-    let
-      f = acc: xs:
-        if xs == []
-        then acc
-        else (
-          let
-            x = lib.head xs;
-            xs' = lib.tail xs;
-          in
-            if pred x then f (acc ++ [x]) xs' else acc
-        );
-    in
-      f [];
-
-  pathBetween = a: b:
-    let
-      aParsed = parseSimplePath a;
-      bParsed = parseSimplePath b;
-    in
-    assert aParsed.isAbsolute == bParsed.isAbsolute;
-    let
-      commonPrefixLen = lib.length (takeWhile lib.id (lib.zipListsWith (x: y: x == y) aParsed.segments bParsed.segments));
-      aDeviatingSegs = lib.drop commonPrefixLen aParsed.segments;
-      bDeviatingSegs = lib.drop commonPrefixLen bParsed.segments;
-      relSegs = lib.genList (lib.const "..") (lib.length aDeviatingSegs) ++ bDeviatingSegs;
-    in
-      lib.concatStringsSep "/" relSegs;
-
   scanDirForFilesWithName = dirFilter: fileName:
     let
       f = relativePathSegments: absolutePath: lib.concatLists (lib.mapAttrsToList (name: type:
@@ -88,7 +48,7 @@ in
 
 let
   cargoNixPaths =
-      scanDirForFilesWithName workspaceDirFilter "Cargo.nix" workspaceRoot;
+    scanDirForFilesWithName workspaceDirFilter "Cargo.nix" workspaceRoot;
 
   generateManifest = cargoNixAbsolutePath:
     let
@@ -107,27 +67,29 @@ let
 
   callManifest = { absolutePath, f }:
     let
-      bespokeScope = manifestScope // {
-        localCrates = mkDeps absolutePath;
+      scope = manifestScope {
+        inherit packages absolutePath;
       };
-      args = builtins.intersectAttrs (lib.functionArgs f) bespokeScope;
+      args = builtins.intersectAttrs (lib.functionArgs f) scope;
     in
       f args;
-
-  mkDeps = absolutePath:
-    let
-      rel = pathBetween absolutePath;
-      generated = lib.mapAttrs (_: manifest: { path = rel manifest.absolutePath; }) generatedManifestsByPackageName;
-      manual = lib.mapAttrs (_: otherPath: { path = rel otherPath; }) manualManifests;
-    in
-      generated // manual;
 
   generatedManifestsList = map generateManifest cargoNixPaths;
 
   generatedManifestsByPackageName =
     lib.listToAttrs
       (lib.flip lib.concatMap generatedManifestsList
-        (manifest: lib.optional (manifest.packageName != null) (lib.nameValuePair manifest.packageName manifest)));
+        (manifest: lib.optional (manifest.packageName != null) (lib.nameValuePair manifest.packageName {
+          inherit (manifest) absolutePath manifestValue;
+        })));
+
+  manualManifestsByPackageName =
+    lib.mapAttrs (_: absolutePath: {
+      inherit absolutePath;
+      manifestValue = lib.importTOML absolutePath;
+    }) manualManifests;
+
+  packages = generatedManifestsByPackageName // manualManifestsByPackageName;
 
 in rec {
   blueprint = generatedManifestsList;
