@@ -165,7 +165,7 @@ struct AllowListUpdateViewEntry<'a> {
     req: VersionReq,
     req_slot: &'a mut Formatted<String>,
     applies_to: Vec<String>,
-    allow_out_of_date: bool,
+    auto_update: bool,
 }
 
 impl<'a> AllowListUpdateView<'a> {
@@ -178,21 +178,23 @@ impl<'a> AllowListUpdateView<'a> {
                     req,
                     req_slot,
                     applies_to: vec![key.to_owned()],
-                    allow_out_of_date: false,
+                    auto_update: true,
                 }
             } else if let Some(v) = value.as_table_like_mut() {
                 let applies_to = v
                     .get("applies-to")
-                    .unwrap()
-                    .as_array()
-                    .unwrap()
-                    .iter()
-                    .map(|v| v.as_str().unwrap().to_owned())
-                    .collect();
-                let allow_out_of_date = v
-                    .get("allow_out_of_date")
+                    .map(|packages| {
+                        packages.as_array()
+                        .unwrap()
+                        .iter()
+                        .map(|v| v.as_str().unwrap().to_owned())
+                        .collect()
+                    })
+                    .unwrap_or_else(|| vec![key.to_owned()]);
+                let auto_update = v
+                    .get("auto-update")
                     .map(|v| v.as_bool().unwrap())
-                    .unwrap_or(false);
+                    .unwrap_or(true);
                 let req_slot = match v.get_mut("version").unwrap() {
                     Item::Value(Value::String(req_slot)) => req_slot,
                     _ => panic!(),
@@ -202,7 +204,7 @@ impl<'a> AllowListUpdateView<'a> {
                     req,
                     req_slot,
                     applies_to,
-                    allow_out_of_date,
+                    auto_update,
                 }
             } else {
                 panic!()
@@ -215,9 +217,9 @@ impl<'a> AllowListUpdateView<'a> {
     fn update(&mut self) -> bool {
         let mut out_of_date = false;
         for (k, v) in self.allow.iter_mut() {
-            let max_stable_version = v.fetch_max_stable_version();
-            if !v.req.matches(&max_stable_version) {
-                if !v.allow_out_of_date {
+            if v.auto_update {
+                let max_stable_version = v.fetch_max_stable_version();
+                if !v.req.matches(&max_stable_version) {
                     out_of_date = true;
                     eprintln!("{}: {} -> {}", k, v.req, max_stable_version);
                     *v.req_slot = Formatted::new(max_stable_version.to_string());
@@ -252,6 +254,6 @@ fn fetch_max_stable_version(crate_name: &str) -> Version {
     let val = serde_json::from_str::<serde_json::Value>(&resp).unwrap();
     let ver = val.as_object().unwrap()["crate"].as_object().unwrap()["max_stable_version"]
         .as_str()
-        .unwrap();
+        .unwrap_or_else(|| panic!("crate '{crate_name}' does not have a max_stable_version"));
     Version::parse(ver).unwrap()
 }
