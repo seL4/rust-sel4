@@ -6,7 +6,9 @@
 
 {
     "rust-analyzer.statusBar.clickAction": "stopServer",
+    "rust-analyzer.server.path": "rust-analyzer",
+    "rust-analyzer.cargo.targetDir": true, // use subdir
     "rust-analyzer.linkedProjects": [
-        "/var/empty/Cargo.toml"
-    ]
+        "hacking/cargo-manifest-management/tool/Cargo.toml",
+    ],
 }
