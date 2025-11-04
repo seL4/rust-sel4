@@ -13,6 +13,7 @@
 , runCommand, linkFarm
 , makeWrapper
 , overrideCC
+, writers
 , fetchurl
 , qemu
 }:
@@ -105,10 +106,24 @@ superCallPackage ../rust-utils {} self //
 
   inherit fenix zig-overlay;
 
-  topLevelRustToolchainFile = rec {
-    path = ../../../rust-toolchain.toml;
-    attrs = builtins.fromTOML (builtins.readFile path);
-  };
+  topLevelRustToolchainFile =
+    let
+      orig = lib.importTOML ../../../rust-toolchain.toml;
+      allowedComponents = [ "rust-src" "rustc-dev" "llvm-tools-preview" ];
+      patched = lib.updateManyAttrsByPath [
+        {
+          path = [ "toolchain" "components" ];
+          update = lib.filter (lib.flip lib.elem allowedComponents);
+        }
+        {
+          path = [ "toolchain" "targets" ];
+          update = _: [];
+        }
+      ] orig;
+    in {
+      path = writers.writeTOML "rust-toolchain.toml" patched;
+      attrs = patched;
+    };
 
   assembleRustToolchain = args:
     let
