@@ -16,7 +16,7 @@ mk {
     ;
   };
   target."cfg(panic = \"unwind\")".dependencies = {
-    unwinding = unwindingWith [];
+    unwinding = unwindingWith [ "panicking" ];
   };
   features = {
     personality = [ "unwinding/personality" ];

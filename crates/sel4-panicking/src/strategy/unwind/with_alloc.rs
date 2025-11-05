@@ -5,38 +5,24 @@
 //
 
 use alloc::boxed::Box;
-use core::mem;
 
 use unwinding::abi::*;
+use unwinding::panicking::Exception;
 
-use super::{RUST_EXCEPTION_CLASS, drop_panic, foreign_exception};
+use super::{ExceptionImpl, RustPanic, foreign_exception};
 
-pub(crate) fn panic_cleanup(exception: *mut u8) {
-    let exception = exception as *mut UnwindException;
-    unsafe {
-        if (*exception).exception_class != RUST_EXCEPTION_CLASS {
-            _Unwind_DeleteException(exception);
+unsafe impl Exception for RustPanic {
+    const CLASS: [u8; 8] = RustPanic::EXCEPTION_CLASS;
+
+    fn wrap(this: Self) -> *mut UnwindException {
+        Box::into_raw(Box::new(ExceptionImpl::new(this))).cast()
+    }
+
+    unsafe fn unwrap(ex: *mut UnwindException) -> Self {
+        let Some(ex) = ExceptionImpl::check_cast(ex) else {
             foreign_exception()
-        } else {
-            drop(Box::from_raw(exception));
-        }
+        };
+        let ex = unsafe { Box::from_raw(ex) };
+        ex.payload
     }
-}
-
-pub(crate) fn start_panic() -> i32 {
-    extern "C" fn exception_cleanup(
-        _unwind_code: UnwindReasonCode,
-        exception: *mut UnwindException,
-    ) {
-        unsafe {
-            drop(Box::from_raw(exception));
-        }
-        drop_panic()
-    }
-
-    let mut exception = unsafe { mem::zeroed::<UnwindException>() };
-    exception.exception_class = RUST_EXCEPTION_CLASS;
-    exception.exception_cleanup = Some(exception_cleanup);
-    let exception = Box::into_raw(Box::new(exception));
-    unsafe { _Unwind_RaiseException(&mut *exception).0 }
 }
