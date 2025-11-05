@@ -84,7 +84,7 @@ pub fn catch_unwind<R, F: FnOnce() -> R + UnwindSafe>(f: F) -> Result<R, ()> {
     }
 }
 
-/// Like `std::panic::abort_unwind`.
+/// Like the unstable `core::panic::abort_unwind`
 pub fn abort_unwind<F, R>(f: F) -> R
 where
     F: FnOnce() -> R,
