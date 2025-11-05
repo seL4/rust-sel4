@@ -43,3 +43,7 @@
 
 #![feature(never_type)]
 #![feature(unwrap_infallible)]
+
+// Useful throughout, including Default for sel4_capdl_initializer_core::PerObjectBuffer
+#![feature(const_trait_impl)]
+#![feature(derive_const)]
