@@ -103,7 +103,7 @@ impl<'a, P: AbstractPolicy> FormatterState<'a, P> {
             UnformattedValue::Integer(w) => Value::Integer(Formatted::new(*w)),
             UnformattedValue::Float(w) => Value::Float(Formatted::new(*w)),
             UnformattedValue::String(w) => Value::String(Formatted::new(w.clone())),
-            UnformattedValue::Datetime(w) => Value::Datetime(Formatted::new(w.clone())),
+            UnformattedValue::Datetime(w) => Value::Datetime(Formatted::new(*w)),
             UnformattedValue::Array(w) => Value::Array(self.format_array_to_array(w)?),
             UnformattedValue::Table(w) => Value::InlineTable(self.format_table_to_inline_table(w)?),
         })

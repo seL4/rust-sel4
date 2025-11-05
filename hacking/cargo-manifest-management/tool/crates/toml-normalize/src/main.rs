@@ -86,7 +86,7 @@ fn main() {
             .map(Iterator::collect)
             .unwrap_or_else(Vec::new),
     ) {
-        let policy = serde_json::from_str(&s)
+        let policy = serde_json::from_str(s)
             .unwrap_or_else(|err| panic!("error deserializing policy {}: {:?}", s, err));
         policies.push((policy, index));
     }
@@ -113,7 +113,7 @@ fn main() {
 
     let out_toml = Formatter::new(composite_policy)
         .format(
-            &in_toml
+            in_toml
                 .as_table()
                 .unwrap_or_else(|| panic!("input TOML document is not a table")),
         )

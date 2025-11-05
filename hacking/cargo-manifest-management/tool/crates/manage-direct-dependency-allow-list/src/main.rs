@@ -137,11 +137,9 @@ impl AllowListCheckWorkspaceView {
                     .as_ref()
                     .map(|source| source.starts_with("registry+"))
                     .unwrap_or(false)
-                {
-                    if !self.check_one(&dep.name, &dep.req) {
+                    && !self.check_one(&dep.name, &dep.req) {
                         panic!("{} {} not in allowlist", dep.name, dep.req);
                     }
-                }
             }
         }
     }

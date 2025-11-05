@@ -105,8 +105,8 @@ impl Policy {
 impl KeyOrdering {
     fn key<'a>(&self, a: &'a str) -> (Reverse<Option<Reverse<usize>>>, Option<usize>, &'a str) {
         (
-            Reverse(self.front.iter().position(|s| s == &a).map(Reverse)),
-            self.back.iter().position(|s| s == &a),
+            Reverse(self.front.iter().position(|s| s == a).map(Reverse)),
+            self.back.iter().position(|s| s == a),
             a,
         )
     }

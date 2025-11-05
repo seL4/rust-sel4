@@ -31,7 +31,7 @@ pub struct PathRegex {
 }
 
 impl PathRegex {
-    pub fn new(path_regex: &str) -> Result<Self, Error> {
+    pub fn new(path_regex: &str) -> Result<Self, Box<Error>> {
         let expr = parse(path_regex)?;
         Ok(Self {
             pattern: path_regex.to_owned(),
@@ -48,7 +48,7 @@ impl PathRegex {
     }
 }
 
-fn generic_regex_from_expr(expr: &Expr) -> Result<GenericRegex<PathSegmentPredicate>, Error> {
+fn generic_regex_from_expr(expr: &Expr) -> Result<GenericRegex<PathSegmentPredicate>, Box<Error>> {
     Ok(match expr {
         Expr::Epsilon => GenericRegex::epsilon(),
         Expr::Not(r) => GenericRegex::complement(generic_regex_from_expr(r)?),
@@ -76,7 +76,7 @@ fn generic_regex_from_expr(expr: &Expr) -> Result<GenericRegex<PathSegmentPredic
                     ErrorVariant::CustomError {
                         message: format!("{}", err),
                     },
-                    key_regex.clone(),
+                    *key_regex,
                 )
             })?;
             GenericRegex::symbol(PathSegmentPredicate::from_key_regex(compiled_re))
@@ -102,10 +102,10 @@ impl fmt::Debug for PathRegex {
 }
 
 impl FromStr for PathRegex {
-    type Err = Error;
+    type Err = Box<Error>;
 
     /// Attempts to parse a string into a regular expression
-    fn from_str(s: &str) -> Result<Self, Error> {
+    fn from_str(s: &str) -> Result<Self, Box<Error>> {
         Self::new(s)
     }
 }
