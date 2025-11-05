@@ -29,4 +29,4 @@ sel4-panicking-env = { path = "env" }
 [target."cfg(panic = \"unwind\")".dependencies.unwinding]
 version = "0.2.8"
 default-features = false
-features = ["unwinder", "fde-custom", "hide-trace"]
+features = ["unwinder", "fde-custom", "hide-trace", "panicking"]
