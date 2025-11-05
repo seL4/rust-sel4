@@ -47,3 +47,6 @@
 // Useful throughout, including Default for sel4_capdl_initializer_core::PerObjectBuffer
 #![feature(const_trait_impl)]
 #![feature(derive_const)]
+
+// Will replace sel4_panicking::abort_unwind
+#![feature(abort_unwind)]
