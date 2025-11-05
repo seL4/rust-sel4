@@ -19,7 +19,7 @@ mk {
       sel4-dlmalloc
     ;
     sel4-panicking = localCrates.sel4-panicking // {
-      features = [ "alloc" ];
+      features = [ "personality" "panic-handler" "alloc" ];
     };
     sel4-runtime-common = localCrates.sel4-runtime-common // {
       features = [ "full" ];

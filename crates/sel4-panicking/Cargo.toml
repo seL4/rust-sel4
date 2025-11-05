@@ -18,6 +18,8 @@ license = "BSD-2-Clause"
 
 [features]
 alloc = []
+panic-handler = []
+personality = ["unwinding/personality"]
 
 [dependencies]
 cfg-if = "1.0.4"
@@ -27,4 +29,4 @@ sel4-panicking-env = { path = "env" }
 [target."cfg(panic = \"unwind\")".dependencies.unwinding]
 version = "0.2.8"
 default-features = false
-features = ["unwinder", "fde-custom", "hide-trace", "personality"]
+features = ["unwinder", "fde-custom", "hide-trace"]

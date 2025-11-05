@@ -16,11 +16,11 @@ mk {
     inherit (localCrates)
       sel4-immediate-sync-once-cell
       sel4-panicking-env
-      sel4-panicking
       sel4-dlmalloc
       sel4-microkit-base
       sel4-microkit-macros
     ;
+    sel4-panicking = localCrates.sel4-panicking // { features = [ "personality" "panic-handler" ]; };
     sel4-runtime-common = localCrates.sel4-runtime-common // { features = [ "abort" ]; };
     sel4 = localCrates.sel4 // { features = [ "single-threaded" ]; };
   };
