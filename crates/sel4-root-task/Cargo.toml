@@ -25,7 +25,7 @@ single-threaded = ["sel4/single-threaded"]
 sel4 = { path = "../sel4" }
 sel4-dlmalloc = { path = "../sel4-dlmalloc" }
 sel4-immediate-sync-once-cell = { path = "../sel4-immediate-sync-once-cell" }
-sel4-panicking = { path = "../sel4-panicking" }
+sel4-panicking = { path = "../sel4-panicking", features = ["personality", "panic-handler"] }
 sel4-panicking-env = { path = "../sel4-panicking/env" }
 sel4-root-task-macros = { path = "macros" }
 sel4-runtime-common = { path = "../sel4-runtime-common", features = ["full"] }

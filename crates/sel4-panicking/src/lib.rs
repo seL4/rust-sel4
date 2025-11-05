@@ -31,7 +31,8 @@ use strategy::{panic_cleanup, start_panic};
 
 pub use hook::{PanicHook, set_hook};
 
-#[panic_handler]
+#[cfg_attr(feature = "panic-handler", panic_handler)]
+#[cfg_attr(not(feature = "panic-handler"), allow(dead_code))]
 fn panic(info: &PanicInfo) -> ! {
     if let Some(must_abort) = count_panic() {
         debug_println!("{}", info);
