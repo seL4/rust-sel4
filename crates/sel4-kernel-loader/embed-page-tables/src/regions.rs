@@ -123,7 +123,7 @@ mod test {
         for region in regions.as_slice() {
             eprint!("{:?} ({:?}), ", region.range, region.content);
         }
-        eprintln!("");
+        eprintln!();
     }
 
     #[test]
