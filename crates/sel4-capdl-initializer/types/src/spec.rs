@@ -19,7 +19,7 @@ use sel4_capdl_initializer_types_derive::{HasCapTable, IsCap, IsObject};
 
 use crate::{HasArchivedCapTable, HasCapTable};
 
-#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[derive(rkyv::Archive, rkyv::Deserialize, rkyv::Serialize)]
 #[rkyv(derive(Debug, Copy, Clone, Eq, PartialEq))]
@@ -116,6 +116,18 @@ pub struct Spec<D> {
 #[rkyv(derive(Debug, Copy, Clone, Eq, PartialEq))]
 pub struct Word(pub u64);
 
+impl From<u64> for Word {
+    fn from(x: u64) -> Word {
+        Word(x)
+    }
+}
+
+impl From<Word> for u64 {
+    fn from(x: Word) -> u64 {
+        x.0
+    }
+}
+
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[derive(rkyv::Archive, rkyv::Deserialize, rkyv::Serialize)]
@@ -182,6 +194,32 @@ impl<D> Object<D> {
             Object::Frame(obj) => obj.paddr,
             _ => None,
         }
+    }
+
+    pub fn slots(&self) -> Option<&[CapTableEntry]> {
+        Some(match self {
+            Object::CNode(obj) => obj.slots(),
+            Object::Tcb(obj) => obj.slots(),
+            Object::PageTable(obj) => obj.slots(),
+            Object::ArmIrq(obj) => obj.slots(),
+            Object::IrqMsi(obj) => obj.slots(),
+            Object::IrqIOApic(obj) => obj.slots(),
+            Object::RiscvIrq(obj) => obj.slots(),
+            _ => return None,
+        })
+    }
+
+    pub fn slots_mut(&mut self) -> Option<&mut Vec<CapTableEntry>> {
+        Some(match self {
+            Object::CNode(obj) => &mut obj.slots,
+            Object::Tcb(obj) => &mut obj.slots,
+            Object::PageTable(obj) => &mut obj.slots,
+            Object::ArmIrq(obj) => &mut obj.slots,
+            Object::IrqMsi(obj) => &mut obj.slots,
+            Object::IrqIOApic(obj) => &mut obj.slots,
+            Object::RiscvIrq(obj) => &mut obj.slots,
+            _ => return None,
+        })
     }
 }
 
@@ -260,26 +298,26 @@ impl Cap {
         }
     }
 
-    pub fn set_obj(&mut self, new_id: ObjectId) {
+    pub fn set_obj(&mut self, object: ObjectId) {
         match self {
-            Cap::Untyped(cap) => cap.object = new_id,
-            Cap::Endpoint(cap) => cap.object = new_id,
-            Cap::Notification(cap) => cap.object = new_id,
-            Cap::CNode(cap) => cap.object = new_id,
-            Cap::Frame(cap) => cap.object = new_id,
-            Cap::Tcb(cap) => cap.object = new_id,
-            Cap::IrqHandler(cap) => cap.object = new_id,
-            Cap::VCpu(cap) => cap.object = new_id,
-            Cap::PageTable(cap) => cap.object = new_id,
-            Cap::AsidPool(cap) => cap.object = new_id,
-            Cap::ArmIrqHandler(cap) => cap.object = new_id,
-            Cap::IrqMsiHandler(cap) => cap.object = new_id,
-            Cap::IrqIOApicHandler(cap) => cap.object = new_id,
-            Cap::RiscvIrqHandler(cap) => cap.object = new_id,
-            Cap::IOPorts(cap) => cap.object = new_id,
-            Cap::SchedContext(cap) => cap.object = new_id,
-            Cap::Reply(cap) => cap.object = new_id,
-            Cap::ArmSmc(cap) => cap.object = new_id,
+            Cap::Untyped(cap) => cap.object = object,
+            Cap::Endpoint(cap) => cap.object = object,
+            Cap::Notification(cap) => cap.object = object,
+            Cap::CNode(cap) => cap.object = object,
+            Cap::Frame(cap) => cap.object = object,
+            Cap::Tcb(cap) => cap.object = object,
+            Cap::IrqHandler(cap) => cap.object = object,
+            Cap::VCpu(cap) => cap.object = object,
+            Cap::PageTable(cap) => cap.object = object,
+            Cap::AsidPool(cap) => cap.object = object,
+            Cap::ArmIrqHandler(cap) => cap.object = object,
+            Cap::IrqMsiHandler(cap) => cap.object = object,
+            Cap::IrqIOApicHandler(cap) => cap.object = object,
+            Cap::RiscvIrqHandler(cap) => cap.object = object,
+            Cap::IOPorts(cap) => cap.object = object,
+            Cap::SchedContext(cap) => cap.object = object,
+            Cap::Reply(cap) => cap.object = object,
+            Cap::ArmSmc(cap) => cap.object = object,
         }
     }
 }
