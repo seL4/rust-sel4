@@ -64,7 +64,6 @@ in
     , backwardsCompatibilityHacks ? {}
     , mkCustomTargetPath ? customTargetTripleTripleName: throw "unimplemented"
     , chooseLinker ? { targetTriple, platform }: null
-    , compilerRTSource ? null
     , vendoredSuperLockfile ? null
     }:
     let
@@ -81,7 +80,6 @@ in
       elaboratedBackwardsCompatibilityHacks = elaborateBackwardsCompatibilityHacks backwardsCompatibilityHacks;
     in {
       inherit rustToolchain channel isNightly;
-      inherit compilerRTSource;
       inherit chooseLinker;
       inherit vendoredSuperLockfile;
 
