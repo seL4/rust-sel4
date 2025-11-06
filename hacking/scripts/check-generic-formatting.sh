@@ -1,3 +1,4 @@
+#!/bin/sh
 #
 # Copyright 2023, Colias Group, LLC
 #
