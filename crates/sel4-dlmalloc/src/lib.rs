@@ -7,7 +7,7 @@
 #![no_std]
 
 use core::alloc::{GlobalAlloc, Layout};
-use core::cell::{RefCell, UnsafeCell};
+use core::cell::UnsafeCell;
 use core::ptr;
 use core::sync::atomic::{AtomicUsize, Ordering};
 
@@ -102,7 +102,7 @@ impl<R: RawMutex> DeferredStaticDlmalloc<R> {
         self.0
             .dlmalloc
             .lock()
-            .allocator()
+            .allocator_mut()
             .0
             .set(StaticDlmallocAllocator::new(bounds))
     }
@@ -166,10 +166,8 @@ impl SimpleDlmallocAllocator for StaticDlmallocAllocator {
     }
 }
 
-// TODO remove RefCell once this is released:
-// https://github.com/alexcrichton/dlmalloc-rs/pull/49
 struct DeferredStaticDlmallocAllocator<T> {
-    state: RefCell<Option<T>>,
+    state: Option<T>,
 }
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
@@ -177,15 +175,12 @@ pub struct BoundsAlreadySetError(());
 
 impl<T> DeferredStaticDlmallocAllocator<T> {
     const fn new() -> Self {
-        Self {
-            state: RefCell::new(None),
-        }
+        Self { state: None }
     }
 
-    fn set(&self, state: T) -> Result<(), BoundsAlreadySetError> {
-        let mut state_opt = self.state.borrow_mut();
-        if state_opt.is_none() {
-            *state_opt = Some(state);
+    fn set(&mut self, state: T) -> Result<(), BoundsAlreadySetError> {
+        if self.state.is_none() {
+            self.state = Some(state);
             Ok(())
         } else {
             Err(BoundsAlreadySetError(()))
@@ -196,7 +191,6 @@ impl<T> DeferredStaticDlmallocAllocator<T> {
 impl<T: SimpleDlmallocAllocator> SimpleDlmallocAllocator for DeferredStaticDlmallocAllocator<T> {
     fn alloc_simple(&self, size: usize) -> Option<*mut u8> {
         self.state
-            .borrow()
             .as_ref()
             .and_then(|state| state.alloc_simple(size))
     }
