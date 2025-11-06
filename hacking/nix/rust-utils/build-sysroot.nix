@@ -17,7 +17,6 @@
 , alloc ? true
 , std ? false
 , compilerBuiltinsMem ? true
-, compilerBuiltinsC ? rustEnvironment.compilerRTSource != null
 , src ? null
 , extraManifest ? {}
 , extraConfig ? {}
@@ -78,20 +77,16 @@ let
 
   features = lib.concatStringsSep "," (lib.flatten [
     (lib.optional compilerBuiltinsMem "compiler-builtins-mem")
-    (lib.optional compilerBuiltinsC "compiler-builtins-c")
   ]);
 
 in
-(if compilerBuiltinsC then runCommandCC else runCommand) "sysroot" ({
+runCommand "sysroot" ({
   depsBuildBuild = [ buildPackages.stdenv.cc ];
   nativeBuildInputs = [ rustEnvironment.rustToolchain ];
   RUST_TARGET_PATH = rustEnvironment.mkTargetPath targetTriple;
 } // lib.optionalAttrs (!rustEnvironment.isNightly) {
   # HACK
   RUSTC_BOOTSTRAP = 1;
-} // lib.optionalAttrs compilerBuiltinsC {
-  "CC_${targetTriple.name}" = "${stdenv.cc.targetPrefix}gcc";
-  RUST_COMPILER_RT_ROOT = rustEnvironment.compilerRTSource;
 } // lib.optionalAttrs (src != null) {
   # HACK
   __CARGO_TESTS_ONLY_SRC_ROOT = src;

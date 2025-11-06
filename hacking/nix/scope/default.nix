@@ -147,10 +147,6 @@ superCallPackage ../rust-utils {} self //
     };
   } // {
     channel = topLevelRustToolchainFile.attrs.toolchain.channel;
-    compilerRTSource = mkCompilerRTSource {
-      rev = "4f74b76fb69688474e073fb26b316d9ea571388f"; # matches rust:src/llvm-project
-      hash = "sha256-FmBZFLTdRek2SkYRwdNtmkEl38HM7Dsks5OF5XSXilQ=";
-    };
     mkCustomTargetPath = customTargetTripleTripleName:
       let
         fname = "${customTargetTripleTripleName}.json";
