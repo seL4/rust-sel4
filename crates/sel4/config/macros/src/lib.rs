@@ -42,7 +42,7 @@ fn get_impls() -> MacroImpls<'static> {
 ///
 /// Unlike in `#[cfg]`, using a configuration key that is not present in the seL4 kernel
 /// configuration will result in an error rather than just evaluating to false. That is, a key that
-/// is not part of an equality expression evaluates to itsqqqqqqqqqq boolean value, whereas in `#[cfg]` a key
+/// is not part of an equality expression evaluates to its boolean value, whereas in `#[cfg]` a key
 /// that is not part of an equality expression evaluates to whether it is present in the
 /// configuration.
 #[proc_macro_attribute]
