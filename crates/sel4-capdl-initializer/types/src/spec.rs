@@ -190,34 +190,34 @@ impl<D> Object<D> {
 
     pub fn paddr(&self) -> Option<Word> {
         match self {
-            Object::Untyped(obj) => obj.paddr,
-            Object::Frame(obj) => obj.paddr,
+            Self::Untyped(obj) => obj.paddr,
+            Self::Frame(obj) => obj.paddr,
             _ => None,
         }
     }
 
     pub fn slots(&self) -> Option<&[CapTableEntry]> {
         Some(match self {
-            Object::CNode(obj) => obj.slots(),
-            Object::Tcb(obj) => obj.slots(),
-            Object::PageTable(obj) => obj.slots(),
-            Object::ArmIrq(obj) => obj.slots(),
-            Object::IrqMsi(obj) => obj.slots(),
-            Object::IrqIOApic(obj) => obj.slots(),
-            Object::RiscvIrq(obj) => obj.slots(),
+            Self::CNode(obj) => obj.slots(),
+            Self::Tcb(obj) => obj.slots(),
+            Self::PageTable(obj) => obj.slots(),
+            Self::ArmIrq(obj) => obj.slots(),
+            Self::IrqMsi(obj) => obj.slots(),
+            Self::IrqIOApic(obj) => obj.slots(),
+            Self::RiscvIrq(obj) => obj.slots(),
             _ => return None,
         })
     }
 
     pub fn slots_mut(&mut self) -> Option<&mut Vec<CapTableEntry>> {
         Some(match self {
-            Object::CNode(obj) => &mut obj.slots,
-            Object::Tcb(obj) => &mut obj.slots,
-            Object::PageTable(obj) => &mut obj.slots,
-            Object::ArmIrq(obj) => &mut obj.slots,
-            Object::IrqMsi(obj) => &mut obj.slots,
-            Object::IrqIOApic(obj) => &mut obj.slots,
-            Object::RiscvIrq(obj) => &mut obj.slots,
+            Self::CNode(obj) => &mut obj.slots,
+            Self::Tcb(obj) => &mut obj.slots,
+            Self::PageTable(obj) => &mut obj.slots,
+            Self::ArmIrq(obj) => &mut obj.slots,
+            Self::IrqMsi(obj) => &mut obj.slots,
+            Self::IrqIOApic(obj) => &mut obj.slots,
+            Self::RiscvIrq(obj) => &mut obj.slots,
             _ => return None,
         })
     }
@@ -234,8 +234,8 @@ impl<D: Archive> ArchivedObject<D> {
 
     pub fn paddr(&self) -> ArchivedOption<ArchivedWord> {
         match self {
-            ArchivedObject::Untyped(obj) => obj.paddr,
-            ArchivedObject::Frame(obj) => obj.paddr,
+            Self::Untyped(obj) => obj.paddr,
+            Self::Frame(obj) => obj.paddr,
             _ => ArchivedOption::None,
         }
     }
@@ -277,47 +277,47 @@ impl Cap {
 
     pub fn obj(&self) -> ObjectId {
         match self {
-            Cap::Untyped(cap) => cap.object,
-            Cap::Endpoint(cap) => cap.object,
-            Cap::Notification(cap) => cap.object,
-            Cap::CNode(cap) => cap.object,
-            Cap::Frame(cap) => cap.object,
-            Cap::Tcb(cap) => cap.object,
-            Cap::IrqHandler(cap) => cap.object,
-            Cap::VCpu(cap) => cap.object,
-            Cap::PageTable(cap) => cap.object,
-            Cap::AsidPool(cap) => cap.object,
-            Cap::ArmIrqHandler(cap) => cap.object,
-            Cap::IrqMsiHandler(cap) => cap.object,
-            Cap::IrqIOApicHandler(cap) => cap.object,
-            Cap::RiscvIrqHandler(cap) => cap.object,
-            Cap::IOPorts(cap) => cap.object,
-            Cap::SchedContext(cap) => cap.object,
-            Cap::Reply(cap) => cap.object,
-            Cap::ArmSmc(cap) => cap.object,
+            Self::Untyped(cap) => cap.object,
+            Self::Endpoint(cap) => cap.object,
+            Self::Notification(cap) => cap.object,
+            Self::CNode(cap) => cap.object,
+            Self::Frame(cap) => cap.object,
+            Self::Tcb(cap) => cap.object,
+            Self::IrqHandler(cap) => cap.object,
+            Self::VCpu(cap) => cap.object,
+            Self::PageTable(cap) => cap.object,
+            Self::AsidPool(cap) => cap.object,
+            Self::ArmIrqHandler(cap) => cap.object,
+            Self::IrqMsiHandler(cap) => cap.object,
+            Self::IrqIOApicHandler(cap) => cap.object,
+            Self::RiscvIrqHandler(cap) => cap.object,
+            Self::IOPorts(cap) => cap.object,
+            Self::SchedContext(cap) => cap.object,
+            Self::Reply(cap) => cap.object,
+            Self::ArmSmc(cap) => cap.object,
         }
     }
 
     pub fn set_obj(&mut self, object: ObjectId) {
         match self {
-            Cap::Untyped(cap) => cap.object = object,
-            Cap::Endpoint(cap) => cap.object = object,
-            Cap::Notification(cap) => cap.object = object,
-            Cap::CNode(cap) => cap.object = object,
-            Cap::Frame(cap) => cap.object = object,
-            Cap::Tcb(cap) => cap.object = object,
-            Cap::IrqHandler(cap) => cap.object = object,
-            Cap::VCpu(cap) => cap.object = object,
-            Cap::PageTable(cap) => cap.object = object,
-            Cap::AsidPool(cap) => cap.object = object,
-            Cap::ArmIrqHandler(cap) => cap.object = object,
-            Cap::IrqMsiHandler(cap) => cap.object = object,
-            Cap::IrqIOApicHandler(cap) => cap.object = object,
-            Cap::RiscvIrqHandler(cap) => cap.object = object,
-            Cap::IOPorts(cap) => cap.object = object,
-            Cap::SchedContext(cap) => cap.object = object,
-            Cap::Reply(cap) => cap.object = object,
-            Cap::ArmSmc(cap) => cap.object = object,
+            Self::Untyped(cap) => cap.object = object,
+            Self::Endpoint(cap) => cap.object = object,
+            Self::Notification(cap) => cap.object = object,
+            Self::CNode(cap) => cap.object = object,
+            Self::Frame(cap) => cap.object = object,
+            Self::Tcb(cap) => cap.object = object,
+            Self::IrqHandler(cap) => cap.object = object,
+            Self::VCpu(cap) => cap.object = object,
+            Self::PageTable(cap) => cap.object = object,
+            Self::AsidPool(cap) => cap.object = object,
+            Self::ArmIrqHandler(cap) => cap.object = object,
+            Self::IrqMsiHandler(cap) => cap.object = object,
+            Self::IrqIOApicHandler(cap) => cap.object = object,
+            Self::RiscvIrqHandler(cap) => cap.object = object,
+            Self::IOPorts(cap) => cap.object = object,
+            Self::SchedContext(cap) => cap.object = object,
+            Self::Reply(cap) => cap.object = object,
+            Self::ArmSmc(cap) => cap.object = object,
         }
     }
 }
@@ -333,24 +333,24 @@ impl ArchivedCap {
 
     pub fn obj(&self) -> ArchivedObjectId {
         match self {
-            ArchivedCap::Untyped(cap) => cap.object,
-            ArchivedCap::Endpoint(cap) => cap.object,
-            ArchivedCap::Notification(cap) => cap.object,
-            ArchivedCap::CNode(cap) => cap.object,
-            ArchivedCap::Frame(cap) => cap.object,
-            ArchivedCap::Tcb(cap) => cap.object,
-            ArchivedCap::IrqHandler(cap) => cap.object,
-            ArchivedCap::VCpu(cap) => cap.object,
-            ArchivedCap::PageTable(cap) => cap.object,
-            ArchivedCap::AsidPool(cap) => cap.object,
-            ArchivedCap::ArmIrqHandler(cap) => cap.object,
-            ArchivedCap::IrqMsiHandler(cap) => cap.object,
-            ArchivedCap::IrqIOApicHandler(cap) => cap.object,
-            ArchivedCap::RiscvIrqHandler(cap) => cap.object,
-            ArchivedCap::IOPorts(cap) => cap.object,
-            ArchivedCap::SchedContext(cap) => cap.object,
-            ArchivedCap::Reply(cap) => cap.object,
-            ArchivedCap::ArmSmc(cap) => cap.object,
+            Self::Untyped(cap) => cap.object,
+            Self::Endpoint(cap) => cap.object,
+            Self::Notification(cap) => cap.object,
+            Self::CNode(cap) => cap.object,
+            Self::Frame(cap) => cap.object,
+            Self::Tcb(cap) => cap.object,
+            Self::IrqHandler(cap) => cap.object,
+            Self::VCpu(cap) => cap.object,
+            Self::PageTable(cap) => cap.object,
+            Self::AsidPool(cap) => cap.object,
+            Self::ArmIrqHandler(cap) => cap.object,
+            Self::IrqMsiHandler(cap) => cap.object,
+            Self::IrqIOApicHandler(cap) => cap.object,
+            Self::RiscvIrqHandler(cap) => cap.object,
+            Self::IOPorts(cap) => cap.object,
+            Self::SchedContext(cap) => cap.object,
+            Self::Reply(cap) => cap.object,
+            Self::ArmSmc(cap) => cap.object,
         }
     }
 }
