@@ -1,0 +1,9 @@
+#
+# Copyright 2025, Colias Group, LLC
+#
+# SPDX-License-Identifier: BSD-2-Clause
+#
+
+[unstable]
+build-std = ["compiler_builtins", "core", "alloc", "std"]
+build-std-features = ["compiler-builtins-mem"]

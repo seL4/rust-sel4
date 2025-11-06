@@ -6,5 +6,18 @@
 
 [toolchain]
 channel = "nightly-2025-10-20"
-components = [ "rust-src", "rustc-dev", "llvm-tools-preview", "rust-analyzer" ]
 profile = "default"
+components = [
+    "rust-src",
+    "rustc-dev",
+    "llvm-tools-preview",
+    "rust-analyzer",
+]
+targets = [
+    "x86_64-unknown-linux-musl",
+    "aarch64-unknown-linux-musl",
+    "armv7-unknown-linux-musleabi",
+    "riscv64gc-unknown-linux-musl",
+    # tier 2, not available via rustup
+    # "riscv32gc-unknown-linux-musl",
+]
