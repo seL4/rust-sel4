@@ -171,7 +171,7 @@ sel4_cfg_if! {
     if #[sel4_cfg(DEBUG_BUILD)] {
         mod debug;
 
-        pub use debug::debug_snapshot;
+        pub use debug::{debug_snapshot, debug_halt};
     }
 }
 
