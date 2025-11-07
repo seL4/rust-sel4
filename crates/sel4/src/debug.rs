@@ -7,6 +7,11 @@
 
 use crate::{sys, InvocationContext, CapType, cap, Cap};
 
+/// Corresponds to `seL4_DebugHalt`.
+pub fn debug_halt() {
+    sys::seL4_DebugHalt()
+}
+
 /// Corresponds to `seL4_DebugSnapshot`.
 pub fn debug_snapshot() {
     sys::seL4_DebugSnapshot()
