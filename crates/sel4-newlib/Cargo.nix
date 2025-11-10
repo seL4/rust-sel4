@@ -9,9 +9,9 @@
 mk {
   package.name = "sel4-newlib";
   features = {
-    default = [ "detect-libc" ];
     detect-libc = [ "cc" ];
-    nosys = [];
+    link-libc = [];
+    link-libnosys = [];
     _exit = [];
     _write = [];
     errno = [];

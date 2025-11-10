@@ -12,8 +12,13 @@ mk {
     inherit (localCrates)
       sel4
       sel4-root-task
-      sel4-newlib
     ;
+    sel4-newlib = localCrates.sel4-newlib // {
+      features = [
+        "detect-libc"
+        "link-libc"
+      ];
+    };
   };
   build-dependencies = {
     inherit (versions) cc glob;
