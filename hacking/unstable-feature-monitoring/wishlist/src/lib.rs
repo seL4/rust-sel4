@@ -50,3 +50,6 @@
 
 // Will replace sel4_panicking::abort_unwind
 #![feature(abort_unwind)]
+
+// For global_asm! throughout
+#![feature(asm_cfg)]
