@@ -4,9 +4,10 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
+use sel4_panicking_env::abort;
+
 use unwinding::custom_eh_frame_finder::{
-    EhFrameFinder, FrameInfo, FrameInfoKind, SetCustomEhFrameFinderError,
-    set_custom_eh_frame_finder,
+    EhFrameFinder, FrameInfo, FrameInfoKind, set_custom_eh_frame_finder,
 };
 
 use sel4_elf_header::{PT_GNU_EH_FRAME, PT_LOAD};
@@ -43,7 +44,9 @@ unsafe impl EhFrameFinder for EhFrameFinderImpl {
     }
 }
 
-pub(crate) fn set_eh_frame_finder() -> Result<(), SetCustomEhFrameFinderError> {
-    static EH_FRAME_FINDER: &(dyn EhFrameFinder + Sync) = &EhFrameFinderImpl;
+static EH_FRAME_FINDER: &(dyn EhFrameFinder + Sync) = &EhFrameFinderImpl;
+
+pub(crate) fn init_unwinding() {
     set_custom_eh_frame_finder(EH_FRAME_FINDER)
+        .unwrap_or_else(|_| abort!("failed to initialize stack unwinding"));
 }

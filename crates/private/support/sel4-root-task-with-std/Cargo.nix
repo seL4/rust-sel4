@@ -13,7 +13,7 @@ mk {
       sel4
       sel4-panicking-env
     ;
-    sel4-runtime-common = localCrates.sel4-runtime-common // { features = [ "sel4" "full" ]; };
+    sel4-runtime-common = localCrates.sel4-runtime-common // { features = [ "sel4" ]; };
   };
   features = {
     single-threaded = [

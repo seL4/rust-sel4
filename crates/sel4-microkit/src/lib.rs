@@ -39,7 +39,6 @@ pub use sel4_microkit_base::*;
 mod entry;
 mod heap;
 mod printing;
-mod start;
 
 pub mod panicking;
 

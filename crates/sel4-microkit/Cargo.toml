@@ -30,4 +30,4 @@ sel4-microkit-base = { path = "base" }
 sel4-microkit-macros = { path = "macros" }
 sel4-panicking = { path = "../sel4-panicking", features = ["personality", "panic-handler"] }
 sel4-panicking-env = { path = "../sel4-panicking/env" }
-sel4-runtime-common = { path = "../sel4-runtime-common", features = ["sel4", "abort"] }
+sel4-runtime-common = { path = "../sel4-runtime-common", features = ["sel4"] }
