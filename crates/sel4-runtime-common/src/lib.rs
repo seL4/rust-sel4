@@ -6,9 +6,10 @@
 
 #![no_std]
 #![feature(cfg_target_thread_local)]
-#![feature(core_intrinsics)]
 #![feature(never_type)]
-#![allow(internal_features)]
+#![cfg_attr(feature = "abort", feature(core_intrinsics))]
+#![cfg_attr(feature = "abort", feature(linkage))]
+#![cfg_attr(feature = "abort", allow(internal_features))]
 
 use sel4_elf_header::{ElfHeader, ProgramHeader};
 use sel4_panicking_env::abort;
