@@ -43,6 +43,7 @@ members = [
     "crates/examples/root-task/spawn-thread",
     "crates/lionsos/sys",
     "crates/private/meta",
+    "crates/private/support/sel4-minimal-linux-syscalls",
     "crates/private/support/sel4-root-task-with-std",
     "crates/private/support/sel4-simple-task/config-types",
     "crates/private/support/sel4-simple-task/rpc",
