@@ -21,7 +21,7 @@ mk {
     unwinding = unwindingWith [];
   };
   target."cfg(target_thread_local)".dependencies = {
-    sel4 = localCrates.sel4 // { default-features = false; };
+    sel4 = localCrates.sel4 // { default-features = false; optional = true; };
     sel4-initialize-tls = localCrates.sel4-initialize-tls // { features = [ "on-stack" ]; };
   };
   features = {
