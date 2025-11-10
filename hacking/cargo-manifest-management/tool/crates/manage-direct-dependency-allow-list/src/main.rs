@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use std::collections::{HashMap, HashSet};
+use std::collections::{BTreeMap, BTreeSet, HashMap};
 use std::fs;
 use std::path::PathBuf;
 
@@ -91,7 +91,7 @@ fn main() -> anyhow::Result<()> {
 
 #[derive(Debug, Clone, Default)]
 struct AllowListCheckWorkspaceView {
-    allow: HashMap<String, HashMap<VersionReq, HashSet<String>>>,
+    allow: BTreeMap<String, HashMap<VersionReq, BTreeSet<String>>>,
 }
 
 impl AllowListCheckWorkspaceView {
@@ -137,9 +137,10 @@ impl AllowListCheckWorkspaceView {
                     .as_ref()
                     .map(|source| source.starts_with("registry+"))
                     .unwrap_or(false)
-                    && !self.check_one(&dep.name, &dep.req) {
-                        panic!("{} {} not in allowlist", dep.name, dep.req);
-                    }
+                    && !self.check_one(&dep.name, &dep.req)
+                {
+                    panic!("{} {} not in allowlist", dep.name, dep.req);
+                }
             }
         }
     }
