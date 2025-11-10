@@ -4,13 +4,14 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use std::path::Path;
-use std::process::Stdio;
-use std::str;
+#[cfg(feature = "detect-libc")]
+use std::{path::Path, process::Stdio, str};
 
 fn main() {
-    println!("cargo::rustc-link-lib=static=c");
-    if cfg!(feature = "nosys") {
+    if cfg!(feature = "link-libc") {
+        println!("cargo::rustc-link-lib=static=c");
+    }
+    if cfg!(feature = "link-libnosys") {
         println!("cargo::rustc-link-lib=static=nosys");
     }
     #[cfg(feature = "detect-libc")]

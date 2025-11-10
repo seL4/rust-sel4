@@ -20,10 +20,10 @@ license = "BSD-2-Clause"
 _exit = []
 _write = []
 all-symbols = ["_exit", "_write", "errno"]
-default = ["detect-libc"]
 detect-libc = ["cc"]
 errno = []
-nosys = []
+link-libc = []
+link-libnosys = []
 
 [dependencies]
 log = { version = "0.4.28", optional = true }

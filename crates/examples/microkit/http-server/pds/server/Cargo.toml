@@ -34,7 +34,6 @@ sel4-immediate-sync-once-cell = { path = "../../../../../sel4-immediate-sync-onc
 sel4-logging = { path = "../../../../../sel4-logging" }
 sel4-microkit = { path = "../../../../../sel4-microkit", features = ["alloc"] }
 sel4-microkit-driver-adapters = { path = "../../../../../sel4-microkit/driver-adapters" }
-sel4-newlib = { path = "../../../../../sel4-newlib", features = ["nosys", "all-symbols"] }
 sel4-shared-memory = { path = "../../../../../sel4-shared-memory" }
 sel4-shared-ring-buffer = { path = "../../../../../sel4-shared-ring-buffer" }
 sel4-shared-ring-buffer-block-io = { path = "../../../../../sel4-shared-ring-buffer/block-io" }
@@ -42,6 +41,10 @@ sel4-shared-ring-buffer-smoltcp = { path = "../../../../../sel4-shared-ring-buff
 
 [dependencies.sel4-async-single-threaded-executor]
 path = "../../../../../sel4-async/single-threaded-executor"
+
+[dependencies.sel4-newlib]
+path = "../../../../../sel4-newlib"
+features = ["detect-libc", "link-libc", "link-libnosys", "all-symbols"]
 
 [dependencies.sel4-shared-ring-buffer-block-io-types]
 path = "../../../../../sel4-shared-ring-buffer/block-io/types"

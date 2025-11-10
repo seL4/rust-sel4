@@ -49,7 +49,9 @@ mk {
 
     sel4-newlib = localCrates.sel4-newlib // {
       features = [
-        "nosys"
+        "detect-libc"
+        "link-libc"
+        "link-libnosys"
         "all-symbols"
       ];
     };
