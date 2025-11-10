@@ -4,6 +4,8 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
+use cfg_if::cfg_if;
+
 use sel4_elf_header::PT_TLS;
 use sel4_panicking_env::abort;
 
@@ -30,15 +32,28 @@ pub(crate) unsafe fn with_tls(f: impl FnOnce() -> !) -> ! {
     unsafe { checked.with_initialize_on_stack(CHOSEN_SET_THREAD_POINTER_FN, f) }
 }
 
-sel4::sel4_cfg_if! {
-    if #[sel4_cfg(all(ARCH_X86_64, SET_TLS_BASE_SELF))] {
-        const CHOSEN_SET_THREAD_POINTER_FN: SetThreadPointerFn = set_thread_pointer_via_syscall;
+#[allow(unused_macros)]
+macro_rules! use_default_set_thread_pointer_fn {
+    () => {
+        const CHOSEN_SET_THREAD_POINTER_FN: SetThreadPointerFn = DEFAULT_SET_THREAD_POINTER_FN;
+    };
+}
 
-        unsafe extern "C" fn set_thread_pointer_via_syscall(val: usize) {
-            sel4::set_tls_base(val);
+cfg_if! {
+    if #[cfg(feature = "sel4")] {
+        sel4::sel4_cfg_if! {
+            if #[sel4_cfg(all(ARCH_X86_64, SET_TLS_BASE_SELF))] {
+                const CHOSEN_SET_THREAD_POINTER_FN: SetThreadPointerFn = set_thread_pointer_via_syscall;
+
+                unsafe extern "C" fn set_thread_pointer_via_syscall(val: usize) {
+                    sel4::set_tls_base(val);
+                }
+            } else {
+                use_default_set_thread_pointer_fn!();
+            }
         }
     } else {
-        const CHOSEN_SET_THREAD_POINTER_FN: SetThreadPointerFn = DEFAULT_SET_THREAD_POINTER_FN;
+        use_default_set_thread_pointer_fn!();
     }
 }
 
