@@ -56,13 +56,3 @@ cfg_if! {
         use_default_set_thread_pointer_fn!();
     }
 }
-
-#[cfg(target_arch = "arm")]
-#[unsafe(no_mangle)]
-extern "C" fn __aeabi_read_tp() -> usize {
-    let mut val: usize;
-    unsafe {
-        core::arch::asm!("mrc p15, 0, {val}, c13, c0, 2", val = out(reg) val); // tpidrurw
-    }
-    val
-}

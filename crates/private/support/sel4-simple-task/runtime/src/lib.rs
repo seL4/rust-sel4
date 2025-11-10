@@ -43,24 +43,13 @@ static CONFIG: ImmediateSyncOnceCell<RuntimeConfig<'static>> = ImmediateSyncOnce
 #[thread_local]
 static THREAD_INDEX: ImmediateSyncOnceCell<usize> = ImmediateSyncOnceCell::new();
 
-#[unsafe(no_mangle)]
-#[allow(clippy::missing_safety_doc)]
-pub unsafe extern "C" fn _start(config: *const u8, config_size: usize, thread_index: usize) -> ! {
-    unsafe {
-        sel4_runtime_common::with_local_initialization(|| {
-            start_inner(config, config_size, thread_index)
-        })
-    }
+sel4_runtime_common::declare_entrypoint! {
+    entrypoint(config: *const u8, config_size: usize, thread_index: usize)
+    global_init if thread_index == 0
 }
 
 #[allow(clippy::missing_safety_doc)]
-unsafe fn start_inner(config: *const u8, config_size: usize, thread_index: usize) -> ! {
-    if thread_index == 0 {
-        unsafe {
-            sel4_runtime_common::global_initialzation();
-        }
-    }
-
+unsafe fn entrypoint(config: *const u8, config_size: usize, thread_index: usize) -> ! {
     let config = RuntimeConfig::new(unsafe { slice::from_raw_parts(config, config_size) });
 
     let thread_config = &config.threads()[thread_index];
@@ -96,6 +85,7 @@ unsafe fn start_inner(config: *const u8, config_size: usize, thread_index: usize
     idle()
 }
 
+// TODO assert global_init_complete
 fn run_secondary_thread(thread_config: &RuntimeThreadConfig) {
     let endpoint =
         sel4::cap::Endpoint::from_bits(thread_config.endpoint().unwrap().try_into().unwrap());

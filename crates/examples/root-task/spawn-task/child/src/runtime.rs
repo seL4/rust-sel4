@@ -29,17 +29,19 @@ static GLOBAL_ALLOCATOR: StaticDlmalloc<RawOneShotMutex> =
 
 sel4_panicking_env::register_debug_put_char!(sel4::debug_put_char);
 
-sel4_runtime_common::declare_entrypoint! {
-    () -> ! {
-        unsafe {
-            sel4::set_ipc_buffer(get_ipc_buffer().as_mut().unwrap());
-        }
+sel4_runtime_common::declare_entrypoint_with_stack_init! {
+    entrypoint()
+}
 
-        match catch_unwind(main) {
-            #[allow(unreachable_patterns)]
-            Ok(never) => never,
-            Err(_) => abort!("main() panicked"),
-        }
+fn entrypoint() -> ! {
+    unsafe {
+        sel4::set_ipc_buffer(get_ipc_buffer().as_mut().unwrap());
+    }
+
+    match catch_unwind(main) {
+        #[allow(unreachable_patterns)]
+        Ok(never) => never,
+        Err(_) => abort!("main() panicked"),
     }
 }
 

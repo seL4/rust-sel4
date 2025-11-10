@@ -27,7 +27,7 @@ mk {
       features = [ "personality" "panic-handler" ];
     };
     sel4-runtime-common = localCrates.sel4-runtime-common // {
-      features = [ "sel4" "abort" ];
+      features = [ "sel4" ];
     };
   };
   target."cfg(not(target_arch = \"arm\"))".dependencies = {

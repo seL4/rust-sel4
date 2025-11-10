@@ -21,7 +21,7 @@ mk {
       sel4-microkit-macros
     ;
     sel4-panicking = localCrates.sel4-panicking // { features = [ "personality" "panic-handler" ]; };
-    sel4-runtime-common = localCrates.sel4-runtime-common // { features = [ "sel4" "abort" ]; };
+    sel4-runtime-common = localCrates.sel4-runtime-common // { features = [ "sel4" ]; };
     sel4 = localCrates.sel4 // { features = [ "single-threaded" ]; };
   };
   features = {

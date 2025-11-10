@@ -22,7 +22,7 @@ mk {
       features = [ "personality" "panic-handler" "alloc" ];
     };
     sel4-runtime-common = localCrates.sel4-runtime-common // {
-      features = [ "sel4" "full" ];
+      features = [ "sel4" ];
     };
   };
 }

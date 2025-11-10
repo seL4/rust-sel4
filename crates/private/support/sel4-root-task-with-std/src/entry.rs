@@ -8,16 +8,18 @@ use std::panic::{UnwindSafe, catch_unwind};
 
 use crate::{Termination, abort};
 
-sel4_runtime_common::declare_entrypoint! {
-    (bootinfo: *const sel4::BootInfo) -> ! {
-        let bootinfo = unsafe { sel4::BootInfoPtr::new(bootinfo) };
+sel4_runtime_common::declare_entrypoint_with_stack_init! {
+    entrypoint(bootinfo: *const sel4::BootInfo)
+}
 
-        let ipc_buffer = unsafe { bootinfo.ipc_buffer().as_mut().unwrap() };
-        sel4::set_ipc_buffer(ipc_buffer);
+fn entrypoint(bootinfo: *const sel4::BootInfo) -> ! {
+    let bootinfo = unsafe { sel4::BootInfoPtr::new(bootinfo) };
 
-        unsafe {
-            __sel4_root_task__main(&bootinfo);
-        }
+    let ipc_buffer = unsafe { bootinfo.ipc_buffer().as_mut().unwrap() };
+    sel4::set_ipc_buffer(ipc_buffer);
+
+    unsafe {
+        __sel4_root_task__main(&bootinfo);
     }
 }
 

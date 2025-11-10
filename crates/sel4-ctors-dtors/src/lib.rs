@@ -11,6 +11,7 @@
 #![no_std]
 #![feature(linkage)]
 
+use core::fmt;
 use core::mem;
 use core::ptr;
 use core::slice;
@@ -42,6 +43,16 @@ mod _weak {
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum Error {
     Misaligned { section_name: &'static str },
+}
+
+impl fmt::Display for Error {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Self::Misaligned { section_name } => {
+                write!(f, "section '{section_name}' is misaligned")
+            }
+        }
+    }
 }
 
 unsafe fn run_array(

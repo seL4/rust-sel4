@@ -18,7 +18,7 @@ mk {
       sel4-root-task-macros
     ;
     sel4-panicking = localCrates.sel4-panicking // { features = [ "personality" "panic-handler" ]; };
-    sel4-runtime-common = localCrates.sel4-runtime-common // { features = [ "sel4" "full" ]; };
+    sel4-runtime-common = localCrates.sel4-runtime-common // { features = [ "sel4" ]; };
   };
   features = {
     full = [
