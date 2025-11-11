@@ -53,3 +53,7 @@
 
 // For global_asm! throughout
 #![feature(asm_cfg)]
+
+// To replace runtime macro crates
+#![feature(macro_attr)]
+#![feature(macro_derive)]
