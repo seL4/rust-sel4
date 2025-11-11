@@ -186,6 +186,9 @@ in let
       inherit crossSystem;
       overlays = [
         (import ./overlay)
+        (_: _: {
+          selfTopLevel = self;
+        })
       ];
       config = baseConfig;
     };

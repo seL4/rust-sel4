@@ -35,4 +35,8 @@ import ./aggregates.nix self //
 
   example-rpi4-b-4gb = worlds.aarch64.bcm2711.instances.examples.root-task.example-root-task.bootCopied;
 
+  cargoConfig = import ./cargo-config.nix {
+    topLevel = self;
+  };
+
 }
