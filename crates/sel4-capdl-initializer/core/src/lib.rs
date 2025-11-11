@@ -597,7 +597,7 @@ impl<'a, N: ObjectName, D: Content, M: GetEmbeddedFrame, B: BorrowMut<[PerObject
             init_thread::slot::VSPACE.cap(),
             self.copy_addrs.select(frame_object_type),
             CapRights::read_write(),
-            vm_attributes_from_whether_cached_and_exec(false, false),
+            vm_attributes_from_whether_cached_and_exec(true, false),
         )?;
         for entry in fill.iter() {
             let offset = entry.range.start;
