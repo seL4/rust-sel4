@@ -90,14 +90,13 @@ extern "C" fn __aeabi_read_tp() -> usize {
 
 #[doc(hidden)]
 #[allow(unreachable_code)]
-pub unsafe fn _run_entrypoint(global_init_cond: bool, f: impl FnOnce()) -> ! {
+pub unsafe fn _run_entrypoint(global_init_cond: bool, f: impl FnOnce() -> !) -> ! {
     unsafe {
         with_local_init(|| {
             if global_init_cond {
                 global_init();
             }
-            f();
-            abort!("entrypoint returned")
+            f()
         });
     }
 }

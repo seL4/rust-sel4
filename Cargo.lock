@@ -2734,6 +2734,29 @@ dependencies = [
 ]
 
 [[package]]
+name = "sel4-minimal-linux-runtime"
+version = "0.1.0"
+dependencies = [
+ "one-shot-mutex",
+ "sel4-dlmalloc",
+ "sel4-immediate-sync-once-cell",
+ "sel4-minimal-linux-runtime-macros",
+ "sel4-minimal-linux-syscalls",
+ "sel4-panicking",
+ "sel4-panicking-env",
+ "sel4-runtime-common",
+]
+
+[[package]]
+name = "sel4-minimal-linux-runtime-macros"
+version = "0.1.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "sel4-minimal-linux-syscalls"
 version = "0.1.0"
 dependencies = [

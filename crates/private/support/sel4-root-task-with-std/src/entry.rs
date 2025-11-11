@@ -21,10 +21,12 @@ fn entrypoint(bootinfo: *const sel4::BootInfo) -> ! {
     unsafe {
         __sel4_root_task__main(&bootinfo);
     }
+
+    abort!("main returned")
 }
 
 unsafe extern "Rust" {
-    fn __sel4_root_task__main(bootinfo: &sel4::BootInfoPtr) -> !;
+    fn __sel4_root_task__main(bootinfo: &sel4::BootInfoPtr);
 }
 
 #[doc(hidden)]
@@ -33,8 +35,8 @@ macro_rules! declare_main {
     ($main:expr) => {
         #[allow(non_snake_case)]
         #[unsafe(no_mangle)]
-        fn __sel4_root_task__main(bootinfo: &$crate::_private::BootInfoPtr) -> ! {
-            $crate::_private::run_main($main, bootinfo);
+        fn __sel4_root_task__main(bootinfo: &$crate::_private::BootInfoPtr) {
+            $crate::_private::run_main($main, bootinfo)
         }
     };
 }
