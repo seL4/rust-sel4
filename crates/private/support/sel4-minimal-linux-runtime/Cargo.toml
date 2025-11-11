@@ -1,0 +1,38 @@
+#
+# Copyright 2023, Colias Group, LLC
+#
+# SPDX-License-Identifier: BSD-2-Clause
+#
+#
+# This file is generated from './Cargo.nix'. You can edit this file directly
+# if you are not using this project's Cargo manifest management tools.
+# See 'hacking/cargo-manifest-management/README.md' for more information.
+#
+
+[package]
+name = "sel4-minimal-linux-runtime"
+version = "0.1.0"
+authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
+edition = "2024"
+license = "BSD-2-Clause"
+
+[lib]
+test = false
+
+[[test]]
+harness = false
+name = "hello_world"
+
+[features]
+alloc = ["sel4-panicking/alloc"]
+full = ["alloc"]
+
+[dependencies]
+one-shot-mutex = "0.2.1"
+sel4-dlmalloc = { path = "../../../sel4-dlmalloc" }
+sel4-immediate-sync-once-cell = { path = "../../../sel4-immediate-sync-once-cell" }
+sel4-minimal-linux-runtime-macros = { path = "macros" }
+sel4-minimal-linux-syscalls = { path = "../sel4-minimal-linux-syscalls" }
+sel4-panicking = { path = "../../../sel4-panicking", features = ["personality", "panic-handler"] }
+sel4-panicking-env = { path = "../../../sel4-panicking/env" }
+sel4-runtime-common = { path = "../../../sel4-runtime-common" }

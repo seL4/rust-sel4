@@ -25,10 +25,12 @@ fn entrypoint() -> ! {
     unsafe {
         __sel4_microkit__main();
     }
+
+    abort!("main returned")
 }
 
 unsafe extern "C" {
-    fn __sel4_microkit__main() -> !;
+    fn __sel4_microkit__main();
 }
 
 #[doc(hidden)]
@@ -37,8 +39,8 @@ macro_rules! declare_init {
     ($init:expr) => {
         #[allow(non_snake_case)]
         #[unsafe(no_mangle)]
-        fn __sel4_microkit__main() -> ! {
-            $crate::_private::run_main($init);
+        fn __sel4_microkit__main() {
+            $crate::_private::run_main($init)
         }
     };
 }
