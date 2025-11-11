@@ -100,7 +100,7 @@ unsafe extern "C" {
 macro_rules! common_asm_prefix {
     () => {
         r#"
-            .section .text
+            .section .text.__sel4_alloca__reserve_on_stack, "ax", %progbits
             .global __sel4_alloca__reserve_on_stack
             __sel4_alloca__reserve_on_stack:
         "#
