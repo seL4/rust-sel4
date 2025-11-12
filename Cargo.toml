@@ -21,6 +21,7 @@ members = [
     "crates/drivers/virtio/hal-impl",
     "crates/drivers/virtio/net",
     "crates/examples/lionsos/serial/components/client",
+    "crates/drivers/zynqmp-xuartps",
     "crates/examples/microkit/banscii/pds/artist",
     "crates/examples/microkit/banscii/pds/artist/interface-types",
     "crates/examples/microkit/banscii/pds/assistant",
