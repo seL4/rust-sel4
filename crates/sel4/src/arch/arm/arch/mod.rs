@@ -17,9 +17,9 @@ sel4_cfg_if! {
 }
 
 // HACK for rustfmt
-#[cfg(any())]
+#[cfg(false)]
 mod aarch32;
-#[cfg(any())]
+#[cfg(false)]
 mod aarch64;
 
 pub(crate) use imp::*;

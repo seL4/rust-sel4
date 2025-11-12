@@ -23,11 +23,11 @@ sel4_cfg_if! {
 }
 
 // HACK for rustfmt
-#[cfg(any())]
+#[cfg(false)]
 mod aarch32;
-#[cfg(any())]
+#[cfg(false)]
 mod aarch64;
-#[cfg(any())]
+#[cfg(false)]
 mod riscv;
-#[cfg(any())]
+#[cfg(false)]
 mod x86_64;

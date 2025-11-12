@@ -20,11 +20,11 @@ sel4_cfg_if! {
 }
 
 // HACK for rustfmt
-#[cfg(any())]
+#[cfg(false)]
 mod bcm2711;
-#[cfg(any())]
+#[cfg(false)]
 mod qemu_arm_virt;
-#[cfg(any())]
+#[cfg(false)]
 mod riscv_generic;
 
 #[allow(unused_imports)]

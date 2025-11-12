@@ -14,7 +14,7 @@ sel4_cfg_if! {
 }
 
 // HACK for rustfmt
-#[cfg(any())]
+#[cfg(false)]
 mod x64;
 
 pub(crate) use imp::*;
