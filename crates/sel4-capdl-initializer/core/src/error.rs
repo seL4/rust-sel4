@@ -4,9 +4,10 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use crate::CSlotAllocatorError;
 use core::convert::Infallible;
 use core::fmt;
+
+use crate::cslot_allocator::CSlotAllocatorError;
 
 #[derive(Debug)]
 pub enum CapDLInitializerError {
