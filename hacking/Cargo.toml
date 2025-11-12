@@ -1,0 +1,15 @@
+#
+# Copyright 2023, Colias Group, LLC
+#
+# SPDX-License-Identifier: BSD-2-Clause
+#
+
+[workspace]
+resolver = "3"
+members = [
+    "cargo-manifest-management/tool/crates/toml-path-regex",
+    "cargo-manifest-management/tool/crates/toml-normalize",
+    "cargo-manifest-management/tool/crates/manage-cargo-manifests",
+    "cargo-manifest-management/tool/crates/manage-direct-dependency-allow-list",
+    "unstable-feature-monitoring/wishlist",
+]

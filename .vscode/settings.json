@@ -9,6 +9,6 @@
     "rust-analyzer.server.path": "rust-analyzer",
     "rust-analyzer.cargo.targetDir": true, // use subdir
     "rust-analyzer.linkedProjects": [
-        "hacking/cargo-manifest-management/tool/Cargo.toml",
+        "hacking/Cargo.toml",
     ],
 }

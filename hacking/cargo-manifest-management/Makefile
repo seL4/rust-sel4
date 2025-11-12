@@ -6,13 +6,9 @@
 
 blueprint := blueprint.json
 
-tools_manifest_path_arg := --manifest-path=tool/Cargo.toml
+run := cargo run -p manage-cargo-manifests --
 
-run := cargo run \
-	$(tools_manifest_path_arg) -p manage-cargo-manifests --
-
-run_allowlist := cargo run \
-	$(tools_manifest_path_arg) -p manage-direct-dependency-allow-list --
+run_allowlist := cargo run -p manage-direct-dependency-allow-list --
 
 project_manifest_path_arg := --manifest-path=../../Cargo.toml
 
