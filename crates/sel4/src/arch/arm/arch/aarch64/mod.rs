@@ -15,7 +15,7 @@ sel4_config::sel4_cfg_if! {
 }
 
 // HACK for rustfmt
-#[cfg(any())]
+#[cfg(false)]
 mod vcpu_reg;
 
 pub(crate) mod top_level {

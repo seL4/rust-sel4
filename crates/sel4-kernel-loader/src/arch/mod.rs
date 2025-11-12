@@ -18,9 +18,9 @@ sel4_cfg_if! {
 }
 
 // HACK for rustfmt
-#[cfg(any())]
+#[cfg(false)]
 mod arm;
-#[cfg(any())]
+#[cfg(false)]
 mod riscv;
 
 pub(crate) use imp::*;
