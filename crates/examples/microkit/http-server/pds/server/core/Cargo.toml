@@ -23,19 +23,21 @@ httparse = { version = "1.10.1", default-features = false }
 log = "0.4.28"
 rustls = { version = "0.23.5", default-features = false, features = ["logging", "ring", "tls12"] }
 rustls-pemfile = { version = "2.0.0", default-features = false }
-sel4-async-block-io = { path = "../../../../../../sel4-async/block-io" }
-sel4-async-block-io-fat = { path = "../../../../../../sel4-async/block-io/fat" }
-sel4-async-io = { path = "../../../../../../sel4-async/io" }
-sel4-async-network = { path = "../../../../../../sel4-async/network" }
-sel4-async-network-rustls = { path = "../../../../../../sel4-async/network/rustls" }
-sel4-async-network-rustls-utils = { path = "../../../../../../sel4-async/network/rustls/utils" }
-sel4-async-time = { path = "../../../../../../sel4-async/time" }
-sel4-async-unsync = { path = "../../../../../../sel4-async/unsync" }
+sel4-async-block-io = { path = "../../../../../../experimental/sel4-async/block-io" }
+sel4-async-block-io-fat = { path = "../../../../../../experimental/sel4-async/block-io/fat" }
+sel4-async-io = { path = "../../../../../../experimental/sel4-async/io" }
+sel4-async-network = { path = "../../../../../../experimental/sel4-async/network" }
+sel4-async-network-rustls = { path = "../../../../../../experimental/sel4-async/network/rustls" }
+sel4-async-time = { path = "../../../../../../experimental/sel4-async/time" }
+sel4-async-unsync = { path = "../../../../../../experimental/sel4-async/unsync" }
 sel4-panicking-env = { path = "../../../../../../sel4-panicking/env" }
 webpki-roots = "1.0.3"
 
+[dependencies.sel4-async-network-rustls-utils]
+path = "../../../../../../experimental/sel4-async/network/rustls/utils"
+
 [dependencies.sel4-async-single-threaded-executor]
-path = "../../../../../../sel4-async/single-threaded-executor"
+path = "../../../../../../experimental/sel4-async/single-threaded-executor"
 
 [dependencies.smoltcp]
 version = "0.12.0"

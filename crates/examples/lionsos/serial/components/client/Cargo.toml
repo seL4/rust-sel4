@@ -17,5 +17,5 @@ edition = "2024"
 license = "BSD-2-Clause"
 
 [dependencies]
-sddf = { path = "../../../../../sddf" }
+sddf = { path = "../../../../../experimental/sddf" }
 sel4-microkit = { path = "../../../../../sel4-microkit" }

@@ -17,4 +17,4 @@ edition = "2024"
 license = "BSD-2-Clause"
 
 [dependencies]
-sel4-microkit-base = { path = "../../sel4-microkit/base", optional = true }
+sel4-microkit-base = { path = "../../../sel4-microkit/base", optional = true }

@@ -22,7 +22,7 @@ futures = { version = "0.3.31", default-features = false, features = ["async-awa
 log = "0.4.28"
 sel4-abstract-allocator = { path = "../../sel4-abstract-allocator" }
 sel4-async-block-io = { path = "../../sel4-async/block-io" }
-sel4-shared-memory = { path = "../../sel4-shared-memory" }
+sel4-shared-memory = { path = "../../../sel4-shared-memory" }
 sel4-shared-ring-buffer = { path = ".." }
 sel4-shared-ring-buffer-block-io-types = { path = "types" }
 sel4-shared-ring-buffer-bookkeeping = { path = "../bookkeeping", features = ["async-unsync"] }

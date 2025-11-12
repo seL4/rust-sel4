@@ -18,4 +18,4 @@ license = "BSD-2-Clause"
 
 [dependencies]
 sel4-microkit = { path = "../../../../sel4-microkit" }
-sel4-reset = { path = "../../../../sel4-reset" }
+sel4-reset = { path = "../../../../experimental/sel4-reset" }

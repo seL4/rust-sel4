@@ -45,5 +45,8 @@ path = "../../../../sel4-panicking"
 features = ["personality", "panic-handler"]
 
 [target."cfg(not(target_arch = \"arm\"))".dependencies]
-sel4-backtrace = { path = "../../../../sel4-backtrace", features = ["unwinding", "postcard"] }
-sel4-backtrace-simple = { path = "../../../../sel4-backtrace/simple" }
+sel4-backtrace-simple = { path = "../../../../experimental/sel4-backtrace/simple" }
+
+[target."cfg(not(target_arch = \"arm\"))".dependencies.sel4-backtrace]
+path = "../../../../experimental/sel4-backtrace"
+features = ["unwinding", "postcard"]

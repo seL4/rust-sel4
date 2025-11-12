@@ -22,6 +22,8 @@ banscii-assistant-core = { path = "core" }
 embedded-hal-nb = "1.0"
 hex = { version = "0.4.3", default-features = false, features = ["alloc"] }
 sel4-microkit = { path = "../../../../../sel4-microkit", features = ["alloc"] }
-sel4-microkit-driver-adapters = { path = "../../../../../sel4-microkit/driver-adapters" }
-sel4-microkit-simple-ipc = { path = "../../../../../sel4-microkit/simple-ipc" }
+sel4-microkit-simple-ipc = { path = "../../../../../experimental/sel4-microkit/simple-ipc" }
 sel4-shared-memory = { path = "../../../../../sel4-shared-memory" }
+
+[dependencies.sel4-microkit-driver-adapters]
+path = "../../../../../experimental/sel4-microkit/driver-adapters"

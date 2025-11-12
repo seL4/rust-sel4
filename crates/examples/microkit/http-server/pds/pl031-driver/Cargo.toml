@@ -18,5 +18,7 @@ license = "BSD-2-Clause"
 
 [dependencies]
 sel4-microkit = { path = "../../../../../sel4-microkit" }
-sel4-microkit-driver-adapters = { path = "../../../../../sel4-microkit/driver-adapters" }
 sel4-pl031-driver = { path = "../../../../../drivers/pl031" }
+
+[dependencies.sel4-microkit-driver-adapters]
+path = "../../../../../experimental/sel4-microkit/driver-adapters"
