@@ -12,7 +12,7 @@ Files:
   Cargo.lock
   support/*.json
   crates/sel4-generate-target-specs/src/microkit-resettable.lds
-  hacking/cargo-manifest-management/tool/Cargo.lock
+  hacking/Cargo.lock
   hacking/unstable-feature-monitoring/wishlist/Cargo.lock
   hacking/nix/scope/capdl-tool/capDL-tool.nix
   hacking/nix/scope/capdl-tool/base-compat-0-12-2.nix

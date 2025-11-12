@@ -21,4 +21,4 @@ crates-using:
 
 .PHONY: wishlist
 wishlist:
-	cargo build --manifest-path wishlist/Cargo.toml
+	cargo build -p wishlist
