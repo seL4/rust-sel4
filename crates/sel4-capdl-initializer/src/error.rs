@@ -12,6 +12,7 @@ use crate::cslot_allocator::CSlotAllocatorError;
 #[derive(Debug)]
 pub enum CapDLInitializerError {
     CSlotAllocatorError(CSlotAllocatorError),
+    #[allow(dead_code)] // false positive
     SeL4Error(sel4::Error),
 }
 

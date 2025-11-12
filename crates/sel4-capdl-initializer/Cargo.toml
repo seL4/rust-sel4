@@ -25,8 +25,7 @@ deflate = ["sel4-capdl-initializer-types/deflate"]
 log = "0.4.28"
 rkyv = { version = "0.8.12", default-features = false }
 sel4 = { path = "../sel4" }
-sel4-capdl-initializer-core = { path = "core" }
-sel4-capdl-initializer-types = { path = "types" }
+sel4-capdl-initializer-types = { path = "types", features = ["sel4"] }
 sel4-immutable-cell = { path = "../sel4-immutable-cell" }
 sel4-logging = { path = "../sel4-logging" }
 sel4-one-ref-cell = { path = "../sel4-one-ref-cell" }

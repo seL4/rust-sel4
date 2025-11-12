@@ -14,14 +14,13 @@ mk {
     ;
     rkyv = { version = versions.rkyv; default-features = false; };
     inherit (localCrates)
-      sel4-capdl-initializer-core
       sel4
       sel4-logging
       sel4-immutable-cell
       sel4-one-ref-cell
     ;
     sel4-root-task = localCrates.sel4-root-task // { features = [ "single-threaded" ]; };
-    sel4-capdl-initializer-types = localCrates.sel4-capdl-initializer-types;
+    sel4-capdl-initializer-types = localCrates.sel4-capdl-initializer-types // { features = [ "sel4" ]; };
   };
   features = {
     default = [

@@ -2425,7 +2425,6 @@ dependencies = [
  "log",
  "rkyv",
  "sel4",
- "sel4-capdl-initializer-core",
  "sel4-capdl-initializer-types",
  "sel4-immutable-cell",
  "sel4-logging",
@@ -2445,16 +2444,6 @@ dependencies = [
  "sel4-capdl-initializer-types",
  "sel4-synthetic-elf",
  "serde_json",
-]
-
-[[package]]
-name = "sel4-capdl-initializer-core"
-version = "0.1.0"
-dependencies = [
- "log",
- "rkyv",
- "sel4",
- "sel4-capdl-initializer-types",
 ]
 
 [[package]]

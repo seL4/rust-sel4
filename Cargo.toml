@@ -118,7 +118,6 @@ members = [
     "crates/sel4-alloca",
     "crates/sel4-capdl-initializer",
     "crates/sel4-capdl-initializer/add-spec",
-    "crates/sel4-capdl-initializer/core",
     "crates/sel4-capdl-initializer/types",
     "crates/sel4-capdl-initializer/types/derive",
     "crates/sel4-ctors-dtors",
