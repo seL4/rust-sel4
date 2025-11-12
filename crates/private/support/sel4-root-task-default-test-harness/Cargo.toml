@@ -17,6 +17,6 @@ edition = "2024"
 license = "BSD-2-Clause"
 
 [dependencies]
-sel4 = { path = "../../sel4" }
-sel4-root-task = { path = ".." }
-sel4-test-harness = { path = "../../sel4-test-harness" }
+sel4 = { path = "../../../sel4" }
+sel4-root-task = { path = "../../../sel4-root-task" }
+sel4-test-harness = { path = "../sel4-test-harness" }

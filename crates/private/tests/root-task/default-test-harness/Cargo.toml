@@ -20,5 +20,5 @@ license = "BSD-2-Clause"
 log = "0.4.28"
 
 [dev-dependencies.test]
-path = "../../../../sel4-root-task/default-test-harness"
+path = "../../../support/sel4-root-task-default-test-harness"
 package = "sel4-root-task-default-test-harness"

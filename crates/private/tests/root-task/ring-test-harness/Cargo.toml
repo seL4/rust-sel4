@@ -21,7 +21,7 @@ getrandom = { version = "0.2.10", features = ["custom"] }
 rand = { version = "0.9.2", default-features = false, features = ["small_rng"] }
 sel4 = { path = "../../../../sel4" }
 sel4-root-task = { path = "../../../../sel4-root-task" }
-sel4-test-harness = { path = "../../../../sel4-test-harness" }
+sel4-test-harness = { path = "../../../support/sel4-test-harness" }
 
 [dependencies.sel4-newlib]
 path = "../../../../sel4-newlib"
