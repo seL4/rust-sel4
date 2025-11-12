@@ -69,8 +69,6 @@ following versions of those related projects:
   implementation for the [`log`](https://crates.io/crates/log) crate.
 - [`sel4-shared-memory`](./crates/sel4-shared-memory): Abstractions for interacting with
   data in shared memory.
-- [`sel4-shared-ring-buffer`](./crates/sel4-shared-ring-buffer): Implementation of shared data
-  structures used in the [seL4 Device Driver Framework](https://github.com/au-ts/sddf).
 - [`sel4-async-*`](./crates/experimental/sel4-async): Crates for leveraging async Rust in seL4 userspace.
 
 ##### Runtime crates
