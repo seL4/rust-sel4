@@ -3,6 +3,8 @@
 //
 // SPDX-License-Identifier: BSD-2-Clause
 //
+#![feature(custom_inner_attributes)]
+#![rustfmt::skip]
 
 #![feature(exclusive_wrapper)]
 #![feature(sync_unsafe_cell)]
