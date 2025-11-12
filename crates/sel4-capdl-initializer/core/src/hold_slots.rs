@@ -6,7 +6,8 @@
 
 use sel4::{AbsoluteCPtr, init_thread::Slot};
 
-use crate::{CSlotAllocator, CapDLInitializerError};
+use crate::cslot_allocator::CSlotAllocator;
+use crate::error::CapDLInitializerError;
 
 const NUM_SLOTS: usize = 2;
 
