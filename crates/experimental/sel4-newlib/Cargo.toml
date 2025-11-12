@@ -27,7 +27,7 @@ link-libnosys = []
 
 [dependencies]
 log = { version = "0.4.28", optional = true }
-sel4-panicking-env = { path = "../sel4-panicking/env" }
+sel4-panicking-env = { path = "../../sel4-panicking/env" }
 
 [build-dependencies]
 cc = { version = "1.2.43", optional = true }

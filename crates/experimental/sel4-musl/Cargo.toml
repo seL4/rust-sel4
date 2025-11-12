@@ -17,5 +17,5 @@ edition = "2024"
 license = "BSD-2-Clause"
 
 [dependencies]
-sel4-immediate-sync-once-cell = { path = "../sel4-immediate-sync-once-cell" }
+sel4-immediate-sync-once-cell = { path = "../../sel4-immediate-sync-once-cell" }
 sel4-linux-syscall-types = { path = "../sel4-linux-syscall-types" }

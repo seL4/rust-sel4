@@ -18,8 +18,16 @@ license = "BSD-2-Clause"
 
 [dependencies]
 sel4 = { path = "../../../../sel4" }
-sel4-backtrace = { path = "../../../../sel4-backtrace", features = ["full"] }
-sel4-backtrace-embedded-debug-info = { path = "../../../../sel4-backtrace/embedded-debug-info" }
-sel4-backtrace-simple = { path = "../../../../sel4-backtrace/simple", features = ["alloc"] }
-sel4-backtrace-types = { path = "../../../../sel4-backtrace/types", features = ["full"] }
+sel4-backtrace = { path = "../../../../experimental/sel4-backtrace", features = ["full"] }
 sel4-root-task = { path = "../../../../sel4-root-task", features = ["alloc"] }
+
+[dependencies.sel4-backtrace-embedded-debug-info]
+path = "../../../../experimental/sel4-backtrace/embedded-debug-info"
+
+[dependencies.sel4-backtrace-simple]
+path = "../../../../experimental/sel4-backtrace/simple"
+features = ["alloc"]
+
+[dependencies.sel4-backtrace-types]
+path = "../../../../experimental/sel4-backtrace/types"
+features = ["full"]

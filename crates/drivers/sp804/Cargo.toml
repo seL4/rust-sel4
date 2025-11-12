@@ -17,5 +17,5 @@ edition = "2024"
 license = "BSD-2-Clause"
 
 [dependencies]
-sel4-driver-interfaces = { path = "../../sel4-driver-interfaces" }
+sel4-driver-interfaces = { path = "../../experimental/sel4-driver-interfaces" }
 tock-registers = "0.10.0"

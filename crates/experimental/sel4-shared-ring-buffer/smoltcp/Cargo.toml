@@ -22,7 +22,7 @@ log = "0.4.28"
 one-shot-mutex = "0.2.1"
 sel4-abstract-allocator = { path = "../../sel4-abstract-allocator" }
 sel4-abstract-rc = { path = "../../sel4-abstract-rc" }
-sel4-shared-memory = { path = "../../sel4-shared-memory" }
+sel4-shared-memory = { path = "../../../sel4-shared-memory" }
 sel4-shared-ring-buffer = { path = ".." }
 sel4-shared-ring-buffer-bookkeeping = { path = "../bookkeeping" }
 
