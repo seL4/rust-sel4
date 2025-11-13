@@ -54,23 +54,15 @@ in rec {
 
   # NOTE: Be sure to keep the commit hashes in the top-level README up-to-date.
 
-  seL4 = {
-    rust = fetchGit {
-      url = "https://github.com/coliasgroup/seL4.git";
-      rev = "dcdd2bcf2a64f3b34d2a406824fa54df7ed55571"; # branch "rust-testing", based on 13.0.0
-      local = localRoot + "/seL4";
-    };
-
-    rust-microkit = fetchGit {
-      url = "https://github.com/coliasgroup/seL4.git";
-      rev = "4b97df4c7e24fd0c297e21cae8d997a08b8952b0"; # branch "rust-microkit" seL4/seL4:microkit
-      local = localRoot + "/seL4";
-    };
+  seL4 = fetchGit {
+    url = "https://github.com/coliasgroup/seL4.git";
+    rev = "97b287181e45240f630158a674b303a6b6223c23"; # branch "rust-testing", based on 14.0.0
+    local = localRoot + "/seL4";
   };
 
   microkit = fetchGit {
     url = "https://github.com/coliasgroup/microkit.git";
-    rev = "55a972479f81a1a706d6eb4e8fbfd6daa88b603f"; # branch "rust-nix", based on 2.0.1
+    rev = "26230271a12cb39c6cc08ac75d33e02489990922"; # branch "rust-nix", based on 3.0.0
     local = localRoot + "/microkit";
     extraFilter = path: type:
       lib.hasSuffix "/target" path;

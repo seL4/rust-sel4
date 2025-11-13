@@ -51,7 +51,7 @@ self: with self;
 {
   inherit worldConfig;
 
-  microkit = assert worldConfig.isMicrokit; mkMicrokit worldConfig.microkitConfig;
+  microkit = assert worldConfig.isMicrokit; mkMicrokit worldConfig;
 
   microkitForUserspace = microkit;
   microkitForBoot = microkit;
@@ -90,7 +90,11 @@ self: with self;
     modifyDerivation = drv: drv.overrideAttrs (self: super: seL4RustEnvVars);
   };
 
-  kernelBinary = assert !worldConfig.isMicrokit; "${seL4ForBoot}/bin/kernel.elf";
+  kernelBinary =
+    if worldConfig.isMicrokit
+    then "${microkitDir}/elf/sel4.elf"
+    else "${seL4ForBoot}/bin/kernel.elf"
+  ;
 
   kernelBinary32Bit =
     assert hostPlatform.isx86_64;

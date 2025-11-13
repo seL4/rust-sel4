@@ -15,7 +15,7 @@
 kernelConfig:
 
 let
-  src = sources.seL4.rust;
+  src = sources.seL4;
 
   settings = writeText "settings.cmake" ''
     ${lib.concatStrings (lib.mapAttrsToList (k: v: ''

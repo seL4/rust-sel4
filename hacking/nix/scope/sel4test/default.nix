@@ -50,7 +50,7 @@ let
       "-DARM_CPU=cortex-a15"
     ];
 
-  kernelSrc = sources.seL4.rust;
+  kernelSrc = sources.seL4;
 
   tests = stdenv.mkDerivation {
     name = "sel4test";
