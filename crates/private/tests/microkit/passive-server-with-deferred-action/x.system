@@ -6,11 +6,11 @@
 -->
 <system>
 
-    <protection_domain name="client" priority="253" stack_size="0x10_000">
+    <protection_domain name="client" priority="1" stack_size="0x10_000">
         <program_image path="client.elf" />
     </protection_domain>
 
-    <protection_domain name="server" priority="254" passive="true" stack_size="0x10_000">
+    <protection_domain name="server" priority="2" passive="true" stack_size="0x10_000">
         <program_image path="server.elf" />
     </protection_domain>
 

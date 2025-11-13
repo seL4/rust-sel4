@@ -67,7 +67,7 @@ def run(args):
     serial_driver = ProtectionDomain(
         'serial_driver',
         'banscii-serial-driver.elf',
-        priority=254,
+        priority=3,
         stack_size=DEFAULT_STACK_SIZE,
     )
     serial_driver.add_map(
@@ -88,7 +88,7 @@ def run(args):
     assistant = ProtectionDomain(
         'assistant',
         'banscii-assistant.elf',
-        priority=252,
+        priority=1,
         stack_size=DEFAULT_STACK_SIZE,
     )
     assistant.add_map(
@@ -113,7 +113,7 @@ def run(args):
     artist = ProtectionDomain(
         'artist',
         'banscii-artist.elf',
-        priority=253,
+        priority=2,
         stack_size=DEFAULT_STACK_SIZE,
     )
     artist.add_map(
