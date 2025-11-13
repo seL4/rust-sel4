@@ -23,7 +23,7 @@
     <memory_region name="virtio_blk_free" size="0x200_000" page_size="0x200_000"/>
     <memory_region name="virtio_blk_used" size="0x200_000" page_size="0x200_000"/>
 
-    <protection_domain name="http_server" priority="250" stack_size="0x10_000">
+    <protection_domain name="http_server" priority="1" stack_size="0x10_000">
         <program_image path="microkit-http-server-example-server.elf" />
 
         <map mr="virtio_net_client_dma" vaddr="0x1_000_000_000" perms="rw" cached="true" setvar_vaddr="virtio_net_client_dma_vaddr" />
@@ -39,19 +39,19 @@
         <map mr="virtio_blk_used" vaddr="0x4_001_000_000" perms="rw" cached="true" setvar_vaddr="virtio_blk_used" />
     </protection_domain>
 
-    <protection_domain name="pl031_driver" priority="251" stack_size="0x10_000">
+    <protection_domain name="pl031_driver" priority="2" stack_size="0x10_000">
         <program_image path="microkit-http-server-example-pl031-driver.elf" />
         <map mr="pl031_mmio" vaddr="0x5_000_000_000" perms="rw" cached="false" setvar_vaddr="pl031_mmio_vaddr" />
         <irq irq="34" id="0" />
     </protection_domain>
 
-    <protection_domain name="sp804_driver" priority="254" stack_size="0x10_000">
+    <protection_domain name="sp804_driver" priority="5" stack_size="0x10_000">
         <program_image path="microkit-http-server-example-sp804-driver.elf" />
         <map mr="sp804_mmio" vaddr="0x5_000_000_000" perms="rw" cached="false" setvar_vaddr="sp804_mmio_vaddr" />
         <irq irq="43" id="0" />
     </protection_domain>
 
-    <protection_domain name="virtio_net_driver" priority="253" stack_size="0x10_000">
+    <protection_domain name="virtio_net_driver" priority="4" stack_size="0x10_000">
         <program_image path="microkit-http-server-example-virtio-net-driver.elf" />
 
         <map mr="virtio_mmio" vaddr="0x6_000_000_000" perms="rw" cached="false" setvar_vaddr="virtio_net_mmio_vaddr" />
@@ -69,7 +69,7 @@
         <irq irq="79" id="0" />
     </protection_domain>
 
-    <protection_domain name="virtio_blk_driver" priority="252" stack_size="0x10_000">
+    <protection_domain name="virtio_blk_driver" priority="3" stack_size="0x10_000">
         <program_image path="microkit-http-server-example-virtio-blk-driver.elf" />
 
         <map mr="virtio_mmio" vaddr="0x6_000_000_000" perms="rw" cached="false" setvar_vaddr="virtio_blk_mmio_vaddr" />
