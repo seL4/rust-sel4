@@ -237,7 +237,7 @@ impl Arch {
     }
 
     fn microkit_support(&self) -> bool {
-        matches!(self, Self::AArch64 | Self::RiscV64(_))
+        matches!(self, Self::AArch64 | Self::RiscV64(_) | Self::X86_64)
     }
 
     fn unwinding_support(&self) -> bool {
