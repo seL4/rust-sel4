@@ -1,0 +1,15 @@
+#
+# Copyright 2025, Colias Group, LLC
+#
+# SPDX-License-Identifier: BSD-2-Clause
+#
+
+[toolchain]
+channel = "1.90"
+components = [
+    "rust-src",
+]
+targets = [
+    "x86_64-unknown-linux-musl",
+    "aarch64-unknown-linux-musl",
+]

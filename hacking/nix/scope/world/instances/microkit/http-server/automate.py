@@ -25,7 +25,7 @@ def main():
 def run(args):
     child = pexpect.spawn(args.simulate, encoding='utf-8')
     child.logfile = sys.stdout
-    child.expect('completed system invocations', timeout=5)
+    child.expect('Starting threads', timeout=5)
 
     time.sleep(3)
 

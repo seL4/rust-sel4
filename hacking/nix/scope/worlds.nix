@@ -425,52 +425,70 @@ in rec {
   x86 = is64bit:
     let
     in rec {
-      default = pc99;
+      default = pc99.default;
 
-      pc99 = lib.fix (self: mkWorld {
-        inherit kernelLoaderConfig;
-        platformRequiresLoader = false;
-        kernelConfig = kernelConfigCommon // {
-          KernelArch = mkString "x86";
-          KernelSel4Arch = mkString (if is64bit then "x86_64" else "ia32");
-          KernelPlatform = mkString "pc99";
+      pc99 =
+        let
+          mk =
+            { isMicrokit ? false
+            , microkitBoard ? null
+            , microkitConfig ? "debug"
+            }:
+            lib.fix (self: mkWorld {
+              inherit kernelLoaderConfig;
+              platformRequiresLoader = false;
+              kernelConfig = kernelConfigCommon // {
+                KernelArch = mkString "x86";
+                KernelSel4Arch = mkString (if is64bit then "x86_64" else "ia32");
+                KernelPlatform = mkString "pc99";
 
-          # for the sake of simulation (see seL4_tools/cmake-tool/helpers/application_settings.cmake)
-          KernelFSGSBase = mkString "msr";
-          # KernelFSGSBase = mkString "inst";
-          KernelSupportPCID = off;
-          KernelIOMMU = off;
-          KernelFPU = mkString "FXSAVE";
+                # for the sake of simulation (see seL4_tools/cmake-tool/helpers/application_settings.cmake)
+                KernelFSGSBase = mkString "msr";
+                # KernelFSGSBase = mkString "inst";
+                KernelSupportPCID = off;
+                KernelIOMMU = off;
+                KernelFPU = mkString "FXSAVE";
+              };
+              inherit isMicrokit;
+              microkitConfig = {
+                board = microkitBoard;
+                config = microkitConfig;
+              };
+              canSimulate = true;
+              mkPlatformSystemExtension = platUtils.qemu.mkMkPlatformSystemExtension {
+                mkQEMUCmd =
+                  let
+                    enable = opt: "+${opt}";
+                    disable = opt: "-${opt}";
+                    opts = lib.concatStringsSep "," [
+                      (disable "vme")
+                      (enable "pdpe1gb")
+                      ((if isMicrokit then enable else disable) "xsave")
+                      ((if isMicrokit then enable else disable) "xsaveopt")
+                      (disable "xsavec")
+                      ((if isMicrokit then enable else disable) "fsgsbase")
+                      (disable "invpcid")
+                      (enable "syscall")
+                      (enable "lm")
+                    ];
+                  in task: [
+                    "${pkgsBuildBuild.this.qemuForSeL4}/bin/qemu-system-${if is64bit then "x86_64" else "i386"}"
+                      "-cpu" "Nehalem,${opts},enforce"
+                      "-m" "size=512M"
+                      "-nographic"
+                      "-serial" "mon:stdio"
+                      "-kernel" self.kernelBinary32Bit
+                      "-initrd" task
+                  ];
+              };
+            });
+        in {
+          default = mk {};
+          microkit = mk {
+            isMicrokit = true;
+            microkitBoard = "x86_64_generic";
+          };
         };
-        canSimulate = true;
-        mkPlatformSystemExtension = platUtils.qemu.mkMkPlatformSystemExtension {
-          mkQEMUCmd =
-            let
-              enable = opt: "+${opt}";
-              disable = opt: "-${opt}";
-              opts = lib.concatStringsSep "," [
-                (disable "vme")
-                (enable "pdpe1gb")
-                (disable "xsave")
-                (disable "xsaveopt")
-                (disable "xsavec")
-                (disable "fsgsbase")
-                # (enable "fsgsbase")
-                (disable "invpcid")
-                (enable "syscall")
-                (enable "lm")
-              ];
-            in task: [
-              "${pkgsBuildBuild.this.qemuForSeL4}/bin/qemu-system-${if is64bit then "x86_64" else "i386"}"
-                "-cpu" "Nehalem,${opts},enforce"
-                "-m" "size=512M"
-                "-nographic"
-                "-serial" "mon:stdio"
-                "-kernel" self.kernelBinary32Bit
-                "-initrd" task
-            ];
-        };
-      });
     };
 
   x86_64 = x86 true;

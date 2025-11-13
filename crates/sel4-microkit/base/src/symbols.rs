@@ -173,6 +173,11 @@ pub(crate) fn pd_pps() -> usize {
     *maybe_extern_var!(microkit_pps: usize = 0)
 }
 
+#[allow(dead_code)]
+pub(crate) fn pd_ioports() -> usize {
+    *maybe_extern_var!(microkit_ioports: usize = 0)
+}
+
 const PD_NAME_LENGTH: usize = 64;
 
 /// Returns the name of this protection domain without converting to unicode.
