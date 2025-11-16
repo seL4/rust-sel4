@@ -24,7 +24,8 @@
     "gnu-lld": [
       "--fix-cortex-a53-843419",
       "-z",
-      "max-page-size=4096"
+      "max-page-size=4096",
+      "--no-rosegment"
     ]
   },
   "relocation-model": "static",

@@ -28,10 +28,13 @@ cfg_if! {
 
 use clap::{Arg, ArgAction, Command};
 
+const CHOSEN_LINKER_FLAVOR: LinkerFlavor = LinkerFlavor::Gnu(Cc::No, Lld::Yes);
+
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 struct Config {
     arch: Arch,
     context: Context,
+    resettable: bool,
     minimal: bool,
     unwind: bool,
     musl: bool,
@@ -66,8 +69,9 @@ impl RiscVArch {
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 enum Context {
+    Unspecified,
     RootTask,
-    Microkit { resettable: bool },
+    Microkit,
 }
 
 impl Config {
@@ -76,23 +80,18 @@ impl Config {
             Arch::AArch64 => {
                 let mut target = builtin("aarch64-unknown-none");
                 // target.llvm_target = "aarch64-none-elf".into(); // TODO why or why not?
-                let options = &mut target.options;
-                let linker_flavor = LinkerFlavor::Gnu(Cc::No, Lld::Yes);
-                assert_eq!(options.linker_flavor, linker_flavor);
-                options.pre_link_args = BTreeMap::from_iter([(
-                    linker_flavor,
-                    vec![
+                target
+                    .options
+                    .pre_link_args
+                    .entry(CHOSEN_LINKER_FLAVOR)
+                    .or_default()
+                    .extend(vec![
                         // Determines p_align. Default is 64K, which results in wasted space when
                         // the ELF file is loaded as a single contiguous region as it is in the case
                         // of a root task.
                         "-z".into(),
                         "max-page-size=4096".into(),
-                        // TODO
-                        // Consider a configuration with --omagic/--nmagic/similar to further reduce
-                        // wasted space in cases where segments are mapped without regards for
-                        // permissions. --no-rosegment could be a good place to start.
-                    ],
-                )]);
+                    ]);
                 target
             }
             Arch::Armv7a => builtin("armv7a-none-eabi"),
@@ -125,14 +124,41 @@ impl Config {
             }
         }
 
-        if let Context::Microkit { resettable } = &self.context {
-            let mut linker_script = String::new();
-            if *resettable {
-                linker_script.push_str(include_str!("microkit-resettable.lds"));
-            }
-            linker_script.push_str("__sel4_ipc_buffer_obj = (__ehdr_start & ~(4096 - 1)) - 4096;");
-            let options = &mut target.options;
-            options.link_script = Some(linker_script.into());
+        assert_eq!(target.options.linker_flavor, CHOSEN_LINKER_FLAVOR);
+
+        if self.resettable {
+            target
+                .options
+                .link_script
+                .get_or_insert_default()
+                .to_mut()
+                .push_str(include_str!("resettable.lds"));
+        }
+
+        if let Context::RootTask = &self.context {
+            target
+                .options
+                .pre_link_args
+                .entry(CHOSEN_LINKER_FLAVOR)
+                .or_default()
+                .extend(vec![
+                    // No use in root task.
+                    // Remove unnecessary alignment gap between segments.
+                    "--no-rosegment".into(),
+                    // TODO
+                    // Consider a configuration with --omagic/--nmagic/similar to further reduce
+                    // wasted space in cases where segments are mapped without regards for
+                    // permissions. --no-rosegment is a place to start.
+                ]);
+        }
+
+        if let Context::Microkit = &self.context {
+            target
+                .options
+                .link_script
+                .get_or_insert_default()
+                .to_mut()
+                .push_str("__sel4_ipc_buffer_obj = (__ehdr_start & ~(4096 - 1)) - 4096;");
         }
 
         target.options.has_thread_local = !self.minimal;
@@ -158,6 +184,9 @@ impl Config {
     }
 
     fn filter(&self) -> bool {
+        if self.resettable && self.context != Context::Microkit {
+            return false;
+        }
         if self.unwind && !self.arch.unwinding_support() {
             return false;
         }
@@ -176,11 +205,17 @@ impl Config {
     fn name(&self) -> String {
         let mut name = self.arch.name();
         name.push_str("-sel4");
-        if let Context::Microkit { resettable } = &self.context {
-            name.push_str("-microkit");
-            if *resettable {
-                name.push_str("-resettable");
+        match self.context {
+            Context::Unspecified => {}
+            Context::RootTask => {
+                name.push_str("-roottask");
             }
+            Context::Microkit => {
+                name.push_str("-microkit");
+            }
+        }
+        if self.resettable {
+            name.push_str("-resettable");
         }
         if self.minimal {
             name.push_str("-minimal");
@@ -194,30 +229,32 @@ impl Config {
         name
     }
 
-    fn all() -> Vec<Self> {
+    fn all_filtered() -> Vec<Self> {
         let mut all = vec![];
         for arch in Arch::all() {
             for context in Context::all() {
-                for minimal in [true, false] {
-                    for unwind in [true, false] {
-                        for musl in [true, false] {
-                            all.push(Self {
-                                arch,
-                                context,
-                                minimal,
-                                unwind,
-                                musl,
-                            });
+                for resettable in [true, false] {
+                    for minimal in [true, false] {
+                        for unwind in [true, false] {
+                            for musl in [true, false] {
+                                let config = Self {
+                                    arch,
+                                    context,
+                                    resettable,
+                                    minimal,
+                                    unwind,
+                                    musl,
+                                };
+                                if config.filter() {
+                                    all.push(config);
+                                }
+                            }
                         }
                     }
                 }
             }
         }
         all
-    }
-
-    fn all_filtered() -> Vec<Self> {
-        Self::all().into_iter().filter(Self::filter).collect()
     }
 }
 
@@ -264,12 +301,7 @@ impl Context {
     }
 
     fn all() -> Vec<Self> {
-        let mut v = vec![];
-        v.push(Self::RootTask);
-        for resettable in [true, false] {
-            v.push(Self::Microkit { resettable });
-        }
-        v
+        vec![Self::Unspecified, Self::RootTask, Self::Microkit]
     }
 }
 

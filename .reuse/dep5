@@ -11,7 +11,7 @@ License: CC-BY-SA-4.0
 Files:
   Cargo.lock
   support/*.json
-  crates/sel4-generate-target-specs/src/microkit-resettable.lds
+  crates/sel4-generate-target-specs/src/resettable.lds
   hacking/Cargo.lock
   hacking/unstable-feature-monitoring/wishlist/Cargo.lock
   hacking/nix/scope/capdl-tool/capDL-tool.nix
