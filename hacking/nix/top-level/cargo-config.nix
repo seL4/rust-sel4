@@ -79,7 +79,7 @@ let
       inherit (hostPkgs) stdenv;
       inherit (hostPkgs.this) muslForSeL4 dummyLibunwind;
     in
-      if !isBuiltin || hasSegment "musl" target
+      if !isBuiltin && hasSegment "musl" target
       then {
         env = {
           "CC_${target}" = getCCExePath stdenv;
