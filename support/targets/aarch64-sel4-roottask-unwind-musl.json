@@ -1,8 +1,11 @@
 {
   "arch": "aarch64",
   "crt-objects-fallback": "false",
+  "crt-static-default": true,
+  "crt-static-respected": true,
   "data-layout": "e-m:e-p270:32:32-p271:32:32-p272:64:64-i8:8:32-i16:16:32-i64:64-i128:128-n32:64-S128-Fn32",
   "disable-redzone": true,
+  "env": "musl",
   "exe-suffix": ".elf",
   "features": "+v8a,+strict-align,+neon,+fp-armv8",
   "has-thread-local": true,
@@ -16,7 +19,7 @@
     "std": null,
     "tier": null
   },
-  "panic-strategy": "abort",
+  "os": "linux",
   "pre-link-args": {
     "gnu": [
       "--fix-cortex-a53-843419"
@@ -24,7 +27,8 @@
     "gnu-lld": [
       "--fix-cortex-a53-843419",
       "-z",
-      "max-page-size=4096"
+      "max-page-size=4096",
+      "--no-rosegment"
     ]
   },
   "relocation-model": "static",
@@ -34,6 +38,9 @@
   "supported-sanitizers": [
     "kcfi",
     "kernel-address"
+  ],
+  "target-family": [
+    "unix"
   ],
   "target-pointer-width": 64
 }

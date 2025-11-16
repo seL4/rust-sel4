@@ -1,18 +1,21 @@
 {
-  "arch": "aarch64",
+  "arch": "riscv64",
+  "code-model": "medium",
+  "cpu": "generic-rv64",
   "crt-objects-fallback": "false",
   "crt-static-default": true,
   "crt-static-respected": true,
-  "data-layout": "e-m:e-p270:32:32-p271:32:32-p272:64:64-i8:8:32-i16:16:32-i64:64-i128:128-n32:64-S128-Fn32",
-  "disable-redzone": true,
+  "data-layout": "e-m:e-p:64:64-i64:64-i128:128-n32:64-S128",
+  "emit-debug-gdb-scripts": false,
   "env": "musl",
   "exe-suffix": ".elf",
-  "features": "+v8a,+strict-align,+neon,+fp-armv8",
+  "features": "+m,+a,+f,+d,+c,+zicsr,+zifencei",
   "has-thread-local": true,
   "linker": "rust-lld",
   "linker-flavor": "gnu-lld",
-  "llvm-target": "aarch64-unknown-none",
-  "max-atomic-width": 128,
+  "llvm-abiname": "lp64d",
+  "llvm-target": "riscv64",
+  "max-atomic-width": 64,
   "metadata": {
     "description": null,
     "host_tools": null,
@@ -21,21 +24,13 @@
   },
   "os": "linux",
   "pre-link-args": {
-    "gnu": [
-      "--fix-cortex-a53-843419"
-    ],
     "gnu-lld": [
-      "--fix-cortex-a53-843419",
-      "-z",
-      "max-page-size=4096"
+      "--no-rosegment"
     ]
   },
   "relocation-model": "static",
-  "stack-probes": {
-    "kind": "inline"
-  },
   "supported-sanitizers": [
-    "kcfi",
+    "shadow-call-stack",
     "kernel-address"
   ],
   "target-family": [

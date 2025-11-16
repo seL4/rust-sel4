@@ -5,7 +5,6 @@
   "disable-redzone": true,
   "exe-suffix": ".elf",
   "features": "+v8a,+strict-align,+neon,+fp-armv8",
-  "has-thread-local": true,
   "linker": "rust-lld",
   "linker-flavor": "gnu-lld",
   "llvm-target": "aarch64-unknown-none",
@@ -24,7 +23,8 @@
     "gnu-lld": [
       "--fix-cortex-a53-843419",
       "-z",
-      "max-page-size=4096"
+      "max-page-size=4096",
+      "--no-rosegment"
     ]
   },
   "relocation-model": "static",

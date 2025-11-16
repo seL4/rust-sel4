@@ -18,6 +18,9 @@ have `"has-thread-local": false`.
 The difference between the `*-unwind` targets and the non-unwind ones are that the unwind ones have
 `"panic = "unwind"`.
 
+The `*-sel4-roottask` targets include linker args to optimize image layout given that the root task
+image is mapped entirely read-write.
+
 The difference between the `*-sel4-microkit` targets and the `*-sel4` ones is that the
 `*-sel4-microkit` targets include a linker script fragment to add the `__sel4_ipc_buffer_obj` symbol
 required by the `microkit` tool.

@@ -1,0 +1,28 @@
+{
+  "arch": "riscv32",
+  "cpu": "generic-rv32",
+  "crt-objects-fallback": "false",
+  "data-layout": "e-m:e-p:32:32-i64:64-n32-S128",
+  "emit-debug-gdb-scripts": false,
+  "exe-suffix": ".elf",
+  "features": "+m,+a,+c",
+  "has-thread-local": true,
+  "linker": "rust-lld",
+  "linker-flavor": "gnu-lld",
+  "llvm-abiname": "ilp32",
+  "llvm-target": "riscv32",
+  "max-atomic-width": 32,
+  "metadata": {
+    "description": null,
+    "host_tools": null,
+    "std": null,
+    "tier": null
+  },
+  "pre-link-args": {
+    "gnu-lld": [
+      "--no-rosegment"
+    ]
+  },
+  "relocation-model": "static",
+  "target-pointer-width": 32
+}
