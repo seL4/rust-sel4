@@ -21,6 +21,6 @@ mk {
   };
   features = {
     deflate = [ "dep:miniz_oxide" ];
-    fill-utils = [ "deflate" ];
+    transform = [ "deflate" ];
   };
 }
