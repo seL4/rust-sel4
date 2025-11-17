@@ -60,7 +60,7 @@ const LOG_LEVEL: LevelFilter = {
 
 static LOGGER: Logger = LoggerBuilder::const_default()
     .level_filter(LOG_LEVEL)
-    .filter(|meta| meta.target() == "sel4_capdl_initializer_core")
+    .filter(|meta| meta.target().starts_with("sel4_capdl_initializer"))
     .write(|s| debug_print!("{}", s))
     .build();
 
