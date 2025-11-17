@@ -71,6 +71,7 @@ in rec {
                   KernelPlatform = mkString "qemu-arm-virt";
                   KernelMaxNumNodes = mkString numCores;
                   KernelIsMCS = fromBool mcs;
+                  KernelAllowSMCCalls = fromBool true;
                 } // lib.optionalAttrs hypervisor {
                   KernelArmHypervisorSupport = on;
                 } // lib.optionalAttrs (verificationBuild != null) {
