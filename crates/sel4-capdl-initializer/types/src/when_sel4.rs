@@ -52,7 +52,17 @@ impl<D: Archive> ArchivedObject<D> {
                     // assert!(obj.level.is_none()); // sanity check // TODO
                     sel4::ObjectBlueprintArch::PageTable.into()
                 }
-                #[sel4_cfg(ARCH_X86_64)]
+                #[sel4_cfg(all(ARCH_X86_64, VTX))]
+                ArchivedObject::PageTable(obj) => {
+                    let level = obj.level.unwrap();
+                    assert_eq!(obj.is_root, level == 0); // sanity check
+                    if obj.x86_ept {
+                        sel4::TranslationTableObjectType::from_level_ept(level.into()).unwrap().blueprint()
+                    } else {
+                        sel4::TranslationTableObjectType::from_level(level.into()).unwrap().blueprint()
+                    }
+                }
+                #[sel4_cfg(all(ARCH_X86_64, not(VTX)))]
                 ArchivedObject::PageTable(obj) => {
                     let level = obj.level.unwrap();
                     assert_eq!(obj.is_root, level == 0); // sanity check

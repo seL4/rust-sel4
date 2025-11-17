@@ -420,6 +420,8 @@ pub mod object {
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
     #[derive(rkyv::Archive, rkyv::Deserialize, rkyv::Serialize)]
     pub struct PageTable {
+        #[cfg_attr(feature = "serde", serde(default))]
+        pub x86_ept: bool,
         pub is_root: bool,
         pub level: Option<u8>,
         pub slots: Vec<CapTableEntry>,

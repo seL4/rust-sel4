@@ -93,6 +93,7 @@ alias_cap_table! {
         temp_fault_ep: Endpoint = SLOT_TEMP_FAULT_EP(7) @optional,
         bound_notification: Notification = SLOT_BOUND_NOTIFICATION(8) @optional,
         vcpu: VCpu = SLOT_VCPU(9) @optional,
+        x86_eptpml4: PageTable = SLOT_X86_EPTPML4(10) @optional,
     }
 }
 
