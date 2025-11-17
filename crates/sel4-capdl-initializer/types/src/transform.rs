@@ -11,7 +11,8 @@ use core::ops::Range;
 
 use crate::{
     BytesContent, Content, DeflatedBytesContent, EmbeddedFrameIndex, Fill, FillEntry,
-    FillEntryContent, FrameInit, NamedObject, Object, ObjectId, Spec, SpecForInitializer, object,
+    FillEntryContent, FrameInit, NamedObject, Object, ObjectId, OrigCapSlots, Spec,
+    SpecForInitializer, object,
 };
 
 impl<D> Spec<Fill<D>> {
@@ -118,6 +119,7 @@ impl<D> Spec<D> {
             asid_slots: self.asid_slots.clone(),
             root_objects: self.root_objects.clone(),
             untyped_covers: self.untyped_covers.clone(),
+            orig_cap_slots: self.orig_cap_slots.clone(),
         })
     }
 }
@@ -169,4 +171,37 @@ fn try_into_usize_range<T: TryInto<usize> + Copy>(
     range: &Range<T>,
 ) -> Result<Range<usize>, <T as TryInto<usize>>::Error> {
     Ok(range.start.try_into()?..range.end.try_into()?)
+}
+
+impl SpecForInitializer {
+    pub fn cache_orig_cap_slots(&mut self) {
+        let mut num_occupied = 0;
+        let offsets_by_object = self
+            .objects
+            .iter()
+            .map(|named_obj| {
+                if named_obj.object.needs_orig_cap_slot() {
+                    let offset = num_occupied;
+                    num_occupied += 1;
+                    Some(offset)
+                } else {
+                    None
+                }
+            })
+            .collect();
+        self.orig_cap_slots = Some(OrigCapSlots {
+            num_occupied,
+            offsets_by_object,
+        })
+    }
+}
+
+impl Object<FrameInit> {
+    fn needs_orig_cap_slot(&self) -> bool {
+        match self {
+            Self::ArmSmc => false,
+            Self::Frame(frame) => !frame.init.is_embedded(),
+            _ => true,
+        }
+    }
 }

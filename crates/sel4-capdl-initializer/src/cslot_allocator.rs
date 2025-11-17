@@ -29,7 +29,13 @@ impl CSlotAllocator {
             .ok_or(CSlotAllocatorError::OutOfSlots)
     }
 
-    pub(crate) fn alloc_or_panic(&mut self) -> Slot {
-        self.alloc().unwrap()
+    pub(crate) fn alloc_many(&mut self, n: usize) -> Result<Range<Slot>, CSlotAllocatorError> {
+        let alloc_start = self.free.start;
+        let alloc_end = alloc_start.checked_add(n).unwrap();
+        if alloc_end > self.free.end {
+            return Err(CSlotAllocatorError::OutOfSlots);
+        }
+        self.free.start = alloc_end;
+        Ok(Slot::from_index(alloc_start)..Slot::from_index(alloc_end))
     }
 }

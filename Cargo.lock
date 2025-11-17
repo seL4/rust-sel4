@@ -2428,7 +2428,6 @@ dependencies = [
  "sel4-capdl-initializer-types",
  "sel4-immutable-cell",
  "sel4-logging",
- "sel4-one-ref-cell",
  "sel4-root-task",
 ]
 

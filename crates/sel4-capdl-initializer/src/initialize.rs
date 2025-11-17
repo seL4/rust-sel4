@@ -5,7 +5,6 @@
 //
 
 use core::array;
-use core::borrow::BorrowMut;
 use core::ops::Range;
 use core::result::Result as CoreResult;
 use core::slice;
@@ -22,7 +21,6 @@ use sel4::{
 };
 use sel4_capdl_initializer_types::*;
 
-use crate::buffers::{InitializerBuffers, PerObjectBuffer};
 use crate::cslot_allocator::CSlotAllocator;
 use crate::error::CapDLInitializerError;
 use crate::hold_slots::HoldSlots;
@@ -30,23 +28,22 @@ use crate::memory::{CopyAddrs, get_user_image_frame_slot};
 
 type Result<T> = CoreResult<T, CapDLInitializerError>;
 
-pub struct Initializer<'a, B> {
+pub struct Initializer<'a> {
     bootinfo: &'a sel4::BootInfoPtr,
     user_image_bounds: Range<usize>,
     copy_addrs: CopyAddrs,
     spec: &'a <SpecForInitializer as Archive>::Archived,
     embedded_frames_base_addr: usize,
+    orig_cslots: Range<Slot>,
     cslot_allocator: &'a mut CSlotAllocator,
-    buffers: &'a mut InitializerBuffers<B>,
 }
 
-impl<'a, B: BorrowMut<[PerObjectBuffer]>> Initializer<'a, B> {
+impl<'a> Initializer<'a> {
     pub fn initialize(
         bootinfo: &sel4::BootInfoPtr,
         user_image_bounds: Range<usize>,
         spec: &'a <SpecForInitializer as Archive>::Archived,
         embedded_frames_base_addr: usize,
-        buffers: &mut InitializerBuffers<B>,
     ) -> ! {
         info!("Starting CapDL initializer");
 
@@ -54,14 +51,25 @@ impl<'a, B: BorrowMut<[PerObjectBuffer]>> Initializer<'a, B> {
 
         let mut cslot_allocator = CSlotAllocator::new(bootinfo.empty().range());
 
+        let orig_cslots = cslot_allocator
+            .alloc_many(
+                spec.orig_cap_slots
+                    .as_ref()
+                    .unwrap()
+                    .num_occupied
+                    .try_into()
+                    .unwrap(),
+            )
+            .unwrap();
+
         Initializer {
             bootinfo,
             user_image_bounds,
             copy_addrs,
             spec,
             embedded_frames_base_addr,
+            orig_cslots,
             cslot_allocator: &mut cslot_allocator,
-            buffers,
         }
         .run()
         .unwrap_or_else(|err| panic!("Error: {}", err));
@@ -248,9 +256,8 @@ impl<'a, B: BorrowMut<[PerObjectBuffer]>> Initializer<'a, B> {
                             // Skip embedded frames
                             while *obj_id < by_size_end[size_bits] {
                                 if let ArchivedObject::Frame(obj) = self.object((*obj_id).into())
-                                    && let ArchivedFrameInit::Embedded(embedded) = &obj.init
+                                    && obj.init.is_embedded()
                                 {
-                                    self.take_cap_for_embedded_frame((*obj_id).into(), embedded)?;
                                     *obj_id += 1;
                                     continue;
                                 }
@@ -270,7 +277,7 @@ impl<'a, B: BorrowMut<[PerObjectBuffer]>> Initializer<'a, B> {
                                 self.ut_cap(*i_ut).untyped_retype(
                                     &blueprint,
                                     &init_thread_cnode_absolute_cptr(),
-                                    self.alloc_orig_cslot((*obj_id).into()).index(),
+                                    self.orig_cslot((*obj_id).into()).index(),
                                     1,
                                 )?;
                                 cur_paddr += 1 << size_bits;
@@ -314,7 +321,7 @@ impl<'a, B: BorrowMut<[PerObjectBuffer]>> Initializer<'a, B> {
                     self.ut_cap(*i_ut).untyped_retype(
                         &blueprint,
                         &init_thread_cnode_absolute_cptr(),
-                        self.alloc_orig_cslot(obj_id.into()).index(),
+                        self.orig_cslot(obj_id.into()).index(),
                         1,
                     )?;
                     cur_paddr += 1 << blueprint.physical_size_bits();
@@ -358,7 +365,7 @@ impl<'a, B: BorrowMut<[PerObjectBuffer]>> Initializer<'a, B> {
                 parent_cptr.untyped_retype(
                     &child.object.blueprint().unwrap(),
                     &init_thread_cnode_absolute_cptr(),
-                    self.alloc_orig_cslot(child_obj_id.into()).index(),
+                    self.orig_cslot(child_obj_id.into()).index(),
                     1,
                 )?;
             }
@@ -369,19 +376,20 @@ impl<'a, B: BorrowMut<[PerObjectBuffer]>> Initializer<'a, B> {
         // upstream C CapDL loader).
         {
             for obj_id in self.spec.asid_slots.iter() {
-                let ut = self.orig_cap(*obj_id);
-                let slot = self.cslot_alloc_or_panic();
+                let orig = self.orig_cslot(*obj_id);
+                let orig_absolute = cslot_to_absolute_cptr(orig);
+                let copy = self.copy(orig.cap().downcast())?;
+                orig_absolute.delete()?;
                 init_thread::slot::ASID_CONTROL
                     .cap()
-                    .asid_control_make_pool(ut, &cslot_to_absolute_cptr(slot))?;
-                self.set_orig_cslot(*obj_id, slot);
+                    .asid_control_make_pool(copy, &orig_absolute)?;
             }
         }
 
         // Create IrqHandler caps
         {
             for ArchivedIrqEntry { irq, handler } in self.spec.irqs.iter() {
-                let slot = self.cslot_alloc_or_panic();
+                let slot = self.orig_cslot(*handler);
                 sel4::sel4_cfg_wrap_match! {
                     match self.object(*handler) {
                         ArchivedObject::Irq(_) => {
@@ -442,7 +450,6 @@ impl<'a, B: BorrowMut<[PerObjectBuffer]>> Initializer<'a, B> {
                         }
                     }
                 }
-                self.set_orig_cslot(*handler, slot);
             }
         }
 
@@ -455,45 +462,15 @@ impl<'a, B: BorrowMut<[PerObjectBuffer]>> Initializer<'a, B> {
                         .map(|(obj_id, obj)| (obj_id, obj.start_port, obj.end_port));
 
                     for (obj_id, start_port, end_port) in ioports {
-                        let slot = self.cslot_alloc_or_panic();
+                        let slot = self.orig_cslot(obj_id);
                         init_thread::slot::IO_PORT_CONTROL
                             .cap()
                             .ioport_control_issue(start_port.to_sel4(), end_port.to_sel4(), &cslot_to_absolute_cptr(slot))?;
-                        self.set_orig_cslot(obj_id, slot);
                     }
                 }
             }
         }
 
-        // Set initial ARM SMC cap
-        sel4::sel4_cfg_if! {
-            if #[sel4_cfg(all(ARCH_AARCH64, ALLOW_SMC_CALLS))] {
-                let arm_smc_maybe = self
-                    .objects()
-                    .enumerate()
-                    .find(|(_, obj)| {
-                        matches!(obj, ArchivedObject::ArmSmc)
-                    });
-                if let Some((arm_smc_obj_id, _)) = arm_smc_maybe {
-                    let arm_smc_slot_idx = init_thread::slot::SMC.index();
-                    self.set_orig_cslot(arm_smc_obj_id.try_into().unwrap(), Slot::from_index(arm_smc_slot_idx));
-                }
-            }
-        }
-
-        Ok(())
-    }
-
-    fn take_cap_for_embedded_frame(
-        &mut self,
-        obj_id: ArchivedObjectId,
-        frame_index: &ArchivedEmbeddedFrameIndex,
-    ) -> Result<()> {
-        let frame_addr = self.embedded_frames_base_addr
-            + usize::try_from(frame_index.index).unwrap()
-                * cap_type::Granule::FRAME_OBJECT_TYPE.bytes();
-        let slot = get_user_image_frame_slot(self.bootinfo, &self.user_image_bounds, frame_addr);
-        self.set_orig_cslot(obj_id, slot.upcast());
         Ok(())
     }
 
@@ -968,23 +945,41 @@ impl<'a, B: BorrowMut<[PerObjectBuffer]>> Initializer<'a, B> {
     //
 
     fn cslot_alloc_or_panic(&mut self) -> Slot {
-        self.cslot_allocator.alloc_or_panic()
-    }
-
-    fn set_orig_cslot(&mut self, obj_id: ArchivedObjectId, slot: Slot) {
-        self.buffers.per_obj_mut()[usize::from(obj_id)].orig_slot = Some(slot);
+        self.cslot_allocator.alloc().unwrap()
     }
 
     fn orig_cslot(&self, obj_id: ArchivedObjectId) -> Slot {
-        self.buffers.per_obj()[usize::from(obj_id)]
-            .orig_slot
-            .unwrap()
-    }
-
-    fn alloc_orig_cslot(&mut self, obj_id: ArchivedObjectId) -> Slot {
-        let slot = self.cslot_alloc_or_panic();
-        self.set_orig_cslot(obj_id, slot);
-        slot
+        match self.object(obj_id) {
+            ArchivedObject::ArmSmc => {
+                sel4::sel4_cfg_if! {
+                    if #[sel4_cfg(all(ARCH_AARCH64, ALLOW_SMC_CALLS))] {
+                        init_thread::slot::SMC.upcast()
+                    } else {
+                        panic!()
+                    }
+                }
+            }
+            ArchivedObject::Frame(object::ArchivedFrame {
+                init: ArchivedFrameInit::Embedded(embedded),
+                ..
+            }) => {
+                let frame_addr = self.embedded_frames_base_addr
+                    + usize::try_from(embedded.index).unwrap()
+                        * cap_type::Granule::FRAME_OBJECT_TYPE.bytes();
+                get_user_image_frame_slot(self.bootinfo, &self.user_image_bounds, frame_addr)
+                    .upcast()
+            }
+            _ => {
+                let orig_cap_slots = self.spec.orig_cap_slots.as_ref().unwrap();
+                Slot::from_index(
+                    self.orig_cslots.start.index()
+                        + usize::try_from(
+                            orig_cap_slots.offsets_by_object[usize::from(obj_id)].unwrap(),
+                        )
+                        .unwrap(),
+                )
+            }
+        }
     }
 
     fn orig_cap<U: sel4::CapType>(&self, obj_id: ArchivedObjectId) -> sel4::Cap<U> {

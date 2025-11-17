@@ -108,6 +108,8 @@ pub struct Spec<D> {
     pub asid_slots: Vec<AsidSlotEntry>,
     pub root_objects: Range<ObjectId>,
     pub untyped_covers: Vec<UntypedCover>,
+    #[cfg_attr(feature = "serde", serde(default))]
+    pub orig_cap_slots: Option<OrigCapSlots>,
 }
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
@@ -144,6 +146,14 @@ pub type AsidSlotEntry = ObjectId;
 pub struct UntypedCover {
     pub parent: ObjectId,
     pub children: Range<ObjectId>,
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(rkyv::Archive, rkyv::Deserialize, rkyv::Serialize)]
+pub struct OrigCapSlots {
+    pub num_occupied: u32,
+    pub offsets_by_object: Vec<Option<u32>>,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]

@@ -28,5 +28,4 @@ sel4 = { path = "../sel4" }
 sel4-capdl-initializer-types = { path = "types", features = ["sel4"] }
 sel4-immutable-cell = { path = "../sel4-immutable-cell" }
 sel4-logging = { path = "../sel4-logging" }
-sel4-one-ref-cell = { path = "../sel4-one-ref-cell" }
 sel4-root-task = { path = "../sel4-root-task", features = ["single-threaded"] }
