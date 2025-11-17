@@ -9,7 +9,6 @@
 #[cfg(feature = "alloc")]
 extern crate alloc;
 
-mod buffers;
 mod cslot_allocator;
 mod error;
 mod hold_slots;

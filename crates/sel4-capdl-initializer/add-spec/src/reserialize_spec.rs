@@ -34,6 +34,8 @@ pub fn reserialize_spec(
         },
     );
 
+    output_spec.cache_orig_cap_slots();
+
     for named_obj in output_spec.objects.iter_mut() {
         let keep = match object_names_level {
             ObjectNamesLevel::All => true,

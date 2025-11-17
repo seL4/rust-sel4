@@ -18,6 +18,18 @@ pub enum FrameInit {
     Embedded(EmbeddedFrameIndex),
 }
 
+impl FrameInit {
+    pub fn is_embedded(&self) -> bool {
+        matches!(self, Self::Embedded(_))
+    }
+}
+
+impl ArchivedFrameInit {
+    pub fn is_embedded(&self) -> bool {
+        matches!(self, Self::Embedded(_))
+    }
+}
+
 #[derive(Debug, Copy, Clone, Eq, PartialEq, rkyv::Archive, rkyv::Deserialize, rkyv::Serialize)]
 pub struct EmbeddedFrameIndex {
     pub index: u64,
