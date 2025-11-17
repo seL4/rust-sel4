@@ -21,7 +21,7 @@ mkTask {
 
   rootCrate = crates.sel4-capdl-initializer;
 
-  targetTriple = mkSeL4RustTargetTriple { minimal = true; };
+  targetTriple = mkSeL4RustTargetTriple { rootTask = true; minimal = true; };
 
   release = true;
 
