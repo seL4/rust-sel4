@@ -23,7 +23,6 @@ mk {
   };
   features = {
     default = [
-      "alloc"
       "deflate"
     ];
     alloc = [];
