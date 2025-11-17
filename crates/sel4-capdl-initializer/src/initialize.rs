@@ -662,7 +662,7 @@ impl<'a, B: BorrowMut<[PerObjectBuffer]>> Initializer<'a, B> {
                             vaddr,
                             cap.vm_attributes(),
                         )?;
-                    let obj = self.lookup_object::<object::ArchivedPageTable>(cap.object);
+                    let obj = self.object_as::<object::ArchivedPageTable>(cap.object);
                     self.init_vspace_x86_ept(eptpml4, level + 1, vaddr, obj)?;
                 }
             }
@@ -694,7 +694,7 @@ impl<'a, B: BorrowMut<[PerObjectBuffer]>> Initializer<'a, B> {
                             vaddr,
                             cap.vm_attributes(),
                         )?;
-                    let obj = self.lookup_object::<object::ArchivedPageTable>(cap.object);
+                    let obj = self.object_as::<object::ArchivedPageTable>(cap.object);
                     self.init_vspace(vspace, level + 1, vaddr, obj)?;
                 }
             }
@@ -713,7 +713,7 @@ impl<'a, B: BorrowMut<[PerObjectBuffer]>> Initializer<'a, B> {
 
     #[sel4::sel4_cfg(KERNEL_MCS)]
     fn init_sched_context(&self, obj_id: ArchivedObjectId, affinity: usize) -> Result<()> {
-        let obj = self.lookup_object::<object::ArchivedSchedContext>(obj_id);
+        let obj = self.object_as::<object::ArchivedSchedContext>(obj_id);
         let sched_context = self.orig_cap::<cap_type::SchedContext>(obj_id);
         self.bootinfo
             .sched_control()
@@ -923,6 +923,10 @@ impl<'a, B: BorrowMut<[PerObjectBuffer]>> Initializer<'a, B> {
         &self.named_object(obj_id).object
     }
 
+    fn object_as<O: IsArchivedObject<FrameInit> + 'a>(&self, obj_id: ArchivedObjectId) -> &'a O {
+        self.object(obj_id).as_().unwrap()
+    }
+
     fn root_objects(&self) -> &[ArchivedNamedObject<FrameInit>] {
         &self.spec.objects
             [ArchivedObjectId::into_usize_range(&archived_range_to_range(&self.spec.root_objects))]
@@ -950,13 +954,6 @@ impl<'a, B: BorrowMut<[PerObjectBuffer]>> Initializer<'a, B> {
         f: impl Fn(&'a O) -> bool + 'a,
     ) -> impl Iterator<Item = (ArchivedObjectId, &'a O)> + 'a {
         self.filter_objects().filter(move |(_, obj)| (f)(obj))
-    }
-
-    fn lookup_object<O: IsArchivedObject<FrameInit> + 'a>(
-        &self,
-        obj_id: ArchivedObjectId,
-    ) -> &'a O {
-        self.object(obj_id).as_().unwrap()
     }
 
     //
