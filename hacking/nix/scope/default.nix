@@ -214,7 +214,8 @@ superCallPackage ../rust-utils {} self //
   }."${seL4Arch}";
 
   mkSeL4CustomRustTargetTripleName =
-    { microkit ? false
+    { rootTask ? false
+    , microkit ? false
     , resettable ? false
     , minimal ? false
     , unwind ? false
@@ -223,6 +224,7 @@ superCallPackage ../rust-utils {} self //
     lib.concatStrings [
       rustTargetArchName
       "-sel4"
+      (lib.optionalString rootTask "-roottask")
       (lib.optionalString microkit "-microkit")
       (lib.optionalString resettable "-resettable")
       (lib.optionalString minimal "-minimal")
