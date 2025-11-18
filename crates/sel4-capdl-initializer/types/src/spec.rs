@@ -109,7 +109,7 @@ pub struct Spec<D> {
     pub root_objects: Range<ObjectId>,
     pub untyped_covers: Vec<UntypedCover>,
     #[cfg_attr(feature = "serde", serde(default))]
-    pub orig_cap_slots: Option<OrigCapSlots>,
+    pub cached_orig_cap_slots: Option<OrigCapSlots>,
 }
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
