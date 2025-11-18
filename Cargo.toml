@@ -129,7 +129,6 @@ members = [
     "crates/sel4-initialize-tls",
     "crates/sel4-kernel-loader",
     "crates/sel4-kernel-loader/add-payload",
-    "crates/sel4-kernel-loader/config-types",
     "crates/sel4-kernel-loader/embed-page-tables",
     "crates/sel4-kernel-loader/embed-page-tables/runtime",
     "crates/sel4-kernel-loader/payload-types",

@@ -2582,7 +2582,6 @@ dependencies = [
  "sel4-build-env",
  "sel4-config",
  "sel4-immutable-cell",
- "sel4-kernel-loader-config-types",
  "sel4-kernel-loader-embed-page-tables",
  "sel4-kernel-loader-embed-page-tables-runtime",
  "sel4-kernel-loader-payload-types",
@@ -2607,19 +2606,11 @@ dependencies = [
  "object",
  "postcard",
  "sel4-config-types",
- "sel4-kernel-loader-config-types",
  "sel4-kernel-loader-payload-types",
  "sel4-synthetic-elf",
  "serde",
  "serde_json",
  "serde_yaml",
-]
-
-[[package]]
-name = "sel4-kernel-loader-config-types"
-version = "0.1.0"
-dependencies = [
- "serde",
 ]
 
 [[package]]

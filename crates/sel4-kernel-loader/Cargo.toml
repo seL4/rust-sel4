@@ -41,7 +41,6 @@ proc-macro2 = "1.0.103"
 quote = "1.0.41"
 sel4-build-env = { path = "../sel4/build-env" }
 sel4-config = { path = "../sel4/config" }
-sel4-kernel-loader-config-types = { path = "config-types" }
 sel4-kernel-loader-embed-page-tables = { path = "embed-page-tables" }
 sel4-kernel-loader-payload-types = { path = "payload-types" }
 sel4-platform-info = { path = "../sel4-platform-info" }
