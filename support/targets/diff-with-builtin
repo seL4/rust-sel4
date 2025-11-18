@@ -1,0 +1,42 @@
+#
+# Copyright 2025, Colias Group, LLC
+#
+# SPDX-License-Identifier: BSD-2-Clause
+#
+#!/usr/bin/env bash
+
+set -eu -o pipefail
+
+targ="$1"
+
+case "$targ" in
+    aarch64-*)
+        builtin="aarch64-unknown-none"
+        ;;
+    armv7a-*)
+        builtin="armv7a-none-eabi"
+        ;;
+    riscv64gc-*)
+        builtin="riscv64gc-unknown-none-elf"
+        ;;
+    riscv64imac-*)
+        builtin="riscv64imac-unknown-none-elf"
+        ;;
+    riscv32imafc-*)
+        builtin="riscv32imafc-unknown-none-elf"
+        ;;
+    riscv32imac-*)
+        builtin="riscv32imac-unknown-none-elf"
+        ;;
+    x86_64-*)
+        builtin="x86_64-unknown-none"
+        ;;
+    *)
+        echo "unrecognized arch" >&2
+        exit 1
+        ;;
+esac
+
+diff -U 1000 \
+    <(cargo rustc --print target-spec-json --target "$builtin" -- -Z unstable-options) \
+    <(cargo rustc --print target-spec-json --target "$targ" -- -Z unstable-options)
