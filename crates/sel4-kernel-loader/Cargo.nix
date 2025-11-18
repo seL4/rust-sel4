@@ -48,7 +48,6 @@ mk {
     inherit (localCrates)
       sel4-platform-info
       sel4-config
-      sel4-kernel-loader-config-types
       sel4-build-env
       sel4-kernel-loader-payload-types
       sel4-kernel-loader-embed-page-tables
