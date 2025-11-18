@@ -102,14 +102,14 @@ let
           [ "$1" == "--" ] || die
           shift
           exec "$@"
-        ;;
+          ;;
       toolchain)
           [ "$1" == "toolchain" ] || die
           shift
           [ "$1" == "list" ] || die
           shift
           echo "${toolchainName}"
-        ;;
+          ;;
       *)
         die
         ;;
