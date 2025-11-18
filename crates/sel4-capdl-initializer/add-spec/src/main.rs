@@ -30,6 +30,7 @@ fn main() -> Result<()> {
         &args.object_names_level,
         args.embed_frames,
         args.deflate,
+        args.initializer_verbosity,
     );
 
     fs::write(&args.out_file_path, rendered_initializer_elf_buf)?;
@@ -45,8 +46,11 @@ pub struct Args {
     pub object_names_level: ObjectNamesLevel,
     pub embed_frames: bool,
     pub deflate: bool,
+    pub initializer_verbosity: u8,
     pub verbose: bool,
 }
+
+const DEFAULT_INITIALIZER_VERBOSITY: u8 = 3; // log::LevelFilter::Info
 
 impl Args {
     pub fn parse() -> Result<Self> {
@@ -92,6 +96,12 @@ impl Args {
                     .long("no-deflate")
                     .action(ArgAction::SetTrue),
             )
+            .arg(
+                Arg::new("initializer_verbosity")
+                    .long("initializer-verbosity")
+                    .value_name("VERBOSITY")
+                    .value_parser(clap::value_parser!(u8).range(..=5)),
+            )
             .arg(Arg::new("verbose").short('v').action(ArgAction::SetTrue))
             .get_matches();
 
@@ -115,6 +125,9 @@ impl Args {
 
         let embed_frames = !*matches.get_one::<bool>("no_embed_frames").unwrap();
         let deflate = !*matches.get_one::<bool>("no_deflate").unwrap();
+        let initializer_verbosity = *matches
+            .get_one::<u8>("initializer_verbosity")
+            .unwrap_or(&DEFAULT_INITIALIZER_VERBOSITY);
 
         let verbose = *matches.get_one::<bool>("verbose").unwrap();
 
@@ -126,6 +139,7 @@ impl Args {
             object_names_level,
             embed_frames,
             deflate,
+            initializer_verbosity,
             verbose,
         })
     }

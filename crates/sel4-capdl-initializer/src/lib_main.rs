@@ -11,6 +11,7 @@ use core::slice;
 use rkyv::Archive;
 
 use sel4_capdl_initializer_types::SpecForInitializer;
+use sel4_immediate_sync_once_cell::ImmediateSyncOnceCell;
 use sel4_immutable_cell::ImmutableCell;
 use sel4_logging::{LevelFilter, Logger, LoggerBuilder};
 use sel4_root_task::{debug_print, root_task};
@@ -47,17 +48,7 @@ static sel4_capdl_initializer_image_start: ImmutableCell<*mut u8> =
 static sel4_capdl_initializer_image_end: ImmutableCell<*mut u8> =
     ImmutableCell::new(ptr::null_mut());
 
-const LOG_LEVEL: LevelFilter = {
-    // LevelFilter::Trace
-    // LevelFilter::Debug
-    LevelFilter::Info
-};
-
-static LOGGER: Logger = LoggerBuilder::const_default()
-    .level_filter(LOG_LEVEL)
-    .filter(|meta| meta.target().starts_with("sel4_capdl_initializer"))
-    .write(|s| debug_print!("{}", s))
-    .build();
+static LOGGER: ImmediateSyncOnceCell<Logger> = ImmediateSyncOnceCell::new();
 
 #[cfg_attr(
     feature = "alloc",
@@ -65,14 +56,31 @@ static LOGGER: Logger = LoggerBuilder::const_default()
 )]
 #[cfg_attr(not(feature = "alloc"), root_task(stack_size = 0x10_000))]
 fn main(bootinfo: &sel4::BootInfoPtr) -> ! {
-    LOGGER.set().unwrap();
     let spec = access_spec(get_spec_bytes());
+    init_logging(spec.log_level.unwrap());
     Initializer::initialize(
         bootinfo,
         user_image_bounds(),
         spec,
         *sel4_capdl_initializer_embedded_frames_data_start.get() as usize,
     )
+}
+
+fn init_logging(spec_log_level: u8) {
+    let mut level_filter = LevelFilter::Off;
+    for _ in 0..spec_log_level {
+        level_filter = level_filter.increment_severity();
+    }
+    LOGGER
+        .set(
+            LoggerBuilder::default()
+                .level_filter(level_filter)
+                .write(|s| debug_print!("{}", s))
+                .build(),
+        )
+        .ok()
+        .unwrap();
+    LOGGER.get().unwrap().set().unwrap();
 }
 
 fn get_spec_bytes() -> &'static [u8] {
