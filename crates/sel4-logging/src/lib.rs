@@ -136,6 +136,12 @@ impl LoggerBuilder {
     }
 }
 
+impl Default for LoggerBuilder {
+    fn default() -> Self {
+        Self::const_default()
+    }
+}
+
 //
 
 pub fn fmt_with_module(record: &Record, f: &mut fmt::Formatter) -> fmt::Result {

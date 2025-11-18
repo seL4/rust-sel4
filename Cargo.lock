@@ -2426,6 +2426,7 @@ dependencies = [
  "rkyv",
  "sel4",
  "sel4-capdl-initializer-types",
+ "sel4-immediate-sync-once-cell",
  "sel4-immutable-cell",
  "sel4-logging",
  "sel4-root-task",

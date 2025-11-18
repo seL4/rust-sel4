@@ -25,6 +25,7 @@ pub fn add_spec(
     object_names_level: &ObjectNamesLevel,
     embed_frames: bool,
     deflate: bool,
+    initializer_verbosity: u8,
 ) -> Vec<u8> {
     let (output_spec, embedded_frame_data_list) = reserialize_spec::reserialize_spec(
         spec,
@@ -32,6 +33,7 @@ pub fn add_spec(
         object_names_level,
         embed_frames,
         deflate,
+        initializer_verbosity,
         GRANULE_SIZE_BITS,
     );
 

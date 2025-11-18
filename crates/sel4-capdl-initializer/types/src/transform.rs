@@ -120,6 +120,7 @@ impl<D> Spec<D> {
             root_objects: self.root_objects.clone(),
             untyped_covers: self.untyped_covers.clone(),
             cached_orig_cap_slots: self.cached_orig_cap_slots.clone(),
+            log_level: self.log_level,
         })
     }
 }
@@ -193,6 +194,10 @@ impl SpecForInitializer {
             num_occupied,
             offsets_by_object,
         })
+    }
+
+    pub fn set_log_level(&mut self, log_level: u8) {
+        self.log_level = Some(log_level);
     }
 }
 

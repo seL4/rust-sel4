@@ -110,6 +110,8 @@ pub struct Spec<D> {
     pub untyped_covers: Vec<UntypedCover>,
     #[cfg_attr(feature = "serde", serde(default))]
     pub cached_orig_cap_slots: Option<OrigCapSlots>,
+    #[cfg_attr(feature = "serde", serde(default))]
+    pub log_level: Option<u8>,
 }
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]

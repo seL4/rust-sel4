@@ -21,6 +21,7 @@ pub fn reserialize_spec(
     object_names_level: &ObjectNamesLevel,
     embed_frames: bool,
     deflate: bool,
+    initializer_verbosity: u8,
     granule_size_bits: u8,
 ) -> (SpecForInitializer, Vec<Vec<u8>>) {
     let mut filler = Filler::new(fill_dirs);
@@ -35,6 +36,8 @@ pub fn reserialize_spec(
     );
 
     output_spec.cache_orig_cap_slots();
+
+    output_spec.set_log_level(initializer_verbosity);
 
     for named_obj in output_spec.objects.iter_mut() {
         let keep = match object_names_level {
