@@ -58,8 +58,8 @@ let
     src = buildPackages.fetchRepoProject {
       name = "sel4test";
       manifest = "https://github.com/seL4/sel4test-manifest.git";
-      rev = "8bf6fd506a0546866ba5fbd7396f497d5a056f5c";
-      sha256 = "sha256-1Gmbksgh2VTUggM6qcawRC9b+g/bwB8tWGfUzCg1A0U=";
+      rev = "e304ca1d7de60b3ea91ccae25f84b6f8557e2f1f";
+      sha256 = "sha256-sPaSfBHKTZ/IqMGFzRlrD6ZN3X7a+8nqTMBNeyWQmBw=";
     };
 
     depsBuildBuild = lib.optionals (buildPlatform != hostPlatform) [

@@ -142,7 +142,7 @@ in let
                 gcc = {}; # equivalent to default, omitting means we can use cached binary
                 this = {
                   rustTargetRiscVArch = "imafc";
-                  gccParams = { arch = "rv64imafc_zicsr_zifencei"; abi = "ilp32f"; };
+                  gccParams = { arch = "rv32imafdc_zicsr_zifencei"; abi = "ilp32d"; };
                 };
               });
               linux = mkLeafWithGuard {
