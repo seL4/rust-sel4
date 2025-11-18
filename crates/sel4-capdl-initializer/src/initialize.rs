@@ -74,7 +74,7 @@ impl<'a> Initializer<'a> {
         .run()
         .unwrap_or_else(|err| panic!("Error: {}", err));
 
-        info!("CapDL initializer done, suspending");
+        debug!("CapDL initializer done, suspending");
 
         init_thread::suspend_self()
     }
@@ -880,7 +880,7 @@ impl<'a> Initializer<'a> {
     }
 
     fn start_threads(&self) -> Result<()> {
-        debug!("Starting threads");
+        info!("Starting threads");
         for (obj_id, obj) in self.filter_objects::<object::ArchivedTcb>() {
             let tcb = self.orig_cap::<cap_type::Tcb>(obj_id);
             if obj.extra.resume {
