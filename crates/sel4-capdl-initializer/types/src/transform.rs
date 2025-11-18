@@ -119,7 +119,7 @@ impl<D> Spec<D> {
             asid_slots: self.asid_slots.clone(),
             root_objects: self.root_objects.clone(),
             untyped_covers: self.untyped_covers.clone(),
-            orig_cap_slots: self.orig_cap_slots.clone(),
+            cached_orig_cap_slots: self.cached_orig_cap_slots.clone(),
         })
     }
 }
@@ -189,7 +189,7 @@ impl SpecForInitializer {
                 }
             })
             .collect();
-        self.orig_cap_slots = Some(OrigCapSlots {
+        self.cached_orig_cap_slots = Some(OrigCapSlots {
             num_occupied,
             offsets_by_object,
         })

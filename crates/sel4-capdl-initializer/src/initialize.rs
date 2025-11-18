@@ -53,7 +53,7 @@ impl<'a> Initializer<'a> {
 
         let orig_cslots = cslot_allocator
             .alloc_many(
-                spec.orig_cap_slots
+                spec.cached_orig_cap_slots
                     .as_ref()
                     .unwrap()
                     .num_occupied
@@ -970,11 +970,11 @@ impl<'a> Initializer<'a> {
                     .upcast()
             }
             _ => {
-                let orig_cap_slots = self.spec.orig_cap_slots.as_ref().unwrap();
+                let cached_orig_cap_slots = self.spec.cached_orig_cap_slots.as_ref().unwrap();
                 Slot::from_index(
                     self.orig_cslots.start.index()
                         + usize::try_from(
-                            orig_cap_slots.offsets_by_object[usize::from(obj_id)].unwrap(),
+                            cached_orig_cap_slots.offsets_by_object[usize::from(obj_id)].unwrap(),
                         )
                         .unwrap(),
                 )
