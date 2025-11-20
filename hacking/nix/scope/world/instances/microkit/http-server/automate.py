@@ -13,14 +13,17 @@ from requests import Session
 HTTP_URL_BASE = 'http://localhost:8080'
 HTTPS_URL_BASE = 'https://localhost:8443'
 
+
 def mk_url(path):
     return URL_BASE + path
+
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('simulate')
     args = parser.parse_args()
     run(args)
+
 
 def run(args):
     child = pexpect.spawn(args.simulate, encoding='utf-8')
@@ -41,12 +44,14 @@ def run(args):
     finally:
         flush_read(child)
 
+
 def flush_read(child):
     while True:
         try:
             child.read_nonblocking(timeout=0)
         except pexpect.TIMEOUT:
             break
+
 
 if __name__ == '__main__':
     main()

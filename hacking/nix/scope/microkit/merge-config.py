@@ -8,12 +8,14 @@ import sys
 import argparse
 import toml
 
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-d')
     parser.add_argument('config', type=argparse.FileType('r'), nargs='*')
     args = parser.parse_args()
     run(args)
+
 
 def run(args):
     source = {
@@ -29,7 +31,8 @@ def run(args):
         for (k, v) in obj.items():
             if k not in ['vendored-sources', 'crates-io']:
                 source[k] = v
-    toml.dump({ 'source': source }, sys.stdout)
+    toml.dump({'source': source}, sys.stdout)
+
 
 if __name__ == '__main__':
     main()
