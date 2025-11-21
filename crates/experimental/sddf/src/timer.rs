@@ -22,7 +22,7 @@ pub struct ClientConfig(sys::timer_client_config);
 
 unsafe impl Config for ClientConfig {
     fn is_magic_valid(&self) -> bool {
-        self.0.magic == sys::SDDF_TIMER_MAGIC
+        self.0.magic == unsafe { sys::SDDF_TIMER_MAGIC }
     }
 }
 
