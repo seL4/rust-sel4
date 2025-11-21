@@ -62,7 +62,7 @@ in rec {
 
   microkit = fetchGit {
     url = "https://github.com/coliasgroup/microkit.git";
-    rev = "26230271a12cb39c6cc08ac75d33e02489990922"; # branch "rust-nix", based on 3.0.0
+    rev = "26230271a12cb39c6cc08ac75d33e02489990922"; # branch "rust-testing", based on 2.0.1-dev
     local = localRoot + "/microkit";
     extraFilter = path: type:
       lib.hasSuffix "/target" path;
