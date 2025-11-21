@@ -10,11 +10,13 @@
 #
 
 [package]
-name = "sddf"
+name = "lionsos"
 version = "0.1.0"
 authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
 edition = "2024"
 license = "BSD-2-Clause"
 
 [dependencies]
-sddf-sys = { path = "sys" }
+lionsos-sys = { path = "sys" }
+sddf = { path = "../sddf" }
+sddf-sys = { path = "../sddf/sys" }

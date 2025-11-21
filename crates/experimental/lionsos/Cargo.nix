@@ -7,9 +7,11 @@
 { mk, localCrates }:
 
 mk {
-  package.name = "sddf";
+  package.name = "lionsos";
   dependencies = {
     inherit (localCrates)
+      lionsos-sys
+      sddf
       sddf-sys
     ;
   };

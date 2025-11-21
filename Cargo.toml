@@ -41,6 +41,7 @@ members = [
     "crates/examples/root-task/spawn-task",
     "crates/examples/root-task/spawn-task/child",
     "crates/examples/root-task/spawn-thread",
+    "crates/experimental/lionsos",
     "crates/experimental/lionsos/sys",
     "crates/experimental/sddf",
     "crates/experimental/sddf/ipc-types",
