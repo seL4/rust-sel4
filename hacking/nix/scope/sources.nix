@@ -55,8 +55,8 @@ in rec {
   # NOTE: Be sure to keep the commit hashes in the top-level README up-to-date.
 
   seL4 = fetchGit {
-    url = "https://github.com/coliasgroup/seL4.git";
-    rev = "97b287181e45240f630158a674b303a6b6223c23"; # branch "rust-testing", based on 14.0.0
+    url = "https://github.com/seL4/seL4.git";
+    rev = "fdf7f2a0823330615dfb6b3ae6706403217e74ea";
     local = localRoot + "/seL4";
   };
 
