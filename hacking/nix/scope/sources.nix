@@ -76,24 +76,25 @@ in rec {
       lib.hasSuffix "/.zig-cache" path || lib.hasSuffix "/zig-out" path || lib.hasSuffix "/result" path;
   };
 
+  # micropython submodule is too big for this to be worth it
   # sddf = fetchGit (lionsosAttrs // {
+  #   submodules = true;
   #   andThen = "/dep/sddf";
+  #   local = localRoot + "/lionsos/dep/sddf";
   # });
 
   sddf = fetchGit {
     url = "https://github.com/au-ts/sddf";
-    rev = "50c4eb17a7dfc65b4111e4770227c3919bdaa1c3";
-    ref = "0.6.0";
+    rev = "6bba35a9597639929be9e0db4b7f8fba2a307ad6"; # lionsos HEAD
+    # ref = null;
     local = localRoot + "/lionsos/dep/sddf";
-    # useLocal = true;
   };
 
   lionsosAttrs = {
     url = "https://github.com/au-ts/lionsos";
-    rev = "681143753fc8c7b91153a8fe1486674a70fbb0eb";
-    ref = "0.3.0";
+    rev = "67377b5b3b340d1466abf4fb3ca098a5cae36d82"; # HEAD
+    # ref = null;
     local = localRoot + "/lionsos";
-    # useLocal = true;
   };
 
   lionsos = fetchGit lionsosAttrs;
