@@ -27,7 +27,7 @@ pub struct ClientConfig(sys::serial_client_config);
 
 unsafe impl Config for ClientConfig {
     fn is_magic_valid(&self) -> bool {
-        self.0.magic == sys::SDDF_SERIAL_MAGIC
+        self.0.magic == unsafe { sys::SDDF_SERIAL_MAGIC }
     }
 }
 
@@ -78,7 +78,7 @@ pub struct DriverConfig(sys::serial_driver_config);
 
 unsafe impl Config for DriverConfig {
     fn is_magic_valid(&self) -> bool {
-        self.0.magic == sys::SDDF_SERIAL_MAGIC
+        self.0.magic == unsafe { sys::SDDF_SERIAL_MAGIC }
     }
 }
 

@@ -1164,8 +1164,8 @@ name = "lionsos-sys"
 version = "0.1.0"
 dependencies = [
  "bindgen",
+ "cc",
  "sddf-sys",
- "sel4-sys",
 ]
 
 [[package]]
@@ -2190,8 +2190,7 @@ name = "sddf-sys"
 version = "0.1.0"
 dependencies = [
  "bindgen",
- "ptr_meta",
- "sel4-sys",
+ "cc",
 ]
 
 [[package]]

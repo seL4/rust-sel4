@@ -19,7 +19,7 @@ links = "lions"
 
 [dependencies]
 sddf-sys = { path = "../../sddf/sys" }
-sel4-sys = { path = "../../../sel4/sys" }
 
 [build-dependencies]
 bindgen = "0.72.1"
+cc = "1.2.43"
