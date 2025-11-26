@@ -56,13 +56,13 @@ in rec {
 
   seL4 = fetchGit {
     url = "https://github.com/seL4/seL4.git";
-    rev = "fdf7f2a0823330615dfb6b3ae6706403217e74ea";
+    rev = "c0fc32450fb5e8460083b89a84d067249b109cfc"; # 14.0.0
     local = localRoot + "/seL4";
   };
 
   microkit = fetchGit {
     url = "https://github.com/coliasgroup/microkit.git";
-    rev = "26230271a12cb39c6cc08ac75d33e02489990922"; # branch "rust-testing", based on 2.0.1-dev
+    rev = "5825477583cad0dd555569373fef797aa82d7047"; # branch "rust-testing", based on 2.1.0
     local = localRoot + "/microkit";
     extraFilter = path: type:
       lib.hasSuffix "/target" path;
