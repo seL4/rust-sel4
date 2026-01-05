@@ -547,6 +547,7 @@ impl ParameterTypes {
 
         if sel4_cfg_bool!(ARCH_X86_64) {
             this.insert_enum("seL4_X86_VMAttributes", WORD_SIZE);
+            this.insert_enum("seL4_X86_EPT_VMAttributes", WORD_SIZE);
             this.insert_capability("seL4_X86_IOPort");
             this.insert_capability("seL4_X86_IOPortControl");
             this.insert_capability("seL4_X86_ASIDControl");
