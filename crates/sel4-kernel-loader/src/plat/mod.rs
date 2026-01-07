@@ -31,7 +31,6 @@ mod qemu_arm_virt;
 mod riscv_generic;
 #[cfg(any())]
 mod odroidc2;
-// TODO: need to add meson?
 
 #[allow(unused_imports)]
 pub(crate) use imp::*;

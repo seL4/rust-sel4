@@ -47,7 +47,6 @@ impl Plat for PlatImpl {
         nb::block!(get_serial_device().write(c)).unwrap_or_else(|err| match err {});
     }
 
-    // TODO: fix to use : https://github.com/au-ts/rust-sel4/blob/main/crates/sel4-kernel-loader/src/plat/bcm2711/mod.rs#L58
     fn start_secondary_core(core_id: usize, sp: usize) {
         psci::start_secondary_core(core_id, sp)
     }
