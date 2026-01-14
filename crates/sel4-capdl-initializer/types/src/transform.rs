@@ -111,11 +111,14 @@ impl<D> Spec<D> {
                             Object::SchedContext(obj) => Object::SchedContext(obj.clone()),
                             Object::Reply => Object::Reply,
                             Object::ArmSmc => Object::ArmSmc,
+                            Object::DomainSet => Object::DomainSet,
                         },
                     })
                 })
                 .collect::<Result<_, E>>()?,
             irqs: self.irqs.clone(),
+            domain_schedule: self.domain_schedule.clone(),
+            domain_start_idx: self.domain_start_idx.clone(),
             asid_slots: self.asid_slots.clone(),
             root_objects: self.root_objects.clone(),
             untyped_covers: self.untyped_covers.clone(),

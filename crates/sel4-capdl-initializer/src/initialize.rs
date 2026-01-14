@@ -97,8 +97,10 @@ impl<'a> Initializer<'a> {
 
         self.init_tcbs()?;
         self.init_cspaces()?;
+        self.init_domain_schedule()?;
 
         self.start_threads()?;
+        self.start_domain_scehdule()?;
 
         Ok(())
     }
@@ -753,6 +755,16 @@ impl<'a> Initializer<'a> {
                 let authority = init_thread::slot::TCB.cap();
                 let max_prio = obj.extra.max_prio.into();
                 let prio = obj.extra.prio.into();
+                let domain_id: u8 = obj.extra.domain.into();
+
+                sel4::sel4_cfg_if! {
+                    if #[sel4_cfg(not(NUM_DOMAINS = "1"))] {
+                        let ret = init_thread::slot::DOMAIN_SET.cap().domain_set_set(domain_id, tcb);
+                        if let Err(e) = ret {
+                             debug!("Error setting domain of thread to {}: {:?}", domain_id, e);
+                        }
+                    }
+                }
 
                 #[allow(unused_variables)]
                 let affinity = obj.extra.affinity.to_sel4();
@@ -883,6 +895,32 @@ impl<'a> Initializer<'a> {
         Ok(())
     }
 
+    fn init_domain_schedule(&self) -> Result<()> {
+        if self.spec.domain_schedule.is_some() {
+            debug!("Initializing domain schedule");
+
+            for (idx, ArchivedDomainSchedEntry { id, time}) in self.spec.domain_schedule.as_ref().unwrap().iter().enumerate() {
+                let domain_time = *time;
+                init_thread::slot::DOMAIN_SET.cap().domain_set_schedule_configure(idx as u64, *id, domain_time.to_native())?;
+            }
+        }
+        Ok(())
+    }
+
+    fn start_domain_scehdule(&self) -> Result<()> {
+        if self.spec.domain_schedule.is_some() {
+            debug!("Starting domain schedule");
+
+           if self.spec.domain_start_idx.is_some() {
+                init_thread::slot::DOMAIN_SET.cap().domain_set_schedule_set_start(self.spec.domain_start_idx.unwrap().to_sel4())?;
+            } else {
+                init_thread::slot::DOMAIN_SET.cap().domain_set_schedule_set_start(0)?;
+            }
+        }
+     
+        Ok(())
+    }
+
     fn start_threads(&self) -> Result<()> {
         info!("Starting threads");
         for (obj_id, obj) in self.filter_objects::<object::ArchivedTcb>() {
@@ -962,6 +1000,9 @@ impl<'a> Initializer<'a> {
                         panic!()
                     }
                 }
+            }
+            ArchivedObject::DomainSet => {
+                init_thread::slot::DOMAIN_SET.upcast()
             }
             ArchivedObject::Frame(object::ArchivedFrame {
                 init: ArchivedFrameInit::Embedded(embedded),
