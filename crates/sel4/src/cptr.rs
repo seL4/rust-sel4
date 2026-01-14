@@ -246,6 +246,11 @@ pub mod cap_type {
         UnspecifiedIntermediateTranslationTable
     }
 
+    declare_cap_type! {
+        /// Corresponds to `seL4_DomainSet`
+        DomainSet
+    }
+
     sel4_cfg_if! {
         if #[sel4_cfg(KERNEL_MCS)] {
             declare_cap_type! {
@@ -286,6 +291,7 @@ pub mod cap {
     declare_cap_alias!(CNode);
     declare_cap_alias!(IrqControl);
     declare_cap_alias!(IrqHandler);
+    declare_cap_alias!(DomainSet);
     declare_cap_alias!(AsidControl);
     declare_cap_alias!(AsidPool);
 

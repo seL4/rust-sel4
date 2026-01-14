@@ -105,6 +105,8 @@ pub struct CapTableEntry {
 pub struct Spec<D> {
     pub objects: Vec<NamedObject<D>>,
     pub irqs: Vec<IrqEntry>,
+    pub domain_schedule: Option<Vec<DomainSchedEntry>>,
+    pub domain_start_idx: Option<Word>,
     pub asid_slots: Vec<AsidSlotEntry>,
     pub root_objects: Range<ObjectId>,
     pub untyped_covers: Vec<UntypedCover>,
@@ -138,6 +140,14 @@ impl From<Word> for u64 {
 pub struct IrqEntry {
     pub irq: Word,
     pub handler: ObjectId,
+}
+
+#[derive(Debug, Clone, Copy, Eq, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(rkyv::Archive, rkyv::Deserialize, rkyv::Serialize)]
+pub struct DomainSchedEntry {
+    pub id: u8,
+    pub time: u64,
 }
 
 pub type AsidSlotEntry = ObjectId;
@@ -188,6 +198,7 @@ pub enum Object<D> {
     SchedContext(object::SchedContext),
     Reply,
     ArmSmc,
+    DomainSet,
 }
 
 pub trait IsObject<D> {
@@ -275,6 +286,7 @@ pub enum Cap {
     SchedContext(cap::SchedContext),
     Reply(cap::Reply),
     ArmSmc(cap::ArmSmc),
+    DomainSet(cap::DomainSet),
 }
 
 pub trait IsCap {
@@ -307,6 +319,7 @@ impl Cap {
             Self::SchedContext(cap) => cap.object,
             Self::Reply(cap) => cap.object,
             Self::ArmSmc(cap) => cap.object,
+            Self::DomainSet(cap) => cap.object,
         }
     }
 
@@ -330,6 +343,7 @@ impl Cap {
             Self::SchedContext(cap) => cap.object = object,
             Self::Reply(cap) => cap.object = object,
             Self::ArmSmc(cap) => cap.object = object,
+            Self::DomainSet(cap) => cap.object = object,
         }
     }
 }
@@ -363,6 +377,7 @@ impl ArchivedCap {
             Self::SchedContext(cap) => cap.object,
             Self::Reply(cap) => cap.object,
             Self::ArmSmc(cap) => cap.object,
+            Self::DomainSet(cap) => cap.object,
         }
     }
 }
@@ -404,6 +419,8 @@ pub mod object {
         pub prio: u8,
         pub max_prio: u8,
         pub resume: bool,
+
+        pub domain: u8,
 
         pub ip: Word,
         pub sp: Word,
@@ -690,6 +707,13 @@ pub mod cap {
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
     #[derive(rkyv::Archive, rkyv::Deserialize, rkyv::Serialize)]
     pub struct ArmSmc {
+        pub object: ObjectId,
+    }
+
+    #[derive(Debug, Clone, Eq, PartialEq, IsCap)]
+    #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+    #[derive(rkyv::Archive, rkyv::Deserialize, rkyv::Serialize)]
+    pub struct DomainSet {
         pub object: ObjectId,
     }
 }

@@ -146,8 +146,7 @@ pub mod slot {
         (IO_SPACE, Null, seL4_CapIOSpace),
         (BOOT_INFO_FRAME, Granule, seL4_CapBootInfoFrame),
         (IPC_BUFFER, Granule, seL4_CapInitThreadIPCBuffer),
-        #[cfg(false)] // TODO
-        (DOMAIN, Null, seL4_CapDomain),
+        (DOMAIN_SET, DomainSet, seL4_CapDomain),
         #[cfg(false)] // TODO
         (SMMU_SID_CONTROL, Null, seL4_CapSMMUSIDControl),
         #[cfg(false)] // TODO
