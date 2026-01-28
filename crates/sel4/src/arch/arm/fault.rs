@@ -18,6 +18,9 @@ declare_fault_newtype!(VmFault, seL4_Fault_VMFault);
 #[sel4_cfg(KERNEL_MCS)]
 declare_fault_newtype!(Timeout, seL4_Fault_Timeout);
 
+#[sel4_cfg(HARDWARE_DEBUG_API)]
+declare_fault_newtype!(DebugException, seL4_Fault_DebugException);
+
 sel4_cfg_if! {
     if #[sel4_cfg(ARM_HYPERVISOR_SUPPORT)] {
         declare_fault_newtype!(VGicMaintenance, seL4_Fault_VGICMaintenance);
@@ -43,6 +46,8 @@ pub enum Fault {
     VCpuFault(VCpuFault),
     #[sel4_cfg(ARM_HYPERVISOR_SUPPORT)]
     VPpiEvent(VPpiEvent),
+    #[sel4_cfg(HARDWARE_DEBUG_API)]
+    DebugException(DebugException),
 }
 
 impl Fault {
@@ -73,6 +78,10 @@ impl Fault {
                 #[sel4_cfg(ARM_HYPERVISOR_SUPPORT)]
                 sys::seL4_Fault_Splayed::VPPIEvent(inner) => {
                     Self::VPpiEvent(VPpiEvent::from_inner(inner))
+                }
+                #[sel4_cfg(HARDWARE_DEBUG_API)]
+                sys::seL4_Fault_Splayed::DebugException(inner) => {
+                    Self::DebugException(DebugException::from_inner(inner))
                 }
             }
         }
