@@ -224,8 +224,8 @@ impl<'a> InvocationGenerator<'a> {
         out_params_passed_by_value: &[&Parameter],
     ) -> TokenStream {
         let ret_struct_fields = out_params_passed_by_value.iter().map(|param| {
-            let name = format_ident!("{}", param.name);
-            let ty = format_ident!("{}", param.ty);
+            let name = raw_ident(&param.name);
+            let ty = raw_ident(&param.ty);
             quote! {
                 #name: #ty
             }
@@ -304,16 +304,16 @@ impl<'a> InvocationGenerator<'a> {
                 ParameterType::Primitive {
                     module_enum: false, ..
                 } => {
-                    let name = format_ident!("{}", param.name);
+                    let name = raw_ident(&param.name);
                     toks.extend(quote! {
                         ret.#name = self.get_mr_bits(#start..#end);
                     })
                 }
                 ParameterType::Struct { members } => {
                     assert!(self.parameter_types.get(&param.ty).pass_by_reference());
-                    let name = format_ident!("{}", param.name);
+                    let name = raw_ident(&param.name);
                     for (i, member) in members.iter().enumerate() {
-                        let member = format_ident!("{}", member);
+                        let member = raw_ident(member);
                         let member_start = start + i * WORD_SIZE;
                         let member_end = member_start + WORD_SIZE;
                         toks.extend(quote! {
