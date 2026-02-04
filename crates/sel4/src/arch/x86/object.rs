@@ -30,6 +30,7 @@ pub enum ObjectTypeX86 {
     EPTPageDirectory,
     #[sel4_cfg(VTX)]
     EPTPageTable,
+    IOPageTable,
     SeL4Arch(ObjectTypeSeL4Arch),
 }
 
@@ -47,6 +48,7 @@ impl ObjectTypeX86 {
                 Self::EPTPageDirectory => sys::_object::seL4_X86_EPTPDObject,
                 #[sel4_cfg(VTX)]
                 Self::EPTPageTable => sys::_object::seL4_X86_EPTPTObject,
+                Self::IOPageTable => sys::_object::seL4_X86_IOPageTableObject,
                 Self::SeL4Arch(sel4_arch) => sel4_arch.into_sys(),
             }
         }
@@ -78,6 +80,7 @@ pub enum ObjectBlueprintX86 {
     EPTPageDirectory,
     #[sel4_cfg(VTX)]
     EPTPageTable,
+    IOPageTable,
     SeL4Arch(ObjectBlueprintSeL4Arch),
 }
 
@@ -95,6 +98,7 @@ impl ObjectBlueprintX86 {
                 Self::EPTPageDirectory => ObjectTypeX86::EPTPageDirectory,
                 #[sel4_cfg(VTX)]
                 Self::EPTPageTable => ObjectTypeX86::EPTPageTable,
+                Self::IOPageTable => ObjectTypeX86::IOPageTable,
                 Self::SeL4Arch(sel4_arch) => ObjectTypeX86::SeL4Arch(sel4_arch.ty()),
             }
         }
@@ -113,6 +117,7 @@ impl ObjectBlueprintX86 {
                 Self::EPTPageDirectory => u32_into_usize(sys::seL4_X86_EPTPDBits),
                 #[sel4_cfg(VTX)]
                 Self::EPTPageTable => u32_into_usize(sys::seL4_X86_EPTPTBits),
+                Self::IOPageTable => u32_into_usize(sys::seL4_IOPageTableBits),
                 Self::SeL4Arch(sel4_arch) => sel4_arch.physical_size_bits(),
             }
         }

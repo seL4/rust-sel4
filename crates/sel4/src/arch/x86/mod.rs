@@ -93,6 +93,13 @@ pub(crate) mod cap_type_arch {
     pub type VSpace = PML4;
     pub type Granule = _4k;
 
+    // FIXIT: How am I suppose to know how large this object is gonna be?
+    pub type IOSpace = PML4;
+    declare_cap_type_for_object_of_fixed_size!(IOPageTable {
+        ObjectTypeArch,
+        ObjectBlueprintArch
+    });
+
     declare_cap_type!(IOPortControl);
 }
 
@@ -117,6 +124,9 @@ pub(crate) mod cap_arch {
     declare_cap_alias!(PDPT);
     declare_cap_alias!(PageDirectory);
     declare_cap_alias!(PageTable);
+
+    declare_cap_alias!(IOSpace);
+    declare_cap_alias!(IOPageTable);
 
     declare_cap_alias!(IOPortControl);
 }
