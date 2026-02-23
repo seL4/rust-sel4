@@ -190,6 +190,7 @@ pub enum Object<D> {
     VCpu,
     Frame(object::Frame<D>),
     PageTable(object::PageTable),
+    IOPageTable(object::IOPageTable),
     AsidPool(object::AsidPool),
     ArmIrq(object::ArmIrq),
     IrqMsi(object::IrqMsi),
@@ -225,6 +226,7 @@ impl<D> Object<D> {
             Self::CNode(obj) => obj.slots(),
             Self::Tcb(obj) => obj.slots(),
             Self::PageTable(obj) => obj.slots(),
+            Self::IOPageTable(obj) => obj.slots(),
             Self::ArmIrq(obj) => obj.slots(),
             Self::IrqMsi(obj) => obj.slots(),
             Self::IrqIOApic(obj) => obj.slots(),
@@ -238,6 +240,7 @@ impl<D> Object<D> {
             Self::CNode(obj) => &mut obj.slots,
             Self::Tcb(obj) => &mut obj.slots,
             Self::PageTable(obj) => &mut obj.slots,
+            Self::IOPageTable(obj) => &mut obj.slots,
             Self::ArmIrq(obj) => &mut obj.slots,
             Self::IrqMsi(obj) => &mut obj.slots,
             Self::IrqIOApic(obj) => &mut obj.slots,
@@ -278,6 +281,7 @@ pub enum Cap {
     VCpu(cap::VCpu),
     Frame(cap::Frame),
     PageTable(cap::PageTable),
+    IOPageTable(cap::IOPageTable),
     AsidPool(cap::AsidPool),
     ArmIrqHandler(cap::ArmIrqHandler),
     IrqMsiHandler(cap::IrqMsiHandler),
@@ -311,6 +315,7 @@ impl Cap {
             Self::IrqHandler(cap) => cap.object,
             Self::VCpu(cap) => cap.object,
             Self::PageTable(cap) => cap.object,
+            Self::IOPageTable(cap) => cap.object,
             Self::AsidPool(cap) => cap.object,
             Self::ArmIrqHandler(cap) => cap.object,
             Self::IrqMsiHandler(cap) => cap.object,
@@ -335,6 +340,7 @@ impl Cap {
             Self::IrqHandler(cap) => cap.object = object,
             Self::VCpu(cap) => cap.object = object,
             Self::PageTable(cap) => cap.object = object,
+            Self::IOPageTable(cap) => cap.object = object,
             Self::AsidPool(cap) => cap.object = object,
             Self::ArmIrqHandler(cap) => cap.object = object,
             Self::IrqMsiHandler(cap) => cap.object = object,
@@ -369,6 +375,7 @@ impl ArchivedCap {
             Self::IrqHandler(cap) => cap.object,
             Self::VCpu(cap) => cap.object,
             Self::PageTable(cap) => cap.object,
+            Self::IOPageTable(cap) => cap.object,
             Self::AsidPool(cap) => cap.object,
             Self::ArmIrqHandler(cap) => cap.object,
             Self::IrqMsiHandler(cap) => cap.object,
@@ -453,6 +460,15 @@ pub mod object {
     pub struct PageTable {
         #[cfg_attr(feature = "serde", serde(default))]
         pub x86_ept: bool,
+        pub is_root: bool,
+        pub level: Option<u8>,
+        pub slots: Vec<CapTableEntry>,
+    }
+
+    #[derive(Debug, Clone, Eq, PartialEq, IsObject, HasCapTable)]
+    #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+    #[derive(rkyv::Archive, rkyv::Deserialize, rkyv::Serialize)]
+    pub struct IOPageTable {
         pub is_root: bool,
         pub level: Option<u8>,
         pub slots: Vec<CapTableEntry>,
@@ -652,6 +668,13 @@ pub mod cap {
     #[derive(Debug, Clone, Eq, PartialEq, IsCap)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
     #[derive(rkyv::Archive, rkyv::Deserialize, rkyv::Serialize)]
+    pub struct IOPageTable {
+        pub object: ObjectId,
+    }
+
+    #[derive(Debug, Clone, Eq, PartialEq, IsCap)]
+    #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+    #[derive(rkyv::Archive, rkyv::Deserialize, rkyv::Serialize)]
     pub struct AsidPool {
         pub object: ObjectId,
     }
@@ -733,6 +756,26 @@ impl object::ArchivedPageTable {
                 match &entry.cap {
                     ArchivedCap::PageTable(cap) => PageTableEntry::PageTable(cap),
                     ArchivedCap::Frame(cap) => PageTableEntry::Frame(cap),
+                    _ => panic!(),
+                },
+            )
+        })
+    }
+}
+
+pub enum IOPageTableEntry<'a> {
+    IOPageTable(&'a cap::ArchivedIOPageTable),
+    Frame(&'a cap::ArchivedFrame),
+}
+
+impl object::ArchivedIOPageTable {
+    pub fn entries(&self) -> impl Iterator<Item = (ArchivedCapSlot, IOPageTableEntry<'_>)> {
+        self.slots.iter().map(|entry| {
+            (
+                entry.slot,
+                match &entry.cap {
+                    ArchivedCap::IOPageTable(cap) => IOPageTableEntry::IOPageTable(cap),
+                    ArchivedCap::Frame(cap) => IOPageTableEntry::Frame(cap),
                     _ => panic!(),
                 },
             )
