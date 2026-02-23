@@ -90,6 +90,12 @@ impl<'a> Initializer<'a> {
         self.init_vspaces()?;
 
         sel4::sel4_cfg_if! {
+            if #[sel4_cfg(all(ARCH_X86_64, IOMMU))] {
+                self.init_iospaces()?;
+            }
+        }
+
+        sel4::sel4_cfg_if! {
             if #[sel4_cfg(KERNEL_MCS)] {
                 self.init_sched_contexts()?;
             }
@@ -677,6 +683,49 @@ impl<'a> Initializer<'a> {
                         )?;
                     let obj = self.object_as::<object::ArchivedPageTable>(cap.object);
                     self.init_vspace(vspace, level + 1, vaddr, obj)?;
+                }
+            }
+        }
+        Ok(())
+    }
+
+    #[sel4::sel4_cfg(all(ARCH_X86_64, IOMMU))]
+    fn init_iospaces(&mut self) -> Result<()> {
+        debug!("Initializing IOSpace");
+
+        for (obj_id, obj) in
+            self.filter_objects_with::<object::ArchivedIOPageTable>(|obj| obj.is_root)
+        {   
+            // Not sure if this part of the code is right
+            let root_level = obj.level.unwrap_or(0).into();
+            let iospace = self.orig_cap::<cap_type::IOSpace>(obj_id);
+            self.init_iospace(iospace, root_level, 0, obj)?;
+        }
+        Ok(())
+    }
+
+    #[sel4::sel4_cfg(all(ARCH_X86_64, IOMMU))]
+    fn init_iospace(
+        &mut self,
+        iospace: sel4::cap::IOSpace,
+        level: usize,
+        ioaddr: usize,
+        obj: &object::ArchivedIOPageTable,
+    ) -> Result<()> {
+        for (i, entry) in obj.entries() {
+            let ioaddr = ioaddr + (usize::from(i) << sel4::vspace_levels::step_bits(level));
+            match entry {
+                IOPageTableEntry::Frame(cap) => {
+                    let frame = self.orig_cap::<cap_type::UnspecifiedPage>(cap.object);
+                    let rights = cap.rights.to_sel4();
+                    self.copy(frame)?.frame_map_io(iospace, ioaddr, rights)?;
+                }
+                IOPageTableEntry::IOPageTable(cap) => {
+                    // This line is likely incorrect but I will leave it for now until Microkit Tool is finished.
+                    self.orig_cap::<cap_type::IOPageTable>(cap.object)
+                        .io_page_table_map(iospace, ioaddr)?;
+                    let obj = self.object_as::<object::ArchivedIOPageTable>(cap.object);
+                    self.init_iospace(iospace, level + 1, ioaddr, obj)?;
                 }
             }
         }

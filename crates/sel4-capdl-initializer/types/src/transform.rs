@@ -102,6 +102,7 @@ impl<D> Spec<D> {
                                 },
                             }),
                             Object::PageTable(obj) => Object::PageTable(obj.clone()),
+                            Object::IOPageTable(obj) => Object::IOPageTable(obj.clone()),
                             Object::AsidPool(obj) => Object::AsidPool(obj.clone()),
                             Object::ArmIrq(obj) => Object::ArmIrq(obj.clone()),
                             Object::IrqMsi(obj) => Object::IrqMsi(obj.clone()),
