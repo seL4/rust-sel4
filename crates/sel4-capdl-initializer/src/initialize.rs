@@ -17,7 +17,7 @@ use log::{debug, error, info, trace};
 
 use sel4::{
     CapRights, CapTypeForFrameObjectOfFixedSize, cap_type,
-    init_thread::{self, Slot},
+    init_thread::{self, Slot, SlotRegion},
 };
 use sel4_capdl_initializer_types::*;
 
@@ -26,7 +26,26 @@ use crate::error::CapDLInitializerError;
 use crate::hold_slots::HoldSlots;
 use crate::memory::{CopyAddrs, get_user_image_frame_slot};
 
+
+// XXX: added temp
+use sel4::CPtr;
+use sel4::cap::CNode;
+use sel4::NoExplicitInvocationContext;
+
 type Result<T> = CoreResult<T, CapDLInitializerError>;
+
+// Info passed to the initial task from capDL, based on bootinfo
+pub struct CapDLBootInfo {
+    // TODO: figure out the size of this, might have more untypeds after splitting? and where to
+    // allocate
+    // XXX: is this necessary? can untypeds be offset by this already? (2 level index in singel
+    // entry?)
+    untyped_cnode_idx: usize,
+    untypeds: SlotRegion<cap_type::Untyped>,
+    #[allow(non_snake_case)]
+    untypedList: [sel4::UntypedDesc; sel4::sel4_cfg_usize!(MAX_NUM_BOOTINFO_UNTYPED_CAPS)]
+}
+
 
 pub struct Initializer<'a> {
     bootinfo: &'a sel4::BootInfoPtr,
@@ -83,6 +102,7 @@ impl<'a> Initializer<'a> {
 
     fn run(&mut self) -> Result<()> {
         self.create_objects()?;
+        self.create_untyped_info()?;
 
         self.init_irqs()?;
         self.init_asids()?;
@@ -119,6 +139,8 @@ impl<'a> Initializer<'a> {
             arr.sort_unstable_by_key(|i| uts[*i].paddr());
             arr
         };
+        let mut uts_watermark_by_paddr: [usize;
+             sel4::sel4_cfg_usize!(MAX_NUM_BOOTINFO_UNTYPED_CAPS)] = [0; sel4::sel4_cfg_usize!(MAX_NUM_BOOTINFO_UNTYPED_CAPS)];
 
         // Index root objects
 
@@ -190,6 +212,9 @@ impl<'a> Initializer<'a> {
             );
         }
 
+        // Since the capDL spec object list (AFTER THE objects which have a specified PHYS ADDR) is expected
+        // in a descending order of obj size, we
+        // use this to get the start (inclusive) and end (exclusive) range of indexes of objects of all sizes
         let mut by_size_start: [usize; sel4::WORD_SIZE] = array::from_fn(|_| 0);
         let mut by_size_end: [usize; sel4::WORD_SIZE] = array::from_fn(|_| 0);
         {
@@ -197,6 +222,7 @@ impl<'a> Initializer<'a> {
                 let obj = &self.object(obj_id.into());
                 if let Some(blueprint) = obj.blueprint() {
                     by_size_end[blueprint.physical_size_bits()] += 1;
+                    info!("obj size: {}", blueprint.physical_size_bits());
                 }
             }
             let mut acc = first_obj_without_paddr;
@@ -205,6 +231,11 @@ impl<'a> Initializer<'a> {
                 acc += *n;
                 *n = acc;
             }
+        }
+
+        info!("start end");
+        for size in 0..sel4::WORD_SIZE {
+            info!("{}    {}", by_size_start[size], by_size_end[size]);
         }
 
         // In order to allocate objects which specify paddrs, we may have to
@@ -217,7 +248,7 @@ impl<'a> Initializer<'a> {
         // Create root objects
 
         let mut next_obj_with_paddr = 0;
-        for i_ut in uts_by_paddr.iter() {
+        for (idx, i_ut) in uts_by_paddr.iter().enumerate() {
             let ut = &uts[*i_ut];
             let ut_size_bits = ut.size_bits();
             let ut_size_bytes = 1 << ut_size_bits;
@@ -246,6 +277,9 @@ impl<'a> Initializer<'a> {
                 };
                 let target_is_obj_with_paddr = target < ut_paddr_end;
                 while cur_paddr < target {
+                    // If not allocating objects with set physical address, doing a first fit alloc
+                    // algo (untypeds sorted in ascending paddr, objects for allocation sorted in
+                    // descending order by size)
                     let max_size_bits = usize::try_from(cur_paddr.trailing_zeros())
                         .unwrap()
                         .min((target - cur_paddr).trailing_zeros().try_into().unwrap());
@@ -281,6 +315,7 @@ impl<'a> Initializer<'a> {
                                     1,
                                 )?;
                                 cur_paddr += 1 << size_bits;
+                                uts_watermark_by_paddr[idx] += 1 << size_bits;
                                 *obj_id += 1;
                                 created = true;
                                 break;
@@ -290,6 +325,7 @@ impl<'a> Initializer<'a> {
                     if !created {
                         if target_is_obj_with_paddr {
                             let hold_slot = hold_slots.get_slot()?;
+                            // TODO: later, save this untyped and reuse it
                             trace!(
                                 "Creating dummy: paddr=0x{cur_paddr:x}, size_bits={max_size_bits}"
                             );
@@ -303,7 +339,10 @@ impl<'a> Initializer<'a> {
                             )?;
                             hold_slots.report_used();
                             cur_paddr += 1 << max_size_bits;
+                            uts_watermark_by_paddr[idx] += 1 << max_size_bits;
                         } else {
+                            // Not allocating an object with specified paddr, and cannot fit any
+                            // remaining objects in this untyped. Skip
                             cur_paddr = target;
                         }
                     }
@@ -325,11 +364,18 @@ impl<'a> Initializer<'a> {
                         1,
                     )?;
                     cur_paddr += 1 << blueprint.physical_size_bits();
+                    uts_watermark_by_paddr[idx] += 1 << blueprint.physical_size_bits();
                     next_obj_with_paddr += 1;
                 } else {
                     break;
                 }
             }
+        }
+
+        info!("paddr, watermark, ut capacity, %tage");
+        for idx in 0..uts.len() {
+            let size = 1 << &uts[uts_by_paddr[idx]].size_bits();
+            info!("0x{:x}   {}   {}   {}%", uts[uts_by_paddr[idx]].paddr(), uts_watermark_by_paddr[idx], size, 100*uts_watermark_by_paddr[idx] / size);
         }
 
         // Ensure that we've created every root object
@@ -349,7 +395,9 @@ impl<'a> Initializer<'a> {
 
         // Create child objects
 
+        info!("DONE CREATING ROOT OBJECTS!");
         for cover in self.spec.untyped_covers.iter() {
+            info!("CREATING UNTYPED COVER STUFF!");
             let parent_obj_id = cover.parent;
             let parent = self.named_object(parent_obj_id);
             let parent_cptr = self.orig_cap::<cap_type::Untyped>(parent_obj_id);
@@ -471,6 +519,76 @@ impl<'a> Initializer<'a> {
             }
         }
 
+        Ok(())
+    }
+
+    fn create_untyped_info(&mut self) -> Result<()> {
+        // Sort untypeds by paddr
+        let mut _uts_by_paddr_backing: [usize;
+            sel4::sel4_cfg_usize!(MAX_NUM_BOOTINFO_UNTYPED_CAPS)] = array::from_fn(|i| i); // TODO (not a big deal) allocate in image rather than on stack
+        let uts = self.bootinfo.untyped_list();
+        let uts_by_paddr = {
+            let arr = &mut _uts_by_paddr_backing[..uts.len()];
+            arr.sort_unstable_by_key(|i| uts[*i].paddr());
+            arr
+        };
+        // Check if a CNode (and memory region) marked for receiving untypeds exists, if so construct meta data on all
+        // remaining untypeds,  copy (or move?) the untypeds to the receiving CNode and pass the
+        // meta data to the marked memory region.
+        let mut receiving_untypeds_cnode_id;
+        let mut receiving_untypeds_frame_id;
+        let mut found = false;
+        for (obj_id, obj) in self.filter_objects::<object::ArchivedCNode>() {
+            if obj.receive_all_untypeds {
+                receiving_untypeds_cnode_id = obj_id;
+                found = true;
+            }
+        }
+        if !found {
+            debug!("No CNode found for receiving untyped objects");
+            return Ok(());
+        }
+        found = false;
+        for (obj_id, obj) in self.filter_objects::<object::ArchivedFrame<_>>() {
+                    //if let Some(name) = object_name(self.named_object(obj_id)) {
+            // XXX: FIX: modify memory regions to contain a better way of indicating it should
+            // receive the untyped metadata
+            if object_name(self.named_object(obj_id)).unwrap_or_else(|| "").contains("remaining_untypeds") {
+                // Get the first Frame of the memory region (if larger than a page, only get the
+                // first page)
+                receiving_untypeds_frame_id = obj_id;
+                found = true;
+                break;
+            }
+        }
+        if !found {
+            error!("CNode for receiving untyped objects found, but no matching Frame (Memory Region) found!");
+        }
+        info!("Found both CNode and Frame for receiving untypeds and their meta data");
+
+        // Move all untypeds to the new CNode
+        // TODO: move only CLEAN untypeds to the new CNode (watermark == 0). Also move the split
+        // untypeds created when aligning objects to phys addr
+        // // TODO: fix hack for calculating CPtr idx: 1 << (kernel_config,cap_address_bits -
+        // root_cnode_size_bits)
+        let untyped_cptr_slot = CPtr::from_bits(1 << (64 - 6));
+        for (ut_idx, ut) in uts.iter().enumerate() {
+            let cnode_cap: CNode<NoExplicitInvocationContext> =  self.orig_cslot((receiving_untypeds_cnode_id).into()).cap().into();
+            cnode_cap.absolute_cptr_from_bits_with_depth(untyped_cptr_slot, sel4::WORD_SIZE).move_(
+                &init_thread::slot::CNODE.cap().absolute_cptr_from_bits_with_depth(self.ut_cap(ut_idx).bits(), sel4::WORD_SIZE)
+                );
+            //init_thread::slot::CNODE.cap().absolute_cptr_from_bits_with_depth(self.ut_cap(ut_idx), sel4::WORD_SIZE).move_(src)
+            //init_thread_cnode_absolute_cptr()
+            //self.ut_cap(ut_idx)
+        }
+
+
+        // TODO: figure out how create_objects tracks untyped info
+        // TODO: move all "clean" untypeds after create_objects to new CNode
+        // TODO: move CNode to the root CNode slot in target PD's Cnode, save the idx to the passed
+        // on struct
+        // TODO: construct the struct (and array) containing all untyped info, put it inside the
+        // memory region marked ("remaining_untypeds" name? maybe mark in spec instead?)
         Ok(())
     }
 
