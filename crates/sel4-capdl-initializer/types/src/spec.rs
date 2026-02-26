@@ -180,6 +180,7 @@ pub enum Object<D> {
     Frame(object::Frame<D>),
     PageTable(object::PageTable),
     IOPageTable(object::IOPageTable),
+    IOSpace(object::IOSpace),
     AsidPool(object::AsidPool),
     ArmIrq(object::ArmIrq),
     IrqMsi(object::IrqMsi),
@@ -215,6 +216,7 @@ impl<D> Object<D> {
             Self::Tcb(obj) => obj.slots(),
             Self::PageTable(obj) => obj.slots(),
             Self::IOPageTable(obj) => obj.slots(),
+            Self::IOSpace(obj) => obj.slots(),
             Self::ArmIrq(obj) => obj.slots(),
             Self::IrqMsi(obj) => obj.slots(),
             Self::IrqIOApic(obj) => obj.slots(),
@@ -229,6 +231,7 @@ impl<D> Object<D> {
             Self::Tcb(obj) => &mut obj.slots,
             Self::PageTable(obj) => &mut obj.slots,
             Self::IOPageTable(obj) => &mut obj.slots,
+            Self::IOSpace(obj) => &mut obj.slots,
             Self::ArmIrq(obj) => &mut obj.slots,
             Self::IrqMsi(obj) => &mut obj.slots,
             Self::IrqIOApic(obj) => &mut obj.slots,
@@ -452,6 +455,17 @@ pub mod object {
     pub struct IOPageTable {
         pub is_root: bool,
         pub level: Option<u8>,
+        pub slots: Vec<CapTableEntry>,
+    }
+
+    #[derive(Debug, Clone, Eq, PartialEq, IsObject, HasCapTable)]
+    #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+    #[derive(rkyv::Archive, rkyv::Deserialize, rkyv::Serialize)]
+    pub struct IOSpace {
+        pub pci_bus: u8,
+        pub pci_device: u8,
+        pub dev_func: u8,
+        pub pd_id: usize,
         pub slots: Vec<CapTableEntry>,
     }
 
