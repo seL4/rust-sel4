@@ -698,7 +698,7 @@ impl<'a> Initializer<'a> {
 
         for (obj_id, obj) in
             self.filter_objects_with::<object::ArchivedIOPageTable>(|obj| obj.is_root)
-        {   
+        {
             // Not sure if this part of the code is right
             let root_level = obj.level.unwrap_or(0).into();
             let iospace = self.orig_cap::<cap_type::IOSpace>(obj_id);
