@@ -29,7 +29,7 @@
     ]
   },
   "relro-level": "full",
-  "rustc-abi": "x86-softfloat",
+  "rustc-abi": "softfloat",
   "stack-probes": {
     "kind": "inline"
   },
