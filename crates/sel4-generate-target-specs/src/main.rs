@@ -14,7 +14,7 @@ use std::fs;
 use std::path::Path;
 
 use rustc_target::json::ToJson;
-use rustc_target::spec::{Cc, CodeModel, LinkerFlavor, Lld, PanicStrategy, Target};
+use rustc_target::spec::{Cc, CodeModel, Env, LinkerFlavor, Lld, Os, PanicStrategy, Target};
 
 use cfg_if::cfg_if;
 
@@ -169,8 +169,8 @@ impl Config {
 
         if self.musl {
             let options = &mut target.options;
-            options.os = "linux".into();
-            options.env = "musl".into();
+            options.os = Os::Linux;
+            options.env = Env::Musl;
             options.families.to_mut().push("unix".into());
             options.crt_static_default = true;
             options.crt_static_respected = true;
