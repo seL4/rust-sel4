@@ -38,9 +38,9 @@ mkInstance {
     # ];
 
     commonModifications = {
-      modifyConfig = old: crateUtils.combineConfig old {
+      modifyConfig = lib.flip crateUtils.combineConfig {
         target.${defaultRustTargetTriple.name} = {
-          rustflags = (old.target.${defaultRustTargetTriple.name}.rustflags or []) ++ [
+          rustflags = [
             # TODO
             # NOTE: won't work because cross gcc always uses hard-coded --with-ld
 

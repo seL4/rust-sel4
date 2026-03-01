@@ -129,7 +129,22 @@ in rec {
       table = builtins.fromTOML (builtins.readFile ./direct-dependency-allow-list.toml);
       getVersion = v: if lib.isString v then v else v.version;
     in
-      lib.mapAttrs (lib.const getVersion) table.allow;
+      lib.listToAttrs (
+        lib.concatLists (
+          lib.mapAttrsToList
+            (k: v:
+              let
+                names =
+                  if lib.isString v
+                  then [ k ]
+                  else v.applies-to or [ k ];
+                version = getVersion v;
+              in
+                map (name: lib.nameValuePair name version) names
+            )
+            table.allow
+        )
+      );
 
   zerocopyWith = features: filterOutEmptyFeatureList {
     version = versions.zerocopy;
@@ -222,10 +237,5 @@ in rec {
   dafnySource = {
     git = "https://github.com/coliasgroup/dafny.git";
     tag = mkKeepRef "02d0a578fdf594a38c7c72d7ad56e1a62e464f44"; # branch dev
-  };
-
-  verusSource = {
-    git = "https://github.com/verus-lang/verus.git";
-    rev = "release/0.2025.06.30.0c71b39";
   };
 }
