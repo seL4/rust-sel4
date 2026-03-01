@@ -19,7 +19,25 @@ endif
 CLIPPY ?= 1
 
 ifeq ($(CLIPPY),1)
-	nix_clippy_attr_prefix := withClippy.
+	nix_clippy_attr_prefix := $(nix_clippy_attr_prefix)withClippy.
+endif
+
+FERROCENE ?= 0
+
+ifeq ($(FERROCENE),1)
+	nix_clippy_attr_prefix := $(nix_clippy_attr_prefix)withFerrocene.
+endif
+
+VERUS ?= 0
+
+ifeq ($(VERUS),1)
+	nix_clippy_attr_prefix := $(nix_clippy_attr_prefix)withVerus.
+endif
+
+UPSTREAM ?= 0
+
+ifeq ($(UPSTREAM),1)
+	nix_clippy_attr_prefix := $(nix_clippy_attr_prefix)withUpstream.
 endif
 
 nix_args := $(keep_going_args) $(jobs_args) $(cores_args)
