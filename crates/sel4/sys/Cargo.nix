@@ -21,9 +21,8 @@ mk {
     inherit (versions)
       proc-macro2 quote prettyplease
       bindgen xmltree glob
-      regex pest
+      regex pest pest_derive
     ;
-    pest_derive = versions.pest;
     syn = { version = versions.syn; features = [ "parsing" ]; };
     inherit (localCrates)
       sel4-build-env
