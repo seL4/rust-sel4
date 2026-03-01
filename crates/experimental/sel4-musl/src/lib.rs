@@ -31,9 +31,9 @@ unsafe extern "C" {
 
 static SYSCALL_HANDLER: ImmediateSyncOnceCell<SyscallHandler> = ImmediateSyncOnceCell::new();
 
-unsafe extern "C" fn handle_syscall(sysnum: isize, mut args: ...) -> isize {
+unsafe extern "C" fn handle_syscall(sysnum: isize, args: ...) -> isize {
     (SYSCALL_HANDLER.get().unwrap())(Syscall::parse(sysnum, unsafe {
-        VaListAsSyscallArgs::new(args.as_va_list())
+        VaListAsSyscallArgs::new(args)
     }))
 }
 
