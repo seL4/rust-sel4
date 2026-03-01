@@ -92,7 +92,7 @@ let
       # ];
       inherit targetTriple;
       commonModifications = {
-        modifyManifest = lib.flip lib.recursiveUpdate {
+        modifyManifest = lib.flip crateUtils.combineConfig {
           patch.crates-io = {
             inherit (globalPatchSection.crates-io) ring;
           };

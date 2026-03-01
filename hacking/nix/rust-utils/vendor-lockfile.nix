@@ -10,6 +10,7 @@
 , jq
 , toTOMLFile
 , defaultRustToolchain
+, crateUtils
 }:
 
 { rustToolchain ? defaultRustToolchain
@@ -34,7 +35,7 @@ let
     "${package.source}" = builtins.removeAttrs package [ "source" ];
   }));
 
-  vendoredSources = lib.fold lib.recursiveUpdate {} (lib.mapAttrsToList vendorSource remotePackagesBySource);
+  vendoredSources = lib.fold crateUtils.combineConfig {} (lib.mapAttrsToList vendorSource remotePackagesBySource);
 
   cratesIORegistryURL = "https://github.com/rust-lang/crates.io-index";
 

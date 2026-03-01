@@ -42,7 +42,7 @@ let
   mkIncludeArg = d: "-I${d}/include";
 
   concatAttrs = lib.fold (x: y: x // y) {};
-  clobberAttrs = lib.fold lib.recursiveUpdate {};
+  clobberAttrs = lib.fold crateUtils.combineConfig {};
 
   builtinMuslTargets = [
     "x86_64-unknown-linux-musl"

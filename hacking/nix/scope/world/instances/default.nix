@@ -268,7 +268,7 @@ in rec {
               std = true;
               inherit targetTriple;
               commonModifications = {
-                modifyConfig = old: lib.recursiveUpdate old {
+                modifyConfig = old: crateUtils.combineConfig old {
                   target.${targetTriple.name} = {
                     rustflags = (old.target.${targetTriple.name}.rustflags or []) ++ [
                       "-L" "${muslForSeL4}/lib"
