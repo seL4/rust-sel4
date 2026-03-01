@@ -268,9 +268,9 @@ in rec {
               std = true;
               inherit targetTriple;
               commonModifications = {
-                modifyConfig = old: crateUtils.combineConfig old {
+                modifyConfig = lib.flip crateUtils.combineConfig {
                   target.${targetTriple.name} = {
-                    rustflags = (old.target.${targetTriple.name}.rustflags or []) ++ [
+                    rustflags = [
                       "-L" "${muslForSeL4}/lib"
                       "-L" "${dummyLibunwind}/lib"
                     ];
