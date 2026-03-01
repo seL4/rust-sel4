@@ -231,11 +231,11 @@ let
             cp -r --preserve=timestamps ${prev} $out
             chmod -R +w $out
 
-            ${mkCargoInvocation false runClippyThisLayer (flags ++ [
+            ${mkCargoInvocation false runClippyThisLayer ([
               "--config" "${config}"
               "--manifest-path" "${workspace}/Cargo.toml"
               "--target-dir" "$out"
-            ]) []}
+            ] ++ flags) []}
 
             ${lib.optionalString test (lib.concatStringsSep " " (findTestsCommandPrefix "$out" ++ [
               "-delete"
@@ -277,11 +277,11 @@ in let
       cp -r --preserve=timestamps ${lastIntermediateLayer} $target_dir
       chmod -R +w $target_dir
 
-      ${mkCargoInvocation true runClippy (flags ++ [
+      ${mkCargoInvocation true runClippy ([
         "--config" "${config}"
         "--manifest-path" "${workspace}/Cargo.toml"
         "--target-dir" "$target_dir"
-      ]) (lib.optionals (!test) [
+      ] ++ flags) (lib.optionals (!test) [
         rustEnvironment.artifactDirFlag "$out/bin"
       ])}
 
