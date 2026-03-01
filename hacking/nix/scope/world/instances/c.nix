@@ -38,7 +38,7 @@ mkInstance {
     # ];
 
     commonModifications = {
-      modifyConfig = old: lib.recursiveUpdate old {
+      modifyConfig = old: crateUtils.combineConfig old {
         target.${defaultRustTargetTriple.name} = {
           rustflags = (old.target.${defaultRustTargetTriple.name}.rustflags or []) ++ [
             # TODO

@@ -79,8 +79,8 @@ let
   };
 
   theseCommonModifications = crateUtils.elaborateModifications {
-    modifyManifest = lib.flip lib.recursiveUpdate profiles;
-    modifyConfig = lib.flip lib.recursiveUpdate {
+    modifyManifest = lib.flip crateUtils.combineConfig profiles;
+    modifyConfig = lib.flip crateUtils.combineConfig {
       target.${targetTriple.name}.rustflags = [
         "--sysroot" sysroot
       ];

@@ -19,7 +19,27 @@ rec {
 
   inherit toTOMLFile;
 
-  clobber = lib.fold lib.recursiveUpdate {};
+  clobber = lib.fold combineConfig {};
+
+  combineConfig =
+    let
+      f = lib.zipAttrsWith (
+        _name: values:
+        if lib.length values == 1
+        then lib.head values
+        else
+          let
+            lhs = lib.elemAt values 0;
+            rhs = lib.elemAt values 1;
+          in
+            if lib.isAttrs lhs && lib.isAttrs rhs
+            then f [ lhs rhs ]
+            else if lib.isList lhs && lib.isList rhs
+            then lhs ++ rhs
+            else rhs
+      );
+    in
+      lhs: rhs: f [ lhs rhs ];
 
   toUpperWithUnderscores = s: lib.replaceStrings ["-"] ["_"] (lib.toUpper s);
 
