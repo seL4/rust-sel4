@@ -22,6 +22,8 @@
 , cmake
 , perl
 , python3Packages
+
+, verus
 }:
 
 let
@@ -86,6 +88,7 @@ mkShell (seL4RustEnvVars // kernelLoaderConfigEnvVars // bindgenEnvVars // miscE
     perl
     python3Packages.jsonschema
     python3Packages.jinja2
+    verus
   ];
 
   depsBuildBuild = [
