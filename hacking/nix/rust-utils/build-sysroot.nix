@@ -56,6 +56,7 @@ let
       target = {
         "${targetTriple.name}" = {
           rustflags = [
+            "-Zunstable-options"
             "--sysroot" "/dev/null"
             "-C" "embed-bitcode=yes"
             # "-C" "force-unwind-tables=yes" # TODO compare with "requires-uwtable" in target.json
