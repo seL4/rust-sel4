@@ -10,9 +10,10 @@ use core::arch::global_asm;
 use core::ptr;
 use core::slice;
 
-use cfg_if::cfg_if;
-
 use sel4_stack::{Stack, StackBottom};
+
+#[cfg(not(any(target_arch = "aarch64",)))]
+compile_error!("unsupported architecture");
 
 // // //
 
@@ -85,30 +86,25 @@ macro_rules! rodata {
             static $ident: usize;
         }
         global_asm! {
-            ".section .rodata",
-            concat!(".global ", stringify!($ident)),
-            concat!(stringify!($ident), ": ", asm_word_size!(), " 0"),
-            concat!(".size ", stringify!($ident), ", .-", stringify!($ident)),
+            r#"
+                .section .rodata
+                .global {ident}
+                {ident}:
+            "#,
+            #[cfg(target_pointer_width = "64")]
+            r#"
+                    .quad 0
+            "#,
+            #[cfg(target_pointer_width = "32")]
+            r#"
+                    .word 0
+            "#,
+            r#"
+                .size {ident}, .-{ident}
+            "#,
+            ident = sym $ident,
         }
     };
-}
-
-cfg_if! {
-    if #[cfg(target_pointer_width = "64")] {
-        macro_rules! asm_word_size {
-            () => {
-                ".quad"
-            }
-        }
-    } else if #[cfg(target_pointer_width = "32")] {
-        macro_rules! asm_word_size {
-            () => {
-                ".word"
-            }
-        }
-    } else {
-        compile_error!("unsupported configuration");
-    }
 }
 
 rodata!(sel4_reset_regions_start);
@@ -130,35 +126,24 @@ unsafe extern "C" {
     fn _reset();
 }
 
-macro_rules! common_asm_prefix {
-    () => {
-        r#"
-            .extern _start
+global_asm! {
+    r#"
+        .extern _start
 
-            .global _reset
+        .global _reset
 
-            .section .text
+        .section .text
 
-            _reset:
-        "#
-    };
-}
+        _reset:
+    "#,
+    #[cfg(target_arch = "aarch64")]
+    r#"
+            ldr x9, =__sel4_reset__stack_bottom
+            ldr x9, [x9]
+            mov sp, x9
+            bl __sel4_reset__reset_memory
+            b _start
 
-cfg_if::cfg_if! {
-    if #[cfg(target_arch = "aarch64")] {
-        global_asm! {
-            common_asm_prefix!(),
-            r#"
-                    ldr x9, =__sel4_reset__stack_bottom
-                    ldr x9, [x9]
-                    mov sp, x9
-                    bl __sel4_reset__reset_memory
-                    b _start
-        
-                1:  b 1b
-            "#
-        }
-    } else {
-        compile_error!("unsupported architecture");
-    }
+        1:  b 1b
+    "#,
 }
