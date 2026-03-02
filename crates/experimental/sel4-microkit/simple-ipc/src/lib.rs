@@ -101,6 +101,5 @@ impl Error for TryCallError {}
 // // //
 
 fn bytes_to_words(num_bytes: usize) -> usize {
-    let d = size_of::<MessageRegisterValue>();
-    num_bytes.next_multiple_of(d) / d
+    num_bytes.div_ceil(size_of::<MessageRegisterValue>())
 }

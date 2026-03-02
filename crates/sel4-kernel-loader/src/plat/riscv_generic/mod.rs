@@ -62,7 +62,7 @@ fn start_all_harts() {
             let _ = unsafe {
                 sbi::hart_state_management::hart_start(
                     i,
-                    sbi::PhysicalAddress::new(secondary_harts as usize),
+                    sbi::PhysicalAddress::new(secondary_harts as *const () as usize),
                     i,
                 )
             };
