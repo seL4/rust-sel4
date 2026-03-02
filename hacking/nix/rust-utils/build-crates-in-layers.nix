@@ -128,6 +128,13 @@ let
     })
     {
       unstable.unstable-options = true;
+      target = {
+        "${targetTriple.name}" = {
+          rustflags = [
+            "-Zunstable-options"
+          ];
+        };
+      };
     }
     vendoredLockfile.configFragment
     (lib.optionalAttrs denyWarnings {
