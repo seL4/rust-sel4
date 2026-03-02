@@ -57,7 +57,11 @@ mod when_alloc {
             let f_arg = Box::into_raw(b);
             self.0.send_with_mrs(
                 sel4::MessageInfoBuilder::default().length(3).build(),
-                [entry as *const () as usize as sel4::Word, f_arg as sel4::Word, 0],
+                [
+                    entry as *const () as usize as sel4::Word,
+                    f_arg as sel4::Word,
+                    0,
+                ],
             );
         }
     }
