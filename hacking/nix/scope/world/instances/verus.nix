@@ -30,11 +30,12 @@ mkInstance {
     };
 
     layers = [
-      crateUtils.defaultIntermediateLayer
-      {
-        crates = [ "sel4-root-task" ];
-        modifications = seL4Modifications;
-      }
+      # TODO single layer to work around https://github.com/verus-lang/verus/issues/2209
+      # crateUtils.defaultIntermediateLayer
+      # {
+      #   crates = [ "sel4-root-task" ];
+      #   modifications = seL4Modifications;
+      # }
     ];
   
     verifyWithVerus = true;
