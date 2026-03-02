@@ -59,3 +59,6 @@
 // To replace runtime macro crates
 #![feature(macro_attr)]
 #![feature(macro_derive)]
+
+// To replace cfg_if, and to use in place of asm_cfg in some cases
+#![feature(cfg_select)]
