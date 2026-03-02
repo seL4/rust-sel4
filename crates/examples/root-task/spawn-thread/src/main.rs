@@ -141,7 +141,9 @@ fn create_user_context(f: SecondaryThreadFn) -> sel4::UserContext {
     *ctx.sp_mut() = (SECONDARY_THREAD_STACK.bottom().ptr() as usize)
         .try_into()
         .unwrap();
-    *ctx.pc_mut() = (secondary_thread_entrypoint as *const () as usize).try_into().unwrap();
+    *ctx.pc_mut() = (secondary_thread_entrypoint as *const () as usize)
+        .try_into()
+        .unwrap();
     *ctx.c_param_mut(0) = f.into_arg();
 
     let tls_reservation = get_tls_image().initialize_on_heap();
