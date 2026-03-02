@@ -413,7 +413,7 @@ impl<'a> LayoutHelper<'a> {
     }
 
     fn num_msg_regs(&self) -> usize {
-        self.data_cursor.next_multiple_of(WORD_SIZE) / WORD_SIZE
+        self.data_cursor.div_ceil(WORD_SIZE)
     }
 
     fn num_caps(&self) -> usize {
