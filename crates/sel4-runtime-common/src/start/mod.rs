@@ -6,8 +6,6 @@
 
 use core::arch::global_asm;
 
-use cfg_if::cfg_if;
-
 mod with_stack_init;
 
 #[macro_export]
@@ -33,95 +31,58 @@ macro_rules! declare_entrypoint {
             }
         };
 
-        // TODO make this much prettier once #[feature(asm_cfg)] stabilizes
-        $crate::_private::cfg_if! {
-            if #[cfg(any(target_arch = "aarch64", target_arch = "arm"))] {
-                $crate::_private::global_asm! {
-                    r#"
-                        .extern __sel4_runtime_common__call_rust_entrypoint
+        $crate::_private::global_asm! {
+            r#"
+                .extern __sel4_runtime_common__call_rust_entrypoint
 
-                        .section .text
+                .section .text
 
-                        .global _start
-                        _start:
-                            b __sel4_runtime_common__call_rust_entrypoint
-                    "#
-                }
-            } else if #[cfg(any(target_arch = "riscv64", target_arch = "riscv32"))] {
-                $crate::_private::global_asm! {
-                    r#"
-                        .extern __sel4_runtime_common__call_rust_entrypoint
-
-                        .section .text
-
-                        .global _start
-                        _start:
-                            j __sel4_runtime_common__call_rust_entrypoint
-                    "#
-                }
-            } else if #[cfg(target_arch = "x86_64")] {
-                $crate::_private::global_asm! {
-                    r#"
-                        .extern __sel4_runtime_common__call_rust_entrypoint
-
-                        .section .text
-
-                        .global _start
-                        _start:
-                            jmp __sel4_runtime_common__call_rust_entrypoint
-                    "#
-                }
-            } else {
-                compile_error!("unsupported architecture");
-            }
+                .global _start
+                _start:
+            "#,
+            #[cfg(any(target_arch = "aarch64", target_arch = "arm"))]
+            r#"
+                    b __sel4_runtime_common__call_rust_entrypoint
+            "#,
+            #[cfg(any(target_arch = "riscv64", target_arch = "riscv32"))]
+            r#"
+                    j __sel4_runtime_common__call_rust_entrypoint
+            "#,
+            #[cfg(target_arch = "x86_64")]
+            r#"
+                    jmp __sel4_runtime_common__call_rust_entrypoint
+            "#,
         }
     };
 }
 
-macro_rules! common_asm_prefix {
-    () => {
-        r#"
-            .extern __sel4_runtime_common__rust_entrypoint
+global_asm! {
+    r#"
+        .extern __sel4_runtime_common__rust_entrypoint
 
-            .section .text.__sel4_runtime_common__call_rust_entrypoint, "ax", %progbits
+        .section .text.__sel4_runtime_common__call_rust_entrypoint, "ax", %progbits
 
-            .global __sel4_runtime_common__call_rust_entrypoint
-            __sel4_runtime_common__call_rust_entrypoint:
-        "#
-    };
-}
-
-cfg_if! {
-    if #[cfg(any(target_arch = "aarch64", target_arch = "arm"))] {
-        global_asm! {
-            common_asm_prefix!(),
-            r#"
-                    bl __sel4_runtime_common__rust_entrypoint
-                1:  b 1b
-            "#
-        }
-    } else if #[cfg(any(target_arch = "riscv64", target_arch = "riscv32"))] {
-        global_asm! {
-            common_asm_prefix!(),
-            r#"
-                .option push
-                .option norelax
-                1:  auipc gp, %pcrel_hi(__global_pointer$)
-                    addi gp, gp, %pcrel_lo(1b)
-                .option pop
-                    jal __sel4_runtime_common__rust_entrypoint
-                1:  j 1b
-            "#
-        }
-    } else if #[cfg(target_arch = "x86_64")] {
-        global_asm! {
-            common_asm_prefix!(),
-            r#"
-                    call __sel4_runtime_common__rust_entrypoint
-                1:  jmp 1b
-            "#
-        }
-    } else {
-        compile_error!("unsupported architecture");
-    }
+        .global __sel4_runtime_common__call_rust_entrypoint
+        __sel4_runtime_common__call_rust_entrypoint:
+    "#,
+    #[cfg(any(target_arch = "aarch64", target_arch = "arm"))]
+    r#"
+            bl __sel4_runtime_common__rust_entrypoint
+        1:  b 1b
+    "#,
+    #[cfg(any(target_arch = "riscv64", target_arch = "riscv32"))]
+    r#"
+        .option push
+        .option norelax
+        1:  auipc gp, %pcrel_hi(__global_pointer$)
+            addi gp, gp, %pcrel_lo(1b)
+        .option pop
+            jal __sel4_runtime_common__rust_entrypoint
+        1:  j 1b
+    "#,
+    #[cfg(target_arch = "x86_64")]
+    r#"
+            call __sel4_runtime_common__rust_entrypoint
+        1:  jmp 1b
+    "#,
 }
