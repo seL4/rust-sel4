@@ -52,6 +52,7 @@ let
   config = crateUtils.toTOMLFile "config" (crateUtils.clobber [
     # baseConfig # TODO will trigger rebuild
     {
+      unstable.unstable-options = true;
       target = {
         "${targetTriple.name}" = {
           rustflags = [
@@ -92,7 +93,6 @@ runCommand "sysroot" ({
   __CARGO_TESTS_ONLY_SRC_ROOT = src;
 }) ''
   cargo build \
-    -Z unstable-options \
     --offline \
     --frozen \
     --config ${config} \
