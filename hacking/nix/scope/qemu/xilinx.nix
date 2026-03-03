@@ -6,7 +6,7 @@
 
 { lib, stdenv
 , fetchFromGitHub, fetchFromGitLab
-, python3, dtc
+, python3, python3Packages, dtc
 , qemuForSeL4
 }:
 
@@ -82,6 +82,10 @@ in
       cp -r packagefiles/$d/* $d
     popd
   '';
+
+  nativeBuildInputs = (previousAttrs.nativeBuildInputs or []) ++ [
+    python3Packages.distutils
+  ];
 
   passthru = (previousAttrs.passthru or {}) // {
     inherit devicetrees;
