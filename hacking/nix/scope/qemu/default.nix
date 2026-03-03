@@ -48,6 +48,7 @@ stdenv.mkDerivation (finalAttrs: with finalAttrs; {
     python3Packages.python
     python3Packages.sphinx
     python3Packages.sphinx-rtd-theme
+    python3Packages.distlib
   ];
 
   buildInputs = [
