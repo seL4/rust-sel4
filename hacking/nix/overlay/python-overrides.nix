@@ -19,10 +19,12 @@ self: super: with self;
   autopep8_1_4_3 = buildPythonPackage rec {
     pname = "autopep8";
     version = "1.4.3";
+    pyproject = true;
     src = fetchPypi {
       inherit pname version;
       sha256 = "13140hs3kh5k13yrp1hjlyz2xad3xs1fjkw1811gn6kybcrbblik";
     };
+    build-system = [ setuptools ];
     propagatedBuildInputs = [
       pycodestyle
     ];
@@ -34,10 +36,12 @@ self: super: with self;
   cmake-format = buildPythonPackage rec {
     pname = "cmake_format";
     version = "0.4.5";
+    pyproject = true;
     src = fetchPypi {
       inherit pname version;
       sha256 = "0nl78yb6zdxawidp62w9wcvwkfid9kg86n52ryg9ikblqw428q0n";
     };
+    build-system = [ setuptools ];
     propagatedBuildInputs = [
       jinja2
       pyyaml
@@ -48,10 +52,12 @@ self: super: with self;
   guardonce = buildPythonPackage rec {
     pname = "guardonce";
     version = "2.4.0";
+    pyproject = true;
     src = fetchPypi {
       inherit pname version;
       sha256 = "0sr7c1f9mh2vp6pkw3bgpd7crldmaksjfafy8wp5vphxk98ix2f7";
     };
+    build-system = [ setuptools ];
     doCheck = false;
   };
 
@@ -68,6 +74,7 @@ self: super: with self;
   sel4-deps = buildPythonPackage rec {
     pname = "sel4-deps";
     version = "0.3.1";
+    pyproject = true;
     src = fetchPypi {
       inherit pname version;
       sha256 = "09xjv4gc9cwanxdhpqg2sy2pfzn2rnrnxgjdw93nqxyrbpdagd5r";
@@ -75,6 +82,7 @@ self: super: with self;
     postPatch = ''
       substituteInPlace setup.py --replace bs4 beautifulsoup4
     '';
+    build-system = [ setuptools ];
     propagatedBuildInputs = [
       six
       future
