@@ -554,7 +554,7 @@ impl<'a> Initializer<'a> {
             init_thread::slot::VSPACE.cap(),
             self.copy_addrs.select(frame_object_type),
             CapRights::read_write(),
-            vm_attributes_from_whether_cached_and_exec(true, false),
+            vm_attributes_from_whether_cached_and_exec(true, false, false),
         )?;
         for entry in fill.iter() {
             let range = try_into_usize_range(&archived_range_to_range(&entry.range)).unwrap();
@@ -628,8 +628,12 @@ impl<'a> Initializer<'a> {
                 PageTableEntry::Frame(cap) => {
                     let frame = self.orig_cap::<cap_type::UnspecifiedPage>(cap.object);
                     let rights = cap.rights.to_sel4();
-                    self.copy(frame)?
-                        .ept_frame_map(eptpml4, vaddr, rights, cap.vm_attributes())?;
+                    self.copy(frame)?.ept_frame_map(
+                        eptpml4,
+                        vaddr,
+                        rights,
+                        cap.vm_attributes(true),
+                    )?;
                 }
                 PageTableEntry::PageTable(cap) => {
                     self.orig_cap::<cap_type::UnspecifiedIntermediateTranslationTable>(cap.object)
@@ -637,7 +641,7 @@ impl<'a> Initializer<'a> {
                             sel4::TranslationTableObjectType::from_level_ept(level + 1).unwrap(),
                             eptpml4,
                             vaddr,
-                            cap.vm_attributes(),
+                            cap.vm_attributes(true),
                         )?;
                     let obj = self.object_as::<object::ArchivedPageTable>(cap.object);
                     self.init_vspace_x86_ept(eptpml4, level + 1, vaddr, obj)?;
@@ -661,7 +665,7 @@ impl<'a> Initializer<'a> {
                     let frame = self.orig_cap::<cap_type::UnspecifiedPage>(cap.object);
                     let rights = cap.rights.to_sel4();
                     self.copy(frame)?
-                        .frame_map(vspace, vaddr, rights, cap.vm_attributes())?;
+                        .frame_map(vspace, vaddr, rights, cap.vm_attributes(false))?;
                 }
                 PageTableEntry::PageTable(cap) => {
                     self.orig_cap::<cap_type::UnspecifiedIntermediateTranslationTable>(cap.object)
@@ -669,7 +673,7 @@ impl<'a> Initializer<'a> {
                             sel4::TranslationTableObjectType::from_level(level + 1).unwrap(),
                             vspace,
                             vaddr,
-                            cap.vm_attributes(),
+                            cap.vm_attributes(false),
                         )?;
                     let obj = self.object_as::<object::ArchivedPageTable>(cap.object);
                     self.init_vspace(vspace, level + 1, vaddr, obj)?;

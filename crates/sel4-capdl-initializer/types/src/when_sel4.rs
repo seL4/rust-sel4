@@ -129,17 +129,17 @@ impl ArchivedFillEntryContentBootInfoId {
 }
 
 pub trait HasVmAttributes {
-    fn vm_attributes(&self) -> VmAttributes;
+    fn vm_attributes(&self, is_x86_ept: bool) -> VmAttributes;
 }
 
 impl HasVmAttributes for cap::ArchivedFrame {
-    fn vm_attributes(&self) -> VmAttributes {
-        vm_attributes_from_whether_cached_and_exec(self.cached, self.executable)
+    fn vm_attributes(&self, is_x86_ept: bool) -> VmAttributes {
+        vm_attributes_from_whether_cached_and_exec(self.cached, self.executable, is_x86_ept)
     }
 }
 
 impl HasVmAttributes for cap::ArchivedPageTable {
-    fn vm_attributes(&self) -> VmAttributes {
+    fn vm_attributes(&self, _is_x86_ept: bool) -> VmAttributes {
         default_vm_attributes_for_page_table()
     }
 }
@@ -159,15 +159,38 @@ sel4::sel4_cfg_if! {
     }
 }
 
+sel4::sel4_cfg_if! {
+    if #[sel4_cfg(all(ARCH_X86_64, VTX))] {
+        const EPT_CACHED: VmAttributes = VmAttributes::EPT_DEFAULT;
+        const EPT_UNCACHED: VmAttributes = VmAttributes::EPT_CACHE_DISABLED;
+    }
+}
+
 // Allow these because on some architectures, certain variables are not touched.
 #[allow(unused_variables, unused_assignments)]
-pub fn vm_attributes_from_whether_cached_and_exec(cached: bool, executable: bool) -> VmAttributes {
-    let mut vmattr = VmAttributes::NONE;
-    if cached {
-        vmattr = CACHED;
+pub fn vm_attributes_from_whether_cached_and_exec(
+    cached: bool,
+    executable: bool,
+    x86_ept: bool,
+) -> VmAttributes {
+    #[allow(unused_mut)]
+    let mut vmattr = if x86_ept {
+        sel4::sel4_cfg_if! {
+            if #[sel4_cfg(all(ARCH_X86_64, VTX))] {
+                if cached {
+                    EPT_CACHED
+                } else {
+                    EPT_UNCACHED
+                }
+            } else {
+                panic!("Encountered EPT mapping on non x86 VTX kernel build");
+            }
+        }
+    } else if cached {
+        CACHED
     } else {
-        vmattr = UNCACHED;
-    }
+        UNCACHED
+    };
 
     sel4::sel4_cfg_if! {
         if #[sel4_cfg(any(ARCH_AARCH64, ARCH_AARCH32, ARCH_RISCV64, ARCH_RISCV32))] {
