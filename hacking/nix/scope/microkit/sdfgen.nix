@@ -33,9 +33,8 @@ in
 with python312Packages;
 buildPythonPackage rec {
   name = "sdfgen";
+  pyproject = true;
   src = sources.sdfgen;
-
-  build-system = [ setuptools ];
 
   pythonImportsCheck = [ "sdfgen" ];
 
@@ -44,6 +43,8 @@ buildPythonPackage rec {
     export ZIG_GLOBAL_CACHE_DIR=$(mktemp -d)
     ln -s ${deps} $ZIG_GLOBAL_CACHE_DIR/p
   '';
+
+  build-system = [ setuptools ];
 
   nativeBuildInputs = [ zig-overlay."0.15.1" ];
 }
