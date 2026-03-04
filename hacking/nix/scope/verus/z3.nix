@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
 #
 
-{ stdenv, hostPlatform
+{ stdenv
 , fetchurl
 , autoPatchelfHook
 , unzip
@@ -24,7 +24,7 @@ let
     };
   };
 
-  inherit (byArch.${hostPlatform.parsed.cpu.name}) arch sha256;
+  inherit (byArch.${stdenv.hostPlatform.parsed.cpu.name}) arch sha256;
 
   filename = "z3-${version}-${arch}-glibc-2.35";
 

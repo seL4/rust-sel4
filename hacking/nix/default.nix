@@ -54,7 +54,7 @@ in let
 
   isCrossSystemActuallyCross =
     let
-      inherit (nixpkgsFn {}) hostPlatform;
+      inherit ((nixpkgsFn {}).stdenv) hostPlatform;
     in
       crossSystem: crossSystem != builtins.intersectAttrs crossSystem hostPlatform;
 

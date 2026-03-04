@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
 #
 
-{ lib, stdenv, hostPlatform
+{ lib, stdenv
 , cmake, perl
 
 , crateUtils, crates
@@ -17,7 +17,7 @@
 }:
 
 let
-  libcDir = "${stdenv.cc.libc}/${hostPlatform.config}";
+  libcDir = "${stdenv.cc.libc}/${stdenv.hostPlatform.config}";
 
 in
 mkInstance {

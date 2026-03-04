@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
 #
 
-{ lib, hostPlatform, callPackage
+{ lib, stdenv, callPackage
 , pkgsBuildBuild
 , runCommand, writeText
 , fetchFromGitHub
@@ -28,7 +28,7 @@ let
 
   configTxt = writeText "config.txt" ''
     enable_uart=1
-    arm_64bit=${if hostPlatform.is32bit then "0" else "1"}
+    arm_64bit=${if stdenv.hostPlatform.is32bit then "0" else "1"}
   '';
     # for debugging:
     # start_debug=1
@@ -60,7 +60,7 @@ let
         ${uBootEnvTxt { inherit bootCmd; }}
     '';
 
-  kernelFileName = "kernel${if hostPlatform.is32bit then "7l" else "8"}.img";
+  kernelFileName = "kernel${if stdenv.hostPlatform.is32bit then "7l" else "8"}.img";
 
   mkBootLinks =
     { image ? null
@@ -108,7 +108,7 @@ let
       bootCopied = mkBootCopied boot;
       qemu = platUtils.qemu.mkMkPlatformSystemExtension {
         mkQEMUCmd = loader: [
-          "${pkgsBuildBuild.this.qemuForSeL4}/bin/qemu-system-${if hostPlatform.is32bit then "arm" else "aarch64"}"
+          "${pkgsBuildBuild.this.qemuForSeL4}/bin/qemu-system-${if stdenv.hostPlatform.is32bit then "arm" else "aarch64"}"
             "-smp" "4"
             "-m" "size=2048"
             "-machine" "raspi4b"

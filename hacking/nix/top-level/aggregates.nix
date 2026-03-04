@@ -67,7 +67,7 @@ in {
     # TODO broken
     # sel4testInstancesList
 
-    (lib.optionals pkgs.build.hostPlatform.isx86_64 [
+    (lib.optionals pkgs.build.stdenv.hostPlatform.isx86_64 [
       pkgs.build.this.kani
       pkgs.build.this.verus
     ])

@@ -7,7 +7,6 @@
 { lib
 , pkgs
 , stdenv
-, buildPlatform, hostPlatform, targetPlatform
 , pkgsBuildBuild
 , callPackage
 , runCommand, linkFarm
@@ -93,7 +92,7 @@ superCallPackage ../rust-utils {} self //
 
   sources = callPackage ./sources.nix {};
 
-  seL4Arch = with hostPlatform;
+  seL4Arch = with stdenv.hostPlatform;
     if isAarch64 then "aarch64" else
     if isAarch32 then "aarch32" else
     if isRiscV64 then "riscv64" else
@@ -189,11 +188,11 @@ superCallPackage ../rust-utils {} self //
     inherit rustToolchain;
 
     chooseLinker = { targetTriple, platform, cc }:
-      if platform.config == buildPlatform.config
+      if platform.config == stdenv.buildPlatform.config
       then null
       else (
         if platform.isNone
-        then "${rustToolchain}/lib/rustlib/${buildPlatform.config}/bin/rust-lld"
+        then "${rustToolchain}/lib/rustlib/${stdenv.buildPlatform.config}/bin/rust-lld"
         else "${cc.targetPrefix}cc"
       );
 
@@ -207,8 +206,8 @@ superCallPackage ../rust-utils {} self //
   rustTargetArchName = {
     aarch64 = "aarch64";
     aarch32 = "armv7a";
-    riscv64 = "riscv64${hostPlatform.this.rustTargetRiscVArch}";
-    riscv32 = "riscv32${hostPlatform.this.rustTargetRiscVArch}";
+    riscv64 = "riscv64${stdenv.hostPlatform.this.rustTargetRiscVArch}";
+    riscv32 = "riscv32${stdenv.hostPlatform.this.rustTargetRiscVArch}";
     x86_64 = "x86_64";
     ia32 = "i686";
   }."${seL4Arch}";
@@ -245,8 +244,8 @@ superCallPackage ../rust-utils {} self //
   bareMetalBuiltinRustTargetTriple = {
     aarch64 = "aarch64-unknown-none";
     aarch32 = "armv7a-none-eabi"; # armv7a-none-eabihf?
-    riscv64 = "riscv64${hostPlatform.this.rustTargetRiscVArch}-unknown-none-elf";
-    riscv32 = "riscv32${hostPlatform.this.rustTargetRiscVArch}-unknown-none-elf";
+    riscv64 = "riscv64${stdenv.hostPlatform.this.rustTargetRiscVArch}-unknown-none-elf";
+    riscv32 = "riscv32${stdenv.hostPlatform.this.rustTargetRiscVArch}-unknown-none-elf";
     x86_64 = "x86_64-unknown-none";
     ia32 = "i686-unknown-linux-gnu"; # HACK
   }."${seL4Arch}";
@@ -254,9 +253,9 @@ superCallPackage ../rust-utils {} self //
   bareMetalRustTargetTriple = mkBuiltinRustTargetTriple bareMetalBuiltinRustTargetTriple;
 
   defaultRustTargetTriple =
-    if hostPlatform.isNone
+    if stdenv.hostPlatform.isNone
     then mkSeL4RustTargetTriple {}
-    else mkBuiltinRustTargetTriple hostPlatform.config;
+    else mkBuiltinRustTargetTriple stdenv.hostPlatform.config;
 
   mkMkCustomTargetPathForEnvironment = { rustEnvironment }:
     let

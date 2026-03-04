@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
 #
 
-{ lib, stdenv, hostPlatform, buildPlatform, buildPackages
+{ lib, stdenv, buildPackages
 , callPackage
 , runCommand, linkFarm, writeText, writeScript
 
@@ -40,8 +40,8 @@ let
 
   haveFullRuntime = !isMicrokit;
   haveMinimalRuntime = !isMicrokit;
-  haveUnwindingSupport = !hostPlatform.isAarch32;
-  haveKernelLoader = hostPlatform.isAarch || hostPlatform.isRiscV;
+  haveUnwindingSupport = !stdenv.hostPlatform.isAarch32;
+  haveKernelLoader = stdenv.hostPlatform.isAarch || stdenv.hostPlatform.isRiscV;
   haveCapDLInitializer = true;
 
   maybe = condition: v: if condition then v else null;
@@ -257,7 +257,7 @@ in rec {
         inherit mkInstance canSimulate;
       });
 
-      musl = maybe (haveFullRuntime && !hostPlatform.isRiscV /* TODO riscv linking broken */) (mkInstance {
+      musl = maybe (haveFullRuntime && !stdenv.hostPlatform.isRiscV /* TODO riscv linking broken */) (mkInstance {
         rootTask =
           let
             targetTriple = mkSeL4RustTargetTriple { musl = true; };
@@ -283,7 +283,7 @@ in rec {
         };
       });
 
-      verus = maybe (haveFullRuntime && hostPlatform.is64bit && buildPlatform.isx86_64) (callPackage ./verus.nix {
+      verus = maybe (haveFullRuntime && stdenv.hostPlatform.is64bit && stdenv.buildPlatform.isx86_64) (callPackage ./verus.nix {
         inherit mkInstance canSimulate;
       });
 
@@ -304,7 +304,7 @@ in rec {
       });
 
       # ring at 8c665d20ed7621b81d8f4ad564cb7f43a02d42ad (sel4-testing)
-      ring = maybe (haveFullRuntime && haveUnwindingSupport && !hostPlatform.isRiscV32 && !hostPlatform.isx86) (
+      ring = maybe (haveFullRuntime && haveUnwindingSupport && !stdenv.hostPlatform.isRiscV32 && !stdenv.hostPlatform.isx86) (
         let
           rootTask = lib.makeOverridable mkTask {
             rootCrate = crates.ring;
@@ -445,7 +445,7 @@ in rec {
         };
       });
 
-      serial-device = maybe (haveFullRuntime && hostPlatform.isAarch) (lib.fix (self: mkInstance {
+      serial-device = maybe (haveFullRuntime && stdenv.hostPlatform.isAarch) (lib.fix (self: mkInstance {
         rootTask = mkTask {
           rootCrate = crates.serial-device;
           release = false;

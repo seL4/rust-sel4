@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
 #
 
-{ lib, stdenv, buildPlatform, hostPlatform
+{ lib, stdenv
 , buildPackages, pkgsBuildBuild
 , linkFarm, writeScript, runCommand
 , buildEnv
@@ -48,9 +48,9 @@ let
   };
 
   sdkArch =
-    if hostPlatform.isAarch64 then "aarch64"
-    else if hostPlatform.isRiscV64 then "riscv64"
-    else if hostPlatform.isx86_64 then "x86_64"
+    if stdenv.hostPlatform.isAarch64 then "aarch64"
+    else if stdenv.hostPlatform.isRiscV64 then "riscv64"
+    else if stdenv.hostPlatform.isx86_64 then "x86_64"
     else throw "unknown arch";
 
   rustToolchain = fenix.fromToolchainFile {

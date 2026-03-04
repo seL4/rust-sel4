@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
 #
 
-{ lib, hostPlatform
+{ lib, stdenv
 , mkShell
 , python3
 , reuse
@@ -27,7 +27,7 @@ let
       cargo-audit
       lychee
       nixfmt-tree
-    ] ++ lib.optionals hostPlatform.isx86_64 [
+    ] ++ lib.optionals stdenv.hostPlatform.isx86_64 [
       kani
     ];
   };

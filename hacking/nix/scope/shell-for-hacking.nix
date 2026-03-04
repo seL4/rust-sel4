@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
 #
 
-{ lib, stdenv, hostPlatform, buildPackages
+{ lib, stdenv, buildPackages
 , mkShell
 
 , pkg-config
@@ -44,7 +44,7 @@ mkShell (shellForMakefile.apply {
     strace
     cntr
     cachix
-  ] ++ lib.optionals hostPlatform.isx86_64 [
+  ] ++ lib.optionals stdenv.hostPlatform.isx86_64 [
     kani
     verus
   ];

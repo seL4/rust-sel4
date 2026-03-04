@@ -5,7 +5,6 @@
 #
 
 { lib, stdenv
-, buildPlatform
 , callPackage
 , makeWrapper
 , writeShellScriptBin
@@ -42,7 +41,7 @@ let
     };
   }));
 
-  toolchainName = "${rustEnvironment.channel}-${buildPlatform.config}";
+  toolchainName = "${rustEnvironment.channel}-${stdenv.buildPlatform.config}";
 
   src = fetchFromGitHub {
     owner = "verus-lang";

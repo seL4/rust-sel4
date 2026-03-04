@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
 #
 
-{ lib, buildPlatform, hostPlatform
+{ lib
 , stdenv, buildPackages
 , writeText, linkFarm, runCommand
 , toTOMLFile
@@ -131,13 +131,13 @@ rec {
     in
       clobber [
         (f {
-          targetTriple = mkBuiltinRustTargetTriple buildPlatform.config;
-          platform = buildPlatform;
+          targetTriple = mkBuiltinRustTargetTriple stdenv.buildPlatform.config;
+          platform = stdenv.buildPlatform;
           inherit (buildPackages.stdenv) cc;
         })
         (f {
           inherit targetTriple;
-          platform = hostPlatform;
+          platform = stdenv.hostPlatform;
           inherit (stdenv) cc;
         })
       ];

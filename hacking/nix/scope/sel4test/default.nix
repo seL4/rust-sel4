@@ -5,7 +5,7 @@
 #
 
 { stdenv, lib
-, buildPackages, buildPlatform, hostPlatform
+, buildPackages
 , writeText, writeScript, linkFarm
 , fetchRepoProject
 , cmake, ninja
@@ -37,16 +37,16 @@ let
       "-DSMP=${bool smp}"
       "-DSIMULATION=TRUE"
       "-DLibSel4TestPrinterRegex='${filter}'"
-    ] ++ lib.optionals hostPlatform.isi686 [
+    ] ++ lib.optionals stdenv.hostPlatform.isi686 [
       "-DPLATFORM=pc99"
-    ] ++ lib.optionals hostPlatform.isRiscV [
+    ] ++ lib.optionals stdenv.hostPlatform.isRiscV [
       "-DPLATFORM=spike"
-      "-DOPENSBI_PLAT_ISA=${hostPlatform.this.gccParams.arch}"
-      "-DOPENSBI_PLAT_ABI=${hostPlatform.this.gccParams.abi}"
-    ] ++ lib.optionals hostPlatform.isAarch [
+      "-DOPENSBI_PLAT_ISA=${stdenv.hostPlatform.this.gccParams.arch}"
+      "-DOPENSBI_PLAT_ABI=${stdenv.hostPlatform.this.gccParams.abi}"
+    ] ++ lib.optionals stdenv.hostPlatform.isAarch [
       "-DPLATFORM=qemu-arm-virt"
       "-DARM_HYP=${bool virtualization}"
-    ] ++ lib.optionals hostPlatform.isAarch32 [
+    ] ++ lib.optionals stdenv.hostPlatform.isAarch32 [
       "-DARM_CPU=cortex-a15"
     ];
 
@@ -62,7 +62,7 @@ let
       sha256 = "sha256-sPaSfBHKTZ/IqMGFzRlrD6ZN3X7a+8nqTMBNeyWQmBw=";
     };
 
-    depsBuildBuild = lib.optionals (buildPlatform != hostPlatform) [
+    depsBuildBuild = lib.optionals (stdenv.buildPlatform != stdenv.hostPlatform) [
       buildPackages.stdenv.cc
       # NOTE: cause drv.__spliced.buildBuild to be used to work around splicing issue
       qemuForSeL4
@@ -105,7 +105,7 @@ let
       # HACK with this aarch32 toolchain, sizeof(SUCCESS) != sizeof(test_result_t)
       sed -i 's|test_eq(res, SUCCESS);|test_eq((int)res, SUCCESS);|' \
         projects/sel4test/apps/sel4test-tests/src/tests/ipc.c
-    '' + lib.optionalString hostPlatform.isx86 ''
+    '' + lib.optionalString stdenv.hostPlatform.isx86 ''
       # HACK
       sed -i \
         -e 's|test_scheduler_accuracy,|test_scheduler_accuracy, false \&\&|' \
