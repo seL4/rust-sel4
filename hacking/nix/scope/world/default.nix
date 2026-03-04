@@ -5,7 +5,7 @@
 #
 
 { lib
-, hostPlatform
+, stdenv
 , buildPackages
 , runCommand, runCommandCC, linkFarm, writeScript
 , jq
@@ -97,7 +97,7 @@ self: with self;
   ;
 
   kernelBinary32Bit =
-    assert hostPlatform.isx86_64;
+    assert stdenv.hostPlatform.isx86_64;
     runCommandCC "kernel32.elf" {} ''
       $OBJCOPY -O elf32-i386 ${kernelBinary} $out
     '';

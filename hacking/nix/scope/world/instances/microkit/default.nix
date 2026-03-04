@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
 #
 
-{ lib, stdenv, hostPlatform
+{ lib, stdenv
 , buildPackages, pkgsBuildBuild
 , linkFarm, symlinkJoin, writeText, runCommand, runCommandCC
 , callPackage
@@ -151,7 +151,7 @@ in {
         }
     );
 
-    reset = maybe (isMicrokit && hostPlatform.isAarch64) (
+    reset = maybe (isMicrokit && stdenv.hostPlatform.isAarch64) (
       let
         pd = rec {
           orig = mkPD rec {

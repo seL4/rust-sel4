@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
 #
 
-{ lib, stdenv, buildPlatform, hostPlatform, buildPackages
+{ lib, buildPackages
 , runCommand, runCommandCC, linkFarm
 , crateUtils
 , defaultRustEnvironment, defaultRustTargetTriple

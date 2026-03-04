@@ -4,8 +4,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
 #
 
-{ lib, buildPackages, runCommand, writeText, linkFarm
-, hostPlatform
+{ lib, stdenv, buildPackages, runCommand, writeText, linkFarm
 , python312Packages
 
 , sources
@@ -27,8 +26,8 @@
 let
   augmentedConfig = config // {
     kernel_config = "${seL4ForUserspace}/libsel4/include/kernel/gen_config.json";
-    device_tree = if hostPlatform.isx86 then null else "${seL4ForUserspace}/support/kernel.dtb";
-    platform_info =  if hostPlatform.isx86 then null else "${seL4ForUserspace}/support/platform_gen.yaml";
+    device_tree = if stdenv.hostPlatform.isx86 then null else "${seL4ForUserspace}/support/kernel.dtb";
+    platform_info =  if stdenv.hostPlatform.isx86 then null else "${seL4ForUserspace}/support/platform_gen.yaml";
     object_sizes = objectSizes;
     compute_ut_covers = computeUtCovers;
   };

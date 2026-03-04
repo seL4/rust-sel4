@@ -5,7 +5,6 @@
 #
 
 { lib
-, hostPlatform
 , stdenv
 , requireFile
 , fetchFromGitHub
@@ -232,7 +231,7 @@ let
 
   rustToolchain = mkToolchain {
     inherit hashesFilePath;
-    arch = hostPlatform.config;
+    arch = stdenv.hostPlatform.config;
     inherit versionTag versionName;
   };
 

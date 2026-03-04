@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
 #
 
-{ lib, buildPlatform, hostPlatform, buildPackages
+{ lib, buildPackages
 , runCommandCC, linkFarm, symlinkJoin, emptyDirectory
 , rsync
 

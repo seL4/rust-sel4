@@ -18,7 +18,6 @@
 , seL4ForBoot
 , crateUtils
 
-, hostPlatform
 , cmake
 , perl
 , python3Packages
@@ -31,7 +30,7 @@ let
     SEL4_KERNEL_LOADER_CONFIG = writeText "loader-config.json" (builtins.toJSON worldConfig.kernelLoaderConfig);
   };
 
-  libcDir = "${stdenv.cc.libc}/${hostPlatform.config}";
+  libcDir = "${stdenv.cc.libc}/${stdenv.hostPlatform.config}";
 
   bindgenEnvVars =
     lib.listToAttrs (lib.forEach allCustomRustTargetTripleNames (targetName: {

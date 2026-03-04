@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
 #
 
-{ lib, stdenv, hostPlatform, buildPackages
+{ lib, stdenv, buildPackages
 , fetchFromGitHub
 , bc, bison, dtc, flex
 , openssl
@@ -13,7 +13,7 @@
 let
   defconfig =
     let
-      modifier = lib.optionalString hostPlatform.is32bit "_32b";
+      modifier = lib.optionalString stdenv.hostPlatform.is32bit "_32b";
     in
       "rpi_4${modifier}_defconfig";
 

@@ -5,7 +5,6 @@
 #
 
 { lib
-, hostPlatform
 , buildPackages
 , writeScript
 }:
