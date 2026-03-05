@@ -8,6 +8,7 @@ use crate::{const_helpers::u32_into_usize, sys};
 
 mod arch;
 mod invocations;
+mod iospace;
 mod object;
 mod vm_attributes;
 mod vspace;
@@ -60,6 +61,17 @@ pub(crate) mod cap_type_arch {
         }
     }
 
+    sel4_cfg_if! {
+        if #[sel4_cfg(IOMMU)] {
+            declare_cap_type!(IOSpace);
+
+            declare_cap_type_for_object_of_fixed_size!(IOPageTable {
+                ObjectTypeArch,
+                ObjectBlueprintArch
+            });
+        }
+    }
+
     declare_cap_type_for_object_of_fixed_size!(_4k {
         ObjectTypeArch,
         ObjectBlueprintArch
@@ -92,13 +104,6 @@ pub(crate) mod cap_type_arch {
 
     pub type VSpace = PML4;
     pub type Granule = _4k;
-
-    // FIXIT: How am I suppose to know how large this object is gonna be?
-    pub type IOSpace = PML4;
-    declare_cap_type_for_object_of_fixed_size!(IOPageTable {
-        ObjectTypeArch,
-        ObjectBlueprintArch
-    });
 
     declare_cap_type!(IOPortControl);
 }

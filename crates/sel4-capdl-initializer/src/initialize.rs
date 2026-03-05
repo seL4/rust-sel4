@@ -17,7 +17,9 @@ use rkyv::option::ArchivedOption;
 use log::{debug, error, info, trace};
 
 use sel4::{
-    CapRights, CapTypeForFrameObjectOfFixedSize, cap_type,
+    CapRights, CapTypeForFrameObjectOfFixedSize,
+    cap::IOSpace,
+    cap_type, debug_println,
     init_thread::{self, Slot},
 };
 use sel4_capdl_initializer_types::*;
@@ -327,6 +329,7 @@ impl<'a> Initializer<'a> {
                         blueprint.physical_size_bits(),
                         object_name_or_default(named_obj)
                     );
+                    // orig_cslot(obj_id.into()) return slot allocated in alloc_many()
                     self.ut_cap(*i_ut).untyped_retype(
                         &blueprint,
                         &init_thread_cnode_absolute_cptr(),
@@ -694,14 +697,49 @@ impl<'a> Initializer<'a> {
 
     #[sel4::sel4_cfg(all(ARCH_X86_64, IOMMU))]
     fn init_iospaces(&mut self) -> Result<()> {
+        const DEVICE_ID_SHIFT: u16 = 3;
+        const PCI_ID_SHIFT: u16 = DEVICE_ID_SHIFT + 5;
+        const DOMAIN_ID_SHIFT: u16 = PCI_ID_SHIFT + 8;
+
         debug!("Initializing IOSpace");
 
-        for (obj_id, obj) in
-            self.filter_objects_with::<object::ArchivedIOPageTable>(|obj| obj.is_root)
-        {
+        let origin_iospace = init_thread::slot::CNODE
+            .cap()
+            .absolute_cptr(init_thread::slot::IO_SPACE.cap().cptr());
+
+        // let src = init_thread::slot::CNODE.cap().absolute_cptr(orig);
+        // let new = self.cslot_alloc_or_panic().cap();
+        // let dst = init_thread::slot::CNODE.cap().absolute_cptr(new);
+        // dst.mint(&src, rights, badge)?;
+
+        for (obj_id, obj) in self.filter_objects::<object::ArchivedIOSpace>() {
+            // Slot has been allocated in alloc_many() so we do not need to alloc slot by ourselves
+            // We only need to get the correct slot by orig_cslot(obj_id.into())
+            let slot = self.orig_cslot(obj_id.into());
+            let cptr = cslot_to_absolute_cptr(slot);
+            let badge = ((obj.pci_bus as u64) << PCI_ID_SHIFT)
+                + ((obj.pci_device as u64) << DEVICE_ID_SHIFT)
+                + obj.dev_func as u64
+                + ((u16::from(obj.domain_id) as u64) << DOMAIN_ID_SHIFT) as u64;
+
+            cptr.mint(&origin_iospace, CapRights::all(), badge)?;
+
+            // For debugging
+            let minted_cap: sel4::cap::IOSpace = slot.cap().downcast();
+
+            let obj = self.object_as::<object::ArchivedIOPageTable>(obj.slots[0].cap.obj());
+
             // Not sure if this part of the code is right
             let root_level = obj.level.unwrap_or(0).into();
             let iospace = self.orig_cap::<cap_type::IOSpace>(obj_id);
+
+            // For debugging
+            debug_println!(
+                "minted cap: {}, cap get later: {}",
+                minted_cap.cptr().bits(),
+                iospace.cptr().bits()
+            );
+
             self.init_iospace(iospace, root_level, 0, obj)?;
         }
         Ok(())
@@ -716,14 +754,29 @@ impl<'a> Initializer<'a> {
         obj: &object::ArchivedIOPageTable,
     ) -> Result<()> {
         for (i, entry) in obj.entries() {
+            // Change sel4::vspace_levels::step_bits
+            // Reuse it for now as the result should be the same
             let ioaddr = ioaddr + (usize::from(i) << sel4::vspace_levels::step_bits(level));
             match entry {
                 IOPageTableEntry::Frame(cap) => {
                     let frame = self.orig_cap::<cap_type::UnspecifiedPage>(cap.object);
                     let rights = cap.rights.to_sel4();
+
+                    debug_println!(
+                        "Map in io_frame: iospace: {}, ioaddr: 0x{:x}",
+                        iospace.bits(),
+                        ioaddr
+                    );
+
                     self.copy(frame)?.frame_map_io(iospace, ioaddr, rights)?;
                 }
                 IOPageTableEntry::IOPageTable(cap) => {
+                    debug_println!(
+                        "Map in IOPageTable: iospace: {}, ioaddr: 0x{:x}",
+                        iospace.bits(),
+                        ioaddr
+                    );
+
                     // This line is likely incorrect but I will leave it for now until Microkit Tool is finished.
                     self.orig_cap::<cap_type::IOPageTable>(cap.object)
                         .io_page_table_map(iospace, ioaddr)?;
