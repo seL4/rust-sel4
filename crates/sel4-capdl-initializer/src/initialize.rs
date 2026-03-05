@@ -8,6 +8,7 @@ use core::array;
 use core::ops::Range;
 use core::result::Result as CoreResult;
 use core::slice;
+use core::mem;
 
 use rkyv::Archive;
 use rkyv::ops::ArchivedRange;
@@ -27,28 +28,25 @@ use crate::hold_slots::HoldSlots;
 use crate::memory::{CopyAddrs, get_user_image_frame_slot};
 
 
-// XXX: added temp
-use sel4::CPtr;
-use sel4::cap::CNode;
-use sel4::NoExplicitInvocationContext;
-
 type Result<T> = CoreResult<T, CapDLInitializerError>;
 
 // Info passed to the initial task from capDL, based on bootinfo
+#[repr(C)]
 pub struct CapDLBootInfo {
     // TODO: figure out the size of this, might have more untypeds after splitting? and where to
     // allocate
     // XXX: is this necessary? can untypeds be offset by this already? (2 level index in singel
     // entry?)
-    untyped_cnode_idx: usize,
+    untyped_cnode_cap: sel4::Cap<cap_type::CNode>,
     untypeds: SlotRegion<cap_type::Untyped>,
     #[allow(non_snake_case)]
-    untypedList: [sel4::UntypedDesc; sel4::sel4_cfg_usize!(MAX_NUM_BOOTINFO_UNTYPED_CAPS)]
+    untypedList: [sel4::sys::seL4_UntypedDesc; sel4::sel4_cfg_usize!(MAX_NUM_BOOTINFO_UNTYPED_CAPS)]
 }
 
 
 pub struct Initializer<'a> {
     bootinfo: &'a sel4::BootInfoPtr,
+    capdl_bootinfo: CapDLBootInfo,
     user_image_bounds: Range<usize>,
     copy_addrs: CopyAddrs,
     spec: &'a <SpecForInitializer as Archive>::Archived,
@@ -81,8 +79,14 @@ impl<'a> Initializer<'a> {
             )
             .unwrap();
 
+        let capdl_bootinfo = CapDLBootInfo { untyped_cnode_cap: sel4::Cap::<cap_type::CNode>::from_bits(0 as sel4::CPtrBits), untypeds:
+            SlotRegion::<cap_type::Untyped>::from_range(0..0),
+        untypedList:bootinfo.inner().untypedList.clone(), // TODO (not a big deal) allocate in image rather than on stack
+        };
+
         Initializer {
             bootinfo,
+            capdl_bootinfo,
             user_image_bounds,
             copy_addrs,
             spec,
@@ -102,7 +106,6 @@ impl<'a> Initializer<'a> {
 
     fn run(&mut self) -> Result<()> {
         self.create_objects()?;
-        self.create_untyped_info()?;
 
         self.init_irqs()?;
         self.init_asids()?;
@@ -118,6 +121,7 @@ impl<'a> Initializer<'a> {
         self.init_tcbs()?;
         self.init_cspaces()?;
 
+        self.create_untyped_info()?;
         self.start_threads()?;
 
         Ok(())
@@ -314,6 +318,13 @@ impl<'a> Initializer<'a> {
                                     self.orig_cslot((*obj_id).into()).index(),
                                     1,
                                 )?;
+                                if let Some(a) = named_obj.object.as_::<object::ArchivedCNode>() && a.receive_all_untypeds {
+                                    info!("Mutating guard of receiving Cap, swapping and deleting original!");
+                                    let guard =  sel4::CNodeCapData::new(0, 56).into_word();
+                                    init_thread::slot::CNODE.cap().absolute_cptr_from_bits_with_depth(self.orig_cslot((*obj_id).into()).index() as u64 + 1, sel4::WORD_SIZE).mutate(&init_thread::slot::CNODE.cap().absolute_cptr_from_bits_with_depth(self.orig_cslot((*obj_id).into()).index() as u64, sel4::WORD_SIZE), guard);
+                                    // swap
+                                    init_thread::slot::CNODE.cap().absolute_cptr_from_bits_with_depth(self.orig_cslot((*obj_id).into()).index() as u64, sel4::WORD_SIZE).move_(&init_thread::slot::CNODE.cap().absolute_cptr_from_bits_with_depth(self.orig_cslot((*obj_id).into()).index() as u64 + 1, sel4::WORD_SIZE));
+                                }
                                 cur_paddr += 1 << size_bits;
                                 uts_watermark_by_paddr[idx] += 1 << size_bits;
                                 *obj_id += 1;
@@ -535,13 +546,18 @@ impl<'a> Initializer<'a> {
         // Check if a CNode (and memory region) marked for receiving untypeds exists, if so construct meta data on all
         // remaining untypeds,  copy (or move?) the untypeds to the receiving CNode and pass the
         // meta data to the marked memory region.
-        let mut receiving_untypeds_cnode_id;
-        let mut receiving_untypeds_frame_id;
+        let mut receiving_untypeds_cnode_id = None;
+        let mut root_cnode_id = None;
+        let mut receiving_untypeds_frame_id = None;
+        let mut receiving_untypeds_frame_obj = None;
         let mut found = false;
         for (obj_id, obj) in self.filter_objects::<object::ArchivedCNode>() {
             if obj.receive_all_untypeds {
-                receiving_untypeds_cnode_id = obj_id;
+                receiving_untypeds_cnode_id = Some(obj_id);
                 found = true;
+            }
+            if object_name(self.named_object(obj_id)).unwrap_or_else(||"").contains("_root") {
+                root_cnode_id = Some(obj_id);
             }
         }
         if !found {
@@ -556,13 +572,14 @@ impl<'a> Initializer<'a> {
             if object_name(self.named_object(obj_id)).unwrap_or_else(|| "").contains("remaining_untypeds") {
                 // Get the first Frame of the memory region (if larger than a page, only get the
                 // first page)
-                receiving_untypeds_frame_id = obj_id;
+                receiving_untypeds_frame_id = Some(obj_id);
+                receiving_untypeds_frame_obj = Some(obj);
                 found = true;
                 break;
             }
         }
         if !found {
-            error!("CNode for receiving untyped objects found, but no matching Frame (Memory Region) found!");
+            panic!("CNode for receiving untyped objects found, but no matching Frame (Memory Region) found!");
         }
         info!("Found both CNode and Frame for receiving untypeds and their meta data");
 
@@ -571,17 +588,39 @@ impl<'a> Initializer<'a> {
         // untypeds created when aligning objects to phys addr
         // // TODO: fix hack for calculating CPtr idx: 1 << (kernel_config,cap_address_bits -
         // root_cnode_size_bits)
-        let untyped_cptr_slot = CPtr::from_bits(1 << (64 - 6));
+        let mut untyped_cptr_slot = 0;
+        //let cap = self.orig_cap::<cap_type::CNode>(receiving_untypeds_cnode_id.expect("Untypeds Cnode not found but got here"));
+        self.capdl_bootinfo = CapDLBootInfo { 
+           untyped_cnode_cap: self.orig_cap::<cap_type::CNode>(receiving_untypeds_cnode_id.expect("Untypeds Cnode not found but got here")),
+           untypeds: SlotRegion::<cap_type::Untyped>::from_range(0..self.bootinfo.untyped().len()),
+           // XXX: maybe not clone it but initialise an empty array with default() trait? https://gist.github.com/ChrisWellsWood/84421854794037e760808d5d97d21421
+           untypedList: self.bootinfo.inner().untypedList.clone(), // TODO (not a big deal) allocate in image rather than on stack
+        };
         for (ut_idx, ut) in uts.iter().enumerate() {
-            let cnode_cap: CNode<NoExplicitInvocationContext> =  self.orig_cslot((receiving_untypeds_cnode_id).into()).cap().into();
-            cnode_cap.absolute_cptr_from_bits_with_depth(untyped_cptr_slot, sel4::WORD_SIZE).move_(
+            //let cnode_cap: CNode<NoExplicitInvocationContext> =  self.orig_cslot((receiving_untypeds_cnode_id).into()).cap().into();
+            let res = self.capdl_bootinfo.untyped_cnode_cap.absolute_cptr_from_bits_with_depth(untyped_cptr_slot, sel4::WORD_SIZE).move_(
                 &init_thread::slot::CNODE.cap().absolute_cptr_from_bits_with_depth(self.ut_cap(ut_idx).bits(), sel4::WORD_SIZE)
                 );
-            //init_thread::slot::CNODE.cap().absolute_cptr_from_bits_with_depth(self.ut_cap(ut_idx), sel4::WORD_SIZE).move_(src)
-            //init_thread_cnode_absolute_cptr()
-            //self.ut_cap(ut_idx)
-        }
+            match res {
+                Ok(()) => {},
+                Err(e) => panic!("Failed to copy untypeds {}", e)
+            }
+            // XXX: add info on watermark? actually will probably need to discard dirty Untypeds
+            // and only put here clean ones/split the dirty ones (and move here the splie ones)
+            self.capdl_bootinfo.untypedList[ut_idx] = ut.inner().clone();
 
+            untyped_cptr_slot += 1;
+            //cnode_cap = self.orig_cap::<cap_type::CNode>(root_cnode_id.expect("root Cnode not found but got here"));
+            //info!("root Cnode cap: {:?}", cnode_cap);
+            //info!("target slot Absolute CPtr: {:?}", cnode_cap.absolute_cptr_from_bits_with_depth(untyped_cptr_slot, sel4::WORD_SIZE));
+            //
+            //let res = cnode_cap.absolute_cptr_from_bits_with_depth(untyped_cptr_slot, sel4::WORD_SIZE).copy(
+            //    &init_thread::slot::CNODE.cap().absolute_cptr_from_bits_with_depth(self.ut_cap(ut_idx).bits(), sel4::WORD_SIZE),
+            //    CapRights::all()
+            //);
+            //info!("Res: {:?}", res);
+            //break;
+        }
 
         // TODO: figure out how create_objects tracks untyped info
         // TODO: move all "clean" untypeds after create_objects to new CNode
@@ -589,6 +628,29 @@ impl<'a> Initializer<'a> {
         // on struct
         // TODO: construct the struct (and array) containing all untyped info, put it inside the
         // memory region marked ("remaining_untypeds" name? maybe mark in spec instead?)
+
+        //  Fill the frame with the struct of untyped info
+        let frame_object_type =
+            sel4::FrameObjectType::from_bits(receiving_untypeds_frame_obj.expect("Receiving untyped info Frame obj not found but got here").size_bits.into()).unwrap();
+        let frame = self.orig_cap::<cap_type::UnspecifiedPage>(receiving_untypeds_frame_id.expect("Receiving untyped info Frame ID not found but got here"));
+        frame.frame_map(
+            init_thread::slot::VSPACE.cap(),
+            self.copy_addrs.select(frame_object_type),
+            CapRights::read_write(),
+            vm_attributes_from_whether_cached_and_exec(true, false),
+        )?;
+        let p  = &self.capdl_bootinfo as *const CapDLBootInfo as *const u8;
+        let capdl_bootinfo_slice = unsafe { slice::from_raw_parts(p, mem::size_of::<CapDLBootInfo>()) };
+        let dst_frame = self.copy_addrs.select(frame_object_type) as *mut u8;
+        let dst = unsafe { slice::from_raw_parts_mut(dst_frame, mem::size_of::<CapDLBootInfo>()) };
+
+        info!("capdl_bootinfo.untyped_cnode_cap: {:?}\n", self.capdl_bootinfo.untyped_cnode_cap);
+        dst.copy_from_slice(capdl_bootinfo_slice);
+        //pub fn copy_out(&self, dst: &mut [u8]) {
+        //    dst.copy_from_slice(&self.bytes)
+        //}
+
+        frame.frame_unmap()?;
         Ok(())
     }
 
