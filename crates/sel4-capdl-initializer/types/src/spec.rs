@@ -465,7 +465,7 @@ pub mod object {
         pub pci_bus: u8,
         pub pci_device: u8,
         pub dev_func: u8,
-        pub pd_id: usize,
+        pub domain_id: u16,
         pub slots: Vec<CapTableEntry>,
     }
 

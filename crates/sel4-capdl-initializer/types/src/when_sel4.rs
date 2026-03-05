@@ -75,6 +75,8 @@ impl<D: Archive> ArchivedObject<D> {
                 },
                 #[sel4_cfg(KERNEL_MCS)]
                 ArchivedObject::Reply => ObjectBlueprint::Reply,
+                #[sel4_cfg(all(ARCH_X86_64, IOMMU))]
+                ArchivedObject::IOPageTable(_) => sel4::ObjectBlueprintArch::IOPageTable.into(),
                 _ => return None,
             }
         })
