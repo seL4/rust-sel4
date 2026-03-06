@@ -33,14 +33,15 @@ type Result<T> = CoreResult<T, CapDLInitializerError>;
 // Info passed to the initial task from capDL, based on bootinfo
 #[repr(C)]
 pub struct CapDLBootInfo {
-    // TODO: figure out the size of this, might have more untypeds after splitting? and where to
-    // allocate
     // XXX: is this necessary? can untypeds be offset by this already? (2 level index in singel
     // entry?)
-    untyped_cnode_cap: sel4::Cap<cap_type::CNode>,
+    untyped_cnode_cptr: sel4::Cap<cap_type::CNode>,
     untypeds: SlotRegion<cap_type::Untyped>,
+    // TODO: figure out the size of this, might have more untypeds after splitting? and where to
+    // allocate
     #[allow(non_snake_case)]
-    untypedList: [sel4::sys::seL4_UntypedDesc; sel4::sel4_cfg_usize!(MAX_NUM_BOOTINFO_UNTYPED_CAPS)]
+    untypedList: [sel4::sys::seL4_UntypedDesc; sel4::sel4_cfg_usize!(MAX_NUM_BOOTINFO_UNTYPED_CAPS)],
+    // TODO: add watermark tracking
 }
 
 
@@ -80,13 +81,13 @@ impl<'a> Initializer<'a> {
             .unwrap();
 
         let capdl_bootinfo = CapDLBootInfo {
-            untyped_cnode_cap: sel4::Cap::<cap_type::CNode>::from_bits(1 << (64-6) as sel4::CPtrBits),
+            untyped_cnode_cptr: sel4::Cap::<cap_type::CNode>::from_bits(1 << (64-6) as sel4::CPtrBits),
             // leave slot 0 empty (used as self-reference to the CNode itself)
             untypeds: SlotRegion::<cap_type::Untyped>::from_range(1..bootinfo.untyped().len()+1),
            // XXX: maybe not clone it but initialise an empty array with default() trait? https://gist.github.com/ChrisWellsWood/84421854794037e760808d5d97d21421
             untypedList:bootinfo.inner().untypedList.clone(), // TODO (not a big deal) allocate in image rather than on stack
         };
-        info!("capdl_bootinfo: {:?}", capdl_bootinfo.untyped_cnode_cap);
+        info!("capdl_bootinfo.untyped_cnode_cptr: {:?}", capdl_bootinfo.untyped_cnode_cptr);
 
         Initializer {
             bootinfo,
@@ -230,7 +231,6 @@ impl<'a> Initializer<'a> {
                 let obj = &self.object(obj_id.into());
                 if let Some(blueprint) = obj.blueprint() {
                     by_size_end[blueprint.physical_size_bits()] += 1;
-                    info!("obj size: {}", blueprint.physical_size_bits());
                 }
             }
             let mut acc = first_obj_without_paddr;
@@ -239,11 +239,6 @@ impl<'a> Initializer<'a> {
                 acc += *n;
                 *n = acc;
             }
-        }
-
-        info!("start end");
-        for size in 0..sel4::WORD_SIZE {
-            info!("{}    {}", by_size_start[size], by_size_end[size]);
         }
 
         // In order to allocate objects which specify paddrs, we may have to
@@ -403,9 +398,7 @@ impl<'a> Initializer<'a> {
 
         // Create child objects
 
-        info!("DONE CREATING ROOT OBJECTS!");
         for cover in self.spec.untyped_covers.iter() {
-            info!("CREATING UNTYPED COVER STUFF!");
             let parent_obj_id = cover.parent;
             let parent = self.named_object(parent_obj_id);
             let parent_cptr = self.orig_cap::<cap_type::Untyped>(parent_obj_id);
@@ -532,36 +525,25 @@ impl<'a> Initializer<'a> {
 
     fn create_untyped_info(&mut self) -> Result<()> {
         // Sort untypeds by paddr
-        let mut _uts_by_paddr_backing: [usize;
-            sel4::sel4_cfg_usize!(MAX_NUM_BOOTINFO_UNTYPED_CAPS)] = array::from_fn(|i| i); // TODO (not a big deal) allocate in image rather than on stack
-        let uts = self.bootinfo.untyped_list();
-        let uts_by_paddr = {
-            let arr = &mut _uts_by_paddr_backing[..uts.len()];
-            arr.sort_unstable_by_key(|i| uts[*i].paddr());
-            arr
-        };
+        debug!("Create untyped info");
+
         // Check if a CNode (and memory region) marked for receiving untypeds exists, if so construct meta data on all
         // remaining untypeds,  copy (or move?) the untypeds to the receiving CNode and pass the
         // meta data to the marked memory region.
-        let mut receiving_untypeds_cnode_id = None;
-        let mut root_cnode_id = None;
-        let mut receiving_untypeds_frame_id = None;
-        let mut receiving_untypeds_frame_obj = None;
-        let mut found = false;
+        let mut receiving_untypeds_cnode_id_opt = None;
+        let mut receiving_untypeds_cnode_obj_opt = None;
+        let mut receiving_untypeds_frame_id_opt = None;
+        let mut receiving_untypeds_frame_obj_opt = None;
         for (obj_id, obj) in self.filter_objects::<object::ArchivedCNode>() {
             if obj.receive_all_untypeds {
-                receiving_untypeds_cnode_id = Some(obj_id);
-                found = true;
-            }
-            if object_name(self.named_object(obj_id)).unwrap_or_else(||"").contains("_root") {
-                root_cnode_id = Some(obj_id);
+                receiving_untypeds_cnode_id_opt = Some(obj_id);
+                receiving_untypeds_cnode_obj_opt = Some(obj);
             }
         }
-        if !found {
+        if receiving_untypeds_cnode_id_opt.is_none() {
             debug!("No CNode found for receiving untyped objects");
             return Ok(());
         }
-        found = false;
         for (obj_id, obj) in self.filter_objects::<object::ArchivedFrame<_>>() {
                     //if let Some(name) = object_name(self.named_object(obj_id)) {
             // XXX: FIX: modify memory regions to contain a better way of indicating it should
@@ -569,40 +551,33 @@ impl<'a> Initializer<'a> {
             if object_name(self.named_object(obj_id)).unwrap_or_else(|| "").contains("remaining_untypeds") {
                 // Get the first Frame of the memory region (if larger than a page, only get the
                 // first page)
-                receiving_untypeds_frame_id = Some(obj_id);
-                receiving_untypeds_frame_obj = Some(obj);
-                found = true;
+                receiving_untypeds_frame_id_opt = Some(obj_id);
+                receiving_untypeds_frame_obj_opt = Some(obj);
                 break;
             }
         }
-        if !found {
+        if receiving_untypeds_frame_id_opt.is_none() {
             panic!("CNode for receiving untyped objects found, but no matching Frame (Memory Region) found!");
         }
-        info!("Found both CNode and Frame for receiving untypeds and their meta data");
+        let receiving_untypeds_cnode_id = receiving_untypeds_cnode_id_opt.expect("Receiving untypeds CNode ID is None but got here");
+        let receiving_untypeds_cnode_obj = receiving_untypeds_cnode_obj_opt.expect("Receiving untypeds CNode obj is None but got here"); 
+        let receiving_untypeds_frame_id = receiving_untypeds_frame_id_opt.expect("Receiving untypeds Frame ID is None but got here");
+        let receiving_untypeds_frame_obj = receiving_untypeds_frame_obj_opt.expect("Receiving untypeds Frame Obj is None but got here");
 
         // Move all untypeds to the new CNode
         // TODO: move only CLEAN untypeds to the new CNode (watermark == 0). Also move the split
         // untypeds created when aligning objects to phys addr
-        // // TODO: fix hack for calculating CPtr idx: 1 << (kernel_config,cap_address_bits -
-        // root_cnode_size_bits)
         let mut untyped_cptr_slot = 1;
-        //let cap = self.orig_cap::<cap_type::CNode>(receiving_untypeds_cnode_id.expect("Untypeds Cnode not found but got here"));
         // this is the initial Cap to the CNode that got created, with guardsize = 0, hence need to
-        // do some arithmetic with addressing
-        let untyped_cnode_cap_init = self.orig_cap::<cap_type::CNode>(receiving_untypeds_cnode_id.expect("Untypeds Cnode not found but got here"));
+        // use depth == sizeBits of the CNode
+        //let receiving_untyped_cnode_size_bits = self.named_object(receiving
+        let untyped_cnode_cptr_init = self.orig_cap::<cap_type::CNode>(receiving_untypeds_cnode_id);
 
-        for (ut_idx, ut) in uts.iter().enumerate() {
-            // TODO: extract size_bits from the capdl_spec for the root cnode and the receiving_untyped_cnode
-            info!("untyped cptr offset: {:x}", untyped_cptr_slot);
-            //let cnode_cap: CNode<NoExplicitInvocationContext> =  self.orig_cslot((receiving_untypeds_cnode_id).into()).cap().into();
-            let res = untyped_cnode_cap_init.absolute_cptr_from_bits_with_depth(untyped_cptr_slot, 8).move_(
+        for (ut_idx, ut) in self.bootinfo.untyped_list().iter().enumerate() {
+            untyped_cnode_cptr_init.absolute_cptr_from_bits_with_depth(untyped_cptr_slot, receiving_untypeds_cnode_obj.size_bits as usize).move_(
                 &init_thread::slot::CNODE.cap().absolute_cptr_from_bits_with_depth(self.ut_cap(ut_idx).bits(), sel4::WORD_SIZE)
-                );
-            match res {
-                Ok(()) => {},
-                Err(e) => panic!("Failed to copy untypeds {}", e)
-            }
-            // XXX: add info on watermark? actually will probably need to discard dirty Untypeds
+                ).inspect_err(|e| panic!("Failed to copy untypeds {}", e));
+            // XXX: add info on watermark? will need to discard dirty Untypeds
             // and only put here clean ones/split the dirty ones (and move here the splie ones)
             // XXX: should this be addressed with regards to untyped_cptr_slot and not ut_idx?
             // maybe reshape the untyped CNode so thye always live from idx 0 ->
@@ -610,29 +585,13 @@ impl<'a> Initializer<'a> {
             self.capdl_bootinfo.untypedList[untyped_cptr_slot as usize] = ut.inner().clone();
 
             untyped_cptr_slot += 1;
-            //cnode_cap = self.orig_cap::<cap_type::CNode>(root_cnode_id.expect("root Cnode not found but got here"));
-            //info!("root Cnode cap: {:?}", cnode_cap);
-            //info!("target slot Absolute CPtr: {:?}", cnode_cap.absolute_cptr_from_bits_with_depth(untyped_cptr_slot, sel4::WORD_SIZE));
-            //
-            //let res = cnode_cap.absolute_cptr_from_bits_with_depth(untyped_cptr_slot, sel4::WORD_SIZE).copy(
-            //    &init_thread::slot::CNODE.cap().absolute_cptr_from_bits_with_depth(self.ut_cap(ut_idx).bits(), sel4::WORD_SIZE),
-            //    CapRights::all()
-            //);
-            //info!("Res: {:?}", res);
-            //break;
         }
 
-        // TODO: figure out how create_objects tracks untyped info
-        // TODO: move all "clean" untypeds after create_objects to new CNode
-        // TODO: move CNode to the root CNode slot in target PD's Cnode, save the idx to the passed
-        // on struct
-        // TODO: construct the struct (and array) containing all untyped info, put it inside the
-        // memory region marked ("remaining_untypeds" name? maybe mark in spec instead?)
-
+        // TODO: mark memory region in capDL spec (rn matching by "remaining_untypeds" name?)
         //  Fill the frame with the struct of untyped info
         let frame_object_type =
-            sel4::FrameObjectType::from_bits(receiving_untypeds_frame_obj.expect("Receiving untyped info Frame obj not found but got here").size_bits.into()).unwrap();
-        let frame = self.orig_cap::<cap_type::UnspecifiedPage>(receiving_untypeds_frame_id.expect("Receiving untyped info Frame ID not found but got here"));
+            sel4::FrameObjectType::from_bits(receiving_untypeds_frame_obj.size_bits.into()).unwrap();
+        let frame = self.orig_cap::<cap_type::UnspecifiedPage>(receiving_untypeds_frame_id);
         frame.frame_map(
             init_thread::slot::VSPACE.cap(),
             self.copy_addrs.select(frame_object_type),
@@ -644,12 +603,8 @@ impl<'a> Initializer<'a> {
         let dst_frame = self.copy_addrs.select(frame_object_type) as *mut u8;
         let dst = unsafe { slice::from_raw_parts_mut(dst_frame, mem::size_of::<CapDLBootInfo>()) };
 
-        info!("capdl_bootinfo.untyped_cnode_cap: {:?}\n", self.capdl_bootinfo.untyped_cnode_cap);
+        info!("capdl_bootinfo.untyped_cnode_cptr: {:?}\n", self.capdl_bootinfo.untyped_cnode_cptr);
         dst.copy_from_slice(capdl_bootinfo_slice);
-        //pub fn copy_out(&self, dst: &mut [u8]) {
-        //    dst.copy_from_slice(&self.bytes)
-        //}
-
         frame.frame_unmap()?;
         Ok(())
     }
