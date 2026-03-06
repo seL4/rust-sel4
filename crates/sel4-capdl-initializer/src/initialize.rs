@@ -79,10 +79,14 @@ impl<'a> Initializer<'a> {
             )
             .unwrap();
 
-        let capdl_bootinfo = CapDLBootInfo { untyped_cnode_cap: sel4::Cap::<cap_type::CNode>::from_bits(0 as sel4::CPtrBits), untypeds:
-            SlotRegion::<cap_type::Untyped>::from_range(0..0),
-        untypedList:bootinfo.inner().untypedList.clone(), // TODO (not a big deal) allocate in image rather than on stack
+        let capdl_bootinfo = CapDLBootInfo {
+            untyped_cnode_cap: sel4::Cap::<cap_type::CNode>::from_bits(1 << (64-6) as sel4::CPtrBits),
+            // leave slot 0 empty (used as self-reference to the CNode itself)
+            untypeds: SlotRegion::<cap_type::Untyped>::from_range(1..bootinfo.untyped().len()+1),
+           // XXX: maybe not clone it but initialise an empty array with default() trait? https://gist.github.com/ChrisWellsWood/84421854794037e760808d5d97d21421
+            untypedList:bootinfo.inner().untypedList.clone(), // TODO (not a big deal) allocate in image rather than on stack
         };
+        info!("capdl_bootinfo: {:?}", capdl_bootinfo.untyped_cnode_cap);
 
         Initializer {
             bootinfo,
@@ -318,13 +322,6 @@ impl<'a> Initializer<'a> {
                                     self.orig_cslot((*obj_id).into()).index(),
                                     1,
                                 )?;
-                                if let Some(a) = named_obj.object.as_::<object::ArchivedCNode>() && a.receive_all_untypeds {
-                                    info!("Mutating guard of receiving Cap, swapping and deleting original!");
-                                    let guard =  sel4::CNodeCapData::new(0, 56).into_word();
-                                    init_thread::slot::CNODE.cap().absolute_cptr_from_bits_with_depth(self.orig_cslot((*obj_id).into()).index() as u64 + 1, sel4::WORD_SIZE).mutate(&init_thread::slot::CNODE.cap().absolute_cptr_from_bits_with_depth(self.orig_cslot((*obj_id).into()).index() as u64, sel4::WORD_SIZE), guard);
-                                    // swap
-                                    init_thread::slot::CNODE.cap().absolute_cptr_from_bits_with_depth(self.orig_cslot((*obj_id).into()).index() as u64, sel4::WORD_SIZE).move_(&init_thread::slot::CNODE.cap().absolute_cptr_from_bits_with_depth(self.orig_cslot((*obj_id).into()).index() as u64 + 1, sel4::WORD_SIZE));
-                                }
                                 cur_paddr += 1 << size_bits;
                                 uts_watermark_by_paddr[idx] += 1 << size_bits;
                                 *obj_id += 1;
@@ -588,17 +585,17 @@ impl<'a> Initializer<'a> {
         // untypeds created when aligning objects to phys addr
         // // TODO: fix hack for calculating CPtr idx: 1 << (kernel_config,cap_address_bits -
         // root_cnode_size_bits)
-        let mut untyped_cptr_slot = 0;
+        let mut untyped_cptr_slot = 1;
         //let cap = self.orig_cap::<cap_type::CNode>(receiving_untypeds_cnode_id.expect("Untypeds Cnode not found but got here"));
-        self.capdl_bootinfo = CapDLBootInfo { 
-           untyped_cnode_cap: self.orig_cap::<cap_type::CNode>(receiving_untypeds_cnode_id.expect("Untypeds Cnode not found but got here")),
-           untypeds: SlotRegion::<cap_type::Untyped>::from_range(0..self.bootinfo.untyped().len()),
-           // XXX: maybe not clone it but initialise an empty array with default() trait? https://gist.github.com/ChrisWellsWood/84421854794037e760808d5d97d21421
-           untypedList: self.bootinfo.inner().untypedList.clone(), // TODO (not a big deal) allocate in image rather than on stack
-        };
+        // this is the initial Cap to the CNode that got created, with guardsize = 0, hence need to
+        // do some arithmetic with addressing
+        let untyped_cnode_cap_init = self.orig_cap::<cap_type::CNode>(receiving_untypeds_cnode_id.expect("Untypeds Cnode not found but got here"));
+
         for (ut_idx, ut) in uts.iter().enumerate() {
+            // TODO: extract size_bits from the capdl_spec for the root cnode and the receiving_untyped_cnode
+            info!("untyped cptr offset: {:x}", untyped_cptr_slot);
             //let cnode_cap: CNode<NoExplicitInvocationContext> =  self.orig_cslot((receiving_untypeds_cnode_id).into()).cap().into();
-            let res = self.capdl_bootinfo.untyped_cnode_cap.absolute_cptr_from_bits_with_depth(untyped_cptr_slot, sel4::WORD_SIZE).move_(
+            let res = untyped_cnode_cap_init.absolute_cptr_from_bits_with_depth(untyped_cptr_slot, 8).move_(
                 &init_thread::slot::CNODE.cap().absolute_cptr_from_bits_with_depth(self.ut_cap(ut_idx).bits(), sel4::WORD_SIZE)
                 );
             match res {
@@ -607,7 +604,10 @@ impl<'a> Initializer<'a> {
             }
             // XXX: add info on watermark? actually will probably need to discard dirty Untypeds
             // and only put here clean ones/split the dirty ones (and move here the splie ones)
-            self.capdl_bootinfo.untypedList[ut_idx] = ut.inner().clone();
+            // XXX: should this be addressed with regards to untyped_cptr_slot and not ut_idx?
+            // maybe reshape the untyped CNode so thye always live from idx 0 ->
+            // capdl_bootinfo.untypeds.end?
+            self.capdl_bootinfo.untypedList[untyped_cptr_slot as usize] = ut.inner().clone();
 
             untyped_cptr_slot += 1;
             //cnode_cap = self.orig_cap::<cap_type::CNode>(root_cnode_id.expect("root Cnode not found but got here"));
