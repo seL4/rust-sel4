@@ -555,11 +555,7 @@ impl<'a> Initializer<'a> {
             return Ok(());
         }
         for (obj_id, obj) in self.filter_objects::<object::ArchivedFrame<_>>() {
-            // XXX: FIX: modify memory regions to contain a better way of indicating it should
-            // receive the untyped metadata
-            if object_name(self.named_object(obj_id)).unwrap_or_else(|| "").contains("remaining_untypeds") {
-                // Get the first Frame of the memory region (if larger than a page, only get the
-                // first page)
+            if obj.receive_all_untypeds {
                 receiving_untypeds_frame_id_opt = Some(obj_id);
                 receiving_untypeds_frame_obj_opt = Some(obj);
                 break;
@@ -583,7 +579,7 @@ impl<'a> Initializer<'a> {
         let untyped_cnode_cptr_init = self.orig_cap::<cap_type::CNode>(receiving_untypeds_cnode_id);
 
         for (ut_idx, ut) in self.bootinfo.untyped_list().iter().enumerate() {
-            untyped_cnode_cptr_init.absolute_cptr_from_bits_with_depth(untyped_cptr_slot, receiving_untypeds_cnode_obj.size_bits as usize).move_(
+            let _ = untyped_cnode_cptr_init.absolute_cptr_from_bits_with_depth(untyped_cptr_slot, receiving_untypeds_cnode_obj.size_bits as usize).move_(
                 &init_thread::slot::CNODE.cap().absolute_cptr_from_bits_with_depth(self.ut_cap(ut_idx).bits(), sel4::WORD_SIZE)
                 ).inspect_err(|e| panic!("Failed to copy untypeds {}", e));
             // XXX: add info on watermark? will need to discard dirty Untypeds
