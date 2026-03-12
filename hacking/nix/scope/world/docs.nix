@@ -103,12 +103,14 @@ let
           unstable.unstable-options = true;
 
           target.${targetTriple.name}.rustflags = [
+            "-Zunstable-options"
             "--sysroot" sysroot
           ];
 
           # TODO
           # target.${targetTriple.name}.rustdocflags = [
           build.rustdocflags = [
+            "-Zunstable-options"
             "--sysroot" sysroot
           ];
         }
