@@ -53,9 +53,6 @@
 // Will replace sel4_panicking::abort_unwind
 #![feature(abort_unwind)]
 
-// For global_asm! throughout
-#![feature(asm_cfg)]
-
 // To replace runtime macro crates
 #![feature(macro_attr)]
 #![feature(macro_derive)]
