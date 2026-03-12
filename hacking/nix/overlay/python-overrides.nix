@@ -61,16 +61,6 @@ self: super: with self;
     doCheck = false;
   };
 
-  concurrencytest = buildPythonPackage rec {
-    pname = "concurrencytest";
-    version = "0.1.2";
-    src = fetchPypi {
-      inherit pname version;
-      sha256 = "1n62h3wyq2i3aqwns0hsrh3nl3qqh9512pncbwvrm55rrnswbab4";
-    };
-    propagatedBuildInputs = [ subunit testtools ];
-  };
-
   sel4-deps = buildPythonPackage rec {
     pname = "sel4-deps";
     version = "0.3.1";
