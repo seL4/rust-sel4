@@ -103,15 +103,19 @@ impl AllowListCheckWorkspaceView {
                 this.insert_version(source_key, req, source_key);
             } else if let Some(v) = v.as_table_like() {
                 let req = VersionReq::parse(v.get("version").unwrap().as_str().unwrap()).unwrap();
-                for package_name in v
-                    .get("applies-to")
-                    .unwrap()
-                    .as_array()
-                    .unwrap()
-                    .iter()
-                    .map(|v| v.as_str().unwrap())
-                {
-                    this.insert_version(package_name, req.clone(), source_key);
+                match v.get("applies-to") {
+                    Some(package_names) => {
+                        for package_name in package_names.as_array().unwrap().iter() {
+                            this.insert_version(
+                                package_name.as_str().unwrap(),
+                                req.clone(),
+                                source_key,
+                            );
+                        }
+                    }
+                    None => {
+                        this.insert_version(source_key, req, source_key);
+                    }
                 }
             } else {
                 panic!()
