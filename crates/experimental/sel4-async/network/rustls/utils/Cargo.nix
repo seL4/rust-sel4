@@ -21,9 +21,6 @@ mk {
     rand = {
       version = versions.rand;
       default-features = false;
-      features = [
-        "small_rng"
-      ];
     };
   };
 }
