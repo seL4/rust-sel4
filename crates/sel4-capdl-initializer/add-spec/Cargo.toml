@@ -20,7 +20,7 @@ license = "BSD-2-Clause"
 anyhow = "1.0.100"
 clap = "4.5.50"
 num = "0.4.3"
-object = { version = "0.37.3", features = ["all"] }
+object = { version = "0.38.1", features = ["all"] }
 rkyv = "0.8.12"
 sel4-capdl-initializer-types = { path = "../types", features = ["serde", "deflate", "transform"] }
 sel4-synthetic-elf = { path = "../../sel4-synthetic-elf" }

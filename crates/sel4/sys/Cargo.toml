@@ -36,4 +36,4 @@ sel4-build-env = { path = "../build-env" }
 sel4-config = { path = "../config" }
 sel4-config-data = { path = "../config/data" }
 syn = { version = "2.0.108", features = ["parsing"] }
-xmltree = "0.11.0"
+xmltree = "0.12.0"

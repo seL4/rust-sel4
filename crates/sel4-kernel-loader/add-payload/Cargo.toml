@@ -21,7 +21,7 @@ anyhow = "1.0.100"
 clap = "4.5.50"
 heapless = "0.9.1"
 num = "0.4.3"
-object = { version = "0.37.3", features = ["all"] }
+object = { version = "0.38.1", features = ["all"] }
 postcard = { version = "1.1.3", default-features = false, features = ["alloc"] }
 sel4-config-types = { path = "../../sel4/config/types", features = ["serde"] }
 sel4-kernel-loader-payload-types = { path = "../payload-types", features = ["serde"] }

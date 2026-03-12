@@ -28,7 +28,7 @@ sel4-shared-memory = { path = "../../../../../sel4-shared-memory" }
 sel4-shared-ring-buffer = { path = "../../../../../experimental/sel4-shared-ring-buffer" }
 sel4-virtio-blk = { path = "../../../../../drivers/virtio/blk" }
 sel4-virtio-hal-impl = { path = "../../../../../drivers/virtio/hal-impl" }
-virtio-drivers = { version = "0.12.0", default-features = false }
+virtio-drivers = { version = "0.13.0", default-features = false }
 
 [dependencies.sel4-microkit-driver-adapters]
 path = "../../../../../experimental/sel4-microkit/driver-adapters"

@@ -32,7 +32,7 @@ mod dummy_custom_getrandom {
     use core::cell::RefCell;
 
     use rand::rngs::SmallRng;
-    use rand::{RngCore, SeedableRng};
+    use rand::{Rng, SeedableRng};
 
     #[cfg(not(target_thread_local))]
     compile_error!("");

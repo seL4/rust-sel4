@@ -30,7 +30,7 @@ sel4-backtrace-symbolize = { path = "../symbolize", optional = true }
 serde = { version = "1.0.228", default-features = false, features = ["derive"], optional = true }
 
 [dependencies.addr2line]
-version = "0.25.1"
+version = "0.26.0"
 default-features = false
 features = ["rustc-demangle", "cpp_demangle", "fallible-iterator", "smallvec"]
 optional = true
