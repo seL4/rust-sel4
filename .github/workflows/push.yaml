@@ -47,18 +47,6 @@ jobs:
     name: Run tests
     runs-on: ubuntu-latest
     steps:
-      - name: Prepare to maximize build space
-        run: sudo mkdir /nix
-      - name: Maximize build space
-        uses: easimon/maximize-build-space@master
-        with:
-          build-mount-path: /nix
-          root-reserve-mb: 8192
-          remove-dotnet: 'true'
-          remove-android: 'true'
-          remove-haskell: 'true'
-          remove-codeql: 'true'
-          remove-docker-images: 'true'
       - uses: cachix/install-nix-action@v26
         with:
           nix_path: nixpkgs=channel:nixos-unstable
@@ -90,18 +78,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: [check-source, run-tests, build-docs]
     steps:
-      - name: Prepare to maximize build space
-        run: sudo mkdir /nix
-      - name: Maximize build space
-        uses: easimon/maximize-build-space@master
-        with:
-          build-mount-path: /nix
-          root-reserve-mb: 8192
-          remove-dotnet: 'true'
-          remove-android: 'true'
-          remove-haskell: 'true'
-          remove-codeql: 'true'
-          remove-docker-images: 'true'
       - uses: cachix/install-nix-action@v26
         with:
           nix_path: nixpkgs=channel:nixos-unstable
