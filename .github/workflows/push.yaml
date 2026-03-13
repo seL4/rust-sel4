@@ -26,7 +26,7 @@ jobs:
         with:
           name: coliasgroup
           authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Check source
         run: make check-source
   check-dependencies:
@@ -40,7 +40,7 @@ jobs:
         with:
           name: coliasgroup
           authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Check dependencies
         run: make check-dependencies
   run-tests:
@@ -56,7 +56,7 @@ jobs:
         with:
           name: coliasgroup
           authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Run tests
         run: make run-fast-tests
   build-docs:
@@ -70,7 +70,7 @@ jobs:
         with:
           name: coliasgroup
           authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Build docs
         run: make html-links
   build-everything:
@@ -87,7 +87,7 @@ jobs:
         with:
           name: coliasgroup
           authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Build everything
         run: make everything
       - name: Expose docs
@@ -108,7 +108,7 @@ jobs:
         with:
           name: coliasgroup
           authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Check Kani proofs
         run: make check-kani-proofs
   deploy-docs:
