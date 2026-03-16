@@ -4,10 +4,10 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use core::array;
 use core::ops::Range;
 use core::result::Result as CoreResult;
 use core::slice;
+use core::{array, panic};
 
 use rkyv::Archive;
 use rkyv::ops::ArchivedRange;
@@ -701,7 +701,8 @@ impl<'a> Initializer<'a> {
         const PCI_ID_SHIFT: u16 = DEVICE_ID_SHIFT + 5;
         const DOMAIN_ID_SHIFT: u16 = PCI_ID_SHIFT + 8;
 
-        debug!("Initializing IOSpace");
+        const VTD_THREE_LEVEL_PT: u64 = 3;
+        const VTD_FOUR_LEVEL_PT: u64 = 4;
 
         let origin_iospace = init_thread::slot::CNODE
             .cap()
@@ -712,35 +713,56 @@ impl<'a> Initializer<'a> {
         // let dst = init_thread::slot::CNODE.cap().absolute_cptr(new);
         // dst.mint(&src, rights, badge)?;
 
-        for (obj_id, obj) in self.filter_objects::<object::ArchivedIOSpace>() {
+        for (obj_id, iospace) in self.filter_objects::<object::ArchivedIOSpace>() {
             // Slot has been allocated in alloc_many() so we do not need to alloc slot by ourselves
             // We only need to get the correct slot by orig_cslot(obj_id.into())
             let slot = self.orig_cslot(obj_id.into());
             let cptr = cslot_to_absolute_cptr(slot);
-            let badge = ((obj.pci_bus as u64) << PCI_ID_SHIFT)
-                + ((obj.pci_device as u64) << DEVICE_ID_SHIFT)
-                + obj.dev_func as u64
-                + ((u16::from(obj.domain_id) as u64) << DOMAIN_ID_SHIFT) as u64;
+            let badge = ((iospace.pci_bus as u64) << PCI_ID_SHIFT)
+                + ((iospace.pci_device as u64) << DEVICE_ID_SHIFT)
+                + iospace.dev_func as u64
+                + ((u16::from(iospace.domain_id) as u64) << DOMAIN_ID_SHIFT) as u64;
 
             cptr.mint(&origin_iospace, CapRights::all(), badge)?;
 
-            // For debugging
-            let minted_cap: sel4::cap::IOSpace = slot.cap().downcast();
-
-            let obj = self.object_as::<object::ArchivedIOPageTable>(obj.slots[0].cap.obj());
+            // The first entry in the IOSpace slot is the root page table
+            let root_pt = self.object_as::<object::ArchivedIOPageTable>(iospace.slots[0].cap.obj());
 
             // Not sure if this part of the code is right
-            let root_level = obj.level.unwrap_or(0).into();
-            let iospace = self.orig_cap::<cap_type::IOSpace>(obj_id);
+            let root_level = root_pt.level.unwrap_or(0).into();
+            let iospace_cap = self.orig_cap::<cap_type::IOSpace>(obj_id);
 
-            // For debugging
-            debug_println!(
-                "minted cap: {}, cap get later: {}",
-                minted_cap.cptr().bits(),
-                iospace.cptr().bits()
-            );
+            let level = unsafe { self.bootinfo.ptr().as_ref().unwrap().inner().numIOPTLevels };
 
-            self.init_iospace(iospace, root_level, 0, obj)?;
+            debug!("Initializing iospace, PAGE TABLE LEVEL: {}", level);
+
+            // In microkit tool, we default to use the four level page table structure
+            match level {
+                // If only three level page table is supported by the hardware, we skip mapping in the root entry
+                // But we validate if the data structure fits in a three level page table structure.
+                // Are we wasting the root page table object here since we created it but does not map it in?
+                VTD_THREE_LEVEL_PT => {
+                    let root = &root_pt.slots;
+                    if root.len() == 1 || usize::from(root[0].slot) == 0 {
+                        self.init_iospace(iospace_cap, root_level, 0, root_pt)?;
+                    } else {
+                        panic!(
+                            "The device only support 3 level VTD Page Table but a 4 level VTD PT is needed for provided Capdl Spec"
+                        )
+                    }
+                }
+                VTD_FOUR_LEVEL_PT => {
+                    self.orig_cap::<cap_type::IOPageTable>(iospace.slots[0].cap.obj())
+                        .io_page_table_map(iospace_cap, 0)?;
+                    self.init_iospace(iospace_cap, root_level, 0, root_pt)?;
+                }
+                _ => {
+                    panic!(
+                        "VTD Page Table level should be 3 or 4 level, but {} is provided",
+                        level
+                    );
+                }
+            }
         }
         Ok(())
     }
@@ -756,6 +778,8 @@ impl<'a> Initializer<'a> {
         for (i, entry) in obj.entries() {
             // Change sel4::vspace_levels::step_bits
             // Reuse it for now as the result should be the same
+            // The code is buggy in a way that works, the VTD_PML4 is not mapped in
+            // However, because the thing is designed for 4 level page table, ignore the VTD_PML4 makes it work
             let ioaddr = ioaddr + (usize::from(i) << sel4::vspace_levels::step_bits(level));
             match entry {
                 IOPageTableEntry::Frame(cap) => {
@@ -763,18 +787,23 @@ impl<'a> Initializer<'a> {
                     let rights = cap.rights.to_sel4();
 
                     debug_println!(
-                        "Map in io_frame: iospace: {}, ioaddr: 0x{:x}",
+                        "Map in io_frame: iospace: {}, ioaddr: 0x{:x}, capslot: {}, step bits: {}",
                         iospace.bits(),
-                        ioaddr
+                        ioaddr,
+                        usize::from(i),
+                        sel4::vspace_levels::step_bits(level)
                     );
 
                     self.copy(frame)?.frame_map_io(iospace, ioaddr, rights)?;
                 }
                 IOPageTableEntry::IOPageTable(cap) => {
                     debug_println!(
-                        "Map in IOPageTable: iospace: {}, ioaddr: 0x{:x}",
+                        "Map in IOPageTable: iospace: {}, ioaddr: 0x{:x}, level: {}, capslot: {}, step bits: {}",
                         iospace.bits(),
-                        ioaddr
+                        ioaddr,
+                        level,
+                        usize::from(i),
+                        sel4::vspace_levels::step_bits(level)
                     );
 
                     // This line is likely incorrect but I will leave it for now until Microkit Tool is finished.
