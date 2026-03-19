@@ -16,9 +16,7 @@ use rkyv::ops::ArchivedRange;
 use log::{debug, error, info, trace};
 
 use sel4::{
-    CapRights, CapTypeForFrameObjectOfFixedSize,
-    cap::IOSpace,
-    cap_type, debug_println,
+    CapRights, CapTypeForFrameObjectOfFixedSize, cap_type, debug_println,
     init_thread::{self, Slot},
 };
 use sel4_capdl_initializer_types::*;
@@ -699,7 +697,7 @@ impl<'a> Initializer<'a> {
         const DOMAIN_ID_SHIFT: u16 = PCI_ID_SHIFT + 8;
 
         const VTD_THREE_LEVEL_PT: u64 = 3;
-        const VTD_FOUR_LEVEL_PT: u64 = 4;
+        // const VTD_FOUR_LEVEL_PT: u64 = 4;
 
         let origin_iospace = init_thread::slot::CNODE
             .cap()
@@ -726,7 +724,7 @@ impl<'a> Initializer<'a> {
             let root_pt = self.object_as::<object::ArchivedIOPageTable>(iospace.slots[0].cap.obj());
 
             // Not sure if this part of the code is right
-            let root_level = root_pt.level.unwrap_or(0).into();
+            let root_level: usize = root_pt.level.unwrap_or(0).into();
             let iospace_cap = self.orig_cap::<cap_type::IOSpace>(obj_id);
 
             let level = unsafe { self.bootinfo.ptr().as_ref().unwrap().inner().numIOPTLevels };
@@ -739,23 +737,14 @@ impl<'a> Initializer<'a> {
                 // But we validate if the data structure fits in a three level page table structure.
                 // Are we wasting the root page table object here since we created it but does not map it in?
                 VTD_THREE_LEVEL_PT => {
-                    let root = &root_pt.slots;
-                    if root.len() == 1 || usize::from(root[0].slot) == 0 {
-                        self.init_iospace(iospace_cap, root_level, 0, root_pt)?;
-                    } else {
-                        panic!(
-                            "The device only support 3 level VTD Page Table but a 4 level VTD PT is needed for provided Capdl Spec"
-                        )
-                    }
-                }
-                VTD_FOUR_LEVEL_PT => {
                     self.orig_cap::<cap_type::IOPageTable>(iospace.slots[0].cap.obj())
                         .io_page_table_map(iospace_cap, 0)?;
-                    self.init_iospace(iospace_cap, root_level, 0, root_pt)?;
+                    // Add one to the level to get step_bits() working hackily
+                    self.init_iospace(iospace_cap, root_level + 1, 0, root_pt)?;
                 }
                 _ => {
                     panic!(
-                        "VTD Page Table level should be 3 or 4 level, but {} is provided",
+                        "The hardware does not support three level VTD Page Table, but {} level is provided",
                         level
                     );
                 }
