@@ -106,7 +106,7 @@ pub struct Spec<D> {
     pub objects: Vec<NamedObject<D>>,
     pub irqs: Vec<IrqEntry>,
     pub domain_schedule: Option<Vec<DomainSchedEntry>>,
-    pub domain_start_idx: Option<Word>,
+    pub domain_set_start: Option<Word>,
     pub domain_idx_shift: Option<Word>,
     pub asid_slots: Vec<AsidSlotEntry>,
     pub root_objects: Range<ObjectId>,
