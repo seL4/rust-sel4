@@ -421,7 +421,7 @@ pub mod object {
         pub max_prio: u8,
         pub resume: bool,
 
-        pub domain: u8,
+        pub domain: Option<u8>,
 
         pub ip: Word,
         pub sp: Word,
