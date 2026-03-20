@@ -118,7 +118,7 @@ impl<D> Spec<D> {
                 .collect::<Result<_, E>>()?,
             irqs: self.irqs.clone(),
             domain_schedule: self.domain_schedule.clone(),
-            domain_start_idx: self.domain_start_idx.clone(),
+            domain_set_start: self.domain_set_start.clone(),
             domain_idx_shift: self.domain_idx_shift.clone(),
             asid_slots: self.asid_slots.clone(),
             root_objects: self.root_objects.clone(),

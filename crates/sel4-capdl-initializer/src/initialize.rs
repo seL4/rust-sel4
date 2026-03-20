@@ -922,10 +922,9 @@ impl<'a> Initializer<'a> {
                 shift = self.spec.domain_idx_shift.unwrap().to_sel4();
             }
 
-            if self.spec.domain_start_idx.is_some() {
-                init_thread::slot::DOMAIN_SET.cap().domain_set_schedule_set_start(self.spec.domain_start_idx.unwrap().to_sel4() + shift)?;
-            } else {
-                init_thread::slot::DOMAIN_SET.cap().domain_set_schedule_set_start(0)?;
+            // Only call set start if we have been given a start index
+            if self.spec.domain_set_start.is_some() {
+                init_thread::slot::DOMAIN_SET.cap().domain_set_schedule_set_start(self.spec.domain_set_start.unwrap().to_sel4() + shift)?;
             }
         }
      
