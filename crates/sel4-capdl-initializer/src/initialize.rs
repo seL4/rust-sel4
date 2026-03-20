@@ -758,9 +758,9 @@ impl<'a> Initializer<'a> {
 
                 sel4::sel4_cfg_if! {
                     if #[sel4_cfg(not(NUM_DOMAINS = "1"))] {
-                        let domain_id: u8 = obj.extra.domain.into();
+                        let domain_id = obj.extra.domain.unwrap_or(0);
                         init_thread::slot::DOMAIN_SET.cap().domain_set_set(domain_id, tcb)
-                        .unwrap_or_else(|err| panic!("Error setting domain of thread to {}: {:?}", domain_id, err));
+                            .unwrap_or_else(|err| panic!("Error setting domain of thread to {}: {:?}", domain_id, err));
                     }
                 }
 
