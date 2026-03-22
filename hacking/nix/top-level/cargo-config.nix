@@ -13,6 +13,8 @@ let
   inherit (build) writers linkFarm this;
   inherit (this) crateUtils;
 
+  targetRootDir = toString ../../../target;
+
   toolchainPath = ../../../rust-toolchain.toml;
 
   rustupTargets = (lib.importTOML toolchainPath).toolchain.targets;
@@ -119,13 +121,15 @@ let
       ])
     ;
 
+  ccConfigCommon = {
+    env = {
+      HOST_CC = getCCExePath build.stdenv;
+      LIBCLANG_PATH = build.this.libclangPath;
+    };
+  };
+
   cc = writers.writeTOML "cc.toml" (crateUtils.clobber ([
-    {
-      env = {
-        HOST_CC = getCCExePath build.stdenv;
-        LIBCLANG_PATH = build.this.libclangPath;
-      };
-    }
+    ccConfigCommon
   ] ++ map ccConfigForTarget allTargets));
 
   byTarget = lib.genAttrs allTargets (target:
@@ -141,13 +145,44 @@ let
           build-std-features = [ "compiler-builtins-mem" ];
         };
       })
+      ccConfigCommon
       (ccConfigForTarget target)
     ]))
   );
 
   byTargetLinks = linkFarm "by-target" (lib.flip lib.mapAttrs' byTarget (k: v: lib.nameValuePair ("${k}.toml") v));
 
-  byWorldLinks = linkFarm "by-world" {};
+  worlds = lib.mapAttrs
+    (_: attrs: attrs.none.this.worlds or attrs.default.none.this.worlds /* HACK */)
+    pkgs.host
+  ;
+
+  configForWorld = attrPath: world:
+    {
+      build.target-dir = "${targetRootDir}/by-world/${lib.concatStringsSep "." attrPath}";
+      env = world.seL4RustEnvVars;
+    };
+
+  byWorldList = lib.mapAttrsToListRecursiveCond
+    (_: attrs: !(attrs.__isWorld or false))
+    (attrPath: world: {
+      path = attrPath;
+      config = configForWorld attrPath world;
+    })
+    worlds
+  ;
+
+  byWorldLinks = linkFarm "by-world"
+    (lib.listToAttrs
+      (map
+        ({ path, config }:
+          let
+            name = "${lib.concatStringsSep "." path}.toml";
+          in
+            lib.nameValuePair
+              name
+              (writers.writeTOML name config))
+        byWorldList));
 
   links = linkFarm "generated-config" {
     "cc.toml" = cc;
@@ -157,7 +192,7 @@ let
 
 in {
 
-  inherit links cc byTarget;
+  inherit links cc;
 
   utils = {
     inherit

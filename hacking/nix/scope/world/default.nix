@@ -49,6 +49,8 @@ in
 self: with self;
 
 {
+  __isWorld = true;
+
   inherit worldConfig;
 
   microkit = assert worldConfig.isMicrokit; mkMicrokit worldConfig;
