@@ -484,10 +484,10 @@ in rec {
             });
         in {
           default = mk {};
-          microkit = mk {
+          microkit = lib.optionalAttrs is64bit (mk {
             isMicrokit = true;
             microkitBoard = "x86_64_generic";
-          };
+          });
         };
     };
 
