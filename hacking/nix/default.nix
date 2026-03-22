@@ -149,6 +149,17 @@ in let
                 config = "riscv32-unknown-linux-gnu";
               };
             };
+            # TODO (see note for riscv64.gc)
+            gc = {
+              none = mkLeafWithGuard (rec {
+                config = "riscv32-none-elf";
+                gcc = {}; # equivalent to default, omitting means we can use cached binary
+                this = {
+                  rustTargetRiscVArch = "gc";
+                  gccParams = { arch = "rv32gc"; abi = "lp32d"; };
+                };
+              });
+            };
           };
           x86_64 = {
             none = mkLeafWithGuard {

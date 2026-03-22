@@ -10,12 +10,18 @@
 let
   inherit (topLevel) lib pkgs;
   inherit (pkgs) build;
-  inherit (build) writers this;
+  inherit (build) writers linkFarm this;
   inherit (this) crateUtils;
+
+  toolchainPath = ../../../rust-toolchain.toml;
+
+  rustupTargets = (lib.importTOML toolchainPath).toolchain.targets;
+
+  isRustupTarget = targetName: lib.elem targetName rustupTargets;
 
   targetsPath = ../../../support/targets;
 
-  seL4Targets =
+  customTargets =
     let
       parseTargetName = fname:
         let
@@ -60,6 +66,12 @@ let
     "riscv32imafc-unknown-none-elf"
   ];
 
+  allTargets = builtinMuslTargets ++ builtinBareMetalTargets ++ customTargets;
+
+  hasMusl = hasSegment "musl";
+
+  hasSeL4 = targetName: hasSegment "sel4" targetName || hasSegment "microkit" targetName;
+
   getPkgsForTarget = target: {
     "x86_64" = pkgs.host.x86_64.none;
     "aarch64" = pkgs.host.aarch64.none;
@@ -67,55 +79,91 @@ let
     "armv7a" = pkgs.host.aarch32.none;
     "riscv64gc" = pkgs.host.riscv64.gc.none;
     "riscv64imac" = pkgs.host.riscv64.imac.none;
+    "riscv32gc" = pkgs.host.riscv32.gc.none;
     "riscv32imac" = pkgs.host.riscv32.imac.none;
     "riscv32imafc" = pkgs.host.riscv32.imafc.none;
   }.${firstSegment target};
 
-  configForTarget = isBuiltin: target:
+  ccConfigForTarget = target:
     let
       hostPkgs = getPkgsForTarget target;
       inherit (hostPkgs) stdenv;
       inherit (hostPkgs.this) muslForSeL4 dummyLibunwind;
     in
-      if !isBuiltin && hasSegment "musl" target
-      then {
-        env = {
-          "CC_${target}" = getCCExePath stdenv;
-          "CFLAGS_${target}" = "-nostdlib ${mkIncludeArg muslForSeL4}";
-          "BINDGEN_EXTRA_CLANG_ARGS_${target}" = mkIncludeArg muslForSeL4;
-        };
-        target.${target} = {
-          rustflags = [
-            "-L${muslForSeL4}/lib"
-            "-L${dummyLibunwind}/lib"
-          ];
-        };
-      }
-      else {
-        env = {
-          "CC_${target}" = getCCExePath stdenv;
-          "BINDGEN_EXTRA_CLANG_ARGS_${target}" = mkIncludeArg (getNewlibDir stdenv);
-        };
-      }
+      crateUtils.clobber ([
+        {
+          env = {
+            "CC_${target}" = getCCExePath stdenv;
+          };
+        }
+        (
+          if hasSeL4 target && hasMusl target
+          then {
+            env = {
+              "CFLAGS_${target}" = "-nostdlib ${mkIncludeArg muslForSeL4}";
+              "BINDGEN_EXTRA_CLANG_ARGS_${target}" = mkIncludeArg muslForSeL4;
+            };
+            target.${target} = {
+              rustflags = [
+                "-L${muslForSeL4}/lib"
+                "-L${dummyLibunwind}/lib"
+              ];
+            };
+          }
+          else {
+            env = {
+              "BINDGEN_EXTRA_CLANG_ARGS_${target}" = mkIncludeArg (getNewlibDir stdenv);
+            };
+          }
+        )
+      ])
     ;
 
-in {
-  cc = writers.writeTOML "config-cc.toml" (crateUtils.clobber ([
+  cc = writers.writeTOML "cc.toml" (crateUtils.clobber ([
     {
       env = {
         HOST_CC = getCCExePath build.stdenv;
         LIBCLANG_PATH = build.this.libclangPath;
       };
     }
-  ] ++ map (configForTarget true) builtinBareMetalTargets
-    ++ map (configForTarget false) seL4Targets
-  ));
+  ] ++ map ccConfigForTarget allTargets));
+
+  byTarget = lib.genAttrs allTargets (target:
+    writers.writeTOML "${target}.toml" (crateUtils.clobber ([
+      {
+        build = {
+          target = target;
+        };
+      }
+      (lib.optionalAttrs (!(isRustupTarget target)) {
+        unstable = {
+          build-std = [ "compiler_builtins" "core" "alloc" ] ++ lib.optional (hasMusl target) "std";
+          build-std-features = [ "compiler-builtins-mem" ];
+        };
+      })
+      (ccConfigForTarget target)
+    ]))
+  );
+
+  byTargetLinks = linkFarm "by-target" (lib.flip lib.mapAttrs' byTarget (k: v: lib.nameValuePair ("${k}.toml") v));
+
+  byWorldLinks = linkFarm "by-world" {};
+
+  links = linkFarm "generated-config" {
+    "cc.toml" = cc;
+    "by-target" = byTargetLinks;
+    "by-world" = byWorldLinks;
+  };
+
+in {
+
+  inherit links cc byTarget;
 
   utils = {
     inherit
       firstSegment
       hasSegment
-      seL4Targets
+      customTargets
       builtinBareMetalTargets
     ;
   };
