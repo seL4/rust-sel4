@@ -6,10 +6,8 @@
 
 #![no_std]
 #![feature(cfg_target_thread_local)]
-#![feature(core_intrinsics)]
-#![feature(lang_items)]
 #![feature(panic_can_unwind)]
-#![feature(thread_local)]
+#![cfg_attr(target_thread_local, feature(thread_local))]
 #![allow(internal_features)]
 
 #[cfg(feature = "alloc")]
