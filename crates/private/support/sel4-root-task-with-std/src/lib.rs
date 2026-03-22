@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-#![feature(cfg_target_thread_local)]
 #![feature(linkage)]
 #![feature(never_type)]
 

@@ -5,7 +5,6 @@
 //
 
 #![no_main]
-#![feature(thread_local)]
 #![allow(unreachable_patterns)]
 #![allow(unused_variables)]
 

@@ -83,6 +83,7 @@
 #![no_std]
 #![feature(cfg_target_thread_local)]
 #![feature(thread_local)]
+#![allow(unused_features)]
 #![allow(clippy::unit_arg)]
 
 pub use sel4_config::{
