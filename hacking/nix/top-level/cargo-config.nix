@@ -11,6 +11,7 @@ let
   inherit (topLevel) lib pkgs;
   inherit (pkgs) build;
   inherit (build) writers this;
+  inherit (this) crateUtils;
 
   targetsPath = ../../../support/targets;
 
@@ -40,9 +41,6 @@ let
   getNewlibDir = stdenv: "${stdenv.cc.libc}/${stdenv.hostPlatform.config}";
 
   mkIncludeArg = d: "-I${d}/include";
-
-  concatAttrs = lib.fold (x: y: x // y) {};
-  clobberAttrs = lib.fold crateUtils.combineConfig {};
 
   builtinMuslTargets = [
     "x86_64-unknown-linux-musl"
@@ -102,7 +100,7 @@ let
     ;
 
 in {
-  cc = writers.writeTOML "config-cc.toml" (clobberAttrs ([
+  cc = writers.writeTOML "config-cc.toml" (crateUtils.clobber ([
     {
       env = {
         HOST_CC = getCCExePath build.stdenv;
@@ -117,8 +115,6 @@ in {
     inherit
       firstSegment
       hasSegment
-      clobberAttrs
-      concatAttrs
       seL4Targets
       builtinBareMetalTargets
     ;
