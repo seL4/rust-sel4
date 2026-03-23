@@ -49,6 +49,7 @@ impl ObjectTypeX86 {
                 Self::EPTPageDirectory => sys::_object::seL4_X86_EPTPDObject,
                 #[sel4_cfg(VTX)]
                 Self::EPTPageTable => sys::_object::seL4_X86_EPTPTObject,
+                #[sel4_cfg(IOMMU)]
                 Self::IOPageTable => sys::_object::seL4_X86_IOPageTableObject,
                 Self::SeL4Arch(sel4_arch) => sel4_arch.into_sys(),
             }

@@ -697,7 +697,7 @@ impl<'a> Initializer<'a> {
         const DOMAIN_ID_SHIFT: u16 = PCI_ID_SHIFT + 8;
 
         const VTD_THREE_LEVEL_PT: u64 = 3;
-        // const VTD_FOUR_LEVEL_PT: u64 = 4;
+        const VTD_FOUR_LEVEL_PT: u64 = 4;
 
         let origin_iospace = init_thread::slot::CNODE
             .cap()
@@ -733,14 +733,16 @@ impl<'a> Initializer<'a> {
 
             // In microkit tool, we default to use the four level page table structure
             match level {
-                // If only three level page table is supported by the hardware, we skip mapping in the root entry
-                // But we validate if the data structure fits in a three level page table structure.
-                // Are we wasting the root page table object here since we created it but does not map it in?
+                // If only three level page table is supported by the hardware, we skip mapping the root page table in
+                // Current approach waste the root page table if three level page table is supported
                 VTD_THREE_LEVEL_PT => {
+                    self.init_iospace(iospace_cap, root_level, 0, root_pt)?;
+                }
+                VTD_FOUR_LEVEL_PT => {
+                    // Map in the root page table if four level VTD PT is supported
                     self.orig_cap::<cap_type::IOPageTable>(iospace.slots[0].cap.obj())
                         .io_page_table_map(iospace_cap, 0)?;
-                    // Add one to the level to get step_bits() working hackily
-                    self.init_iospace(iospace_cap, root_level + 1, 0, root_pt)?;
+                    self.init_iospace(iospace_cap, root_level, 0, root_pt)?;
                 }
                 _ => {
                     panic!(
@@ -762,10 +764,7 @@ impl<'a> Initializer<'a> {
         obj: &object::ArchivedIOPageTable,
     ) -> Result<()> {
         for (i, entry) in obj.entries() {
-            // Change sel4::vspace_levels::step_bits
-            // Reuse it for now as the result should be the same
-            // The code is buggy in a way that works, the VTD_PML4 is not mapped in
-            // However, because the thing is designed for 4 level page table, ignore the VTD_PML4 makes it work
+            // The code is reusing sel4::vspace_levels::step_bits for now
             let ioaddr = ioaddr + (usize::from(i) << sel4::vspace_levels::step_bits(level));
             match entry {
                 IOPageTableEntry::Frame(cap) => {
