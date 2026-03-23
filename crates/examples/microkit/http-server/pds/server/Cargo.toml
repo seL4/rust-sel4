@@ -59,7 +59,7 @@ path = "../../../../../experimental/sel4-shared-ring-buffer/bookkeeping"
 path = "../../../../../experimental/sel4-shared-ring-buffer/smoltcp"
 
 [dependencies.smoltcp]
-version = "0.12.0"
+version = "0.13.0"
 default-features = false
 features = [
     "proto-ipv4",
