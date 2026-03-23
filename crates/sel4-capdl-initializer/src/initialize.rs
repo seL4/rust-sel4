@@ -758,9 +758,11 @@ impl<'a> Initializer<'a> {
 
                 sel4::sel4_cfg_if! {
                     if #[sel4_cfg(not(NUM_DOMAINS = "1"))] {
-                        let domain_id = obj.extra.domain.unwrap_or(0);
-                        init_thread::slot::DOMAIN_SET.cap().domain_set_set(domain_id, tcb)
-                            .unwrap_or_else(|err| panic!("Error setting domain of thread to {}: {:?}", domain_id, err));
+                        if obj.extra.domain.is_some() {
+                            let domain_id = obj.extra.domain.unwrap();
+                            init_thread::slot::DOMAIN_SET.cap().domain_set_set(domain_id, tcb)
+                                .unwrap_or_else(|err| panic!("Error setting domain of thread to {}: {:?}", domain_id, err));
+                        }
                     }
                 }
 
@@ -927,7 +929,6 @@ impl<'a> Initializer<'a> {
                 init_thread::slot::DOMAIN_SET.cap().domain_set_schedule_set_start(self.spec.domain_set_start.unwrap().to_sel4() + shift)?;
             }
         }
-     
         Ok(())
     }
 
