@@ -904,9 +904,13 @@ impl<'a> Initializer<'a> {
                 sched_index = self.spec.domain_idx_shift.unwrap().to_sel4();
             }
 
-            for ArchivedDomainSchedEntry { id, time} in self.spec.domain_schedule.as_ref().unwrap().iter() {
+            for ArchivedDomainSchedEntry { id, time } in
+                self.spec.domain_schedule.as_ref().unwrap().iter()
+            {
                 let domain_time = *time;
-                init_thread::slot::DOMAIN_SET.cap().domain_set_schedule_configure(sched_index, *id, domain_time.to_native())?;
+                init_thread::slot::DOMAIN_SET
+                    .cap()
+                    .domain_set_schedule_configure(sched_index, *id, domain_time.to_native())?;
                 sched_index += 1;
             }
         }
@@ -926,7 +930,11 @@ impl<'a> Initializer<'a> {
 
             // Only call set start if we have been given a start index
             if self.spec.domain_set_start.is_some() {
-                init_thread::slot::DOMAIN_SET.cap().domain_set_schedule_set_start(self.spec.domain_set_start.unwrap().to_sel4() + shift)?;
+                init_thread::slot::DOMAIN_SET
+                    .cap()
+                    .domain_set_schedule_set_start(
+                        self.spec.domain_set_start.unwrap().to_sel4() + shift,
+                    )?;
             }
         }
         Ok(())
@@ -1012,9 +1020,7 @@ impl<'a> Initializer<'a> {
                     }
                 }
             }
-            ArchivedObject::DomainSet => {
-                init_thread::slot::DOMAIN_SET.upcast()
-            }
+            ArchivedObject::DomainSet => init_thread::slot::DOMAIN_SET.upcast(),
             ArchivedObject::Frame(object::ArchivedFrame {
                 init: ArchivedFrameInit::Embedded(embedded),
                 ..

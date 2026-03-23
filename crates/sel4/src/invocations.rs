@@ -360,16 +360,19 @@ impl<C: InvocationContext> DomainSet<C> {
     /// Corresponds to `seL4_DomainSet_Set`.
     pub fn domain_set_set(self, domain: u8, thread: Tcb) -> Result<()> {
         Error::wrap(self.invoke(|cptr, ipc_buffer| {
-            ipc_buffer.inner_mut().seL4_DomainSet_Set(
-                cptr.bits(),
-                domain,
-                thread.bits(),
-            )
+            ipc_buffer
+                .inner_mut()
+                .seL4_DomainSet_Set(cptr.bits(), domain, thread.bits())
         }))
     }
 
     /// Corresponds to `seL4_DomainSet_ScheduleConfigure`
-    pub fn domain_set_schedule_configure(self, index: Word, domain: u8, duration: Time) -> Result<()> {
+    pub fn domain_set_schedule_configure(
+        self,
+        index: Word,
+        domain: u8,
+        duration: Time,
+    ) -> Result<()> {
         Error::wrap(self.invoke(|cptr, ipc_buffer| {
             ipc_buffer.inner_mut().seL4_DomainSet_ScheduleConfigure(
                 cptr.bits(),
@@ -383,10 +386,9 @@ impl<C: InvocationContext> DomainSet<C> {
     /// Corresponds to `seL4_DomainSet_ScheduleSetStart`
     pub fn domain_set_schedule_set_start(self, index: Word) -> Result<()> {
         Error::wrap(self.invoke(|cptr, ipc_buffer| {
-            ipc_buffer.inner_mut().seL4_DomainSet_ScheduleSetStart(
-                cptr.bits(),
-                index,
-            )
+            ipc_buffer
+                .inner_mut()
+                .seL4_DomainSet_ScheduleSetStart(cptr.bits(), index)
         }))
     }
 }
