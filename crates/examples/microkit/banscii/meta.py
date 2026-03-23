@@ -13,7 +13,7 @@ ProtectionDomain = SystemDescription.ProtectionDomain
 MemoryRegion = SystemDescription.MemoryRegion
 Channel = SystemDescription.Channel
 Map = SystemDescription.Map
-Irq = SystemDescription.Irq
+IrqConventional = SystemDescription.IrqConventional
 
 
 @dataclass
@@ -79,7 +79,7 @@ def run(args):
         )
     )
     serial_driver.add_irq(
-        Irq(
+        IrqConventional(
             board.serial_irq,
             setvar_id='serial_irq_id',
         )
