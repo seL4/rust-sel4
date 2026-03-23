@@ -34,7 +34,7 @@ let
 
   capdlCommon = {
     url = "https://github.com/coliasgroup/capdl.git";
-    rev = "83e2decec0beab4a54ef1c454ec84ad7997fed89"; # branch rust-testing
+    rev = "099f46fd10f2fbb34b9fd640f9ba96096dd636d5"; # branch rust-testing
     local = localRoot + "/capdl";
     extraFilter = path: type:
       lib.hasSuffix "/.stack-work" path || lib.hasSuffix "/stack.yaml.lock" path;
@@ -56,13 +56,13 @@ in rec {
 
   seL4 = fetchGit {
     url = "https://github.com/seL4/seL4.git";
-    rev = "c0fc32450fb5e8460083b89a84d067249b109cfc"; # 14.0.0
+    rev = "ebbda2af5aeb5a93d42f108f9732c1b4134d4d64"; # master
     local = localRoot + "/seL4";
   };
 
   microkit = fetchGit {
     url = "https://github.com/coliasgroup/microkit.git";
-    rev = "5825477583cad0dd555569373fef797aa82d7047"; # branch "rust-testing", based on 2.1.0
+    rev = "f68fd8fd5ddcb26ffbafaa81e0b615288a38ee21"; # branch "rust-testing", based on main
     local = localRoot + "/microkit";
     extraFilter = path: type:
       lib.hasSuffix "/target" path;
@@ -70,7 +70,7 @@ in rec {
 
   sdfgen = fetchGit {
     url = "https://github.com/coliasgroup/microkit_sdf_gen";
-    rev = "16f735ab4954ae8e0490c65787b33f5b0ec87957"; # branch "rust", based on 0.27.0
+    rev = "6a42abbe6a81af3a37cd1070d47106c55c7f4e0c"; # branch "rust", based on main
     local = localRoot + "/microkit_sdf_gen";
     extraFilter = path: type:
       lib.hasSuffix "/.zig-cache" path || lib.hasSuffix "/zig-out" path || lib.hasSuffix "/result" path;
@@ -85,14 +85,14 @@ in rec {
 
   sddf = fetchGit {
     url = "https://github.com/au-ts/sddf";
-    rev = "6bba35a9597639929be9e0db4b7f8fba2a307ad6"; # lionsos HEAD
+    rev = "1905749cbde7fcda827d95ea8a85924bbcfcff6c"; # lionsos HEAD
     # ref = null;
     local = localRoot + "/lionsos/dep/sddf";
   };
 
   lionsosAttrs = {
     url = "https://github.com/au-ts/lionsos";
-    rev = "67377b5b3b340d1466abf4fb3ca098a5cae36d82"; # HEAD
+    rev = "1905749cbde7fcda827d95ea8a85924bbcfcff6c"; # HEAD
     # ref = null;
     local = localRoot + "/lionsos";
   };
