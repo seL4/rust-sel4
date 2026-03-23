@@ -40,6 +40,6 @@ path = "../../../../../../experimental/sel4-async/network/rustls/utils"
 path = "../../../../../../experimental/sel4-async/single-threaded-executor"
 
 [dependencies.smoltcp]
-version = "0.12.0"
+version = "0.13.0"
 default-features = false
 features = ["proto-ipv4", "proto-dhcpv4", "proto-dns", "socket-dhcpv4", "socket-dns", "socket-tcp"]
