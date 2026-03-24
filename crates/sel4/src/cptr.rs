@@ -227,6 +227,11 @@ pub mod cap_type {
     }
 
     declare_cap_type! {
+        /// Corresponds to `seL4_DomainSet`
+        DomainSet
+    }
+
+    declare_cap_type! {
         /// Corresponds to the null capability.
         Null
     }
@@ -244,11 +249,6 @@ pub mod cap_type {
     declare_cap_type! {
         /// Any intermediate translation table capability.
         UnspecifiedIntermediateTranslationTable
-    }
-
-    declare_cap_type! {
-        /// Corresponds to `seL4_DomainSet`
-        DomainSet
     }
 
     sel4_cfg_if! {

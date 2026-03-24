@@ -100,7 +100,7 @@ impl<'a> Initializer<'a> {
         self.init_domain_schedule()?;
 
         self.start_threads()?;
-        self.start_domain_scehdule()?;
+        self.start_domain_schedule()?;
 
         Ok(())
     }
@@ -755,14 +755,12 @@ impl<'a> Initializer<'a> {
                 let authority = init_thread::slot::TCB.cap();
                 let max_prio = obj.extra.max_prio.into();
                 let prio = obj.extra.prio.into();
-                let domain_id: u8 = obj.extra.domain.into();
 
                 sel4::sel4_cfg_if! {
                     if #[sel4_cfg(not(NUM_DOMAINS = "1"))] {
-                        let ret = init_thread::slot::DOMAIN_SET.cap().domain_set_set(domain_id, tcb);
-                        if let Err(e) = ret {
-                             debug!("Error setting domain of thread to {}: {:?}", domain_id, e);
-                        }
+                        let domain_id: u8 = obj.extra.domain.into();
+                        init_thread::slot::DOMAIN_SET.cap().domain_set_set(domain_id, tcb)
+                        .unwrap_or_else(|err| panic!("Error setting domain of thread to {}: {:?}", domain_id, err));
                     }
                 }
 
@@ -899,20 +897,33 @@ impl<'a> Initializer<'a> {
         if self.spec.domain_schedule.is_some() {
             debug!("Initializing domain schedule");
 
-            for (idx, ArchivedDomainSchedEntry { id, time}) in self.spec.domain_schedule.as_ref().unwrap().iter().enumerate() {
+            let mut sched_index = 0;
+            if self.spec.domain_idx_shift.is_some() {
+                sched_index = self.spec.domain_idx_shift.unwrap().to_sel4();
+            }
+
+            for ArchivedDomainSchedEntry { id, time} in self.spec.domain_schedule.as_ref().unwrap().iter() {
                 let domain_time = *time;
-                init_thread::slot::DOMAIN_SET.cap().domain_set_schedule_configure(idx as u64, *id, domain_time.to_native())?;
+                init_thread::slot::DOMAIN_SET.cap().domain_set_schedule_configure(sched_index, *id, domain_time.to_native())?;
+                sched_index += 1;
             }
         }
         Ok(())
     }
 
-    fn start_domain_scehdule(&self) -> Result<()> {
+    fn start_domain_schedule(&self) -> Result<()> {
         if self.spec.domain_schedule.is_some() {
             debug!("Starting domain schedule");
 
-           if self.spec.domain_start_idx.is_some() {
-                init_thread::slot::DOMAIN_SET.cap().domain_set_schedule_set_start(self.spec.domain_start_idx.unwrap().to_sel4())?;
+            // The start index also needs to be shifted. This makes the shift
+            // an offset into the schedule rather than an absolute index.
+            let mut shift = 0;
+            if self.spec.domain_idx_shift.is_some() {
+                shift = self.spec.domain_idx_shift.unwrap().to_sel4();
+            }
+
+            if self.spec.domain_start_idx.is_some() {
+                init_thread::slot::DOMAIN_SET.cap().domain_set_schedule_set_start(self.spec.domain_start_idx.unwrap().to_sel4() + shift)?;
             } else {
                 init_thread::slot::DOMAIN_SET.cap().domain_set_schedule_set_start(0)?;
             }
