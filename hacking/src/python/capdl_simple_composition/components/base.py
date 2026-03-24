@@ -63,6 +63,9 @@ class BaseComponent:
 
     ###
 
+    def add_hack_page(self, vaddr, size, cap):
+        self.addr_space().add_external_region_with_caps(vaddr, [size], [cap])
+
     def map_with_size(self, size, vaddr, paddr=None, device=False, fill=[], label=None, read=False, write=False, execute=False, cached=True):
         assert vaddr % size == 0
         name = ''
@@ -71,7 +74,7 @@ class BaseComponent:
         name += '0x{:x}'.format(vaddr)
         frame = self.alloc(ObjectType.seL4_FrameObject, name, size=size, fill=fill, paddr=paddr, device=device)
         cap = Cap(frame, read=read, write=write, grant=execute, cached=cached)
-        self.addr_space().add_hack_page(vaddr, size, cap)
+        self.add_hack_page(vaddr, size, cap)
 
     def map_page(self, *args, **kwargs):
         self.map_with_size(self.composition.kernel_config.page_size(), *args, **kwargs)
