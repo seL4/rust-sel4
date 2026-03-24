@@ -210,7 +210,7 @@ class ElfThread:
         ipc_buffer_vaddr, _ = self.component.advance(page_size)
         ipc_buffer_frame = self.component.alloc(ObjectType.seL4_FrameObject, '{}_ipc_buffer'.format(self.name), size=page_size)
         ipc_buffer_cap = Cap(ipc_buffer_frame, read=True, write=True)
-        self.component.addr_space().add_hack_page(ipc_buffer_vaddr, page_size, ipc_buffer_cap)
+        self.component.add_hack_page(ipc_buffer_vaddr, page_size, ipc_buffer_cap)
 
         tcb = self.component.alloc(ObjectType.seL4_TCBObject, name='{}_tcb'.format(self.name))
         tcb.ip = self.component.elf.get_entry_point()
