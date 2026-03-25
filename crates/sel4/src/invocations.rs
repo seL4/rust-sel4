@@ -371,7 +371,7 @@ impl<C: InvocationContext> DomainSet<C> {
         self,
         index: Word,
         domain: u8,
-        duration: Time,
+        duration: u64,
     ) -> Result<()> {
         Error::wrap(self.invoke(|cptr, ipc_buffer| {
             ipc_buffer.inner_mut().seL4_DomainSet_ScheduleConfigure(
