@@ -19,6 +19,7 @@ from capdl_simple_composition.kernel_config import KernelConfig
 from capdl_simple_composition.device_tree import DeviceTree
 from capdl_simple_composition.utils import aligned_chunks
 
+
 class BaseComposition:
 
     @classmethod
@@ -109,7 +110,8 @@ class BaseComposition:
 
         def add_untyped_from(region, device=False):
             for paddr, size_bits in aligned_chunks(self.kernel_config.word_size(), region['start'], region['end']):
-                ut_allocator.add_untyped(Untyped(name='root_untyped_{}'.format(paddr), size_bits=size_bits, paddr=paddr))
+                ut_allocator.add_untyped(Untyped(name='root_untyped_{}'.format(
+                    paddr), size_bits=size_bits, paddr=paddr))
 
         for region in self.platform_info['memory']:
             add_untyped_from(region)
@@ -123,7 +125,7 @@ class BaseComposition:
 
     def write_links(self):
         d = self.out_dir / 'links'
-        shutil.rmtree(d, ignore_errors=True) # HACK
+        shutil.rmtree(d, ignore_errors=True)  # HACK
         d.mkdir()
         for fname, path in self.files.items():
             (d / fname).symlink_to(path)

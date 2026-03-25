@@ -8,6 +8,7 @@ from capdl import ObjectType, CSpaceAllocator, AddressSpaceAllocator, Cap
 
 from capdl_simple_composition.utils import align_up, mk_fill
 
+
 class BaseComponent:
 
     def __init__(self, composition, name):
@@ -18,7 +19,8 @@ class BaseComponent:
         cspace = self.alloc(ObjectType.seL4_CapTableObject, 'cspace')
         vspace = self.alloc(self.composition.capdl_arch.vspace().object, 'vspace')
         self.render_state().cspaces[self.key] = CSpaceAllocator(cspace)
-        self.render_state().addr_spaces[self.key] = AddressSpaceAllocator('{}_addr_space'.format(self.key), vspace)
+        self.render_state().addr_spaces[self.key] = AddressSpaceAllocator(
+            '{}_addr_space'.format(self.key), vspace)
         self.render_state().pds[self.key] = vspace
 
     def render_state(self):
@@ -72,7 +74,8 @@ class BaseComponent:
         if label is not None:
             name += label + '_'
         name += '0x{:x}'.format(vaddr)
-        frame = self.alloc(ObjectType.seL4_FrameObject, name, size=size, fill=fill, paddr=paddr, device=device)
+        frame = self.alloc(ObjectType.seL4_FrameObject, name, size=size,
+                           fill=fill, paddr=paddr, device=device)
         cap = Cap(frame, read=read, write=write, grant=execute, cached=cached)
         self.add_hack_page(vaddr, size, cap)
 

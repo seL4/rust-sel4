@@ -7,6 +7,7 @@
 from capdl import ObjectType, Cap
 from capdl_simple_composition import BaseComposition, ElfComponent
 
+
 class TestComponent(ElfComponent):
 
     def __init__(self, *args, **kwargs):
@@ -16,7 +17,8 @@ class TestComponent(ElfComponent):
 
         self.primary_thread.tcb['sc_slot'] = self.new_sched_context("primary")
 
-        secondary_thread = self.secondary_thread('secondary_thread', affinity=max_affinity, sched_context=self.new_sched_context("secondary"))
+        secondary_thread = self.secondary_thread(
+            'secondary_thread', affinity=max_affinity, sched_context=self.new_sched_context("secondary"))
         lock_nfn = self.alloc(ObjectType.seL4_NotificationObject, name='lock_nfn')
         barrier_nfn = self.alloc(ObjectType.seL4_NotificationObject, name='barrier_nfn')
 
@@ -30,9 +32,11 @@ class TestComponent(ElfComponent):
     def arg_json(self):
         return self._arg
 
+
 class TestComposition(BaseComposition):
 
     def compose(self):
         self.component(TestComponent, 'example_component')
+
 
 TestComposition.from_env().run()

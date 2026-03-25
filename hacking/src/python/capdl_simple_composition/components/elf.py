@@ -20,6 +20,7 @@ DEFAULT_MAX_PRIO = 0
 DEFAULT_STACK_SIZE = 2 * 2**20
 DEFAULT_STATIC_HEAP_SIZE = 8 * 2**20
 
+
 class ElfComponent(BaseComponent):
 
     def __init__(
@@ -29,7 +30,7 @@ class ElfComponent(BaseComponent):
             affinity=DEFAULT_AFFINITY,
             sched_context=None,
             **kwargs,
-            ):
+    ):
 
         super().__init__(composition, name, **kwargs)
 
@@ -50,7 +51,7 @@ class ElfComponent(BaseComponent):
             sched_context=sched_context,
             prio=prio, max_prio=max_prio,
             alloc_endpoint=False,
-            )
+        )
 
         self.secondary_threads = []
 
@@ -67,7 +68,8 @@ class ElfComponent(BaseComponent):
         super().pre_finalize()
 
     def finalize(self):
-        elf_spec = self.elf.get_spec(infer_tcb=False, infer_asid=False, pd=self.addr_space().vspace_root, addr_space=self.addr_space())
+        elf_spec = self.elf.get_spec(infer_tcb=False, infer_asid=False,
+                                     pd=self.addr_space().vspace_root, addr_space=self.addr_space())
         self.obj_space().merge(elf_spec, label=self.key)
         super().finalize()
 
@@ -89,7 +91,7 @@ class ElfComponent(BaseComponent):
         if affinity is None:
             affinity = self.primary_thread.tcb.affinity
         if prio is None:
-            prio = self.primary_thread.tcb.prio + 1 # a reasonable default for thin threads
+            prio = self.primary_thread.tcb.prio + 1  # a reasonable default for thin threads
         if max_prio is None:
             max_prio = self.primary_thread.tcb.max_prio
         thread = self.thread(name, *args, affinity=affinity, prio=prio, **kwargs)
@@ -112,14 +114,14 @@ class ElfComponent(BaseComponent):
         self.pad_and_align_to_larger_page()
         start, end = self.map_range_at_cursor(size, label='heap')
         lock = self.cspace().alloc(
-                self.alloc(ObjectType.seL4_NotificationObject, 'heap_lock'),
-                read=True, write=True, badge=1,
-                )
+            self.alloc(ObjectType.seL4_NotificationObject, 'heap_lock'),
+            read=True, write=True, badge=1,
+        )
         return {
             'start': start,
             'end': end,
             'lock': lock,
-            }
+        }
 
     def runtime_config(self):
         heap_info = self.static_heap()
@@ -129,13 +131,13 @@ class ElfComponent(BaseComponent):
             'static_heap': {
                 'start': heap_info['start'],
                 'end': heap_info['end'],
-                },
+            },
             'static_heap_mutex_notification': heap_info['lock'],
             'idle_notification': self.cspace().alloc(
                 self.alloc(ObjectType.seL4_NotificationObject, 'idle_notification'),
                 read=True,
-                ),
-            'threads': [ thread.get_thread_runtime_config() for thread in self.threads() ],
+            ),
+            'threads': [thread.get_thread_runtime_config() for thread in self.threads()],
             'image_identifier': str(self.elf_path),
             'arg': str(self.composition.out_dir / arg_bin),
         }
@@ -147,7 +149,8 @@ class ElfComponent(BaseComponent):
             json.dump(config, f_json, indent=4)
         with path_json.open('r') as f_json:
             with path_bin.open('wb') as f_bin:
-                subprocess.check_call(['sel4-simple-task-serialize-runtime-config'], stdin=f_json, stdout=f_bin)
+                subprocess.check_call(
+                    ['sel4-simple-task-serialize-runtime-config'], stdin=f_json, stdout=f_bin)
 
         self.composition.register_file(path_bin.name, path_bin)
 
@@ -168,7 +171,8 @@ class ElfComponent(BaseComponent):
         with path_json.open('r') as f_json:
             with path_bin.open('wb') as f_bin:
                 try:
-                    subprocess.check_call(self.transform_arg_json_argv(), stdin=f_json, stdout=f_bin)
+                    subprocess.check_call(self.transform_arg_json_argv(),
+                                          stdin=f_json, stdout=f_bin)
                 except Exception as e:
                     print(path_json)
                     raise e
@@ -193,22 +197,24 @@ class ElfComponent(BaseComponent):
 class ElfThread:
 
     def __init__(self, component, name,
-            stack_size=DEFAULT_STACK_SIZE,
-            prio=DEFAULT_PRIO, max_prio=DEFAULT_MAX_PRIO,
-            affinity=DEFAULT_AFFINITY,
-            sched_context=None,
-            alloc_endpoint=True,
-            ):
+                 stack_size=DEFAULT_STACK_SIZE,
+                 prio=DEFAULT_PRIO, max_prio=DEFAULT_MAX_PRIO,
+                 affinity=DEFAULT_AFFINITY,
+                 sched_context=None,
+                 alloc_endpoint=True,
+                 ):
 
         self.component = component
         self.name = name
 
         page_size = self.component.composition.kernel_config.page_size()
         self.component.pad_and_align_to_larger_page()
-        stack_start_vaddr, stack_end_vaddr = self.component.map_range_at_cursor(stack_size, label='{}_stack'.format(self.name))
+        stack_start_vaddr, stack_end_vaddr = self.component.map_range_at_cursor(
+            stack_size, label='{}_stack'.format(self.name))
         self.component.pad_and_align_to_larger_page()
         ipc_buffer_vaddr, _ = self.component.advance(page_size)
-        ipc_buffer_frame = self.component.alloc(ObjectType.seL4_FrameObject, '{}_ipc_buffer'.format(self.name), size=page_size)
+        ipc_buffer_frame = self.component.alloc(
+            ObjectType.seL4_FrameObject, '{}_ipc_buffer'.format(self.name), size=page_size)
         ipc_buffer_cap = Cap(ipc_buffer_frame, read=True, write=True)
         self.component.add_hack_page(ipc_buffer_vaddr, page_size, ipc_buffer_cap)
 
@@ -227,9 +233,10 @@ class ElfThread:
 
         if alloc_endpoint:
             endpoint = self.component.cspace().alloc(
-                self.component.alloc(ObjectType.seL4_EndpointObject, name='{}_thread_ep'.format(self.name)),
+                self.component.alloc(ObjectType.seL4_EndpointObject,
+                                     name='{}_thread_ep'.format(self.name)),
                 read=True, write=True,
-                )
+            )
         else:
             endpoint = None
 
@@ -243,8 +250,9 @@ class ElfThread:
     def get_thread_runtime_config(self):
         if self.component.composition.kernel_config.is_mcs():
             reply_authority = self.component.cspace().alloc(
-                self.component.alloc(ObjectType.seL4_RTReplyObject, name='{}_reply'.format(self.name)),
-                )
+                self.component.alloc(ObjectType.seL4_RTReplyObject,
+                                     name='{}_reply'.format(self.name)),
+            )
         else:
             reply_authority = None
 
@@ -252,7 +260,7 @@ class ElfThread:
             'ipc_buffer_addr': self.ipc_buffer_vaddr,
             'endpoint': self.endpoint,
             'reply_authority': reply_authority,
-            }
+        }
 
     def set_component_runtime_config(self, config_vaddr, config_size, thread_index):
         self.tcb.init.append(config_vaddr)
