@@ -44,6 +44,7 @@ impl<T: CapTypeForFrameObject, C: InvocationContext> Cap<T, C> {
     }
 
     /// Corresponds to `seL4_X86_Page_MapIO`.
+    #[sel4_cfg(IOMMU)]
     pub fn frame_map_io(self, iospace: IOSpace, ioaddr: usize, rights: CapRights) -> Result<()> {
         Error::wrap(self.invoke(|cptr, ipc_buffer| {
             ipc_buffer.inner_mut().seL4_X86_Page_MapIO(
@@ -140,6 +141,7 @@ impl<C: InvocationContext> PageTable<C> {
 
 // From my understanding, iopage_table_map map a page table structure into a specific address of the iospace.
 // TODO: Verify whether my understanding is correct or not.
+#[sel4_cfg(IOMMU)]
 impl<C: InvocationContext> IOPageTable<C> {
     /// Corresponds to `seL4_X86_IOPageTable_Map`.
     pub fn io_page_table_map(self, iospace: IOSpace, ioaddr: usize) -> Result<()> {
