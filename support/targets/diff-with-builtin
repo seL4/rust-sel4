@@ -38,5 +38,5 @@ case "$targ" in
 esac
 
 diff -U 1000 \
-    <(cargo rustc --print target-spec-json --target "$builtin" -- -Z unstable-options) \
-    <(cargo rustc --print target-spec-json --target "$targ" -- -Z unstable-options)
+    <(cargo rustc -Zjson-target-spec --print target-spec-json --target "$builtin" -- -Z unstable-options) \
+    <(cargo rustc -Zjson-target-spec --print target-spec-json --target "$targ" -- -Z unstable-options)
