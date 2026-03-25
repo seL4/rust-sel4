@@ -906,6 +906,9 @@ impl<'a> Initializer<'a> {
                 .as_ref()
                 .map(ArchivedWord::to_sel4)
                 .unwrap_or(0);
+
+            // sched_index is used as a shift, and not an invariant for the loop.
+            #[allow(clippy::explicit_counter_loop)]
             for ArchivedDomainSchedEntry { id, time } in
                 self.spec.domain_schedule.as_ref().unwrap().iter()
             {
