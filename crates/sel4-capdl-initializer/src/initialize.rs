@@ -9,7 +9,7 @@ use core::ops::Range;
 use core::result::Result as CoreResult;
 use core::slice;
 
-use rkyv::{Archive};
+use rkyv::Archive;
 use rkyv::ops::ArchivedRange;
 use rkyv::option::ArchivedOption;
 
@@ -900,7 +900,12 @@ impl<'a> Initializer<'a> {
         if self.spec.domain_schedule.is_some() {
             debug!("Initializing domain schedule");
 
-            let mut sched_index = self.spec.domain_idx_shift.as_ref().map(ArchivedWord::to_sel4).unwrap_or(0);
+            let mut sched_index = self
+                .spec
+                .domain_idx_shift
+                .as_ref()
+                .map(ArchivedWord::to_sel4)
+                .unwrap_or(0);
             for ArchivedDomainSchedEntry { id, time } in
                 self.spec.domain_schedule.as_ref().unwrap().iter()
             {
@@ -920,15 +925,18 @@ impl<'a> Initializer<'a> {
 
             // The start index also needs to be shifted. This makes the shift
             // an offset into the schedule rather than an absolute index.
-            let shift = self.spec.domain_idx_shift.as_ref().map(ArchivedWord::to_sel4).unwrap_or(0);
+            let shift = self
+                .spec
+                .domain_idx_shift
+                .as_ref()
+                .map(ArchivedWord::to_sel4)
+                .unwrap_or(0);
 
             // Only call set start if we have been given a start index
             if let ArchivedOption::Some(start) = self.spec.domain_set_start {
                 init_thread::slot::DOMAIN_SET
                     .cap()
-                    .domain_set_schedule_set_start(
-                        start.to_sel4() + shift,
-                    )?;
+                    .domain_set_schedule_set_start(start.to_sel4() + shift)?;
             }
         }
         Ok(())
