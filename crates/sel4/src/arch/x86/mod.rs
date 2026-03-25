@@ -130,8 +130,12 @@ pub(crate) mod cap_arch {
     declare_cap_alias!(PageDirectory);
     declare_cap_alias!(PageTable);
 
-    declare_cap_alias!(IOSpace);
-    declare_cap_alias!(IOPageTable);
+    sel4_cfg_if! {
+        if #[sel4_cfg(IOMMU)] {
+            declare_cap_alias!(IOSpace);
+            declare_cap_alias!(IOPageTable);
+        }
+    }
 
     declare_cap_alias!(IOPortControl);
 }
