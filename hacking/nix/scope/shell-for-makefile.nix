@@ -7,6 +7,7 @@
 { lib, stdenv
 , mkShell
 , python3
+, python3Packages
 , reuse
 , cargo-audit
 , lychee
@@ -23,6 +24,7 @@ let
 
     nativeBuildInputs = (attrs.nativeBuildInputs or []) ++ [
       python3
+      python3Packages.autopep8
       reuse
       cargo-audit
       lychee

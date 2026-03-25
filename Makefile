@@ -95,12 +95,22 @@ fmt:
 check-fmt:
 	cargo fmt --all -- --check
 
+autopep8_args := --max-line-length 100 $$(find . -name '*.py' -printf '%p ')
+
+.PHONY: fmt-python
+fmt-python:
+	$(run_in_nix_shell) "autopep8 -i $(autopep8_args)"
+
+.PHONY: check-fmt-python
+check-fmt-python:
+	$(run_in_nix_shell) "autopep8 -d --exit-code $(autopep8_args)"
+
 .PHONY: check-generic-formatting
 check-generic-formatting:
 	$(run_in_nix_shell) "sh hacking/scripts/check-generic-formatting.sh"
 
 .PHONY: check-source
-check-source: check-generated-sources check-fmt check-generic-formatting
+check-source: check-generated-sources check-fmt check-fmt-python check-generic-formatting
 
 .PHONY: check-licenses
 check-licenses:
