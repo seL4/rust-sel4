@@ -6,6 +6,7 @@
 
 from pyfdt.pyfdt import FdtBlobParse
 
+
 class DeviceTree:
 
     def __init__(self, path):

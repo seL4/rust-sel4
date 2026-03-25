@@ -8,6 +8,7 @@ import json
 
 from capdl import lookup_architecture, register_object_sizes
 
+
 class KernelConfig:
 
     def __init__(self, path):
@@ -60,7 +61,7 @@ class KernelConfig:
         return self.page_sizes_in_bits()[1]
 
     def page_sizes(self):
-        return [ 1 << n for n in self.page_sizes_in_bits() ]
+        return [1 << n for n in self.page_sizes_in_bits()]
 
     def page_size(self):
         return 1 << self.page_size_in_bits()

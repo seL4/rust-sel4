@@ -8,12 +8,14 @@ import sys
 import argparse
 import pexpect
 
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--simulate')
     parser.add_argument('--timeout', type=int)
     args = parser.parse_args()
     run(args)
+
 
 def run(args):
     child = pexpect.spawn(args.simulate, encoding='utf-8')
@@ -29,6 +31,7 @@ def run(args):
             assert False
     except KeyboardInterrupt:
         sys.exit('> interrupted')
+
 
 if __name__ == '__main__':
     main()
