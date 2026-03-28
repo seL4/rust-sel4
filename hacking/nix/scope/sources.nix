@@ -85,7 +85,7 @@ in rec {
 
   sddf = fetchGit {
     url = "https://github.com/au-ts/sddf";
-    rev = "1905749cbde7fcda827d95ea8a85924bbcfcff6c"; # lionsos HEAD
+    rev = "b0e86b1d5082ec8680585ad3429a8a519efa57ff"; # lionsos HEAD
     # ref = null;
     local = localRoot + "/lionsos/dep/sddf";
   };
