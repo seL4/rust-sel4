@@ -5,11 +5,14 @@
 #
 
 [toolchain]
-channel = "1.90"
+channel = "1.94"
 components = [
     "rust-src",
 ]
 targets = [
     "x86_64-unknown-linux-musl",
     "aarch64-unknown-linux-musl",
+    "aarch64-unknown-none",
+    "riscv64gc-unknown-none-elf",
+    "x86_64-unknown-none",
 ]
