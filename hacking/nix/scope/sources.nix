@@ -56,7 +56,7 @@ in rec {
 
   seL4 = fetchGit {
     url = "https://github.com/seL4/seL4.git";
-    rev = "27a52ddd4cf592b1996ba50074c85e21d832398a"; # master
+    rev = "55c1ea653c6a737243b5f950a28f866af0def4d2"; # master
     local = localRoot + "/seL4";
   };
 
