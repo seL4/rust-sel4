@@ -8,11 +8,11 @@ let
 
   defaultNixpkgsPath =
     let
-      rev = "3f09edafbcbc09bdf422221c6cc0d1b81360b63e"; # based on a snapshot of nixos-25.11
+      rev = "53c4f440db47a727388f489cf349175c26c1448d"; # based on a snapshot of nixos-25.11
     in
       builtins.fetchTarball {
         url = "https://github.com/coliasgroup/nixpkgs/archive/refs/tags/keep/${builtins.substring 0 32 rev}.tar.gz";
-        sha256 = "sha256:0lk087z085cvi66cjpg1mbdgcbd21h14k1s6ycpxm0ycda10024q";
+        sha256 = "sha256:0ky3yigb0w8g53r95341idr4pg5d81j0fi1bx67gywp225aaazpi";
       };
 
 in
