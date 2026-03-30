@@ -67,6 +67,20 @@ impl<C: InvocationContext> cap::Endpoint<C> {
         })
     }
 
+    pub fn nb_send_with_mrs<T: FastMessages>(self, info: MessageInfo, messages: T) {
+        let [msg0, msg1, msg2, msg3] = messages.prepare_in();
+        self.invoke(|cptr, ipc_buffer| {
+            ipc_buffer.inner_mut().seL4_NBSendWithMRs(
+                cptr.bits(),
+                info.into_inner(),
+                msg0,
+                msg1,
+                msg2,
+                msg3,
+            )
+        })
+    }
+
     /// Corresponds to `seL4_Recv`.
     pub fn recv(self, reply_authority: impl ConveysReplyAuthority) -> (MessageInfo, Badge) {
         let (raw_msg_info, badge) = self.invoke(|cptr, ipc_buffer| {
@@ -134,12 +148,62 @@ impl<C: InvocationContext> cap::Endpoint<C> {
         })
     }
 
+    pub fn nb_recv_with_mrs(self, reply_authority: impl ConveysReplyAuthority) -> RecvWithMRs {
+        let mut msg = [0; NUM_FAST_MESSAGE_REGISTERS];
+        let [mr0, mr1, mr2, mr3] = &mut msg;
+        let (raw_msg_info, badge) = self.invoke(|cptr, ipc_buffer| {
+            ipc_buffer.inner_mut().seL4_NBRecvWithMRs(
+                cptr.bits(),
+                Some(mr0),
+                Some(mr1),
+                Some(mr2),
+                Some(mr3),
+                reply_authority
+                    .into_reply_authority()
+                    .into_sys_reply_authority(),
+            )
+        });
+        RecvWithMRs {
+            info: MessageInfo::from_inner(raw_msg_info),
+            badge,
+            msg,
+        }
+    }
+
     pub fn recv_with_mrs(self, reply_authority: impl ConveysReplyAuthority) -> RecvWithMRs {
         let mut msg = [0; NUM_FAST_MESSAGE_REGISTERS];
         let [mr0, mr1, mr2, mr3] = &mut msg;
         let (raw_msg_info, badge) = self.invoke(|cptr, ipc_buffer| {
             ipc_buffer.inner_mut().seL4_RecvWithMRs(
                 cptr.bits(),
+                Some(mr0),
+                Some(mr1),
+                Some(mr2),
+                Some(mr3),
+                reply_authority
+                    .into_reply_authority()
+                    .into_sys_reply_authority(),
+            )
+        });
+        RecvWithMRs {
+            info: MessageInfo::from_inner(raw_msg_info),
+            badge,
+            msg,
+        }
+    }
+
+    pub fn reply_recv_with_mrs<T: FastMessages>(
+        self,
+        info: MessageInfo,
+        messages: T,
+        reply_authority: impl ConveysReplyAuthority,
+    ) -> RecvWithMRs {
+        let mut msg = messages.prepare_in_out();
+        let [mr0, mr1, mr2, mr3] = &mut msg;
+        let (raw_msg_info, badge) = self.invoke(|cptr, ipc_buffer| {
+            ipc_buffer.inner_mut().seL4_ReplyRecvWithMRs(
+                cptr.bits(),
+                info.into_inner(),
                 Some(mr0),
                 Some(mr1),
                 Some(mr2),
@@ -188,6 +252,61 @@ impl<C: InvocationContext> cap::Notification<C> {
             self.invoke(|cptr, ipc_buffer| ipc_buffer.inner_mut().seL4_Wait(cptr.bits()));
         (wait_message_info_from_sys(info), badge)
     }
+
+    #[sel4_cfg(KERNEL_MCS)]
+    pub fn wait_with_mrs(self) -> WaitWithMRs {
+        let mut msg = [0; NUM_FAST_MESSAGE_REGISTERS];
+        let [mr0, mr1, mr2, mr3] = &mut msg;
+        let (raw_msg_info, badge) = self.invoke(|cptr, ipc_buffer| {
+            ipc_buffer.inner_mut().seL4_WaitWithMRs(
+                cptr.bits(),
+                Some(mr0),
+                Some(mr1),
+                Some(mr2),
+                Some(mr3),
+            )
+        });
+        WaitWithMRs {
+            info: wait_message_info_from_sys(raw_msg_info),
+            badge,
+            msg,
+        }
+    }
+
+    /// Corresponds to `seL4_NBWait`.
+    #[sel4_cfg(KERNEL_MCS)]
+    pub fn nb_wait(self) -> (WaitMessageInfo, Badge) {
+        let (info, badge) =
+            self.invoke(|cptr, ipc_buffer| ipc_buffer.inner_mut().seL4_NBWait(cptr.bits()));
+        (wait_message_info_from_sys(info), badge)
+    }
+
+    #[sel4_cfg(KERNEL_MCS)]
+    pub fn nb_wait_with_mrs(self) -> WaitWithMRs {
+        let mut msg = [0; NUM_FAST_MESSAGE_REGISTERS];
+        let [mr0, mr1, mr2, mr3] = &mut msg;
+        let (raw_msg_info, badge) = self.invoke(|cptr, ipc_buffer| {
+            ipc_buffer.inner_mut().seL4_NBWaitWithMRs(
+                cptr.bits(),
+                Some(mr0),
+                Some(mr1),
+                Some(mr2),
+                Some(mr3),
+            )
+        });
+        WaitWithMRs {
+            info: wait_message_info_from_sys(raw_msg_info),
+            badge,
+            msg,
+        }
+    }
+
+    /// Corresponds to `seL4_Poll`.
+    pub fn poll(self) -> (MessageInfo, Badge) {
+        let (raw_msg_info, badge) =
+            self.invoke(|cptr, ipc_buffer| ipc_buffer.inner_mut().seL4_Poll(cptr.bits()));
+        (MessageInfo::from_inner(raw_msg_info), badge)
+    }
 }
 
 #[sel4_cfg(KERNEL_MCS)]
@@ -224,12 +343,97 @@ impl<T: IpcCapType, C: InvocationContext> Cap<T, C> {
         });
         (MessageInfo::from_inner(raw_msg_info), badge)
     }
+
+    /// Corresponds to `seL4_NBSendRecvWithMRs`.
+    #[sel4_cfg(KERNEL_MCS)]
+    pub fn nb_send_recv_with_mrs<U: IpcCapType, M: FastMessages>(
+        self,
+        info: MessageInfo,
+        messages: M,
+        src: Cap<U>,
+        reply_authority: impl ConveysReplyAuthority,
+    ) -> RecvWithMRs {
+        let mut msg = messages.prepare_in_out();
+        let [mr0, mr1, mr2, mr3] = &mut msg;
+        let (raw_msg_info, badge) = self.invoke(|cptr, ipc_buffer| {
+            ipc_buffer.inner_mut().seL4_NBSendRecvWithMRs(
+                cptr.bits(),
+                info.into_inner(),
+                src.bits(),
+                Some(mr0),
+                Some(mr1),
+                Some(mr2),
+                Some(mr3),
+                reply_authority
+                    .into_reply_authority()
+                    .into_sys_reply_authority(),
+            )
+        });
+        RecvWithMRs {
+            info: MessageInfo::from_inner(raw_msg_info),
+            badge,
+            msg,
+        }
+    }
+
+    /// Corresponds to `seL4_NBSendWait`.
+    #[sel4_cfg(KERNEL_MCS)]
+    pub fn nb_send_wait<U: IpcCapType>(
+        self,
+        info: MessageInfo,
+        src: Cap<U>,
+    ) -> (MessageInfo, Badge) {
+        let (raw_msg_info, badge) = self.invoke(|cptr, ipc_buffer| {
+            ipc_buffer
+                .inner_mut()
+                .seL4_NBSendWait(cptr.bits(), info.into_inner(), src.bits())
+        });
+        (MessageInfo::from_inner(raw_msg_info), badge)
+    }
+
+    /// Corresponds to `seL4_NBSendWaitWithMRs`.
+    #[sel4_cfg(KERNEL_MCS)]
+    pub fn nb_send_wait_with_mrs<U: IpcCapType, M: FastMessages>(
+        self,
+        info: MessageInfo,
+        messages: M,
+        src: Cap<U>,
+    ) -> RecvWithMRs {
+        let mut msg = messages.prepare_in_out();
+        let [mr0, mr1, mr2, mr3] = &mut msg;
+        let (raw_msg_info, badge) = self.invoke(|cptr, ipc_buffer| {
+            ipc_buffer.inner_mut().seL4_NBSendWaitWithMRs(
+                cptr.bits(),
+                info.into_inner(),
+                src.bits(),
+                Some(mr0),
+                Some(mr1),
+                Some(mr2),
+                Some(mr3),
+            )
+        });
+        RecvWithMRs {
+            info: MessageInfo::from_inner(raw_msg_info),
+            badge,
+            msg,
+        }
+    }
 }
 
 /// Corresponds to `seL4_Reply`.
 #[sel4_cfg(not(KERNEL_MCS))]
 pub fn reply(ipc_buffer: &mut IpcBuffer, info: MessageInfo) {
     ipc_buffer.inner_mut().seL4_Reply(info.into_inner())
+}
+
+/// Corresponds to `seL4_ReplyWithMRs`.
+#[sel4_cfg(not(KERNEL_MCS))]
+#[allow(dead_code)]
+pub fn reply_with_mrs<T: FastMessages>(ipc_buffer: &mut IpcBuffer, info: MessageInfo, messages: T) {
+    let [msg0, msg1, msg2, msg3] = messages.prepare_in();
+    ipc_buffer
+        .inner_mut()
+        .seL4_ReplyWithMRs(info.into_inner(), msg0, msg1, msg2, msg3)
 }
 
 /// Corresponds to `seL4_Yield`.
@@ -257,6 +461,14 @@ pub struct RecvWithMRs {
 /// The result of [`cap::Endpoint::call_with_mrs`].
 pub struct CallWithMRs {
     pub info: MessageInfo,
+    pub msg: [Word; NUM_FAST_MESSAGE_REGISTERS],
+}
+
+/// The result of [`cap::Notification::wait_with_mrs`].
+#[sel4_cfg(KERNEL_MCS)]
+pub struct WaitWithMRs {
+    pub info: WaitMessageInfo,
+    pub badge: Badge,
     pub msg: [Word; NUM_FAST_MESSAGE_REGISTERS],
 }
 
