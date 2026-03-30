@@ -419,6 +419,7 @@ pub mod object {
         pub affinity: Word,
         pub prio: u8,
         pub max_prio: u8,
+        pub fpu_disabled: bool,
         pub resume: bool,
 
         pub domain: Option<u8>,

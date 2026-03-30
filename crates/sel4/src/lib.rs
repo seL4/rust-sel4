@@ -125,6 +125,7 @@ pub use cptr::{
 pub use error::{Error, Result};
 pub use fault::*;
 pub use invocation_context::{InvocationContext, NoExplicitInvocationContext, NoInvocationContext};
+pub use invocations::TcbFlagsBuilder;
 pub use ipc_buffer::IpcBuffer;
 pub use message_info::{MessageInfo, MessageInfoBuilder};
 pub use object::{
