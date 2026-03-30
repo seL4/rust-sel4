@@ -225,6 +225,7 @@ class ElfThread:
         tcb.prio = prio
         tcb.max_prio = max_prio
         tcb.affinity = affinity
+        tcb.fpu_disabled = False
         tcb.resume = True
         tcb['cspace'] = self.component.cnode_cap(update_guard_size=self.component.update_guard_size)
         tcb['vspace'] = Cap(self.component.pd())

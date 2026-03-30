@@ -766,6 +766,8 @@ impl<'a> Initializer<'a> {
                     }
                 }
 
+                let fpu_disabled = obj.extra.fpu_disabled;
+
                 #[allow(unused_variables)]
                 let affinity = obj.extra.affinity.to_sel4();
 
@@ -822,6 +824,14 @@ impl<'a> Initializer<'a> {
                             fault_ep,
                         )?;
 
+                        let tcb_flags = sel4::TcbFlagsBuilder::new()
+                            .fpu_disabled(fpu_disabled)
+                            .build();
+                        tcb.tcb_set_flags(
+                            0,
+                            tcb_flags,
+                        )?;
+
                         tcb.tcb_set_timeout_endpoint(temp_fault_ep)?;
                     } else {
                         let fault_ep = sel4::CPtr::from_bits(obj.extra.master_fault_ep.as_ref().unwrap().to_sel4());
@@ -839,6 +849,14 @@ impl<'a> Initializer<'a> {
                             authority,
                             max_prio,
                             prio,
+                        )?;
+
+                        let tcb_flags = sel4::TcbFlagsBuilder::new()
+                            .fpu_disabled(fpu_disabled)
+                            .build();
+                        tcb.tcb_set_flags(
+                            0,
+                            tcb_flags,
                         )?;
 
                         sel4::sel4_cfg_if! {

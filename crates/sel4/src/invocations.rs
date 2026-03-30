@@ -49,6 +49,38 @@ impl<C: InvocationContext> Untyped<C> {
 const USER_CONTEXT_MAX_REG_COUNT: usize =
     mem::size_of::<sys::seL4_UserContext>() / mem::size_of::<Word>();
 
+#[derive(Debug, Clone, PartialEq)]
+pub struct TcbFlagsBuilder(Word);
+
+impl TcbFlagsBuilder {
+    pub fn new() -> Self {
+        Self(sel4_sys::seL4_TCBFlag::seL4_TCBFlag_NoFlag)
+    }
+
+    pub fn build(self) -> Word {
+        self.0
+    }
+
+    pub fn fpu_disabled(self, val: bool) -> Self {
+        self.apply_flag_val(sel4_sys::seL4_TCBFlag::seL4_TCBFlag_fpuDisabled, val)
+    }
+
+    fn apply_flag_val(mut self, flag: Word, val: bool) -> Self {
+        if val {
+            self.0 |= flag
+        } else {
+            self.0 &= !flag
+        }
+        self
+    }
+}
+
+impl Default for TcbFlagsBuilder {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl<C: InvocationContext> Tcb<C> {
     /// Corresponds to `seL4_TCB_ReadRegisters`.
     pub fn tcb_read_registers(self, suspend: bool, count: Word) -> Result<UserContext> {
@@ -122,6 +154,16 @@ impl<C: InvocationContext> Tcb<C> {
                 .inner_mut()
                 .seL4_TCB_SetMCPriority(cptr.bits(), authority.bits(), mcp)
         }))
+    }
+
+    // Corresponds to `seL4_TCB_SetFlags`.
+    pub fn tcb_set_flags(self, clear: Word, set: Word) -> Result<Word> {
+        let ret = self.invoke(|cptr, ipc_buffer| {
+            ipc_buffer
+                .inner_mut()
+                .seL4_TCB_SetFlags(cptr.bits(), clear, set)
+        });
+        Error::or(ret.error, ret.flags)
     }
 
     sel4_cfg_if! {
