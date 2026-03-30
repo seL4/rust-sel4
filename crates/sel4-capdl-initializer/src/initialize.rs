@@ -759,8 +759,7 @@ impl<'a> Initializer<'a> {
 
                 sel4::sel4_cfg_if! {
                     if #[sel4_cfg(not(NUM_DOMAINS = "1"))] {
-                        if obj.extra.domain.is_some() {
-                            let domain_id = obj.extra.domain.unwrap();
+                        if let ArchivedOption::Some(domain_id) = obj.extra.domain {
                             init_thread::slot::DOMAIN_SET.cap().domain_set_set(domain_id, tcb)
                                 .unwrap_or_else(|err| panic!("Error setting domain of thread to {}: {:?}", domain_id, err));
                         }
@@ -897,7 +896,7 @@ impl<'a> Initializer<'a> {
     }
 
     fn init_domain_schedule(&self) -> Result<()> {
-        if self.spec.domain_schedule.is_some() {
+        if let ArchivedOption::Some(domain_schedule) = &self.spec.domain_schedule {
             debug!("Initializing domain schedule");
 
             let mut sched_index = self
@@ -909,9 +908,7 @@ impl<'a> Initializer<'a> {
 
             // sched_index is used as a shift, and not an invariant for the loop.
             #[allow(clippy::explicit_counter_loop)]
-            for ArchivedDomainSchedEntry { id, time } in
-                self.spec.domain_schedule.as_ref().unwrap().iter()
-            {
+            for ArchivedDomainSchedEntry { id, time } in domain_schedule.iter() {
                 let domain_time = *time;
                 init_thread::slot::DOMAIN_SET
                     .cap()
