@@ -56,21 +56,21 @@ in rec {
 
   seL4 = fetchGit {
     url = "https://github.com/seL4/seL4.git";
-    rev = "55c1ea653c6a737243b5f950a28f866af0def4d2"; # master
+    rev = "881de507fe528490dc5e570c7810a149bad5880f"; # 15.0.0
     local = localRoot + "/seL4";
   };
 
   microkit = fetchGit {
     url = "https://github.com/seL4/microkit.git";
-    rev = "fc90d89013b3a0cb330d2ac8d61abaee1223f711"; # main
+    rev = "27e7b6784664a5e62c11b49559995d266dece3c3"; # 2.2.0
     local = localRoot + "/microkit";
     extraFilter = path: type:
       lib.hasSuffix "/target" path;
   };
 
   sdfgen = fetchGit {
-    url = "https://github.com/coliasgroup/microkit_sdf_gen";
-    rev = "6a42abbe6a81af3a37cd1070d47106c55c7f4e0c"; # branch "rust", based on main
+    url = "https://github.com/au-ts/microkit_sdf_gen";
+    rev = "e92b69d5f5ceb6819301514fd7704618360ef9dd"; # main
     local = localRoot + "/microkit_sdf_gen";
     extraFilter = path: type:
       lib.hasSuffix "/.zig-cache" path || lib.hasSuffix "/zig-out" path || lib.hasSuffix "/result" path;
@@ -85,14 +85,14 @@ in rec {
 
   sddf = fetchGit {
     url = "https://github.com/au-ts/sddf";
-    rev = "b0e86b1d5082ec8680585ad3429a8a519efa57ff"; # lionsos HEAD
+    rev = "d1f5252ea64edab6087552eb4220e23c019c2fbe"; # from lionsos main
     # ref = null;
     local = localRoot + "/lionsos/dep/sddf";
   };
 
   lionsosAttrs = {
     url = "https://github.com/au-ts/lionsos";
-    rev = "1905749cbde7fcda827d95ea8a85924bbcfcff6c"; # HEAD
+    rev = "927fc257c786df3b0b3c2d19673c186e0a166df3"; # main
     # ref = null;
     local = localRoot + "/lionsos";
   };
