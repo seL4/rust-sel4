@@ -34,9 +34,8 @@ This project builds upon [seL4](https://github.com/seL4/seL4) and the [seL4
 Microkit](https://github.com/seL4/microkit). In particular, this project works with at least the
 following versions of those related projects:
 
-- seL4 version 14.0.0 ([`c0fc32450fb5e8460083b89a84d067249b109cfc`](https://github.com/seL4/seL4/tree/c0fc32450fb5e8460083b89a84d067249b109cfc))
-  (version 13.0.0, on [github.com/seL4/seL4:master](https://github.com/seL4/seL4/tree/master))
-- seL4 Microkit version 2.1.0 ([`e043cec8d8613e7473368ec56a8843aacfca010b`](https://github.com/seL4/microkit/tree/e043cec8d8613e7473368ec56a8843aacfca010b))
+- seL4 version 15.0.0 ([`3f590a6027eadd3ae8352d044f06746bcc8980df`](https://github.com/seL4/seL4/tree/3f590a6027eadd3ae8352d044f06746bcc8980df))
+- seL4 Microkit version 2.2.0 ([`27e7b6784664a5e62c11b49559995d266dece3c3`](https://github.com/seL4/microkit/tree/27e7b6784664a5e62c11b49559995d266dece3c3))
 
 ### Demos
 
