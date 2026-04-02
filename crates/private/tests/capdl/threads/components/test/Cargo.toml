@@ -17,7 +17,7 @@ edition = "2024"
 license = "BSD-2-Clause"
 
 [dependencies]
-sel4 = { path = "../../../../../../sel4" }
+sel4 = { path = "../../../../../../sel4", default-features = false }
 sel4-simple-task-config-types = { path = "../../../../../support/sel4-simple-task/config-types" }
 sel4-simple-task-runtime = { path = "../../../../../support/sel4-simple-task/runtime" }
 sel4-sync = { path = "../../../../../../sel4-sync" }

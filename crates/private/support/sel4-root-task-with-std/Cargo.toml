@@ -20,6 +20,6 @@ license = "BSD-2-Clause"
 single-threaded = ["sel4/single-threaded"]
 
 [dependencies]
-sel4 = { path = "../../../sel4" }
+sel4 = { path = "../../../sel4", default-features = false, features = ["state"] }
 sel4-panicking-env = { path = "../../../sel4-panicking/env" }
 sel4-runtime-common = { path = "../../../sel4-runtime-common", features = ["sel4"] }

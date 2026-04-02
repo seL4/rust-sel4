@@ -19,7 +19,7 @@ license = "BSD-2-Clause"
 [dependencies]
 getrandom = { version = "0.2.10", features = ["custom"] }
 rand = { version = "0.10.0", default-features = false }
-sel4 = { path = "../../../../sel4" }
+sel4 = { path = "../../../../sel4", default-features = false }
 sel4-root-task = { path = "../../../../sel4-root-task" }
 sel4-test-harness = { path = "../../../support/sel4-test-harness" }
 

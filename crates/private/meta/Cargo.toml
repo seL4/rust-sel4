@@ -23,7 +23,7 @@ sel4-root-task = ["dep:sel4-root-task"]
 [dependencies]
 cfg-if = "1.0.4"
 log = "0.4.28"
-sel4 = { path = "../../sel4" }
+sel4 = { path = "../../sel4", default-features = false }
 sel4-abstract-allocator = { path = "../../experimental/sel4-abstract-allocator" }
 sel4-abstract-ptr = { path = "../../sel4-abstract-ptr" }
 sel4-abstract-rc = { path = "../../experimental/sel4-abstract-rc" }
@@ -76,7 +76,7 @@ path = "../../experimental/sel4-shared-ring-buffer/bookkeeping"
 sel4-platform-info = { path = "../../sel4-platform-info", optional = true }
 
 [target."cfg(not(target_thread_local))".dependencies]
-sel4 = { path = "../../sel4", features = ["single-threaded"] }
+sel4 = { path = "../../sel4", default-features = false, features = ["single-threaded"] }
 
 [target."cfg(target_arch = \"aarch64\")".dependencies]
 sel4-reset = { path = "../../experimental/sel4-reset" }

@@ -18,7 +18,7 @@ license = "BSD-2-Clause"
 
 [dependencies]
 cfg-if = "1.0.4"
-sel4 = { path = "../../../sel4" }
+sel4 = { path = "../../../sel4", default-features = false, features = ["state"] }
 sel4-elf-header = { path = "../../../sel4-elf-header" }
 sel4-initialize-tls = { path = "../../../sel4-initialize-tls", features = ["on-heap"] }
 sel4-root-task = { path = "../../../sel4-root-task" }

@@ -6,5 +6,5 @@
 
 #![no_std]
 
-#[cfg(feature = "postcard")]
+#[cfg(all(feature = "postcard", feature = "state"))]
 pub mod easy;

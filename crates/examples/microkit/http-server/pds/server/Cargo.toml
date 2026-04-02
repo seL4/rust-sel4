@@ -23,7 +23,7 @@ log = "0.4.28"
 microkit-http-server-example-server-core = { path = "core", features = [] }
 one-shot-mutex = "0.2.1"
 rtcc = "0.4.0"
-sel4 = { path = "../../../../../sel4" }
+sel4 = { path = "../../../../../sel4", default-features = false }
 sel4-abstract-allocator = { path = "../../../../../experimental/sel4-abstract-allocator" }
 sel4-async-block-io = { path = "../../../../../experimental/sel4-async/block-io" }
 sel4-async-block-io-fat = { path = "../../../../../experimental/sel4-async/block-io/fat" }

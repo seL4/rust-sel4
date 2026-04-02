@@ -20,5 +20,5 @@ license = "BSD-2-Clause"
 extern-symbols = []
 
 [dependencies]
-sel4 = { path = "../../sel4" }
+sel4 = { path = "../../sel4", default-features = false, features = ["state"] }
 sel4-immutable-cell = { path = "../../sel4-immutable-cell" }

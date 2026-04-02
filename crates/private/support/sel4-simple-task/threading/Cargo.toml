@@ -20,5 +20,5 @@ license = "MIT"
 alloc = []
 
 [dependencies]
-sel4 = { path = "../../../../sel4" }
+sel4 = { path = "../../../../sel4", default-features = false }
 sel4-panicking = { path = "../../../../sel4-panicking" }
