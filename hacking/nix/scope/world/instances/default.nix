@@ -43,6 +43,7 @@ let
   haveUnwindingSupport = !stdenv.hostPlatform.isAarch32;
   haveKernelLoader = stdenv.hostPlatform.isAarch || stdenv.hostPlatform.isRiscV;
   haveCapDLInitializer = true;
+  isMCS = seL4Config.KERNEL_MCS or false;
 
   maybe = condition: v: if condition then v else null;
 
@@ -467,7 +468,7 @@ in rec {
             '';
       }));
 
-      spawn-thread = maybe haveFullRuntime (mkInstance {
+      spawn-thread = maybe (haveFullRuntime && !isMCS) (mkInstance {
         rootTask = mkTask {
           rootCrate = crates.spawn-thread;
           release = false;
@@ -477,7 +478,7 @@ in rec {
         };
       });
 
-      spawn-task = maybe haveFullRuntime (
+      spawn-task = maybe (haveFullRuntime && !isMCS) (
         let
           child = mkTask {
             rootCrate = crates.spawn-task-child;

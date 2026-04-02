@@ -44,14 +44,26 @@ fn main(bootinfo: &sel4::BootInfoPtr) -> sel4::Result<Never> {
 
     let secondary_thread_tcb = object_allocator.allocate_fixed_sized::<sel4::cap_type::Tcb>();
 
-    secondary_thread_tcb.tcb_configure(
-        sel4::init_thread::slot::NULL.cptr(),
-        sel4::init_thread::slot::CNODE.cap(),
-        sel4::CNodeCapData::new(0, 0),
-        sel4::init_thread::slot::VSPACE.cap(),
-        SECONDARY_THREAD_IPC_BUFFER_FRAME.ptr() as sel4::Word,
-        SECONDARY_THREAD_IPC_BUFFER_FRAME.cap(bootinfo),
-    )?;
+    sel4::sel4_cfg_if! {
+        if #[sel4_cfg(KERNEL_MCS)] {
+            secondary_thread_tcb.tcb_configure(
+                sel4::init_thread::slot::CNODE.cap(),
+                sel4::CNodeCapData::new(0, 0),
+                sel4::init_thread::slot::VSPACE.cap(),
+                SECONDARY_THREAD_IPC_BUFFER_FRAME.ptr() as sel4::Word,
+                SECONDARY_THREAD_IPC_BUFFER_FRAME.cap(bootinfo),
+            )?;
+        } else {
+            secondary_thread_tcb.tcb_configure(
+                sel4::init_thread::slot::NULL.cptr(),
+                sel4::init_thread::slot::CNODE.cap(),
+                sel4::CNodeCapData::new(0, 0),
+                sel4::init_thread::slot::VSPACE.cap(),
+                SECONDARY_THREAD_IPC_BUFFER_FRAME.ptr() as sel4::Word,
+                SECONDARY_THREAD_IPC_BUFFER_FRAME.cap(bootinfo),
+            )?;
+        }
+    }
 
     let secondary_thread_fn = SecondaryThreadFn::new(move || {
         unsafe { sel4::set_ipc_buffer(SECONDARY_THREAD_IPC_BUFFER_FRAME.ptr().as_mut().unwrap()) }
