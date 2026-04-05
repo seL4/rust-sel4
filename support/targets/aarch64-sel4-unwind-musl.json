@@ -37,7 +37,8 @@
   },
   "supported-sanitizers": [
     "kcfi",
-    "kernel-address"
+    "kernel-address",
+    "kernel-hwaddress"
   ],
   "target-family": [
     "unix"
