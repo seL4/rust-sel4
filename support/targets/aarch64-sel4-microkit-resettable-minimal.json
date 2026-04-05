@@ -34,7 +34,8 @@
   },
   "supported-sanitizers": [
     "kcfi",
-    "kernel-address"
+    "kernel-address",
+    "kernel-hwaddress"
   ],
   "target-pointer-width": 64
 }
