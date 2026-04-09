@@ -4,6 +4,8 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 #![feature(custom_inner_attributes)]
+#![allow(unused_features)]
+#![cfg_attr(not(feature = "warn"), allow(stable_features))]
 #![rustfmt::skip]
 
 #![feature(exclusive_wrapper)]

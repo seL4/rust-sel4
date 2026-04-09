@@ -21,4 +21,4 @@ crates-using:
 
 .PHONY: wishlist
 wishlist:
-	cargo build -p wishlist
+	cargo build -p wishlist --features warn
