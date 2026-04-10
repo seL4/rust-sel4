@@ -8,7 +8,6 @@ use crate::{const_helpers::u32_into_usize, sys};
 
 mod arch;
 mod invocations;
-mod iospace;
 mod object;
 mod vm_attributes;
 mod vspace;

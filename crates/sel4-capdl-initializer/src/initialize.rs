@@ -16,7 +16,7 @@ use rkyv::ops::ArchivedRange;
 use log::{debug, error, info, trace};
 
 use sel4::{
-    CapRights, CapTypeForFrameObjectOfFixedSize, cap_type, debug_println,
+    CapRights, CapTypeForFrameObjectOfFixedSize, cap_type,
     init_thread::{self, Slot},
 };
 use sel4_capdl_initializer_types::*;
@@ -324,7 +324,7 @@ impl<'a> Initializer<'a> {
                         blueprint.physical_size_bits(),
                         object_name_or_default(named_obj)
                     );
-                    // orig_cslot(obj_id.into()) return slot allocated in alloc_many()
+
                     self.ut_cap(*i_ut).untyped_retype(
                         &blueprint,
                         &init_thread_cnode_absolute_cptr(),
@@ -703,14 +703,7 @@ impl<'a> Initializer<'a> {
             .cap()
             .absolute_cptr(init_thread::slot::IO_SPACE.cap().cptr());
 
-        // let src = init_thread::slot::CNODE.cap().absolute_cptr(orig);
-        // let new = self.cslot_alloc_or_panic().cap();
-        // let dst = init_thread::slot::CNODE.cap().absolute_cptr(new);
-        // dst.mint(&src, rights, badge)?;
-
         for (obj_id, iospace) in self.filter_objects::<object::ArchivedIOSpace>() {
-            // Slot has been allocated in alloc_many() so we do not need to alloc slot by ourselves
-            // We only need to get the correct slot by orig_cslot(obj_id.into())
             let slot = self.orig_cslot(obj_id.into());
             let cptr = cslot_to_absolute_cptr(slot);
             let badge = ((iospace.pci_bus as u64) << PCI_ID_SHIFT)
@@ -723,7 +716,6 @@ impl<'a> Initializer<'a> {
             // The first entry in the IOSpace slot is the root page table
             let root_pt = self.object_as::<object::ArchivedIOPageTable>(iospace.slots[0].cap.obj());
 
-            // Not sure if this part of the code is right
             let root_level: usize = root_pt.level.unwrap_or(0).into();
             let iospace_cap = self.orig_cap::<cap_type::IOSpace>(obj_id);
 
@@ -731,15 +723,16 @@ impl<'a> Initializer<'a> {
 
             debug!("Initializing iospace, PAGE TABLE LEVEL: {}", level);
 
-            // In microkit tool, we default to use the four level page table structure
+            // There is no way to determine the level of io page table before actually running it on hardware
+            // So there is no way to allocate the correct number of slots
+            // Thus we default to assume the four level page table structure
             match level {
-                // If only three level page table is supported by the hardware, we skip mapping the root page table in
-                // Current approach waste the root page table if three level page table is supported
+                // If three level page table is chosen by seL4, we skip mapping the root page table in
+                // Current approach wastes the memory root page table object
                 VTD_THREE_LEVEL_PT => {
                     self.init_iospace(iospace_cap, root_level, 0, root_pt)?;
                 }
                 VTD_FOUR_LEVEL_PT => {
-                    // Map in the root page table if four level VTD PT is supported
                     self.orig_cap::<cap_type::IOPageTable>(iospace.slots[0].cap.obj())
                         .io_page_table_map(iospace_cap, 0)?;
                     self.init_iospace(iospace_cap, root_level, 0, root_pt)?;
@@ -764,34 +757,16 @@ impl<'a> Initializer<'a> {
         obj: &object::ArchivedIOPageTable,
     ) -> Result<()> {
         for (i, entry) in obj.entries() {
-            // The code is reusing sel4::vspace_levels::step_bits for now
+            // Reuse sel4::vspace_levels::step_bits
             let ioaddr = ioaddr + (usize::from(i) << sel4::vspace_levels::step_bits(level));
             match entry {
                 IOPageTableEntry::Frame(cap) => {
                     let frame = self.orig_cap::<cap_type::UnspecifiedPage>(cap.object);
                     let rights = cap.rights.to_sel4();
 
-                    debug_println!(
-                        "Map in io_frame: iospace: {}, ioaddr: 0x{:x}, capslot: {}, step bits: {}",
-                        iospace.bits(),
-                        ioaddr,
-                        usize::from(i),
-                        sel4::vspace_levels::step_bits(level)
-                    );
-
                     self.copy(frame)?.frame_map_io(iospace, ioaddr, rights)?;
                 }
                 IOPageTableEntry::IOPageTable(cap) => {
-                    debug_println!(
-                        "Map in IOPageTable: iospace: {}, ioaddr: 0x{:x}, level: {}, capslot: {}, step bits: {}",
-                        iospace.bits(),
-                        ioaddr,
-                        level,
-                        usize::from(i),
-                        sel4::vspace_levels::step_bits(level)
-                    );
-
-                    // This line is likely incorrect but I will leave it for now until Microkit Tool is finished.
                     self.orig_cap::<cap_type::IOPageTable>(cap.object)
                         .io_page_table_map(iospace, ioaddr)?;
                     let obj = self.object_as::<object::ArchivedIOPageTable>(cap.object);
