@@ -139,8 +139,6 @@ impl<C: InvocationContext> PageTable<C> {
     }
 }
 
-// From my understanding, iopage_table_map map a page table structure into a specific address of the iospace.
-// TODO: Verify whether my understanding is correct or not.
 #[sel4_cfg(IOMMU)]
 impl<C: InvocationContext> IOPageTable<C> {
     /// Corresponds to `seL4_X86_IOPageTable_Map`.
