@@ -84,7 +84,7 @@ members = [
     "crates/private/support/sel4-minimal-linux-syscalls",
     "crates/private/support/sel4-root-task-default-test-harness",
     "crates/private/support/sel4-root-task-with-std",
-    "crates/private/support/sel4-simple-task/config-types",
+    "crates/private/support/sel4-simple-task/application-config-types",
     "crates/private/support/sel4-simple-task/rpc",
     "crates/private/support/sel4-simple-task/runtime",
     "crates/private/support/sel4-simple-task/runtime/config/cli",

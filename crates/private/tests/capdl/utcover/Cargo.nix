@@ -13,7 +13,7 @@ mk {
     inherit (localCrates)
       sel4
       sel4-simple-task-runtime
-      sel4-simple-task-config-types
+      sel4-simple-task-application-config-types
       sel4-test-capdl
     ;
   };

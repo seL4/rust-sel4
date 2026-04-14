@@ -15,7 +15,7 @@ mk {
       sel4-sync
       sel4-simple-task-runtime
       sel4-simple-task-threading
-      sel4-simple-task-config-types
+      sel4-simple-task-application-config-types
       sel4-test-capdl
     ;
   };

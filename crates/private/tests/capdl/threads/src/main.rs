@@ -14,7 +14,7 @@ use alloc::vec::Vec;
 
 use serde::{Deserialize, Serialize};
 
-use sel4_simple_task_config_types::*;
+use sel4_simple_task_application_config_types::*;
 use sel4_simple_task_runtime::{debug_println, main_json};
 use sel4_simple_task_threading::StaticThread;
 use sel4_sync::{RawNotificationMutex, lock_api::Mutex};
