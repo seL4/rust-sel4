@@ -95,7 +95,11 @@ pub fn cargo_manifest_policy() -> Policy {
             TableRule {
                 path_regex: PathRegex::new("['workspace']").unwrap(),
                 key_ordering: KeyOrdering {
-                    back: vec!["members".to_owned(), "exclude".to_owned()],
+                    back: vec![
+                        "members".to_owned(),
+                        "exclude".to_owned(),
+                        "default-members".to_owned(),
+                    ],
                     ..Default::default()
                 },
                 ..Default::default()
