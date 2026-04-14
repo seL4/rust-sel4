@@ -34,11 +34,11 @@ runner = "qemu-riscv32"
 # tweaks
 
 [target.riscv64gc-unknown-linux-musl]
-rustflags = ["-C", "target-feature=+crt-static"]
+rustflags = ["-Ctarget-feature=+crt-static"]
 
 # TODO this target doesn't ship with musl
 [target.riscv32gc-unknown-linux-musl]
-rustflags = ["-C", "target-feature=+crt-static"]
+rustflags = ["-Ctarget-feature=+crt-static"]
 
 # TODO is this necessary?
 [target.x86_64-unknown-none]
