@@ -43,7 +43,9 @@ static CONFIG: ImmediateSyncOnceCell<RuntimeConfig<'static>> = ImmediateSyncOnce
 #[thread_local]
 static THREAD_INDEX: ImmediateSyncOnceCell<usize> = ImmediateSyncOnceCell::new();
 
-sel4_runtime_common::declare_entrypoint! {
+sel4_runtime_common::declare_entrypoint!();
+
+sel4_runtime_common::declare_rust_entrypoint! {
     entrypoint(config: *const u8, config_size: usize, thread_index: usize)
     global_init if thread_index == 0
 }

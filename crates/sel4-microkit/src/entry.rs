@@ -12,7 +12,7 @@ use sel4_panicking_env::abort;
 
 use crate::{Handler, panicking::init_panicking};
 
-sel4_runtime_common::declare_entrypoint! {
+sel4_runtime_common::declare_rust_entrypoint! {
     entrypoint()
 }
 

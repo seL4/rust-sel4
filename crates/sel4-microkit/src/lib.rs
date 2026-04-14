@@ -82,14 +82,27 @@ macro_rules! declare_protection_domain {
     {
         init = $init:expr $(,)?
     } => {
+        $crate::_private::declare_entrypoint!();
         $crate::_private::declare_init!($init);
     };
     {
         init = $init:expr,
+        stack_size = $stack_size:expr $(,)?
+    } => {
+        $crate::_private::declare_stack!($stack_size);
+        $crate::_private::declare_entrypoint_with_stack_init!();
+        $crate::_private::declare_init!($init);
+    };
+    {
+        init = $init:expr,
+        $(stack_size = $stack_size:expr,)?
         heap_size = $heap_size:expr $(,)?
     } => {
-        $crate::_private::declare_init!($init);
         $crate::_private::declare_heap!($heap_size);
+        $crate::_private::declare_protection_domain! {
+            init = $init,
+            $(stack_size = $stack_size,)?
+        }
     };
 }
 
@@ -97,6 +110,10 @@ macro_rules! declare_protection_domain {
 #[doc(hidden)]
 pub mod _private {
     pub use crate::heap::_private as heap;
+
+    pub use sel4_runtime_common::{
+        declare_entrypoint, declare_entrypoint_with_stack_init, declare_stack,
+    };
 
     pub use crate::{declare_heap, declare_init, declare_protection_domain, entry::run_main};
 }
