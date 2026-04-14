@@ -17,6 +17,7 @@ edition = "2024"
 license = "BSD-2-Clause"
 
 [features]
+alloc = []
 extern-symbols = []
 
 [dependencies]

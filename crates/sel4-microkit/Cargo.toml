@@ -17,7 +17,7 @@ edition = "2024"
 license = "BSD-2-Clause"
 
 [features]
-alloc = ["sel4-panicking/alloc"]
+alloc = ["sel4-panicking/alloc", "sel4-microkit-base/alloc"]
 full = ["alloc"]
 
 [dependencies]

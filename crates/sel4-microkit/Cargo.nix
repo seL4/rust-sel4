@@ -29,7 +29,7 @@ mk {
       "alloc"
     ];
     alloc = [
-      "sel4-panicking/alloc"
+      "sel4-panicking/alloc" "sel4-microkit-base/alloc"
     ];
   };
 }
