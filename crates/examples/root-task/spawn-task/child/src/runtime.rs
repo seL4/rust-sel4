@@ -29,7 +29,9 @@ static GLOBAL_ALLOCATOR: StaticDlmalloc<RawOneShotMutex> =
 
 sel4_panicking_env::register_debug_put_char!(sel4::debug_put_char);
 
-sel4_runtime_common::declare_entrypoint_with_stack_init! {
+sel4_runtime_common::declare_entrypoint_with_stack_init!();
+
+sel4_runtime_common::declare_rust_entrypoint! {
     entrypoint()
 }
 

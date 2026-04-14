@@ -68,7 +68,9 @@ pub const DEFAULT_STACK_SIZE: usize = 1024
         64
     };
 
-sel4_runtime_common::declare_entrypoint_with_stack_init! {
+sel4_runtime_common::declare_entrypoint_with_stack_init!();
+
+sel4_runtime_common::declare_rust_entrypoint! {
     entrypoint()
 }
 

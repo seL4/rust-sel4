@@ -101,6 +101,31 @@ pub unsafe fn _run_entrypoint(global_init_cond: bool, f: impl FnOnce() -> !) -> 
     }
 }
 
+#[macro_export]
+macro_rules! declare_rust_entrypoint {
+    {
+        $f:ident($( $i:ident: $t:ty ),* $(,)?)
+    } => {
+        $crate::declare_rust_entrypoint! {
+            $f($($i: $t,)*)
+            global_init if true
+        }
+    };
+    {
+        $f:ident($( $i:ident: $t:ty ),* $(,)?)
+        global_init if $global_init_cond:expr
+    } => {
+        const _: () = {
+            #[unsafe(no_mangle)]
+            unsafe extern "C" fn __sel4_runtime_common__rust_entrypoint($($i: $t,)*) -> ! {
+                $crate::_private::_run_entrypoint($global_init_cond, || {
+                    $f($($i,)*)
+                });
+            }
+        };
+    };
+}
+
 #[doc(hidden)]
 pub mod _private {
     pub use super::_run_entrypoint;

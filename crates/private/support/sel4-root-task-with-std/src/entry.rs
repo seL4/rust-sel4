@@ -8,7 +8,9 @@ use std::panic::{UnwindSafe, catch_unwind};
 
 use crate::{Termination, abort};
 
-sel4_runtime_common::declare_entrypoint_with_stack_init! {
+sel4_runtime_common::declare_entrypoint_with_stack_init!();
+
+sel4_runtime_common::declare_rust_entrypoint! {
     entrypoint(bootinfo: *const sel4::BootInfo)
 }
 
