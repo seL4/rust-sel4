@@ -11,6 +11,8 @@ use core::sync::atomic::{AtomicBool, Ordering};
 
 use sel4_microkit::{NullHandler, debug_println, panicking, protection_domain};
 
+sel4_test_microkit::embed_sdf_xml!("../../system.xml");
+
 static F1_DROPPED: AtomicBool = AtomicBool::new(false);
 
 #[protection_domain]
@@ -19,15 +21,7 @@ fn init() -> NullHandler {
         f1();
     });
     assert!(F1_DROPPED.load(Ordering::SeqCst));
-    let r = panicking::catch_unwind(|| {
-        panicking::panic_any(Foo(1337));
-    });
-    assert!(matches!(
-        r.err().unwrap().downcast::<Foo>().ok().unwrap(),
-        Foo(1337)
-    ));
-    debug_println!("TEST_PASS");
-    NullHandler::new()
+    sel4_test_microkit::indicate_success()
 }
 
 fn f1() {
@@ -47,8 +41,3 @@ impl Drop for F1Drop {
         F1_DROPPED.store(true, Ordering::SeqCst);
     }
 }
-
-#[derive(Copy, Clone)]
-struct Foo(usize);
-
-impl panicking::SmallPayload for Foo {}

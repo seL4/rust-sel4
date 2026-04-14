@@ -10,7 +10,6 @@
 #
 
 [workspace]
-default-members = []
 resolver = "3"
 members = [
     "crates/drivers/bcm2835-aux-uart",
@@ -92,12 +91,16 @@ members = [
     "crates/private/support/sel4-simple-task/runtime/config/types",
     "crates/private/support/sel4-simple-task/runtime/macros",
     "crates/private/support/sel4-simple-task/threading",
+    "crates/private/support/sel4-test-capdl",
     "crates/private/support/sel4-test-harness",
-    "crates/private/tests/capdl/threads/components/test",
-    "crates/private/tests/capdl/utcover/components/test",
+    "crates/private/support/sel4-test-microkit",
+    "crates/private/support/sel4-test-root-task",
+    "crates/private/support/sel4-test-sentinels",
+    "crates/private/support/sel4-test-sentinels/wrapper",
+    "crates/private/tests/capdl/threads",
+    "crates/private/tests/capdl/utcover",
     "crates/private/tests/microkit/minimal",
-    "crates/private/tests/microkit/passive-server-with-deferred-action/pds/client",
-    "crates/private/tests/microkit/passive-server-with-deferred-action/pds/server",
+    "crates/private/tests/microkit/passive-server-with-deferred-action",
     "crates/private/tests/microkit/reset",
     "crates/private/tests/microkit/unwind",
     "crates/private/tests/root-task/alloca",
@@ -157,6 +160,7 @@ members = [
     "crates/sel4/config/types",
     "crates/sel4/sys",
 ]
+default-members = []
 
 [patch.crates-io.ring]
 git = "https://github.com/coliasgroup/ring.git"

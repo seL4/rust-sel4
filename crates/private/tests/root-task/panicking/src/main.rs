@@ -19,9 +19,7 @@ fn main(_: &sel4::BootInfoPtr) -> ! {
         f1();
     });
     assert!(F1_DROPPED.load(Ordering::SeqCst));
-    debug_println!("TEST_PASS");
-
-    sel4::init_thread::suspend_self()
+    sel4_test_root_task::indicate_success()
 }
 
 fn f1() {

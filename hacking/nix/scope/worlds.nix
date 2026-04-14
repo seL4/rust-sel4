@@ -47,8 +47,8 @@ in rec {
             , mkLoaderQEMUArgs ? loader: [ "-kernel" loader ]
 
             , isMicrokit ? false
-            , microkitBoard ? null
-            , microkitConfig ? if debugBuild == null || debugBuild then "debug" else "release"
+            , microkitConfigBoard ? null
+            , microkitConfigConfig ? if debugBuild == null || debugBuild then "debug" else "release"
 
             , qemuMemory ? "2048"
             , extraQEMUArgs ? []
@@ -56,12 +56,12 @@ in rec {
             let
               numCores = if smp then "2" else "1";
             in
-              mkWorld {
+              mkWorld rec {
                 inherit kernelLoaderConfig;
                 inherit isMicrokit;
                 microkitConfig = {
-                  board = microkitBoard;
-                  config = microkitConfig;
+                  board = microkitConfigBoard;
+                  config = microkitConfigConfig;
                 };
                 kernelConfig = kernelConfigCommon // {
                   QEMU_MEMORY = mkString qemuMemory;
@@ -90,6 +90,8 @@ in rec {
                   # KernelSignalFastpath = on;
                 canSimulate = true;
                 mkPlatformSystemExtension = platUtils.qemu.mkMkPlatformSystemExtension {
+                  inherit mkQEMUCmd;
+                };
                   mkQEMUCmd = loader: [
                     # NOTE
                     # virtualization=on even when hypervisor to test loader dropping exception level
@@ -99,7 +101,6 @@ in rec {
                       "-nographic"
                       "-serial" "mon:stdio"
                   ] ++ mkLoaderQEMUArgs loader ++ extraQEMUArgs;
-                };
               };
         in rec {
           default = el2;
@@ -110,7 +111,7 @@ in rec {
             el2 = true;
             mcs = true;
             isMicrokit = true;
-            microkitBoard = "qemu_virt_aarch64";
+            microkitConfigBoard = "qemu_virt_aarch64";
             cpu = "cortex-a53";
             mkLoaderQEMUArgs = loader: [ "-device" "loader,file=${loader},addr=0x70000000,cpu-num=0" ];
           };
@@ -147,7 +148,7 @@ in rec {
                 el2 = true;
                 mcs = true;
                 isMicrokit = true;
-                microkitBoard = "qemu_virt_aarch64";
+                microkitConfigBoard = "qemu_virt_aarch64";
                 debugBuild = false;
               };
             };
@@ -182,9 +183,11 @@ in rec {
                 KernelPlatform = mkString "zynqmp";
                 KernelARMPlatform = mkString "zcu102";
               };
-            }) // {
+            }) // rec {
               canSimulate = true;
               mkPlatformSystemExtension = platUtils.qemu.mkMkPlatformSystemExtension {
+                inherit mkQEMUCmd;
+              };
                 mkQEMUCmd = loader: [
                   "${pkgsBuildBuild.this.qemuForSeL4Xilinx}/bin/qemu-system-aarch64"
                   # "${pkgsBuildBuild.this.qemuForSeL4}/bin/qemu-system-aarch64"
@@ -200,7 +203,6 @@ in rec {
                 ] else [
                     "-kernel" loader
                 ]);
-              };
             });
         in {
           default = mk {};
@@ -223,7 +225,7 @@ in rec {
             let
               numCores = if smp then "2" else "1";
             in
-              mkWorld {
+              mkWorld rec {
                 inherit kernelLoaderConfig;
                 isMicrokit = false;
                 kernelConfig = kernelConfigCommon // {
@@ -236,6 +238,8 @@ in rec {
                 };
                 canSimulate = true;
                 mkPlatformSystemExtension = platUtils.qemu.mkMkPlatformSystemExtension {
+                  inherit mkQEMUCmd;
+                };
                   mkQEMUCmd = loader: [
                     "${pkgsBuildBuild.this.qemuForSeL4}/bin/qemu-system-arm"
                       "-machine" "virt,highmem=off,secure=off,virtualization=${if bootInHyp then "on" else "off"}"
@@ -244,7 +248,6 @@ in rec {
                       "-serial" "mon:stdio"
                       "-kernel" loader
                   ];
-                };
               };
         in rec {
           default = smp;
@@ -283,8 +286,8 @@ in rec {
             , debugBuild ? null
 
             , isMicrokit ? false
-            , microkitBoard ? null
-            , microkitConfig ? if debugBuild == null || debugBuild then "debug" else "release"
+            , microkitConfigBoard ? null
+            , microkitConfigConfig ? if debugBuild == null || debugBuild then "debug" else "release"
 
             , extraQEMUArgs ? []
             }:
@@ -292,12 +295,12 @@ in rec {
               numCores = if smp then "2" else "1";
               qemuMemory = "2048";
             in
-              mkWorld {
+              mkWorld rec {
                 inherit kernelLoaderConfig;
                 inherit isMicrokit;
                 microkitConfig = {
-                  board = microkitBoard;
-                  config = microkitConfig;
+                  board = microkitConfigBoard;
+                  config = microkitConfigConfig;
                 };
                 kernelConfig = kernelConfigCommon // {
                   QEMU_MEMORY = mkString qemuMemory;
@@ -309,6 +312,8 @@ in rec {
                 };
                 canSimulate = true;
                 mkPlatformSystemExtension = platUtils.qemu.mkMkPlatformSystemExtension {
+                  inherit mkQEMUCmd;
+                };
                   mkQEMUCmd = loader: [
                     "${pkgsBuildBuild.this.qemuForSeL4}/bin/qemu-system-riscv64"
                       "-machine" "virt"
@@ -317,7 +322,7 @@ in rec {
                       "-serial" "mon:stdio"
                       # "-d" "unimp,guest_errors"
                   ] ++ mkLoaderQEMUArgs loader ++ extraQEMUArgs;
-                };
+
               };
         in rec {
           default = legacy.smp;
@@ -332,11 +337,11 @@ in rec {
           microkit = mk {
             mcs = true;
             isMicrokit = true;
-            microkitBoard = "qemu_virt_riscv64";
+            microkitConfigBoard = "qemu_virt_riscv64";
           };
         };
 
-      spike = mkWorld {
+      spike = mkWorld rec {
         inherit kernelLoaderConfig;
         kernelConfig = kernelConfigCommon // {
           KernelArch = mkString "riscv";
@@ -345,6 +350,8 @@ in rec {
         };
         canSimulate = true;
         mkPlatformSystemExtension = platUtils.qemu.mkMkPlatformSystemExtension {
+          inherit mkQEMUCmd;
+        };
           mkQEMUCmd = loader: [
             "${pkgsBuildBuild.this.qemuForSeL4}/bin/qemu-system-riscv64"
               "-machine" "spike"
@@ -358,10 +365,9 @@ in rec {
             #   "--kernel=${loader}"
             #   "${opensbi}/share/opensbi/lp64/generic/firmware/fw_dynamic.elf"
           ];
-        };
       };
 
-      hifive = mkWorld {
+      hifive = mkWorld rec {
         inherit kernelLoaderConfig;
         kernelConfig = kernelConfigCommon // {
           KernelArch = mkString "riscv";
@@ -370,6 +376,8 @@ in rec {
         };
         canSimulate = true;
         mkPlatformSystemExtension = platUtils.qemu.mkMkPlatformSystemExtension {
+          inherit mkQEMUCmd;
+        };
           mkQEMUCmd = loader: [
             "${pkgsBuildBuild.this.qemuForSeL4}/bin/qemu-system-riscv64"
               "-machine" "sifive_u"
@@ -378,7 +386,6 @@ in rec {
               "-serial" "mon:stdio"
               "-kernel" loader
           ];
-        };
       };
     };
 
@@ -394,7 +401,7 @@ in rec {
             }:
             let
             in
-              mkWorld {
+              mkWorld rec {
                 inherit kernelLoaderConfig;
                 kernelConfig = kernelConfigCommon // {
                   KernelArch = mkString "riscv";
@@ -404,6 +411,8 @@ in rec {
                 };
                 canSimulate = true;
                 mkPlatformSystemExtension = platUtils.qemu.mkMkPlatformSystemExtension {
+                  inherit mkQEMUCmd;
+                };
                   mkQEMUCmd = loader: [
                     "${pkgsBuildBuild.this.qemuForSeL4}/bin/qemu-system-riscv32"
                       "-machine" "spike"
@@ -413,7 +422,6 @@ in rec {
                       "-bios" "${opensbi}/share/opensbi/ilp32/generic/firmware/fw_dynamic.bin"
                       "-kernel" loader
                   ];
-                };
               };
         in rec {
           default = legacy;
@@ -431,10 +439,10 @@ in rec {
         let
           mk =
             { isMicrokit ? false
-            , microkitBoard ? null
-            , microkitConfig ? "debug"
+            , microkitConfigBoard ? null
+            , microkitConfigConfig ? "debug"
             }:
-            lib.fix (self: mkWorld {
+            lib.fix (self: mkWorld rec {
               inherit kernelLoaderConfig;
               platformRequiresLoader = false;
               kernelConfig = kernelConfigCommon // {
@@ -451,11 +459,13 @@ in rec {
               };
               inherit isMicrokit;
               microkitConfig = {
-                board = microkitBoard;
-                config = microkitConfig;
+                board = microkitConfigBoard;
+                config = microkitConfigConfig;
               };
               canSimulate = true;
               mkPlatformSystemExtension = platUtils.qemu.mkMkPlatformSystemExtension {
+                inherit mkQEMUCmd;
+              };
                 mkQEMUCmd =
                   let
                     enable = opt: "+${opt}";
@@ -480,13 +490,12 @@ in rec {
                       "-kernel" self.kernelBinary32Bit
                       "-initrd" task
                   ];
-              };
             });
         in {
           default = mk {};
           microkit = lib.optionalAttrs is64bit (mk {
             isMicrokit = true;
-            microkitBoard = "x86_64_generic";
+            microkitConfigBoard = "x86_64_generic";
           });
         };
     };

@@ -62,6 +62,42 @@ let
         "README.md"
       ];
     };
+    tests-capdl-utcover = {
+      resolveLinks = true;
+      extraPaths = [
+        "cdl.py"
+      ];
+    };
+    tests-capdl-threads = {
+      resolveLinks = true;
+      extraPaths = [
+        "cdl.py"
+      ];
+    };
+    tests-microkit-minimal = {
+      resolveLinks = true;
+      extraPaths = [
+        "system.py"
+      ];
+    };
+    tests-microkit-unwind = {
+      resolveLinks = true;
+      extraPaths = [
+        "system.xml"
+      ];
+    };
+    tests-microkit-reset = {
+      resolveLinks = true;
+      extraPaths = [
+        "x.system"
+      ];
+    };
+    tests-microkit-passive-server-with-deferred-action = {
+      resolveLinks = true;
+      extraPaths = [
+        "x.system"
+      ];
+    };
   };
 
   unAugmentedCrates = lib.listToAttrs (lib.forEach workspaceMemberPaths (cratePath: rec {

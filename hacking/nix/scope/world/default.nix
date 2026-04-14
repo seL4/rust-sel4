@@ -24,6 +24,7 @@ let
     , microkitConfig ? null
     , canSimulate ? false
     , platformRequiresLoader ? true
+    , mkQEMUCmd ? null
     , mkPlatformSystemExtension ? _: { attrs = {}; links = []; }
     , ...
     } @ args:
@@ -35,6 +36,7 @@ let
         microkitConfig
         canSimulate
         platformRequiresLoader
+        mkQEMUCmd
         mkPlatformSystemExtension
       ;
     };
@@ -106,6 +108,8 @@ self: with self;
 
   libsel4 = if worldConfig.isMicrokit then microkitDir else "${seL4ForUserspace}/libsel4";
 
+  seL4KernelConfigFile = "${seL4IncludeDir}/kernel/gen_config.json";
+
   seL4Config =
     let
       f = seg: builtins.fromJSON (builtins.readFile (symlinkToRegularFile "${seg}-gen_config.json" "${seL4IncludeDir}/${seg}/gen_config.json"));
@@ -129,6 +133,18 @@ self: with self;
   serializeCapDLSpec = callPackage ./capdl/serialize-capdl-spec.nix {};
   mkSimpleCompositionCapDLSpec = callPackage ./capdl/mk-simple-composition-capdl-spec.nix {};
   mkCapDLInitializerWithSpec = callPackage ./capdl/mk-capdl-initializer-with-spec.nix {};
+
+  genSDF = callPackage ./gen-sdf.nix {};
+
+  simulateScript = if !worldConfig.canSimulate then null else buildPackages.writeShellApplication {
+    name = "simulate";
+    checkPhase = "";
+    text = ''
+      image="$1"
+      shift
+      exec ${lib.concatStringsSep " " (worldConfig.mkQEMUCmd ''"$image"'')} "$@"
+    '';
+  };
 
   mkCapDLInitializer =
     { spec ? null

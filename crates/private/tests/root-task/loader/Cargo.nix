@@ -14,6 +14,7 @@ mk {
       sel4
       sel4-root-task
       sel4-platform-info
+      sel4-test-root-task
     ;
   };
 }

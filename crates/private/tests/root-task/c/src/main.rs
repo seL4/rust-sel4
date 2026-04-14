@@ -22,6 +22,5 @@ fn main(_: &sel4::BootInfoPtr) -> ! {
     let n = unsafe { test(s.as_ptr()) };
     debug_println!("n = {}", n);
     assert_eq!(n, 1234 + 234);
-    debug_println!("TEST_PASS");
-    sel4::init_thread::suspend_self()
+    sel4_test_root_task::indicate_success()
 }

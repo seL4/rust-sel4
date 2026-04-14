@@ -10,6 +10,7 @@ use core::panic::AssertUnwindSafe;
 
 use sel4_panicking::catch_unwind;
 use sel4_panicking_env::{debug_print, debug_println};
+use sel4_test_sentinels::{indicate_failure, indicate_success};
 
 use crate::{
     config::types::*,
@@ -61,8 +62,8 @@ pub fn run_tests_with_config(config: &Config, tests: &[&TestDescAndFn]) {
     debug_println!();
 
     match result {
-        TestResult::Ok => debug_println!("TEST_PASS"),
-        TestResult::Failed => debug_println!("TEST_FAIL"),
+        TestResult::Ok => indicate_success(),
+        TestResult::Failed => indicate_failure(),
     }
 }
 

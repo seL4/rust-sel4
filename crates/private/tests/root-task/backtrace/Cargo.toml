@@ -20,6 +20,7 @@ license = "BSD-2-Clause"
 sel4 = { path = "../../../../sel4" }
 sel4-backtrace = { path = "../../../../experimental/sel4-backtrace", features = ["full"] }
 sel4-root-task = { path = "../../../../sel4-root-task", features = ["alloc"] }
+sel4-test-root-task = { path = "../../../support/sel4-test-root-task" }
 
 [dependencies.sel4-backtrace-embedded-debug-info]
 path = "../../../../experimental/sel4-backtrace/embedded-debug-info"

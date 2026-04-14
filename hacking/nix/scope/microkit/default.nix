@@ -29,6 +29,8 @@ let
 
   kernelSource = sources.seL4;
 
+  genSDF = callPackage ./gen-sdf.nix {};
+
   kernelSourcePatched = stdenv.mkDerivation {
     name = "kernel-source-for-microkit";
     src = kernelSource;
@@ -183,5 +185,6 @@ in rec {
   inherit
     sdk
     mkSystem
+    genSDF
   ;
 }

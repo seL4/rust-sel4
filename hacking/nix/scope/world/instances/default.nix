@@ -102,6 +102,7 @@ in rec {
     microkit.tests.minimal
     microkit.tests.passive-server-with-deferred-action
     microkit.tests.reset
+    microkit.tests.unwind
     examples.root-task.hello
     examples.root-task.example-root-task
     examples.root-task.example-root-task-without-runtime
@@ -359,18 +360,16 @@ in rec {
     capdl = {
       threads = maybe (haveFullRuntime && haveCapDLInitializer) (mkInstance rec {
         test = mkTask {
-          rootCrate = crates.tests-capdl-threads-components-test;
+          rootCrate = crates.tests-capdl-threads;
           targetTriple = mkSeL4RustTargetTriple { unwind = haveUnwindingSupport; };
           release = true; # test optimizations
         };
         rootTask = mkCapDLInitializer {
           spec = mkSimpleCompositionCapDLSpec {
             script = sources.srcRoot + "/crates/private/tests/capdl/threads/cdl.py";
-            config = {
-              components = {
-                example_component.image = test.elf;
-              };
-            };
+            searchDirs = [
+              test
+            ];
           };
         };
         extraPlatformArgs = lib.optionalAttrs canSimulate {
@@ -380,7 +379,7 @@ in rec {
 
       utcover = maybe (haveFullRuntime && haveCapDLInitializer) (mkInstance rec {
         test = mkTask {
-          rootCrate = crates.tests-capdl-utcover-components-test;
+          rootCrate = crates.tests-capdl-utcover;
           targetTriple = mkSeL4RustTargetTriple { unwind = haveUnwindingSupport; };
           # release = false;
           release = true;
@@ -388,11 +387,9 @@ in rec {
         rootTask = mkCapDLInitializer {
           spec = mkSimpleCompositionCapDLSpec {
             script = sources.srcRoot + "/crates/private/tests/capdl/utcover/cdl.py";
-            config = {
-              components = {
-                example_component.image = test.elf;
-              };
-            };
+            searchDirs = [
+              test
+            ];
           };
           embedFrames = false;
           deflate = false;

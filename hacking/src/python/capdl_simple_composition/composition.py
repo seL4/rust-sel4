@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
 #
 
+import argparse
 import json
 import os
 import shutil
@@ -24,29 +25,46 @@ class BaseComposition:
 
     @classmethod
     def from_env(cls):
-        with open(os.environ['CONFIG']) as f:
-            config = json.load(f)
-        return cls(out_dir=os.environ['OUT_DIR'], config=config)
+        parser = argparse.ArgumentParser()
+        parser.add_argument('--kernel', required=True, type=Path)
+        parser.add_argument('--object-sizes', required=True, type=Path)
+        parser.add_argument('--search-dir', required=True, type=Path, action ='append')
+        parser.add_argument('-o', required=True, type=Path)
+        args = parser.parse_args()
 
-    def __init__(self, out_dir, config):
-        self.out_dir = Path(out_dir)
-        self.config = config
+        return cls(
+            out_dir=args.o,
+            kernel=args.kernel,
+            object_sizes=args.object_sizes,
+            search_dirs=args.search_dir,
+        )
 
-        self.kernel_config = KernelConfig(config['kernel_config'])
+    def __init__(
+        self,
+        out_dir,
+        kernel,
+        object_sizes,
+        search_dirs,
+        compute_ut_covers=False,
+    ):
+        self.out_dir = out_dir
 
-        config_device_tree = config.get('device_tree')
-        self.device_tree = None if config_device_tree is None else DeviceTree(config_device_tree)
+        self.kernel_config = KernelConfig(f'{kernel}/libsel4/include/kernel/gen_config.json')
 
-        platform_info = config.get('platform_info', None)
-        if platform_info is not None:
-            with open(platform_info) as f:
+        self.search_dirs = search_dirs
+
+        self.device_tree = None
+        self.platform_info = None
+        if self.kernel_config.sel4_arch() != 'x86_64':
+            device_tree_path = f'{kernel}/support/kernel.dtb'
+            self.device_tree = DeviceTree(device_tree_path)
+            platform_info_path = f'{kernel}/support/platform_gen.yaml'
+            with open(platform_info_path) as f:
                 self.platform_info = yaml.load(f, Loader=yaml.FullLoader)
-        else:
-            self.platform_info = None
 
-        with open(config['object_sizes']) as f:
+        with open(object_sizes) as f:
             object_sizes = yaml.load(f, Loader=yaml.FullLoader)
-        register_object_sizes(object_sizes)
+            register_object_sizes(object_sizes)
 
         self.arch = self.kernel_config.sel4_arch()
         self.capdl_arch = self.kernel_config.capdl_arch()
@@ -56,7 +74,7 @@ class BaseComposition:
         self.render_state = RenderState(obj_space=obj_space)
 
         # TODO
-        self.compute_ut_covers = config.get('compute_ut_covers', False)
+        self.compute_ut_covers = compute_ut_covers
 
         self.components = set()
         self.files = {}
@@ -129,6 +147,13 @@ class BaseComposition:
         d.mkdir()
         for fname, path in self.files.items():
             (d / fname).symlink_to(path)
+
+    def find_in_search_dirs(self, fname):
+        for d in self.search_dirs:
+            path = d / fname
+            if path.exists():
+                return path
+        raise Exception('could not find {fname} in search dirs')
 
     def complete(self):
         self.finalize()

@@ -7,11 +7,11 @@
 <system>
 
     <protection_domain name="client" priority="1" stack_size="0x10_000">
-        <program_image path="client.elf" />
+        <program_image path="test.elf" />
     </protection_domain>
 
     <protection_domain name="server" priority="2" passive="true" stack_size="0x10_000">
-        <program_image path="server.elf" />
+        <program_image path="test.elf" />
     </protection_domain>
 
     <channel>

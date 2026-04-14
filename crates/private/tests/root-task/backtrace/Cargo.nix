@@ -12,6 +12,7 @@ mk {
     inherit (localCrates)
       sel4
       sel4-backtrace-embedded-debug-info
+      sel4-test-root-task
     ;
     sel4-root-task = localCrates.sel4-root-task // { features = [ "alloc" ]; };
     sel4-backtrace-simple = localCrates.sel4-backtrace-simple // { features = [ "alloc" ]; };

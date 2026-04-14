@@ -20,3 +20,4 @@ license = "MIT OR Apache-2.0"
 sel4-immediate-sync-once-cell = { path = "../../../sel4-immediate-sync-once-cell" }
 sel4-panicking = { path = "../../../sel4-panicking" }
 sel4-panicking-env = { path = "../../../sel4-panicking/env" }
+sel4-test-sentinels = { path = "../sel4-test-sentinels" }

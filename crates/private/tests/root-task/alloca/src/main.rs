@@ -23,7 +23,5 @@ fn main(_bootinfo: &sel4::BootInfoPtr) -> ! {
 
     assert_eq!(x, X);
 
-    debug_println!("TEST_PASS");
-
-    sel4::init_thread::suspend_self()
+    sel4_test_root_task::indicate_success()
 }

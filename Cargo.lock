@@ -3059,12 +3059,49 @@ dependencies = [
 ]
 
 [[package]]
+name = "sel4-test-capdl"
+version = "0.1.0"
+dependencies = [
+ "sel4-test-sentinels",
+]
+
+[[package]]
 name = "sel4-test-harness"
 version = "0.1.0"
 dependencies = [
  "sel4-immediate-sync-once-cell",
  "sel4-panicking",
  "sel4-panicking-env",
+ "sel4-test-sentinels",
+]
+
+[[package]]
+name = "sel4-test-microkit"
+version = "0.1.0"
+dependencies = [
+ "sel4-microkit",
+ "sel4-test-sentinels",
+]
+
+[[package]]
+name = "sel4-test-root-task"
+version = "0.1.0"
+dependencies = [
+ "sel4-test-sentinels",
+]
+
+[[package]]
+name = "sel4-test-sentinels"
+version = "0.1.0"
+dependencies = [
+ "sel4-panicking-env",
+]
+
+[[package]]
+name = "sel4-test-sentinels-wrapper"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
 ]
 
 [[package]]
@@ -3352,23 +3389,25 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "81c645a4de0d803ced6ef0388a2646aa1ef8467173b5d59a2c33c88de4ab76e7"
 
 [[package]]
-name = "tests-capdl-threads-components-test"
+name = "tests-capdl-threads"
 version = "0.1.0"
 dependencies = [
  "sel4",
  "sel4-simple-task-config-types",
  "sel4-simple-task-runtime",
  "sel4-sync",
+ "sel4-test-capdl",
  "serde",
 ]
 
 [[package]]
-name = "tests-capdl-utcover-components-test"
+name = "tests-capdl-utcover"
 version = "0.1.0"
 dependencies = [
  "sel4",
  "sel4-simple-task-config-types",
  "sel4-simple-task-runtime",
+ "sel4-test-capdl",
  "serde",
 ]
 
@@ -3377,20 +3416,15 @@ name = "tests-microkit-minimal"
 version = "0.1.0"
 dependencies = [
  "sel4-microkit",
+ "sel4-test-microkit",
 ]
 
 [[package]]
-name = "tests-microkit-passive-server-with-deferred-action-pds-client"
+name = "tests-microkit-passive-server-with-deferred-action"
 version = "0.1.0"
 dependencies = [
  "sel4-microkit",
-]
-
-[[package]]
-name = "tests-microkit-passive-server-with-deferred-action-pds-server"
-version = "0.1.0"
-dependencies = [
- "sel4-microkit",
+ "sel4-test-microkit",
 ]
 
 [[package]]
@@ -3399,6 +3433,7 @@ version = "0.1.0"
 dependencies = [
  "sel4-microkit",
  "sel4-reset",
+ "sel4-test-microkit",
 ]
 
 [[package]]
@@ -3406,6 +3441,7 @@ name = "tests-microkit-unwind"
 version = "0.1.0"
 dependencies = [
  "sel4-microkit",
+ "sel4-test-microkit",
 ]
 
 [[package]]
@@ -3415,6 +3451,7 @@ dependencies = [
  "sel4",
  "sel4-alloca",
  "sel4-root-task",
+ "sel4-test-root-task",
 ]
 
 [[package]]
@@ -3427,6 +3464,7 @@ dependencies = [
  "sel4-backtrace-simple",
  "sel4-backtrace-types",
  "sel4-root-task",
+ "sel4-test-root-task",
 ]
 
 [[package]]
@@ -3438,6 +3476,7 @@ dependencies = [
  "sel4",
  "sel4-newlib",
  "sel4-root-task",
+ "sel4-test-root-task",
 ]
 
 [[package]]
@@ -3446,6 +3485,7 @@ version = "0.1.0"
 dependencies = [
  "sel4",
  "sel4-root-task",
+ "sel4-test-root-task",
 ]
 
 [[package]]
@@ -3464,6 +3504,7 @@ version = "0.1.0"
 dependencies = [
  "sel4",
  "sel4-root-task",
+ "sel4-test-root-task",
  "tests-root-task-dafny-core",
 ]
 
@@ -3483,6 +3524,7 @@ dependencies = [
  "sel4",
  "sel4-platform-info",
  "sel4-root-task",
+ "sel4-test-root-task",
 ]
 
 [[package]]
@@ -3496,6 +3538,7 @@ dependencies = [
  "sel4-linux-syscall-types",
  "sel4-musl",
  "sel4-root-task-with-std",
+ "sel4-test-root-task",
 ]
 
 [[package]]
@@ -3505,6 +3548,7 @@ dependencies = [
  "cfg-if",
  "sel4",
  "sel4-root-task",
+ "sel4-test-root-task",
 ]
 
 [[package]]
@@ -3525,6 +3569,7 @@ version = "0.1.0"
 dependencies = [
  "sel4",
  "sel4-root-task",
+ "sel4-test-root-task",
 ]
 
 [[package]]
@@ -3542,6 +3587,7 @@ version = "0.1.0"
 dependencies = [
  "sel4",
  "sel4-root-task",
+ "sel4-test-root-task",
  "tests-root-task-verus-core",
 ]
 

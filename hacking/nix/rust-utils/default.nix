@@ -32,6 +32,8 @@ in
 
   symlinkToRegularFile = callBuildBuildPackage ./symlink-to-regular-file.nix {};
 
+  pathToLink = callBuildBuildPackage ./path-to-link.nix {};
+
   mkCompilerRTSource = { rev, hash }:
     let
       llvmProject = fetchFromGitHub {

@@ -25,7 +25,7 @@ fn main(_: &sel4::BootInfoPtr) -> ! {
         f();
     });
 
-    sel4::init_thread::suspend_self()
+    sel4_test_root_task::indicate_success()
 }
 
 pub fn f() {
@@ -46,6 +46,4 @@ fn g(_: &()) {
         .symbolize(&get_context().unwrap(), &mut s)
         .unwrap();
     debug_println!("{}", s);
-
-    debug_println!("TEST_PASS");
 }
