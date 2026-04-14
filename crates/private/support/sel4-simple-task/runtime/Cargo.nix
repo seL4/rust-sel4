@@ -12,7 +12,10 @@ mk {
     serde = serdeWith [];
     postcard = postcardWith [];
     serde_json = { version = versions.serde_json; default-features = false; optional = true; };
-
+    rkyv = {
+      version = versions.rkyv;
+      default-features = false;
+    };
     inherit (localCrates)
       sel4
       sel4-dlmalloc

@@ -11,7 +11,7 @@ mk {
   dependencies = {
     inherit (versions) serde_json;
     sel4-simple-task-runtime-config-types = localCrates.sel4-simple-task-runtime-config-types // {
-      features = [ "serde" "alloc" ];
+      features = [ "serde" ];
     };
   };
 }
