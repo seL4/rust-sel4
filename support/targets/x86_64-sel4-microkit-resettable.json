@@ -8,7 +8,7 @@
   "exe-suffix": ".elf",
   "features": "-mmx,-sse,-sse2,-sse3,-ssse3,-sse4.1,-sse4.2,-avx,-avx2,+soft-float",
   "has-thread-local": true,
-  "link-script": "SECTIONS {\n    .persistent : {\n        *(.persistent .persistent.*)\n    }\n} INSERT BEFORE .data;\n\nASSERT(DEFINED(_reset), \"_reset is not defined\")\n\nENTRY(_reset)\n__sel4_ipc_buffer_obj = (__ehdr_start & ~(4096 - 1)) - 4096;",
+  "link-script": "ASSERT(DEFINED(_reset), \"_reset is not defined\")\n\nENTRY(_reset)\n__sel4_ipc_buffer_obj = (__ehdr_start & ~(4096 - 1)) - 4096;",
   "linker": "rust-lld",
   "linker-flavor": "gnu-lld",
   "llvm-target": "x86_64-unknown-none-elf",
