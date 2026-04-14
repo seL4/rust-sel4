@@ -9,14 +9,8 @@
 mk {
   package.name = "sel4-simple-task-rpc";
   dependencies = {
-    serde = serdeWith [] // { optional = true; };
-    postcard = postcardWith [] // { optional = true; };
+    serde = serdeWith [];
+    postcard = postcardWith [];
     inherit (localCrates) sel4;
-  };
-  features = {
-    postcard = [
-      "dep:serde"
-      "dep:postcard"
-    ];
   };
 }
