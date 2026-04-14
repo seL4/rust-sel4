@@ -1,6 +1,6 @@
 {
   "arch": "x86_64",
-  "code-model": "small",
+  "code-model": "kernel",
   "cpu": "x86-64",
   "crt-objects-fallback": "false",
   "crt-static-default": true,
@@ -23,11 +23,14 @@
   },
   "os": "linux",
   "plt-by-default": false,
-  "relro-level": "full",
+  "position-independent-executables": true,
+  "relocation-model": "static",
+  "relro-level": "off",
   "rustc-abi": "softfloat",
   "stack-probes": {
     "kind": "inline"
   },
+  "static-position-independent-executables": true,
   "supported-sanitizers": [
     "kcfi",
     "kernel-address"

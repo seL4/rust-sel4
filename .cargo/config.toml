@@ -42,4 +42,4 @@ rustflags = ["-C", "target-feature=+crt-static"]
 
 # TODO is this necessary?
 [target.x86_64-unknown-none]
-rustflags = ["-C", "relocation-model=static"]
+rustflags = ["-Crelocation-model=static", "-Crelro-level=off"]

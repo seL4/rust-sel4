@@ -14,7 +14,9 @@ use std::fs;
 use std::path::Path;
 
 use rustc_target::json::ToJson;
-use rustc_target::spec::{Cc, CodeModel, Env, LinkerFlavor, Lld, Os, PanicStrategy, Target};
+use rustc_target::spec::{
+    Cc, Env, LinkerFlavor, Lld, Os, PanicStrategy, RelocModel, RelroLevel, Target,
+};
 
 use cfg_if::cfg_if;
 
@@ -93,9 +95,11 @@ impl Config {
             Arch::X86_64 => {
                 let mut target = builtin("x86_64-unknown-none");
                 let options = &mut target.options;
-                options.position_independent_executables = false;
-                options.static_position_independent_executables = false;
-                options.code_model = Some(CodeModel::Small);
+                options.relocation_model = RelocModel::Static;
+                options.relro_level = RelroLevel::Off;
+                // options.code_model = Some(CodeModel::Small); // TODO necessary?
+                // options.position_independent_executables = false; // TODO necessary?
+                // options.static_position_independent_executables = false; // TODO necessary?
                 target
             }
         };

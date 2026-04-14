@@ -1,6 +1,6 @@
 {
   "arch": "x86_64",
-  "code-model": "small",
+  "code-model": "kernel",
   "cpu": "x86-64",
   "crt-objects-fallback": "false",
   "crt-static-default": true,
@@ -24,6 +24,7 @@
   "os": "linux",
   "panic-strategy": "abort",
   "plt-by-default": false,
+  "position-independent-executables": true,
   "pre-link-args": {
     "gnu-lld": [
       "-z",
@@ -31,11 +32,13 @@
       "--no-rosegment"
     ]
   },
-  "relro-level": "full",
+  "relocation-model": "static",
+  "relro-level": "off",
   "rustc-abi": "softfloat",
   "stack-probes": {
     "kind": "inline"
   },
+  "static-position-independent-executables": true,
   "supported-sanitizers": [
     "kcfi",
     "kernel-address"
