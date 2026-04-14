@@ -16,27 +16,11 @@ RUST_TARGET_PATH = { value = "support/targets", relative = true }
 [target."cfg(any(target_os = \"none\", target_env = \"musl\"))"]
 linker = "rust-lld"
 
-[target."cfg(all(any(target_os = \"none\", target_env = \"musl\"), target_arch = \"x86_64\"))"]
-runner = "qemu-x86_64"
-
-[target."cfg(all(any(target_os = \"none\", target_env = \"musl\"), target_arch = \"aarch64\"))"]
-runner = "qemu-aarch64"
-
-[target."cfg(all(any(target_os = \"none\", target_env = \"musl\"), target_arch = \"arm\"))"]
-runner = "qemu-arm"
-
-[target."cfg(all(any(target_os = \"none\", target_env = \"musl\"), target_arch = \"riscv64\"))"]
-runner = "qemu-riscv64"
-
-[target."cfg(all(any(target_os = \"none\", target_env = \"musl\"), target_arch = \"riscv32\"))"]
-runner = "qemu-riscv32"
-
 # tweaks
 
 [target.riscv64gc-unknown-linux-musl]
 rustflags = ["-Ctarget-feature=+crt-static"]
 
-# TODO this target doesn't ship with musl
 [target.riscv32gc-unknown-linux-musl]
 rustflags = ["-Ctarget-feature=+crt-static"]
 

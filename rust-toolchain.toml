@@ -20,4 +20,11 @@ targets = [
     "riscv64gc-unknown-linux-musl",
     # tier 2, not available via rustup
     # "riscv32gc-unknown-linux-musl",
+    "aarch64-unknown-none",
+    "armv7a-none-eabi",
+    "riscv64gc-unknown-none-elf",
+    "riscv64imac-unknown-none-elf",
+    "riscv32imafc-unknown-none-elf",
+    "riscv32imac-unknown-none-elf",
+    "x86_64-unknown-none",
 ]

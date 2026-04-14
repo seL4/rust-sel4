@@ -55,6 +55,8 @@ endif
 
 out := out
 
+cargo_config_link := .cargo/gen
+
 .PHONY: none
 none:
 
@@ -68,6 +70,10 @@ $(out):
 .PHONY: shell
 shell:
 	$(nix_shell) -A shellForHacking
+
+.PHONY: cargo-config
+cargo-config:
+	$(nix_build) -A cargoConfig.links -o $(cargo_config_link)
 
 .PHONY: update-generated-sources
 update-generated-sources:

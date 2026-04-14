@@ -159,6 +159,12 @@ in let
                   gccParams = { arch = "rv32gc"; abi = "lp32d"; };
                 };
               });
+              linux = mkLeafWithGuard {
+                config = "riscv32-unknown-linux-gnu";
+              };
+              linuxMusl = mkLeafWithGuard {
+                config = "riscv32-unknown-linux-musl";
+              };
             };
           };
           x86_64 = {
