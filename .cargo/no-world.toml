@@ -1,0 +1,23 @@
+#
+# Copyright 2026, Colias Group, LLC
+#
+# SPDX-License-Identifier: BSD-2-Clause
+#
+
+[target."cfg(all(any(target_os = \"none\", target_env = \"musl\"), target_arch = \"x86_64\"))"]
+runner = "qemu-x86_64"
+
+[target."cfg(all(any(target_os = \"none\", target_env = \"musl\"), target_arch = \"x86\"))"]
+runner = "qemu-i386"
+
+[target."cfg(all(any(target_os = \"none\", target_env = \"musl\"), target_arch = \"aarch64\"))"]
+runner = "qemu-aarch64"
+
+[target."cfg(all(any(target_os = \"none\", target_env = \"musl\"), target_arch = \"arm\"))"]
+runner = "qemu-arm"
+
+[target."cfg(all(any(target_os = \"none\", target_env = \"musl\"), target_arch = \"riscv64\"))"]
+runner = "qemu-riscv64"
+
+[target."cfg(all(any(target_os = \"none\", target_env = \"musl\"), target_arch = \"riscv32\"))"]
+runner = "qemu-riscv32"

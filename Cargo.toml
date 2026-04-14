@@ -95,6 +95,7 @@ members = [
     "crates/private/support/sel4-test-harness",
     "crates/private/support/sel4-test-microkit",
     "crates/private/support/sel4-test-root-task",
+    "crates/private/support/sel4-test-runner",
     "crates/private/support/sel4-test-sentinels",
     "crates/private/support/sel4-test-sentinels/wrapper",
     "crates/private/tests/capdl/threads",

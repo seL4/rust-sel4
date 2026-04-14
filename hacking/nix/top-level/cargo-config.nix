@@ -10,8 +10,8 @@
 let
   inherit (topLevel) lib pkgs;
   inherit (pkgs) build;
-  inherit (build) writers linkFarm this;
-  inherit (this) crateUtils;
+  inherit (build) writers linkFarm writeShellApplication this llvm python312;
+  inherit (this) sources crateUtils capdl-tool sdfgen;
 
   targetRootDir = toString ../../../target;
 
@@ -20,6 +20,16 @@ let
   rustupTargets = (lib.importTOML toolchainPath).toolchain.targets;
 
   isRustupTarget = targetName: lib.elem targetName rustupTargets;
+
+  allTargets = builtinTargets ++ customTargets;
+
+  builtinTargets = rustupTargets ++ [
+    "riscv32gc-unknown-linux-musl"
+  ];
+
+  builtinMuslTargets = lib.filter hasMusl builtinTargets;
+
+  builtinBareMetalTargets = lib.filter (target: !(hasMusl target)) builtinTargets;
 
   targetsPath = ../../../support/targets;
 
@@ -31,14 +41,32 @@ let
         in
           if m == null then null else lib.elemAt m 0
       ;
-      targetNames = lib.filter (x: x != null) (map parseTargetName (lib.attrNames(builtins.readDir targetsPath)));
+      targetNames = lib.filter (x: x != null) (map parseTargetName (lib.attrNames (builtins.readDir targetsPath)));
     in
       targetNames
     ;
 
+  firstSegment = targetName: lib.head (lib.splitString "-" targetName);
+
   hasSegment = seg: targetName: lib.elem seg (lib.splitString "-" targetName);
 
-  firstSegment = targetName: lib.head (lib.splitString "-" targetName);
+  hasMusl = hasSegment "musl";
+
+  hasSeL4 = targetName: hasSegment "sel4" targetName || hasSegment "microkit" targetName;
+
+  getPkgsForTarget = target: with pkgs.host; {
+    "x86_64" = x86_64;
+    "aarch64" = aarch64;
+    "armv7" = aarch32;
+    "armv7a" = aarch32;
+    "riscv64gc" = riscv64.gc;
+    "riscv64imac" = riscv64.imac;
+    "riscv32gc" = riscv32.gc;
+    "riscv32imac" = riscv32.imac;
+    "riscv32imafc" = riscv32.imafc;
+  }.${firstSegment target}.none;
+  # TODO
+  # ${if hasMusl target then "linuxMusl" else "none"}
 
   getCCExePath = stdenv:
     let
@@ -50,41 +78,12 @@ let
 
   mkIncludeArg = d: "-I${d}/include";
 
-  builtinMuslTargets = [
-    "x86_64-unknown-linux-musl"
-    "aarch64-unknown-linux-musl"
-    "armv7-unknown-linux-musleabi"
-    "riscv64gc-unknown-linux-musl"
-    "riscv32gc-unknown-linux-musl"
-  ];
-
-  builtinBareMetalTargets = [
-    "x86_64-unknown-none"
-    "aarch64-unknown-none"
-    "armv7a-none-eabi"
-    "riscv64imac-unknown-none-elf"
-    "riscv64gc-unknown-none-elf"
-    "riscv32imac-unknown-none-elf"
-    "riscv32imafc-unknown-none-elf"
-  ];
-
-  allTargets = builtinMuslTargets ++ builtinBareMetalTargets ++ customTargets;
-
-  hasMusl = hasSegment "musl";
-
-  hasSeL4 = targetName: hasSegment "sel4" targetName || hasSegment "microkit" targetName;
-
-  getPkgsForTarget = target: {
-    "x86_64" = pkgs.host.x86_64.none;
-    "aarch64" = pkgs.host.aarch64.none;
-    "armv7" = pkgs.host.aarch32.none;
-    "armv7a" = pkgs.host.aarch32.none;
-    "riscv64gc" = pkgs.host.riscv64.gc.none;
-    "riscv64imac" = pkgs.host.riscv64.imac.none;
-    "riscv32gc" = pkgs.host.riscv32.gc.none;
-    "riscv32imac" = pkgs.host.riscv32.imac.none;
-    "riscv32imafc" = pkgs.host.riscv32.imafc.none;
-  }.${firstSegment target};
+  ccConfigCommon = {
+    env = {
+      HOST_CC = getCCExePath build.stdenv;
+      LIBCLANG_PATH = build.this.libclangPath;
+    };
+  };
 
   ccConfigForTarget = target:
     let
@@ -93,17 +92,23 @@ let
       inherit (hostPkgs.this) muslForSeL4 dummyLibunwind;
     in
       crateUtils.clobber ([
-        {
+        (lib.optionalAttrs (!(hasMusl target) || hasSeL4 target) {
           env = {
             "CC_${target}" = getCCExePath stdenv;
           };
-        }
+        })
         (
-          if hasSeL4 target && hasMusl target
+          if !(hasMusl target)
           then {
             env = {
-              "CFLAGS_${target}" = "-nostdlib ${mkIncludeArg muslForSeL4}";
-              "BINDGEN_EXTRA_CLANG_ARGS_${target}" = mkIncludeArg muslForSeL4;
+              "BINDGEN_EXTRA_CLANG_ARGS_${target}" = mkIncludeArg (getNewlibDir stdenv); # TODO necessary?
+            };
+          }
+          else if hasSeL4 target
+          then {
+            env = {
+              "CFLAGS_${target}" = "-nostdlib ${mkIncludeArg muslForSeL4}"; # TODO necessary?
+              "BINDGEN_EXTRA_CLANG_ARGS_${target}" = mkIncludeArg muslForSeL4; # TODO necessary?
             };
             target.${target} = {
               rustflags = [
@@ -112,21 +117,25 @@ let
               ];
             };
           }
+          # special case, not included in rustup
+          else if target == "riscv32gc-unknown-linux-musl"
+          then
+            let
+              thesePkgs = pkgs.host.riscv32.gc.linuxMusl;
+            in {
+              target.${target} = {
+                rustflags = [
+                  "-L${thesePkgs.stdenv.cc.cc}/lib/gcc/${thesePkgs.stdenv.hostPlatform.config}/${thesePkgs.stdenv.cc.version}"
+                  "-L${thesePkgs.stdenv.cc.libc}/lib"
+                  "-L${thesePkgs.libunwind}/lib"
+                ];
+              };
+            }
           else {
-            env = {
-              "BINDGEN_EXTRA_CLANG_ARGS_${target}" = mkIncludeArg (getNewlibDir stdenv);
-            };
           }
         )
       ])
     ;
-
-  ccConfigCommon = {
-    env = {
-      HOST_CC = getCCExePath build.stdenv;
-      LIBCLANG_PATH = build.this.libclangPath;
-    };
-  };
 
   cc = writers.writeTOML "cc.toml" (crateUtils.clobber ([
     ccConfigCommon
@@ -154,13 +163,51 @@ let
 
   worlds = lib.mapAttrs
     (_: attrs: attrs.none.this.worlds or attrs.default.none.this.worlds /* HACK */)
-    pkgs.host
+    (lib.filterAttrs (n: _: n != "ia32") pkgs.host)
   ;
 
   configForWorld = attrPath: world:
-    {
-      build.target-dir = "${targetRootDir}/by-world/${lib.concatStringsSep "." attrPath}";
+    let
+      targetDir = "${targetRootDir}/by-world/${lib.concatStringsSep "." attrPath}";
+    in {
+      build.target-dir = targetDir;
       env = world.seL4RustEnvVars;
+    } // lib.optionalAttrs world.worldConfig.canSimulate {
+      target."cfg(not(any()))".runner =
+        let
+          simulateScript =
+            let script = world.simulateScript;
+            in "${script}/bin/${script.name}";
+          runScript = writeShellApplication {
+            name = "run";
+            runtimeInputs = [
+              llvm
+              capdl-tool
+              (python312.withPackages (p: with p; [
+                future six
+                aenum sortedcontainers
+                pyyaml pyelftools pyfdt
+                sdfgen
+              ]))
+            ];
+            text = ''
+              PYTHONPATH="${toString ../../src/python}:${sources.pythonCapDLTool}:''${PYTHONPATH:-}" \
+                cargo run -p sel4-test-runner -- \
+                  --target-dir ${targetDir} \
+                  --object-sizes ${world.objectSizes} \
+                  --simulate-script ${simulateScript} \
+                  ${if world.worldConfig.isMicrokit then ''
+                    --microkit-sdk ${world.microkit.sdk} \
+                    --microkit-board ${world.worldConfig.microkitConfig.board} \
+                    --microkit-config ${world.worldConfig.microkitConfig.config} \
+                  '' else ''
+                    --kernel ${world.seL4} \
+                  ''} \
+                  "$@"
+            '';
+          };
+        in
+          "${runScript}/bin/${runScript.name}";
     };
 
   byWorldList = lib.mapAttrsToListRecursiveCond
@@ -186,22 +233,17 @@ let
 
   links = linkFarm "generated-config" {
     "cc.toml" = cc;
-    "by-target" = byTargetLinks;
-    "by-world" = byWorldLinks;
+    "target" = byTargetLinks;
+    "world" = byWorldLinks;
   };
 
 in {
-
-  inherit links cc;
-
-  utils = {
-    inherit
-      firstSegment
-      hasSegment
-      customTargets
-      builtinBareMetalTargets
-    ;
-  };
+  inherit
+    links
+    cc
+    byTarget
+    byWorldList
+  ;
 }
 
 # -nostdlib
