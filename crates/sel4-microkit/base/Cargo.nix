@@ -15,6 +15,7 @@ mk {
     ;
   };
   features = {
+    alloc = [];
     extern-symbols = [];
   };
 }

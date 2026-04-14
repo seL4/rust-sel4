@@ -7,6 +7,9 @@
 #![no_std]
 #![feature(used_with_arg)]
 
+#[cfg(feature = "alloc")]
+extern crate alloc;
+
 mod channel;
 mod defer;
 mod handler;
