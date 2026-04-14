@@ -2424,6 +2424,7 @@ dependencies = [
  "gimli 0.33.0",
  "object",
  "stable_deref_trait",
+ "thiserror",
 ]
 
 [[package]]

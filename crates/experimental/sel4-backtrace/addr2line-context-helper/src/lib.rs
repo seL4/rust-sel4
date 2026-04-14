@@ -15,22 +15,12 @@ use object::{Object, ObjectSection};
 
 pub type Context = AbstractContext<gimli::EndianRcSlice<gimli::RunTimeEndian>>;
 
-#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+#[derive(thiserror::Error, Debug, Copy, Clone, Eq, PartialEq)]
 pub enum Error {
-    ObjectError(object::Error),
-    GimliError(gimli::Error),
-}
-
-impl From<object::Error> for Error {
-    fn from(err: object::Error) -> Self {
-        Self::ObjectError(err)
-    }
-}
-
-impl From<gimli::Error> for Error {
-    fn from(err: gimli::Error) -> Self {
-        Self::GimliError(err)
-    }
+    #[error("ELF error")]
+    ObjectError(#[from] object::Error),
+    #[error("DWARF error")]
+    GimliError(#[from] gimli::Error),
 }
 
 pub fn new_context<'data: 'file, 'file, O: Object<'data>>(
