@@ -64,7 +64,5 @@ fn main(bootinfo: &sel4::BootInfoPtr) -> ! {
     //     debug_println!("d {:x?} {}", ut.paddr, ut.isDevice);
     // }
 
-    debug_println!("TEST_PASS");
-
-    sel4::init_thread::suspend_self()
+    sel4_test_root_task::indicate_success()
 }

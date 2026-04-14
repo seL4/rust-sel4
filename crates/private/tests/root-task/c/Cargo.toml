@@ -19,6 +19,7 @@ license = "BSD-2-Clause"
 [dependencies]
 sel4 = { path = "../../../../sel4" }
 sel4-root-task = { path = "../../../../sel4-root-task" }
+sel4-test-root-task = { path = "../../../support/sel4-test-root-task" }
 
 [dependencies.sel4-newlib]
 path = "../../../../experimental/sel4-newlib"

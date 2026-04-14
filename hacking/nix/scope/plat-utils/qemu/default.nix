@@ -7,6 +7,8 @@
 { lib
 , buildPackages
 , writeScript
+, pathToLink
+, selfTopLevel
 }:
 
 let
@@ -26,13 +28,20 @@ in rec {
       py = buildPackages.python3.withPackages (pkgs: [
         pkgs.pexpect
       ]);
+      script = buildPackages.writeShellApplication {
+        name = "automate-qemu";
+        runtimeInputs = [
+          selfTopLevel.pkgs.build.this.sel4-test-sentinels-wrapper
+        ];
+        # -f to allow ctrl-c
+        text = ''
+          timeout -f \
+            ${toString timeout}s \
+            sel4-test-sentinels-wrapper ${simulate}
+        '';
+      };
     in
-      writeScript "automate-qemu" ''
-        #!${buildPackages.runtimeShell}
-        set -eu
-
-        ${py}/bin/python3 ${./automate_simple.py} --simulate ${simulate} --timeout ${toString timeout}
-      '';
+      pathToLink "automate-qemu" "${script}/bin/${script.name}";
 
   mkMkPlatformSystemExtension =
     { mkQEMUCmd

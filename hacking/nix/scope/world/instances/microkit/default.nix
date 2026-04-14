@@ -19,6 +19,7 @@
 , seL4Config
 , callPlatform
 , verus
+, genSDF
 
 , maybe
 , canSimulate
@@ -90,7 +91,9 @@ in {
             searchPath = [
               "${pd}/bin"
             ];
-            systemXML = sources.srcRoot + "/crates/private/tests/microkit/minimal/x.system";
+            systemXML = genSDF {
+              script = sources.srcRoot + "/crates/private/tests/microkit/minimal/system.py";
+            };
           };
           extraPlatformArgs = lib.optionalAttrs canSimulate  {
             canAutomateSimply = true;
@@ -112,7 +115,7 @@ in {
             searchPath = [
               "${pd}/bin"
             ];
-            systemXML = sources.srcRoot + "/crates/private/tests/microkit/unwind/x.system";
+            systemXML = sources.srcRoot + "/crates/private/tests/microkit/unwind/system.xml";
           };
           extraPlatformArgs = lib.optionalAttrs canSimulate  {
             canAutomateSimply = true;
@@ -126,20 +129,14 @@ in {
       let
         mkCrateName = role: "tests-microkit-passive-server-with-deferred-action-pds-${role}";
 
-        pds = {
-          client = mkPD rec {
-            rootCrate = crates.${mkCrateName "client"};
-          };
-          server = mkPD rec {
-            rootCrate = crates.${mkCrateName "server"};
-          };
+        pd = mkPD {
+          rootCrate = crates.tests-microkit-passive-server-with-deferred-action;
         };
       in
         callPlatform {
           system = microkit.mkSystem {
             searchPath = [
-              "${pds.client}/bin"
-              "${pds.server}/bin"
+              "${pd}/bin"
             ];
             systemXML = sources.srcRoot + "/crates/private/tests/microkit/passive-server-with-deferred-action/x.system";
           };
@@ -147,7 +144,7 @@ in {
             canAutomateSimply = true;
           };
         } // {
-          inherit pds;
+          inherit pd;
         }
     );
 

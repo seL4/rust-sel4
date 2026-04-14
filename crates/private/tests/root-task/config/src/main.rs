@@ -23,7 +23,6 @@ fn main(_: &sel4::BootInfoPtr) -> ! {
             debug_println!("NUM_PRIORITIES: {}", sel4::sel4_cfg_usize!(NUM_PRIORITIES));
         }
     }
-    debug_println!("TEST_PASS");
 
-    sel4::init_thread::suspend_self()
+    sel4_test_root_task::indicate_success()
 }

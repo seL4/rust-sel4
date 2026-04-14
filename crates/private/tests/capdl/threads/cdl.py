@@ -36,7 +36,7 @@ class TestComponent(ElfComponent):
 class TestComposition(BaseComposition):
 
     def compose(self):
-        self.component(TestComponent, 'example_component')
+        self.component(TestComponent, 'example_component', 'tests-capdl-threads.elf')
 
 
 TestComposition.from_env().run()

@@ -13,6 +13,7 @@ mk {
       sel4
       sel4-root-task
       sel4-alloca
+      sel4-test-root-task
     ;
   };
 }

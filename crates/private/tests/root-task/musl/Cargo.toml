@@ -24,3 +24,4 @@ sel4-dlmalloc = { path = "../../../../sel4-dlmalloc" }
 sel4-linux-syscall-types = { path = "../../../../experimental/sel4-linux-syscall-types" }
 sel4-musl = { path = "../../../../experimental/sel4-musl" }
 sel4-root-task-with-std = { path = "../../../support/sel4-root-task-with-std" }
+sel4-test-root-task = { path = "../../../support/sel4-test-root-task" }

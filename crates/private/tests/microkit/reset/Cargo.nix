@@ -12,6 +12,7 @@ mk {
     inherit (localCrates)
       sel4-microkit
       sel4-reset
+      sel4-test-microkit
     ;
   };
 }

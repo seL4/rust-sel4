@@ -33,7 +33,7 @@ class TestComponent(ElfComponent):
 class TestComposition(BaseComposition):
 
     def compose(self):
-        self.component(TestComponent, 'example_component')
+        self.component(TestComponent, 'example_component', 'tests-capdl-utcover.elf')
 
 
 TestComposition.from_env().run()

@@ -15,7 +15,7 @@
 , sel4-simple-task-runtime-config-cli
 }:
 
-{ config
+{ searchDirs
 , script ? null
 , command ? "python3 ${script}"
 , computeUtCovers ? false
@@ -24,16 +24,6 @@
 }:
 
 let
-  augmentedConfig = config // {
-    kernel_config = "${seL4ForUserspace}/libsel4/include/kernel/gen_config.json";
-    device_tree = if stdenv.hostPlatform.isx86 then null else "${seL4ForUserspace}/support/kernel.dtb";
-    platform_info =  if stdenv.hostPlatform.isx86 then null else "${seL4ForUserspace}/support/platform_gen.yaml";
-    object_sizes = objectSizes;
-    compute_ut_covers = computeUtCovers;
-  };
-
-  augmentedConfigJSON = writeText "config.json" (builtins.toJSON augmentedConfig);
-
   capdlSrc = sources.pythonCapDLTool;
 
   capdlSimpleCompositionSrc =
@@ -61,27 +51,19 @@ lib.fix (self: runCommand "manifest" {
 
   PYTHONPATH_ = lib.concatStringsSep ":" ([ capdlSimpleCompositionSrc capdlSrc ] ++ extraPythonPath);
 
-  CONFIG = augmentedConfigJSON;
-
   passthru = {
-    config = augmentedConfig;
     specAttrs = {
       cdl = "${self}/spec.cdl";
       fill = "${self}/links";
     };
   };
-
-  shellHook = ''
-    export PYTHONPATH=${pythonPathForShell}:$PYTHONPATH
-    export OUT_DIR=$(pwd)/x
-
-    xxx() {
-      ${command}
-    }
-  '';
-
 } ''
-  export PYTHONPATH=$PYTHONPATH_:$PYTHONPATH
-  export OUT_DIR=$out
-  ${command}
+  PYTHONPATH=$PYTHONPATH_:$PYTHONPATH
+    ${command} \
+      -o $out \
+      --object-sizes ${objectSizes} \
+      --kernel ${seL4ForUserspace} \
+      ${lib.concatStrings (lib.forEach searchDirs (d: ''
+        --search-dir ${d}/bin \
+      ''))}
 '')

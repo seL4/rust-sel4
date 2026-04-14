@@ -11,6 +11,8 @@
 use sel4_microkit::{NullHandler, debug_println, protection_domain};
 use sel4_reset::reset;
 
+sel4_test_microkit::embed_sdf_xml!("../../x.system");
+
 const INIT: usize = 1337;
 
 static mut NOT_PERSISTENT: usize = INIT;
@@ -31,8 +33,7 @@ fn init() -> NullHandler {
         if RESET_COUNT == 3 {
             assert_eq!(NOT_PERSISTENT, INIT);
             assert_eq!(PERSISTENT, INIT + RESET_COUNT);
-            debug_println!("TEST_PASS");
-            return NullHandler::new();
+            sel4_test_microkit::indicate_success()
         }
 
         NOT_PERSISTENT += 1;

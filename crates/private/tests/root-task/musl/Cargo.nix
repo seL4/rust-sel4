@@ -19,6 +19,7 @@ mk {
       sel4-musl
       sel4-linux-syscall-types
       sel4-dlmalloc
+      sel4-test-root-task
     ;
   };
 }

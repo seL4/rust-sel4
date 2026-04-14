@@ -6,6 +6,7 @@
 
 import json
 import subprocess
+import shutil
 from pathlib import Path
 from elftools.elf.elffile import ELFFile
 
@@ -24,11 +25,12 @@ DEFAULT_STATIC_HEAP_SIZE = 8 * 2**20
 class ElfComponent(BaseComponent):
 
     def __init__(
-            self, composition, name,
+            self, composition, name, elf_path,
             update_guard_size=True,
             prio=DEFAULT_PRIO, max_prio=DEFAULT_MAX_PRIO,
             affinity=DEFAULT_AFFINITY,
             sched_context=None,
+            static_heap_size=DEFAULT_STATIC_HEAP_SIZE,
             **kwargs,
     ):
 
@@ -37,11 +39,10 @@ class ElfComponent(BaseComponent):
         self.update_guard_size = update_guard_size
 
         elf_fname = '{}.elf'.format(self.name)
-        elf_path = Path(self.config()['image'])
-        self.elf_path = elf_path
-        self.elf = ELF(str(elf_path), elf_fname, self.composition.arch)
+        self.elf_path = composition.find_in_search_dirs(elf_path)
+        self.elf = ELF(str(self.elf_path), elf_fname, self.composition.arch)
 
-        self.composition.register_file(elf_fname, elf_path)
+        self.composition.register_file(elf_fname, self.elf_path)
 
         self.set_cursor(self.first_vaddr_after_elf())
 
@@ -52,6 +53,8 @@ class ElfComponent(BaseComponent):
             prio=prio, max_prio=max_prio,
             alloc_endpoint=False,
         )
+
+        self.static_heap_size_ = static_heap_size
 
         self.secondary_threads = []
 
@@ -107,7 +110,7 @@ class ElfComponent(BaseComponent):
         return Cap(self.alloc(ObjectType.seL4_SchedContextObject, name, **kwargs))
 
     def static_heap_size(self):
-        return self.config().get('heap_size', DEFAULT_STATIC_HEAP_SIZE)
+        return self.static_heap_size_
 
     def static_heap(self):
         size = self.static_heap_size()
@@ -149,8 +152,13 @@ class ElfComponent(BaseComponent):
             json.dump(config, f_json, indent=4)
         with path_json.open('r') as f_json:
             with path_bin.open('wb') as f_bin:
-                subprocess.check_call(
-                    ['sel4-simple-task-serialize-runtime-config'], stdin=f_json, stdout=f_bin)
+                tool = 'sel4-simple-task-serialize-runtime-config'
+                if shutil.which(tool) is not None:
+                    args = [tool]
+                else:
+                    # HACK
+                    args = ['cargo', 'run', '-p', 'sel4-simple-task-runtime-config-cli', '--']
+                subprocess.check_call(args, stdin=f_json, stdout=f_bin)
 
         self.composition.register_file(path_bin.name, path_bin)
 

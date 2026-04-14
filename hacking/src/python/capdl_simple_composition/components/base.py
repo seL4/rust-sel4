@@ -60,9 +60,6 @@ class BaseComponent:
     def fmt(self, s, *args):
         return s.format(self.name, *args)
 
-    def config(self):
-        return self.composition.config['components'][self.name]
-
     ###
 
     def add_hack_page(self, vaddr, size, cap):

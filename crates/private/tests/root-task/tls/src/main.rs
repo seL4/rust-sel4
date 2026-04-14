@@ -26,6 +26,5 @@ fn main(_: &sel4::BootInfoPtr) -> ! {
     let observed = Y.0;
     debug_println!("{}", observed);
     assert_eq!(observed, black_box(X));
-    debug_println!("TEST_PASS");
-    sel4::init_thread::suspend_self()
+    sel4_test_root_task::indicate_success()
 }

@@ -25,3 +25,4 @@ panic-unwind = []
 cfg-if = "1.0.4"
 sel4 = { path = "../../../../sel4" }
 sel4-root-task = { path = "../../../../sel4-root-task" }
+sel4-test-root-task = { path = "../../../support/sel4-test-root-task" }

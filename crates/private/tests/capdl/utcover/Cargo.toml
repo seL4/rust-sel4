@@ -1,0 +1,24 @@
+#
+# Copyright 2023, Colias Group, LLC
+#
+# SPDX-License-Identifier: BSD-2-Clause
+#
+#
+# This file is generated from './Cargo.nix'. You can edit this file directly
+# if you are not using this project's Cargo manifest management tools.
+# See 'hacking/cargo-manifest-management/README.md' for more information.
+#
+
+[package]
+name = "tests-capdl-utcover"
+version = "0.1.0"
+authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
+edition = "2024"
+license = "BSD-2-Clause"
+
+[dependencies]
+sel4 = { path = "../../../../sel4" }
+sel4-simple-task-config-types = { path = "../../../support/sel4-simple-task/config-types" }
+sel4-simple-task-runtime = { path = "../../../support/sel4-simple-task/runtime" }
+sel4-test-capdl = { path = "../../../support/sel4-test-capdl" }
+serde = { version = "1.0.228", default-features = false, features = ["alloc", "derive"] }
