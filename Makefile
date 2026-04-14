@@ -57,12 +57,14 @@ out := out
 
 cargo_config_link := .cargo/gen
 
+hacking_manifest_path_arg := --manifest-path hacking/Cargo.toml
+
 .PHONY: none
 none:
 
 .PHONY: clean
 clean:
-	rm -rf $(out) target
+	rm -rf $(out) $(cargo_config_link) target
 
 $(out):
 	mkdir -p $@
@@ -96,10 +98,12 @@ check-lockfile:
 .PHONY: fmt
 fmt:
 	cargo fmt --all
+	cargo fmt $(hacking_manifest_path_arg) --all
 
 .PHONY: check-fmt
 check-fmt:
 	cargo fmt --all -- --check
+	cargo fmt $(hacking_manifest_path_arg) --all -- --check
 
 autopep8_args := --max-line-length 100 $$(find . -name '*.py' -printf '%p ')
 
