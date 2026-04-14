@@ -1,6 +1,6 @@
 {
   "arch": "x86_64",
-  "code-model": "small",
+  "code-model": "kernel",
   "cpu": "x86-64",
   "crt-objects-fallback": "false",
   "data-layout": "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128",
@@ -20,11 +20,14 @@
     "tier": null
   },
   "plt-by-default": false,
-  "relro-level": "full",
+  "position-independent-executables": true,
+  "relocation-model": "static",
+  "relro-level": "off",
   "rustc-abi": "softfloat",
   "stack-probes": {
     "kind": "inline"
   },
+  "static-position-independent-executables": true,
   "supported-sanitizers": [
     "kcfi",
     "kernel-address"
