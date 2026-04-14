@@ -164,6 +164,7 @@ in rec {
         rootTask =
           let
             orig = mkTask {
+              targetTriple = mkSeL4RustTargetTriple { unwind = true; };
               rootCrate = crates.tests-root-task-backtrace;
               release = false;
               extraProfile = {
