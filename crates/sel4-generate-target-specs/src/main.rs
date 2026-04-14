@@ -78,21 +78,8 @@ impl Config {
     fn target_spec(&self) -> Target {
         let mut target = match &self.arch {
             Arch::AArch64 => {
-                let mut target = builtin("aarch64-unknown-none");
                 // target.llvm_target = "aarch64-none-elf".into(); // TODO why or why not?
-                target
-                    .options
-                    .pre_link_args
-                    .entry(CHOSEN_LINKER_FLAVOR)
-                    .or_default()
-                    .extend(vec![
-                        // Determines p_align. Default is 64K, which results in wasted space when
-                        // the ELF file is loaded as a single contiguous region as it is in the case
-                        // of a root task.
-                        "-z".into(),
-                        "max-page-size=4096".into(),
-                    ]);
-                target
+                builtin("aarch64-unknown-none")
             }
             Arch::Armv7a => builtin("armv7a-none-eabi"),
             Arch::RiscV64(riscv_arch) => builtin(&format!(
@@ -142,6 +129,11 @@ impl Config {
                 .entry(CHOSEN_LINKER_FLAVOR)
                 .or_default()
                 .extend(vec![
+                    // Determines p_align. Default is 64K, which results in wasted space when
+                    // the ELF file is loaded as a single contiguous region as it is in the case
+                    // of a root task.
+                    "-z".into(),
+                    "max-page-size=4096".into(),
                     // No use in root task.
                     // Remove unnecessary alignment gap between segments.
                     "--no-rosegment".into(),
