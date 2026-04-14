@@ -16,7 +16,7 @@ fn debug_put_char(c: u8) {
     let _ = unsafe { syscall!(Sysno::write, 1, &raw const c, 1) };
 }
 
-pub fn exit(status: u8) -> ! {
+fn exit(status: u8) -> ! {
     let r = unsafe { syscall!(Sysno::exit, status) };
 
     if let Err(err) = r {
@@ -25,8 +25,16 @@ pub fn exit(status: u8) -> ! {
     unreachable!()
 }
 
+pub fn exit_success() -> ! {
+    exit(0)
+}
+
+pub fn exit_failure() -> ! {
+    exit(1)
+}
+
 register_abort_trap!(exit_abort);
 
 fn exit_abort() -> ! {
-    exit(1)
+    exit_failure()
 }
