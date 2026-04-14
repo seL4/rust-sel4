@@ -16,14 +16,15 @@ use serde::{Deserialize, Serialize};
 
 use sel4_simple_task_config_types::*;
 use sel4_simple_task_runtime::{debug_println, main_json};
+use sel4_simple_task_threading::StaticThread;
 use sel4_sync::{RawNotificationMutex, lock_api::Mutex};
 
 sel4_test_capdl::embed_capdl_script!("../cdl.py");
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Config {
-    pub lock_nfn: ConfigCPtr<Notification>,
-    pub barrier_nfn: ConfigCPtr<Notification>,
+    pub lock_nfn: ConfigCPtr<sel4::cap::Notification>,
+    pub barrier_nfn: ConfigCPtr<sel4::cap::Notification>,
     pub secondary_thread: ConfigCPtr<StaticThread>,
     pub foo: Vec<i32>,
 }

@@ -18,7 +18,7 @@ sel4_test_capdl::embed_capdl_script!("../cdl.py");
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Config {
-    pub frame: ConfigCPtr<Granule>,
+    pub frame: ConfigCPtr<sel4::cap::Granule>,
 }
 
 #[main_json]

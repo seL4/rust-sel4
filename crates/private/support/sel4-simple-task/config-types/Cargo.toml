@@ -17,9 +17,6 @@ edition = "2024"
 license = "BSD-2-Clause"
 
 [dependencies]
-cfg-if = "1.0.4"
-serde = { version = "1.0.228", default-features = false, features = ["derive"] }
-
-[target."cfg(target_os = \"none\")".dependencies]
 sel4 = { path = "../../../../sel4" }
 sel4-simple-task-threading = { path = "../threading" }
+serde = { version = "1.0.228", default-features = false, features = ["derive"] }
