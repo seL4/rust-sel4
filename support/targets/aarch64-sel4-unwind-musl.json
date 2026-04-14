@@ -26,9 +26,7 @@
       "--fix-cortex-a53-843419"
     ],
     "gnu-lld": [
-      "--fix-cortex-a53-843419",
-      "-z",
-      "max-page-size=4096"
+      "--fix-cortex-a53-843419"
     ]
   },
   "relocation-model": "static",

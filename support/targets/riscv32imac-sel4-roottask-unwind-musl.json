@@ -24,6 +24,8 @@
   "os": "linux",
   "pre-link-args": {
     "gnu-lld": [
+      "-z",
+      "max-page-size=4096",
       "--no-rosegment"
     ]
   },
