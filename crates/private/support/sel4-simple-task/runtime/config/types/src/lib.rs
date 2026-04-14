@@ -6,117 +6,92 @@
 
 #![no_std]
 
-#[cfg(feature = "alloc")]
 extern crate alloc;
 
 use core::ops::Range;
-use core::str;
 
-use zerocopy::{FromBytes, Immutable, IntoBytes, KnownLayout};
+use alloc::string::String;
+use alloc::vec::Vec;
 
-mod zerocopy_helpers;
+use rkyv::Archive;
+use rkyv::rancor;
+use rkyv::util::AlignedVec;
 
-pub use zerocopy_helpers::{
-    InvalidZerocopyOptionTag, NativeWord, ZerocopyOptionWord, ZerocopyOptionWordRange,
-    ZerocopyWord, ZerocopyWordRange,
-};
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
 
-#[cfg(feature = "alloc")]
-mod with_alloc;
+#[cfg(target_pointer_width = "32")]
+type NativeWord = u32;
 
-#[cfg(feature = "alloc")]
-pub use with_alloc::{RuntimeConfigForPacking, RuntimeThreadConfigForPacking};
+#[cfg(target_pointer_width = "64")]
+type NativeWord = u64;
 
-pub type Address = NativeWord;
-pub type CPtrBits = NativeWord;
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(rkyv::Archive, rkyv::Deserialize, rkyv::Serialize)]
+#[rkyv(derive(Debug))]
+pub struct Word(pub u64);
 
-#[repr(C)]
-#[derive(Debug, Clone, PartialEq, Eq, FromBytes, IntoBytes, Immutable, KnownLayout)]
-struct Head {
-    static_heap: ZerocopyOptionWordRange,
-    static_heap_mutex_notification: ZerocopyOptionWord,
-    idle_notification: ZerocopyOptionWord,
-    threads: ZerocopyWordRange,
-    image_identifier: ZerocopyOptionWordRange,
-    arg: ZerocopyWordRange,
-}
-
-#[repr(C)]
-#[derive(Debug, Clone, PartialEq, Eq, FromBytes, IntoBytes, Immutable)]
-struct Thread {
-    ipc_buffer_addr: ZerocopyWord,
-    endpoint: ZerocopyOptionWord,
-    reply_authority: ZerocopyOptionWord,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct RuntimeConfig<'a> {
-    bytes: &'a [u8],
-}
-
-impl<'a> RuntimeConfig<'a> {
-    pub fn new(bytes: &'a [u8]) -> Self {
-        Self { bytes }
-    }
-
-    pub fn static_heap(&self) -> Option<Range<Address>> {
-        self.head().static_heap.try_into_native().unwrap()
-    }
-
-    pub fn static_heap_mutex_notification(&self) -> Option<CPtrBits> {
-        self.head()
-            .static_heap_mutex_notification
-            .try_into_native()
-            .unwrap()
-    }
-
-    pub fn idle_notification(&self) -> Option<CPtrBits> {
-        self.head().idle_notification.try_into_native().unwrap()
-    }
-
-    pub fn threads(&self) -> &[RuntimeThreadConfig] {
-        FromBytes::ref_from_bytes(self.index(self.head().threads.try_into_native().unwrap()))
-            .unwrap()
-    }
-
-    pub fn image_identifier(&self) -> Option<&str> {
-        self.head()
-            .image_identifier
-            .try_into_native()
-            .unwrap()
-            .map(|range| str::from_utf8(self.index(range)).unwrap())
-    }
-
-    pub fn arg(&self) -> &[u8] {
-        self.index(self.head().arg.try_into_native().unwrap())
-    }
-
-    fn head(&self) -> &Head {
-        let (head, _) = FromBytes::ref_from_prefix(self.bytes).unwrap();
-        head
-    }
-
-    fn index(&self, range: Range<usize>) -> &[u8] {
-        &self.bytes[range]
+impl ArchivedWord {
+    #[allow(clippy::useless_conversion)]
+    pub fn to_native(&self) -> NativeWord {
+        self.0.to_native().try_into().unwrap()
     }
 }
 
-#[repr(transparent)]
-#[derive(Debug, Clone, PartialEq, Eq, FromBytes, IntoBytes, Immutable)]
+pub type Address = u64;
+pub type CPtrBits = Word;
+
+pub type RuntimeConfig = GenericRuntimeConfig<Vec<u8>>;
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(rkyv::Archive, rkyv::Deserialize, rkyv::Serialize)]
+pub struct GenericRuntimeConfig<T> {
+    pub static_heap: Option<Range<Address>>,
+    pub static_heap_mutex_notification: Option<CPtrBits>,
+    pub idle_notification: Option<CPtrBits>,
+    pub threads: Vec<RuntimeThreadConfig>,
+    pub image_identifier: Option<String>,
+    pub app_config: T,
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(rkyv::Archive, rkyv::Deserialize, rkyv::Serialize)]
 pub struct RuntimeThreadConfig {
-    inner: Thread,
+    pub ipc_buffer_addr: Address,
+    pub endpoint: Option<CPtrBits>,
+    pub reply_authority: Option<CPtrBits>,
 }
 
-impl RuntimeThreadConfig {
-    pub fn ipc_buffer_addr(&self) -> Address {
-        self.inner.ipc_buffer_addr.get()
+impl<T> GenericRuntimeConfig<T> {
+    pub fn traverse<U, V>(
+        self,
+        f: impl FnOnce(T) -> Result<U, V>,
+    ) -> Result<GenericRuntimeConfig<U>, V> {
+        Ok(GenericRuntimeConfig {
+            static_heap: self.static_heap,
+            static_heap_mutex_notification: self.static_heap_mutex_notification,
+            idle_notification: self.idle_notification,
+            threads: self.threads,
+            image_identifier: self.image_identifier,
+            app_config: f(self.app_config)?,
+        })
+    }
+}
+
+impl RuntimeConfig {
+    pub fn to_bytes(&self) -> Result<AlignedVec, rancor::Error> {
+        rkyv::to_bytes(self)
     }
 
-    pub fn endpoint(&self) -> Option<CPtrBits> {
-        self.inner.endpoint.try_into_native().unwrap()
+    pub fn access(buf: &[u8]) -> Result<&<Self as Archive>::Archived, rancor::Error> {
+        rkyv::access(buf)
     }
 
-    pub fn reply_authority(&self) -> Option<CPtrBits> {
-        self.inner.reply_authority.try_into_native().unwrap()
+    #[allow(clippy::missing_safety_doc)]
+    pub unsafe fn access_unchecked(buf: &[u8]) -> &<Self as Archive>::Archived {
+        unsafe { rkyv::access_unchecked(buf) }
     }
 }

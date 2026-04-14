@@ -142,7 +142,7 @@ class ElfComponent(BaseComponent):
             ),
             'threads': [thread.get_thread_runtime_config() for thread in self.threads()],
             'image_identifier': str(self.elf_path),
-            'arg': str(self.composition.out_dir / arg_bin),
+            'app_config': str(self.composition.out_dir / arg_bin),
         }
 
         path_base = self.composition.out_dir / '{}_config'.format(self.name)

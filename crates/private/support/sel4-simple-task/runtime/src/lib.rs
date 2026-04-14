@@ -16,6 +16,8 @@ extern crate alloc;
 use core::panic::PanicInfo;
 use core::slice;
 
+use rkyv::Archive;
+
 use sel4_dlmalloc::StaticHeapBounds;
 use sel4_immediate_sync_once_cell::ImmediateSyncOnceCell;
 use sel4_panicking_env::{AbortInfo, abort};
@@ -38,7 +40,8 @@ unsafe extern "Rust" {
     pub(crate) fn __sel4_simple_task_main(arg: &[u8]);
 }
 
-static CONFIG: ImmediateSyncOnceCell<RuntimeConfig<'static>> = ImmediateSyncOnceCell::new();
+static CONFIG: ImmediateSyncOnceCell<&'static <RuntimeConfig as Archive>::Archived> =
+    ImmediateSyncOnceCell::new();
 
 #[thread_local]
 static THREAD_INDEX: ImmediateSyncOnceCell<usize> = ImmediateSyncOnceCell::new();
@@ -52,20 +55,21 @@ sel4_runtime_common::declare_rust_entrypoint! {
 
 #[allow(clippy::missing_safety_doc)]
 unsafe fn entrypoint(config: *const u8, config_size: usize, thread_index: usize) -> ! {
-    let config = RuntimeConfig::new(unsafe { slice::from_raw_parts(config, config_size) });
+    let config =
+        unsafe { RuntimeConfig::access_unchecked(slice::from_raw_parts(config, config_size)) };
 
-    let thread_config = &config.threads()[thread_index];
+    let thread_config = &config.threads[thread_index];
 
     sel4::set_ipc_buffer(unsafe {
-        (usize::try_from(thread_config.ipc_buffer_addr()).unwrap() as *mut sel4::IpcBuffer)
+        (usize::try_from(thread_config.ipc_buffer_addr).unwrap() as *mut sel4::IpcBuffer)
             .as_mut()
             .unwrap()
     });
 
-    THREAD_INDEX.set(thread_index).unwrap();
+    THREAD_INDEX.set(thread_index).unwrap_or_else(|_| abort!());
 
     if thread_index == 0 {
-        CONFIG.set(config.clone()).unwrap();
+        CONFIG.set(config).unwrap_or_else(|_| abort!());
 
         #[cfg(feature = "alloc")]
         {
@@ -78,7 +82,7 @@ unsafe fn entrypoint(config: *const u8, config_size: usize, thread_index: usize)
         sel4_panicking::set_hook(&panic_hook);
 
         unsafe {
-            __sel4_simple_task_main(config.arg());
+            __sel4_simple_task_main(config.app_config.as_slice());
         }
     } else {
         run_secondary_thread(thread_config)
@@ -88,15 +92,15 @@ unsafe fn entrypoint(config: *const u8, config_size: usize, thread_index: usize)
 }
 
 // TODO assert global_init_complete
-fn run_secondary_thread(thread_config: &RuntimeThreadConfig) {
+fn run_secondary_thread(thread_config: &<RuntimeThreadConfig as Archive>::Archived) {
     let endpoint =
-        sel4::cap::Endpoint::from_bits(thread_config.endpoint().unwrap().try_into().unwrap());
+        sel4::cap::Endpoint::from_bits(thread_config.endpoint.as_ref().unwrap().to_native());
     let reply_authority = {
         sel4::sel4_cfg_if! {
             if #[sel4_cfg(KERNEL_MCS)] {
-                sel4::cap::Reply::from_bits(thread_config.reply_authority().unwrap().try_into().unwrap())
+                sel4::cap::Reply::from_bits(thread_config.reply_authority().unwrap().to_native().try_into().unwrap())
             } else {
-                assert!(thread_config.reply_authority().is_none());
+                assert!(thread_config.reply_authority.is_none());
                 sel4::ImplicitReplyAuthority::default()
             }
         }
@@ -107,13 +111,11 @@ fn run_secondary_thread(thread_config: &RuntimeThreadConfig) {
 }
 
 pub fn try_idle() {
-    CONFIG
-        .get()
-        .and_then(RuntimeConfig::idle_notification)
-        .map(sel4::CPtrBits::try_from)
-        .map(Result::unwrap)
-        .map(sel4::cap::Notification::from_bits)
-        .map(sel4::cap::Notification::wait);
+    if let Some(config) = CONFIG.get()
+        && let Some(nfn) = config.idle_notification.as_ref()
+    {
+        sel4::cap::Notification::from_bits(nfn.to_native()).wait();
+    }
 }
 
 pub fn idle() -> ! {
@@ -143,7 +145,7 @@ fn panic_hook(info: &PanicInfo<'_>) {
 }
 
 fn get_static_heap_bounds() -> StaticHeapBounds {
-    let addrs = CONFIG.get().unwrap().static_heap().unwrap();
+    let addrs = CONFIG.get().unwrap().static_heap.as_ref().unwrap();
     StaticHeapBounds::new(
         usize::try_from(addrs.start).unwrap() as *mut _,
         (addrs.end - addrs.start).try_into().unwrap(),
@@ -151,14 +153,15 @@ fn get_static_heap_bounds() -> StaticHeapBounds {
 }
 
 fn get_static_heap_mutex_notification() -> sel4::cap::Notification {
-    CONFIG
-        .get()
-        .unwrap()
-        .static_heap_mutex_notification()
-        .map(sel4::CPtrBits::try_from)
-        .map(Result::unwrap)
-        .map(sel4::cap::Notification::from_bits)
-        .unwrap()
+    sel4::cap::Notification::from_bits(
+        CONFIG
+            .get()
+            .unwrap()
+            .static_heap_mutex_notification
+            .as_ref()
+            .unwrap()
+            .to_native(),
+    )
 }
 
 #[cfg(not(target_arch = "arm"))]
@@ -168,7 +171,12 @@ pub fn get_backtracing() -> SimpleBacktracing {
 
 #[allow(dead_code)]
 fn get_backtrace_image_identifier() -> Option<&'static str> {
-    CONFIG.get().unwrap().image_identifier()
+    CONFIG
+        .get()
+        .unwrap()
+        .image_identifier
+        .as_ref()
+        .map(|s| s.as_str())
 }
 
 // // //

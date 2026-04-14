@@ -3059,6 +3059,7 @@ name = "sel4-simple-task-runtime"
 version = "0.1.0"
 dependencies = [
  "postcard",
+ "rkyv",
  "sel4",
  "sel4-backtrace",
  "sel4-backtrace-simple",
@@ -3087,8 +3088,8 @@ dependencies = [
 name = "sel4-simple-task-runtime-config-types"
 version = "0.1.0"
 dependencies = [
+ "rkyv",
  "serde",
- "zerocopy",
 ]
 
 [[package]]

@@ -16,10 +16,13 @@ authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
 edition = "2024"
 license = "BSD-2-Clause"
 
-[features]
-alloc = ["serde?/alloc"]
-serde = ["dep:serde"]
+[dependencies.rkyv]
+version = "0.8.12"
+default-features = false
+features = ["alloc", "bytecheck", "pointer_width_32"]
 
-[dependencies]
-serde = { version = "1.0.228", default-features = false, features = ["derive"], optional = true }
-zerocopy = { version = "0.8.27", features = ["derive"] }
+[dependencies.serde]
+version = "1.0.228"
+default-features = false
+features = ["derive", "alloc"]
+optional = true
