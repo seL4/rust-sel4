@@ -3037,7 +3037,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "sel4-simple-task-config-types"
+name = "sel4-simple-task-application-config-types"
 version = "0.1.0"
 dependencies = [
  "sel4",
@@ -3518,7 +3518,7 @@ name = "tests-capdl-threads"
 version = "0.1.0"
 dependencies = [
  "sel4",
- "sel4-simple-task-config-types",
+ "sel4-simple-task-application-config-types",
  "sel4-simple-task-runtime",
  "sel4-simple-task-threading",
  "sel4-sync",
@@ -3531,7 +3531,7 @@ name = "tests-capdl-utcover"
 version = "0.1.0"
 dependencies = [
  "sel4",
- "sel4-simple-task-config-types",
+ "sel4-simple-task-application-config-types",
  "sel4-simple-task-runtime",
  "sel4-test-capdl",
  "serde",

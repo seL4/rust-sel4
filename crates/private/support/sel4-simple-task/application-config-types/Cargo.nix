@@ -7,7 +7,7 @@
 { mk, localCrates, serdeWith }:
 
 mk {
-  package.name = "sel4-simple-task-config-types";
+  package.name = "sel4-simple-task-application-config-types";
   dependencies = {
     serde = serdeWith [ "derive" ];
     inherit (localCrates)
