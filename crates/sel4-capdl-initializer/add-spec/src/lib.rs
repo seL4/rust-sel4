@@ -16,7 +16,7 @@ mod reserialize_spec;
 // HACK hardcoded
 const GRANULE_SIZE_BITS: u8 = 12;
 
-type ArchiveAlignedVec = AlignedVec<16>;
+type ArchiveAlignedVec = AlignedVec;
 
 pub fn add_spec(
     initializer_without_spec: &[u8],
