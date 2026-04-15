@@ -8,7 +8,7 @@
 
 use core::panic::UnwindSafe;
 
-pub use sel4_minimal_linux_syscalls::exit_success;
+pub use sel4_minimal_linux_syscalls::{exit_failure, exit_success};
 pub use sel4_panicking::catch_unwind;
 pub use sel4_panicking_env::{abort, debug_println};
 
