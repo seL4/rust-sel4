@@ -79,4 +79,4 @@ sel4-platform-info = { path = "../../sel4-platform-info", optional = true }
 sel4 = { path = "../../sel4", features = ["single-threaded"] }
 
 [target."cfg(target_arch = \"aarch64\")".dependencies]
-sel4-reset = { path = "../../experimental/sel4-reset" }
+sel4-reset = { path = "../../sel4-reset" }

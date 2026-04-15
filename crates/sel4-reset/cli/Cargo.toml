@@ -10,13 +10,15 @@
 #
 
 [package]
-name = "sel4-reset"
+name = "sel4-reset-cli"
 version = "0.1.0"
 authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
 edition = "2024"
 license = "BSD-2-Clause"
 
 [dependencies]
-cfg-if = "1.0.4"
-sel4-rodata-static = { path = "../../sel4-rodata-static" }
-sel4-stack = { path = "../../sel4-stack" }
+anyhow = "1.0.100"
+clap = "4.5.50"
+num = "0.4.3"
+rangemap = "1.7.1"
+sel4-synthetic-elf = { path = "../../sel4-synthetic-elf" }
