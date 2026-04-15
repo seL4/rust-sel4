@@ -203,11 +203,7 @@ impl<'a> Runner<'a> {
     }
 
     fn is_resettable(&self) -> bool {
-        if let Some(sym) = self.file.symbol_by_name("_reset") {
-            self.file.entry() == sym.address()
-        } else {
-            false
-        }
+        self.file.symbol_by_name("_reset").is_some()
     }
 
     fn mk_resettable(&self) -> anyhow::Result<()> {
