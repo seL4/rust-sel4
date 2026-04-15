@@ -165,9 +165,6 @@ in rec {
         let
           origRootTask = mkTask {
             rootCrate = crates.tests-root-task-reset;
-            targetTriple = mkSeL4RustTargetTriple {
-              resettable = true;
-            };
             release = false;
           };
         in maybe haveFullRuntime (mkInstance {

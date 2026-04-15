@@ -36,7 +36,6 @@ const CHOSEN_LINKER_FLAVOR: LinkerFlavor = LinkerFlavor::Gnu(Cc::No, Lld::Yes);
 struct Config {
     arch: Arch,
     context: Context,
-    resettable: bool,
     minimal: bool,
     unwind: bool,
     musl: bool,
@@ -116,15 +115,6 @@ impl Config {
         }
 
         assert_eq!(target.options.linker_flavor, CHOSEN_LINKER_FLAVOR);
-
-        if self.resettable {
-            target
-                .options
-                .link_script
-                .get_or_insert_default()
-                .to_mut()
-                .push_str(include_str!("resettable.lds"));
-        }
 
         if let Context::RootTask = &self.context {
             target
@@ -207,9 +197,6 @@ impl Config {
                 name.push_str("-microkit");
             }
         }
-        if self.resettable {
-            name.push_str("-resettable");
-        }
         if self.minimal {
             name.push_str("-minimal");
         }
@@ -226,21 +213,18 @@ impl Config {
         let mut all = vec![];
         for arch in Arch::all() {
             for context in Context::all() {
-                for resettable in [true, false] {
-                    for minimal in [true, false] {
-                        for unwind in [true, false] {
-                            for musl in [true, false] {
-                                let config = Self {
-                                    arch,
-                                    context,
-                                    resettable,
-                                    minimal,
-                                    unwind,
-                                    musl,
-                                };
-                                if config.filter() {
-                                    all.push(config);
-                                }
+                for minimal in [true, false] {
+                    for unwind in [true, false] {
+                        for musl in [true, false] {
+                            let config = Self {
+                                arch,
+                                context,
+                                minimal,
+                                unwind,
+                                musl,
+                            };
+                            if config.filter() {
+                                all.push(config);
                             }
                         }
                     }

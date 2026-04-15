@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use std::borrow::Cow;
 use std::fs;
 
 use anyhow::Result;
@@ -12,6 +11,7 @@ use num::NumCast;
 use object::elf::{PF_W, PT_LOAD};
 use object::read::elf::{ElfFile, FileHeader, ProgramHeader};
 use object::{Endian, File, Object, ObjectSection, ReadCache, ReadRef};
+use rangemap::RangeSet;
 
 use sel4_synthetic_elf::{Builder, PatchValue, Segment, object};
 
@@ -46,43 +46,48 @@ where
 {
     let endian = elf.endian();
 
-    let persistent_section = elf.section_by_name(".persistent");
+    let persistent_ranges = {
+        let mut set = RangeSet::new();
+        for s in elf.sections() {
+            if let Ok(name) = s.name()
+                && (name == ".persistent" || name.starts_with(".persistent."))
+            {
+                set.insert(s.address()..(s.address() + s.size()));
+            }
+        }
+        set
+    };
 
     let mut builder = Builder::empty(elf);
 
     let mut regions_builder = RegionsBuilder::<T>::new();
 
-    let mut persistent_section_placed = false;
-
     for phdr in elf.elf_program_headers() {
         if phdr.p_type(endian) == PT_LOAD {
-            let mut segment = Segment::from_phdr(phdr, endian, elf.data())?;
+            let segment = Segment::from_phdr(phdr, endian, elf.data())?;
+            builder.add_segment(segment);
             if phdr.p_flags(endian) & PF_W != 0 {
                 let vaddr = phdr.p_vaddr(endian).into();
                 let memsz = phdr.p_memsz(endian).into();
                 let data = phdr.data(endian, elf.data()).unwrap();
-                let skip = persistent_section
-                    .as_ref()
-                    .and_then(|section| {
-                        if section.address() == vaddr {
-                            persistent_section_placed = true;
-                            Some(section.size())
-                        } else {
-                            None
-                        }
-                    })
-                    .unwrap_or(0);
-                regions_builder.add_region_with_skip(skip, vaddr, memsz, data);
-                segment.data = match &segment.data {
-                    Cow::Borrowed(slice) => slice[..usize::try_from(skip).unwrap()].into(),
-                    _ => panic!(),
+                let segment_range = vaddr..(vaddr + memsz);
+                let relevant_persistent_ranges = RangeSet::from_iter(
+                    persistent_ranges.intersection(&RangeSet::from_iter([segment_range.clone()])),
+                );
+                for ephermal in relevant_persistent_ranges.gaps(&segment_range) {
+                    let region_memsz = ephermal.end - ephermal.start;
+                    let region_offset_in_segment = ephermal.start - vaddr;
+                    let region_data = if region_offset_in_segment < data.len().try_into().unwrap() {
+                        &data[region_offset_in_segment.try_into().unwrap()
+                            ..data.len().min((ephermal.end - vaddr).try_into().unwrap())]
+                    } else {
+                        &[]
+                    };
+                    regions_builder.add_region(ephermal.start, region_memsz, region_data);
                 }
             }
-            builder.add_segment(segment);
         }
     }
-
-    assert!(persistent_section.is_none() || persistent_section_placed);
 
     let regions = regions_builder.build(endian);
 
@@ -139,16 +144,6 @@ impl<T: FileHeader<Word: NumCast + PatchValue>> RegionsBuilder<T> {
             filesz: NumCast::from(filesz).unwrap(),
             memsz: NumCast::from(memsz).unwrap(),
         })
-    }
-
-    fn add_region_with_skip(&mut self, skip: u64, vaddr: u64, memsz: u64, data: &[u8]) {
-        if skip < memsz {
-            self.add_region(
-                vaddr + skip,
-                memsz - skip,
-                &data[data.len().min(skip.try_into().unwrap())..],
-            );
-        }
     }
 
     fn build(&self, endian: impl Endian) -> Regions {
