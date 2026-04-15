@@ -180,9 +180,6 @@ impl Config {
     }
 
     fn filter(&self) -> bool {
-        if self.resettable && self.context != Context::Microkit {
-            return false;
-        }
         if self.unwind && !self.arch.unwinding_support() {
             return false;
         }

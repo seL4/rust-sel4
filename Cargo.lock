@@ -3680,6 +3680,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "tests-root-task-reset"
+version = "0.1.0"
+dependencies = [
+ "sel4",
+ "sel4-reset",
+ "sel4-root-task",
+ "sel4-test-root-task",
+]
+
+[[package]]
 name = "tests-root-task-ring-test-harness"
 version = "0.1.0"
 dependencies = [
