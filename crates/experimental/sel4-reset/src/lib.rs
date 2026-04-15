@@ -12,6 +12,10 @@ use core::slice;
 
 use sel4_stack::{Stack, StackBottom};
 
+mod rodata_var;
+
+use rodata_var::rodata_var;
+
 #[cfg(not(any(target_arch = "aarch64", target_arch = "x86_64")))]
 compile_error!("unsupported architecture");
 
@@ -65,73 +69,18 @@ unsafe extern "C" fn __sel4_reset__reset_memory() {
 }
 
 unsafe fn get_regions() -> Regions<'static> {
+    let start = *rodata_var!(sel4_reset_regions_start: usize);
+    let meta_offset = *rodata_var!(sel4_reset_regions_meta_offset: usize);
+    let meta_count = *rodata_var!(sel4_reset_regions_meta_count: usize);
+    let data_offset = *rodata_var!(sel4_reset_regions_data_offset: usize);
+    let data_size = *rodata_var!(sel4_reset_regions_data_size: usize);
     unsafe {
         Regions {
-            meta: slice::from_raw_parts(
-                (sel4_reset_regions_start + sel4_reset_regions_meta_offset) as *const _,
-                sel4_reset_regions_meta_count,
-            ),
-            data: slice::from_raw_parts(
-                (sel4_reset_regions_start + sel4_reset_regions_data_offset) as *const _,
-                sel4_reset_regions_data_size,
-            ),
+            meta: slice::from_raw_parts((start + meta_offset) as *const _, meta_count),
+            data: slice::from_raw_parts((start + data_offset) as *const _, data_size),
         }
     }
 }
-
-// HACK to force variables into .rodata without causing .rodata to end up in a PF_W segment
-macro_rules! rodata {
-    ($ident:ident) => {
-        unsafe extern "C" {
-            static $ident: usize;
-        }
-        global_asm! {
-            r#"
-                .section .rodata
-            "#,
-            #[cfg(target_pointer_width = "64")]
-            r#"
-                    .align 8
-            "#,
-            #[cfg(target_pointer_width = "32")]
-            r#"
-                    .align 4
-            "#,
-            r#"
-                .global {ident}
-            "#,
-            #[cfg(target_pointer_width = "64")]
-            r#"
-                .p2align 8
-            "#,
-            #[cfg(target_pointer_width = "32")]
-            r#"
-                .p2align 4
-            "#,
-            r#"
-                {ident}:
-            "#,
-            #[cfg(target_pointer_width = "64")]
-            r#"
-                    .quad 0
-            "#,
-            #[cfg(target_pointer_width = "32")]
-            r#"
-                    .dword 0
-            "#,
-            r#"
-                .size {ident}, .-{ident}
-            "#,
-            ident = sym $ident,
-        }
-    };
-}
-
-rodata!(sel4_reset_regions_start);
-rodata!(sel4_reset_regions_meta_offset);
-rodata!(sel4_reset_regions_meta_count);
-rodata!(sel4_reset_regions_data_offset);
-rodata!(sel4_reset_regions_data_size);
 
 // // //
 
