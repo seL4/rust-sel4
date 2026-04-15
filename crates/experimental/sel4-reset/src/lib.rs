@@ -7,7 +7,6 @@
 #![no_std]
 
 use core::arch::global_asm;
-use core::ptr;
 use core::slice;
 
 use sel4_stack::{Stack, StackBottom};
@@ -47,25 +46,6 @@ impl Regions<'_> {
     }
 }
 
-// // //
-
-const STACK_SIZE: usize = 4096;
-
-#[unsafe(link_section = ".persistent")]
-static STACK: Stack<STACK_SIZE> = Stack::new();
-
-#[unsafe(no_mangle)]
-static __sel4_reset__stack_bottom: StackBottom = STACK.bottom();
-
-// // //
-
-#[unsafe(no_mangle)]
-unsafe extern "C" fn __sel4_reset__reset_memory() {
-    unsafe {
-        get_regions().reset_memory();
-    }
-}
-
 unsafe fn get_regions() -> Regions<'static> {
     let start = *rodata_var!(sel4_reset_regions_start: usize);
     let meta_offset = *rodata_var!(sel4_reset_regions_meta_offset: usize);
@@ -82,20 +62,66 @@ unsafe fn get_regions() -> Regions<'static> {
 
 // // //
 
-pub fn reset() -> ! {
-    unsafe {
-        _reset();
-    }
-    unreachable!()
+unsafe extern "C" {
+    fn _reset(x0: usize, x1: usize, x2: usize, x3: usize) -> !;
+    fn _start(x0: usize, x1: usize, x2: usize, x3: usize) -> !;
 }
 
-unsafe extern "C" {
-    fn _reset();
+pub fn reset() -> ! {
+    unsafe {
+        _reset(0, 0, 0, 0);
+    }
 }
+
+pub fn reset1(x0: usize) -> ! {
+    unsafe {
+        _reset(x0, 0, 0, 0);
+    }
+}
+
+pub fn reset2(x0: usize, x1: usize) -> ! {
+    unsafe {
+        _reset(x0, x1, 0, 0);
+    }
+}
+
+pub fn reset3(x0: usize, x1: usize, x2: usize) -> ! {
+    unsafe {
+        _reset(x0, x1, x2, 0);
+    }
+}
+
+pub fn reset4(x0: usize, x1: usize, x2: usize, x3: usize) -> ! {
+    unsafe {
+        _reset(x0, x1, x2, x3);
+    }
+}
+
+#[unsafe(no_mangle)]
+unsafe extern "C" fn __sel4_reset__rust_entrypoint(
+    x0: usize,
+    x1: usize,
+    x2: usize,
+    x3: usize,
+) -> ! {
+    unsafe {
+        get_regions().reset_memory();
+        _start(x0, x1, x2, x3)
+    }
+}
+
+const STACK_SIZE: usize = 4096;
+
+#[unsafe(link_section = ".persistent")]
+static STACK: Stack<STACK_SIZE> = Stack::new();
+
+#[unsafe(no_mangle)]
+static __sel4_reset__stack_bottom: StackBottom = STACK.bottom();
 
 global_asm! {
     r#"
-        .extern _start
+        .extern __sel4_reset__stack_bottom
+        .extern __sel4_reset__rust_entrypoint
 
         .global _reset
 
@@ -108,8 +134,7 @@ global_asm! {
             ldr x9, =__sel4_reset__stack_bottom
             ldr x9, [x9]
             mov sp, x9
-            bl __sel4_reset__reset_memory
-            b _start
+            b __sel4_reset__rust_entrypoint
     "#,
     #[cfg(target_arch = "x86_64")]
     r#"
@@ -117,7 +142,6 @@ global_asm! {
             mov rbp, rsp
             sub rsp, 0x8 // Stack must be 16-byte aligned before call
             push rbp
-            call __sel4_reset__reset_memory
-            jmp _start
+            jmp __sel4_reset__rust_entrypoint
     "#,
 }
