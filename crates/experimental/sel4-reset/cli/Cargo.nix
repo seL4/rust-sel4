@@ -13,6 +13,7 @@ mk {
       anyhow
       num
       clap
+      rangemap
     ;
     inherit (localCrates)
       sel4-synthetic-elf

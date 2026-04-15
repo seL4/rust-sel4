@@ -215,7 +215,6 @@ superCallPackage ../rust-utils {} self //
   mkSeL4CustomRustTargetTripleName =
     { rootTask ? false
     , microkit ? false
-    , resettable ? false
     , minimal ? false
     , unwind ? false
     , musl ? false
@@ -225,7 +224,6 @@ superCallPackage ../rust-utils {} self //
       "-sel4"
       (lib.optionalString rootTask "-roottask")
       (lib.optionalString microkit "-microkit")
-      (lib.optionalString resettable "-resettable")
       (lib.optionalString minimal "-minimal")
       (lib.optionalString unwind "-unwind")
       (lib.optionalString musl "-musl")
