@@ -2924,6 +2924,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "sel4-reset-tests"
+version = "0.1.0"
+dependencies = [
+ "sel4-minimal-linux-runtime",
+ "sel4-reset",
+]
+
+[[package]]
 name = "sel4-rodata-static"
 version = "0.1.0"
 

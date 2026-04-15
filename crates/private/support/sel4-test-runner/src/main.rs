@@ -87,10 +87,10 @@ struct Runner<'a> {
 
 impl<'a> Runner<'a> {
     fn run(&self) -> anyhow::Result<()> {
+        self.mk_resettable()?;
         match self.get_sel4_test_kind() {
             None => self.run_not_sel4(),
             Some(kind) => {
-                self.mk_resettable()?;
                 let image = match kind {
                     SeL4TestKind::RootTask => self.mk_root_task_image(self.exe)?,
                     SeL4TestKind::Microkit => self.mk_microkit_image()?,
