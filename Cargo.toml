@@ -114,6 +114,7 @@ members = [
     "crates/private/tests/root-task/loader",
     "crates/private/tests/root-task/musl",
     "crates/private/tests/root-task/panicking",
+    "crates/private/tests/root-task/reset",
     "crates/private/tests/root-task/ring-test-harness",
     "crates/private/tests/root-task/tls",
     "crates/private/tests/root-task/verus/core",

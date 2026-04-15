@@ -25,6 +25,7 @@
 , seL4Config
 , seL4RustEnvVars
 , seL4Modifications
+, prepareResettable
 
 , muslForSeL4
 , dummyLibunwind
@@ -42,6 +43,7 @@ let
   haveMinimalRuntime = !isMicrokit;
   haveUnwindingSupport = !stdenv.hostPlatform.isAarch32;
   haveKernelLoader = stdenv.hostPlatform.isAarch || stdenv.hostPlatform.isRiscV;
+  haveReset = stdenv.hostPlatform.is64bit;
   haveCapDLInitializer = true;
 
   maybe = condition: v: if condition then v else null;
@@ -159,6 +161,22 @@ in rec {
           canAutomateSimply = true;
         };
       });
+
+      reset =
+        let
+          origRootTask = mkTask {
+            rootCrate = crates.tests-root-task-reset;
+            targetTriple = mkSeL4RustTargetTriple {
+              resettable = true;
+            };
+            release = false;
+          };
+        in maybe (haveFullRuntime && haveReset) (mkInstance {
+          rootTask.elf = prepareResettable origRootTask.elf;
+          extraPlatformArgs = lib.optionalAttrs canSimulate {
+            canAutomateSimply = true;
+          };
+        });
 
       backtrace = maybe (haveFullRuntime && haveUnwindingSupport) (mkInstance rec {
         rootTask =
