@@ -42,9 +42,7 @@ impl Regions<'_> {
             let (dst_data, dst_zero) = dst.split_at_mut(meta.filesz);
             let src_data = &self.data[meta.offset..][..meta.filesz];
             dst_data.copy_from_slice(src_data);
-            unsafe {
-                ptr::write_bytes(dst_zero.as_mut_ptr(), 0, dst_zero.len());
-            }
+            dst_zero.fill(0);
         }
     }
 }
