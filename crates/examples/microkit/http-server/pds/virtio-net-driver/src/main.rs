@@ -37,13 +37,13 @@ const NET_BUFFER_LEN: usize = 2048;
 fn init() -> HandlerImpl<DeviceWrapper<HalImpl, MmioTransport<'static>>> {
     HalImpl::init(
         config::VIRTIO_NET_DRIVER_DMA_SIZE,
-        *var!(virtio_net_driver_dma_vaddr: usize = 0),
-        *var!(virtio_net_driver_dma_paddr: usize = 0),
+        *var!(virtio_net_driver_dma_vaddr: usize),
+        *var!(virtio_net_driver_dma_paddr: usize),
     );
 
     let mut dev = {
         let header = NonNull::new(
-            (*var!(virtio_net_mmio_vaddr: usize = 0) + config::VIRTIO_NET_MMIO_OFFSET)
+            (*var!(virtio_net_mmio_vaddr: usize) + config::VIRTIO_NET_MMIO_OFFSET)
                 as *mut VirtIOHeader,
         )
         .unwrap();

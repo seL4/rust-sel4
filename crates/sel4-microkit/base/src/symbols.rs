@@ -16,11 +16,8 @@ use core::str::{self, Utf8Error};
 /// The following fragment demonstrates its usage:
 ///
 /// ```rust
-/// let my_var: &'static T = var!(my_var_symbol_name: T = MY_DEFAULT_VALUE)
+/// let my_var: &'static T = var!(my_var_symbol_name: T)
 /// ```
-///
-/// where `MY_DEFAULT_VALUE` is the value that the variable will be given at compile-time, before
-/// the protection domain image is passed to the `microkit` tool.
 ///
 /// The patching mechanism used by the `microkit` tool requires that the symbol be allocated space
 /// in the protection domain's ELF file, so we declare the symbol as part of the `.data` section.
@@ -30,39 +27,12 @@ use core::str::{self, Utf8Error};
 /// # Examples
 ///
 /// ```rust
-/// let foo = bar + *var!(baz: usize = 0);
-/// ```
-///
-/// # Note
-///
-/// The `microkit` tool requires memory region address symbols to be present in protection domain
-/// binaries. To prevent Rust from optimizing them out in cases where it is not used, add the
-/// unstable `#[used(linker)]` attribute. For example:
-///
-/// ```rust
-/// #![feature(used_with_arg)]
-///
-/// // might be optimized away if not used
-/// memory_region_symbol!(foo: usize = 0)
-///
-/// // won't be optimized away
-/// memory_region_symbol! {
-///     #[used(linker)]
-///     foo: usize = 0
-/// }
+/// let foo = bar + *var!(baz: usize);
 /// ```
 #[macro_export]
 macro_rules! var {
-    ($(#[$attrs:meta])* $symbol:ident: $ty:ty = $default:expr) => {{
-        use $crate::_private::ImmutableCell;
-
-        #[allow(non_upper_case_globals)]
-        $(#[$attrs])*
-        #[unsafe(no_mangle)]
-        #[unsafe(link_section = ".data")]
-        static $symbol: ImmutableCell<$ty> = ImmutableCell::new($default);
-
-        $symbol.get()
+    ($(#[$attrs:meta])* $symbol:ident: $ty:ty) => {{
+        $crate::_private::rodata_static!($symbol: $ty)
     }}
 }
 
@@ -128,7 +98,7 @@ macro_rules! memory_region_symbol {
     }};
     ($(#[$attrs:meta])* $symbol:ident: *mut $ty:ty $(,)?) => {{
         core::ptr::NonNull::new(
-            *$crate::var!($(#[$attrs])* $symbol: usize = 0) as *mut $ty
+            *$crate::var!($(#[$attrs])* $symbol: usize) as *mut $ty
         ).unwrap_or_else(|| {
             panic!("{} is null", stringify!($symbol))
         })
@@ -137,17 +107,14 @@ macro_rules! memory_region_symbol {
 
 #[cfg(not(feature = "extern-symbols"))]
 macro_rules! maybe_extern_var {
-    ($symbol:ident: $ty:ty = $default:expr) => {{
-        var! {
-            #[used(linker)]
-            $symbol: $ty = $default
-        }
+    ($symbol:ident: $ty:ty) => {{
+        var!($symbol: $ty)
     }};
 }
 
 #[cfg(feature = "extern-symbols")]
 macro_rules! maybe_extern_var {
-    ($symbol:ident: $ty:ty = $default:expr) => {{
+    ($symbol:ident: $ty:ty) => {{
         unsafe extern "C" {
             static $symbol: $ty;
         }
@@ -158,31 +125,31 @@ macro_rules! maybe_extern_var {
 
 /// Returns whether this protection domain is a passive server.
 pub fn pd_is_passive() -> bool {
-    *maybe_extern_var!(microkit_passive: bool = false)
+    *maybe_extern_var!(microkit_passive: bool)
 }
 
 pub(crate) fn pd_irqs() -> usize {
-    *maybe_extern_var!(microkit_irqs: usize = 0)
+    *maybe_extern_var!(microkit_irqs: usize)
 }
 
 pub(crate) fn pd_notifications() -> usize {
-    *maybe_extern_var!(microkit_notifications: usize = 0)
+    *maybe_extern_var!(microkit_notifications: usize)
 }
 
 pub(crate) fn pd_pps() -> usize {
-    *maybe_extern_var!(microkit_pps: usize = 0)
+    *maybe_extern_var!(microkit_pps: usize)
 }
 
 #[allow(dead_code)]
 pub(crate) fn pd_ioports() -> usize {
-    *maybe_extern_var!(microkit_ioports: usize = 0)
+    *maybe_extern_var!(microkit_ioports: usize)
 }
 
 const PD_NAME_LENGTH: usize = 64;
 
 /// Returns the name of this protection domain without converting to unicode.
 pub fn pd_name_bytes() -> &'static [u8] {
-    let all_bytes = maybe_extern_var!(microkit_name: [u8; PD_NAME_LENGTH] = [0; PD_NAME_LENGTH]);
+    let all_bytes = maybe_extern_var!(microkit_name: [u8; PD_NAME_LENGTH]);
     let n = all_bytes.iter().take_while(|b| **b != 0).count();
     &all_bytes[..n]
 }

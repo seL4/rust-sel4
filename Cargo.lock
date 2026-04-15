@@ -2756,7 +2756,7 @@ name = "sel4-microkit-base"
 version = "0.1.0"
 dependencies = [
  "sel4",
- "sel4-immutable-cell",
+ "sel4-rodata-static",
 ]
 
 [[package]]

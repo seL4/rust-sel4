@@ -31,16 +31,16 @@ use artistic_secrets::Masterpiece;
 
 #[protection_domain(heap_size = 0x10000)]
 fn init() -> HandlerImpl {
-    let assistant = Channel::new(*var!(assistant_channel_id: usize = usize::MAX));
+    let assistant = Channel::new(*var!(assistant_channel_id: usize));
 
-    let region_in_size = *var!(region_in_size: usize = 0);
+    let region_in_size = *var!(region_in_size: usize);
     let region_in = unsafe {
         SharedMemoryRef::new_read_only(
             memory_region_symbol!(region_in_start: *mut [u8], n = region_in_size),
         )
     };
 
-    let region_out_size = *var!(region_out_size: usize = 0);
+    let region_out_size = *var!(region_out_size: usize);
     let region_out = unsafe {
         SharedMemoryRef::new(
             memory_region_symbol!(region_out_start: *mut [u8], n = region_out_size),

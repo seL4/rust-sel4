@@ -4,17 +4,20 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
+#![no_std]
+
 /// Forces a static into `.rodata` without causing `.rodata` to end up in a `PF_W` segment
 #[macro_export]
 macro_rules! rodata_static {
     ($ident:ident: $ty:ty) => {{
         mod asm {
+            use super::*;
             unsafe extern "C" {
                 pub(super) static $ident: $ty;
             }
-            core::arch::global_asm! {
+            $crate::_private::global_asm! {
                 r#"
-                    .section .rodata, "a", %progbits
+                    .section .rodata.rodata_static.{ident}, "aR", %progbits
                     .global {ident}
                     .size {ident}, {size}
                     .p2align {align}
@@ -32,5 +35,6 @@ macro_rules! rodata_static {
 
 #[doc(hidden)]
 pub mod _private {
-    pub use core::mem::{size_of, align_of};
+    pub use core::arch::global_asm;
+    pub use core::mem::{align_of, size_of};
 }
