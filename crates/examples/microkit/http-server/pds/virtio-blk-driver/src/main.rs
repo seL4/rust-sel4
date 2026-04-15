@@ -48,13 +48,13 @@ const QUEUE_SIZE: usize = 4;
 fn init() -> HandlerImpl {
     HalImpl::init(
         config::VIRTIO_BLK_DRIVER_DMA_SIZE,
-        *var!(virtio_blk_driver_dma_vaddr: usize = 0),
-        *var!(virtio_blk_driver_dma_paddr: usize = 0),
+        *var!(virtio_blk_driver_dma_vaddr: usize),
+        *var!(virtio_blk_driver_dma_paddr: usize),
     );
 
     let mut dev = {
         let header = NonNull::new(
-            (*var!(virtio_blk_mmio_vaddr: usize = 0) + config::VIRTIO_BLK_MMIO_OFFSET)
+            (*var!(virtio_blk_mmio_vaddr: usize) + config::VIRTIO_BLK_MMIO_OFFSET)
                 as *mut VirtIOHeader,
         )
         .unwrap();

@@ -9,8 +9,8 @@
 use core::arch::global_asm;
 use core::slice;
 
-use sel4_stack::{Stack, StackBottom};
 use sel4_rodata_static::rodata_static;
+use sel4_stack::{Stack, StackBottom};
 
 #[cfg(not(any(
     target_arch = "aarch64",
