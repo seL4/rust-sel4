@@ -85,6 +85,7 @@ self: with self;
     if worldConfig.isMicrokit
     then {
       SEL4_INCLUDE_DIRS = "${microkitDir}/include";
+      SEL4_PLATFORM_INFO = "${microkitDir}/platform_gen.json";
     }
     else {
       SEL4_PREFIX = seL4ForUserspace;
