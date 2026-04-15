@@ -128,8 +128,7 @@ global_asm! {
 
         .global _reset
 
-        .section .text
-
+        .section .text.reset, "axR", %progbits
         _reset:
     "#,
     #[cfg(target_arch = "aarch64")]
