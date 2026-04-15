@@ -4,8 +4,9 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-// HACK to force variables into .rodata without causing .rodata to end up in a PF_W segment
-macro_rules! rodata_var {
+/// Forces a static into `.rodata` without causing `.rodata` to end up in a `PF_W` segment
+#[macro_export]
+macro_rules! rodata_static {
     ($ident:ident: $ty:ty) => {{
         mod asm {
             unsafe extern "C" {
@@ -13,7 +14,7 @@ macro_rules! rodata_var {
             }
             core::arch::global_asm! {
                 r#"
-                    .section .rodata
+                    .section .rodata, "a", %progbits
                     .global {ident}
                     .size {ident}, {size}
                     .p2align {align}
@@ -21,12 +22,15 @@ macro_rules! rodata_var {
                         .skip {size}, 0
                 "#,
                 ident = sym $ident,
-                size = const core::mem::size_of::<$ty>(),
-                align = const core::mem::align_of::<$ty>(),
+                size = const $crate::_private::size_of::<$ty>(),
+                align = const $crate::_private::align_of::<$ty>(),
             }
         }
         unsafe { &asm::$ident }
     }};
 }
 
-pub(crate) use rodata_var;
+#[doc(hidden)]
+pub mod _private {
+    pub use core::mem::{size_of, align_of};
+}

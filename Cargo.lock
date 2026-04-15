@@ -2902,6 +2902,7 @@ name = "sel4-reset"
 version = "0.1.0"
 dependencies = [
  "cfg-if",
+ "sel4-rodata-static",
  "sel4-stack",
 ]
 
@@ -2914,6 +2915,10 @@ dependencies = [
  "num",
  "sel4-synthetic-elf",
 ]
+
+[[package]]
+name = "sel4-rodata-static"
+version = "0.1.0"
 
 [[package]]
 name = "sel4-root-task"

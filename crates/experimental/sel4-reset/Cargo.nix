@@ -10,6 +10,6 @@ mk {
   package.name = "sel4-reset";
   dependencies = {
     inherit (versions) cfg-if;
-    inherit (localCrates) sel4-stack;
+    inherit (localCrates) sel4-stack sel4-rodata-static;
   };
 }

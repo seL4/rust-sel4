@@ -10,10 +10,7 @@ use core::arch::global_asm;
 use core::slice;
 
 use sel4_stack::{Stack, StackBottom};
-
-mod rodata_var;
-
-use rodata_var::rodata_var;
+use sel4_rodata_static::rodata_static;
 
 #[cfg(not(any(
     target_arch = "aarch64",
@@ -53,11 +50,11 @@ impl Regions<'_> {
 }
 
 unsafe fn get_regions() -> Regions<'static> {
-    let start = *rodata_var!(sel4_reset_regions_start: usize);
-    let meta_offset = *rodata_var!(sel4_reset_regions_meta_offset: usize);
-    let meta_count = *rodata_var!(sel4_reset_regions_meta_count: usize);
-    let data_offset = *rodata_var!(sel4_reset_regions_data_offset: usize);
-    let data_size = *rodata_var!(sel4_reset_regions_data_size: usize);
+    let start = *rodata_static!(sel4_reset_regions_start: usize);
+    let meta_offset = *rodata_static!(sel4_reset_regions_meta_offset: usize);
+    let meta_count = *rodata_static!(sel4_reset_regions_meta_count: usize);
+    let data_offset = *rodata_static!(sel4_reset_regions_data_offset: usize);
+    let data_size = *rodata_static!(sel4_reset_regions_data_size: usize);
     unsafe {
         Regions {
             meta: slice::from_raw_parts((start + meta_offset) as *const _, meta_count),
