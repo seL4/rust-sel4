@@ -122,26 +122,26 @@ global_asm! {
             ldr x9, =__sel4_runtime_common__stack_bottom
             ldr x9, [x9]
             mov sp, x9
-            b __sel4_runtime_common__rust_entrypoint
+            b __sel4_runtime_common__call_rust_entrypoint
     "#,
     #[cfg(target_arch = "arm")]
     r#"
             ldr r8, =__sel4_runtime_common__stack_bottom
             ldr r8, [r8]
             mov sp, r8
-            b __sel4_runtime_common__rust_entrypoint
+            b __sel4_runtime_common__call_rust_entrypoint
     "#,
     #[cfg(target_arch = "riscv64")]
     r#"
             la sp, __sel4_runtime_common__stack_bottom
             ld sp, (sp)
-            j __sel4_runtime_common__rust_entrypoint
+            j __sel4_runtime_common__call_rust_entrypoint
     "#,
     #[cfg(target_arch = "riscv32")]
     r#"
             la sp, __sel4_runtime_common__stack_bottom
             lw sp, (sp)
-            j __sel4_runtime_common__rust_entrypoint
+            j __sel4_runtime_common__call_rust_entrypoint
     "#,
     #[cfg(target_arch = "x86_64")]
     r#"
@@ -149,7 +149,7 @@ global_asm! {
             mov rbp, rsp
             sub rsp, 0x8 // Stack must be 16-byte aligned before call
             push rbp
-            call __sel4_runtime_common__rust_entrypoint
+            call __sel4_runtime_common__call_rust_entrypoint
         1:  jmp 1b
     "#,
 }
