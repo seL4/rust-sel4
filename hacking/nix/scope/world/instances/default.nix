@@ -43,7 +43,6 @@ let
   haveMinimalRuntime = !isMicrokit;
   haveUnwindingSupport = !stdenv.hostPlatform.isAarch32;
   haveKernelLoader = stdenv.hostPlatform.isAarch || stdenv.hostPlatform.isRiscV;
-  haveReset = stdenv.hostPlatform.is64bit;
   haveCapDLInitializer = true;
 
   maybe = condition: v: if condition then v else null;
@@ -171,7 +170,7 @@ in rec {
             };
             release = false;
           };
-        in maybe (haveFullRuntime && haveReset) (mkInstance {
+        in maybe haveFullRuntime (mkInstance {
           rootTask.elf = prepareResettable origRootTask.elf;
           extraPlatformArgs = lib.optionalAttrs canSimulate {
             canAutomateSimply = true;

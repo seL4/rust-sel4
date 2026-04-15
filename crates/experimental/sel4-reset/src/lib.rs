@@ -15,7 +15,13 @@ mod rodata_var;
 
 use rodata_var::rodata_var;
 
-#[cfg(not(any(target_arch = "aarch64", target_arch = "x86_64")))]
+#[cfg(not(any(
+    target_arch = "aarch64",
+    target_arch = "arm",
+    target_arch = "riscv64",
+    target_arch = "riscv32",
+    target_arch = "x86_64",
+)))]
 compile_error!("unsupported architecture");
 
 // // //
@@ -135,6 +141,25 @@ global_asm! {
             ldr x9, [x9]
             mov sp, x9
             b __sel4_reset__rust_entrypoint
+    "#,
+    #[cfg(target_arch = "arm")]
+    r#"
+            ldr r8, =__sel4_reset__stack_bottom
+            ldr r8, [r8]
+            mov sp, r8
+            b __sel4_reset__rust_entrypoint
+    "#,
+    #[cfg(target_arch = "riscv64")]
+    r#"
+            la sp, __sel4_reset__stack_bottom
+            ld sp, (sp)
+            j __sel4_reset__rust_entrypoint
+    "#,
+    #[cfg(target_arch = "riscv32")]
+    r#"
+            la sp, __sel4_reset__stack_bottom
+            lw sp, (sp)
+            j __sel4_reset__rust_entrypoint
     "#,
     #[cfg(target_arch = "x86_64")]
     r#"
