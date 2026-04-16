@@ -90,7 +90,7 @@ pub fn _run_main<F>(f: F) -> !
 where
     F: FnOnce() + UnwindSafe,
 {
-    let r = catch_unwind(move || f());
+    let r = catch_unwind(f);
     match r {
         Ok(()) => exit_success(),
         Err(()) => abort!("uncaught panic in main"),
