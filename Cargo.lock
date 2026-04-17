@@ -2762,7 +2762,7 @@ name = "sel4-microkit-base"
 version = "0.1.0"
 dependencies = [
  "sel4",
- "sel4-rodata-static",
+ "sel4-immutable-cell",
 ]
 
 [[package]]
@@ -2909,7 +2909,6 @@ version = "0.1.0"
 dependencies = [
  "cfg-if",
  "sel4-panicking-env",
- "sel4-rodata-static",
  "sel4-stack",
 ]
 
