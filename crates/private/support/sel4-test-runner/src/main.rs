@@ -177,15 +177,19 @@ impl<'a> Runner<'a> {
     }
 
     fn run_not_sel4(&self) -> anyhow::Result<()> {
-        ensure!(
-            Command::new(self.get_qemu_exe())
-                .args(
-                    iter::once(self.exe.as_os_str())
-                        .chain(self.cli.simulate_args.iter().map(AsRef::as_ref)),
-                )
-                .status()?
-                .success()
-        );
+        if self.cli.no_run {
+            println!("{}", self.d.display());
+        } else {
+            ensure!(
+                Command::new(self.get_qemu_exe())
+                    .args(
+                        iter::once(self.exe.as_os_str())
+                            .chain(self.cli.simulate_args.iter().map(AsRef::as_ref)),
+                    )
+                    .status()?
+                    .success()
+            );
+        }
         Ok(())
     }
 
