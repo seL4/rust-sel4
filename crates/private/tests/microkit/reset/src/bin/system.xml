@@ -6,6 +6,6 @@
 -->
 <system>
     <protection_domain name="test" priority="128" stack_size="0x10_000">
-        <program_image path="test.elf" path_for_symbols="test.sup.elf" />
+        <program_image path="test.elf" />
     </protection_domain>
 </system>
