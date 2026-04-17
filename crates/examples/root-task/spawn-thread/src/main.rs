@@ -19,7 +19,7 @@ use core::ptr;
 
 use cfg_if::cfg_if;
 
-use sel4_elf_header::{ElfHeader, PT_TLS};
+use sel4_elf_header::{PT_TLS, locate_phdrs};
 use sel4_initialize_tls::{TlsImage, UncheckedTlsImage};
 use sel4_root_task::{
     Never, abort, panicking::catch_unwind, root_task, set_global_allocator_mutex_notification,
@@ -215,14 +215,11 @@ impl SecondaryThreadFn {
 // // //
 
 fn get_tls_image() -> TlsImage {
-    unsafe extern "C" {
-        static __ehdr_start: ElfHeader;
-    }
-    let phdrs = unsafe {
-        assert!(__ehdr_start.is_magic_valid());
-        __ehdr_start.locate_phdrs()
-    };
-    let phdr = phdrs.iter().find(|phdr| phdr.p_type == PT_TLS).unwrap();
+    let phdr = locate_phdrs()
+        .iter()
+        .find(|phdr| phdr.p_type == PT_TLS)
+        .unwrap_or_else(|| abort!("missing PT_TLS program header"));
+        .unwrap();
     let unchecked = UncheckedTlsImage {
         vaddr: phdr.p_vaddr,
         filesz: phdr.p_filesz,
