@@ -5,6 +5,7 @@
 //
 
 #![no_std]
+#![feature(used_with_arg)]
 
 #[cfg(feature = "alloc")]
 extern crate alloc;
@@ -32,5 +33,5 @@ pub use symbols::{ipc_buffer_ptr, pd_is_passive, pd_name};
 // For macros
 #[doc(hidden)]
 pub mod _private {
-    pub use sel4_rodata_static::rodata_static;
+    pub use sel4_immutable_cell::ImmutableCell;
 }

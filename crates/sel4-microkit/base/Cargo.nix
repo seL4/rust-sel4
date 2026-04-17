@@ -10,7 +10,7 @@ mk {
   package.name = "sel4-microkit-base";
   dependencies = {
     inherit (localCrates)
-      sel4-rodata-static
+      sel4-immutable-cell
       sel4
     ;
   };
