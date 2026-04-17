@@ -6,6 +6,8 @@
 
 #![no_std]
 
+use core::error::Error;
+use core::fmt;
 use core::ops::Range;
 use core::ptr;
 use core::slice;
@@ -48,6 +50,16 @@ impl ElfHeader {
         self.e_ident.magic == ELFMAG
     }
 
+    pub fn check_magic(&self) -> Result<(), InvalidMagic> {
+        if self.is_magic_valid() {
+            Ok(())
+        } else {
+            Err(InvalidMagic {
+                ehdr_addr: self as *const _ as usize,
+            })
+        }
+    }
+
     pub fn locate_phdrs(&'static self) -> &'static [ProgramHeader] {
         unsafe {
             let ptr = ptr::from_ref(self)
@@ -58,6 +70,29 @@ impl ElfHeader {
         }
     }
 }
+
+pub fn locate_phdrs() -> Result<&'static [ProgramHeader], InvalidMagic> {
+    unsafe extern "C" {
+        static __ehdr_start: ElfHeader;
+    }
+    unsafe {
+        __ehdr_start.check_magic()?;
+    }
+    Ok(unsafe { __ehdr_start.locate_phdrs() })
+}
+
+#[derive(Debug, Copy, Clone)]
+pub struct InvalidMagic {
+    ehdr_addr: usize,
+}
+
+impl fmt::Display for InvalidMagic {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "invalid magic for ELF header at 0x{:x}", self.ehdr_addr)
+    }
+}
+
+impl Error for InvalidMagic {}
 
 #[repr(C)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
