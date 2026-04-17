@@ -161,10 +161,6 @@ in {
           origELF = "${orig}/bin/test.elf";
 
           patched = prepareResettable origELF;
-
-          sup = runCommandCC "test.sup.elf" {} ''
-            $OBJCOPY --only-keep-debug ${origELF} $out
-          '';
         };
       in
         callPlatform {
@@ -172,9 +168,6 @@ in {
             searchPath = [
               (linkFarm "pd" {
                 "test.elf" = pd.patched;
-              })
-              (linkFarm "pd" {
-                "test.sup.elf" = pd.sup;
               })
             ];
             systemXML = sources.srcRoot + "/crates/private/tests/microkit/reset/src/bin/system.xml";
@@ -185,7 +178,6 @@ in {
           extraDebuggingLinks = [
             { name = "test.orig.elf"; path = pd.origELF; }
             { name = "test.patched.elf"; path = pd.patched; }
-            { name = "test.sup.elf"; path = pd.sup; }
           ];
         } // {
           inherit pd;
