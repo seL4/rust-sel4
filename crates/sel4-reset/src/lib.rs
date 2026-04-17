@@ -26,41 +26,29 @@ compile_error!("unsupported architecture");
 #[repr(C)]
 #[derive(Debug)]
 struct RegionMeta {
-    vaddr: usize,
-    offset: usize,
-    filesz: usize,
-    memsz: usize,
+    dst_vaddr: usize,
+    dst_size: usize,
+    src_vaddr: usize,
+    src_size: usize,
 }
 
-struct Regions<'a> {
-    meta: &'a [RegionMeta],
-    data: &'a [u8],
-}
-
-impl Regions<'_> {
-    unsafe fn reset_memory(&self) {
-        for meta in self.meta {
-            let dst = unsafe { slice::from_raw_parts_mut(meta.vaddr as *mut _, meta.memsz) };
-            let (dst_data, dst_zero) = dst.split_at_mut(meta.filesz);
-            let src_data = &self.data[meta.offset..][..meta.filesz];
-            dst_data.copy_from_slice(src_data);
-            dst_zero.fill(0);
+unsafe fn reset_memory(regions: &'static [RegionMeta]) {
+    for meta in regions {
+        let dst = unsafe { slice::from_raw_parts_mut(meta.dst_vaddr as *mut u8, meta.dst_size) };
+        let (dst_data, dst_zero) = dst.split_at_mut(meta.src_size);
+        if meta.src_vaddr != 0 {
+            let src =
+                unsafe { slice::from_raw_parts_mut(meta.src_vaddr as *mut u8, meta.src_size) };
+            dst_data.copy_from_slice(src);
         }
+        dst_zero.fill(0);
     }
 }
 
-unsafe fn get_regions() -> Regions<'static> {
-    let start = *rodata_static!(sel4_reset_regions_start: usize);
-    let meta_offset = *rodata_static!(sel4_reset_regions_meta_offset: usize);
+unsafe fn get_regions() -> &'static [RegionMeta] {
+    let meta_vaddr = *rodata_static!(sel4_reset_regions_meta_vaddr: usize);
     let meta_count = *rodata_static!(sel4_reset_regions_meta_count: usize);
-    let data_offset = *rodata_static!(sel4_reset_regions_data_offset: usize);
-    let data_size = *rodata_static!(sel4_reset_regions_data_size: usize);
-    unsafe {
-        Regions {
-            meta: slice::from_raw_parts((start + meta_offset) as *const _, meta_count),
-            data: slice::from_raw_parts((start + data_offset) as *const _, data_size),
-        }
-    }
+    unsafe { slice::from_raw_parts(meta_vaddr as *const _, meta_count) }
 }
 
 // // //
@@ -108,7 +96,7 @@ unsafe extern "C" fn __sel4_reset__rust_entrypoint(
     x3: usize,
 ) -> ! {
     unsafe {
-        get_regions().reset_memory();
+        reset_memory(get_regions());
         _start(x0, x1, x2, x3)
     }
 }

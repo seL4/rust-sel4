@@ -18,7 +18,7 @@ license = "BSD-2-Clause"
 
 [dependencies]
 anyhow = "1.0.100"
-clap = "4.5.50"
+clap = { version = "4.5.50", features = ["derive"] }
 num = "0.4.3"
+object = "0.38.1"
 rangemap = "1.7.1"
-sel4-synthetic-elf = { path = "../../sel4-synthetic-elf" }

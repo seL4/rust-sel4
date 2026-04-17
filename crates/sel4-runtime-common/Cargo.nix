@@ -13,6 +13,7 @@ mk {
     inherit (localCrates)
       sel4-panicking-env
       sel4-elf-header
+      sel4-immutable-cell
       sel4-stack
       sel4-ctors-dtors
     ;
