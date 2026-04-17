@@ -9,7 +9,8 @@
 use core::arch::global_asm;
 use core::slice;
 
-use sel4_rodata_static::rodata_static;
+use sel4_elf_header::{PT_SEL4_RESET_REGIONS, locate_phdrs};
+use sel4_panicking_env::abort;
 use sel4_stack::{Stack, StackBottom};
 
 #[cfg(not(any(
@@ -20,6 +21,17 @@ use sel4_stack::{Stack, StackBottom};
     target_arch = "x86_64",
 )))]
 compile_error!("unsupported architecture");
+
+// 6 should be enough:
+// - 1 PT_LOAD for region meta
+// - 1 PT_SEL4_RESET_REGIONS for region meta
+// - 4 for writeable PT_LOAD
+sel4_elf_header::add_placeholder_phdrs!(reset1);
+sel4_elf_header::add_placeholder_phdrs!(reset2);
+sel4_elf_header::add_placeholder_phdrs!(reset3);
+sel4_elf_header::add_placeholder_phdrs!(reset4);
+sel4_elf_header::add_placeholder_phdrs!(reset5);
+sel4_elf_header::add_placeholder_phdrs!(reset6);
 
 // // //
 
@@ -46,9 +58,17 @@ unsafe fn reset_memory(regions: &'static [RegionMeta]) {
 }
 
 unsafe fn get_regions() -> &'static [RegionMeta] {
-    let meta_vaddr = *rodata_static!(sel4_reset_regions_meta_vaddr: usize);
-    let meta_count = *rodata_static!(sel4_reset_regions_meta_count: usize);
-    unsafe { slice::from_raw_parts(meta_vaddr as *const _, meta_count) }
+    unsafe {
+        let phdr = locate_phdrs()
+            .unwrap_or_else(|err| abort!("{err}"))
+            .iter()
+            .find(|phdr| phdr.p_type == PT_SEL4_RESET_REGIONS)
+            .unwrap_or_else(|| abort!("missing PT_SEL4_RESET_REGIONS program header"));
+        slice::from_raw_parts(
+            phdr.p_vaddr as *const _,
+            phdr.p_memsz / size_of::<RegionMeta>(),
+        )
+    }
 }
 
 // // //

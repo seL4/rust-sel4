@@ -10,15 +10,13 @@ use unwinding::custom_eh_frame_finder::{
     EhFrameFinder, FrameInfo, FrameInfoKind, set_custom_eh_frame_finder,
 };
 
-use sel4_elf_header::{PT_GNU_EH_FRAME, PT_LOAD};
-
-use crate::locate_phdrs;
+use sel4_elf_header::{PT_GNU_EH_FRAME, PT_LOAD, locate_phdrs};
 
 struct EhFrameFinderImpl;
 
 unsafe impl EhFrameFinder for EhFrameFinderImpl {
     fn find(&self, pc: usize) -> Option<FrameInfo> {
-        let phdrs = locate_phdrs();
+        let phdrs = locate_phdrs().unwrap_or_else(|err| abort!("{err}"));
 
         let text_base = phdrs.iter().find_map(|phdr| {
             if phdr.p_type == PT_LOAD {
