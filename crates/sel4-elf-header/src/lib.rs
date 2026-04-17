@@ -115,10 +115,35 @@ pub const PT_LOAD: u32 = 1;
 pub const PT_TLS: u32 = 7;
 pub const PT_GNU_EH_FRAME: u32 = 0x6474_e550;
 
+// seL4-specific
+pub const PT_SEL4_RESET_REGIONS: u32 = 0x64c3_4001;
+
 impl ProgramHeader {
     pub fn vaddr_range(&self) -> Range<usize> {
         let start = self.p_vaddr;
         let end = start + self.p_memsz;
         start..end
     }
+}
+
+#[macro_export]
+macro_rules! add_placeholder_phdrs {
+    ($label:ident) => {
+        const _: () = {
+            #[unsafe(link_section = $crate::_private::concat!(".note.sel4.placeholder.", $crate::_private::stringify!($label), ".1"))]
+            static _1: [u32; 0] = [];
+
+            #[unsafe(link_section = $crate::_private::concat!(".note.sel4.placeholder.", $crate::_private::stringify!($label), ".2"))]
+            static _2: [u64; 0] = [];
+
+            #[unsafe(link_section = $crate::_private::concat!(".note.sel4.placeholder.", $crate::_private::stringify!($label), ".3"))]
+            static _3: [u32; 0] = [];
+
+        };
+    };
+}
+
+#[doc(hidden)]
+pub mod _private {
+    pub use core::{concat, stringify};
 }

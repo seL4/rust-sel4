@@ -7,16 +7,16 @@
 use cfg_if::cfg_if;
 
 use sel4_elf_header::PT_TLS;
+use sel4_elf_header::locate_phdrs;
 use sel4_panicking_env::abort;
 
 #[allow(unused_imports)]
 use sel4_initialize_tls::{DEFAULT_SET_THREAD_POINTER_FN, SetThreadPointerFn, UncheckedTlsImage};
 
-use crate::locate_phdrs;
-
 #[allow(clippy::missing_safety_doc)]
 pub(crate) unsafe fn with_tls(f: impl FnOnce() -> !) -> ! {
     let phdr = locate_phdrs()
+        .unwrap_or_else(|err| abort!("{err}"))
         .iter()
         .find(|phdr| phdr.p_type == PT_TLS)
         .unwrap_or_else(|| abort!("no PT_TLS segment"));

@@ -10,12 +10,9 @@
 #![feature(core_intrinsics)]
 #![feature(linkage)]
 #![allow(internal_features)]
-#![feature(used_with_arg)]
 
 use core::sync::atomic::{AtomicBool, Ordering};
 
-use sel4_elf_header::{ElfHeader, ProgramHeader};
-use sel4_immutable_cell::ImmutableCell;
 use sel4_panicking_env::abort;
 
 mod abort;
@@ -64,23 +61,6 @@ unsafe fn global_init() {
 
 pub fn global_init_complete() -> bool {
     GLOBAL_INIT_COMPLETE.load(Ordering::Acquire)
-}
-
-unsafe extern "C" {
-    static __ehdr_start: ElfHeader;
-}
-
-#[used(linker)]
-#[unsafe(no_mangle)]
-static HACK__ehdr_start: ImmutableCell<&ElfHeader> = ImmutableCell::new(unsafe { &__ehdr_start });
-
-#[allow(dead_code)]
-fn locate_phdrs() -> &'static [ProgramHeader] {
-    let hdr = HACK__ehdr_start.get();
-    if !hdr.is_magic_valid() {
-        abort!("ELF header magic mismatch")
-    }
-    hdr.locate_phdrs()
 }
 
 #[cfg(target_arch = "arm")]

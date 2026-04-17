@@ -2908,6 +2908,7 @@ name = "sel4-reset"
 version = "0.1.0"
 dependencies = [
  "cfg-if",
+ "sel4-elf-header",
  "sel4-panicking-env",
  "sel4-stack",
 ]
