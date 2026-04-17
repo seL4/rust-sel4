@@ -12,11 +12,9 @@ mk {
     inherit (versions)
       anyhow
       num
-      clap
       rangemap
+      object
     ;
-    inherit (localCrates)
-      sel4-synthetic-elf
-    ;
+    clap = { version = versions.clap; features = [ "derive" ]; };
   };
 }
