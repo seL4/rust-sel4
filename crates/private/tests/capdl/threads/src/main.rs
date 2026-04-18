@@ -19,7 +19,7 @@ use sel4_simple_task_runtime::{debug_println, main_json};
 use sel4_simple_task_threading::StaticThread;
 use sel4_sync::{RawNotificationMutex, lock_api::Mutex};
 
-sel4_test_capdl::embed_capdl_script!("../cdl.py");
+sel4_test_capdl::embed_capdl_script!("system.py");
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Config {

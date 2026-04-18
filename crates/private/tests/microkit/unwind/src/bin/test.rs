@@ -11,7 +11,7 @@ use core::sync::atomic::{AtomicBool, Ordering};
 
 use sel4_microkit::{NullHandler, debug_println, panicking, protection_domain};
 
-sel4_test_microkit::embed_sdf_xml!("../../system.xml");
+sel4_test_microkit::embed_sdf_xml!("system.xml");
 
 static F1_DROPPED: AtomicBool = AtomicBool::new(false);
 

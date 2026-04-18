@@ -92,7 +92,7 @@ in {
               "${pd}/bin"
             ];
             systemXML = genSDF {
-              script = sources.srcRoot + "/crates/private/tests/microkit/minimal/system.py";
+              script = sources.srcRoot + "/crates/private/tests/microkit/minimal/src/bin/system.py";
             };
           };
           extraPlatformArgs = lib.optionalAttrs canSimulate  {
@@ -115,7 +115,7 @@ in {
             searchPath = [
               "${pd}/bin"
             ];
-            systemXML = sources.srcRoot + "/crates/private/tests/microkit/unwind/system.xml";
+            systemXML = sources.srcRoot + "/crates/private/tests/microkit/unwind/src/bin/system.xml";
           };
           extraPlatformArgs = lib.optionalAttrs canSimulate  {
             canAutomateSimply = true;
@@ -138,7 +138,7 @@ in {
             searchPath = [
               "${pd}/bin"
             ];
-            systemXML = sources.srcRoot + "/crates/private/tests/microkit/passive-server-with-deferred-action/x.system";
+            systemXML = sources.srcRoot + "/crates/private/tests/microkit/passive-server-with-deferred-action/src/bin/test/system.xml";
           };
           extraPlatformArgs = lib.optionalAttrs canSimulate  {
             canAutomateSimply = true;
@@ -180,7 +180,7 @@ in {
                 "test.sup.elf" = pd.sup;
               })
             ];
-            systemXML = sources.srcRoot + "/crates/private/tests/microkit/reset/x.system";
+            systemXML = sources.srcRoot + "/crates/private/tests/microkit/reset/src/bin/system.xml";
           };
           extraPlatformArgs = lib.optionalAttrs canSimulate  {
             canAutomateSimply = true;
