@@ -11,7 +11,7 @@
 use sel4_microkit::{NullHandler, debug_println, protection_domain};
 use sel4_reset::reset;
 
-sel4_test_microkit::embed_sdf_xml!("../../x.system");
+sel4_test_microkit::embed_sdf_xml!("system.xml");
 
 const INIT: usize = 1337;
 

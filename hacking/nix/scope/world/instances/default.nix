@@ -367,7 +367,7 @@ in rec {
         };
         rootTask = mkCapDLInitializer {
           spec = mkSimpleCompositionCapDLSpec {
-            script = sources.srcRoot + "/crates/private/tests/capdl/threads/cdl.py";
+            script = sources.srcRoot + "/crates/private/tests/capdl/threads/src/system.py";
             searchDirs = [
               test
             ];
@@ -387,7 +387,7 @@ in rec {
         };
         rootTask = mkCapDLInitializer {
           spec = mkSimpleCompositionCapDLSpec {
-            script = sources.srcRoot + "/crates/private/tests/capdl/utcover/cdl.py";
+            script = sources.srcRoot + "/crates/private/tests/capdl/utcover/src/system.py";
             searchDirs = [
               test
             ];
