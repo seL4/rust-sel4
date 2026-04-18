@@ -25,11 +25,6 @@ let
         "build"
       ];
     };
-    sel4-bitfield-parser = {
-      extraPaths = [
-        "grammar.pest"
-      ];
-    };
     sel4-kernel-loader = {
       extraPaths = [
         "asm"
