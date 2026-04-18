@@ -25,7 +25,7 @@ DEFAULT_STATIC_HEAP_SIZE = 8 * 2**20
 class ElfComponent(BaseComponent):
 
     def __init__(
-            self, composition, name, elf_path,
+            self, composition, name, elf_name,
             update_guard_size=True,
             prio=DEFAULT_PRIO, max_prio=DEFAULT_MAX_PRIO,
             affinity=DEFAULT_AFFINITY,
@@ -39,7 +39,7 @@ class ElfComponent(BaseComponent):
         self.update_guard_size = update_guard_size
 
         elf_fname = '{}.elf'.format(self.name)
-        self.elf_path = composition.find_in_search_dirs(elf_path)
+        self.elf_path = composition.find_in_search_dirs(elf_name)
         self.elf = ELF(str(self.elf_path), elf_fname, self.composition.arch)
 
         self.composition.register_file(elf_fname, self.elf_path)
