@@ -17,6 +17,9 @@ declare_fault_newtype!(VmFault, seL4_Fault_VMFault);
 #[sel4_cfg(KERNEL_MCS)]
 declare_fault_newtype!(Timeout, seL4_Fault_Timeout);
 
+#[sel4_cfg(HARDWARE_DEBUG_API)]
+declare_fault_newtype!(DebugException, seL4_Fault_DebugException);
+
 #[sel4_cfg_enum]
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Fault {
@@ -27,6 +30,8 @@ pub enum Fault {
     VmFault(VmFault),
     #[sel4_cfg(KERNEL_MCS)]
     Timeout(Timeout),
+    #[sel4_cfg(HARDWARE_DEBUG_API)]
+    DebugException(DebugException),
 }
 
 impl Fault {
@@ -46,6 +51,8 @@ impl Fault {
                 sys::seL4_Fault_Splayed::VMFault(inner) => Self::VmFault(VmFault::from_inner(inner)),
                 #[sel4_cfg(KERNEL_MCS)]
                 sys::seL4_Fault_Splayed::Timeout(inner) => Self::Timeout(Timeout::from_inner(inner)),
+                #[sel4_cfg(HARDWARE_DEBUG_API)]
+                sys::seL4_Fault_Splayed::DebugException(inner) => Self::DebugException(DebugException::from_inner(inner)),
             }
         }
     }
