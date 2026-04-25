@@ -15,7 +15,7 @@ extern crate alloc;
 pub type StaticThreadEntryFn = extern "C" fn(arg0: sel4::Word, arg1: sel4::Word);
 
 #[derive(Copy, Clone, Debug)]
-pub struct StaticThread(sel4::cap::Endpoint);
+pub struct StaticThread(#[allow(dead_code)] sel4::cap::Endpoint);
 
 impl StaticThread {
     pub fn new(endpoint: sel4::cap::Endpoint) -> Self {
