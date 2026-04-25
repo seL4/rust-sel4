@@ -64,7 +64,7 @@ none:
 
 .PHONY: clean
 clean:
-	rm -rf $(out) $(cargo_config_link) target
+	rm -rf $(out) $(cargo_config_link) target hacking/target
 
 $(out):
 	mkdir -p $@
