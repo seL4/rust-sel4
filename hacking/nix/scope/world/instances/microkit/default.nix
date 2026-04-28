@@ -91,9 +91,7 @@ in {
             searchPath = [
               "${pd}/bin"
             ];
-            systemXML = genSDF {
-              script = sources.srcRoot + "/crates/private/tests/microkit/minimal/src/bin/system.py";
-            };
+            systemXML = sources.srcRoot + "/crates/private/tests/microkit/minimal/src/bin/system.xml";
           };
           extraPlatformArgs = lib.optionalAttrs canSimulate  {
             canAutomateSimply = true;
