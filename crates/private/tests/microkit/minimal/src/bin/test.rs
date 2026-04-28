@@ -9,7 +9,7 @@
 
 use sel4_microkit::{Never, protection_domain};
 
-sel4_test_microkit::embed_sdf_script!("system.py");
+sel4_test_microkit::embed_sdf_script!("system.xml");
 
 #[protection_domain]
 fn init() -> Never {
