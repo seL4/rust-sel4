@@ -12,4 +12,5 @@ members = [
     "cargo-manifest-management/tool/crates/manage-cargo-manifests",
     "cargo-manifest-management/tool/crates/manage-direct-dependency-allow-list",
     "unstable-feature-monitoring/wishlist",
+    "vscode/create-vscode-workspace",
 ]
