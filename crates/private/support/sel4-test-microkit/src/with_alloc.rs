@@ -1,3 +1,9 @@
+//
+// Copyright 2026, Colias Group, LLC
+//
+// SPDX-License-Identifier: BSD-2-Clause
+//
+
 use alloc::boxed::Box;
 use core::error::Error;
 
