@@ -16,11 +16,13 @@ __all__ = [
 
 DEFAULT_STACK_SIZE = 0x10_000
 
+
 @dataclass
 class Board:
     name: str
     arch: SystemDescription.Arch
     paddr_top: int
+
 
 BOARDS: List[Board] = [
     Board(
@@ -39,6 +41,7 @@ BOARDS: List[Board] = [
         paddr_top=0,
     ),
 ]
+
 
 def run_script(f):
     parser = argparse.ArgumentParser()
