@@ -14,7 +14,7 @@ use sel4_microkit::{Handler, Infallible, debug_println, protection_domain};
 fn init() -> HandlerImpl {
     debug_println!("Hello, World!");
 
-    let x = sddf::config!(".serial_client_config", config: ClientConfig);
+    // let x = sddf::config!(".serial_client_config", config: ClientConfig);
 
     HandlerImpl
 }
