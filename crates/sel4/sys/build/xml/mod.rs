@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use std::fs::File;
+use std::fs;
 use std::path::Path;
 
 use xmltree::Element;
@@ -17,5 +17,6 @@ mod condition;
 use condition::Condition;
 
 fn parse_xml(path: impl AsRef<Path>) -> Element {
-    Element::parse(File::open(path).unwrap()).unwrap()
+    let contents = fs::read_to_string(path).unwrap();
+    Element::parse(contents.as_bytes()).unwrap()
 }
