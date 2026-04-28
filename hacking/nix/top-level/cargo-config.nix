@@ -82,6 +82,21 @@ let
     env = {
       HOST_CC = getCCExePath build.stdenv;
       LIBCLANG_PATH = build.this.libclangPath;
+      SDDF_INCLUDE_DIRS =
+        let
+          d = sources.sddf;
+        in
+          lib.concatStringsSep ":" [
+            "${d}/include"
+            "${d}/include/microkit"
+          ];
+      LIONSOS_INCLUDE_DIRS =
+        let
+          d = sources.lionsos;
+        in
+          lib.concatStringsSep ":" [
+            "${d}/include"
+          ];
     };
   };
 
