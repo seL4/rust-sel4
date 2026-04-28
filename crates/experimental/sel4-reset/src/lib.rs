@@ -88,6 +88,16 @@ macro_rules! rodata {
         global_asm! {
             r#"
                 .section .rodata
+            "#,
+            #[cfg(target_pointer_width = "64")]
+            r#"
+                    .align 8
+            "#,
+            #[cfg(target_pointer_width = "32")]
+            r#"
+                    .align 4
+            "#,
+            r#"
                 .global {ident}
                 {ident}:
             "#,
