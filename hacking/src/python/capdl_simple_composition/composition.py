@@ -28,7 +28,7 @@ class BaseComposition:
         parser = argparse.ArgumentParser()
         parser.add_argument('--kernel', required=True, type=Path)
         parser.add_argument('--object-sizes', required=True, type=Path)
-        parser.add_argument('--search-dir', required=True, type=Path, action ='append')
+        parser.add_argument('--search-dir', required=True, type=Path, action='append')
         parser.add_argument('-o', required=True, type=Path)
         args = parser.parse_args()
 
