@@ -31,6 +31,7 @@ in rec {
       script = buildPackages.writeShellApplication {
         name = "automate-qemu";
         runtimeInputs = [
+          selfTopLevel.pkgs.build.coreutils # timeout
           selfTopLevel.pkgs.build.this.sel4-test-sentinels-wrapper
         ];
         # -f to allow ctrl-c
