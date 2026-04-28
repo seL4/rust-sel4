@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+#
+# Copyright 2026, Colias Group, LLC
+#
+# SPDX-License-Identifier: BSD-2-Clause
+#
+
+set -eu -o pipefail
+
+here="$(dirname $0)"
+here_abs="$(cd "$here" && echo $PWD)"
+
+export __RUST_ANALYZER_WRAPPER__CARGO_UWRAPPED="$(command -v cargo)"
+
+readarray -t excludes < "$here_abs/default-excludes.txt"
+declare -a args
+for exclude in "${excludes[@]}"; do
+    args+=("--exclude" "$exclude")
+done
+export __RUST_ANALYZER_WRAPPER__WORKSPACE_ARGS="${args[*]}"
+
+log="$here_abs/log.txt"
+rm -f "$log"
+export __RUST_ANALYZER_WRAPPER__LOG="$log"
+
+export PATH="$here_abs/cargo-wrapper:$PATH"
+
+exec rust-analyzer "$@"

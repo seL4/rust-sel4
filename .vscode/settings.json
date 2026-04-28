@@ -5,10 +5,33 @@
 //
 
 {
+    "rust-analyzer.statusBar.showStatusBar": "always",
     "rust-analyzer.statusBar.clickAction": "stopServer",
-    "rust-analyzer.server.path": "rust-analyzer",
-    "rust-analyzer.cargo.targetDir": true, // use subdir
+    "rust-analyzer.server.path": "./hacking/vscode/rust-analyzer-wrapper",
     "rust-analyzer.linkedProjects": [
+        "Cargo.toml",
         "hacking/Cargo.toml",
     ],
+    "rust-analyzer.check.command": "clippy",
+    "rust-analyzer.cargo.targetDir": true,
+    "rust-analyzer.procMacro.enable": false,
+    "rust-analyzer.procMacro.attributes.enable": false,
+    // TODO
+    //   Could be the best solution, as we can't prevent diagnostics from being
+    //   run on non-default workspace members.
+    // "rust-analyzer.diagnostics.enable": false,
+    "rust-analyzer.diagnostics.disabled": [
+        // shows errors for excluded crates and build scripts that don't run
+        "macro-error",
+        // not aware of no_mangle (incorrect-ident-case not working)
+        "incorrect-ident-case", "non_upper_case_globals",
+        // makes inactive code hard to read
+        "inactive-code",
+    ],
+    // TODO not working
+    // "rust-analyzer.diagnostics.warningsAsInfo": [
+    //     "incorrect-ident-case",
+    // ],
+    "rust-analyzer.imports.granularity.group": "module",
+    "rust-analyzer.rustc.source": "discover",
 }

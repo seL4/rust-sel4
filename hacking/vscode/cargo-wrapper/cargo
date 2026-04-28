@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+#
+# Copyright 2026, Colias Group, LLC
+#
+# SPDX-License-Identifier: BSD-2-Clause
+#
+
+set -eu -o pipefail
+
+declare -a args
+declare -i seen_check_command=0
+
+for arg in "$@"; do
+    args+=( "$arg" )
+    case "$arg" in
+        check|clippy|build)
+            (( seen_check_command+=1 ))
+            ;;
+        --workspace)
+            if [[ $seen_check_command -eq 1 ]]; then
+                read -r -a workspace_args <<< "$__RUST_ANALYZER_WRAPPER__WORKSPACE_ARGS"
+                args+=( "${workspace_args[@]}" )
+            fi
+            ;;
+    esac
+done
+
+if [ -n "${__RUST_ANALYZER_WRAPPER__LOG-}" ]; then
+    log="$__RUST_ANALYZER_WRAPPER__LOG"
+    echo "@ cargo $*" >> "$log"
+    echo "  cargo ${args[*]}" >> "$log"
+fi
+
+exec "$__RUST_ANALYZER_WRAPPER__CARGO_UWRAPPED" "${args[@]}"
