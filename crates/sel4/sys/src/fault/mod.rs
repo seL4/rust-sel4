@@ -47,11 +47,23 @@ impl seL4_Fault {
                 #[sel4_cfg(KERNEL_MCS)]
                 seL4_Fault_tag::seL4_Fault_Timeout => {
                     assert!(length == seL4_Timeout_Msg::seL4_Timeout_Length.into());
-                    seL4_Fault_Timeout_Unpacked {
-                        data: f(seL4_Timeout_Msg::seL4_Timeout_Data.into()),
-                        consumed: f(seL4_Timeout_Msg::seL4_Timeout_Consumed.into()),
+                    #[cfg(target_pointer_width = "64")]
+                    {
+                        seL4_Fault_Timeout_Unpacked {
+                            data: f(seL4_Timeout_Msg::seL4_Timeout_Data.into()),
+                            consumed: f(seL4_Timeout_Msg::seL4_Timeout_Consumed.into()),
+                        }
+                        .unsplay()
                     }
-                    .unsplay()
+                    #[cfg(target_pointer_width = "32")]
+                    {
+                        seL4_Fault_Timeout_Unpacked {
+                            data: f(seL4_Timeout_Msg::seL4_Timeout_Data.into()),
+                            consumed_high: f(seL4_Timeout_Msg::seL4_Timeout_Consumed_HighBits.into()),
+                            consumed_low: f(seL4_Timeout_Msg::seL4_Timeout_Consumed_LowBits.into()),
+                        }
+                        .unsplay()
+                    }
                 }
                 _ => {
                     match Self::arch_get_with(label, length, f) {
