@@ -76,7 +76,7 @@ pub struct SlotRegion<T: CapType> {
 
 #[allow(clippy::len_without_is_empty)]
 impl<T: CapType> SlotRegion<T> {
-    pub(crate) const fn from_range(range: Range<usize>) -> Self {
+    pub const fn from_range(range: Range<usize>) -> Self {
         Self {
             range,
             _phantom: PhantomData,
