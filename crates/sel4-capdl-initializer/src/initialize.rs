@@ -4,10 +4,10 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use core::array;
 use core::ops::Range;
 use core::result::Result as CoreResult;
 use core::slice;
+use core::{array, panic};
 
 use rkyv::Archive;
 use rkyv::ops::ArchivedRange;
@@ -89,6 +89,12 @@ impl<'a> Initializer<'a> {
         self.init_asids()?;
         self.init_frames()?;
         self.init_vspaces()?;
+
+        sel4::sel4_cfg_if! {
+            if #[sel4_cfg(all(ARCH_X86_64, IOMMU))] {
+                self.init_iospaces()?;
+            }
+        }
 
         sel4::sel4_cfg_if! {
             if #[sel4_cfg(KERNEL_MCS)] {
@@ -321,6 +327,7 @@ impl<'a> Initializer<'a> {
                         blueprint.physical_size_bits(),
                         object_name_or_default(named_obj)
                     );
+
                     self.ut_cap(*i_ut).untyped_retype(
                         &blueprint,
                         &init_thread_cnode_absolute_cptr(),
@@ -680,6 +687,93 @@ impl<'a> Initializer<'a> {
                         )?;
                     let obj = self.object_as::<object::ArchivedPageTable>(cap.object);
                     self.init_vspace(vspace, level + 1, vaddr, obj)?;
+                }
+            }
+        }
+        Ok(())
+    }
+
+    #[sel4::sel4_cfg(all(ARCH_X86_64, IOMMU))]
+    fn init_iospaces(&mut self) -> Result<()> {
+        const DEVICE_ID_SHIFT: u16 = 3;
+        const PCI_ID_SHIFT: u16 = DEVICE_ID_SHIFT + 5;
+        const DOMAIN_ID_SHIFT: u16 = PCI_ID_SHIFT + 8;
+
+        const VTD_THREE_LEVEL_PT: u64 = 3;
+        const VTD_FOUR_LEVEL_PT: u64 = 4;
+
+        let origin_iospace = init_thread::slot::CNODE
+            .cap()
+            .absolute_cptr(init_thread::slot::IO_SPACE.cap().cptr());
+
+        for (obj_id, iospace) in self.filter_objects::<object::ArchivedIOSpace>() {
+            let slot = self.orig_cslot(obj_id.into());
+            let cptr = cslot_to_absolute_cptr(slot);
+            let badge = ((iospace.pci_bus as u64) << PCI_ID_SHIFT)
+                + ((iospace.pci_device as u64) << DEVICE_ID_SHIFT)
+                + iospace.dev_func as u64
+                + ((u16::from(iospace.domain_id) as u64) << DOMAIN_ID_SHIFT) as u64;
+
+            cptr.mint(&origin_iospace, CapRights::all(), badge)?;
+
+            // The first entry in the IOSpace slot is the root page table
+            let root_pt = self.object_as::<object::ArchivedIOPageTable>(iospace.slots[0].cap.obj());
+
+            let root_level: usize = root_pt.level.unwrap_or(0).into();
+            let iospace_cap = self.orig_cap::<cap_type::IOSpace>(obj_id);
+
+            let level = unsafe { self.bootinfo.ptr().as_ref().unwrap().inner().numIOPTLevels };
+
+            debug!("Initializing iospace, PAGE TABLE LEVEL: {}", level);
+
+            // There is no way to determine the level of io page table before actually running it on hardware
+            // So there is no way to allocate the correct number of slots
+            // Thus we default to assume the four level page table structure
+            match level {
+                // If three level page table is chosen by seL4, we skip mapping the root page table in
+                // Current approach wastes the memory root page table object
+                VTD_THREE_LEVEL_PT => {
+                    self.init_iospace(iospace_cap, root_level, 0, root_pt)?;
+                }
+                VTD_FOUR_LEVEL_PT => {
+                    self.orig_cap::<cap_type::IOPageTable>(iospace.slots[0].cap.obj())
+                        .io_page_table_map(iospace_cap, 0)?;
+                    self.init_iospace(iospace_cap, root_level, 0, root_pt)?;
+                }
+                _ => {
+                    panic!(
+                        "The hardware does not support three level VTD Page Table, but {} level is provided",
+                        level
+                    );
+                }
+            }
+        }
+        Ok(())
+    }
+
+    #[sel4::sel4_cfg(all(ARCH_X86_64, IOMMU))]
+    fn init_iospace(
+        &mut self,
+        iospace: sel4::cap::IOSpace,
+        level: usize,
+        ioaddr: usize,
+        obj: &object::ArchivedIOPageTable,
+    ) -> Result<()> {
+        for (i, entry) in obj.entries() {
+            // Reuse sel4::vspace_levels::step_bits
+            let ioaddr = ioaddr + (usize::from(i) << sel4::vspace_levels::step_bits(level));
+            match entry {
+                IOPageTableEntry::Frame(cap) => {
+                    let frame = self.orig_cap::<cap_type::UnspecifiedPage>(cap.object);
+                    let rights = cap.rights.to_sel4();
+
+                    self.copy(frame)?.frame_map_io(iospace, ioaddr, rights)?;
+                }
+                IOPageTableEntry::IOPageTable(cap) => {
+                    self.orig_cap::<cap_type::IOPageTable>(cap.object)
+                        .io_page_table_map(iospace, ioaddr)?;
+                    let obj = self.object_as::<object::ArchivedIOPageTable>(cap.object);
+                    self.init_iospace(iospace, level + 1, ioaddr, obj)?;
                 }
             }
         }

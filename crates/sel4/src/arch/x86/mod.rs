@@ -60,6 +60,17 @@ pub(crate) mod cap_type_arch {
         }
     }
 
+    sel4_cfg_if! {
+        if #[sel4_cfg(IOMMU)] {
+            declare_cap_type!(IOSpace);
+
+            declare_cap_type_for_object_of_fixed_size!(IOPageTable {
+                ObjectTypeArch,
+                ObjectBlueprintArch
+            });
+        }
+    }
+
     declare_cap_type_for_object_of_fixed_size!(_4k {
         ObjectTypeArch,
         ObjectBlueprintArch
@@ -117,6 +128,13 @@ pub(crate) mod cap_arch {
     declare_cap_alias!(PDPT);
     declare_cap_alias!(PageDirectory);
     declare_cap_alias!(PageTable);
+
+    sel4_cfg_if! {
+        if #[sel4_cfg(IOMMU)] {
+            declare_cap_alias!(IOSpace);
+            declare_cap_alias!(IOPageTable);
+        }
+    }
 
     declare_cap_alias!(IOPortControl);
 }

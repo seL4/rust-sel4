@@ -142,8 +142,8 @@ pub mod slot {
         (IO_PORT_CONTROL, Null, seL4_CapIOPortControl),
         #[sel4_cfg(ARCH_X86_64)]
         (IO_PORT_CONTROL, IOPortControl, seL4_CapIOPortControl),
-        #[cfg(false)] // TODO
-        (IO_SPACE, Null, seL4_CapIOSpace),
+        #[sel4_cfg(all(ARCH_X86_64, IOMMU))] // TODO
+        (IO_SPACE, IOSpace, seL4_CapIOSpace),
         (BOOT_INFO_FRAME, Granule, seL4_CapBootInfoFrame),
         (IPC_BUFFER, Granule, seL4_CapInitThreadIPCBuffer),
         (DOMAIN_SET, DomainSet, seL4_CapDomain),

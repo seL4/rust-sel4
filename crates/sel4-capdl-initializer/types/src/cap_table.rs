@@ -126,3 +126,9 @@ alias_cap_table! {
         notification: Notification = SLOT_NOTIFICATION(0) @optional,
     }
 }
+
+alias_cap_table! {
+    object::IOSpace | object::ArchivedIOPageTable {
+        iopagetable: IOPageTable = SLOT_IOPAGE_TABLE(0),
+    }
+}
