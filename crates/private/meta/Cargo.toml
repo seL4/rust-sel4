@@ -37,7 +37,6 @@ sel4-bcm2835-aux-uart-driver = { path = "../../drivers/bcm2835-aux-uart" }
 sel4-config = { path = "../../sel4/config" }
 sel4-dlmalloc = { path = "../../sel4-dlmalloc" }
 sel4-driver-interfaces = { path = "../../experimental/sel4-driver-interfaces" }
-sel4-elf-header = { path = "../../sel4-elf-header" }
 sel4-immediate-sync-once-cell = { path = "../../sel4-immediate-sync-once-cell" }
 sel4-immutable-cell = { path = "../../sel4-immutable-cell" }
 sel4-initialize-tls = { path = "../../sel4-initialize-tls" }
@@ -48,6 +47,7 @@ sel4-newlib = { path = "../../experimental/sel4-newlib" }
 sel4-one-ref-cell = { path = "../../sel4-one-ref-cell" }
 sel4-panicking = { path = "../../sel4-panicking" }
 sel4-panicking-env = { path = "../../sel4-panicking/env" }
+sel4-phdrs = { path = "../../sel4-phdrs" }
 sel4-pl011-driver = { path = "../../drivers/pl011" }
 sel4-pl031-driver = { path = "../../drivers/pl031" }
 sel4-root-task = { path = "../../sel4-root-task", features = ["full"], optional = true }

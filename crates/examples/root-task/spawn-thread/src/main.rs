@@ -19,8 +19,8 @@ use core::ptr;
 
 use cfg_if::cfg_if;
 
-use sel4_elf_header::{PT_TLS, locate_phdrs};
 use sel4_initialize_tls::{TlsImage, UncheckedTlsImage};
+use sel4_phdrs::{PT_TLS, locate_phdrs};
 use sel4_root_task::{
     Never, abort, panicking::catch_unwind, root_task, set_global_allocator_mutex_notification,
 };

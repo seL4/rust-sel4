@@ -13,7 +13,7 @@ mk {
     inherit (localCrates)
       sel4
       sel4-root-task
-      sel4-elf-header
+      sel4-phdrs
       sel4-stack
     ;
     sel4-initialize-tls = localCrates.sel4-initialize-tls // { features = [ "on-heap" ]; };

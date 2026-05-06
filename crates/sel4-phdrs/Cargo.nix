@@ -7,5 +7,5 @@
 { mk }:
 
 mk {
-  package.name = "sel4-elf-header";
+  package.name = "sel4-phdrs";
 }

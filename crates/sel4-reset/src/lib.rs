@@ -9,8 +9,8 @@
 use core::arch::global_asm;
 use core::slice;
 
-use sel4_elf_header::{PT_SEL4_RESET_REGIONS, locate_phdrs};
 use sel4_panicking_env::abort;
+use sel4_phdrs::{PT_SEL4_RESET_REGIONS, locate_phdrs};
 use sel4_stack::{Stack, StackBottom};
 
 #[cfg(not(any(
@@ -26,12 +26,12 @@ compile_error!("unsupported architecture");
 // - 1 PT_LOAD for region meta
 // - 1 PT_SEL4_RESET_REGIONS for region meta
 // - 4 for writeable PT_LOAD
-sel4_elf_header::add_placeholder_phdrs!(reset1);
-sel4_elf_header::add_placeholder_phdrs!(reset2);
-sel4_elf_header::add_placeholder_phdrs!(reset3);
-sel4_elf_header::add_placeholder_phdrs!(reset4);
-sel4_elf_header::add_placeholder_phdrs!(reset5);
-sel4_elf_header::add_placeholder_phdrs!(reset6);
+sel4_phdrs::add_placeholder_phdrs!(reset1);
+sel4_phdrs::add_placeholder_phdrs!(reset2);
+sel4_phdrs::add_placeholder_phdrs!(reset3);
+sel4_phdrs::add_placeholder_phdrs!(reset4);
+sel4_phdrs::add_placeholder_phdrs!(reset5);
+sel4_phdrs::add_placeholder_phdrs!(reset6);
 
 // // //
 
