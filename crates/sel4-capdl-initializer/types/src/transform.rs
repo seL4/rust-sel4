@@ -100,6 +100,7 @@ impl<D> Spec<D> {
                                         .contains(&obj_id);
                                     f(obj, is_root)?
                                 },
+                                receive_all_untypeds: obj.receive_all_untypeds,
                             }),
                             Object::PageTable(obj) => Object::PageTable(obj.clone()),
                             Object::AsidPool(obj) => Object::AsidPool(obj.clone()),
