@@ -14,7 +14,7 @@ use core::slice;
 
 #[repr(C)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
-pub struct ElfHeader {
+struct ElfHeader {
     pub e_ident: ElfHeaderIdent,
     pub e_type: u16,
     pub e_machine: u16,
@@ -33,7 +33,7 @@ pub struct ElfHeader {
 
 #[repr(C)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
-pub struct ElfHeaderIdent {
+struct ElfHeaderIdent {
     pub magic: [u8; 4],
     pub class: u8,
     pub data: u8,
@@ -43,14 +43,14 @@ pub struct ElfHeaderIdent {
     pub padding: [u8; 7],
 }
 
-pub const ELFMAG: [u8; 4] = [0x7f, b'E', b'L', b'F'];
+const ELFMAG: [u8; 4] = [0x7f, b'E', b'L', b'F'];
 
 impl ElfHeader {
-    pub fn is_magic_valid(&self) -> bool {
+    fn is_magic_valid(&self) -> bool {
         self.e_ident.magic == ELFMAG
     }
 
-    pub fn check_magic(&self) -> Result<(), InvalidMagic> {
+    fn check_magic(&self) -> Result<(), InvalidMagic> {
         if self.is_magic_valid() {
             Ok(())
         } else {
@@ -60,7 +60,7 @@ impl ElfHeader {
         }
     }
 
-    pub fn locate_phdrs(&'static self) -> &'static [ProgramHeader] {
+    fn locate_phdrs(&'static self) -> &'static [ProgramHeader] {
         unsafe {
             let ptr = ptr::from_ref(self)
                 .cast::<u8>()
