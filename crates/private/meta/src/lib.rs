@@ -96,7 +96,7 @@ definitely! {
     sel4_abstract_allocator
     sel4_dlmalloc
     sel4_driver_interfaces
-    sel4_elf_header
+    sel4_phdrs
     sel4_immediate_sync_once_cell
     sel4_immutable_cell
     sel4_initialize_tls

@@ -28,7 +28,7 @@ mk {
       sel4-abstract-allocator
       sel4-dlmalloc
       sel4-driver-interfaces
-      sel4-elf-header
+      sel4-phdrs
       sel4-immediate-sync-once-cell
       sel4-immutable-cell
       sel4-initialize-tls
