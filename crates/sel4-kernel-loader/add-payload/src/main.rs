@@ -8,21 +8,25 @@ use std::fs::{self, File};
 
 use anyhow::Result;
 use num::{Integer, PrimInt, traits::WrappingSub};
+use object::read::elf::ElfFile;
 use object::{
     Endianness,
     elf::{FileHeader32, FileHeader64},
     read::elf::FileHeader,
 };
+use rkyv::util::AlignedVec;
 use serde::Serialize;
 
 use sel4_config_types::Configuration;
-use sel4_patch_elf::FileHeaderExt;
+use sel4_patch_elf::{FileHeaderExt, Patching};
+use sel4_phdrs_constants::PT_SEL4_KERNEL_LOADER_PAYLOAD;
 
 mod args;
-mod render_elf;
 mod serialize_payload;
 
 use args::Args;
+
+type ArchiveAlignedVec = AlignedVec;
 
 fn main() -> Result<()> {
     let args = Args::parse()?;
@@ -58,14 +62,25 @@ where
 {
     let loader_bytes = fs::read(&args.loader_path)?;
 
-    let serialized_payload = serialize_payload::serialize_payload::<T>(
+    let payload = serialize_payload::serialize_payload::<T>(
         &args.kernel_path,
         &args.app_path,
         &args.dtb_path,
         &args.platform_info_path,
     );
 
-    let loader_with_payload_bytes = render_elf::render_elf::<T>(&loader_bytes, &serialized_payload);
+    let payload_data: ArchiveAlignedVec = payload.to_bytes().unwrap();
+
+    let loader_with_payload_bytes = {
+        let orig_elf = ElfFile::<T>::parse(&loader_bytes).unwrap();
+        let mut patching = Patching::new(&orig_elf);
+        patching.add_data_segment(
+            PT_SEL4_KERNEL_LOADER_PAYLOAD,
+            ArchiveAlignedVec::ALIGNMENT.try_into().unwrap(),
+            &payload_data,
+        );
+        patching.finalize()
+    };
 
     let out_file_path = &args.out_file_path;
 

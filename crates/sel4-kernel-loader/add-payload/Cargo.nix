@@ -13,12 +13,11 @@ mk {
       anyhow
       serde_json
       serde_yaml
-      heapless
       num
       clap
+      object
+      rkyv
     ;
-    object = { version = versions.object; features = [ "all" ]; };
-    postcard = postcardWith [ "alloc" ];
     serde = serdeWith [ "alloc" "derive" ];
     inherit (localCrates)
       sel4-patch-elf

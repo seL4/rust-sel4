@@ -5,7 +5,7 @@
 //
 
 use sel4_config::sel4_cfg_if;
-use sel4_kernel_loader_payload_types::PayloadInfo;
+use sel4_kernel_loader_payload_types::ArchivedPayloadInfo;
 
 sel4_cfg_if! {
     if #[sel4_cfg(ARCH_ARM)] {
@@ -34,7 +34,7 @@ pub(crate) trait Arch {
 
     fn enter_kernel(
         core_id: usize,
-        payload_info: &PayloadInfo<usize>,
+        payload_info: &ArchivedPayloadInfo,
         per_core: Self::PerCore,
     ) -> !;
 }

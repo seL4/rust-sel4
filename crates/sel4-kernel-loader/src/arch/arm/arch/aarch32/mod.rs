@@ -7,7 +7,7 @@
 use core::arch::asm;
 use core::mem;
 
-use sel4_kernel_loader_payload_types::PayloadInfo;
+use sel4_kernel_loader_payload_types::{ArchivedPayloadInfo, ArchivedWord};
 
 use crate::{arch::Arch, main, secondary_main};
 
@@ -44,14 +44,18 @@ impl Arch for ArchImpl {
 
     fn enter_kernel(
         _core_id: usize,
-        payload_info: &PayloadInfo<usize>,
+        payload_info: &ArchivedPayloadInfo,
         _per_core: Self::PerCore,
     ) -> ! {
-        let kernel_entry =
-            unsafe { mem::transmute::<usize, KernelEntry>(payload_info.kernel_image.virt_entry) };
+        let kernel_entry = unsafe {
+            mem::transmute::<usize, KernelEntry>(payload_info.kernel_image.virt_entry.to_usize())
+        };
 
-        let (dtb_addr_p, dtb_size) = match &payload_info.fdt_phys_addr_range {
-            Some(region) => (region.start, region.len()),
+        let (dtb_addr_p, dtb_size) = match payload_info.fdt_phys_addr_range.as_ref() {
+            Some(region) => {
+                let region = ArchivedWord::to_usize_range(region);
+                (region.start, region.len())
+            }
             None => (0, 0),
         };
 
@@ -60,10 +64,10 @@ impl Arch for ArchImpl {
         }
 
         (kernel_entry)(
-            payload_info.user_image.phys_addr_range.start,
-            payload_info.user_image.phys_addr_range.end,
-            0_usize.wrapping_sub(payload_info.user_image.phys_to_virt_offset) as isize,
-            payload_info.user_image.virt_entry,
+            payload_info.user_image.phys_addr_range.start.to_usize(),
+            payload_info.user_image.phys_addr_range.end.to_usize(),
+            0_usize.wrapping_sub(payload_info.user_image.phys_to_virt_offset.to_usize()) as isize,
+            payload_info.user_image.virt_entry.to_usize(),
             dtb_addr_p,
             dtb_size,
         )

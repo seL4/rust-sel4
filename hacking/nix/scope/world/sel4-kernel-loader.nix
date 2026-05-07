@@ -41,7 +41,6 @@ let
     inherit targetTriple;
     inherit profile;
     extraManifest = profiles;
-    alloc = false;
   };
 
 in
