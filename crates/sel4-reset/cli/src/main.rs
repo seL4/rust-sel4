@@ -15,11 +15,8 @@ use object::read::elf::{ElfFile, FileHeader, ProgramHeader};
 use object::{File, Object, ObjectSection, Pod, pod};
 use rangemap::RangeSet;
 
-use sel4_patch_elf::{FileHeaderExt, GenericProgramHeader, Patching, ProgramHeaderExt};
+use sel4_patch_elf::{FileHeaderExt, GenericProgramHeader, Patching};
 use sel4_phdrs_constants::PT_SEL4_RESET_REGIONS;
-
-// HACK
-const PAGE_SIZE: u64 = 4096;
 
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
@@ -56,7 +53,7 @@ where
 {
     let mut patching = Patching::new(orig_elf);
     add_regions(&mut patching)?;
-    Ok(patching.finalize(PAGE_SIZE))
+    Ok(patching.finalize())
 }
 
 struct RegionMeta<T: FileHeader> {
@@ -112,16 +109,20 @@ fn add_regions<'a, T: FileHeader<Word: NumCast> + FileHeaderExt>(
             let p_memsz = phdr.p_memsz(endian).into();
             let p_filesz = phdr.p_filesz(endian).into();
             let p_align = phdr.p_align(endian).into();
-            let ro_phdr = this.add_segment_raw(GenericProgramHeader {
-                p_type: PT_LOAD,
-                p_flags: PF_R,
-                p_offset,
-                p_vaddr: 0,
-                p_paddr: 0,
-                p_filesz,
-                p_memsz: p_filesz,
-                p_align,
-            });
+            let ro_vaddr = this.next_aligned_vaddr(p_align, p_offset);
+            let ro_phdr = this.add_phdr(
+                GenericProgramHeader {
+                    p_type: PT_LOAD,
+                    p_flags: PF_R,
+                    p_offset,
+                    p_vaddr: ro_vaddr,
+                    p_paddr: ro_vaddr,
+                    p_filesz,
+                    p_memsz: p_filesz,
+                    p_align,
+                }
+                .to_concrete(endian),
+            );
             let ro_p_vaddr = ro_phdr.p_vaddr(endian).into();
             let ro_p_filesz = ro_phdr.p_filesz(endian).into();
             for ephermal_region in
@@ -148,18 +149,10 @@ fn add_regions<'a, T: FileHeader<Word: NumCast> + FileHeaderExt>(
     }
 
     let regions_meta_data = RegionMeta::pack_to_vec(&regions);
-    let mut regions_meta_info_phdr = *this.add_segment(
-        GenericProgramHeader {
-            p_type: PT_LOAD,
-            p_flags: PF_R,
-            p_memsz: regions_meta_data.len().try_into().unwrap(),
-            p_align: PAGE_SIZE,
-            ..Default::default()
-        },
+    this.add_data_segment(
+        PT_SEL4_RESET_REGIONS,
         align_of::<RegionMeta<T>>().try_into().unwrap(),
         &regions_meta_data,
     );
-    regions_meta_info_phdr.set_p_type(endian, PT_SEL4_RESET_REGIONS);
-    this.add_phdr(regions_meta_info_phdr);
     Ok(())
 }
