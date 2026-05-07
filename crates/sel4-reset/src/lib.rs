@@ -52,8 +52,7 @@ unsafe fn get_regions() -> &'static [RegionMeta] {
     unsafe {
         let phdr = locate_phdrs()
             .unwrap_or_else(|err| abort!("{err}"))
-            .iter()
-            .find(|phdr| phdr.p_type == PT_SEL4_RESET_REGIONS)
+            .find_by_type(PT_SEL4_RESET_REGIONS)
             .unwrap_or_else(|| abort!("missing PT_SEL4_RESET_REGIONS program header"));
         slice::from_raw_parts(
             phdr.p_vaddr as *const _,

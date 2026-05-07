@@ -29,12 +29,9 @@ unsafe impl EhFrameFinder for EhFrameFinderImpl {
             None
         })?;
 
-        let eh_frame_hdr = phdrs.iter().find_map(|phdr| {
-            if phdr.p_type == PT_GNU_EH_FRAME {
-                return Some(phdr.p_vaddr);
-            }
-            None
-        })?;
+        let eh_frame_hdr = phdrs
+            .find_by_type(PT_GNU_EH_FRAME)
+            .map(|phdr| phdr.p_vaddr)?;
 
         Some(FrameInfo {
             text_base: Some(text_base),
