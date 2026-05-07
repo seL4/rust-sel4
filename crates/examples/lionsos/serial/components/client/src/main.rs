@@ -7,7 +7,6 @@
 #![no_std]
 #![no_main]
 
-use sddf::serial::*;
 use sel4_microkit::{Handler, Infallible, debug_println, protection_domain};
 
 #[protection_domain]
