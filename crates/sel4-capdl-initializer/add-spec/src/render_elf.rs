@@ -9,9 +9,7 @@ use object::elf::PF_R;
 use object::read::elf::FileHeader;
 
 use sel4_patch_elf::{FileHeaderExt, GenericProgramHeader, Patching};
-
-const PT_SEL4_CAPDL_SPEC: u32 = 0x64c3_4002;
-const PT_SEL4_CAPDL_FRAME_DATA: u32 = 0x64c3_4003;
+use sel4_phdrs_constants::{PT_SEL4_CAPDL_FRAME_DATA, PT_SEL4_CAPDL_SPEC};
 
 // HACK
 const PAGE_SIZE: u64 = 4096;

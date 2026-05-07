@@ -23,3 +23,4 @@ num = "0.4.3"
 object = "0.38.1"
 rangemap = "1.7.1"
 sel4-patch-elf = { path = "../../sel4-patch-elf" }
+sel4-phdrs-constants = { path = "../../sel4-phdrs/constants" }

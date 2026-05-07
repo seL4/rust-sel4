@@ -4,8 +4,13 @@
 # SPDX-License-Identifier: BSD-2-Clause
 #
 
-{ mk }:
+{ mk, localCrates }:
 
 mk {
   package.name = "sel4-phdrs";
+  dependencies = {
+    inherit (localCrates)
+      sel4-phdrs-constants
+    ;
+  };
 }

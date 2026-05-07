@@ -19,6 +19,7 @@ mk {
     ;
     inherit (localCrates)
       sel4-patch-elf
+      sel4-phdrs-constants
     ;
     sel4-capdl-initializer-types = localCrates.sel4-capdl-initializer-types // {
       features = [

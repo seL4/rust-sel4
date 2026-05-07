@@ -2463,6 +2463,7 @@ dependencies = [
  "num",
  "object",
  "sel4-patch-elf",
+ "sel4-phdrs-constants",
 ]
 
 [[package]]
@@ -2538,6 +2539,7 @@ dependencies = [
  "rkyv",
  "sel4-capdl-initializer-types",
  "sel4-patch-elf",
+ "sel4-phdrs-constants",
  "serde_json",
 ]
 
@@ -2700,6 +2702,7 @@ dependencies = [
  "sel4-config-types",
  "sel4-kernel-loader-payload-types",
  "sel4-patch-elf",
+ "sel4-phdrs-constants",
  "serde",
  "serde_json",
  "serde_yaml",
@@ -2881,6 +2884,13 @@ dependencies = [
 [[package]]
 name = "sel4-phdrs"
 version = "0.1.0"
+dependencies = [
+ "sel4-phdrs-constants",
+]
+
+[[package]]
+name = "sel4-phdrs-constants"
+version = "0.1.0"
 
 [[package]]
 name = "sel4-phdrs-patched"
@@ -2945,6 +2955,7 @@ dependencies = [
  "object",
  "rangemap",
  "sel4-patch-elf",
+ "sel4-phdrs-constants",
 ]
 
 [[package]]

@@ -16,8 +16,7 @@ use object::{File, Object, ObjectSection, Pod, pod};
 use rangemap::RangeSet;
 
 use sel4_patch_elf::{FileHeaderExt, GenericProgramHeader, Patching, ProgramHeaderExt};
-
-pub const PT_SEL4_RESET_REGIONS: u32 = 0x64c3_4001;
+use sel4_phdrs_constants::PT_SEL4_RESET_REGIONS;
 
 // HACK
 const PAGE_SIZE: u64 = 4096;

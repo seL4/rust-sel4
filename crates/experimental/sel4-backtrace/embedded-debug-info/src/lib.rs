@@ -7,11 +7,9 @@
 #![no_std]
 
 use sel4_backtrace_addr2line_context_helper::{Context, Error, new_context};
-use sel4_phdrs::locate_phdrs;
+use sel4_phdrs::{PT_SEL4_EMBEDDED_DEBUG_INFO, locate_phdrs};
 
 use sel4_phdrs_patched as _;
-
-const PT_SEL4_EMBEDDED_DEBUG_INFO: u32 = 0x64c3_4005;
 
 pub fn get_context() -> Result<Context, Error> {
     let embedded_debug_info = unsafe {
