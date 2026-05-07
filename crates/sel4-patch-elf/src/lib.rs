@@ -73,15 +73,11 @@ impl<'a, T: FileHeaderExt> Patching<'a, T> {
 
     fn infer_page_size(&self) -> Option<u64> {
         let endian = self.endian();
-        let f = || {
-            self.phdrs
-                .iter()
-                .filter(|phdr| phdr.p_type(endian) == PT_LOAD)
-                .map(|phdr| phdr.p_align(endian).into())
-        };
-        let min = f().min();
-        let max = f().max();
-        if min == max { min } else { None }
+        self.phdrs
+            .iter()
+            .filter(|phdr| phdr.p_type(endian) == PT_LOAD)
+            .map(|phdr| phdr.p_align(endian).into())
+            .min()
     }
 
     fn patch_symbol(&mut self, symbol_name: &str, value: &[u8]) {
