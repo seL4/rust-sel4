@@ -2866,6 +2866,13 @@ name = "sel4-panicking-env"
 version = "0.1.0"
 
 [[package]]
+name = "sel4-patch-elf"
+version = "0.1.0"
+dependencies = [
+ "object",
+]
+
+[[package]]
 name = "sel4-phdrs"
 version = "0.1.0"
 
@@ -2931,6 +2938,7 @@ dependencies = [
  "num",
  "object",
  "rangemap",
+ "sel4-patch-elf",
 ]
 
 [[package]]
