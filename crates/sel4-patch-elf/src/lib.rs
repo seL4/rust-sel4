@@ -56,68 +56,47 @@ impl<'a, T: FileHeaderExt> Patching<'a, T> {
         Some(start..end)
     }
 
-    pub fn next_aligned_vaddr(&self, align: u64) -> u64 {
+    pub fn next_aligned_vaddr(&self, p_align: u64, p_offset: u64) -> u64 {
         self.footprint()
             .map(|footprint| footprint.end)
             .unwrap_or(0)
-            .next_multiple_of(align.max(1))
+            .next_multiple_of(p_align.max(1))
+            + p_offset % p_align.max(1)
     }
 
-    pub fn align_data_cursor(&mut self, align: u64) {
+    fn align_data_cursor(&mut self, align: u64) {
         self.data.resize(
             self.data.len().next_multiple_of(align.try_into().unwrap()),
             0,
         );
     }
 
-    pub fn add_segment_with_info_phdr(
-        &mut self,
-        mut phdr: GenericProgramHeader,
-        data_align: u64,
-        data: &[u8],
-        p_type: u32,
-    ) {
-        phdr.p_type = PT_LOAD;
-        let mut info_phdr = *self.add_segment(phdr, data_align, data);
-        info_phdr.set_p_type(self.endian(), p_type);
-        self.add_phdr(info_phdr);
-    }
-
-    pub fn add_segment(
-        &mut self,
-        mut phdr: GenericProgramHeader,
-        data_align: u64,
-        data: &[u8],
-    ) -> &T::ProgramHeader {
-        assert!(data_align <= phdr.p_align);
-        self.align_data_cursor(data_align);
-        phdr.p_offset = self.data.len().try_into().unwrap();
-        phdr.p_filesz = data.len().try_into().unwrap();
-        self.data.extend_from_slice(data);
-        self.add_segment_raw(phdr)
-    }
-
-    pub fn add_segment_raw(&mut self, mut phdr: GenericProgramHeader) -> &T::ProgramHeader {
-        let p_vaddr = self.next_aligned_vaddr(phdr.p_align) + phdr.p_offset % phdr.p_align.max(1);
-        phdr.p_vaddr = p_vaddr;
-        phdr.p_paddr = p_vaddr;
-        self.add_phdr(T::ProgramHeader::from_generic(self.endian(), &phdr))
+    fn infer_page_size(&self) -> Option<u64> {
+        let endian = self.endian();
+        let f = || {
+            self.phdrs
+                .iter()
+                .filter(|phdr| phdr.p_type(endian) == PT_LOAD)
+                .map(|phdr| phdr.p_align(endian).into())
+        };
+        let min = f().min();
+        let max = f().max();
+        if min == max { min } else { None }
     }
 
     fn patch_symbol(&mut self, symbol_name: &str, value: &[u8]) {
+        let val_len = u64::try_from(value.len()).unwrap();
         let symbol = self.orig_elf.symbol_by_name(symbol_name).unwrap();
-        let symbol_vaddr = symbol.address();
-        assert_eq!(usize::try_from(symbol.size()).unwrap(), value.len());
+        assert_eq!(symbol.size(), val_len);
         let offset_in_file = self
             .orig_elf
             .segments()
             .find_map(|segment| {
-                let seg_mem_start = segment.address();
-                let seg_mem_end = seg_mem_start + segment.size();
-                if (seg_mem_start..seg_mem_end).contains(&symbol_vaddr) {
-                    let offset_in_seg = symbol_vaddr - seg_mem_start;
+                let seg_end_addr = segment.address() + segment.size();
+                if (segment.address()..seg_end_addr).contains(&symbol.address()) {
+                    let offset_in_seg = symbol.address() - segment.address();
                     let (seg_file_start, seg_file_size) = segment.file_range();
-                    assert!(offset_in_seg + u64::try_from(value.len()).unwrap() <= seg_file_size);
+                    assert!(offset_in_seg + val_len <= seg_file_size);
                     Some(seg_file_start + offset_in_seg)
                 } else {
                     None
@@ -127,33 +106,43 @@ impl<'a, T: FileHeaderExt> Patching<'a, T> {
         self.data[usize::try_from(offset_in_file).unwrap()..][..value.len()].copy_from_slice(value);
     }
 
-    pub fn finalize(mut self, phdrs_load_segment_p_align: u64) -> Vec<u8> {
+    fn prepare_load_phdr(&mut self, data_align: u64, data_size: usize) -> GenericProgramHeader {
+        let p_align = self.infer_page_size().unwrap();
+        assert!(data_align <= p_align);
+        self.align_data_cursor(data_align);
+        let p_offset = self.data.len().try_into().unwrap();
+        let p_filesz = data_size.try_into().unwrap();
+        let p_vaddr = self.next_aligned_vaddr(p_align, p_offset);
+        GenericProgramHeader {
+            p_type: PT_LOAD,
+            p_flags: PF_R,
+            p_offset,
+            p_vaddr,
+            p_paddr: p_vaddr,
+            p_filesz,
+            p_memsz: p_filesz,
+            p_align,
+        }
+    }
+
+    pub fn add_data_segment(&mut self, p_type: u32, data_align: u64, data: &[u8]) {
         let endian = self.endian();
+        let phdr = self.prepare_load_phdr(data_align, data.len());
+        self.data.extend_from_slice(data);
+        self.add_phdr(phdr.to_concrete(endian));
+        self.add_phdr(GenericProgramHeader { p_type, ..phdr }.to_concrete(endian));
+    }
+
+    pub fn finalize(mut self) -> Vec<u8> {
+        let endian = self.endian();
+
         let phdrs_load_phdr = {
             let data_align = align_of::<T::Word>().try_into().unwrap();
             let eventual_n = self.phdrs.len() + 1;
             let data_size = eventual_n * size_of::<T::ProgramHeader>();
-            let p_align = phdrs_load_segment_p_align;
-            assert!(data_align <= p_align);
-            self.align_data_cursor(data_align);
-            let p_offset = self.data.len().try_into().unwrap();
-            let p_filesz = data_size.try_into().unwrap();
-            let p_vaddr = self.next_aligned_vaddr(p_align) + p_offset % p_align.max(1);
-            T::ProgramHeader::from_generic(
-                endian,
-                &GenericProgramHeader {
-                    p_type: PT_LOAD,
-                    p_flags: PF_R,
-                    p_offset,
-                    p_vaddr,
-                    p_paddr: p_vaddr,
-                    p_filesz,
-                    p_memsz: p_filesz,
-                    p_align,
-                },
-            )
+            self.prepare_load_phdr(data_align, data_size)
+                .to_concrete::<T::ProgramHeader>(endian)
         };
-        self.phdrs.push(phdrs_load_phdr);
         {
             let mut phdrs_phdr_phdr = phdrs_load_phdr;
             phdrs_phdr_phdr.set_p_type(endian, PT_PHDR);
@@ -163,11 +152,14 @@ impl<'a, T: FileHeaderExt> Patching<'a, T> {
                 }
             }
         }
+        self.phdrs.push(phdrs_load_phdr);
         self.data
             .extend_from_slice(pod::bytes_of_slice(&self.phdrs));
+
         let (ehdr, _) = pod::from_bytes_mut::<T>(&mut self.data).unwrap();
         ehdr.set_e_phoff(endian, phdrs_load_phdr.p_offset(endian));
         ehdr.set_e_phnum(endian, self.phdrs.len().try_into().unwrap());
+
         self.patch_symbol(
             "sel4_phdrs_patched__vaddr",
             &phdrs_load_phdr.p_vaddr(endian).write_bytes(endian),
@@ -176,6 +168,7 @@ impl<'a, T: FileHeaderExt> Patching<'a, T> {
             "sel4_phdrs_patched__phnum",
             &endian.write_u16_bytes(u16::try_from(self.phdrs.len()).unwrap()),
         );
+
         self.data
     }
 }
@@ -190,6 +183,12 @@ pub struct GenericProgramHeader {
     pub p_filesz: u64,
     pub p_memsz: u64,
     pub p_align: u64,
+}
+
+impl GenericProgramHeader {
+    pub fn to_concrete<T: ProgramHeaderExt>(&self, endian: T::Endian) -> T {
+        T::from_generic(endian, self)
+    }
 }
 
 pub trait FileHeaderExt: FileHeader<Word: WordExt, ProgramHeader: ProgramHeaderExt> {

@@ -9,13 +9,10 @@ use std::io;
 
 use clap::{Arg, Command};
 use num::NumCast;
+use object::read::elf::{ElfFile, FileHeader};
 
-use object::elf::PF_R;
-use sel4_patch_elf::{FileHeaderExt, GenericProgramHeader, Patching};
+use sel4_patch_elf::{FileHeaderExt, Patching};
 use sel4_phdrs_constants::PT_SEL4_EMBEDDED_DEBUG_INFO;
-
-// HACK
-const PAGE_SIZE: u64 = 4096;
 
 fn main() -> Result<(), io::Error> {
     let matches = Command::new("")
@@ -60,23 +57,11 @@ fn main() -> Result<(), io::Error> {
     fs::write(out_elf_path, out_elf_buf)
 }
 
-fn with_bit_width<T: object::read::elf::FileHeader<Word: NumCast> + FileHeaderExt>(
-    image_elf: &object::read::elf::ElfFile<T>,
+fn with_bit_width<T: FileHeader<Word: NumCast> + FileHeaderExt>(
+    image_elf: &ElfFile<T>,
     content: &[u8],
 ) -> Vec<u8> {
     let mut patching = Patching::new(image_elf);
-
-    patching.add_segment_with_info_phdr(
-        GenericProgramHeader {
-            p_flags: PF_R,
-            p_memsz: content.len().try_into().unwrap(),
-            p_align: PAGE_SIZE,
-            ..Default::default()
-        },
-        1,
-        content,
-        PT_SEL4_EMBEDDED_DEBUG_INFO,
-    );
-
-    patching.finalize(PAGE_SIZE)
+    patching.add_data_segment(PT_SEL4_EMBEDDED_DEBUG_INFO, 1, content);
+    patching.finalize()
 }
