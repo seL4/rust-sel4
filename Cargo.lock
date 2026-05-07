@@ -3177,15 +3177,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "sel4-synthetic-elf"
-version = "0.1.0"
-dependencies = [
- "num",
- "object",
- "thiserror",
-]
-
-[[package]]
 name = "sel4-sys"
 version = "0.1.0"
 dependencies = [
