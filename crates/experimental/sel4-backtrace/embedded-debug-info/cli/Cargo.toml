@@ -19,4 +19,5 @@ license = "BSD-2-Clause"
 [dependencies]
 clap = "4.5.50"
 num = "0.4.3"
-sel4-synthetic-elf = { path = "../../../../sel4-synthetic-elf" }
+object = "0.38.1"
+sel4-patch-elf = { path = "../../../../sel4-patch-elf" }
