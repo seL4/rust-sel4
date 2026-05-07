@@ -11,16 +11,16 @@ use sel4_phdrs::{PT_SEL4_KERNEL_LOADER_PAYLOAD, locate_phdrs};
 
 use sel4_phdrs_patched as _;
 
-pub(crate) fn get_payload() -> (Payload<usize>, &'static [u8]) {
-    let blob = unsafe {
-        locate_phdrs()
-            .unwrap()
-            .find_by_type(PT_SEL4_KERNEL_LOADER_PAYLOAD)
-            .unwrap()
-            .bytes()
-    };
-    let (payload, source) = postcard::take_from_bytes(blob).unwrap();
-    (payload, source)
+pub(crate) fn get_payload() -> &'static ArchivedPayload {
+    unsafe {
+        Payload::access_unchecked(
+            locate_phdrs()
+                .unwrap()
+                .find_by_type(PT_SEL4_KERNEL_LOADER_PAYLOAD)
+                .unwrap()
+                .bytes(),
+        )
+    }
 }
 
 pub(crate) fn get_user_image_bounds() -> Range<usize> {

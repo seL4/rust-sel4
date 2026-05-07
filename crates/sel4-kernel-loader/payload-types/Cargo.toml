@@ -21,3 +21,8 @@ heapless = { version = "0.9.1", features = ["serde"] }
 num-traits = { version = "0.2.19", default-features = false }
 sel4-platform-info-types = { path = "../../sel4-platform-info/types" }
 serde = { version = "1.0.228", default-features = false, features = ["derive"], optional = true }
+
+[dependencies.rkyv]
+version = "0.8.12"
+default-features = false
+features = ["alloc", "bytecheck", "pointer_width_32"]

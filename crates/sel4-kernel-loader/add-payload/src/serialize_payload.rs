@@ -8,10 +8,10 @@ use std::fs::{self, File};
 use std::ops::Range;
 use std::path::Path;
 
-use heapless::Vec as HeaplessVec;
 use num::{CheckedAdd, CheckedSub, Integer, NumCast, One, PrimInt, traits::WrappingSub};
+use object::ObjectSegment as _;
 use object::{
-    Endianness, Object, ReadCache, ReadRef,
+    Object, ReadCache, ReadRef,
     elf::PT_LOAD,
     read::elf::{ElfFile, FileHeader, ProgramHeader},
 };
@@ -30,21 +30,19 @@ struct PlatformInfoForBuildSystem {
     devices: Ranges,
 }
 
-pub fn serialize_payload<
-    T: FileHeader<Endian = Endianness, Word: PrimInt + WrappingSub + Integer + Serialize>,
->(
+pub fn serialize_payload<T: FileHeader<Word: PrimInt + WrappingSub + Integer + Serialize>>(
     kernel_path: impl AsRef<Path>,
     app_path: impl AsRef<Path>,
     dtb_path: impl AsRef<Path>,
     platform_info_path: impl AsRef<Path>,
-) -> Vec<u8> {
+) -> Payload {
     let platform_info: PlatformInfoForBuildSystem =
         serde_yaml::from_reader(fs::File::open(&platform_info_path).unwrap()).unwrap();
 
-    let mut builder = Builder::<T>::new();
+    let mut builder = Builder::new();
 
     let kernel_image = with_elf(&kernel_path, |elf| {
-        builder.add_image(elf, elf_phys_to_vaddr_offset(elf))
+        builder.add_image::<T, _>(elf, elf_phys_to_vaddr_offset(elf))
     });
 
     let user_image = with_elf(&app_path, |elf| {
@@ -59,115 +57,94 @@ pub fn serialize_payload<
             .checked_sub(&footprint_size)
             .unwrap();
         let phys_to_virt_offset = phys_to_virt_offset_for(phys_start, virt_footprint.start);
-        builder.add_image(elf, phys_to_virt_offset)
+        builder.add_image::<T, _>(elf, phys_to_virt_offset)
     });
 
     let fdt_content = fs::read(dtb_path).unwrap();
-    let fdt_paddr = user_image.phys_addr_range.start
-        - <T::Word as NumCast>::from(fdt_content.len())
+    let fdt_paddr = user_image.phys_addr_range.start.0
+        - u64::try_from(fdt_content.len())
             .unwrap()
-            .next_multiple_of(&(T::Word::one() << PAGE_SIZE_BITS));
+            .next_multiple_of(1 << PAGE_SIZE_BITS);
     let fdt_phys_addr_range = builder.add_region(fdt_paddr, fdt_content);
 
-    let payload = Payload {
+    Payload {
         info: PayloadInfo {
             kernel_image,
             user_image,
-            fdt_phys_addr_range: Some(fdt_phys_addr_range),
+            fdt_phys_addr_range: Some(Word::from_u64_range(&fdt_phys_addr_range)),
         },
         data: builder.regions,
-    };
-
-    let mut blob = postcard::to_allocvec(&payload).unwrap();
-    blob.extend(&builder.actual_content);
-    blob
+    }
 }
 
 //
 
-struct Builder<T: FileHeader> {
-    regions: HeaplessVec<Region<T::Word, IndirectRegionContent<T::Word>>, DEFAULT_MAX_NUM_REGIONS>,
-    actual_content: Vec<u8>,
+struct Builder {
+    regions: Vec<Region>,
 }
 
-impl<T: FileHeader<Endian = Endianness, Word: PrimInt + WrappingSub + Integer>> Builder<T> {
+impl Builder {
     fn new() -> Self {
-        Self {
-            regions: HeaplessVec::new(),
-            actual_content: vec![],
-        }
+        Self { regions: vec![] }
     }
 
-    fn add_segments<'a, R: ReadRef<'a>>(
+    fn add_segments<'a, T: FileHeader<Word: PrimInt + WrappingSub>, R: ReadRef<'a>>(
         &mut self,
         elf: &ElfFile<'a, T, R>,
         phys_to_virt_offset: T::Word,
     ) {
         let endian = elf.endian();
-        for phdr in elf
-            .elf_program_headers()
-            .iter()
-            .filter(|phdr| phdr.p_type(endian) == PT_LOAD)
-        {
-            let offset = phdr.p_offset(endian);
-            let vaddr = phdr.p_vaddr(endian);
-            let paddr = virt_to_phys(vaddr, phys_to_virt_offset);
-            let filesz = phdr.p_filesz(endian);
-            let memsz = phdr.p_memsz(endian);
-            let content = elf
-                .data()
-                .read_bytes_at(offset.into(), filesz.into())
-                .unwrap();
-            self.add_region(paddr, content.to_vec());
-            if memsz > filesz {
-                self.regions
-                    .push(Region {
-                        phys_addr_range: paddr.checked_add(&filesz).unwrap()
-                            ..paddr.checked_add(&memsz).unwrap(),
+        for seg in elf.segments() {
+            let phdr = seg.elf_program_header();
+            if phdr.p_type(endian) == PT_LOAD {
+                let vaddr = phdr.p_vaddr(endian);
+                let paddr = virt_to_phys(vaddr, phys_to_virt_offset);
+                let filesz = phdr.p_filesz(endian);
+                let memsz = phdr.p_memsz(endian);
+                let data = seg.data().unwrap();
+                self.add_region(paddr.into(), data.to_vec());
+                if memsz > filesz {
+                    self.regions.push(Region {
+                        phys_addr_range: Word::from_u64_range(
+                            &(paddr.checked_add(&filesz).unwrap()
+                                ..paddr.checked_add(&memsz).unwrap()),
+                        ),
                         content: None,
-                    })
-                    .ok()
-                    .unwrap();
+                    });
+                }
             }
         }
     }
 
-    fn add_region(&mut self, phys_addr_start: T::Word, content: Vec<u8>) -> Range<T::Word> {
+    fn add_region(&mut self, phys_addr_start: u64, content: Vec<u8>) -> Range<u64> {
         let phys_addr_range =
-            phys_addr_start..(phys_addr_start + NumCast::from(content.len()).unwrap());
-        self.regions
-            .push(Region {
-                phys_addr_range: phys_addr_range.clone(),
-                content: Some(IndirectRegionContent {
-                    content_range: {
-                        let start = self.actual_content.len();
-                        let end = start + content.len();
-                        NumCast::from(start).unwrap()..NumCast::from(end).unwrap()
-                    },
-                }),
-            })
-            .ok()
-            .unwrap();
-        self.actual_content.extend(content);
+            phys_addr_start..(phys_addr_start + u64::try_from(content.len()).unwrap());
+        self.regions.push(Region {
+            phys_addr_range: Word::from_u64_range(&phys_addr_range),
+            content: Some(content),
+        });
         phys_addr_range
     }
 
-    fn add_image<'a, R: ReadRef<'a>>(
+    fn add_image<'a, T: FileHeader<Word: PrimInt + WrappingSub + Integer>, R: ReadRef<'a>>(
         &mut self,
         elf: &ElfFile<'a, T, R>,
         phys_to_virt_offset: T::Word,
-    ) -> ImageInfo<T::Word> {
+    ) -> ImageInfo {
         let virt_addr_range = elf_virt_addr_range(elf);
         let phys_addr_range = {
             let start = virt_to_phys(virt_addr_range.start, phys_to_virt_offset);
             let end = virt_to_phys(virt_addr_range.end, phys_to_virt_offset);
-            coarsen_footprint(start..end, T::Word::one() << PAGE_SIZE_BITS)
+            Word::from_u64_range(&coarsen_footprint(
+                start..end,
+                T::Word::one() << PAGE_SIZE_BITS,
+            ))
         };
-        let virt_entry = NumCast::from(elf.entry()).unwrap();
+        let virt_entry = elf.entry().into();
         self.add_segments(elf, phys_to_virt_offset);
         ImageInfo {
             phys_addr_range,
-            phys_to_virt_offset,
+            phys_to_virt_offset: phys_to_virt_offset.into().into(),
             virt_entry,
         }
     }
@@ -175,7 +152,7 @@ impl<T: FileHeader<Endian = Endianness, Word: PrimInt + WrappingSub + Integer>> 
 
 //
 
-fn with_elf<T: FileHeader<Endian = Endianness>, R, F>(path: impl AsRef<Path>, f: F) -> R
+fn with_elf<T: FileHeader, R, F>(path: impl AsRef<Path>, f: F) -> R
 where
     F: FnOnce(&ElfFile<T, &ReadCache<File>>) -> R,
 {
@@ -185,7 +162,7 @@ where
     f(&elf)
 }
 
-fn elf_virt_addr_range<'a, T: FileHeader<Endian = Endianness, Word: PrimInt>, R: ReadRef<'a>>(
+fn elf_virt_addr_range<'a, T: FileHeader<Word: PrimInt>, R: ReadRef<'a>>(
     elf: &ElfFile<'a, T, R>,
 ) -> Range<T::Word> {
     let endian = elf.endian();

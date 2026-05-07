@@ -12,8 +12,10 @@
 
 use spin::RwLock;
 
-use sel4_kernel_loader_payload_types::PayloadInfo;
+use sel4_kernel_loader_payload_types::ArchivedPayloadInfo;
 use sel4_platform_info::PLATFORM_INFO;
+
+use sel4_no_allocator as _;
 
 mod arch;
 mod barrier;
@@ -35,7 +37,7 @@ static SECONDARY_CORE_INIT_INFO: RwLock<Option<SecondaryCoreInitInfo>> = RwLock:
 
 struct SecondaryCoreInitInfo {
     core_id: usize,
-    payload_info: PayloadInfo<usize>,
+    payload_info: ArchivedPayloadInfo,
     barrier: Barrier,
 }
 
@@ -47,7 +49,7 @@ fn main(per_core: <ArchImpl as Arch>::PerCore) -> ! {
 
     log::info!("Starting loader");
 
-    let (payload, region_content_source) = this_image::get_payload();
+    let payload = this_image::get_payload();
 
     let own_footprint = this_image::get_user_image_bounds();
 
@@ -67,7 +69,7 @@ fn main(per_core: <ArchImpl as Arch>::PerCore) -> ! {
 
     log::debug!("Copying payload data");
     unsafe {
-        payload.copy_data_out(region_content_source);
+        payload.copy_data_out();
     }
 
     for core_id in 1..MAX_NUM_NODES {
@@ -111,7 +113,7 @@ static KERNEL_ENTRY_BARRIER: Barrier = Barrier::new(MAX_NUM_NODES);
 
 fn common_epilogue(
     core_id: usize,
-    payload_info: &PayloadInfo<usize>,
+    payload_info: &ArchivedPayloadInfo,
     per_core: <ArchImpl as Arch>::PerCore,
 ) -> ! {
     PlatImpl::init_per_core();

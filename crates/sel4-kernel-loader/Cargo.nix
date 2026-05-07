@@ -11,8 +11,7 @@ mk {
   package.license = "BSD-2-Clause AND GPL-2.0-only";
   dependencies = {
     inherit (versions) cfg-if log embedded-hal-nb;
-    postcard = postcardWith [];
-    heapless = { version = versions.heapless; features = [ "serde" ]; };
+    rkyv = { version = versions.rkyv; default-features = false; };
     spin = { version = versions.spin; features = [ "lock_api" ]; };
     inherit (localCrates)
       sel4-platform-info
@@ -22,6 +21,7 @@ mk {
       sel4-stack
       sel4-phdrs
       sel4-phdrs-patched
+      sel4-no-allocator
     ;
     sel4-kernel-loader-payload-types = localCrates.sel4-kernel-loader-payload-types // { features = [ "serde" ]; };
   };

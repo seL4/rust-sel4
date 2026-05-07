@@ -1646,13 +1646,9 @@ version = "0.38.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "271638cd5fa9cca89c4c304675ca658efc4e64a66c716b7cfe1afb4b9611dbbc"
 dependencies = [
- "crc32fast",
  "flate2",
- "hashbrown 0.16.1",
- "indexmap 2.13.0",
  "memchr",
  "ruzstd",
- "wasmparser 0.243.0",
 ]
 
 [[package]]
@@ -2663,7 +2659,6 @@ dependencies = [
  "cfg-if",
  "embedded-hal-nb",
  "glob",
- "heapless 0.9.1",
  "log",
  "object",
  "postcard",
@@ -2671,6 +2666,7 @@ dependencies = [
  "proc-macro2",
  "quote",
  "riscv",
+ "rkyv",
  "sbi",
  "sel4-bcm2835-aux-uart-driver",
  "sel4-build-env",
@@ -2679,6 +2675,7 @@ dependencies = [
  "sel4-kernel-loader-embed-page-tables-runtime",
  "sel4-kernel-loader-payload-types",
  "sel4-logging",
+ "sel4-no-allocator",
  "sel4-phdrs",
  "sel4-phdrs-patched",
  "sel4-pl011-driver",
@@ -2696,10 +2693,9 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "clap",
- "heapless 0.9.1",
  "num",
  "object",
- "postcard",
+ "rkyv",
  "sel4-config-types",
  "sel4-kernel-loader-payload-types",
  "sel4-patch-elf",
@@ -2728,6 +2724,7 @@ version = "0.1.0"
 dependencies = [
  "heapless 0.9.1",
  "num-traits",
+ "rkyv",
  "sel4-platform-info-types",
  "serde",
 ]
@@ -4095,7 +4092,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "990065f2fe63003fe337b932cfb5e3b80e0b4d0f5ff650e6985b1048f62c8319"
 dependencies = [
  "leb128fmt",
- "wasmparser 0.244.0",
+ "wasmparser",
 ]
 
 [[package]]
@@ -4107,16 +4104,7 @@ dependencies = [
  "anyhow",
  "indexmap 2.13.0",
  "wasm-encoder",
- "wasmparser 0.244.0",
-]
-
-[[package]]
-name = "wasmparser"
-version = "0.243.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f6d8db401b0528ec316dfbe579e6ab4152d61739cfe076706d2009127970159d"
-dependencies = [
- "bitflags 2.11.0",
+ "wasmparser",
 ]
 
 [[package]]
@@ -4300,7 +4288,7 @@ dependencies = [
  "serde_json",
  "wasm-encoder",
  "wasm-metadata",
- "wasmparser 0.244.0",
+ "wasmparser",
  "wit-parser",
 ]
 
@@ -4319,7 +4307,7 @@ dependencies = [
  "serde_derive",
  "serde_json",
  "unicode-xid",
- "wasmparser 0.244.0",
+ "wasmparser",
 ]
 
 [[package]]
