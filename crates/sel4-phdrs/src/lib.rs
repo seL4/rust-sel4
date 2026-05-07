@@ -118,9 +118,6 @@ pub const PT_LOAD: u32 = 1;
 pub const PT_TLS: u32 = 7;
 pub const PT_GNU_EH_FRAME: u32 = 0x6474_e550;
 
-// seL4-specific
-pub const PT_SEL4_RESET_REGIONS: u32 = 0x64c3_4001;
-
 pub fn default_locate_phdrs() -> Result<ProgramHeaders<'static>, &'static dyn Error> {
     unsafe extern "C" {
         safe static __ehdr_start: ElfHeader;

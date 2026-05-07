@@ -10,7 +10,7 @@ use core::arch::global_asm;
 use core::slice;
 
 use sel4_panicking_env::abort;
-use sel4_phdrs::{PT_SEL4_RESET_REGIONS, locate_phdrs};
+use sel4_phdrs::locate_phdrs;
 use sel4_stack::{Stack, StackBottom};
 
 use sel4_phdrs_patched as _;
@@ -25,6 +25,8 @@ use sel4_phdrs_patched as _;
 compile_error!("unsupported architecture");
 
 // // //
+
+const PT_SEL4_RESET_REGIONS: u32 = 0x64c3_4001;
 
 #[repr(C)]
 #[derive(Debug)]
