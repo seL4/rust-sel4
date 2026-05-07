@@ -15,10 +15,10 @@ mk {
       num
       clap
       rkyv
+      object
     ;
-    object = { version = versions.object; features = [ "all" ]; };
     inherit (localCrates)
-      sel4-synthetic-elf
+      sel4-patch-elf
     ;
     sel4-capdl-initializer-types = localCrates.sel4-capdl-initializer-types // {
       features = [

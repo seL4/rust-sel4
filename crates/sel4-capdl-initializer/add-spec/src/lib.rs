@@ -46,7 +46,7 @@ pub fn add_spec(
 
     let render_elf_args = render_elf::RenderElfArgs {
         spec_data: &spec_data,
-        spec_data_alignment: 1 << ArchiveAlignedVec::ALIGNMENT,
+        spec_data_alignment: ArchiveAlignedVec::ALIGNMENT,
         embedded_frame_data: &embedded_frame_data,
         embedded_frame_data_alignment: 1 << GRANULE_SIZE_BITS,
     };

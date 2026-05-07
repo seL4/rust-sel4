@@ -5,9 +5,16 @@
 //
 
 use num::NumCast;
+use object::elf::PF_R;
 use object::read::elf::FileHeader;
 
-use sel4_synthetic_elf::{Builder, PatchValue, Segment};
+use sel4_patch_elf::{FileHeaderExt, GenericProgramHeader, Patching};
+
+const PT_SEL4_CAPDL_SPEC: u32 = 0x64c3_4002;
+const PT_SEL4_CAPDL_FRAME_DATA: u32 = 0x64c3_4003;
+
+// HACK
+const PAGE_SIZE: u64 = 4096;
 
 pub(crate) struct RenderElfArgs<'a> {
     pub(crate) spec_data: &'a [u8],
@@ -17,60 +24,36 @@ pub(crate) struct RenderElfArgs<'a> {
 }
 
 impl RenderElfArgs<'_> {
-    pub(crate) fn call_with<T: FileHeader<Word: NumCast + PatchValue>>(
+    pub(crate) fn call_with<T: FileHeader<Word: NumCast> + FileHeaderExt>(
         &self,
         orig_elf: &object::read::elf::ElfFile<T>,
     ) -> Vec<u8> {
-        let mut builder = Builder::new(orig_elf).unwrap();
-        builder.discard_p_align(true);
+        let mut patching = Patching::new(orig_elf);
 
-        let embedded_frame_data_vaddr = builder
-            .next_vaddr()
-            .next_multiple_of(self.embedded_frame_data_alignment.try_into().unwrap());
-        builder.add_segment(Segment::simple(
-            embedded_frame_data_vaddr,
-            self.embedded_frame_data.into(),
-        ));
-        builder
-            .patch_word_with_cast(
-                "sel4_capdl_initializer_embedded_frames_data_start",
-                embedded_frame_data_vaddr,
-            )
-            .unwrap();
+        patching.add_segment_with_info_phdr(
+            GenericProgramHeader {
+                p_flags: PF_R,
+                p_memsz: self.embedded_frame_data.len().try_into().unwrap(),
+                p_align: PAGE_SIZE,
+                ..Default::default()
+            },
+            self.embedded_frame_data_alignment.try_into().unwrap(),
+            self.embedded_frame_data,
+            PT_SEL4_CAPDL_FRAME_DATA,
+        );
 
-        let serialized_spec_data_vaddr = builder
-            .next_vaddr()
-            .next_multiple_of(self.spec_data_alignment.try_into().unwrap());
-        builder.add_segment(Segment::simple(
-            serialized_spec_data_vaddr,
-            self.spec_data.into(),
-        ));
-        builder
-            .patch_word_with_cast(
-                "sel4_capdl_initializer_serialized_spec_data_start",
-                serialized_spec_data_vaddr,
-            )
-            .unwrap();
-        builder
-            .patch_word_with_cast(
-                "sel4_capdl_initializer_serialized_spec_data_size",
-                self.spec_data.len(),
-            )
-            .unwrap();
+        patching.add_segment_with_info_phdr(
+            GenericProgramHeader {
+                p_flags: PF_R,
+                p_memsz: self.spec_data.len().try_into().unwrap(),
+                p_align: PAGE_SIZE,
+                ..Default::default()
+            },
+            self.spec_data_alignment.try_into().unwrap(),
+            self.spec_data,
+            PT_SEL4_CAPDL_SPEC,
+        );
 
-        builder
-            .patch_word_with_cast(
-                "sel4_capdl_initializer_image_start",
-                builder.footprint().unwrap().start,
-            )
-            .unwrap();
-        builder
-            .patch_word_with_cast(
-                "sel4_capdl_initializer_image_end",
-                builder.footprint().unwrap().end,
-            )
-            .unwrap();
-
-        builder.build().unwrap()
+        patching.finalize(PAGE_SIZE)
     }
 }

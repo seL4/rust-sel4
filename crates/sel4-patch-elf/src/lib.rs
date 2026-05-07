@@ -40,15 +40,18 @@ impl<'a, T: FileHeaderExt> Patching<'a, T> {
     }
 
     fn footprint(&self) -> Option<Range<u64>> {
+        let endian = self.endian();
         let start = self
             .phdrs
             .iter()
-            .map(|phdr| phdr.p_vaddr(self.endian()).into())
+            .filter(|phdr| phdr.p_type(endian) == PT_LOAD)
+            .map(|phdr| phdr.p_vaddr(endian).into())
             .min()?;
         let end = self
             .phdrs
             .iter()
-            .map(|phdr| phdr.p_vaddr(self.endian()).into() + phdr.p_memsz(self.endian()).into())
+            .filter(|phdr| phdr.p_type(endian) == PT_LOAD)
+            .map(|phdr| phdr.p_vaddr(endian).into() + phdr.p_memsz(endian).into())
             .max()?;
         Some(start..end)
     }
@@ -65,6 +68,19 @@ impl<'a, T: FileHeaderExt> Patching<'a, T> {
             self.data.len().next_multiple_of(align.try_into().unwrap()),
             0,
         );
+    }
+
+    pub fn add_segment_with_info_phdr(
+        &mut self,
+        mut phdr: GenericProgramHeader,
+        data_align: u64,
+        data: &[u8],
+        p_type: u32,
+    ) {
+        phdr.p_type = PT_LOAD;
+        let mut info_phdr = *self.add_segment(phdr, data_align, data);
+        info_phdr.set_p_type(self.endian(), p_type);
+        self.add_phdr(info_phdr);
     }
 
     pub fn add_segment(

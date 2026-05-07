@@ -9,6 +9,7 @@
 
 use core::error::Error;
 use core::fmt;
+use core::ops::Range;
 use core::slice;
 
 unsafe extern "Rust" {
@@ -61,6 +62,20 @@ impl<'a> ProgramHeaders<'a> {
 
     pub fn find_by_type(&self, ty: u32) -> Option<&'a ProgramHeader> {
         self.iter().find(|phdr| phdr.p_type == ty)
+    }
+
+    pub fn footprint(&self) -> Option<Range<usize>> {
+        let start = self
+            .iter()
+            .filter(|phdr| phdr.p_type == PT_LOAD)
+            .map(|phdr| phdr.p_vaddr)
+            .min()?;
+        let end = self
+            .iter()
+            .filter(|phdr| phdr.p_type == PT_LOAD)
+            .map(|phdr| phdr.p_vaddr + phdr.p_memsz)
+            .max()?;
+        Some(start..end)
     }
 }
 
@@ -117,6 +132,13 @@ pub const PT_NULL: u32 = 0;
 pub const PT_LOAD: u32 = 1;
 pub const PT_TLS: u32 = 7;
 pub const PT_GNU_EH_FRAME: u32 = 0x6474_e550;
+
+impl ProgramHeader {
+    #[allow(clippy::missing_safety_doc)]
+    pub unsafe fn bytes(&self) -> &'static [u8] {
+        unsafe { slice::from_raw_parts(self.p_vaddr as *const u8, self.p_memsz) }
+    }
+}
 
 pub fn default_locate_phdrs() -> Result<ProgramHeaders<'static>, &'static dyn Error> {
     unsafe extern "C" {
