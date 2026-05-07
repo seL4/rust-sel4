@@ -5,48 +5,21 @@
 //
 
 use core::ops::Range;
-use core::ptr;
-use core::slice;
 
 use rkyv::Archive;
 
 use sel4_capdl_initializer_types::SpecForInitializer;
 use sel4_immediate_sync_once_cell::ImmediateSyncOnceCell;
-use sel4_immutable_cell::ImmutableCell;
 use sel4_logging::{LevelFilter, Logger, LoggerBuilder};
+use sel4_phdrs::locate_phdrs;
 use sel4_root_task::{debug_print, root_task};
+
+use sel4_phdrs_patched as _;
 
 use crate::initialize::Initializer;
 
-#[allow(non_upper_case_globals)]
-#[unsafe(no_mangle)]
-#[unsafe(link_section = ".data")]
-static sel4_capdl_initializer_serialized_spec_data_start: ImmutableCell<*mut u8> =
-    ImmutableCell::new(ptr::null_mut());
-
-#[allow(non_upper_case_globals)]
-#[unsafe(no_mangle)]
-#[unsafe(link_section = ".data")]
-static sel4_capdl_initializer_serialized_spec_data_size: ImmutableCell<usize> =
-    ImmutableCell::new(0);
-
-#[allow(non_upper_case_globals)]
-#[unsafe(no_mangle)]
-#[unsafe(link_section = ".data")]
-static sel4_capdl_initializer_embedded_frames_data_start: ImmutableCell<*mut u8> =
-    ImmutableCell::new(ptr::null_mut());
-
-#[allow(non_upper_case_globals)]
-#[unsafe(no_mangle)]
-#[unsafe(link_section = ".data")]
-static sel4_capdl_initializer_image_start: ImmutableCell<*mut u8> =
-    ImmutableCell::new(ptr::null_mut());
-
-#[allow(non_upper_case_globals)]
-#[unsafe(no_mangle)]
-#[unsafe(link_section = ".data")]
-static sel4_capdl_initializer_image_end: ImmutableCell<*mut u8> =
-    ImmutableCell::new(ptr::null_mut());
+const PT_SEL4_CAPDL_SPEC: u32 = 0x64c3_4002;
+const PT_SEL4_CAPDL_FRAME_DATA: u32 = 0x64c3_4003;
 
 static LOGGER: ImmediateSyncOnceCell<Logger> = ImmediateSyncOnceCell::new();
 
@@ -62,7 +35,11 @@ fn main(bootinfo: &sel4::BootInfoPtr) -> ! {
         bootinfo,
         user_image_bounds(),
         spec,
-        *sel4_capdl_initializer_embedded_frames_data_start.get() as usize,
+        locate_phdrs()
+            .unwrap()
+            .find_by_type(PT_SEL4_CAPDL_FRAME_DATA)
+            .unwrap()
+            .p_vaddr,
     )
 }
 
@@ -85,16 +62,16 @@ fn init_logging(spec_log_level: u8) {
 
 fn get_spec_bytes() -> &'static [u8] {
     unsafe {
-        slice::from_raw_parts(
-            *sel4_capdl_initializer_serialized_spec_data_start.get(),
-            *sel4_capdl_initializer_serialized_spec_data_size.get(),
-        )
+        locate_phdrs()
+            .unwrap()
+            .find_by_type(PT_SEL4_CAPDL_SPEC)
+            .unwrap()
+            .bytes()
     }
 }
 
 fn user_image_bounds() -> Range<usize> {
-    (*sel4_capdl_initializer_image_start.get() as usize)
-        ..(*sel4_capdl_initializer_image_end.get() as usize)
+    locate_phdrs().unwrap().footprint().unwrap()
 }
 
 #[cfg(feature = "alloc")]
