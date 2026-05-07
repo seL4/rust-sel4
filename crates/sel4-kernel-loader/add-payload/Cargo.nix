@@ -21,7 +21,7 @@ mk {
     postcard = postcardWith [ "alloc" ];
     serde = serdeWith [ "alloc" "derive" ];
     inherit (localCrates)
-      sel4-synthetic-elf
+      sel4-patch-elf
     ;
     sel4-kernel-loader-payload-types = localCrates.sel4-kernel-loader-payload-types // { features = [ "serde" ]; };
     sel4-config-types = localCrates.sel4-config-types // { features = [ "serde" ]; };

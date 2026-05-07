@@ -130,7 +130,7 @@ impl<'a, T: FileHeaderExt> Patching<'a, T> {
     pub fn finalize(mut self, phdrs_load_segment_p_align: u64) -> Vec<u8> {
         let endian = self.endian();
         let phdrs_load_phdr = {
-            let data_align = align_of::<T::ProgramHeader>().try_into().unwrap();
+            let data_align = align_of::<T::Word>().try_into().unwrap();
             let eventual_n = self.phdrs.len() + 1;
             let data_size = eventual_n * size_of::<T::ProgramHeader>();
             let p_align = phdrs_load_segment_p_align;
