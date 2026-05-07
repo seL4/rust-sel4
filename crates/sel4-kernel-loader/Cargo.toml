@@ -23,10 +23,11 @@ heapless = { version = "0.9.1", features = ["serde"] }
 log = "0.4.28"
 postcard = { version = "1.1.3", default-features = false }
 sel4-config = { path = "../sel4/config" }
-sel4-immutable-cell = { path = "../sel4-immutable-cell" }
 sel4-kernel-loader-embed-page-tables-runtime = { path = "embed-page-tables/runtime" }
 sel4-kernel-loader-payload-types = { path = "payload-types", features = ["serde"] }
 sel4-logging = { path = "../sel4-logging" }
+sel4-phdrs = { path = "../sel4-phdrs" }
+sel4-phdrs-patched = { path = "../sel4-phdrs/patched" }
 sel4-platform-info = { path = "../sel4-platform-info" }
 sel4-stack = { path = "../sel4-stack" }
 spin = { version = "0.10.0", features = ["lock_api"] }
