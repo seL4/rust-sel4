@@ -13,6 +13,8 @@ use sel4_panicking_env::abort;
 use sel4_phdrs::{PT_SEL4_RESET_REGIONS, locate_phdrs};
 use sel4_stack::{Stack, StackBottom};
 
+use sel4_phdrs_patched as _;
+
 #[cfg(not(any(
     target_arch = "aarch64",
     target_arch = "arm",
@@ -21,17 +23,6 @@ use sel4_stack::{Stack, StackBottom};
     target_arch = "x86_64",
 )))]
 compile_error!("unsupported architecture");
-
-// 6 should be enough:
-// - 1 PT_LOAD for region meta
-// - 1 PT_SEL4_RESET_REGIONS for region meta
-// - 4 for writeable PT_LOAD
-sel4_phdrs_patched::add_placeholder_phdrs!(reset1);
-sel4_phdrs_patched::add_placeholder_phdrs!(reset2);
-sel4_phdrs_patched::add_placeholder_phdrs!(reset3);
-sel4_phdrs_patched::add_placeholder_phdrs!(reset4);
-sel4_phdrs_patched::add_placeholder_phdrs!(reset5);
-sel4_phdrs_patched::add_placeholder_phdrs!(reset6);
 
 // // //
 

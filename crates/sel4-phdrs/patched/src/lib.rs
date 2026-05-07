@@ -12,15 +12,15 @@ use core::fmt;
 use sel4_phdrs::{ProgramHeader, ProgramHeaders, register_locate_phdrs};
 use sel4_rodata_static::rodata_static;
 
-// register_locate_phdrs!(locate_patched_phdrs);
+register_locate_phdrs!(locate_patched_phdrs);
 
 pub fn locate_patched_phdrs() -> Result<ProgramHeaders<'static>, &'static dyn Error> {
-    let start = *rodata_static!(sel4_phdrs_patched__start: *const ProgramHeader);
-    let phnum = *rodata_static!(sel4_phdrs_patched__phnum: usize);
+    let start = *rodata_static!(sel4_phdrs_patched__vaddr: *const ProgramHeader);
+    let phnum = *rodata_static!(sel4_phdrs_patched__phnum: u16);
     if phnum == 0 {
         return Err(&LocatePatchedPhdrsError::PhnumIsZero);
     }
-    Ok(unsafe { ProgramHeaders::new(start, phnum) })
+    Ok(unsafe { ProgramHeaders::new(start, phnum.into()) })
 }
 
 #[derive(Debug, Copy, Clone)]
@@ -37,26 +37,3 @@ impl fmt::Display for LocatePatchedPhdrsError {
 }
 
 impl Error for LocatePatchedPhdrsError {}
-
-#[macro_export]
-macro_rules! add_placeholder_phdrs {
-    ($label:ident) => {
-        const _: () = {
-            #[unsafe(link_section = $crate::_private::concat!(".note.sel4.placeholder.", $crate::_private::stringify!($label), ".1"))]
-            static _1: [u32; 0] = [];
-
-            #[unsafe(link_section = $crate::_private::concat!(".note.sel4.placeholder.", $crate::_private::stringify!($label), ".2"))]
-            static _2: [u64; 0] = [];
-
-            #[unsafe(link_section = $crate::_private::concat!(".note.sel4.placeholder.", $crate::_private::stringify!($label), ".3"))]
-            static _3: [u32; 0] = [];
-
-        };
-    };
-}
-
-// For macros
-#[doc(hidden)]
-pub mod _private {
-    pub use core::{concat, stringify};
-}

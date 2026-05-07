@@ -17,7 +17,7 @@ use rangemap::RangeSet;
 
 mod patch;
 
-use patch::{GenericProgramHeader, Patching, ProgramHeaderExt};
+use patch::{FileHeaderExt, GenericProgramHeader, Patching, ProgramHeaderExt};
 
 pub const PT_SEL4_RESET_REGIONS: u32 = 0x64c3_4001;
 
@@ -55,11 +55,11 @@ fn main() -> Result<(), Error> {
 
 fn continue_with_type<'a, T>(orig_elf: &'a ElfFile<'a, T>) -> Result<Vec<u8>, Error>
 where
-    T: FileHeader<Word: NumCast + Pod, ProgramHeader: ProgramHeaderExt>,
+    T: FileHeader<Word: NumCast> + FileHeaderExt,
 {
     let mut patching = Patching::new(orig_elf);
     add_regions(&mut patching)?;
-    Ok(patching.finalize())
+    Ok(patching.finalize(PAGE_SIZE))
 }
 
 struct RegionMeta<T: FileHeader> {
@@ -88,7 +88,7 @@ impl<T: FileHeader<Word: Pod>> RegionMeta<T> {
 
 fn get_all_persistent_ranges<'a, T>(elf: &'a ElfFile<'a, T>) -> RangeSet<u64>
 where
-    T: FileHeader<Word: NumCast + Pod, ProgramHeader: ProgramHeaderExt>,
+    T: FileHeaderExt,
 {
     let mut set = RangeSet::new();
     for s in elf.sections() {
@@ -101,7 +101,7 @@ where
     set
 }
 
-fn add_regions<'a, T: FileHeader<Word: Pod + NumCast, ProgramHeader: ProgramHeaderExt>>(
+fn add_regions<'a, T: FileHeader<Word: NumCast> + FileHeaderExt>(
     this: &mut Patching<'a, T>,
 ) -> Result<(), Error> {
     let endian = this.endian();
@@ -124,7 +124,7 @@ fn add_regions<'a, T: FileHeader<Word: Pod + NumCast, ProgramHeader: ProgramHead
                 p_filesz,
                 p_memsz: p_filesz,
                 p_align,
-            })?;
+            });
             let ro_p_vaddr = ro_phdr.p_vaddr(endian).into();
             let ro_p_filesz = ro_phdr.p_filesz(endian).into();
             for ephermal_region in
@@ -161,8 +161,8 @@ fn add_regions<'a, T: FileHeader<Word: Pod + NumCast, ProgramHeader: ProgramHead
         },
         align_of::<RegionMeta<T>>().try_into().unwrap(),
         &regions_meta_data,
-    )?;
+    );
     regions_meta_info_phdr.set_p_type(endian, PT_SEL4_RESET_REGIONS);
-    this.add_phdr(regions_meta_info_phdr)?;
+    this.add_phdr(regions_meta_info_phdr);
     Ok(())
 }
