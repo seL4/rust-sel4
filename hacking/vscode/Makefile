@@ -50,3 +50,11 @@ all-sel4:
 		-e spawn-task \
 		-e spawn-thread \
 		-o $(private_workspaces_dir)/all-sel4$(ws)
+
+.PHONY: kernel-loader
+kernel-loader:
+	cargo run -p create-vscode-workspace -- \
+		--config .cargo/gen/target/aarch64-unknown-none.toml \
+		--config .cargo/gen/world/aarch64.default.toml \
+		-i sel4-kernel-loader \
+		-o $(private_workspaces_dir)/kernel-loader$(ws)
