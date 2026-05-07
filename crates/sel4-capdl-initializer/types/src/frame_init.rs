@@ -12,7 +12,7 @@ use core::ops::Range;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Eq, PartialEq, rkyv::Archive, rkyv::Deserialize, rkyv::Serialize)]
+#[derive(Debug, Clone, Eq, PartialEq, rkyv::Archive, rkyv::Serialize)]
 pub enum FrameInit {
     Fill(Fill<Content>),
     Embedded(EmbeddedFrameIndex),
@@ -30,21 +30,21 @@ impl ArchivedFrameInit {
     }
 }
 
-#[derive(Debug, Copy, Clone, Eq, PartialEq, rkyv::Archive, rkyv::Deserialize, rkyv::Serialize)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq, rkyv::Archive, rkyv::Serialize)]
 pub struct EmbeddedFrameIndex {
     pub index: u64,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-#[derive(rkyv::Archive, rkyv::Deserialize, rkyv::Serialize)]
+#[derive(rkyv::Archive, rkyv::Serialize)]
 pub struct Fill<D> {
     pub entries: Vec<FillEntry<D>>,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-#[derive(rkyv::Archive, rkyv::Deserialize, rkyv::Serialize)]
+#[derive(rkyv::Archive, rkyv::Serialize)]
 pub struct FillEntry<D> {
     pub range: Range<u64>,
     pub content: FillEntryContent<D>,
@@ -52,7 +52,7 @@ pub struct FillEntry<D> {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-#[derive(rkyv::Archive, rkyv::Deserialize, rkyv::Serialize)]
+#[derive(rkyv::Archive, rkyv::Serialize)]
 pub enum FillEntryContent<D> {
     Data(D),
     BootInfo(FillEntryContentBootInfo),
@@ -84,7 +84,7 @@ impl<D> FillEntryContent<D> {
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-#[derive(rkyv::Archive, rkyv::Deserialize, rkyv::Serialize)]
+#[derive(rkyv::Archive, rkyv::Serialize)]
 pub struct FillEntryContentBootInfo {
     pub id: FillEntryContentBootInfoId,
     pub offset: u64,
@@ -92,20 +92,20 @@ pub struct FillEntryContentBootInfo {
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-#[derive(rkyv::Archive, rkyv::Deserialize, rkyv::Serialize)]
+#[derive(rkyv::Archive, rkyv::Serialize)]
 pub enum FillEntryContentBootInfoId {
     Fdt,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-#[derive(rkyv::Archive, rkyv::Deserialize, rkyv::Serialize)]
+#[derive(rkyv::Archive, rkyv::Serialize)]
 pub struct FillEntryContentFileOffset {
     pub file: String,
     pub file_offset: u64,
 }
 
-#[derive(Debug, Clone, Eq, PartialEq, rkyv::Archive, rkyv::Deserialize, rkyv::Serialize)]
+#[derive(Debug, Clone, Eq, PartialEq, rkyv::Archive, rkyv::Serialize)]
 pub enum Content {
     Bytes(BytesContent),
     DeflatedBytes(DeflatedBytesContent),
@@ -129,7 +129,7 @@ impl ArchivedContent {
     }
 }
 
-#[derive(Clone, Eq, PartialEq, rkyv::Archive, rkyv::Deserialize, rkyv::Serialize)]
+#[derive(Clone, Eq, PartialEq, rkyv::Archive, rkyv::Serialize)]
 pub struct BytesContent {
     pub bytes: Vec<u8>,
 }
@@ -162,7 +162,7 @@ impl ArchivedBytesContent {
     }
 }
 
-#[derive(Clone, Eq, PartialEq, rkyv::Archive, rkyv::Deserialize, rkyv::Serialize)]
+#[derive(Clone, Eq, PartialEq, rkyv::Archive, rkyv::Serialize)]
 pub struct DeflatedBytesContent {
     pub deflated_bytes: Vec<u8>,
 }
