@@ -28,7 +28,7 @@ type NativeWord = u64;
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-#[derive(rkyv::Archive, rkyv::Deserialize, rkyv::Serialize)]
+#[derive(rkyv::Archive, rkyv::Serialize)]
 #[rkyv(derive(Debug))]
 pub struct Word(pub u64);
 
@@ -46,7 +46,7 @@ pub type RuntimeConfig = GenericRuntimeConfig<Vec<u8>>;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-#[derive(rkyv::Archive, rkyv::Deserialize, rkyv::Serialize)]
+#[derive(rkyv::Archive, rkyv::Serialize)]
 pub struct GenericRuntimeConfig<T> {
     pub static_heap: Option<Range<Address>>,
     pub static_heap_mutex_notification: Option<CPtrBits>,
@@ -58,7 +58,7 @@ pub struct GenericRuntimeConfig<T> {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-#[derive(rkyv::Archive, rkyv::Deserialize, rkyv::Serialize)]
+#[derive(rkyv::Archive, rkyv::Serialize)]
 pub struct RuntimeThreadConfig {
     pub ipc_buffer_addr: Address,
     pub endpoint: Option<CPtrBits>,
