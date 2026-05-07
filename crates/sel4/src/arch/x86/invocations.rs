@@ -43,6 +43,19 @@ impl<T: CapTypeForFrameObject, C: InvocationContext> Cap<T, C> {
         }))
     }
 
+    /// Corresponds to `seL4_X86_Page_MapIO`.
+    #[sel4_cfg(IOMMU)]
+    pub fn frame_map_io(self, iospace: IOSpace, ioaddr: usize, rights: CapRights) -> Result<()> {
+        Error::wrap(self.invoke(|cptr, ipc_buffer| {
+            ipc_buffer.inner_mut().seL4_X86_Page_MapIO(
+                cptr.bits(),
+                iospace.bits(),
+                rights.into_inner(),
+                ioaddr.try_into().unwrap(),
+            )
+        }))
+    }
+
     /// Corresponds to `seL4_X86_Page_MapEPT`.
     #[sel4_cfg(VTX)]
     pub fn ept_frame_map(
@@ -121,6 +134,20 @@ impl<C: InvocationContext> PageTable<C> {
                 vspace.bits(),
                 vaddr.try_into().unwrap(),
                 attr.into_inner(),
+            )
+        }))
+    }
+}
+
+#[sel4_cfg(IOMMU)]
+impl<C: InvocationContext> IOPageTable<C> {
+    /// Corresponds to `seL4_X86_IOPageTable_Map`.
+    pub fn io_page_table_map(self, iospace: IOSpace, ioaddr: usize) -> Result<()> {
+        Error::wrap(self.invoke(|cptr, ipc_buffer| {
+            ipc_buffer.inner_mut().seL4_X86_IOPageTable_Map(
+                cptr.bits(),
+                iospace.bits(),
+                ioaddr.try_into().unwrap(),
             )
         }))
     }
