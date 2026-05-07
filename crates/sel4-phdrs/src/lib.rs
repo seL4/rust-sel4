@@ -5,12 +5,64 @@
 //
 
 #![no_std]
+#![feature(linkage)]
 
 use core::error::Error;
 use core::fmt;
-use core::ops::Range;
-use core::ptr;
 use core::slice;
+
+unsafe extern "Rust" {
+    safe fn __sel4_phdrs__locate_phdrs() -> Result<ProgramHeaders<'static>, &'static dyn Error>;
+}
+
+#[macro_export]
+macro_rules! register_locate_phdrs {
+    ($(#[$attrs:meta])* $path:path) => {
+        #[allow(non_snake_case)]
+        const _: () = {
+            $(#[$attrs])*
+            #[unsafe(no_mangle)]
+            fn __sel4_phdrs__locate_phdrs() -> $crate::_private::LocatePhdrsResult {
+                const F: fn() -> $crate::_private::LocatePhdrsResult = $path;
+                F()
+            }
+        };
+    };
+}
+
+register_locate_phdrs!(
+    #[linkage = "weak"]
+    default_locate_phdrs
+);
+
+pub fn locate_phdrs() -> Result<ProgramHeaders<'static>, &'static dyn Error> {
+    __sel4_phdrs__locate_phdrs()
+}
+
+pub struct ProgramHeaders<'a> {
+    slice: &'a [ProgramHeader],
+}
+
+impl<'a> ProgramHeaders<'a> {
+    #[allow(clippy::missing_safety_doc)]
+    pub unsafe fn new(start: *const ProgramHeader, n: usize) -> Self {
+        Self {
+            slice: unsafe { slice::from_raw_parts(start, n) },
+        }
+    }
+
+    pub fn as_slice(&self) -> &'a [ProgramHeader] {
+        self.slice
+    }
+
+    pub fn iter(&self) -> impl Iterator<Item = &'a ProgramHeader> {
+        self.as_slice().iter()
+    }
+
+    pub fn find_by_type(&self, ty: u32) -> Option<&'a ProgramHeader> {
+        self.iter().find(|phdr| phdr.p_type == ty)
+    }
+}
 
 #[repr(C)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -45,55 +97,6 @@ struct ElfHeaderIdent {
 
 const ELFMAG: [u8; 4] = [0x7f, b'E', b'L', b'F'];
 
-impl ElfHeader {
-    fn is_magic_valid(&self) -> bool {
-        self.e_ident.magic == ELFMAG
-    }
-
-    fn check_magic(&self) -> Result<(), InvalidMagic> {
-        if self.is_magic_valid() {
-            Ok(())
-        } else {
-            Err(InvalidMagic {
-                ehdr_addr: self as *const _ as usize,
-            })
-        }
-    }
-
-    fn locate_phdrs(&'static self) -> &'static [ProgramHeader] {
-        unsafe {
-            let ptr = ptr::from_ref(self)
-                .cast::<u8>()
-                .wrapping_byte_offset(self.e_phoff as isize)
-                .cast::<ProgramHeader>();
-            slice::from_raw_parts(ptr, self.e_phnum.into())
-        }
-    }
-}
-
-pub fn locate_phdrs() -> Result<&'static [ProgramHeader], InvalidMagic> {
-    unsafe extern "C" {
-        static __ehdr_start: ElfHeader;
-    }
-    unsafe {
-        __ehdr_start.check_magic()?;
-    }
-    Ok(unsafe { __ehdr_start.locate_phdrs() })
-}
-
-#[derive(Debug, Copy, Clone)]
-pub struct InvalidMagic {
-    ehdr_addr: usize,
-}
-
-impl fmt::Display for InvalidMagic {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "invalid magic for ELF header at 0x{:x}", self.ehdr_addr)
-    }
-}
-
-impl Error for InvalidMagic {}
-
 #[repr(C)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct ProgramHeader {
@@ -118,32 +121,45 @@ pub const PT_GNU_EH_FRAME: u32 = 0x6474_e550;
 // seL4-specific
 pub const PT_SEL4_RESET_REGIONS: u32 = 0x64c3_4001;
 
-impl ProgramHeader {
-    pub fn vaddr_range(&self) -> Range<usize> {
-        let start = self.p_vaddr;
-        let end = start + self.p_memsz;
-        start..end
+pub fn default_locate_phdrs() -> Result<ProgramHeaders<'static>, &'static dyn Error> {
+    unsafe extern "C" {
+        safe static __ehdr_start: ElfHeader;
+    }
+    if __ehdr_start.e_ident.magic != ELFMAG {
+        return Err(&DefaultLocatePhdrsError::InvalidMagic);
+    }
+    if __ehdr_start.e_phoff != size_of::<ElfHeader>() {
+        return Err(&DefaultLocatePhdrsError::UnexpectedPhoff);
+    }
+    let start = (&raw const __ehdr_start)
+        .wrapping_byte_add(__ehdr_start.e_phoff)
+        .cast();
+    Ok(unsafe { ProgramHeaders::new(start, __ehdr_start.e_phnum.into()) })
+}
+
+#[derive(Debug, Copy, Clone)]
+pub enum DefaultLocatePhdrsError {
+    InvalidMagic,
+    UnexpectedPhoff,
+}
+
+impl fmt::Display for DefaultLocatePhdrsError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::InvalidMagic => write!(f, "invalid magic in ELF header"),
+            Self::UnexpectedPhoff => write!(f, "unexpected e_phoff in ELF header"),
+        }
     }
 }
 
-#[macro_export]
-macro_rules! add_placeholder_phdrs {
-    ($label:ident) => {
-        const _: () = {
-            #[unsafe(link_section = $crate::_private::concat!(".note.sel4.placeholder.", $crate::_private::stringify!($label), ".1"))]
-            static _1: [u32; 0] = [];
+impl Error for DefaultLocatePhdrsError {}
 
-            #[unsafe(link_section = $crate::_private::concat!(".note.sel4.placeholder.", $crate::_private::stringify!($label), ".2"))]
-            static _2: [u64; 0] = [];
-
-            #[unsafe(link_section = $crate::_private::concat!(".note.sel4.placeholder.", $crate::_private::stringify!($label), ".3"))]
-            static _3: [u32; 0] = [];
-
-        };
-    };
-}
-
+// For macros
 #[doc(hidden)]
 pub mod _private {
-    pub use core::{concat, stringify};
+    use core::error::Error;
+
+    use super::ProgramHeaders;
+
+    pub type LocatePhdrsResult = Result<ProgramHeaders<'static>, &'static dyn Error>;
 }

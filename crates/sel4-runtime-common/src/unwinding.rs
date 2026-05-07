@@ -20,9 +20,10 @@ unsafe impl EhFrameFinder for EhFrameFinderImpl {
 
         let text_base = phdrs.iter().find_map(|phdr| {
             if phdr.p_type == PT_LOAD {
-                let vaddr_range = phdr.vaddr_range();
-                if vaddr_range.contains(&pc) {
-                    return Some(vaddr_range.start);
+                let start = phdr.p_vaddr;
+                let end = start + phdr.p_memsz;
+                if start <= pc && pc < end {
+                    return Some(start);
                 }
             }
             None
