@@ -24,4 +24,5 @@ object = "0.38.1"
 rkyv = "0.8.12"
 sel4-capdl-initializer-types = { path = "../types", features = ["serde", "deflate", "transform"] }
 sel4-patch-elf = { path = "../../sel4-patch-elf" }
+sel4-phdrs-constants = { path = "../../sel4-phdrs/constants" }
 serde_json = "1.0.145"

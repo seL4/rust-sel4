@@ -9,8 +9,7 @@ use object::elf::PF_R;
 use object::read::elf::FileHeader;
 
 use sel4_patch_elf::{FileHeaderExt, GenericProgramHeader, Patching};
-
-const PT_SEL4_KERNEL_LOADER_PAYLOAD: u32 = 0x64c3_4004;
+use sel4_phdrs_constants::PT_SEL4_KERNEL_LOADER_PAYLOAD;
 
 // HACK
 const PAGE_SIZE: u64 = 4096;

@@ -7,11 +7,9 @@
 use core::ops::Range;
 
 use sel4_kernel_loader_payload_types::*;
-use sel4_phdrs::locate_phdrs;
+use sel4_phdrs::{PT_SEL4_KERNEL_LOADER_PAYLOAD, locate_phdrs};
 
 use sel4_phdrs_patched as _;
-
-const PT_SEL4_KERNEL_LOADER_PAYLOAD: u32 = 0x64c3_4004;
 
 pub(crate) fn get_payload() -> (Payload<usize>, &'static [u8]) {
     let blob = unsafe {

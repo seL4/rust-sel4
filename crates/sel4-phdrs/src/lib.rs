@@ -12,6 +12,8 @@ use core::fmt;
 use core::ops::Range;
 use core::slice;
 
+pub use sel4_phdrs_constants::*;
+
 unsafe extern "Rust" {
     safe fn __sel4_phdrs__locate_phdrs() -> Result<ProgramHeaders<'static>, &'static dyn Error>;
 }

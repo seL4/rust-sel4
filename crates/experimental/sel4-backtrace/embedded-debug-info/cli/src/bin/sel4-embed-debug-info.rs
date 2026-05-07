@@ -12,8 +12,7 @@ use num::NumCast;
 
 use object::elf::PF_R;
 use sel4_patch_elf::{FileHeaderExt, GenericProgramHeader, Patching};
-
-const PT_SEL4_EMBEDDED_DEBUG_INFO: u32 = 0x64c3_4005;
+use sel4_phdrs_constants::PT_SEL4_EMBEDDED_DEBUG_INFO;
 
 // HACK
 const PAGE_SIZE: u64 = 4096;
