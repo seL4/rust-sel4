@@ -217,8 +217,7 @@ impl SecondaryThreadFn {
 fn get_tls_image() -> TlsImage {
     let phdr = locate_phdrs()
         .unwrap_or_else(|err| abort!("{err}"))
-        .iter()
-        .find(|phdr| phdr.p_type == PT_TLS)
+        .find_by_type(PT_TLS)
         .unwrap_or_else(|| abort!("missing PT_TLS program header"));
     let unchecked = UncheckedTlsImage {
         vaddr: phdr.p_vaddr,

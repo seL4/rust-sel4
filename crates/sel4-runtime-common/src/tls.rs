@@ -17,8 +17,7 @@ use sel4_initialize_tls::{DEFAULT_SET_THREAD_POINTER_FN, SetThreadPointerFn, Unc
 pub(crate) unsafe fn with_tls(f: impl FnOnce() -> !) -> ! {
     let phdr = locate_phdrs()
         .unwrap_or_else(|err| abort!("{err}"))
-        .iter()
-        .find(|phdr| phdr.p_type == PT_TLS)
+        .find_by_type(PT_TLS)
         .unwrap_or_else(|| abort!("no PT_TLS segment"));
     let unchecked = UncheckedTlsImage {
         vaddr: phdr.p_vaddr,
