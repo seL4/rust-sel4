@@ -2870,6 +2870,14 @@ name = "sel4-phdrs"
 version = "0.1.0"
 
 [[package]]
+name = "sel4-phdrs-patched"
+version = "0.1.0"
+dependencies = [
+ "sel4-phdrs",
+ "sel4-rodata-static",
+]
+
+[[package]]
 name = "sel4-pl011-driver"
 version = "0.1.0"
 dependencies = [
@@ -2910,6 +2918,7 @@ dependencies = [
  "cfg-if",
  "sel4-panicking-env",
  "sel4-phdrs",
+ "sel4-phdrs-patched",
  "sel4-stack",
 ]
 
