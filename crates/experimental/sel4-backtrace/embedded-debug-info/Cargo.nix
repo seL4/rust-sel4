@@ -13,6 +13,8 @@ mk {
     object = { version = versions.object; default-features = false; features = [ "read" ]; };
     inherit (localCrates)
       sel4-backtrace-addr2line-context-helper
+      sel4-phdrs
+      sel4-phdrs-patched
     ;
   };
 }

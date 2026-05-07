@@ -10,7 +10,13 @@ use std::io;
 use clap::{Arg, Command};
 use num::NumCast;
 
-use sel4_synthetic_elf::{Builder, PatchValue, Segment, object};
+use object::elf::PF_R;
+use sel4_patch_elf::{FileHeaderExt, GenericProgramHeader, Patching};
+
+const PT_SEL4_EMBEDDED_DEBUG_INFO: u32 = 0x64c3_4005;
+
+// HACK
+const PAGE_SIZE: u64 = 4096;
 
 fn main() -> Result<(), io::Error> {
     let matches = Command::new("")
@@ -31,12 +37,6 @@ fn main() -> Result<(), io::Error> {
                 .short('o')
                 .value_name("OUT_ELF")
                 .required(true),
-        )
-        .arg(
-            Arg::new("object_names_level")
-                .long("object-names-level")
-                .short('n')
-                .value_name("OBJECT_NAMES_LEVEL"),
         )
         .get_matches();
 
@@ -61,24 +61,23 @@ fn main() -> Result<(), io::Error> {
     fs::write(out_elf_path, out_elf_buf)
 }
 
-fn with_bit_width<T: object::read::elf::FileHeader<Word: NumCast + PatchValue>>(
+fn with_bit_width<T: object::read::elf::FileHeader<Word: NumCast> + FileHeaderExt>(
     image_elf: &object::read::elf::ElfFile<T>,
     content: &[u8],
 ) -> Vec<u8> {
-    let mut builder = Builder::new(image_elf).unwrap();
+    let mut patching = Patching::new(image_elf);
 
-    builder.discard_p_align(true);
+    patching.add_segment_with_info_phdr(
+        GenericProgramHeader {
+            p_flags: PF_R,
+            p_memsz: content.len().try_into().unwrap(),
+            p_align: PAGE_SIZE,
+            ..Default::default()
+        },
+        1,
+        content,
+        PT_SEL4_EMBEDDED_DEBUG_INFO,
+    );
 
-    let vaddr = builder.footprint().unwrap().end.next_multiple_of(4096);
-
-    builder.add_segment(Segment::simple(vaddr, content.into()));
-
-    builder
-        .patch_word_with_cast("embedded_debug_info_start", vaddr)
-        .unwrap();
-    builder
-        .patch_word_with_cast("embedded_debug_info_size", content.len())
-        .unwrap();
-
-    builder.build().unwrap()
+    patching.finalize(PAGE_SIZE)
 }

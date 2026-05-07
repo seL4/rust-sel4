@@ -20,3 +20,5 @@ license = "BSD-2-Clause"
 addr2line = { version = "0.26.0", default-features = false }
 object = { version = "0.38.1", default-features = false, features = ["read"] }
 sel4-backtrace-addr2line-context-helper = { path = "../addr2line-context-helper" }
+sel4-phdrs = { path = "../../../sel4-phdrs" }
+sel4-phdrs-patched = { path = "../../../sel4-phdrs/patched" }

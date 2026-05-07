@@ -2451,6 +2451,8 @@ dependencies = [
  "addr2line",
  "object",
  "sel4-backtrace-addr2line-context-helper",
+ "sel4-phdrs",
+ "sel4-phdrs-patched",
 ]
 
 [[package]]
@@ -2459,7 +2461,8 @@ version = "0.1.0"
 dependencies = [
  "clap",
  "num",
- "sel4-synthetic-elf",
+ "object",
+ "sel4-patch-elf",
 ]
 
 [[package]]
