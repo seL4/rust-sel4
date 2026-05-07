@@ -15,9 +15,7 @@ use object::read::elf::{ElfFile, FileHeader, ProgramHeader};
 use object::{File, Object, ObjectSection, Pod, pod};
 use rangemap::RangeSet;
 
-mod patch;
-
-use patch::{FileHeaderExt, GenericProgramHeader, Patching, ProgramHeaderExt};
+use sel4_patch_elf::{FileHeaderExt, GenericProgramHeader, Patching, ProgramHeaderExt};
 
 pub const PT_SEL4_RESET_REGIONS: u32 = 0x64c3_4001;
 

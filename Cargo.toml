@@ -142,6 +142,7 @@ members = [
     "crates/sel4-one-ref-cell",
     "crates/sel4-panicking",
     "crates/sel4-panicking/env",
+    "crates/sel4-patch-elf",
     "crates/sel4-phdrs",
     "crates/sel4-phdrs/patched",
     "crates/sel4-platform-info",

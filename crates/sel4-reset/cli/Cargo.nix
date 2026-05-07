@@ -16,5 +16,8 @@ mk {
       object
     ;
     clap = { version = versions.clap; features = [ "derive" ]; };
+    inherit (localCrates)
+      sel4-patch-elf
+    ;
   };
 }
