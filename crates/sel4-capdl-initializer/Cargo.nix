@@ -20,6 +20,7 @@ mk {
       sel4-immediate-sync-once-cell
       sel4-phdrs
       sel4-phdrs-patched
+      sel4-no-allocator
     ;
     sel4-root-task = localCrates.sel4-root-task // { features = [ "single-threaded" ]; };
     sel4-capdl-initializer-types = localCrates.sel4-capdl-initializer-types // { features = [ "sel4" ]; };

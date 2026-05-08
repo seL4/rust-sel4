@@ -1,8 +1,10 @@
 //
-// Copyright 2025, Colias Group, LLC
+// Copyright 2026, Colias Group, LLC
 //
 // SPDX-License-Identifier: BSD-2-Clause
 //
+
+#![no_std]
 
 use core::alloc::{GlobalAlloc, Layout};
 
@@ -13,14 +15,14 @@ struct NoAllocator;
 
 unsafe impl GlobalAlloc for NoAllocator {
     unsafe fn alloc(&self, _layout: Layout) -> *mut u8 {
-        unsafe { sel4_capdl_initializer__no_allocator_nonexistent() }
+        __sel4_no_allocator__undefined()
     }
 
     unsafe fn dealloc(&self, _ptr: *mut u8, _layout: Layout) {
-        unsafe { sel4_capdl_initializer__no_allocator_nonexistent() }
+        __sel4_no_allocator__undefined()
     }
 }
 
 unsafe extern "Rust" {
-    fn sel4_capdl_initializer__no_allocator_nonexistent() -> !;
+    safe fn __sel4_no_allocator__undefined() -> !;
 }
