@@ -9,7 +9,7 @@ use core::mem;
 
 use aarch64_cpu::registers::{CurrentEL, Readable};
 
-use sel4_kernel_loader_payload_types::{ArchivedPayloadInfo, ArchivedWord};
+use sel4_kernel_loader_payload_types::ArchivedPayloadInfo;
 
 use crate::{arch::Arch, main, secondary_main};
 
@@ -48,15 +48,11 @@ impl Arch for ArchImpl {
         payload_info: &ArchivedPayloadInfo,
         _per_core: Self::PerCore,
     ) -> ! {
-        let kernel_entry = unsafe {
-            mem::transmute::<usize, KernelEntry>(payload_info.kernel_image.virt_entry.to_usize())
-        };
+        let kernel_entry =
+            unsafe { mem::transmute::<usize, KernelEntry>(payload_info.kernel_entry.to_usize()) };
 
-        let (dtb_addr_p, dtb_size) = match payload_info.fdt_phys_addr_range.as_ref() {
-            Some(region) => {
-                let region = ArchivedWord::to_usize_range(region);
-                (region.start, region.len())
-            }
+        let (dtb_addr_p, dtb_size) = match payload_info.dtb.as_ref() {
+            Some(dtb) => (dtb.addr_p.to_usize(), dtb.size.to_usize()),
             None => (0, 0),
         };
 
@@ -72,10 +68,10 @@ impl Arch for ArchImpl {
         }
 
         (kernel_entry)(
-            payload_info.user_image.phys_addr_range.start.to_usize(),
-            payload_info.user_image.phys_addr_range.end.to_usize(),
-            0_usize.wrapping_sub(payload_info.user_image.phys_to_virt_offset.to_usize()) as isize,
-            payload_info.user_image.virt_entry.to_usize(),
+            payload_info.user_image.ui_p_reg_start.to_usize(),
+            payload_info.user_image.ui_p_reg_end.to_usize(),
+            payload_info.user_image.pv_offset.to_usize(),
+            payload_info.user_image.v_entry.to_usize(),
             dtb_addr_p,
             dtb_size,
         )
@@ -85,7 +81,7 @@ impl Arch for ArchImpl {
 type KernelEntry = extern "C" fn(
     ui_p_reg_start: usize,
     ui_p_reg_end: usize,
-    pv_offset: isize,
+    pv_offset: usize,
     v_entry: usize,
     dtb_addr_p: usize,
     dtb_size: usize,
