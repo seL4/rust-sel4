@@ -23,7 +23,7 @@ num = "0.4.3"
 object = "0.38.1"
 rkyv = "0.8.12"
 sel4-config-types = { path = "../../sel4/config/types", features = ["serde"] }
-sel4-kernel-loader-payload-types = { path = "../payload-types", features = ["serde"] }
+sel4-kernel-loader-payload-types = { path = "../payload-types" }
 sel4-patch-elf = { path = "../../sel4-patch-elf" }
 sel4-phdrs-constants = { path = "../../sel4-phdrs/constants" }
 serde = { version = "1.0.228", default-features = false, features = ["alloc", "derive"] }

@@ -1064,7 +1064,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b1edcd5a338e64688fbdcb7531a846cfd3476a54784dcb918a0844682bc7ada5"
 dependencies = [
  "hash32 0.3.1",
- "serde",
  "stable_deref_trait",
 ]
 
@@ -2722,11 +2721,8 @@ version = "0.1.0"
 name = "sel4-kernel-loader-payload-types"
 version = "0.1.0"
 dependencies = [
- "heapless 0.9.1",
- "num-traits",
  "rkyv",
  "sel4-platform-info-types",
- "serde",
 ]
 
 [[package]]
