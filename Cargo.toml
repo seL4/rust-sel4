@@ -139,6 +139,7 @@ members = [
     "crates/sel4-microkit",
     "crates/sel4-microkit/base",
     "crates/sel4-microkit/macros",
+    "crates/sel4-no-allocator",
     "crates/sel4-one-ref-cell",
     "crates/sel4-panicking",
     "crates/sel4-panicking/env",
