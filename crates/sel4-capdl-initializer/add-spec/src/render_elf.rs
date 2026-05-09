@@ -24,13 +24,13 @@ impl RenderElfArgs<'_> {
     ) -> Vec<u8> {
         let mut patching = Patching::new(orig_elf);
 
-        patching.add_data_segment(
+        patching.add_data_segment_with_meta_phdr(
             PT_SEL4_CAPDL_FRAME_DATA,
             self.embedded_frame_data_alignment.try_into().unwrap(),
             self.embedded_frame_data,
         );
 
-        patching.add_data_segment(
+        patching.add_data_segment_with_meta_phdr(
             PT_SEL4_CAPDL_SPEC,
             self.spec_data_alignment.try_into().unwrap(),
             self.spec_data,

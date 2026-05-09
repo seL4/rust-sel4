@@ -2670,8 +2670,7 @@ dependencies = [
  "sel4-bcm2835-aux-uart-driver",
  "sel4-build-env",
  "sel4-config",
- "sel4-kernel-loader-embed-page-tables",
- "sel4-kernel-loader-embed-page-tables-runtime",
+ "sel4-immutable-cell",
  "sel4-kernel-loader-payload-types",
  "sel4-logging",
  "sel4-no-allocator",
@@ -2691,6 +2690,7 @@ name = "sel4-kernel-loader-add-payload"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "bitfield",
  "clap",
  "num",
  "object",
@@ -2703,19 +2703,6 @@ dependencies = [
  "serde_json",
  "serde_yaml",
 ]
-
-[[package]]
-name = "sel4-kernel-loader-embed-page-tables"
-version = "0.1.0"
-dependencies = [
- "bitfield",
- "proc-macro2",
- "quote",
-]
-
-[[package]]
-name = "sel4-kernel-loader-embed-page-tables-runtime"
-version = "0.1.0"
 
 [[package]]
 name = "sel4-kernel-loader-payload-types"

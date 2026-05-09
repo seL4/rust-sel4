@@ -14,6 +14,7 @@ pub struct AbstractRegion<T> {
 }
 
 impl<T> AbstractRegion<T> {
+    #[cfg(test)]
     pub fn new(range: Range<u64>, content: T) -> Self {
         Self { range, content }
     }

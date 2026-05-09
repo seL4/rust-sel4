@@ -32,8 +32,6 @@ pub(crate) enum ArchImpl {}
 impl Arch for ArchImpl {
     type PerCore = ();
 
-    fn init() {}
-
     fn idle() -> ! {
         loop {
             unsafe {

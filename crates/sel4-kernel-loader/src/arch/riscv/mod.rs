@@ -12,13 +12,7 @@ use riscv::register::satp;
 use sel4_config::sel4_cfg_if;
 use sel4_kernel_loader_payload_types::ArchivedPayloadInfo;
 
-use crate::{
-    arch::Arch,
-    main, secondary_main,
-    this_image::page_tables::kernel::{
-        kernel_boot_level_0_table, kernel_boot_level_0_table_access,
-    },
-};
+use crate::{arch::Arch, main, secondary_main, this_image::kernel_boot_level_0_table};
 
 pub(crate) struct PerCoreImpl {
     hart_id: usize,
@@ -38,12 +32,6 @@ pub(crate) enum ArchImpl {}
 
 impl Arch for ArchImpl {
     type PerCore = PerCoreImpl;
-
-    fn init() {
-        unsafe {
-            kernel_boot_level_0_table_access.finish_for_riscv();
-        }
-    }
 
     fn idle() -> ! {
         loop {
@@ -134,7 +122,7 @@ fn switch_page_tables() {
     const MODE: satp::Mode = satp::Mode::Sv39;
 
     unsafe {
-        let ppn = kernel_boot_level_0_table.value() as usize >> 12;
+        let ppn = kernel_boot_level_0_table.get() >> 12;
         asm!("sfence.vma", options(nostack));
         satp::set(MODE, 0, ppn);
         asm!("fence.i", options(nostack));

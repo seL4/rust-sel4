@@ -39,7 +39,7 @@ struct Cli {
     #[arg(long, short = 't')]
     timeout: Option<u32>,
     #[arg(last = true)]
-    simulate_args: Option<String>,
+    simulate_args: Vec<String>,
 }
 
 // TODO allow specifying timeout by embedding in file

@@ -18,11 +18,11 @@ mk {
       sel4-logging
       sel4-config
       sel4-kernel-loader-payload-types
-      sel4-kernel-loader-embed-page-tables-runtime
       sel4-stack
       sel4-phdrs
       sel4-phdrs-patched
       sel4-no-allocator
+      sel4-immutable-cell
     ;
   };
   target."cfg(any(target_arch = \"riscv32\", target_arch = \"riscv64\"))".dependencies = {
@@ -51,7 +51,6 @@ mk {
       sel4-config
       sel4-build-env
       sel4-kernel-loader-payload-types
-      sel4-kernel-loader-embed-page-tables
     ;
   };
 }

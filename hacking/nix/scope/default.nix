@@ -332,7 +332,7 @@ superCallPackage ../rust-utils {} self //
     test = true;
     rootCrates = with crates; [
       sel4-bitfield-ops
-      sel4-kernel-loader-embed-page-tables
+      sel4-kernel-loader-add-payload
       sel4-backtrace-types
     ];
     features = [
