@@ -148,7 +148,7 @@ fn add_regions<'a, T: FileHeader<Word: NumCast> + FileHeaderExt>(
     }
 
     let regions_meta_data = RegionMeta::pack_to_vec(&regions);
-    this.add_data_segment(
+    this.add_data_segment_with_meta_phdr(
         PT_SEL4_RESET_REGIONS,
         align_of::<RegionMeta<T>>().try_into().unwrap(),
         &regions_meta_data,

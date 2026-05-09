@@ -17,6 +17,7 @@ mk {
       clap
       object
       rkyv
+      bitfield
     ;
     serde = serdeWith [ "alloc" "derive" ];
     inherit (localCrates)

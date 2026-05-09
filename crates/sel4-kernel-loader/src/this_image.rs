@@ -6,6 +6,7 @@
 
 use core::ops::Range;
 
+use sel4_immutable_cell::ImmutableCell;
 use sel4_kernel_loader_payload_types::*;
 use sel4_phdrs::{PT_SEL4_KERNEL_LOADER_PAYLOAD, locate_phdrs};
 
@@ -27,15 +28,15 @@ pub(crate) fn get_user_image_bounds() -> Range<usize> {
     locate_phdrs().unwrap().footprint().unwrap()
 }
 
-pub(crate) mod page_tables {
-    #[sel4_config::sel4_cfg(ARCH_ARM)]
-    pub(crate) mod loader {
-        include!(concat!(env!("OUT_DIR"), "/loader_page_tables.rs"));
-    }
-    pub(crate) mod kernel {
-        include!(concat!(env!("OUT_DIR"), "/kernel_page_tables.rs"));
-    }
-}
+#[unsafe(no_mangle)]
+#[unsafe(link_section = ".data")]
+#[used(linker)]
+static loader_level_0_table: ImmutableCell<usize> = ImmutableCell::new(0);
+
+#[unsafe(no_mangle)]
+#[unsafe(link_section = ".data")]
+#[used(linker)]
+pub static kernel_boot_level_0_table: ImmutableCell<usize> = ImmutableCell::new(0);
 
 pub(crate) mod stacks {
     use sel4_config::sel4_cfg_usize;

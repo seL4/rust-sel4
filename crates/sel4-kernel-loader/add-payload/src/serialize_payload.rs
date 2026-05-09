@@ -4,40 +4,29 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use std::fs::{self, File};
+use std::fs;
 use std::ops::Range;
 use std::path::Path;
 
 use num::Integer;
-use object::elf::PT_LOAD;
-use object::read::elf::{ElfFile, ElfSegment, FileHeader, ProgramHeader};
-use object::{Object, ObjectSegment, ReadCache, ReadRef};
-use serde::Deserialize;
+use object::read::elf::{ElfFile, FileHeader, ProgramHeader};
+use object::{Object, ObjectSegment, ReadRef};
 
 use sel4_kernel_loader_payload_types::{
     DtbInfo, Payload, PayloadInfo, Region, UserImageInfo, Word,
 };
 
+use crate::platform_info::PlatformInfoForBuildSystem;
+use crate::utils::{loadable_segments, virt_footprint, with_elf};
+
 const PAGE_SIZE: u64 = 4096;
-
-type Ranges = Vec<Range<u64>>;
-
-#[derive(Debug, Clone, Deserialize)]
-struct PlatformInfoForBuildSystem {
-    memory: Ranges,
-    #[allow(dead_code)]
-    devices: Ranges,
-}
 
 pub fn serialize_payload<T: FileHeader>(
     kernel_path: impl AsRef<Path>,
     app_path: impl AsRef<Path>,
     dtb_path: impl AsRef<Path>,
-    platform_info_path: impl AsRef<Path>,
+    platform_info: &PlatformInfoForBuildSystem,
 ) -> Payload {
-    let platform_info: PlatformInfoForBuildSystem =
-        serde_yaml::from_reader(fs::File::open(&platform_info_path).unwrap()).unwrap();
-
     let mut builder = Builder::new();
 
     let kernel_entry = with_elf::<T, _, _>(&kernel_path, |elf| {
@@ -127,35 +116,6 @@ impl Builder {
 
 //
 
-fn with_elf<T: FileHeader, R, F>(path: impl AsRef<Path>, f: F) -> R
-where
-    F: FnOnce(&ElfFile<T, &ReadCache<File>>) -> R,
-{
-    let file = File::open(path).unwrap();
-    let read_cache = ReadCache::new(file);
-    let elf = ElfFile::<T, _>::parse(&read_cache).unwrap();
-    f(&elf)
-}
-
-fn loadable_segments<'data, 'file, T: FileHeader, R: ReadRef<'data>>(
-    elf: &'file ElfFile<'data, T, R>,
-) -> impl Iterator<Item = ElfSegment<'data, 'file, T, R>> {
-    elf.segments()
-        .filter(|seg| seg.elf_program_header().p_type(elf.endian()) == PT_LOAD)
-}
-
-fn virt_footprint<'a, T: FileHeader, R: ReadRef<'a>>(elf: &ElfFile<'a, T, R>) -> Range<u64> {
-    let min = loadable_segments(elf)
-        .map(|seg| seg.address())
-        .min()
-        .unwrap();
-    let max = loadable_segments(elf)
-        .map(|seg| seg.address().strict_add(seg.size()))
-        .max()
-        .unwrap();
-    min..max
-}
-
 fn coarsen_footprint(footprint: &Range<u64>, granularity: u64) -> Range<u64> {
     let start = footprint.start.prev_multiple_of(&granularity);
     let end = footprint.end.next_multiple_of(granularity);
@@ -163,6 +123,9 @@ fn coarsen_footprint(footprint: &Range<u64>, granularity: u64) -> Range<u64> {
 }
 
 fn truncate_word<T: FileHeader>(word: u64) -> u64 {
-    let bits = if T::is_type_64_sized() { 64 } else { 32 };
-    word & (!0 >> bits)
+    if T::is_type_64_sized() {
+        word
+    } else {
+        word & 0xffff_ffff
+    }
 }
