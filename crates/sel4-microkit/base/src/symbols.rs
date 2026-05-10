@@ -56,7 +56,6 @@ macro_rules! var {
     ($(#[$attrs:meta])* $symbol:ident: $ty:ty = $default:expr) => {{
         use $crate::_private::ImmutableCell;
 
-        #[allow(non_upper_case_globals)]
         $(#[$attrs])*
         #[unsafe(no_mangle)]
         #[unsafe(link_section = ".data")]

@@ -66,7 +66,6 @@ macro_rules! declare_entrypoint_with_stack_init {
 macro_rules! declare_stack {
     ($size:expr) => {
         const _: () = {
-            #[allow(non_upper_case_globals)]
             #[unsafe(no_mangle)]
             static __sel4_runtime_common__stack_bottom: $crate::_private::StackBottom = {
                 static STACK: $crate::_private::Stack<{ $size }> = $crate::_private::Stack::new();
