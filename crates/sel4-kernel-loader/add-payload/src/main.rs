@@ -37,28 +37,24 @@ fn main() -> Result<()> {
         eprintln!("{args:#?}");
     }
 
-    let sel4_config: Configuration =
+    let kernel_config: Configuration =
         serde_json::from_reader(File::open(&args.sel4_config_path).unwrap()).unwrap();
 
-    let word_size = sel4_config.get("WORD_SIZE").unwrap().as_str().unwrap();
-
-    match word_size {
-        "32" => continue_with_config::<FileHeader32<Endianness>>(&args, &sel4_config),
-        "64" => continue_with_config::<FileHeader64<Endianness>>(&args, &sel4_config),
+    match kernel_config.get("WORD_SIZE").unwrap().as_str().unwrap() {
+        "32" => continue_with_type::<FileHeader32<Endianness>>(&args, &kernel_config),
+        "64" => continue_with_type::<FileHeader64<Endianness>>(&args, &kernel_config),
         _ => {
             panic!()
         }
     }
 }
 
-fn continue_with_config<T>(args: &Args, sel4_config: &Configuration) -> Result<()>
+fn continue_with_type<T>(args: &Args, kernel_config: &Configuration) -> Result<()>
 where
     T: FileHeaderExt,
 {
     let platform_info: OwnedPlatformInfo =
         serde_yaml::from_reader(fs::File::open(&args.platform_info_path).unwrap()).unwrap();
-
-    let loader_bytes = fs::read(&args.loader_path)?;
 
     let payload = serialize_payload::serialize_payload::<T>(
         &args.kernel_path,
@@ -69,73 +65,69 @@ where
 
     let payload_data: ArchiveAlignedVec = payload.to_bytes().unwrap();
 
-    let scheme = Scheme::from_config(sel4_config);
+    let orig_elf_bytes = fs::read(&args.loader_path)?;
+    let orig_elf = ElfFile::<T>::parse(&orig_elf_bytes).unwrap();
 
-    let final_loader = {
-        let orig_elf = ElfFile::<T>::parse(&loader_bytes).unwrap();
-        let mut patching = Patching::new(&orig_elf);
+    let mut patching = Patching::new(&orig_elf);
 
-        let smp = sel4_config
-            .get("MAX_NUM_NODES")
-            .unwrap()
-            .as_str()
-            .unwrap()
-            .parse::<u32>()
-            .unwrap()
-            > 1;
+    let scheme = Scheme::from_config(kernel_config);
 
-        let min_level_align = 1
-            << (0..scheme.num_levels())
-                .map(|level| scheme.level_align_bits(level))
-                .min()
-                .unwrap();
+    let smp = kernel_config
+        .get("MAX_NUM_NODES")
+        .unwrap()
+        .as_str()
+        .unwrap()
+        .parse::<u32>()
+        .unwrap()
+        > 1;
 
-        if sel4_config.get("ARCH_ARM").unwrap().as_bool().unwrap() {
-            let mut addr_slot = None;
-            patching.add_data_segment(min_level_align, |vaddr| {
-                let (bytes, root_vaddr) = maps::mk_loader_map(&scheme, smp, vaddr, &platform_info);
+    let min_level_align = 1
+        << (0..scheme.num_levels())
+            .map(|level| scheme.level_align_bits(level))
+            .min()
+            .unwrap();
+
+    if kernel_config.get("ARCH_ARM").unwrap().as_bool().unwrap() {
+        let mut addr_slot = None;
+        patching.add_data_segment(min_level_align, |vaddr| {
+            let (bytes, root_vaddr) = maps::mk_loader_map(&scheme, smp, vaddr, &platform_info);
+            addr_slot = Some(root_vaddr);
+            bytes
+        });
+        let addr = addr_slot.unwrap().try_into().unwrap();
+        patching.patch_word("loader_level_0_table", addr);
+    }
+
+    {
+        let mut addr_slot = None;
+        patching.add_data_segment(min_level_align, |vaddr| {
+            with_elf::<T, _, _>(&args.kernel_path, |elf| {
+                let phys_to_virt_offset = kernel_phys_to_virt_offset(elf, scheme.vaddr_mask());
+                let virt_range = virt_footprint(elf);
+                let masked_virt_addr_range =
+                    virt_range.start & scheme.vaddr_mask()..virt_range.end & scheme.vaddr_mask();
+                let (bytes, root_vaddr) = maps::mk_kernel_map(
+                    &scheme,
+                    smp,
+                    vaddr,
+                    masked_virt_addr_range,
+                    phys_to_virt_offset,
+                );
                 addr_slot = Some(root_vaddr);
                 bytes
-            });
-            let addr = addr_slot.unwrap().try_into().unwrap();
-            patching.patch_word("loader_level_0_table", addr);
-        }
+            })
+        });
+        let addr = addr_slot.unwrap().try_into().unwrap();
+        patching.patch_word("kernel_boot_level_0_table", addr);
+    }
 
-        {
-            let mut addr_slot = None;
-            patching.add_data_segment(min_level_align, |vaddr| {
-                with_elf::<T, _, _>(&args.kernel_path, |elf| {
-                    let phys_to_virt_offset = kernel_phys_to_virt_offset(elf, scheme.vaddr_mask());
-                    let virt_range = virt_footprint(elf);
-                    let masked_virt_addr_range = virt_range.start & scheme.vaddr_mask()
-                        ..virt_range.end & scheme.vaddr_mask();
-                    let (bytes, root_vaddr) = maps::mk_kernel_map(
-                        &scheme,
-                        smp,
-                        vaddr,
-                        masked_virt_addr_range,
-                        phys_to_virt_offset,
-                    );
-                    addr_slot = Some(root_vaddr);
-                    bytes
-                })
-            });
-            let addr = addr_slot.unwrap().try_into().unwrap();
-            patching.patch_word("kernel_boot_level_0_table", addr);
-        }
+    patching.add_data_segment_with_meta_phdr(
+        PT_SEL4_KERNEL_LOADER_PAYLOAD,
+        ArchiveAlignedVec::ALIGNMENT.try_into().unwrap(),
+        &payload_data,
+    );
 
-        patching.add_data_segment_with_meta_phdr(
-            PT_SEL4_KERNEL_LOADER_PAYLOAD,
-            ArchiveAlignedVec::ALIGNMENT.try_into().unwrap(),
-            &payload_data,
-        );
-
-        patching.finalize()
-    };
-
-    let out_file_path = &args.out_file_path;
-
-    fs::write(out_file_path, final_loader)?;
+    fs::write(&args.out_file_path, patching.finalize())?;
     Ok(())
 }
 
