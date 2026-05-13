@@ -11,7 +11,7 @@ use super::regions::{AbstractRegion, AbstractRegions};
 use super::scheme::{LeafDescriptor, Level, RawDescriptor, Scheme};
 
 #[derive(Debug)]
-pub struct Table {
+pub(crate) struct Table {
     pub(crate) entries: Vec<AbstractEntry>,
 }
 
@@ -22,37 +22,40 @@ pub(crate) enum AbstractEntry {
     Branch(Box<Table>),
 }
 
-pub trait MkLeafFn: Fn(MkLeafArgs<'_>) -> RawDescriptor {}
+pub(crate) trait MkLeafFn: Fn(MkLeafArgs<'_>) -> RawDescriptor {}
 
 impl<F: Fn(MkLeafArgs) -> RawDescriptor> MkLeafFn for F {}
 
-pub struct MkLeafArgs<'a> {
+pub(crate) struct MkLeafArgs<'a> {
     scheme: &'a Scheme,
     level: Level,
     vaddr: u64,
 }
 
 impl<'a> MkLeafArgs<'a> {
-    pub fn scheme(&self) -> &'a Scheme {
+    pub(crate) fn scheme(&self) -> &'a Scheme {
         self.scheme
     }
 
-    pub fn descriptor<T: LeafDescriptor>(&self, vaddr_to_paddr: impl FnOnce(u64) -> u64) -> T {
+    pub(crate) fn descriptor<T: LeafDescriptor>(
+        &self,
+        vaddr_to_paddr: impl FnOnce(u64) -> u64,
+    ) -> T {
         self.scheme()
             .leaf_descriptor_from_level_paddr(self.level, (vaddr_to_paddr)(self.vaddr))
     }
 
-    pub fn identity_descriptor<T: LeafDescriptor>(&self) -> T {
+    pub(crate) fn identity_descriptor<T: LeafDescriptor>(&self) -> T {
         self.descriptor(|vaddr| vaddr)
     }
 }
 
-pub struct RegionContent {
+pub(crate) struct RegionContent {
     mk_leaf: Box<dyn MkLeafFn>,
 }
 
 impl RegionContent {
-    pub fn new(mk_leaf: impl MkLeafFn + 'static) -> Self {
+    pub(crate) fn new(mk_leaf: impl MkLeafFn + 'static) -> Self {
         Self {
             mk_leaf: Box::new(mk_leaf),
         }
@@ -60,7 +63,10 @@ impl RegionContent {
 }
 
 impl Table {
-    pub fn construct(scheme: &Scheme, regions: &AbstractRegions<Option<RegionContent>>) -> Self {
+    pub(crate) fn construct(
+        scheme: &Scheme,
+        regions: &AbstractRegions<Option<RegionContent>>,
+    ) -> Self {
         assert_eq!(regions.bounds(), scheme.virt_bounds());
         Construction::new(scheme, regions.as_slice().iter()).construct()
     }

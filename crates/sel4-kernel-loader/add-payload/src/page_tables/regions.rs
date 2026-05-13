@@ -8,14 +8,14 @@ use std::ops::Range;
 use std::sync::Arc;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct AbstractRegion<T> {
+pub(crate) struct AbstractRegion<T> {
     pub(crate) range: Range<u64>,
     pub(crate) content: T,
 }
 
 impl<T> AbstractRegion<T> {
     #[cfg(test)]
-    pub fn new(range: Range<u64>, content: T) -> Self {
+    pub(crate) fn new(range: Range<u64>, content: T) -> Self {
         Self { range, content }
     }
 
@@ -28,17 +28,17 @@ impl<T> AbstractRegion<T> {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct AbstractRegionsBuilder<T> {
+pub(crate) struct AbstractRegionsBuilder<T> {
     regions: Vec<AbstractRegion<Arc<T>>>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct AbstractRegions<T> {
+pub(crate) struct AbstractRegions<T> {
     checked: AbstractRegionsBuilder<T>,
 }
 
 impl<T> AbstractRegionsBuilder<T> {
-    pub fn new_with_background(background: AbstractRegion<T>) -> Self {
+    pub(crate) fn new_with_background(background: AbstractRegion<T>) -> Self {
         Self {
             regions: vec![background.into_arc()],
         }
@@ -52,7 +52,7 @@ impl<T> AbstractRegionsBuilder<T> {
 }
 
 impl<T> AbstractRegionsBuilder<T> {
-    pub fn insert(self, region: AbstractRegion<T>) -> Self {
+    pub(crate) fn insert(self, region: AbstractRegion<T>) -> Self {
         {
             let bounds = self.bounds();
             assert!(bounds.start <= region.range.start);
@@ -99,18 +99,18 @@ impl<T> AbstractRegionsBuilder<T> {
         }
     }
 
-    pub fn build(self) -> AbstractRegions<T> {
+    pub(crate) fn build(self) -> AbstractRegions<T> {
         self.check();
         AbstractRegions { checked: self }
     }
 }
 
 impl<T> AbstractRegions<T> {
-    pub fn as_slice(&self) -> &[AbstractRegion<Arc<T>>] {
+    pub(crate) fn as_slice(&self) -> &[AbstractRegion<Arc<T>>] {
         &self.checked.regions
     }
 
-    pub fn bounds(&self) -> Range<u64> {
+    pub(crate) fn bounds(&self) -> Range<u64> {
         self.checked.bounds()
     }
 }

@@ -13,8 +13,8 @@ use serde::Deserialize;
 type Ranges = Vec<Range<u64>>;
 
 #[derive(Debug, Clone, Deserialize)]
-pub struct PlatformInfoForBuildSystem {
-    pub memory: Ranges,
+pub(crate) struct PlatformInfoForBuildSystem {
+    pub(crate) memory: Ranges,
     #[allow(dead_code)]
-    pub devices: Ranges,
+    pub(crate) devices: Ranges,
 }

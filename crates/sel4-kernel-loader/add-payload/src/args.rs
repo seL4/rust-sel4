@@ -8,19 +8,19 @@ use anyhow::Result;
 use clap::{Arg, ArgAction, Command};
 
 #[derive(Debug)]
-pub struct Args {
-    pub sel4_config_path: String,
-    pub kernel_path: String,
-    pub dtb_path: String,
-    pub platform_info_path: String,
-    pub loader_path: String,
-    pub app_path: String,
-    pub out_file_path: String,
-    pub verbose: bool,
+pub(crate) struct Args {
+    pub(crate) sel4_config_path: String,
+    pub(crate) kernel_path: String,
+    pub(crate) dtb_path: String,
+    pub(crate) platform_info_path: String,
+    pub(crate) loader_path: String,
+    pub(crate) app_path: String,
+    pub(crate) out_file_path: String,
+    pub(crate) verbose: bool,
 }
 
 impl Args {
-    pub fn parse() -> Result<Self> {
+    pub(crate) fn parse() -> Result<Self> {
         let matches = Command::new("")
             .arg(
                 Arg::new("sel4-prefix")
