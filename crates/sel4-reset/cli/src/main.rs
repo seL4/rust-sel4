@@ -110,7 +110,7 @@ fn add_regions<'a, T: FileHeader<Word: NumCast> + FileHeaderExt>(
             let p_filesz = phdr.p_filesz(endian).into();
             let p_align = phdr.p_align(endian).into();
             let ro_vaddr = this.next_aligned_vaddr(p_align, p_offset);
-            let ro_phdr = this.add_phdr(
+            this.add_phdr(
                 GenericProgramHeader {
                     p_type: PT_LOAD,
                     p_flags: PF_R,
@@ -123,17 +123,16 @@ fn add_regions<'a, T: FileHeader<Word: NumCast> + FileHeaderExt>(
                 }
                 .to_concrete(endian),
             );
-            let ro_p_vaddr = ro_phdr.p_vaddr(endian).into();
-            let ro_p_filesz = ro_phdr.p_filesz(endian).into();
+            let ro_filesz = p_filesz;
             for ephermal_region in
                 get_all_persistent_ranges(this.orig_elf()).gaps(&(p_vaddr..(p_vaddr + p_memsz)))
             {
                 let ephermal_region_size = ephermal_region.end - ephermal_region.start;
                 let ephermal_region_offset_in_segment = ephermal_region.start - p_vaddr;
-                let (src_vaddr, src_size) = if ephermal_region_offset_in_segment < ro_p_filesz {
+                let (src_vaddr, src_size) = if ephermal_region_offset_in_segment < ro_filesz {
                     (
-                        ro_p_vaddr + ephermal_region_offset_in_segment,
-                        (ro_p_filesz - ephermal_region_offset_in_segment).min(ephermal_region_size),
+                        ro_vaddr + ephermal_region_offset_in_segment,
+                        (ro_filesz - ephermal_region_offset_in_segment).min(ephermal_region_size),
                     )
                 } else {
                     (0, 0)
