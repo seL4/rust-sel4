@@ -8,8 +8,7 @@ use std::fs;
 use std::io;
 
 use clap::{Arg, Command};
-use num::NumCast;
-use object::read::elf::{ElfFile, FileHeader};
+use object::read::elf::ElfFile;
 
 use sel4_patch_elf::{FileHeaderExt, Patching};
 use sel4_phdrs_constants::PT_SEL4_EMBEDDED_DEBUG_INFO;
@@ -57,7 +56,7 @@ fn main() -> Result<(), io::Error> {
     fs::write(out_elf_path, out_elf_buf)
 }
 
-fn with_bit_width<T: FileHeader<Word: NumCast> + FileHeaderExt>(
+fn with_bit_width<T: FileHeaderExt>(
     image_elf: &ElfFile<T>,
     content: &[u8],
 ) -> Vec<u8> {

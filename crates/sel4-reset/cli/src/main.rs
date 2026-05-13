@@ -9,7 +9,6 @@ use std::path::PathBuf;
 
 use anyhow::Error;
 use clap::Parser;
-use num::NumCast;
 use object::elf::{PF_R, PF_W, PT_LOAD};
 use object::read::elf::{ElfFile, FileHeader, ProgramHeader};
 use object::{File, Object, ObjectSection, Pod, pod};
@@ -49,7 +48,7 @@ fn main() -> Result<(), Error> {
 
 fn continue_with_type<'a, T>(orig_elf: &'a ElfFile<'a, T>) -> Result<Vec<u8>, Error>
 where
-    T: FileHeader<Word: NumCast> + FileHeaderExt,
+    T: FileHeaderExt,
 {
     let mut patching = Patching::new(orig_elf);
     add_regions(&mut patching)?;
@@ -95,7 +94,7 @@ where
     set
 }
 
-fn add_regions<'a, T: FileHeader<Word: NumCast> + FileHeaderExt>(
+fn add_regions<'a, T: FileHeader + FileHeaderExt>(
     this: &mut Patching<'a, T>,
 ) -> Result<(), Error> {
     let endian = this.endian();
@@ -138,10 +137,10 @@ fn add_regions<'a, T: FileHeader<Word: NumCast> + FileHeaderExt>(
                     (0, 0)
                 };
                 regions.push(RegionMeta {
-                    dst_vaddr: <T::Word as NumCast>::from(ephermal_region.start).unwrap(),
-                    dst_size: <T::Word as NumCast>::from(ephermal_region_size).unwrap(),
-                    src_vaddr: <T::Word as NumCast>::from(src_vaddr).unwrap(),
-                    src_size: <T::Word as NumCast>::from(src_size).unwrap(),
+                    dst_vaddr: ephermal_region.start.try_into().unwrap(),
+                    dst_size: ephermal_region_size.try_into().unwrap(),
+                    src_vaddr: src_vaddr.try_into().unwrap(),
+                    src_size: src_size.try_into().unwrap(),
                 });
             }
         }
