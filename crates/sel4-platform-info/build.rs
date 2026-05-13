@@ -17,6 +17,9 @@ use sel4_platform_info_types::OwnedPlatformInfo;
 
 const SEL4_PLATFORM_INFO_ENV: &str = "SEL4_PLATFORM_INFO";
 
+#[sel4_config::sel4_cfg(ARCH_X86)]
+compile_error!("platform_gen.yaml is not generated for x86 platforms");
+
 fn main() {
     let platform_info_path =
         get_with_sel4_prefix_relative_fallback(SEL4_PLATFORM_INFO_ENV, "support/platform_gen.yaml");
