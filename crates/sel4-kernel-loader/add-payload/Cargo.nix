@@ -14,11 +14,11 @@ mk {
       serde_json
       serde_yaml
       num
-      clap
       object
       rkyv
       bitfield
     ;
+    clap = { version = versions.clap; features = [ "derive" ]; };
     inherit (localCrates)
       sel4-patch-elf
       sel4-phdrs-constants
