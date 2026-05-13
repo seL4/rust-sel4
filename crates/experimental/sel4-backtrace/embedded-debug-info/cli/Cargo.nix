@@ -9,7 +9,8 @@
 mk {
   package.name = "sel4-backtrace-embedded-debug-info-cli";
   dependencies = {
-    inherit (versions) clap object;
+    inherit (versions) object;
+    clap = { version = versions.clap; features = [ "derive" ]; };
     inherit (localCrates) sel4-patch-elf sel4-phdrs-constants;
   };
 }
