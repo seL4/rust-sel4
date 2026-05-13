@@ -130,8 +130,7 @@ impl<'a, T: FileHeaderExt> Patching<'a, T> {
         (phdr, ret)
     }
 
-    // TODO return () in public fn
-    pub fn add_data_segment<D: AsRef<[u8]>>(
+    fn add_data_segment_inner<D: AsRef<[u8]>>(
         &mut self,
         data_align: u64,
         f: impl FnOnce(u64) -> D,
@@ -145,9 +144,13 @@ impl<'a, T: FileHeaderExt> Patching<'a, T> {
         self.add_phdr(phdr.to_concrete(endian))
     }
 
+    pub fn add_data_segment<D: AsRef<[u8]>>(&mut self, data_align: u64, f: impl FnOnce(u64) -> D) {
+        self.add_data_segment_inner(data_align, f);
+    }
+
     pub fn add_data_segment_with_meta_phdr(&mut self, p_type: u32, data_align: u64, data: &[u8]) {
         let endian = self.endian();
-        let mut phdr = *self.add_data_segment(data_align, |_| data);
+        let mut phdr = *self.add_data_segment_inner(data_align, |_| data);
         phdr.set_p_type(endian, p_type);
         self.add_phdr(phdr);
     }
