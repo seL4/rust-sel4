@@ -9,6 +9,7 @@
 extern crate rustc_driver;
 extern crate rustc_target;
 
+use std::borrow::Cow;
 use std::collections::BTreeMap;
 use std::fs;
 use std::path::Path;
@@ -18,8 +19,6 @@ use rustc_target::spec::{
     Cc, Env, LinkerFlavor, Lld, Os, PanicStrategy, RelocModel, RelroLevel, Target,
 };
 
-use cfg_if::cfg_if;
-
 cfg_if! {
     if #[cfg(target_tuple)] {
         use rustc_target::spec::TargetTuple;
@@ -28,7 +27,8 @@ cfg_if! {
     }
 }
 
-use clap::{Arg, ArgAction, Command};
+use cfg_if::cfg_if;
+use clap::{Parser, Subcommand};
 
 const CHOSEN_LINKER_FLAVOR: LinkerFlavor = LinkerFlavor::Gnu(Cc::No, Lld::Yes);
 
@@ -314,12 +314,13 @@ fn do_list() {
 
 fn do_write(
     target_dir: impl AsRef<Path>,
-    optional_targets: Option<Vec<String>>,
+    optional_targets: Option<&[String]>,
 ) -> std::io::Result<()> {
     let all_targets = all_target_specs();
-    let these_targets =
-        optional_targets.unwrap_or_else(|| all_target_specs().keys().cloned().collect::<Vec<_>>());
-    for target_name in &these_targets {
+    let these_targets = optional_targets
+        .map(Cow::Borrowed)
+        .unwrap_or_else(|| Cow::Owned(all_target_specs().keys().cloned().collect::<Vec<_>>()));
+    for target_name in &*these_targets {
         let target_spec = all_targets.get(target_name).unwrap();
         write_one(&target_dir, target_name, target_spec)?;
     }
@@ -336,46 +337,41 @@ fn write_one(
     fs::write(path, contents)
 }
 
-fn main() -> std::io::Result<()> {
-    let matches = Command::new("")
-        .subcommand_required(true)
-        .subcommand(Command::new("list"))
-        .subcommand(
-            Command::new("write")
-                .arg(
-                    Arg::new("target_dir")
-                        .long("target-dir")
-                        .short('d')
-                        .value_name("TARGET_DIR")
-                        .required(true),
-                )
-                .arg(
-                    Arg::new("targets")
-                        .long("target")
-                        .short('t')
-                        .value_name("TARGET")
-                        .action(ArgAction::Append),
-                )
-                .arg(Arg::new("all").long("all").action(ArgAction::SetTrue)),
-        )
-        .get_matches();
+#[derive(Parser, Debug)]
+struct Cli {
+    #[command(subcommand)]
+    subcommand: CliSubcommand,
+}
 
-    match matches.subcommand() {
-        Some(("list", _)) => {
+#[derive(Subcommand, Debug)]
+enum CliSubcommand {
+    List,
+    Write(CliWrite),
+}
+
+#[derive(Parser, Debug)]
+struct CliWrite {
+    #[arg(long, short = 'd')]
+    target_dir: String,
+    #[arg(long, short = 't')]
+    targets: Vec<String>,
+    #[arg(long)]
+    all: bool,
+}
+
+fn main() -> std::io::Result<()> {
+    let cli = Cli::parse();
+    match &cli.subcommand {
+        CliSubcommand::List => {
             do_list();
         }
-        Some(("write", sub_matches)) => {
-            let target_dir = sub_matches.get_one::<String>("target_dir").unwrap();
-            let targets = sub_matches
-                .get_many::<String>("targets")
-                .map(|many| many.cloned().collect::<Vec<_>>())
-                .unwrap_or_else(Vec::new);
-            let all = *sub_matches.get_one::<bool>("all").unwrap();
-            let optional_targets = if all { None } else { Some(targets) };
-            do_write(target_dir, optional_targets)?;
-        }
-        _ => {
-            unreachable!()
+        CliSubcommand::Write(write_cli) => {
+            let optional_targets = if write_cli.all {
+                None
+            } else {
+                Some(&*write_cli.targets)
+            };
+            do_write(&write_cli.target_dir, optional_targets)?;
         }
     }
 
