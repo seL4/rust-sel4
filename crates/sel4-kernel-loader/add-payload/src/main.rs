@@ -15,16 +15,15 @@ use rkyv::util::AlignedVec;
 use sel4_config_types::Configuration;
 use sel4_patch_elf::{FileHeaderExt, Patching};
 use sel4_phdrs_constants::PT_SEL4_KERNEL_LOADER_PAYLOAD;
+use sel4_platform_info_types::OwnedPlatformInfo;
 
 mod args;
 mod maps;
 mod page_tables;
-mod platform_info;
 mod serialize_payload;
 mod utils;
 
 use args::Args;
-use platform_info::PlatformInfoForBuildSystem;
 
 use crate::page_tables::Scheme;
 use crate::utils::{virt_footprint, with_elf};
@@ -56,7 +55,7 @@ fn continue_with_config<T>(args: &Args, sel4_config: &Configuration) -> Result<(
 where
     T: FileHeaderExt,
 {
-    let platform_info: PlatformInfoForBuildSystem =
+    let platform_info: OwnedPlatformInfo =
         serde_yaml::from_reader(fs::File::open(&args.platform_info_path).unwrap()).unwrap();
 
     let loader_bytes = fs::read(&args.loader_path)?;

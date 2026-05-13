@@ -2698,7 +2698,7 @@ dependencies = [
  "sel4-kernel-loader-payload-types",
  "sel4-patch-elf",
  "sel4-phdrs-constants",
- "serde",
+ "sel4-platform-info-types",
  "serde_json",
  "serde_yaml",
 ]
@@ -2910,13 +2910,15 @@ dependencies = [
  "sel4-build-env",
  "sel4-config",
  "sel4-platform-info-types",
- "serde",
  "serde_yaml",
 ]
 
 [[package]]
 name = "sel4-platform-info-types"
 version = "0.1.0"
+dependencies = [
+ "serde",
+]
 
 [[package]]
 name = "sel4-reset"

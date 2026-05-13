@@ -56,10 +56,7 @@ fn main() -> Result<(), io::Error> {
     fs::write(out_elf_path, out_elf_buf)
 }
 
-fn with_bit_width<T: FileHeaderExt>(
-    image_elf: &ElfFile<T>,
-    content: &[u8],
-) -> Vec<u8> {
+fn with_bit_width<T: FileHeaderExt>(image_elf: &ElfFile<T>, content: &[u8]) -> Vec<u8> {
     let mut patching = Patching::new(image_elf);
     patching.add_data_segment_with_meta_phdr(PT_SEL4_EMBEDDED_DEBUG_INFO, 1, content);
     patching.finalize()

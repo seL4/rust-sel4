@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
 #
 
-{ mk, localCrates, versions, postcardWith, serdeWith }:
+{ mk, localCrates, versions, serdeWith }:
 
 mk {
   package.name = "sel4-kernel-loader-add-payload";
@@ -19,12 +19,12 @@ mk {
       rkyv
       bitfield
     ;
-    serde = serdeWith [ "alloc" "derive" ];
     inherit (localCrates)
       sel4-patch-elf
       sel4-phdrs-constants
       sel4-kernel-loader-payload-types
     ;
     sel4-config-types = localCrates.sel4-config-types // { features = [ "serde" ]; };
+    sel4-platform-info-types = localCrates.sel4-platform-info-types // { features = [ "owned" ]; };
   };
 }

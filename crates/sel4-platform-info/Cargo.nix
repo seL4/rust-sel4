@@ -15,10 +15,12 @@ mk {
   };
   build-dependencies = {
     inherit (versions) proc-macro2 quote serde_yaml;
-    serde = { version = versions.serde; features = [ "derive" ]; };
     inherit (localCrates)
       sel4-build-env
       sel4-config
     ;
+    sel4-platform-info-types = localCrates.sel4-platform-info-types // {
+      features = [ "owned" ];
+    };
   };
 }

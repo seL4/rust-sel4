@@ -15,8 +15,8 @@ use object::{Object, ObjectSegment, ReadRef};
 use sel4_kernel_loader_payload_types::{
     DtbInfo, Payload, PayloadInfo, Region, UserImageInfo, Word,
 };
+use sel4_platform_info_types::OwnedPlatformInfo;
 
-use crate::platform_info::PlatformInfoForBuildSystem;
 use crate::utils::{loadable_segments, virt_footprint, with_elf};
 
 const PAGE_SIZE: u64 = 4096;
@@ -25,7 +25,7 @@ pub(crate) fn serialize_payload<T: FileHeader>(
     kernel_path: impl AsRef<Path>,
     app_path: impl AsRef<Path>,
     dtb_path: impl AsRef<Path>,
-    platform_info: &PlatformInfoForBuildSystem,
+    platform_info: &OwnedPlatformInfo,
 ) -> Payload {
     let mut builder = Builder::new();
 
