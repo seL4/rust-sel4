@@ -14,7 +14,7 @@ use crate::page_tables::{
 };
 use crate::platform_info::PlatformInfoForBuildSystem;
 
-pub fn mk_loader_map(
+pub(crate) fn mk_loader_map(
     scheme: &Scheme,
     smp: bool,
     vaddr: u64,
@@ -40,7 +40,7 @@ pub fn mk_loader_map(
     regions.build().construct_table(scheme).embed(scheme, vaddr)
 }
 
-pub fn mk_kernel_map(
+pub(crate) fn mk_kernel_map(
     scheme: &Scheme,
     smp: bool,
     vaddr: u64,

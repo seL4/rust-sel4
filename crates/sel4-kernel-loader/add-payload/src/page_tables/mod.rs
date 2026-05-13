@@ -10,10 +10,12 @@ mod regions;
 mod scheme;
 mod table;
 
-pub use glue::{Region, RegionsBuilder};
-pub use scheme::{LeafDescriptor, RawDescriptor, Scheme};
-pub use table::MkLeafArgs;
+pub(crate) use glue::{Region, RegionsBuilder};
+pub(crate) use scheme::{LeafDescriptor, RawDescriptor, Scheme};
+pub(crate) use table::MkLeafArgs;
 
-pub mod schemes {
-    pub use super::scheme::{AArch32LeafDescriptor, AArch64LeafDescriptor, RiscVLeafDescriptor};
+pub(crate) mod schemes {
+    pub(crate) use super::scheme::{
+        AArch32LeafDescriptor, AArch64LeafDescriptor, RiscVLeafDescriptor,
+    };
 }

@@ -8,7 +8,7 @@ use super::scheme::{Level, Scheme};
 use super::table::{AbstractEntry, Table};
 
 impl Table {
-    pub fn embed(&self, scheme: &Scheme, vaddr: u64) -> (Vec<u8>, u64) {
+    pub(crate) fn embed(&self, scheme: &Scheme, vaddr: u64) -> (Vec<u8>, u64) {
         Embedding::new(scheme, vaddr).embed(self)
     }
 }

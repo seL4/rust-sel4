@@ -21,7 +21,7 @@ use crate::utils::{loadable_segments, virt_footprint, with_elf};
 
 const PAGE_SIZE: u64 = 4096;
 
-pub fn serialize_payload<T: FileHeader>(
+pub(crate) fn serialize_payload<T: FileHeader>(
     kernel_path: impl AsRef<Path>,
     app_path: impl AsRef<Path>,
     dtb_path: impl AsRef<Path>,
