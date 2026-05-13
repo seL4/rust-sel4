@@ -12,6 +12,8 @@ use object::elf::{
 use object::read::elf::{ElfFile, FileHeader, ProgramHeader};
 use object::{Endian, Object as _, ObjectSegment as _, ObjectSymbol as _, Pod, U32, U64, pod};
 
+pub mod dynamic;
+
 pub struct Patching<'a, T: FileHeader> {
     orig_elf: &'a ElfFile<'a, T>,
     phdrs: Vec<T::ProgramHeader>,
