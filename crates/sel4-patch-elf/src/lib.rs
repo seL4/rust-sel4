@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
+use std::fmt;
 use std::ops::Range;
 
 use object::elf::{
@@ -241,7 +242,7 @@ impl<E: Endian> FileHeaderExt for FileHeader64<E> {
     }
 }
 
-pub trait WordExt: Pod {
+pub trait WordExt: TryFrom<u64, Error: fmt::Debug> + Pod {
     fn write_bytes(&self, endian: impl Endian) -> Vec<u8>;
 }
 

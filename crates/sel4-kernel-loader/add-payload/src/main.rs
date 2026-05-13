@@ -7,7 +7,6 @@
 use std::fs::{self, File};
 
 use anyhow::Result;
-use num::traits::NumCast;
 use object::elf::{FileHeader32, FileHeader64};
 use object::read::elf::{ElfFile, FileHeader, ProgramHeader};
 use object::{Endianness, ReadRef};
@@ -55,7 +54,7 @@ fn main() -> Result<()> {
 
 fn continue_with_config<T>(args: &Args, sel4_config: &Configuration) -> Result<()>
 where
-    T: FileHeaderExt<Word: NumCast>,
+    T: FileHeaderExt,
 {
     let platform_info: PlatformInfoForBuildSystem =
         serde_yaml::from_reader(fs::File::open(&args.platform_info_path).unwrap()).unwrap();
@@ -99,7 +98,7 @@ where
                 addr_slot = Some(root_vaddr);
                 bytes
             });
-            let addr = <T::Word as NumCast>::from(addr_slot.unwrap()).unwrap();
+            let addr = addr_slot.unwrap().try_into().unwrap();
             patching.patch_word("loader_level_0_table", addr);
         }
 
@@ -122,7 +121,7 @@ where
                     bytes
                 })
             });
-            let addr = <T::Word as NumCast>::from(addr_slot.unwrap()).unwrap();
+            let addr = addr_slot.unwrap().try_into().unwrap();
             patching.patch_word("kernel_boot_level_0_table", addr);
         }
 
