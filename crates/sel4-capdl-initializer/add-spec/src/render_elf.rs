@@ -4,10 +4,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use num::NumCast;
-use object::read::elf::{ElfFile, FileHeader};
-
-use sel4_patch_elf::{FileHeaderExt, Patching};
+use sel4_patch_elf::dynamic::Patching;
 use sel4_phdrs_constants::{PT_SEL4_CAPDL_FRAME_DATA, PT_SEL4_CAPDL_SPEC};
 
 pub(crate) struct RenderElfArgs<'a> {
@@ -18,10 +15,7 @@ pub(crate) struct RenderElfArgs<'a> {
 }
 
 impl RenderElfArgs<'_> {
-    pub(crate) fn call_with<T: FileHeader<Word: NumCast> + FileHeaderExt>(
-        &self,
-        orig_elf: &ElfFile<T>,
-    ) -> Vec<u8> {
+    pub(crate) fn call_with(&self, orig_elf: &object::File) -> Vec<u8> {
         let mut patching = Patching::new(orig_elf);
 
         patching.add_data_segment_with_meta_phdr(

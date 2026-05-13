@@ -44,20 +44,15 @@ pub fn add_spec(
         .flatten()
         .collect::<Vec<_>>();
 
-    let render_elf_args = render_elf::RenderElfArgs {
+    let parsed = object::File::parse(initializer_without_spec).unwrap();
+
+    render_elf::RenderElfArgs {
         spec_data: &spec_data,
         spec_data_alignment: ArchiveAlignedVec::ALIGNMENT,
         embedded_frame_data: &embedded_frame_data,
         embedded_frame_data_alignment: 1 << GRANULE_SIZE_BITS,
-    };
-
-    match object::File::parse(initializer_without_spec).unwrap() {
-        object::File::Elf32(initializer_elf) => render_elf_args.call_with(&initializer_elf),
-        object::File::Elf64(initializer_elf) => render_elf_args.call_with(&initializer_elf),
-        _ => {
-            panic!()
-        }
     }
+    .call_with(&parsed)
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
