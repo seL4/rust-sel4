@@ -24,5 +24,5 @@ proc-macro2 = "1.0.103"
 quote = "1.0.41"
 sel4-build-env = { path = "../sel4/build-env" }
 sel4-config = { path = "../sel4/config" }
-serde = { version = "1.0.228", features = ["derive"] }
+sel4-platform-info-types = { path = "types", features = ["owned"] }
 serde_yaml = "0.9.34"

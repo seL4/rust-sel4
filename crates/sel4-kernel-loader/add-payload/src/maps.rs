@@ -9,16 +9,17 @@
 
 use std::ops::Range;
 
+use sel4_platform_info_types::OwnedPlatformInfo;
+
 use crate::page_tables::{
     LeafDescriptor, MkLeafArgs, RawDescriptor, Region, RegionsBuilder, Scheme, schemes,
 };
-use crate::platform_info::PlatformInfoForBuildSystem;
 
 pub(crate) fn mk_loader_map(
     scheme: &Scheme,
     smp: bool,
     vaddr: u64,
-    platform_info: &PlatformInfoForBuildSystem,
+    platform_info: &OwnedPlatformInfo,
 ) -> (Vec<u8>, u64) {
     let device_range_end = match scheme {
         Scheme::AArch64 => 1 << 39,

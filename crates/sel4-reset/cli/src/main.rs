@@ -94,9 +94,7 @@ where
     set
 }
 
-fn add_regions<'a, T: FileHeader + FileHeaderExt>(
-    this: &mut Patching<'a, T>,
-) -> Result<(), Error> {
+fn add_regions<'a, T: FileHeader + FileHeaderExt>(this: &mut Patching<'a, T>) -> Result<(), Error> {
     let endian = this.endian();
 
     let mut regions: Vec<RegionMeta<T>> = vec![];
