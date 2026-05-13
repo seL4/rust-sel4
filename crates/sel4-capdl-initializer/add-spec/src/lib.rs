@@ -9,8 +9,9 @@ use std::path::Path;
 use rkyv::util::AlignedVec;
 
 use sel4_capdl_initializer_types::InputSpec;
+use sel4_patch_elf::dynamic::Patching;
+use sel4_phdrs_constants::{PT_SEL4_CAPDL_FRAME_DATA, PT_SEL4_CAPDL_SPEC};
 
-mod render_elf;
 mod reserialize_spec;
 
 // HACK hardcoded
@@ -46,13 +47,21 @@ pub fn add_spec(
 
     let parsed = object::File::parse(initializer_without_spec).unwrap();
 
-    render_elf::RenderElfArgs {
-        spec_data: &spec_data,
-        spec_data_alignment: ArchiveAlignedVec::ALIGNMENT,
-        embedded_frame_data: &embedded_frame_data,
-        embedded_frame_data_alignment: 1 << GRANULE_SIZE_BITS,
-    }
-    .call_with(&parsed)
+    let mut patching = Patching::new(&parsed);
+
+    patching.add_data_segment_with_meta_phdr(
+        PT_SEL4_CAPDL_FRAME_DATA,
+        1 << GRANULE_SIZE_BITS,
+        &embedded_frame_data,
+    );
+
+    patching.add_data_segment_with_meta_phdr(
+        PT_SEL4_CAPDL_SPEC,
+        ArchiveAlignedVec::ALIGNMENT.try_into().unwrap(),
+        &spec_data,
+    );
+
+    patching.finalize()
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
