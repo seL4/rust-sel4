@@ -7,6 +7,7 @@
 use std::fs::{self, File};
 
 use anyhow::Result;
+use clap::Parser;
 use object::elf::{FileHeader32, FileHeader64};
 use object::read::elf::{ElfFile, FileHeader, ProgramHeader};
 use object::{Endianness, ReadRef};
@@ -17,55 +18,123 @@ use sel4_patch_elf::{FileHeaderExt, Patching};
 use sel4_phdrs_constants::PT_SEL4_KERNEL_LOADER_PAYLOAD;
 use sel4_platform_info_types::OwnedPlatformInfo;
 
-mod args;
 mod maps;
 mod page_tables;
 mod serialize_payload;
 mod utils;
-
-use args::Args;
 
 use crate::page_tables::Scheme;
 use crate::utils::{virt_footprint, with_elf};
 
 type ArchiveAlignedVec = AlignedVec;
 
-fn main() -> Result<()> {
-    let args = Args::parse()?;
+#[derive(Parser, Debug)]
+struct Cli {
+    #[arg(long)]
+    sel4_prefix: Option<String>,
+    #[arg(long)]
+    sel4_config: Option<String>,
+    #[arg(long)]
+    kernel: Option<String>,
+    #[arg(long)]
+    dtb: Option<String>,
+    #[arg(long)]
+    platform_info: Option<String>,
+    #[arg(long)]
+    loader: String,
+    #[arg(long)]
+    app: String,
+    #[arg(long, short = 'o')]
+    out_file: String,
+    #[arg(long, short = 'v')]
+    verbose: bool,
+}
 
-    if args.verbose {
-        eprintln!("{args:#?}");
+#[derive(Debug)]
+struct Paths {
+    sel4_config_path: String,
+    kernel_path: String,
+    dtb_path: String,
+    platform_info_path: String,
+    loader_path: String,
+    app_path: String,
+    out_file_path: String,
+}
+
+impl Paths {
+    fn get(cli: &Cli) -> Paths {
+        let sel4_prefix = cli.sel4_prefix.as_ref();
+        Paths {
+            sel4_config_path: cli
+                .sel4_config
+                .as_ref()
+                .map(ToOwned::to_owned)
+                .or(sel4_prefix
+                    .map(|prefix| format!("{prefix}/libsel4/include/kernel/gen_config.json")))
+                .unwrap(),
+            kernel_path: cli
+                .kernel
+                .as_ref()
+                .map(ToOwned::to_owned)
+                .or(sel4_prefix.map(|prefix| format!("{prefix}/bin/kernel.elf")))
+                .unwrap(),
+            dtb_path: cli
+                .dtb
+                .as_ref()
+                .map(ToOwned::to_owned)
+                .or(sel4_prefix.map(|prefix| format!("{prefix}/support/kernel.dtb")))
+                .unwrap(),
+            platform_info_path: cli
+                .platform_info
+                .as_ref()
+                .map(ToOwned::to_owned)
+                .or(sel4_prefix.map(|prefix| format!("{prefix}/support/platform_gen.yaml")))
+                .unwrap(),
+            loader_path: cli.loader.to_owned(),
+            app_path: cli.app.to_owned(),
+            out_file_path: cli.out_file.to_owned(),
+        }
+    }
+}
+
+fn main() -> Result<()> {
+    let cli = Cli::parse();
+
+    if cli.verbose {
+        eprintln!("{cli:#?}");
     }
 
+    let paths = Paths::get(&cli);
+
     let kernel_config: Configuration =
-        serde_json::from_reader(File::open(&args.sel4_config_path).unwrap()).unwrap();
+        serde_json::from_reader(File::open(&paths.sel4_config_path).unwrap()).unwrap();
 
     match kernel_config.get("WORD_SIZE").unwrap().as_str().unwrap() {
-        "32" => continue_with_type::<FileHeader32<Endianness>>(&args, &kernel_config),
-        "64" => continue_with_type::<FileHeader64<Endianness>>(&args, &kernel_config),
+        "32" => continue_with_type::<FileHeader32<Endianness>>(&paths, &kernel_config),
+        "64" => continue_with_type::<FileHeader64<Endianness>>(&paths, &kernel_config),
         _ => {
             panic!()
         }
     }
 }
 
-fn continue_with_type<T>(args: &Args, kernel_config: &Configuration) -> Result<()>
+fn continue_with_type<T>(paths: &Paths, kernel_config: &Configuration) -> Result<()>
 where
     T: FileHeaderExt,
 {
     let platform_info: OwnedPlatformInfo =
-        serde_yaml::from_reader(fs::File::open(&args.platform_info_path).unwrap()).unwrap();
+        serde_yaml::from_reader(fs::File::open(&paths.platform_info_path).unwrap()).unwrap();
 
     let payload = serialize_payload::serialize_payload::<T>(
-        &args.kernel_path,
-        &args.app_path,
-        &args.dtb_path,
+        &paths.kernel_path,
+        &paths.app_path,
+        &paths.dtb_path,
         &platform_info,
     );
 
-    let payload_data: ArchiveAlignedVec = payload.to_bytes().unwrap();
+    let payload_data: AlignedVec = payload.to_bytes().unwrap();
 
-    let orig_elf_bytes = fs::read(&args.loader_path)?;
+    let orig_elf_bytes = fs::read(&paths.loader_path)?;
     let orig_elf = ElfFile::<T>::parse(&orig_elf_bytes).unwrap();
 
     let mut patching = Patching::new(&orig_elf);
@@ -101,7 +170,7 @@ where
     {
         let mut addr_slot = None;
         patching.add_data_segment(min_level_align, |vaddr| {
-            with_elf::<T, _, _>(&args.kernel_path, |elf| {
+            with_elf::<T, _, _>(&paths.kernel_path, |elf| {
                 let phys_to_virt_offset = kernel_phys_to_virt_offset(elf, scheme.vaddr_mask());
                 let virt_range = virt_footprint(elf);
                 let masked_virt_addr_range =
@@ -127,7 +196,7 @@ where
         &payload_data,
     );
 
-    fs::write(&args.out_file_path, patching.finalize())?;
+    fs::write(&paths.out_file_path, patching.finalize())?;
     Ok(())
 }
 
