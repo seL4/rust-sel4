@@ -50,13 +50,12 @@ fn main() {
         }
     }
 
-    let kernel_path = get_with_sel4_prefix_relative_fallback(SEL4_KERNEL_ENV, "bin/kernel.elf");
-    let kernel_bytes = fs::read(kernel_path).unwrap();
-    let kernel_elf = ElfFile::<FileHeaderImpl, _>::parse(kernel_bytes.as_slice()).unwrap();
-    let kernel_phys_addr_range = phys_addr_range(&kernel_elf);
-
-    let loader_phys_start =
-        (kernel_phys_addr_range.end + KERNEL_HEADROOM).next_multiple_of(GRANULE_SIZE);
+    let loader_phys_start = {
+        let path = get_with_sel4_prefix_relative_fallback(SEL4_KERNEL_ENV, "bin/kernel.elf");
+        let bytes = fs::read(path).unwrap();
+        let elf = ElfFile::<FileHeaderImpl, _>::parse(bytes.as_slice()).unwrap();
+        (phys_addr_range(&elf).end + KERNEL_HEADROOM).next_multiple_of(GRANULE_SIZE)
+    };
 
     // Note that -Ttext={} is incompatible with --no-rosegment (no error),
     // just bad output. See the "Default program headers" section of:
