@@ -13,10 +13,10 @@ mk {
       anyhow
       serde_json
       num
-      clap
       rkyv
       object
     ;
+    clap = { version = versions.clap; features = [ "derive" ]; };
     inherit (localCrates)
       sel4-patch-elf
       sel4-phdrs-constants
