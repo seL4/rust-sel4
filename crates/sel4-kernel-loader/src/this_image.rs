@@ -28,12 +28,11 @@ pub(crate) fn get_user_image_bounds() -> Range<usize> {
     locate_phdrs().unwrap().footprint().unwrap()
 }
 
-#[used(linker)]
+#[sel4_config::sel4_cfg(ARCH_ARM)]
 #[unsafe(no_mangle)]
 #[unsafe(link_section = ".data")]
 static loader_level_0_table: ImmutableCell<usize> = ImmutableCell::new(0);
 
-#[used(linker)]
 #[unsafe(no_mangle)]
 #[unsafe(link_section = ".data")]
 pub(crate) static kernel_boot_level_0_table: ImmutableCell<usize> = ImmutableCell::new(0);
