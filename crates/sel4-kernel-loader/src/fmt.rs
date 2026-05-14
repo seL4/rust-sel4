@@ -62,10 +62,10 @@ macro_rules! debug_print_without_synchronization {
 
 macro_rules! debug_println_without_synchronization {
     () => ($crate::fmt::debug_print_without_synchronization!("\n"));
-    ($($arg:tt)*) => ({
+    ($($arg:tt)*) => {{
         $crate::fmt::debug_print_without_synchronization!($($arg)*);
         $crate::fmt::debug_print_without_synchronization!("\n");
-    })
+    }}
 }
 
 pub(crate) use debug_print_without_synchronization;

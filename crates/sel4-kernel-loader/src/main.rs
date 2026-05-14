@@ -6,10 +6,7 @@
 
 #![no_std]
 #![no_main]
-#![feature(used_with_arg)]
 #![allow(dead_code)]
-#![allow(unreachable_code)]
-#![allow(clippy::reversed_empty_ranges)]
 
 use spin::RwLock;
 
@@ -42,6 +39,7 @@ struct SecondaryCoreInitInfo {
     barrier: Barrier,
 }
 
+#[allow(clippy::reversed_empty_ranges)]
 fn main(per_core: <ArchImpl as Arch>::PerCore) -> ! {
     ArchImpl::init();
     PlatImpl::init();
@@ -113,6 +111,7 @@ fn secondary_main(per_core: <ArchImpl as Arch>::PerCore) -> ! {
 
 static KERNEL_ENTRY_BARRIER: Barrier = Barrier::new(MAX_NUM_NODES);
 
+#[allow(unreachable_code)]
 fn common_epilogue(
     core_id: usize,
     payload_info: &ArchivedPayloadInfo,
