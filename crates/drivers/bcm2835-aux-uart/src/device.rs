@@ -44,6 +44,15 @@ impl Device {
     }
 
     pub(crate) fn init(&self) {}
+
+    pub(crate) fn put_char(&self, c: u8) {
+        loop {
+            if self.LSR.get() & MU_LSR_TXIDLE != 0 {
+                break;
+            }
+        }
+        self.IO.set(c);
+    }
 }
 
 impl Deref for Device {
@@ -54,13 +63,3 @@ impl Deref for Device {
     }
 }
 
-impl Device {
-    pub(crate) fn put_char(&self, c: u8) {
-        loop {
-            if self.LSR.get() & MU_LSR_TXIDLE != 0 {
-                break;
-            }
-        }
-        self.IO.set(c);
-    }
-}
