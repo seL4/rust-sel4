@@ -25,8 +25,6 @@ mod riscv;
 pub(crate) use imp::*;
 
 pub(crate) trait Arch {
-    fn init() {}
-
     fn idle() -> !;
 
     fn prepare_to_enter_kernel(core_id: usize);
