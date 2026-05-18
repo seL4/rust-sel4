@@ -4,8 +4,6 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use core::arch::asm;
-
 use riscv::register::satp;
 
 use crate::{
@@ -28,9 +26,7 @@ pub(crate) enum ArchImpl {}
 impl Arch for ArchImpl {
     fn idle() -> ! {
         loop {
-            unsafe {
-                asm!("wfi");
-            }
+            riscv::asm::wfi();
         }
     }
 
@@ -47,10 +43,12 @@ fn switch_page_tables() {
     #[cfg(target_pointer_width = "64")]
     const MODE: satp::Mode = satp::Mode::Sv39;
 
+    let ppn = kernel_boot_level_0_table.get() >> 12;
+    riscv::asm::sfence_vma_all();
+
     unsafe {
-        let ppn = kernel_boot_level_0_table.get() >> 12;
-        asm!("sfence.vma", options(nostack));
         satp::set(MODE, 0, ppn);
-        asm!("fence.i", options(nostack));
     }
+
+    riscv::asm::fence_i();
 }
