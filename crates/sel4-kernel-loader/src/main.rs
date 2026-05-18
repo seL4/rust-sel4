@@ -24,11 +24,13 @@ mod logging;
 mod plat;
 mod rt;
 mod this_image;
+mod enter_kernel;
 
 use crate::{
     arch::{Arch, ArchImpl},
     barrier::Barrier,
     plat::{Plat, PlatImpl},
+    enter_kernel::{mk_enter_kernel, KernelEntryExtraArgs},
 };
 
 const MAX_NUM_NODES: usize = sel4_config::sel4_cfg_usize!(MAX_NUM_NODES);
@@ -39,7 +41,7 @@ static NODES_STARTED: AtomicUsize = AtomicUsize::new(0);
 static NODES_READY: AtomicUsize = AtomicUsize::new(0);
 
 #[allow(clippy::reversed_empty_ranges)]
-fn main(per_core: <ArchImpl as Arch>::PerCore) -> ! {
+fn main(kernel_entry_extra_args: KernelEntryExtraArgs) -> ! {
     ArchImpl::init();
     PlatImpl::init();
 
@@ -84,27 +86,31 @@ fn main(per_core: <ArchImpl as Arch>::PerCore) -> ! {
         log::debug!("Primary core: core {core_id} up");
     }
 
-    common_epilogue(0, per_core)
+    common_epilogue(0, kernel_entry_extra_args)
 }
 
-fn secondary_main(per_core: <ArchImpl as Arch>::PerCore) -> ! {
+fn secondary_main(kernel_entry_extra_args: KernelEntryExtraArgs) -> ! {
     let core_id = NODES_STARTED.load(Ordering::SeqCst);
     log::debug!("Core {core_id}: up");
     NODES_READY.store(core_id, Ordering::SeqCst);
-    common_epilogue(core_id, per_core)
+    common_epilogue(core_id, kernel_entry_extra_args)
 }
 
 static KERNEL_ENTRY_BARRIER: Barrier = Barrier::new(MAX_NUM_NODES);
 
 #[allow(unreachable_code)]
-fn common_epilogue(core_id: usize, per_core: <ArchImpl as Arch>::PerCore) -> ! {
+fn common_epilogue(core_id: usize, kernel_entry_extra_args: KernelEntryExtraArgs) -> ! {
     PlatImpl::init_per_core();
-    let payload_info = PAYLOAD_INFO.get().unwrap();
+    let payload_info = PAYLOAD_INFO
+        .get()
+        .unwrap();
+    let enter_kernel = mk_enter_kernel(payload_info, core_id, kernel_entry_extra_args);
     if core_id == 0 {
         log::info!("Entering kernel");
     }
     KERNEL_ENTRY_BARRIER.wait();
-    ArchImpl::enter_kernel(core_id, payload_info, per_core);
+    ArchImpl::prepare_to_enter_kernel(core_id);
+    enter_kernel();
     fmt::debug_println_without_synchronization!("Core {}: failed to enter kernel", core_id);
     ArchImpl::idle()
 }

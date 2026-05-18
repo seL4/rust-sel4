@@ -5,13 +5,10 @@
 //
 
 use core::arch::asm;
-use core::mem;
 
 use aarch64_cpu::registers::{CurrentEL, Readable};
 
-use sel4_kernel_loader_payload_types::ArchivedPayloadInfo;
-
-use crate::{arch::Arch, main, secondary_main};
+use crate::{arch::Arch, main, secondary_main, enter_kernel::KernelEntryExtraArgs};
 
 pub(crate) mod drivers;
 pub(crate) mod exception_handler;
@@ -22,19 +19,17 @@ unsafe extern "C" {
 
 #[unsafe(no_mangle)]
 extern "C" fn arch_main() -> ! {
-    main(())
+    main(KernelEntryExtraArgs {})
 }
 
 #[unsafe(no_mangle)]
 extern "C" fn arch_secondary_main() -> ! {
-    secondary_main(())
+    secondary_main(KernelEntryExtraArgs {})
 }
 
 pub(crate) enum ArchImpl {}
 
 impl Arch for ArchImpl {
-    type PerCore = ();
-
     fn idle() -> ! {
         loop {
             unsafe {
@@ -43,19 +38,7 @@ impl Arch for ArchImpl {
         }
     }
 
-    fn enter_kernel(
-        core_id: usize,
-        payload_info: &ArchivedPayloadInfo,
-        _per_core: Self::PerCore,
-    ) -> ! {
-        let kernel_entry =
-            unsafe { mem::transmute::<usize, KernelEntry>(payload_info.kernel_entry.to_usize()) };
-
-        let (dtb_addr_p, dtb_size) = match payload_info.dtb.as_ref() {
-            Some(dtb) => (dtb.addr_p.to_usize(), dtb.size.to_usize()),
-            None => (0, 0),
-        };
-
+    fn prepare_to_enter_kernel(core_id: usize) {
         let current_el = get_current_el();
         assert!(current_el == Some(CurrentEL::EL::Value::EL2));
 
@@ -66,26 +49,8 @@ impl Arch for ArchImpl {
         unsafe {
             switch_translation_tables_el2();
         }
-
-        (kernel_entry)(
-            payload_info.user_image.ui_p_reg_start.to_usize(),
-            payload_info.user_image.ui_p_reg_end.to_usize(),
-            payload_info.user_image.pv_offset.to_usize(),
-            payload_info.user_image.v_entry.to_usize(),
-            dtb_addr_p,
-            dtb_size,
-        )
     }
 }
-
-type KernelEntry = extern "C" fn(
-    ui_p_reg_start: usize,
-    ui_p_reg_end: usize,
-    pv_offset: usize,
-    v_entry: usize,
-    dtb_addr_p: usize,
-    dtb_size: usize,
-) -> !;
 
 fn get_current_el() -> Option<CurrentEL::EL::Value> {
     CurrentEL.read_as_enum(CurrentEL::EL)

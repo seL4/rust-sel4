@@ -5,34 +5,24 @@
 //
 
 use core::arch::asm;
-use core::mem;
 
 use riscv::register::satp;
 
-use sel4_config::sel4_cfg_if;
-use sel4_kernel_loader_payload_types::ArchivedPayloadInfo;
-
-use crate::{arch::Arch, main, secondary_main, this_image::kernel_boot_level_0_table};
-
-pub(crate) struct PerCoreImpl {
-    hart_id: usize,
-}
+use crate::{arch::Arch, main, secondary_main, this_image::kernel_boot_level_0_table, enter_kernel::KernelEntryExtraArgs};
 
 #[unsafe(no_mangle)]
 extern "C" fn arch_main(hart_id: usize) -> ! {
-    main(PerCoreImpl { hart_id })
+    main(KernelEntryExtraArgs { hart_id })
 }
 
 #[unsafe(no_mangle)]
 extern "C" fn arch_secondary_main(hart_id: usize) -> ! {
-    secondary_main(PerCoreImpl { hart_id })
+    secondary_main(KernelEntryExtraArgs { hart_id })
 }
 
 pub(crate) enum ArchImpl {}
 
 impl Arch for ArchImpl {
-    type PerCore = PerCoreImpl;
-
     fn idle() -> ! {
         loop {
             unsafe {
@@ -42,75 +32,8 @@ impl Arch for ArchImpl {
     }
 
     #[allow(unused_variables)]
-    fn enter_kernel(
-        core_id: usize,
-        payload_info: &ArchivedPayloadInfo,
-        per_core: Self::PerCore,
-    ) -> ! {
-        let kernel_entry =
-            unsafe { mem::transmute::<usize, KernelEntry>(payload_info.kernel_entry.to_usize()) };
-
-        let ui_p_reg_start = payload_info.user_image.ui_p_reg_start.to_usize();
-        let ui_p_reg_end = payload_info.user_image.ui_p_reg_end.to_usize();
-        let pv_offset = payload_info.user_image.pv_offset.to_usize();
-        let v_entry = payload_info.user_image.v_entry.to_usize();
-
-        let (dtb_addr_p, dtb_size) = match payload_info.dtb.as_ref() {
-            Some(dtb) => (dtb.addr_p.to_usize(), dtb.size.to_usize()),
-            None => (0, 0),
-        };
-
-        let hart_id = per_core.hart_id;
-
+    fn prepare_to_enter_kernel(core_id: usize) {
         switch_page_tables();
-
-        sel4_cfg_if! {
-            if #[sel4_cfg(MAX_NUM_NODES = "1")] {
-                (kernel_entry)(
-                    ui_p_reg_start,
-                    ui_p_reg_end,
-                    pv_offset,
-                    v_entry,
-                    dtb_addr_p,
-                    dtb_size,
-                )
-            } else {
-                (kernel_entry)(
-                    ui_p_reg_start,
-                    ui_p_reg_end,
-                    pv_offset,
-                    v_entry,
-                    dtb_addr_p,
-                    dtb_size,
-                    hart_id,
-                    core_id,
-                )
-            }
-        }
-    }
-}
-
-sel4_cfg_if! {
-    if #[sel4_cfg(MAX_NUM_NODES = "1")] {
-        type KernelEntry = extern "C" fn(
-            ui_p_reg_start: usize,
-            ui_p_reg_end: usize,
-            pv_offset: usize,
-            v_entry: usize,
-            dtb_addr_p: usize,
-            dtb_size: usize,
-        ) -> !;
-    } else {
-        type KernelEntry = extern "C" fn(
-            ui_p_reg_start: usize,
-            ui_p_reg_end: usize,
-            pv_offset: usize,
-            v_entry: usize,
-            dtb_addr_p: usize,
-            dtb_size: usize,
-            hart_id: usize,
-            core_id: usize,
-        ) -> !;
     }
 }
 
