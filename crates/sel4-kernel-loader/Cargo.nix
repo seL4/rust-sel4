@@ -23,6 +23,7 @@ mk {
       sel4-phdrs-patched
       sel4-no-allocator
       sel4-immutable-cell
+      sel4-immediate-sync-once-cell
     ;
   };
   target."cfg(any(target_arch = \"riscv32\", target_arch = \"riscv64\"))".dependencies = {
