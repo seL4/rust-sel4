@@ -8,8 +8,10 @@
 #![no_main]
 #![allow(dead_code)]
 
-use spin::RwLock;
+use core::hint;
+use core::sync::atomic::{AtomicUsize, Ordering};
 
+use sel4_immediate_sync_once_cell::ImmediateSyncOnceCell;
 use sel4_kernel_loader_payload_types::ArchivedPayloadInfo;
 use sel4_platform_info::PLATFORM_INFO;
 
@@ -31,13 +33,10 @@ use crate::{
 
 const MAX_NUM_NODES: usize = sel4_config::sel4_cfg_usize!(MAX_NUM_NODES);
 
-static SECONDARY_CORE_INIT_INFO: RwLock<Option<SecondaryCoreInitInfo>> = RwLock::new(None);
+static PAYLOAD_INFO: ImmediateSyncOnceCell<ArchivedPayloadInfo> = ImmediateSyncOnceCell::new();
 
-struct SecondaryCoreInitInfo {
-    core_id: usize,
-    payload_info: ArchivedPayloadInfo,
-    barrier: Barrier,
-}
+static NODES_STARTED: AtomicUsize = AtomicUsize::new(0);
+static NODES_READY: AtomicUsize = AtomicUsize::new(0);
 
 #[allow(clippy::reversed_empty_ranges)]
 fn main(per_core: <ArchImpl as Arch>::PerCore) -> ! {
@@ -72,52 +71,35 @@ fn main(per_core: <ArchImpl as Arch>::PerCore) -> ! {
         payload.copy_data_out();
     }
 
+    PAYLOAD_INFO.set(payload.info.clone()).unwrap();
+
     for core_id in 1..MAX_NUM_NODES {
         let sp = this_image::stacks::get_secondary_stack_bottom(core_id).ptr() as usize;
-        {
-            let mut init_info = SECONDARY_CORE_INIT_INFO.write();
-            *init_info = Some(SecondaryCoreInitInfo {
-                core_id,
-                payload_info: payload.info.clone(),
-                barrier: Barrier::new(2),
-            });
-        }
         log::debug!("Primary core: starting core {core_id}");
+        NODES_STARTED.store(core_id, Ordering::SeqCst);
         PlatImpl::start_secondary_core(core_id, sp);
-        {
-            let init_info = SECONDARY_CORE_INIT_INFO.read();
-            let init_info = init_info.as_ref().unwrap();
-            init_info.barrier.wait();
+        while NODES_READY.load(Ordering::SeqCst) != core_id {
+            hint::spin_loop();
         }
         log::debug!("Primary core: core {core_id} up");
     }
 
-    common_epilogue(0, &payload.info, per_core)
+    common_epilogue(0, per_core)
 }
 
 fn secondary_main(per_core: <ArchImpl as Arch>::PerCore) -> ! {
-    let core_id;
-    let payload_info;
-    {
-        let init_info = SECONDARY_CORE_INIT_INFO.read();
-        let init_info = init_info.as_ref().unwrap();
-        init_info.barrier.wait();
-        core_id = init_info.core_id;
-        payload_info = init_info.payload_info.clone();
-    }
+    let core_id = NODES_STARTED.load(Ordering::SeqCst);
     log::debug!("Core {core_id}: up");
-    common_epilogue(core_id, &payload_info, per_core)
+    NODES_READY.store(core_id, Ordering::SeqCst);
+    common_epilogue(core_id, per_core)
 }
 
 static KERNEL_ENTRY_BARRIER: Barrier = Barrier::new(MAX_NUM_NODES);
 
 #[allow(unreachable_code)]
-fn common_epilogue(
-    core_id: usize,
-    payload_info: &ArchivedPayloadInfo,
-    per_core: <ArchImpl as Arch>::PerCore,
-) -> ! {
+fn common_epilogue(core_id: usize, per_core: <ArchImpl as Arch>::PerCore) -> ! {
     PlatImpl::init_per_core();
+    let payload_info = PAYLOAD_INFO.get().unwrap();
     if core_id == 0 {
         log::info!("Entering kernel");
     }
