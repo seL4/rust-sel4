@@ -8,7 +8,7 @@ use core::arch::asm;
 
 use aarch64_cpu::registers::{CurrentEL, Readable};
 
-use crate::{arch::Arch, main, secondary_main, enter_kernel::KernelEntryExtraArgs};
+use crate::{arch::Arch, enter_kernel::KernelEntryExtraArgs, main, secondary_main};
 
 pub(crate) mod drivers;
 pub(crate) mod exception_handler;

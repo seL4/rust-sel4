@@ -29,8 +29,16 @@ pub(crate) fn mk_enter_kernel(
     let ui_p_reg_end = payload_info.user_image.ui_p_reg_end.to_usize();
     let pv_offset = payload_info.user_image.pv_offset.to_usize();
     let v_entry = payload_info.user_image.v_entry.to_usize();
-    let dtb_addr_p = payload_info.dtb.as_ref().map(|x| x.addr_p.to_usize()).unwrap_or(0);
-    let dtb_size = payload_info.dtb.as_ref().map(|x| x.size.to_usize()).unwrap_or(0);
+    let dtb_addr_p = payload_info
+        .dtb
+        .as_ref()
+        .map(|x| x.addr_p.to_usize())
+        .unwrap_or(0);
+    let dtb_size = payload_info
+        .dtb
+        .as_ref()
+        .map(|x| x.size.to_usize())
+        .unwrap_or(0);
 
     sel4_cfg_if! {
         if #[sel4_cfg(all(ARCH_RISCV, not(MAX_NUM_NODES = "1")))] {

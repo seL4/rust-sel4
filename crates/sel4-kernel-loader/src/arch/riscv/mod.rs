@@ -8,7 +8,10 @@ use core::arch::asm;
 
 use riscv::register::satp;
 
-use crate::{arch::Arch, main, secondary_main, this_image::kernel_boot_level_0_table, enter_kernel::KernelEntryExtraArgs};
+use crate::{
+    arch::Arch, enter_kernel::KernelEntryExtraArgs, main, secondary_main,
+    this_image::kernel_boot_level_0_table,
+};
 
 #[unsafe(no_mangle)]
 extern "C" fn arch_main(hart_id: usize) -> ! {

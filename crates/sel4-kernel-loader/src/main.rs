@@ -19,18 +19,18 @@ use sel4_no_allocator as _;
 
 mod arch;
 mod barrier;
+mod enter_kernel;
 mod fmt;
 mod logging;
 mod plat;
 mod rt;
 mod this_image;
-mod enter_kernel;
 
 use crate::{
     arch::{Arch, ArchImpl},
     barrier::Barrier,
+    enter_kernel::{KernelEntryExtraArgs, mk_enter_kernel},
     plat::{Plat, PlatImpl},
-    enter_kernel::{mk_enter_kernel, KernelEntryExtraArgs},
 };
 
 const MAX_NUM_NODES: usize = sel4_config::sel4_cfg_usize!(MAX_NUM_NODES);
@@ -100,9 +100,7 @@ static KERNEL_ENTRY_BARRIER: Barrier = Barrier::new(MAX_NUM_NODES);
 #[allow(unreachable_code)]
 fn common_epilogue(core_id: usize, kernel_entry_extra_args: KernelEntryExtraArgs) -> ! {
     PlatImpl::init_per_core();
-    let payload_info = PAYLOAD_INFO
-        .get()
-        .unwrap();
+    let payload_info = PAYLOAD_INFO.get().unwrap();
     let enter_kernel = mk_enter_kernel(payload_info, core_id, kernel_entry_extra_args);
     if core_id == 0 {
         log::info!("Entering kernel");
