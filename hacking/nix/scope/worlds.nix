@@ -292,7 +292,7 @@ in rec {
             , extraQEMUArgs ? []
             }:
             let
-              numCores = if smp then "2" else "1";
+              numCores = if smp then "4" else "1";
               qemuMemory = "2048";
             in
               mkWorld rec {
