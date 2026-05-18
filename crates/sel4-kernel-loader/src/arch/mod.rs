@@ -5,7 +5,6 @@
 //
 
 use sel4_config::sel4_cfg_if;
-use sel4_kernel_loader_payload_types::ArchivedPayloadInfo;
 
 sel4_cfg_if! {
     if #[sel4_cfg(ARCH_ARM)] {
@@ -26,15 +25,9 @@ mod riscv;
 pub(crate) use imp::*;
 
 pub(crate) trait Arch {
-    type PerCore;
-
     fn init() {}
 
     fn idle() -> !;
 
-    fn enter_kernel(
-        core_id: usize,
-        payload_info: &ArchivedPayloadInfo,
-        per_core: Self::PerCore,
-    ) -> !;
+    fn prepare_to_enter_kernel(core_id: usize);
 }
