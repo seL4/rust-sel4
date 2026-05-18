@@ -42,7 +42,6 @@ static NODES_READY: AtomicUsize = AtomicUsize::new(0);
 
 #[allow(clippy::reversed_empty_ranges)]
 fn main(kernel_entry_extra_args: KernelEntryExtraArgs) -> ! {
-    ArchImpl::init();
     PlatImpl::init();
 
     logging::set_logger();
