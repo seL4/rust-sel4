@@ -14,6 +14,7 @@ mk {
       cfg-if
       log
       embedded-hal-nb
+      fdt
     ;
     rkyv = { version = versions.rkyv; default-features = false; };
     spin = { version = versions.spin; features = [ "lock_api" ]; };
