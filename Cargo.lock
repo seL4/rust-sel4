@@ -2590,6 +2590,7 @@ dependencies = [
  "cc",
  "cfg-if",
  "embedded-hal-nb",
+ "fdt",
  "glob",
  "log",
  "object",

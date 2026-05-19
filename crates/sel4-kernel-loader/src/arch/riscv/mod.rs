@@ -11,8 +11,8 @@ use sel4_config::sel4_cfg_usize;
 use crate::{arch::Arch, main, secondary_main, this_image::kernel_boot_level_0_table};
 
 #[unsafe(no_mangle)]
-extern "C" fn arch_main(hart_id: usize) -> ! {
-    main(hart_id)
+extern "C" fn arch_main(hart_id: usize, dtb: usize) -> ! {
+    main(hart_id, dtb)
 }
 
 #[unsafe(no_mangle)]
