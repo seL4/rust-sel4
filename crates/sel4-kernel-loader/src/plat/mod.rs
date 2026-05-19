@@ -37,7 +37,5 @@ pub(crate) trait Plat {
 
     fn put_char(c: u8);
 
-    fn put_char_without_synchronization(c: u8);
-
     fn start_secondary_core(core_id: usize, sp: usize);
 }
