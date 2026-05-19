@@ -10,7 +10,11 @@ mk {
   package.name = "sel4-kernel-loader";
   package.license = "BSD-2-Clause AND GPL-2.0-only";
   dependencies = {
-    inherit (versions) cfg-if log embedded-hal-nb;
+    inherit (versions)
+      cfg-if
+      log
+      embedded-hal-nb
+    ;
     rkyv = { version = versions.rkyv; default-features = false; };
     spin = { version = versions.spin; features = [ "lock_api" ]; };
     inherit (localCrates)
