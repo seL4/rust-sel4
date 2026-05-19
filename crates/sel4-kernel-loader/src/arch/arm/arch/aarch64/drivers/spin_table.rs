@@ -12,7 +12,7 @@ use core::sync::atomic::{AtomicUsize, Ordering};
 #[unsafe(no_mangle)]
 static mut spin_table_secondary_stack_bottom: usize = 0;
 
-pub(crate) fn start_secondary_core(spin_table: &[usize], core_id: usize, sp: usize) {
+pub(crate) fn start_core(spin_table: &[usize], core_id: usize, sp: usize) {
     unsafe {
         spin_table_secondary_stack_bottom = sp;
 

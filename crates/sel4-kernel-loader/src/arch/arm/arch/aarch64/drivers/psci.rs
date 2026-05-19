@@ -6,10 +6,10 @@
 
 use core::arch::global_asm;
 
-pub(crate) fn start_secondary_core(core_id: usize, sp: usize) {
+pub(crate) fn start_core(physical_core_id: usize, sp: usize) {
     let start = psci_secondary_entry as *const PsciSecondaryEntryFn as usize;
     smccc::psci::cpu_on::<smccc::Smc>(
-        core_id.try_into().unwrap(),
+        physical_core_id.try_into().unwrap(),
         start.try_into().unwrap(),
         sp.try_into().unwrap(),
     )

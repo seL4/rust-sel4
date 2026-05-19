@@ -367,27 +367,34 @@ in rec {
           ];
       };
 
-      hifive = mkWorld rec {
-        inherit kernelLoaderConfig;
-        kernelConfig = kernelConfigCommon // {
-          KernelArch = mkString "riscv";
-          KernelSel4Arch = mkString "riscv64";
-          KernelPlatform = mkString "hifive";
+      hifive =
+        let
+          smp = true;
+          numCores = if smp then 4 else 1;
+        in
+          mkWorld rec {
+            inherit kernelLoaderConfig;
+            kernelConfig = kernelConfigCommon // {
+              KernelArch = mkString "riscv";
+              KernelSel4Arch = mkString "riscv64";
+              KernelPlatform = mkString "hifive";
+              KernelMaxNumNodes = mkString (toString numCores);
+            };
+            canSimulate = true;
+            mkPlatformSystemExtension = platUtils.qemu.mkMkPlatformSystemExtension {
+              inherit mkQEMUCmd;
+            };
+              mkQEMUCmd = loader: [
+                "${pkgsBuildBuild.this.qemuForSeL4}/bin/qemu-system-riscv64"
+                  "-machine" "sifive_u"
+                  "-m" "size=8192M"
+                  "-smp" (toString (numCores + 1))
+                  "-nographic"
+                  "-serial" "mon:stdio"
+                  "-kernel" loader
+              ];
+          };
         };
-        canSimulate = true;
-        mkPlatformSystemExtension = platUtils.qemu.mkMkPlatformSystemExtension {
-          inherit mkQEMUCmd;
-        };
-          mkQEMUCmd = loader: [
-            "${pkgsBuildBuild.this.qemuForSeL4}/bin/qemu-system-riscv64"
-              "-machine" "sifive_u"
-              "-m" "size=8192M"
-              "-nographic"
-              "-serial" "mon:stdio"
-              "-kernel" loader
-          ];
-      };
-    };
 
   riscv32 =
     let

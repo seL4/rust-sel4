@@ -37,5 +37,9 @@ pub(crate) trait Plat {
 
     fn put_char(c: u8);
 
-    fn start_secondary_core(core_id: usize, sp: usize);
+    fn start_core(physical_core_id: usize, sp: usize);
+
+    fn stop_core() -> ! {
+        unimplemented!()
+    }
 }

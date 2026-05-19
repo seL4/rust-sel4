@@ -34,16 +34,16 @@ impl Plat for PlatImpl {
     }
 
     #[sel4_cfg(ARCH_AARCH64)]
-    fn start_secondary_core(core_id: usize, sp: usize) {
+    fn start_core(physical_core_id: usize, sp: usize) {
         const SPIN_TABLE: &[usize] = &[0xd8, 0xe0, 0xe8, 0xf0];
 
-        crate::arch::drivers::spin_table::start_secondary_core(SPIN_TABLE, core_id, sp)
+        crate::arch::drivers::spin_table::start_core(SPIN_TABLE, physical_core_id, sp)
     }
 
     #[sel4_cfg(ARCH_AARCH32)]
-    fn start_secondary_core(core_id: usize, sp: usize) {
+    fn start_core(physical_core_id: usize, sp: usize) {
         const SPIN_TABLE: &[usize] = &[0xff80_008C, 0xff80_009C, 0xff80_00AC, 0xff80_00BC];
 
-        crate::arch::drivers::spin_table::start_secondary_core(SPIN_TABLE, core_id, sp)
+        crate::arch::drivers::spin_table::start_core(SPIN_TABLE, physical_core_id, sp)
     }
 }

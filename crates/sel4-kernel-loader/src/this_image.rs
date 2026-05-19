@@ -48,16 +48,14 @@ pub(crate) mod stacks {
     #[unsafe(no_mangle)]
     static __primary_stack_bottom: StackBottom = PRIMARY_STACK.bottom();
 
-    const NUM_SECONDARY_CORES: usize = sel4_cfg_usize!(MAX_NUM_NODES) - 1;
+    const MAX_NUM_NODES: usize = sel4_cfg_usize!(MAX_NUM_NODES);
 
     const SECONDARY_STACK_SIZE: usize = 4096 * 2;
 
-    static SECONDARY_STACKS: [Stack<SECONDARY_STACK_SIZE>; NUM_SECONDARY_CORES] =
-        [const { Stack::new() }; NUM_SECONDARY_CORES];
+    static SECONDARY_STACKS: [Stack<SECONDARY_STACK_SIZE>; MAX_NUM_NODES] =
+        [const { Stack::new() }; MAX_NUM_NODES];
 
-    #[allow(clippy::zst_offset)] // for case where NUM_SECONDARY_CORES == 0
     pub(crate) fn get_secondary_stack_bottom(core_id: usize) -> StackBottom {
-        assert!(core_id > 0 && core_id < sel4_cfg_usize!(MAX_NUM_NODES));
-        SECONDARY_STACKS[core_id - 1].bottom()
+        SECONDARY_STACKS[core_id].bottom()
     }
 }

@@ -31,10 +31,10 @@ unsafe fn psci_cpu_on(target_cpu: usize, entry_point: usize, context_id: usize) 
     assert_eq!(ret, 0);
 }
 
-pub(crate) fn start_secondary_core(core_id: usize, sp: usize) {
+pub(crate) fn start_core(physical_core_id: usize, sp: usize) {
     let start = psci_secondary_entry as *const PsciSecondaryEntryFn as usize;
     unsafe {
-        psci_cpu_on(core_id, start, sp);
+        psci_cpu_on(physical_core_id, start, sp);
     }
 }
 

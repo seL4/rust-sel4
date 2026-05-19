@@ -9,11 +9,11 @@
 #![allow(dead_code)]
 
 use core::hint;
-use core::sync::atomic::{AtomicUsize, Ordering};
+use core::sync::atomic::{AtomicBool, Ordering};
 
+use sel4_config::sel4_cfg_usize;
 use sel4_immediate_sync_once_cell::ImmediateSyncOnceCell;
 use sel4_kernel_loader_payload_types::ArchivedPayloadInfo;
-use sel4_platform_info::PLATFORM_INFO;
 
 use sel4_no_allocator as _;
 
@@ -21,6 +21,7 @@ mod arch;
 mod barrier;
 mod enter_kernel;
 mod fmt;
+mod init_memory;
 mod logging;
 mod plat;
 mod rt;
@@ -29,85 +30,69 @@ mod this_image;
 use crate::{
     arch::{Arch, ArchImpl},
     barrier::Barrier,
-    enter_kernel::{KernelEntryExtraArgs, mk_enter_kernel},
+    enter_kernel::mk_enter_kernel,
+    fmt::debug_println,
     plat::{Plat, PlatImpl},
 };
 
-const MAX_NUM_NODES: usize = sel4_config::sel4_cfg_usize!(MAX_NUM_NODES);
+const MAX_NUM_NODES: usize = sel4_cfg_usize!(MAX_NUM_NODES);
 
 static PAYLOAD_INFO: ImmediateSyncOnceCell<ArchivedPayloadInfo> = ImmediateSyncOnceCell::new();
 
-static NODES_STARTED: AtomicUsize = AtomicUsize::new(0);
-static NODES_READY: AtomicUsize = AtomicUsize::new(0);
+static SECONDARY_READY: AtomicBool = AtomicBool::new(false);
 
 #[allow(clippy::reversed_empty_ranges)]
-fn main(kernel_entry_extra_args: KernelEntryExtraArgs) -> ! {
+fn main(physical_core_id: usize) -> ! {
     PlatImpl::init();
 
     logging::set_logger();
 
-    log::info!("Starting loader");
+    log::info!("Starting loader on physical core {physical_core_id}");
 
-    let payload = this_image::get_payload();
+    PAYLOAD_INFO.set(init_memory::init()).unwrap();
 
-    let own_footprint = this_image::get_user_image_bounds();
-
-    log::debug!("Platform info: {PLATFORM_INFO:#x?}");
-    log::debug!("Loader footprint: {own_footprint:#x?}");
-    log::debug!("Payload info: {:#x?}", payload.info);
-    log::debug!("Payload regions:");
-    for region in payload.data.iter() {
-        log::debug!(
-            "    {:#x?} (filesz = {:#x?}, memsz = {:#x?})",
-            region.addr.0,
-            region.size.0,
-            region.data.len()
-        );
-    }
-
-    payload.sanity_check(&PLATFORM_INFO, own_footprint.clone());
-
-    log::debug!("Copying payload data");
-    unsafe {
-        payload.copy_data_out();
-    }
-
-    PAYLOAD_INFO.set(payload.info.clone()).unwrap();
-
-    for core_id in 1..MAX_NUM_NODES {
-        let sp = this_image::stacks::get_secondary_stack_bottom(core_id).ptr() as usize;
-        log::debug!("Primary core: starting core {core_id}");
-        NODES_STARTED.store(core_id, Ordering::SeqCst);
-        PlatImpl::start_secondary_core(core_id, sp);
-        while NODES_READY.load(Ordering::SeqCst) != core_id {
-            hint::spin_loop();
+    for other_core_id in 0..MAX_NUM_NODES {
+        let other_physical_core_id = ArchImpl::logical_to_physical_core_id(other_core_id);
+        if other_physical_core_id != physical_core_id {
+            log::debug!("Starting core {other_physical_core_id}");
+            SECONDARY_READY.store(false, Ordering::SeqCst);
+            let sp = this_image::stacks::get_secondary_stack_bottom(other_core_id)
+                .ptr()
+                .addr();
+            PlatImpl::start_core(other_physical_core_id, sp);
+            while !SECONDARY_READY.load(Ordering::SeqCst) {
+                hint::spin_loop();
+            }
+            log::debug!("Core {other_physical_core_id} up");
         }
-        log::debug!("Primary core: core {core_id} up");
     }
 
-    common_epilogue(0, kernel_entry_extra_args)
+    if let Some(core_id) = ArchImpl::physical_to_logical_core_id(physical_core_id) {
+        common_epilogue(core_id)
+    } else {
+        PlatImpl::stop_core()
+    }
 }
 
-fn secondary_main(kernel_entry_extra_args: KernelEntryExtraArgs) -> ! {
-    let core_id = NODES_STARTED.load(Ordering::SeqCst);
+fn secondary_main(physical_core_id: usize) -> ! {
+    let core_id = ArchImpl::physical_to_logical_core_id(physical_core_id).unwrap();
     log::debug!("Core {core_id}: up");
-    NODES_READY.store(core_id, Ordering::SeqCst);
-    common_epilogue(core_id, kernel_entry_extra_args)
+    SECONDARY_READY.store(true, Ordering::SeqCst);
+    common_epilogue(core_id)
 }
 
 static KERNEL_ENTRY_BARRIER: Barrier = Barrier::new(MAX_NUM_NODES);
 
-#[allow(unreachable_code)]
-fn common_epilogue(core_id: usize, kernel_entry_extra_args: KernelEntryExtraArgs) -> ! {
+fn common_epilogue(core_id: usize) -> ! {
     PlatImpl::init_per_core();
     let payload_info = PAYLOAD_INFO.get().unwrap();
-    let enter_kernel = mk_enter_kernel(payload_info, core_id, kernel_entry_extra_args);
+    let enter_kernel = mk_enter_kernel(payload_info, core_id);
     if core_id == 0 {
         log::info!("Entering kernel");
     }
     KERNEL_ENTRY_BARRIER.wait();
     ArchImpl::prepare_to_enter_kernel(core_id);
     enter_kernel();
-    log::error!("Core {}: failed to enter kernel", core_id);
+    debug_println!("Core {}: failed to enter kernel", core_id);
     ArchImpl::idle()
 }

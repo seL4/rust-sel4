@@ -36,7 +36,7 @@ impl Plat for PlatImpl {
         nb::block!(get_serial_driver().write(c)).unwrap_or_else(|err| match err {});
     }
 
-    fn start_secondary_core(core_id: usize, sp: usize) {
-        psci::start_secondary_core(core_id, sp)
+    fn start_core(physical_core_id: usize, sp: usize) {
+        psci::start_core(physical_core_id, sp)
     }
 }

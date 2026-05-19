@@ -8,7 +8,7 @@ use core::arch::asm;
 
 use aarch64_cpu::registers::{CurrentEL, Readable};
 
-use crate::{arch::Arch, enter_kernel::KernelEntryExtraArgs, main, secondary_main};
+use crate::{arch::Arch, main, secondary_main};
 
 pub(crate) mod drivers;
 pub(crate) mod exception_handler;
@@ -18,13 +18,13 @@ unsafe extern "C" {
 }
 
 #[unsafe(no_mangle)]
-extern "C" fn arch_main() -> ! {
-    main(KernelEntryExtraArgs {})
+extern "C" fn arch_main(physical_core_id: usize) -> ! {
+    main(physical_core_id)
 }
 
 #[unsafe(no_mangle)]
-extern "C" fn arch_secondary_main() -> ! {
-    secondary_main(KernelEntryExtraArgs {})
+extern "C" fn arch_secondary_main(physical_core_id: usize) -> ! {
+    secondary_main(physical_core_id)
 }
 
 pub(crate) enum ArchImpl {}
