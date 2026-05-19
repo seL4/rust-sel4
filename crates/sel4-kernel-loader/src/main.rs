@@ -11,6 +11,8 @@
 use core::hint;
 use core::sync::atomic::{AtomicBool, Ordering};
 
+use fdt::Fdt;
+
 use sel4_config::sel4_cfg_usize;
 use sel4_immediate_sync_once_cell::ImmediateSyncOnceCell;
 use sel4_kernel_loader_payload_types::ArchivedPayloadInfo;
@@ -42,12 +44,21 @@ static PAYLOAD_INFO: ImmediateSyncOnceCell<ArchivedPayloadInfo> = ImmediateSyncO
 static SECONDARY_READY: AtomicBool = AtomicBool::new(false);
 
 #[allow(clippy::reversed_empty_ranges)]
-fn main(physical_core_id: usize) -> ! {
+fn main(physical_core_id: usize, dtb: usize) -> ! {
     PlatImpl::init();
 
     logging::set_logger();
 
     log::info!("Starting loader on physical core {physical_core_id}");
+
+    let fdt = match dtb {
+        0 => None,
+        _ => Some(unsafe {
+            Fdt::from_ptr(dtb as *const _).unwrap()
+        }),
+    };
+
+    log::info!("fdt: {:?}", fdt);
 
     PAYLOAD_INFO.set(init_memory::init()).unwrap();
 

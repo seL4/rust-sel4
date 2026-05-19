@@ -19,6 +19,7 @@ license = "BSD-2-Clause AND GPL-2.0-only"
 [dependencies]
 cfg-if = "1.0.4"
 embedded-hal-nb = "1.0"
+fdt = "0.1.5"
 log = "0.4.28"
 rkyv = { version = "0.8.12", default-features = false }
 sel4-config = { path = "../sel4/config" }

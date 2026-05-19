@@ -18,8 +18,8 @@ unsafe extern "C" {
 }
 
 #[unsafe(no_mangle)]
-extern "C" fn arch_main(physical_core_id: usize) -> ! {
-    main(physical_core_id)
+extern "C" fn arch_main(dtb: usize, physical_core_id: usize) -> ! {
+    main(physical_core_id, dtb)
 }
 
 #[unsafe(no_mangle)]

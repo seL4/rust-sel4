@@ -40,8 +40,9 @@ clear_bss_loop:
     ldr     x9, [x9]
     mov     sp, x9
     bl      init_core_state
-    mrs     x0, mpidr_el1
-    and     x0, x0, #0xf
+    mrs     x1, mpidr_el1
+    and     x1, x1, #0xf
+    mov     x0, #0
     b       arch_main
 
 

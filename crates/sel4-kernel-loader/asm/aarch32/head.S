@@ -56,8 +56,9 @@ clearzi_exit:
     mov     sp, r9
     bl      leave_hyp
     bl      init_core_state
-    mrc     p15, 0, r0, c0, c0, 5 // core id
-    and     r0, r0, #0xff
+    mrc     p15, 0, r1, c0, c0, 5 // core id
+    and     r1, r1, #0xff
+    mov     r0, #0
     b       arch_main
     b       hang
 
