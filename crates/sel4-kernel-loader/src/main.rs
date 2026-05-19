@@ -108,6 +108,6 @@ fn common_epilogue(core_id: usize, kernel_entry_extra_args: KernelEntryExtraArgs
     KERNEL_ENTRY_BARRIER.wait();
     ArchImpl::prepare_to_enter_kernel(core_id);
     enter_kernel();
-    fmt::debug_println_without_synchronization!("Core {}: failed to enter kernel", core_id);
+    log::error!("Core {}: failed to enter kernel", core_id);
     ArchImpl::idle()
 }

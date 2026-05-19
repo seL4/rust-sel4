@@ -39,10 +39,6 @@ impl Plat for PlatImpl {
         sbi::legacy::console_putchar(c)
     }
 
-    fn put_char_without_synchronization(c: u8) {
-        sbi::legacy::console_putchar(c)
-    }
-
     fn start_secondary_core(core_id: usize, sp: usize) {
         unsafe {
             AtomicUsize::from_ptr(ptr::addr_of_mut!(secondary_core_sp)).store(sp, Ordering::SeqCst);

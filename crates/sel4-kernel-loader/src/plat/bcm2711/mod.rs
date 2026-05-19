@@ -6,7 +6,6 @@
 
 use embedded_hal_nb::nb;
 use embedded_hal_nb::serial::Write;
-use spin::lock_api::Mutex;
 
 use sel4_bcm2835_aux_uart_driver::Driver as Bcm2835AuxUartDriver;
 use sel4_config::{sel4_cfg, sel4_cfg_bool};
@@ -15,8 +14,6 @@ use crate::{arch::reset_cntvoff, plat::Plat};
 
 const SERIAL_DEVICE_BASE_ADDR: usize = 0xfe21_5000;
 
-static SERIAL_DRIVER: Mutex<Bcm2835AuxUartDriver> = Mutex::new(get_serial_driver());
-
 const fn get_serial_driver() -> Bcm2835AuxUartDriver {
     unsafe { Bcm2835AuxUartDriver::new_uninit(SERIAL_DEVICE_BASE_ADDR as *mut _) }
 }
@@ -24,10 +21,6 @@ const fn get_serial_driver() -> Bcm2835AuxUartDriver {
 pub(crate) enum PlatImpl {}
 
 impl Plat for PlatImpl {
-    fn init() {
-        SERIAL_DRIVER.lock().init();
-    }
-
     fn init_per_core() {
         if sel4_cfg_bool!(ARM_HYPERVISOR_SUPPORT) {
             unsafe {
@@ -37,10 +30,6 @@ impl Plat for PlatImpl {
     }
 
     fn put_char(c: u8) {
-        nb::block!(SERIAL_DRIVER.lock().write(c)).unwrap_or_else(|err| match err {});
-    }
-
-    fn put_char_without_synchronization(c: u8) {
         nb::block!(get_serial_driver().write(c)).unwrap_or_else(|err| match err {});
     }
 
