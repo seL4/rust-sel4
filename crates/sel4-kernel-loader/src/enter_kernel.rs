@@ -6,22 +6,14 @@
 
 use core::mem;
 
-use sel4_config::{sel4_cfg_if, sel4_cfg_struct};
-
+use sel4_config::sel4_cfg_if;
 use sel4_kernel_loader_payload_types::ArchivedPayloadInfo;
 
-#[sel4_cfg_struct]
-pub(crate) struct KernelEntryExtraArgs {
-    #[sel4_cfg(ARCH_RISCV)]
-    pub(crate) hart_id: usize,
-}
+#[allow(unused_imports)]
+use crate::arch::{Arch, ArchImpl};
 
 #[allow(unused_variables)]
-pub(crate) fn mk_enter_kernel(
-    payload_info: &ArchivedPayloadInfo,
-    core_id: usize,
-    extra_args: KernelEntryExtraArgs,
-) -> impl Fn() {
+pub(crate) fn mk_enter_kernel(payload_info: &ArchivedPayloadInfo, core_id: usize) -> impl Fn() {
     let kernel_entry =
         unsafe { mem::transmute::<usize, KernelEntry>(payload_info.kernel_entry.to_usize()) };
 
@@ -42,7 +34,7 @@ pub(crate) fn mk_enter_kernel(
 
     sel4_cfg_if! {
         if #[sel4_cfg(all(ARCH_RISCV, not(MAX_NUM_NODES = "1")))] {
-            let hart_id = extra_args.hart_id;
+            let hart_id = ArchImpl::logical_to_physical_core_id(core_id);
             move || {
                 (kernel_entry)(
                     ui_p_reg_start,
