@@ -7,9 +7,10 @@
 use core::panic::PanicInfo;
 
 use crate::arch::{Arch, ArchImpl};
+use crate::fmt::debug_println;
 
 #[panic_handler]
 fn panic_handler(info: &PanicInfo) -> ! {
-    log::error!("{info}");
+    debug_println!("{info}");
     ArchImpl::idle()
 }
