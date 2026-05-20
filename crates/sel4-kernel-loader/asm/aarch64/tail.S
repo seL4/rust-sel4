@@ -18,20 +18,20 @@ BEGIN_FUNC(switch_translation_tables_el2)
 
     bl      clean_and_invalideate_dcache
 
-    disable_mmu sctlr_el2, x8
+    disable_mmu sctlr_el2, x9
 
     bl      invalidate_icache
 
-    ldr     x8, =kernel_boot_level_0_table
-    ldr     x8, [x8]
-    msr     ttbr0_el2, x8
+    ldr     x9, =kernel_boot_level_0_table
+    ldr     x9, [x9]
+    msr     ttbr0_el2, x9
     isb
 
     tlbi    alle2is
     dsb     ish
     isb
 
-    enable_mmu  sctlr_el2, x8
+    enable_mmu  sctlr_el2, x9
 
     ic      ialluis
     dsb     ish
