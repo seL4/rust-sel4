@@ -45,7 +45,6 @@ global_asm! {
         spin_table_secondary_entry:
             ldr r0, =spin_table_secondary_stack_bottom
             ldr r0, [r0]
-            mov sp, r0
             b secondary_entry
     "#
 }

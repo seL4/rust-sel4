@@ -34,6 +34,7 @@ _start:
 
 
 secondary_entry:
+    mov     sp, x0
     bl      init_core_state
     b       arch_secondary_main
 

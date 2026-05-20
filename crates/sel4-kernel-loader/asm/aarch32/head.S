@@ -50,6 +50,7 @@ _start:
 
 
 secondary_entry:
+    mov     sp, r0
     bl      leave_hyp
     bl      init_core_state
     b       arch_secondary_main
