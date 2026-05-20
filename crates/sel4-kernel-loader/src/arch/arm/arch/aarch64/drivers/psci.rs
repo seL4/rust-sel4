@@ -30,7 +30,6 @@ global_asm! {
 
         .global psci_secondary_entry
         psci_secondary_entry:
-            mov sp, x0
             b secondary_entry
     "#
 }
