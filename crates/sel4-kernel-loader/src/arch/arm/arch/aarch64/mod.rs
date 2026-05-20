@@ -6,7 +6,7 @@
 
 use core::arch::asm;
 
-use aarch64_cpu::registers::{CurrentEL, Readable};
+use aarch64_cpu::registers::{CurrentEL, MPIDR_EL1, Readable};
 
 use crate::{arch::Arch, main, secondary_main};
 
@@ -18,12 +18,15 @@ unsafe extern "C" {
 }
 
 #[unsafe(no_mangle)]
-extern "C" fn arch_main(dtb: usize, physical_core_id: usize) -> ! {
+extern "C" fn arch_main(dtb: usize) -> ! {
+    let physical_core_id = get_physical_core_id();
+    assert_eq!(physical_core_id, 0); // TODO Check in head.S like elfloader? On what platforms could this fail?
     main(physical_core_id, dtb)
 }
 
 #[unsafe(no_mangle)]
-extern "C" fn arch_secondary_main(physical_core_id: usize) -> ! {
+extern "C" fn arch_secondary_main() -> ! {
+    let physical_core_id = get_physical_core_id();
     secondary_main(physical_core_id)
 }
 
@@ -50,6 +53,10 @@ impl Arch for ArchImpl {
             switch_translation_tables_el2();
         }
     }
+}
+
+fn get_physical_core_id() -> usize {
+    MPIDR_EL1.read(MPIDR_EL1::Aff0).try_into().unwrap()
 }
 
 fn get_current_el() -> Option<CurrentEL::EL::Value> {
