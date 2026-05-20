@@ -6,18 +6,27 @@
 
 use core::arch::asm;
 
+use aarch32_cpu::register::mpidr::Mpidr;
+
 use crate::{arch::Arch, main, secondary_main};
 
 pub(crate) mod drivers;
 
 #[unsafe(no_mangle)]
-extern "C" fn arch_main(dtb: usize, physical_core_id: usize) -> ! {
+extern "C" fn arch_main(dtb: usize) -> ! {
+    let physical_core_id = get_physical_core_id();
+    assert_eq!(physical_core_id, 0);
     main(physical_core_id, dtb)
 }
 
 #[unsafe(no_mangle)]
-extern "C" fn arch_secondary_main(physical_core_id: usize) -> ! {
+extern "C" fn arch_secondary_main() -> ! {
+    let physical_core_id = get_physical_core_id();
     secondary_main(physical_core_id)
+}
+
+fn get_physical_core_id() -> usize {
+    (Mpidr::read().0 & 0xff).try_into().unwrap()
 }
 
 unsafe extern "C" {
