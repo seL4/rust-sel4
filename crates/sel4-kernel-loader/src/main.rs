@@ -63,7 +63,7 @@ fn main(physical_core_id: usize, dtb: usize) -> ! {
     for other_core_id in 0..MAX_NUM_NODES {
         let other_physical_core_id = ArchImpl::logical_to_physical_core_id(other_core_id);
         if other_physical_core_id != physical_core_id {
-            log::debug!("Starting core {other_physical_core_id}");
+            log::debug!("Starting core physical #{other_physical_core_id}");
             SECONDARY_READY.store(false, Ordering::SeqCst);
             let sp = this_image::stacks::get_secondary_stack_bottom(other_core_id)
                 .ptr()
@@ -72,7 +72,7 @@ fn main(physical_core_id: usize, dtb: usize) -> ! {
             while !SECONDARY_READY.load(Ordering::SeqCst) {
                 hint::spin_loop();
             }
-            log::debug!("Core {other_physical_core_id} up");
+            log::debug!("Core physical #{other_physical_core_id} up");
         }
     }
 
@@ -84,9 +84,9 @@ fn main(physical_core_id: usize, dtb: usize) -> ! {
 }
 
 fn secondary_main(physical_core_id: usize) -> ! {
-    let core_id = ArchImpl::physical_to_logical_core_id(physical_core_id).unwrap();
-    log::debug!("Core {core_id}: up");
+    log::debug!("Core physical #{physical_core_id}: up");
     SECONDARY_READY.store(true, Ordering::SeqCst);
+    let core_id = ArchImpl::physical_to_logical_core_id(physical_core_id).unwrap();
     common_epilogue(core_id)
 }
 
@@ -102,6 +102,6 @@ fn common_epilogue(core_id: usize) -> ! {
     KERNEL_ENTRY_BARRIER.wait();
     ArchImpl::prepare_to_enter_kernel(core_id);
     enter_kernel();
-    debug_println!("Core {}: failed to enter kernel", core_id);
+    debug_println!("Core logical #{}: failed to enter kernel", core_id);
     ArchImpl::idle()
 }
