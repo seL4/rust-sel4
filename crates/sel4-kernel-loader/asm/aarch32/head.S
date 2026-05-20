@@ -41,27 +41,18 @@ _start:
     ldr     r9, =__primary_stack_bottom
     ldr     r9, [r9]
     mov     sp, r9
+
+    push    {r0}
     bl      leave_hyp
     bl      init_core_state
-    mrc     p15, 0, r1, c0, c0, 5 // core id
-    and     r1, r1, #0xff
-    mov     r0, #0
+    pop     {r0}
     b       arch_main
-    b       hang
 
 
 secondary_entry:
     bl      leave_hyp
     bl      init_core_state
-    mrc     p15, 0, r0, c0, c0, 5 // core id
-    and     r0, r0, #0xff
     b       arch_secondary_main
-    b       hang
-
-
-hang:
-    wfe
-    b       hang
 
 
 BEGIN_LOCAL_FUNC(init_core_state)
