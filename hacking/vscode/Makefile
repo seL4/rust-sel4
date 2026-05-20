@@ -27,13 +27,23 @@ default-excludes:
 		--just-dump-excludes \
 		-o $(default_excludes)
 
+all_private := \
+	http-server \
+	all-sel4 \
+	kernel-loader-aarch64 \
+	kernel-loader-aarch32 \
+	kernel-loader-riscv64
+
+.PHONY: all-private
+all-private: $(all_private)
+
 .PHONY: http-server
 http-server:
 	cargo run -p create-vscode-workspace -- \
 		--config .cargo/gen/target/aarch64-sel4-microkit.toml \
 		--config .cargo/gen/world/aarch64.microkitDefault.toml \
 		-i microkit-http-server-example-server \
-		-o $(private_workspaces_dir)/ukit$(ws)
+		-o $(private_workspaces_dir)/$@$(ws)
 
 .PHONY: all-sel4
 all-sel4:
@@ -49,12 +59,28 @@ all-sel4:
 		-e sel4-simple-task-rpc \
 		-e spawn-task \
 		-e spawn-thread \
-		-o $(private_workspaces_dir)/all-sel4$(ws)
+		-o $(private_workspaces_dir)/$@$(ws)
 
-.PHONY: kernel-loader
-kernel-loader:
+.PHONY: kernel-loader-aarch64
+kernel-loader-aarch64:
 	cargo run -p create-vscode-workspace -- \
 		--config .cargo/gen/target/aarch64-unknown-none.toml \
 		--config .cargo/gen/world/aarch64.default.toml \
 		-i sel4-kernel-loader \
-		-o $(private_workspaces_dir)/kernel-loader$(ws)
+		-o $(private_workspaces_dir)/$@$(ws)
+
+.PHONY: kernel-loader-aarch32
+kernel-loader-aarch32:
+	cargo run -p create-vscode-workspace -- \
+		--config .cargo/gen/target/armv7a-sel4.toml \
+		--config .cargo/gen/world/aarch32.default.toml \
+		-i sel4-kernel-loader \
+		-o $(private_workspaces_dir)/$@$(ws)
+
+.PHONY: kernel-loader-riscv64
+kernel-loader-riscv64:
+	cargo run -p create-vscode-workspace -- \
+		--config .cargo/gen/target/riscv64imac-sel4.toml \
+		--config .cargo/gen/world/riscv64.default.toml \
+		-i sel4-kernel-loader \
+		-o $(private_workspaces_dir)/$@$(ws)
