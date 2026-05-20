@@ -4,9 +4,9 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use core::arch::global_asm;
-
 use sel4_config::sel4_cfg_bool;
+
+use crate::arch::secondary_entry;
 
 type PsciFunc = unsafe extern "C" fn(id: usize, param1: usize, param2: usize, param3: usize) -> i32;
 
@@ -32,27 +32,8 @@ unsafe fn psci_cpu_on(target_cpu: usize, entry_point: usize, context_id: usize) 
 }
 
 pub(crate) fn start_core(physical_core_id: usize, sp: usize) {
-    let start = psci_secondary_entry as *const PsciSecondaryEntryFn as usize;
+    let start = secondary_entry as *const () as usize;
     unsafe {
         psci_cpu_on(physical_core_id, start, sp);
     }
-}
-
-type PsciSecondaryEntryFn = extern "C" fn() -> !;
-
-unsafe extern "C" {
-    fn psci_secondary_entry() -> !;
-}
-
-global_asm! {
-    r#"
-        .extern secondary_entry
-
-        .section .text
-
-        .global psci_secondary_entry
-        psci_secondary_entry:
-            mov sp, r0
-            b secondary_entry
-    "#
 }
