@@ -76,3 +76,7 @@ pub(crate) unsafe fn reset_cntvoff() {
         asm!("msr cntvoff_el2, xzr");
     }
 }
+
+unsafe extern "C" {
+    pub(crate) fn secondary_entry() -> !;
+}
