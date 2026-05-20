@@ -6,7 +6,7 @@
 
 #![no_std]
 
-use core::arch::global_asm;
+use core::arch::naked_asm;
 use core::slice;
 
 use sel4_panicking_env::abort;
@@ -14,17 +14,6 @@ use sel4_phdrs::{PT_SEL4_RESET_REGIONS, locate_phdrs};
 use sel4_stack::{Stack, StackBottom};
 
 use sel4_phdrs_patched as _;
-
-#[cfg(not(any(
-    target_arch = "aarch64",
-    target_arch = "arm",
-    target_arch = "riscv64",
-    target_arch = "riscv32",
-    target_arch = "x86_64",
-)))]
-compile_error!("unsupported architecture");
-
-// // //
 
 #[repr(C)]
 #[derive(Debug)]
@@ -64,7 +53,6 @@ unsafe fn get_regions() -> &'static [RegionMeta] {
 // // //
 
 unsafe extern "C" {
-    fn _reset(x0: usize, x1: usize, x2: usize, x3: usize) -> !;
     fn _start(x0: usize, x1: usize, x2: usize, x3: usize) -> !;
 }
 
@@ -98,13 +86,7 @@ pub fn reset4(x0: usize, x1: usize, x2: usize, x3: usize) -> ! {
     }
 }
 
-#[unsafe(no_mangle)]
-unsafe extern "C" fn __sel4_reset__rust_entrypoint(
-    x0: usize,
-    x1: usize,
-    x2: usize,
-    x3: usize,
-) -> ! {
+unsafe extern "C" fn reset_rust_entrypoint(x0: usize, x1: usize, x2: usize, x3: usize) -> ! {
     unsafe {
         reset_memory(get_regions());
         _start(x0, x1, x2, x3)
@@ -116,51 +98,43 @@ const STACK_SIZE: usize = 4096;
 #[unsafe(link_section = ".persistent")]
 static STACK: Stack<STACK_SIZE> = Stack::new();
 
-#[unsafe(no_mangle)]
-static __sel4_reset__stack_bottom: StackBottom = STACK.bottom();
+static STACK_BOTTOM: StackBottom = STACK.bottom();
 
-global_asm! {
-    r#"
-        .extern __sel4_reset__stack_bottom
-        .extern __sel4_reset__rust_entrypoint
-
-        .global _reset
-
-        .section .text.reset, "axR", %progbits
-        _reset:
-    "#,
-    #[cfg(target_arch = "aarch64")]
-    r#"
-            ldr x9, =__sel4_reset__stack_bottom
-            ldr x9, [x9]
-            mov sp, x9
-            b __sel4_reset__rust_entrypoint
-    "#,
-    #[cfg(target_arch = "arm")]
-    r#"
-            ldr r8, =__sel4_reset__stack_bottom
-            ldr r8, [r8]
-            mov sp, r8
-            b __sel4_reset__rust_entrypoint
-    "#,
-    #[cfg(target_arch = "riscv64")]
-    r#"
-            la sp, __sel4_reset__stack_bottom
-            ld sp, (sp)
-            j __sel4_reset__rust_entrypoint
-    "#,
-    #[cfg(target_arch = "riscv32")]
-    r#"
-            la sp, __sel4_reset__stack_bottom
-            lw sp, (sp)
-            j __sel4_reset__rust_entrypoint
-    "#,
-    #[cfg(target_arch = "x86_64")]
-    r#"
-            mov rsp, __sel4_reset__stack_bottom
-            mov rbp, rsp
-            sub rsp, 0x8 // Stack must be 16-byte aligned before call
-            push rbp
-            jmp __sel4_reset__rust_entrypoint
-    "#,
+#[unsafe(naked)]
+unsafe extern "C" fn _reset(x0: usize, x1: usize, x2: usize, x3: usize) -> ! {
+    naked_asm! {
+        cfg_select! {
+            target_arch = "aarch64" => r#"
+                ldr x9, ={stack_bottom}
+                ldr x9, [x9]
+                mov sp, x9
+                b {rust_entrypoint}
+            "#,
+            target_arch = "arm" => r#"
+                ldr r12, ={stack_bottom}
+                ldr r12, [r12]
+                mov sp, r12
+                b {rust_entrypoint}
+            "#,
+            target_arch = "riscv64" => r#"
+                la sp, {stack_bottom}
+                ld sp, (sp)
+                j {rust_entrypoint}
+            "#,
+            target_arch = "riscv32" => r#"
+                la sp, {stack_bottom}
+                lw sp, (sp)
+                j {rust_entrypoint}
+            "#,
+            target_arch = "x86_64" => r#"
+                mov rsp, {stack_bottom}
+                mov rbp, rsp
+                sub rsp, 0x8 // Stack must be 16-byte aligned before call
+                push rbp
+                jmp {rust_entrypoint}
+            "#,
+        },
+        stack_bottom = sym STACK_BOTTOM,
+        rust_entrypoint = sym reset_rust_entrypoint,
+    }
 }
