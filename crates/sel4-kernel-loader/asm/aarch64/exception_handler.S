@@ -13,7 +13,7 @@
 .align 7
     // Juggle registers using stack to introduce struct pointer into context
     stp     x2, x3, [sp, #-16]
-    adrp    x2, exception_register_state
+    ldr     x2, =exception_register_state
     stp     x0, x1, [x2]
     mov     x0, x2
     ldp     x2, x3, [sp, #-16]
