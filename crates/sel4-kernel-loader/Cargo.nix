@@ -40,6 +40,9 @@ mk {
   target."cfg(target_arch = \"aarch64\")".dependencies = {
     inherit (versions) smccc aarch64-cpu;
   };
+  target."cfg(target_arch = \"arm\")".dependencies = {
+    inherit (versions) aarch32-cpu;
+  };
   build-dependencies = {
     inherit (versions)
       proc-macro2

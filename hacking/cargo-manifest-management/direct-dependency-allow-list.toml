@@ -5,6 +5,7 @@
 #
 
 [allow]
+aarch32-cpu = "0.3.0"
 aarch64-cpu = "11.1.0"
 ab_glyph = "0.2.32"
 addr2line = "0.26.0"
