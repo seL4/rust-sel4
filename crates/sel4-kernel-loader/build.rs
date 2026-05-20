@@ -43,6 +43,7 @@ fn main() {
         cc::Build::new()
             .files(&asm_files)
             .includes(get_libsel4_include_dirs())
+            .include("asm/common")
             .compile("asm");
 
         for path in &asm_files {

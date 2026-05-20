@@ -53,9 +53,7 @@ fn main(physical_core_id: usize, dtb: usize) -> ! {
 
     let fdt = match dtb {
         0 => None,
-        _ => Some(unsafe {
-            Fdt::from_ptr(dtb as *const _).unwrap()
-        }),
+        _ => Some(unsafe { Fdt::from_ptr(dtb as *const _).unwrap() }),
     };
 
     log::info!("fdt: {:?}", fdt);
