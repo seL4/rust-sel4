@@ -4,9 +4,8 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use core::arch::asm;
-
-use aarch64_cpu::registers::{CurrentEL, MPIDR_EL1, Readable};
+use aarch64_cpu::asm::wfe;
+use aarch64_cpu::registers::{CNTVOFF_EL2, CurrentEL, MPIDR_EL1, Readable, TPIDR_EL1, Writeable};
 
 use crate::{arch::Arch, main, secondary_main};
 
@@ -35,9 +34,7 @@ pub(crate) enum ArchImpl {}
 impl Arch for ArchImpl {
     fn idle() -> ! {
         loop {
-            unsafe {
-                asm!("wfe");
-            }
+            wfe()
         }
     }
 
@@ -65,16 +62,12 @@ fn get_current_el() -> Option<CurrentEL::EL::Value> {
 
 #[inline(never)] // never inline to work around issues with optimizer
 unsafe fn set_tpidr(tpidr: usize) {
-    unsafe {
-        asm!("msr tpidr_el1, {tpidr}", tpidr = in(reg) tpidr);
-    }
+    TPIDR_EL1.set(tpidr.try_into().unwrap())
 }
 
 #[inline(never)]
 pub(crate) unsafe fn reset_cntvoff() {
-    unsafe {
-        asm!("msr cntvoff_el2, xzr");
-    }
+    CNTVOFF_EL2.set(0)
 }
 
 unsafe extern "C" {
