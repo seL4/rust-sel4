@@ -68,3 +68,7 @@ fn is_hyp_mode() -> bool {
     }
     (val & CPSR_MODE_MASK) == CPSR_MODE_HYPERVISOR
 }
+
+unsafe extern "C" {
+    pub(crate) fn secondary_entry() -> !;
+}
