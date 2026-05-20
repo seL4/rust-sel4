@@ -8,8 +8,8 @@ use core::arch::{asm, global_asm};
 use core::ptr;
 use core::sync::atomic::{AtomicUsize, Ordering};
 
+use aarch64_cpu::asm::barried::{SY, dsb};
 use aarch64_cpu::asm::sev;
-use aarch64_cpu::asm::barried::{dsb, SY};
 
 #[used]
 #[unsafe(no_mangle)]
