@@ -13,6 +13,7 @@ pub(crate) mod drivers;
 pub(crate) mod exception_handler;
 
 unsafe extern "C" {
+    pub(crate) fn secondary_entry() -> !;
     fn switch_translation_tables_el2();
 }
 
@@ -29,6 +30,10 @@ extern "C" fn arch_secondary_main() -> ! {
     secondary_main(physical_core_id)
 }
 
+fn get_physical_core_id() -> usize {
+    MPIDR_EL1.read(MPIDR_EL1::Aff0).try_into().unwrap()
+}
+
 pub(crate) enum ArchImpl {}
 
 impl Arch for ArchImpl {
@@ -39,12 +44,10 @@ impl Arch for ArchImpl {
     }
 
     fn prepare_to_enter_kernel(core_id: usize) {
-        let current_el = get_current_el();
+        let current_el = CurrentEL.read_as_enum(CurrentEL::EL);
         assert!(current_el == Some(CurrentEL::EL::Value::EL2));
 
-        unsafe {
-            set_tpidr(core_id);
-        }
+        TPIDR_EL1.set(core_id.try_into().unwrap());
 
         unsafe {
             switch_translation_tables_el2();
@@ -52,24 +55,7 @@ impl Arch for ArchImpl {
     }
 }
 
-fn get_physical_core_id() -> usize {
-    MPIDR_EL1.read(MPIDR_EL1::Aff0).try_into().unwrap()
-}
-
-fn get_current_el() -> Option<CurrentEL::EL::Value> {
-    CurrentEL.read_as_enum(CurrentEL::EL)
-}
-
-#[inline(never)] // never inline to work around issues with optimizer
-unsafe fn set_tpidr(tpidr: usize) {
-    TPIDR_EL1.set(tpidr.try_into().unwrap())
-}
-
 #[inline(never)]
 pub(crate) unsafe fn reset_cntvoff() {
     CNTVOFF_EL2.set(0)
-}
-
-unsafe extern "C" {
-    pub(crate) fn secondary_entry() -> !;
 }

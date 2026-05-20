@@ -6,7 +6,7 @@
 
 use riscv::register::satp;
 
-use sel4_config::sel4_cfg_usize;
+use sel4_config::{sel4_cfg_if, sel4_cfg_usize};
 
 use crate::{arch::Arch, main, secondary_main, this_image::kernel_boot_level_0_table};
 
@@ -48,11 +48,15 @@ impl Arch for ArchImpl {
 }
 
 fn switch_page_tables() {
-    #[cfg(target_pointer_width = "32")]
-    const MODE: satp::Mode = satp::Mode::Sv32;
-
-    #[cfg(target_pointer_width = "64")]
-    const MODE: satp::Mode = satp::Mode::Sv39;
+    const MODE: satp::Mode = sel4_cfg_if! {
+        if #[sel4_cfg(all(SEL4_ARCH = "riscv64", PT_LEVELS = "3"))] {
+            satp::Mode::Sv39
+        } else if #[sel4_cfg(all(SEL4_ARCH = "riscv32", PT_LEVELS = "2"))] {
+            satp::Mode::Sv32
+        } else {
+            compiler_error!("unsupported configuration");
+        }
+    };
 
     let ppn = kernel_boot_level_0_table.get() >> 12;
     riscv::asm::sfence_vma_all();
