@@ -68,7 +68,13 @@ BEGIN_LOCAL_FUNC(init_core_state)
                  MAIR(0xff, MT_NORMAL) | \
                  MAIR(0xaa, MT_NORMAL_WT)
     msr     mair_el2, x5
-    ldr     x8, =TCR_T0SZ(48) | TCR_IRGN0_WBWC | TCR_ORGN0_WBWC | TCR_SH0_ISH | TCR_TG0_4K | TCR_PS | TCR_EL2_RES1
+    ldr     x8, =TCR_T0SZ(48) | \
+                 TCR_IRGN0_WBWC | \
+                 TCR_ORGN0_WBWC | \
+                 TCR_SH0_ISH | \
+                 TCR_TG0_4K | \
+                 TCR_PS | \
+                 TCR_EL2_RES1
     msr     tcr_el2, x8
     isb
 
