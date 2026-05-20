@@ -7,9 +7,13 @@
 use sel4_config::sel4_cfg_usize;
 
 cfg_select! {
-    any(target_arch = "arm", target_arch = "aarch64") => {
-        mod arm;
-        pub(crate) use arm::*;
+    any(target_arch = "aarch64") => {
+        mod aarch64;
+        pub(crate) use aarch64::*;
+    }
+    any(target_arch = "arm") => {
+        mod aarch32;
+        pub(crate) use aarch32::*;
     }
     any(target_arch = "riscv32", target_arch = "riscv64") => {
         mod riscv;
