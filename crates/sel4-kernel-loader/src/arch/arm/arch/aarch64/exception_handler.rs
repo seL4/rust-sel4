@@ -4,48 +4,39 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use core::arch::asm;
 use core::fmt;
+
+use aarch64_cpu::registers::{ESR_EL2, FAR_EL2, Readable, TPIDR_EL1};
 
 use crate::arch::{Arch, ArchImpl};
 use crate::fmt::debug_println;
 
 #[used]
 #[unsafe(no_mangle)]
-static mut exception_register_state: Registers = [0; NUM_REGISTERS];
+static mut exception_register_state: Registers = [0; _];
 
 #[unsafe(no_mangle)]
-unsafe extern "C" fn exception_handler(vector_table_index: usize) -> ! {
-    let mut esr;
-    let mut far;
-    let mut tpidr_el1;
-    unsafe {
-        asm!("mrs {}, esr_el2", out(reg) esr);
-        asm!("mrs {}, far_el2", out(reg) far);
-        asm!("mrs {}, tpidr_el1", out(reg) tpidr_el1);
-    }
+unsafe extern "C" fn exception_handler(vector_table_index: u64) -> ! {
     let exception = Exception {
         vector_table_index,
-        esr,
-        far,
-        tpidr_el1,
+        esr: ESR_EL2.get(),
+        far: FAR_EL2.get(),
+        tpidr_el1: TPIDR_EL1.get(),
         registers: unsafe { exception_register_state },
     };
     debug_println!("!!! Exception:\n{}", exception);
     ArchImpl::idle()
 }
 
-//
-
 const NUM_REGISTERS: usize = 32;
 
 type Registers = [u64; NUM_REGISTERS];
 
 struct Exception {
-    vector_table_index: usize,
-    esr: usize,
-    far: usize,
-    tpidr_el1: usize,
+    vector_table_index: u64,
+    esr: u64,
+    far: u64,
+    tpidr_el1: u64,
     registers: Registers,
 }
 
@@ -66,7 +57,7 @@ impl fmt::Display for Exception {
     }
 }
 
-fn show_vector_table_index(ix: usize) -> Option<&'static str> {
+fn show_vector_table_index(ix: u64) -> Option<&'static str> {
     match ix {
         0 => Some("Synchronous EL1t"),
         1 => Some("IRQ EL1t"),
