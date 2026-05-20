@@ -39,11 +39,6 @@ secondary_entry:
     b       arch_secondary_main
 
 
-hang:
-    wfe
-    b       hang
-
-
 BEGIN_LOCAL_FUNC(init_core_state)
     stp     x29, x30, [sp, #-16]!
     mov     x29, sp
