@@ -43,7 +43,7 @@ impl<const N: usize> Default for Stack<N> {
 pub struct StackBottom(*mut u8);
 
 impl StackBottom {
-    pub fn ptr(&self) -> *mut u8 {
+    pub const fn ptr(&self) -> *mut u8 {
         self.0
     }
 }
