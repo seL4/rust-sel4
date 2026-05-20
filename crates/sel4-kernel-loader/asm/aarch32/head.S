@@ -38,19 +38,6 @@ _start:
     mcr     ACTLR(r1)
 #endif /* CONFIG_MAX_NUM_NODES > 1 */
 
-    ldr     r0, =__bss_start    // [TODO] GNU LD has __bss_start__ and __bss_end__ which feel more robust
-    ldr     r1, =_end
-    mov     r3, #0
-
-clearzi:
-    cmp     r0, r1
-    beq     clearzi_exit
-    str     r3, [r0]
-    add     r0, r0, #4
-    b       clearzi
-
-clearzi_exit:
-
     ldr     r9, =__primary_stack_bottom
     ldr     r9, [r9]
     mov     sp, r9
