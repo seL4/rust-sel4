@@ -28,14 +28,6 @@ _start:
     and     x0, x0, #0xf        // Check processor id
     cbnz    x0, hang            // Hang for all non-primary CPU
 
-    ldr     x0, =__bss_start    // [TODO] GNU LD has __bss_start__ and __bss_end__ which feel more robust
-    ldr     x1, =_end
-
-clear_bss_loop:
-    str     xzr, [x0], #8
-    cmp     x0, x1
-    b.lt    clear_bss_loop
-
     ldr     x9, =__primary_stack_bottom
     ldr     x9, [x9]
     mov     sp, x9
