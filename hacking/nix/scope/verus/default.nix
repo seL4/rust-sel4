@@ -29,7 +29,7 @@ let
 
   rustToolchain = assembleRustToolchain {
     inherit channel;
-    sha256 = "sha256-qqF33vNuAdU5vua96VKVIwuc43j4EFeEXbjQ6+l4mO4=";
+    sha256 = "sha256-gh/xTkxKHL4eiRXzWv8KP7vfjSk61Iq48x47BEDFgfk=";
   };
 
   rustEnvironment = lib.fix (self: elaborateRustEnvironment (mkDefaultElaborateRustEnvironmentArgs {
@@ -46,8 +46,8 @@ let
   src = fetchFromGitHub {
     owner = "verus-lang";
     repo = "verus";
-    rev = "release/0.2026.03.17.a96bad0";
-    sha256 = "sha256-Enc56lwMbRTsGIIJ3XTq9/dy4ZFhJYt7s9Bh2jgF/dg=";
+    rev = "release/0.2026.05.17.e479cce";
+    sha256 = "sha256-fAaGpBTjq9IwENytGe+cPk9AN7GvKdgRBCVcJkaBeeA=";
   };
 
   lockfile = vendorLockfile {
