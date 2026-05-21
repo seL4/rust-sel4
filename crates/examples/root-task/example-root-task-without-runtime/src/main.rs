@@ -142,9 +142,9 @@ cfg_if::cfg_if! {
 
                     .global _start
                     _start:
-                        ldr r8, =__stack_bottom
-                        ldr r8, [r8]
-                        mov sp, r8
+                        ldr r12, =__stack_bottom
+                        ldr r12, [r12]
+                        mov sp, r12
                         b __rust_entry
 
                     1:  b 1b

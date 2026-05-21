@@ -113,9 +113,9 @@ pub unsafe extern "C" fn stack_init() -> ! {
                 b {call_rust_entrypoint}
             "#,
             target_arch = "arm" => r#"
-                ldr r8, ={stack_bottom}
-                ldr r8, [r8]
-                mov sp, r8
+                ldr r12, ={stack_bottom}
+                ldr r12, [r12]
+                mov sp, r12
                 b {call_rust_entrypoint}
             "#,
             target_arch = "riscv64" => r#"
