@@ -105,36 +105,36 @@ unsafe extern "C" fn _reset(x0: usize, x1: usize, x2: usize, x3: usize) -> ! {
     naked_asm! {
         cfg_select! {
             target_arch = "aarch64" => r#"
-                ldr x9, ={reset_stack_bottom}
+                ldr x9, ={stack_bottom}
                 ldr x9, [x9]
                 mov sp, x9
-                b {reset_rust_entrypoint}
+                b {rust_entrypoint}
             "#,
             target_arch = "arm" => r#"
-                ldr r8, ={reset_stack_bottom}
+                ldr r8, ={stack_bottom}
                 ldr r8, [r8]
                 mov sp, r8
-                b {reset_rust_entrypoint}
+                b {rust_entrypoint}
             "#,
             target_arch = "riscv64" => r#"
-                la sp, {reset_stack_bottom}
+                la sp, {stack_bottom}
                 ld sp, (sp)
-                j {reset_rust_entrypoint}
+                j {rust_entrypoint}
             "#,
             target_arch = "riscv32" => r#"
-                la sp, {reset_stack_bottom}
+                la sp, {stack_bottom}
                 lw sp, (sp)
-                j {reset_rust_entrypoint}
+                j {rust_entrypoint}
             "#,
             target_arch = "x86_64" => r#"
-                mov rsp, {reset_stack_bottom}
+                mov rsp, {stack_bottom}
                 mov rbp, rsp
                 sub rsp, 0x8 // Stack must be 16-byte aligned before call
                 push rbp
-                jmp {reset_rust_entrypoint}
+                jmp {rust_entrypoint}
             "#,
         },
-        reset_stack_bottom = sym STACK_BOTTOM,
-        reset_rust_entrypoint = sym reset_rust_entrypoint,
+        stack_bottom = sym STACK_BOTTOM,
+        rust_entrypoint = sym reset_rust_entrypoint,
     }
 }
