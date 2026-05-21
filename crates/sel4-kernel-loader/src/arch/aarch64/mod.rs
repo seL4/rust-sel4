@@ -10,7 +10,7 @@ use aarch64_cpu::registers::{CNTVOFF_EL2, CurrentEL, MPIDR_EL1, Readable, TPIDR_
 use crate::{arch::Arch, main, secondary_main};
 
 pub(crate) mod drivers;
-pub(crate) mod exception_handler;
+mod exception_handler;
 
 unsafe extern "C" {
     pub(crate) fn secondary_entry() -> !;
