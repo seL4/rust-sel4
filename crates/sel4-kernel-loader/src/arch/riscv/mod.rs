@@ -29,8 +29,11 @@ macro_rules! asm_prolog {
     };
 }
 
-macro_rules! asm_lx {
-    () => {
+#[unsafe(naked)]
+#[unsafe(no_mangle)]
+#[unsafe(link_section = ".text.start")]
+extern "C" fn _start(hart_id: usize, dtb: usize) -> ! {
+    naked_asm! {
         cfg_select! {
             target_arch = "riscv64" => r#"
                 .macro lx dst, src
@@ -42,23 +45,14 @@ macro_rules! asm_lx {
                     lw \dst, \src
                 .endm
             "#,
-            _ => "",
         }
-    };
-}
-
-#[unsafe(naked)]
-#[unsafe(no_mangle)]
-#[unsafe(link_section = ".text.start")]
-extern "C" fn _start(hart_id: usize, dtb: usize) -> ! {
-    naked_asm! {
         asm_prolog!(),
-        asm_lx!(),
         r#"
-            la sp, {stack_bottom}
-            lx sp, (sp)
-            la s0, {arch_main}
-            jr s0
+                la sp, {stack_bottom}
+                lx sp, (sp)
+                la s0, {arch_main}
+                jr s0
+            .purgem lx
         "#,
         stack_bottom = sym PRIMARY_STACK_BOTTOM,
         arch_main = sym arch_main,

@@ -18,7 +18,7 @@
 .extern arch_secondary_main
 .extern arm_vector_table
 
-.extern clean_and_invalideate_dcache
+.extern clean_and_invalidate_dcache
 .extern invalidate_dcache
 .extern invalidate_icache
 
@@ -44,7 +44,7 @@ BEGIN_LOCAL_FUNC(init_core_state)
     stp     x29, x30, [sp, #-16]!
     mov     x29, sp
 
-    bl      clean_and_invalideate_dcache
+    bl      clean_and_invalidate_dcache
 
     disable_mmu sctlr_el2, x9
 

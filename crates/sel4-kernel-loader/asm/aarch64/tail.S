@@ -16,7 +16,7 @@ BEGIN_FUNC(switch_translation_tables_el2)
     stp     x29, x30, [sp, #-16]!
     mov     x29, sp
 
-    bl      clean_and_invalideate_dcache
+    bl      clean_and_invalidate_dcache
 
     disable_mmu sctlr_el2, x9
 

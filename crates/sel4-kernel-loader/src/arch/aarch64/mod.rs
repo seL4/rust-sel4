@@ -9,6 +9,7 @@ use aarch64_cpu::registers::{CNTVOFF_EL2, CurrentEL, MPIDR_EL1, Readable, TPIDR_
 
 use crate::{arch::Arch, main, secondary_main};
 
+mod cache;
 pub(crate) mod drivers;
 mod exception_handler;
 

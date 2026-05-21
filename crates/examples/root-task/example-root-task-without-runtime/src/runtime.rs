@@ -82,6 +82,8 @@ unsafe extern "C" fn _start() -> ! {
                     lx sp, (sp)
                     jal {rust_entrypoint}
                 1:  j 1b
+
+                .purgem lx
             "#,
             target_arch = "x86_64" => r#"
                     mov rsp, {stack_bottom}
