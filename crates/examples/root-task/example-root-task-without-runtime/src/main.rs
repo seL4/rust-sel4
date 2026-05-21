@@ -163,6 +163,7 @@ cfg_if::cfg_if! {
                     _start:
 
                         # See https://www.sifive.com/blog/all-aboard-part-3-linker-relaxation-in-riscv-toolchain
+                    .extern __global_pointer$
                     .option push
                     .option norelax
                     1:  auipc gp, %pcrel_hi(__global_pointer$)

@@ -84,6 +84,7 @@ pub unsafe extern "C" fn call_rust_entrypoint() -> ! {
                 1:  b 1b
             "#,
             any(target_arch = "riscv32", target_arch = "riscv64") => r#"
+                .extern __global_pointer$
                 .option push
                 .option norelax
                 1:  auipc gp, %pcrel_hi(__global_pointer$)
