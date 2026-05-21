@@ -828,7 +828,6 @@ dependencies = [
 name = "example-root-task-without-runtime"
 version = "0.1.0"
 dependencies = [
- "cfg-if",
  "sel4",
 ]
 
