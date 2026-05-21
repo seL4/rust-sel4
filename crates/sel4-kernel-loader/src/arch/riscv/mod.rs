@@ -4,18 +4,84 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
+use core::arch::naked_asm;
+
 use riscv::register::satp;
 
 use sel4_config::{sel4_cfg_if, sel4_cfg_usize};
 
-use crate::{arch::Arch, main, secondary_main, this_image::kernel_boot_level_0_table};
+use crate::{
+    arch::Arch,
+    main, secondary_main,
+    this_image::{kernel_boot_level_0_table, stacks::PRIMARY_STACK_BOTTOM},
+};
 
+macro_rules! asm_prolog {
+    () => {
+        r#"
+            .extern __global_pointer$
+            .option push
+            .option norelax
+            1:  auipc gp, %pcrel_hi(__global_pointer$)
+                addi  gp, gp, %pcrel_lo(1b)
+            .option pop
+        "#
+    };
+}
+
+macro_rules! asm_lx {
+    () => {
+        cfg_select! {
+            target_arch = "riscv64" => r#"
+                .macro lx dst, src
+                    ld \dst, \src
+                .endm
+            "#,
+            target_arch = "riscv32" => r#"
+                .macro lx dst, src
+                    lw \dst, \src
+                .endm
+            "#,
+            _ => "",
+        }
+    };
+}
+
+#[unsafe(naked)]
 #[unsafe(no_mangle)]
+#[unsafe(link_section = ".text.start")]
+extern "C" fn _start(hart_id: usize, dtb: usize) -> ! {
+    naked_asm! {
+        asm_prolog!(),
+        asm_lx!(),
+        r#"
+            la sp, {stack_bottom}
+            lx sp, (sp)
+            la s0, {arch_main}
+            jr s0
+        "#,
+        stack_bottom = sym PRIMARY_STACK_BOTTOM,
+        arch_main = sym arch_main,
+    }
+}
+
+#[unsafe(naked)]
+pub(crate) extern "C" fn start_secondary(hart_id: usize) -> ! {
+    naked_asm! {
+        asm_prolog!(),
+        r#"
+            mv sp, a1
+            la s0, {arch_secondary_main}
+            jr s0
+        "#,
+        arch_secondary_main = sym arch_secondary_main,
+    }
+}
+
 extern "C" fn arch_main(hart_id: usize, dtb: usize) -> ! {
     main(hart_id, dtb)
 }
 
-#[unsafe(no_mangle)]
 extern "C" fn arch_secondary_main(hart_id: usize) -> ! {
     secondary_main(hart_id)
 }
