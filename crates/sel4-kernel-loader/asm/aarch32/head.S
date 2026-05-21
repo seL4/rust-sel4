@@ -25,6 +25,7 @@
 
 _start:
     mov     r0, r2
+    mov     r0, #0 // TODO
 
     cpsid   ifa                 // Disable Async aborts that might be pending from bootloader
 
@@ -42,10 +43,10 @@ _start:
     ldr     r9, [r9]
     mov     sp, r9
 
-    push    {r0}
+    mov     r6, r0
     bl      leave_hyp
     bl      init_core_state
-    pop     {r0}
+    mov     r0, r6
     b       arch_main
 
 

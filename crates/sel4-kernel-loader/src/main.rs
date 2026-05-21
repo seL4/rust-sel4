@@ -51,6 +51,8 @@ fn main(physical_core_id: usize, dtb: usize) -> ! {
 
     log::info!("Starting loader on physical core {physical_core_id}");
 
+    log::info!("dtb: {:?}", dtb);
+
     let fdt = match dtb {
         0 => None,
         _ => Some(unsafe { Fdt::from_ptr(dtb as *const _).unwrap() }),
