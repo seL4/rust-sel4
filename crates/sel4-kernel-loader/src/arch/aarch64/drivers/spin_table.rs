@@ -50,8 +50,8 @@ global_asm! {
 
         .global spin_table_secondary_entry
         spin_table_secondary_entry:
-            ldr x9, =spin_table_secondary_stack_bottom
-            ldr x9, [x9]
+            ldr x0, =spin_table_secondary_stack_bottom
+            ldr x0, [x0]
             b secondary_entry
     "#
 }
