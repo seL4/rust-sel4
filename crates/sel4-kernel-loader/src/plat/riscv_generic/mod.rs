@@ -4,11 +4,8 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
+use crate::arch::start_secondary;
 use crate::plat::Plat;
-
-unsafe extern "C" {
-    pub(crate) fn secondary_harts(sp: usize) -> !;
-}
 
 pub(crate) enum PlatImpl {}
 
@@ -23,7 +20,7 @@ impl Plat for PlatImpl {
         unsafe {
             sbi::hart_state_management::hart_start(
                 physical_core_id,
-                sbi::PhysicalAddress::new(secondary_harts as *const () as usize),
+                sbi::PhysicalAddress::new(start_secondary as *const () as usize),
                 sp,
             )
         }

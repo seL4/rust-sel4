@@ -45,6 +45,9 @@ pub(crate) mod stacks {
 
     static PRIMARY_STACK: Stack<PRIMARY_STACK_SIZE> = Stack::new();
 
+    pub(crate) static PRIMARY_STACK_BOTTOM: StackBottom = PRIMARY_STACK.bottom();
+
+    // TODO remove soon
     #[unsafe(no_mangle)]
     static __primary_stack_bottom: StackBottom = PRIMARY_STACK.bottom();
 
