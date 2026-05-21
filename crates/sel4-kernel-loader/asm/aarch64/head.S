@@ -16,6 +16,7 @@
 .extern __primary_stack_size
 .extern arch_main
 .extern arch_secondary_main
+.extern arm_vector_table
 
 .extern clean_and_invalideate_dcache
 .extern invalidate_dcache
