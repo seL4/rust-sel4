@@ -16,6 +16,7 @@
 .extern __primary_stack_size
 .extern arch_main
 .extern arch_secondary_main
+.extern arm_vector_table
 
 .extern clean_and_invalideate_dcache
 .extern invalidate_dcache
@@ -85,8 +86,9 @@ BEGIN_LOCAL_FUNC(init_core_state)
 
     enable_mmu  sctlr_el2, x9
 
-    adrp    x9, arm_vector_table
+    ldr     x9, =arm_vector_table
     msr     vbar_el2, x9
+    isb
 
     ic      ialluis
     dsb     ish
