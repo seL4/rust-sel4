@@ -86,8 +86,9 @@ BEGIN_LOCAL_FUNC(init_core_state)
 
     enable_mmu  sctlr_el2, x9
 
-    adrp    x9, arm_vector_table
+    ldr     x9, =arm_vector_table
     msr     vbar_el2, x9
+    isb
 
     ic      ialluis
     dsb     ish

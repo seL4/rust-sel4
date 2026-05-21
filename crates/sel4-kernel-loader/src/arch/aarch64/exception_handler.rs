@@ -78,6 +78,10 @@ fn show_vector_table_index(ix: u64) -> Option<&'static str> {
     }
 }
 
+unsafe extern "C" {
+    pub(crate) static arm_vector_table: usize;
+}
+
 global_asm! {
     r#"
         .macro ventry id
@@ -108,10 +112,10 @@ global_asm! {
 
         .text
 
-        .global arm_vector_table
-        .size arm_vector_table, {size}
-        .p2align 12
-        arm_vector_table:
+        .global {arm_vector_table}
+        .size {arm_vector_table}, {size}
+        .p2align 11
+        {arm_vector_table}:
             ventry  #0
             ventry  #1
             ventry  #2
@@ -129,6 +133,7 @@ global_asm! {
             ventry  #14
             ventry  #15
     "#,
+    arm_vector_table = sym arm_vector_table,
     exception_register_state = sym EXCEPTION_REGISTER_STATE,
     exception_handler = sym exception_handler,
     size = const { 16 * (1 << 7) },
