@@ -2676,6 +2676,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "sel4-kernel-loader-masquerade"
+version = "0.1.0"
+dependencies = [
+ "fdt",
+ "sel4-no-panic",
+ "semihosting",
+]
+
+[[package]]
+name = "sel4-kernel-loader-masquerade-add-payload"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "clap",
+ "object",
+]
+
+[[package]]
 name = "sel4-kernel-loader-payload-types"
 version = "0.1.0"
 dependencies = [
@@ -2810,6 +2828,10 @@ dependencies = [
 
 [[package]]
 name = "sel4-no-allocator"
+version = "0.1.0"
+
+[[package]]
+name = "sel4-no-panic"
 version = "0.1.0"
 
 [[package]]
@@ -3251,6 +3273,12 @@ dependencies = [
  "smoltcp",
  "virtio-drivers",
 ]
+
+[[package]]
+name = "semihosting"
+version = "0.1.25"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f8e4abf97879f4e80db69a9fba7bd64998e9bdad25f58ef045a778e191172fd4"
 
 [[package]]
 name = "semver"
