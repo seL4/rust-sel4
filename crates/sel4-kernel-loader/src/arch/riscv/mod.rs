@@ -45,7 +45,7 @@ extern "C" fn _start(hart_id: usize, dtb: usize) -> ! {
                     lw \dst, \src
                 .endm
             "#,
-        }
+        },
         asm_prolog!(),
         r#"
                 la sp, {stack_bottom}
