@@ -63,6 +63,7 @@ rustls = "0.23.5"
 rustls-pemfile = "2.0.0"
 rustversion = "1.0.22"
 sbi = "0.3.0"
+semihosting = "0.1.25"
 serde = "1.0.228"
 serde_json = "1.0.145"
 serde_yaml = "0.9.34" # TODO depricated
