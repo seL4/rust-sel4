@@ -2562,7 +2562,6 @@ dependencies = [
 name = "sel4-config"
 version = "0.1.0"
 dependencies = [
- "prettyplease",
  "proc-macro2",
  "quote",
  "sel4-config-data",
@@ -2660,7 +2659,6 @@ dependencies = [
  "log",
  "object",
  "postcard",
- "prettyplease",
  "proc-macro2",
  "quote",
  "riscv",
@@ -3181,7 +3179,6 @@ dependencies = [
  "log",
  "pest",
  "pest_derive",
- "prettyplease",
  "proc-macro2",
  "quote",
  "regex",

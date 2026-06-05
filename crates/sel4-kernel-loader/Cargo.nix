@@ -40,7 +40,6 @@ mk {
       quote
       object
       serde
-      prettyplease
       cc
       glob
     ;

@@ -91,8 +91,10 @@ impl OutDir {
     }
 
     fn write_file(&self, toks: TokenStream, filename: impl AsRef<Path>) {
-        let formatted = prettyplease::unparse(&syn::parse2(toks).unwrap());
+        let syntax_tree: syn::File = syn::parse2(toks).unwrap();
+        let formatted = quote!(#syntax_tree).to_string();
         let out_path = self.path.join(filename);
-        fs::write(out_path, formatted).unwrap();
+        let mut out_file = BufWriter::new(fs::File::create(out_path).unwrap());
+        write!(out_file, "{}", formatted).unwrap();
     }
 }

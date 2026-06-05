@@ -15,7 +15,6 @@ mk {
   };
   build-dependencies = {
     inherit (versions)
-      prettyplease
       proc-macro2
       quote
     ;
