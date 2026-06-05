@@ -13,6 +13,7 @@ use sel4_build_env::find_in_libsel4_include_dirs;
 use sel4_config_types::{Configuration, Value};
 use tinyjson::JsonValue;
 
+#[cfg(feature = "embedded-config")]
 fn main() {
     let config = {
         let kernel_config = from_path(find_in_libsel4_include_dirs("kernel/gen_config.json"));
@@ -35,6 +36,9 @@ fn main() {
     let out_json_str: String = out_json.format().unwrap();
     write!(out_file, "{}", out_json_str).unwrap();
 }
+
+#[cfg(not(feature = "embedded-config"))]
+fn main() {}
 
 fn from_path(path: impl AsRef<Path>) -> Configuration {
     let json = std::fs::read_to_string(path).unwrap();

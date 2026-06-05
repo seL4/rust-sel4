@@ -20,7 +20,7 @@ pub fn generate_rust(syscalls_xml_path: impl AsRef<Path>) -> TokenStream {
     let ty = quote!(i32);
     let mut i = -1i32;
     let mut toks = quote!();
-    let syscalls_for_api = if sel4_config::sel4_cfg_bool!(KERNEL_MCS) {
+    let syscalls_for_api = if sel4_config_data::config_as_bool("KERNEL_MCS") {
         &syscalls.api_mcs
     } else {
         &syscalls.api_master

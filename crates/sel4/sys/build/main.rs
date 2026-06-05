@@ -5,11 +5,13 @@
 //
 
 use std::env;
+use std::io::{BufWriter, Write};
 use std::fs;
 use std::path::{Path, PathBuf};
 
 use glob::glob;
 use proc_macro2::TokenStream;
+use quote::quote;
 
 use sel4_build_env::{find_in_libsel4_include_dirs, get_libsel4_include_dirs};
 
@@ -76,7 +78,7 @@ fn main() {
 
 #[allow(clippy::assertions_on_constants)]
 fn check_configuration() {
-    assert!(!sel4_config::sel4_cfg_bool!(ARCH_IA32));
+    assert!(!sel4_config_data::config_as_bool("ARCH_IA32"));
 }
 
 struct OutDir {

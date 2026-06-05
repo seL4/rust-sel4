@@ -32,7 +32,6 @@ proc-macro2 = "1.0.103"
 quote = "1.0.41"
 regex = { version = "1.12.2", default-features = false }
 sel4-build-env = { path = "../build-env" }
-sel4-config = { path = "../config" }
 sel4-config-data = { path = "../config/data" }
 syn = { version = "2.0.108", features = ["parsing"], default-features = false }
 xmltree = "0.12.0"

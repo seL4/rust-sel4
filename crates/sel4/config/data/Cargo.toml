@@ -16,11 +16,15 @@ authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
 edition = "2024"
 license = "BSD-2-Clause"
 
+[features]
+embedded-config = []
+
 [dependencies]
-sel4-config-types = { path = "../types", features = ["serde"] }
+sel4-build-env = { path = "../../build-env" }
+sel4-config-types = { path = "../types", features = [] }
 tinyjson = { version = "2.5.1", default-features = false }
 
 [build-dependencies]
 sel4-build-env = { path = "../../build-env" }
-sel4-config-types = { path = "../types", features = ["serde"] }
+sel4-config-types = { path = "../types", features = [] }
 tinyjson = { version = "2.5.1", default-features = false }
