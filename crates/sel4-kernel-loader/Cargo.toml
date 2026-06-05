@@ -44,7 +44,7 @@ sel4-config = { path = "../sel4/config" }
 sel4-kernel-loader-payload-types = { path = "payload-types" }
 sel4-platform-info = { path = "../sel4-platform-info" }
 serde = "1.0.228"
-syn = { version = "2.0.108", features = ["parsing"] }
+syn = { version = "2.0.108", features = ["parsing"], default-features = false }
 
 [target."cfg(any(target_arch = \"arm\", target_arch = \"aarch64\"))".dependencies]
 sel4-bcm2835-aux-uart-driver = { path = "../drivers/bcm2835-aux-uart" }
