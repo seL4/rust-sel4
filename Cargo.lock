@@ -2568,6 +2568,7 @@ dependencies = [
  "sel4-config-macros",
  "sel4-config-types",
  "syn",
+ "tinyjson",
 ]
 
 [[package]]
@@ -2576,7 +2577,6 @@ version = "0.1.0"
 dependencies = [
  "sel4-build-env",
  "sel4-config-types",
- "serde_json",
 ]
 
 [[package]]
@@ -3796,6 +3796,12 @@ name = "time-core"
 version = "0.1.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8b36ee98fd31ec7426d599183e8fe26932a8dc1fb76ddb6214d05493377d34ca"
+
+[[package]]
+name = "tinyjson"
+version = "2.5.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9ab95735ea2c8fd51154d01e39cf13912a78071c2d89abc49a7ef102a7dd725a"
 
 [[package]]
 name = "tinyvec"
