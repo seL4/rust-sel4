@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: MIT
 //
 
-use sel4_config::{sel4_cfg, sel4_cfg_enum, sel4_cfg_wrap_match};
+use sel4_config::{sel4_cfg, sel4_cfg_enum, sel4_cfg_if, sel4_cfg_wrap_match};
 
 use crate::{
     CapTypeForFrameObject, CapTypeForFrameObjectOfFixedSize, CapTypeForTranslationTableObject,
@@ -13,10 +13,12 @@ use crate::{
 };
 
 /// Frame object types for this kernel configuration.
+#[sel4_cfg_enum]
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum FrameObjectType {
     _4k,
     LargePage,
+    #[sel4_cfg(HUGE_PAGE)]
     HugePage,
 }
 
@@ -24,27 +26,35 @@ impl FrameObjectType {
     pub const GRANULE: Self = Self::_4k;
 
     pub const fn blueprint(self) -> ObjectBlueprint {
-        match self {
-            Self::_4k => ObjectBlueprint::Arch(ObjectBlueprintX86::_4k),
-            Self::LargePage => ObjectBlueprint::Arch(ObjectBlueprintX86::LargePage),
-            Self::HugePage => {
-                ObjectBlueprint::Arch(ObjectBlueprintX86::SeL4Arch(ObjectBlueprintX64::HugePage))
+        sel4_cfg_wrap_match! {
+            match self {
+                Self::_4k => ObjectBlueprint::Arch(ObjectBlueprintX86::_4k),
+                Self::LargePage => ObjectBlueprint::Arch(ObjectBlueprintX86::LargePage),
+                #[sel4_cfg(HUGE_PAGE)]
+                Self::HugePage => {
+                    ObjectBlueprint::Arch(ObjectBlueprintX86::SeL4Arch(ObjectBlueprintX64::HugePage))
+                }
             }
         }
     }
 
     pub const fn from_bits(bits: usize) -> Option<Self> {
-        Some(match bits {
-            Self::_4K_BITS => Self::_4k,
-            Self::LARGE_PAGE_BITS => Self::LargePage,
-            Self::HUGE_PAGE_BITS => Self::HugePage,
-            _ => return None,
+        Some(sel4_cfg_wrap_match! {
+            match bits {
+                Self::_4K_BITS => Self::_4k,
+                Self::LARGE_PAGE_BITS => Self::LargePage,
+                #[sel4_cfg(HUGE_PAGE)]
+                Self::HUGE_PAGE_BITS => Self::HugePage,
+                _ => return None,
+            }
         })
     }
 
     // For match arm LHS's, as we can't call const fn's
     pub const _4K_BITS: usize = Self::_4k.bits();
     pub const LARGE_PAGE_BITS: usize = Self::LargePage.bits();
+
+    #[sel4_cfg(HUGE_PAGE)]
     pub const HUGE_PAGE_BITS: usize = Self::HugePage.bits();
 }
 
@@ -60,10 +70,14 @@ impl CapTypeForFrameObjectOfFixedSize for cap_type::LargePage {
     const FRAME_OBJECT_TYPE: FrameObjectType = FrameObjectType::LargePage;
 }
 
-impl CapTypeForFrameObject for cap_type::HugePage {}
+sel4_cfg_if! {
+    if #[sel4_cfg(HUGE_PAGE)] {
+        impl CapTypeForFrameObject for cap_type::HugePage {}
 
-impl CapTypeForFrameObjectOfFixedSize for cap_type::HugePage {
-    const FRAME_OBJECT_TYPE: FrameObjectType = FrameObjectType::HugePage;
+        impl CapTypeForFrameObjectOfFixedSize for cap_type::HugePage {
+            const FRAME_OBJECT_TYPE: FrameObjectType = FrameObjectType::HugePage;
+        }
+    }
 }
 
 // // //

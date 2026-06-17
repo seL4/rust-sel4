@@ -68,10 +68,15 @@ pub(crate) mod cap_type_arch {
         ObjectTypeArch,
         ObjectBlueprintArch
     });
-    declare_cap_type_for_object_of_fixed_size!(HugePage {
-        ObjectTypeSeL4Arch,
-        ObjectBlueprintSeL4Arch
-    });
+
+    sel4_cfg_if! {
+        if #[sel4_cfg(HUGE_PAGE)] {
+            declare_cap_type_for_object_of_fixed_size!(HugePage {
+                ObjectTypeSeL4Arch,
+                ObjectBlueprintSeL4Arch
+            });
+        }
+    }
 
     declare_cap_type_for_object_of_fixed_size!(PML4 {
         ObjectTypeSeL4Arch,
@@ -111,7 +116,12 @@ pub(crate) mod cap_arch {
 
     declare_cap_alias!(_4k);
     declare_cap_alias!(LargePage);
-    declare_cap_alias!(HugePage);
+
+    sel4_cfg_if! {
+        if #[sel4_cfg(HUGE_PAGE)] {
+            declare_cap_alias!(HugePage);
+        }
+    }
 
     declare_cap_alias!(PML4);
     declare_cap_alias!(PDPT);
