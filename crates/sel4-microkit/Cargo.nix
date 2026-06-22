@@ -31,5 +31,8 @@ mk {
     alloc = [
       "sel4-panicking/alloc" "sel4-microkit-base/alloc"
     ];
+    extern-symbols = [
+      "sel4-microkit-base/extern-symbols"
+    ];
   };
 }
