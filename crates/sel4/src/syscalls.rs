@@ -188,6 +188,13 @@ impl<C: InvocationContext> cap::Notification<C> {
             self.invoke(|cptr, ipc_buffer| ipc_buffer.inner_mut().seL4_Wait(cptr.bits()));
         (wait_message_info_from_sys(info), badge)
     }
+
+    /// Corresponds to `seL4_Poll`.
+    pub fn poll(self) -> (MessageInfo, Badge) {
+        let (info, badge) =
+            self.invoke(|cptr, ipc_buffer| ipc_buffer.inner_mut().seL4_Poll(cptr.bits()));
+        (MessageInfo::from_inner(info), badge)
+    }
 }
 
 #[sel4_cfg(KERNEL_MCS)]
