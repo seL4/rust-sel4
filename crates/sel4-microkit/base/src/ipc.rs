@@ -129,6 +129,10 @@ pub(crate) fn nb_send_recv(action: PreparedDeferredAction) -> Event {
     ))
 }
 
+pub(crate) fn send(action: PreparedDeferredAction) {
+    action.cptr().send(action.msg_info())
+}
+
 pub(crate) fn forfeit_sc() -> PreparedDeferredAction {
     PreparedDeferredAction::new(
         MONITOR_EP_CAP.cast(),
