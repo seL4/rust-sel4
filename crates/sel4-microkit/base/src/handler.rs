@@ -78,10 +78,14 @@ pub trait Handler {
 
         loop {
             let event = match (reply_tag.take(), prepared_deferred_action.take()) {
-                (Some(msg_info), None) => ipc::reply_recv(msg_info),
+                (Some(msg_info), action_opt) => {
+                    if let Some(action) = action_opt {
+                        ipc::send(action);
+                    }
+                    ipc::reply_recv(msg_info)
+                }
                 (None, Some(action)) => ipc::nb_send_recv(action),
                 (None, None) => ipc::recv(),
-                _ => panic!("handler yielded deferred action after call to 'protected()'"),
             };
 
             match event {
