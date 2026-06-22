@@ -133,9 +133,7 @@ pub use object::{
     ObjectType,
 };
 pub use reply_authority::{ConveysReplyAuthority, ReplyAuthority};
-pub use syscalls::{
-    Badge, CallWithMRs, FastMessages, IpcCapType, NUM_MESSAGE_REGISTERS, RecvWithMRs, r#yield,
-};
+pub use syscalls::{Badge, CallWithMRs, FastMessages, NUM_MESSAGE_REGISTERS, RecvWithMRs, r#yield};
 pub use vspace::{
     CapTypeForFrameObject, CapTypeForFrameObjectOfFixedSize, CapTypeForTranslationTableObject,
     vspace_levels,

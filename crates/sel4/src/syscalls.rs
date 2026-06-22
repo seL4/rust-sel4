@@ -10,7 +10,7 @@ use sel4_config::{sel4_cfg, sel4_cfg_if};
 
 use crate::{
     Cap, CapType, ConveysReplyAuthority, InvocationContext, MessageInfo,
-    NUM_FAST_MESSAGE_REGISTERS, Word, cap, cap_type, const_helpers::u32_into_usize, sys,
+    NUM_FAST_MESSAGE_REGISTERS, Word, cap, const_helpers::u32_into_usize, sys,
 };
 
 #[sel4_cfg(not(KERNEL_MCS))]
@@ -21,16 +21,6 @@ pub const NUM_MESSAGE_REGISTERS: usize = u32_into_usize(sys::seL4_MsgLimits::seL
 
 /// A capability badge.
 pub type Badge = Word;
-
-/// Trait for [`CapType`]s which are used as targets of IPC syscalls.
-pub trait IpcCapType: CapType {}
-
-impl IpcCapType for cap_type::Notification {}
-
-impl IpcCapType for cap_type::Endpoint {}
-
-// HACK
-impl IpcCapType for cap_type::Unspecified {}
 
 sel4_cfg_if! {
     if #[sel4_cfg(KERNEL_MCS)] {
@@ -48,7 +38,7 @@ sel4_cfg_if! {
     }
 }
 
-impl<C: InvocationContext> cap::Endpoint<C> {
+impl<T: CapType, C: InvocationContext> Cap<T, C> {
     /// Corresponds to `seL4_Send`.
     pub fn send(self, info: MessageInfo) {
         self.invoke(|cptr, ipc_buffer| {
@@ -65,6 +55,27 @@ impl<C: InvocationContext> cap::Endpoint<C> {
                 .inner_mut()
                 .seL4_NBSend(cptr.bits(), info.into_inner())
         })
+    }
+
+    /// Corresponds to `seL4_NBSendRecv`.
+    #[sel4_cfg(KERNEL_MCS)]
+    pub fn nb_send_recv<U: CapType>(
+        self,
+        info: MessageInfo,
+        src: Cap<U>,
+        reply_authority: impl ConveysReplyAuthority,
+    ) -> (MessageInfo, Badge) {
+        let (raw_msg_info, badge) = self.invoke(|cptr, ipc_buffer| {
+            ipc_buffer.inner_mut().seL4_NBSendRecv(
+                cptr.bits(),
+                info.into_inner(),
+                src.bits(),
+                reply_authority
+                    .into_reply_authority()
+                    .into_sys_reply_authority(),
+            )
+        });
+        (MessageInfo::from_inner(raw_msg_info), badge)
     }
 
     /// Corresponds to `seL4_Recv`.
@@ -120,7 +131,7 @@ impl<C: InvocationContext> cap::Endpoint<C> {
         (MessageInfo::from_inner(raw_msg_info), badge)
     }
 
-    pub fn send_with_mrs<T: FastMessages>(self, info: MessageInfo, messages: T) {
+    pub fn send_with_mrs<M: FastMessages>(self, info: MessageInfo, messages: M) {
         let [msg0, msg1, msg2, msg3] = messages.prepare_in();
         self.invoke(|cptr, ipc_buffer| {
             ipc_buffer.inner_mut().seL4_SendWithMRs(
@@ -156,7 +167,7 @@ impl<C: InvocationContext> cap::Endpoint<C> {
         }
     }
 
-    pub fn call_with_mrs<T: FastMessages>(self, info: MessageInfo, messages: T) -> CallWithMRs {
+    pub fn call_with_mrs<M: FastMessages>(self, info: MessageInfo, messages: M) -> CallWithMRs {
         let mut msg = messages.prepare_in_out();
         let [mr0, mr1, mr2, mr3] = &mut msg;
         let raw_msg_info = self.invoke(|cptr, ipc_buffer| {
@@ -194,42 +205,6 @@ impl<C: InvocationContext> cap::Notification<C> {
         let (info, badge) =
             self.invoke(|cptr, ipc_buffer| ipc_buffer.inner_mut().seL4_Poll(cptr.bits()));
         (MessageInfo::from_inner(info), badge)
-    }
-}
-
-#[sel4_cfg(KERNEL_MCS)]
-impl<C: InvocationContext> cap::Reply<C> {
-    /// Corresponds to `seL4_Send`.
-    pub fn send(self, info: MessageInfo) {
-        self.invoke(|cptr, ipc_buffer| {
-            ipc_buffer
-                .inner_mut()
-                .seL4_Send(cptr.bits(), info.into_inner())
-        })
-    }
-}
-
-// TODO more
-impl<T: IpcCapType, C: InvocationContext> Cap<T, C> {
-    /// Corresponds to `seL4_NBSendRecv`.
-    #[sel4_cfg(KERNEL_MCS)]
-    pub fn nb_send_recv<U: IpcCapType>(
-        self,
-        info: MessageInfo,
-        src: Cap<U>,
-        reply_authority: impl ConveysReplyAuthority,
-    ) -> (MessageInfo, Badge) {
-        let (raw_msg_info, badge) = self.invoke(|cptr, ipc_buffer| {
-            ipc_buffer.inner_mut().seL4_NBSendRecv(
-                cptr.bits(),
-                info.into_inner(),
-                src.bits(),
-                reply_authority
-                    .into_reply_authority()
-                    .into_sys_reply_authority(),
-            )
-        });
-        (MessageInfo::from_inner(raw_msg_info), badge)
     }
 }
 
