@@ -13,7 +13,7 @@ use crate::{
     Channel, Child, MessageInfo,
     defer::{DeferredAction, PreparedDeferredAction},
     ipc::{self, ChannelSet, Event},
-    pd_is_passive,
+    pd_is_passive, symbols,
 };
 
 pub use core::convert::Infallible;
@@ -75,6 +75,16 @@ pub trait Handler {
         } else {
             None
         };
+
+        // Work around https://github.com/seL4/seL4/issues/1536
+        {
+            let mut bits = symbols::pd_irqs();
+            while bits != 0 {
+                let i = bits.trailing_zeros();
+                Channel::new(i.try_into().unwrap()).irq_ack().unwrap();
+                bits &= bits - 1; // clear lowest bit
+            }
+        }
 
         loop {
             let event = match (reply_tag.take(), prepared_deferred_action.take()) {
