@@ -833,6 +833,20 @@ impl<'a> Initializer<'a> {
                         )?;
 
                         tcb.tcb_set_timeout_endpoint(temp_fault_ep)?;
+
+                        if obj.extra.passive {
+                            if let Some(bound_sc) = obj.sc() {
+                                if let Some(bound_ntfn) = obj.bound_notification() {
+                                    let bound_ntfn_cap =
+                                        self.orig_cap::<cap_type::Notification>(bound_ntfn.object);
+                                    sc.bind_ntfn(bound_ntfn_cap)?;
+                                } else {
+                                    panic!("A passive task must have its own Notification.");
+                                }
+                            } else {
+                                panic!("A passive task must have its own Scheduling Context.");
+                            }
+                        }
                     } else {
                         let fault_ep = sel4::CPtr::from_bits(obj.extra.master_fault_ep.as_ref().unwrap().to_sel4());
 
