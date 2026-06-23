@@ -400,6 +400,7 @@ pub mod object {
     pub struct CNode {
         pub size_bits: u8,
         pub slots: Vec<CapTableEntry>,
+        pub receive_all_untypeds: bool,
     }
 
     #[derive(Debug, Clone, Eq, PartialEq, IsObject, HasCapTable)]
@@ -445,6 +446,7 @@ pub mod object {
         pub size_bits: u8,
         pub paddr: Option<Word>,
         pub init: D,
+        pub receive_all_untypeds: bool,
     }
 
     #[derive(Debug, Clone, Eq, PartialEq, IsObject, HasCapTable)]
