@@ -167,6 +167,11 @@ impl BootInfoExtra<'_> {
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum BootInfoExtraId {
     Padding,
+    X86Vbe,
+    X86Mbmmap,
+    X86AcpiRsdp,
+    X86FrameBuffer,
+    X86TscFreq,
     Fdt,
 }
 
@@ -174,6 +179,19 @@ impl BootInfoExtraId {
     pub fn from_sys(id: sys::seL4_BootInfoID::Type) -> Option<Self> {
         match id {
             sys::seL4_BootInfoID::SEL4_BOOTINFO_HEADER_PADDING => Some(BootInfoExtraId::Padding),
+            sys::seL4_BootInfoID::SEL4_BOOTINFO_HEADER_X86_VBE => Some(BootInfoExtraId::X86Vbe),
+            sys::seL4_BootInfoID::SEL4_BOOTINFO_HEADER_X86_MBMMAP => {
+                Some(BootInfoExtraId::X86Mbmmap)
+            }
+            sys::seL4_BootInfoID::SEL4_BOOTINFO_HEADER_X86_ACPI_RSDP => {
+                Some(BootInfoExtraId::X86AcpiRsdp)
+            }
+            sys::seL4_BootInfoID::SEL4_BOOTINFO_HEADER_X86_FRAMEBUFFER => {
+                Some(BootInfoExtraId::X86FrameBuffer)
+            }
+            sys::seL4_BootInfoID::SEL4_BOOTINFO_HEADER_X86_TSC_FREQ => {
+                Some(BootInfoExtraId::X86TscFreq)
+            }
             sys::seL4_BootInfoID::SEL4_BOOTINFO_HEADER_FDT => Some(BootInfoExtraId::Fdt),
             _ => None,
         }

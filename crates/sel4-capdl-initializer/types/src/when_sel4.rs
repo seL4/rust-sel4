@@ -123,6 +123,12 @@ impl ArchivedRights {
 impl ArchivedFillEntryContentBootInfoId {
     pub fn to_sel4(&self) -> sel4::BootInfoExtraId {
         match self {
+            Self::Padding => sel4::BootInfoExtraId::Padding,
+            Self::X86Vbe => sel4::BootInfoExtraId::X86Vbe,
+            Self::X86Mbmmap => sel4::BootInfoExtraId::X86Mbmmap,
+            Self::X86AcpiRsdp => sel4::BootInfoExtraId::X86AcpiRsdp,
+            Self::X86FrameBuffer => sel4::BootInfoExtraId::X86FrameBuffer,
+            Self::X86TscFreq => sel4::BootInfoExtraId::X86TscFreq,
             Self::Fdt => sel4::BootInfoExtraId::Fdt,
         }
     }
