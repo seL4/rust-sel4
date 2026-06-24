@@ -94,6 +94,12 @@ pub struct FillEntryContentBootInfo {
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[derive(rkyv::Archive, rkyv::Serialize)]
 pub enum FillEntryContentBootInfoId {
+    Padding,
+    X86Vbe,
+    X86Mbmmap,
+    X86AcpiRsdp,
+    X86FrameBuffer,
+    X86TscFreq,
     Fdt,
 }
 
