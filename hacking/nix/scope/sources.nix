@@ -34,7 +34,7 @@ let
 
   capdlCommon = {
     url = "https://github.com/coliasgroup/capdl.git";
-    rev = "e0dfb895ec7dda40a6e59eec11fe2c20dd5c831d"; # branch rust-testing
+    rev = "2753f824ceeda696fff5cdb421aa8d604262c43c"; # branch rust-testing
     local = localRoot + "/capdl";
     extraFilter = path: type:
       lib.hasSuffix "/.stack-work" path || lib.hasSuffix "/stack.yaml.lock" path;
@@ -56,13 +56,13 @@ in rec {
 
   seL4 = fetchGit {
     url = "https://github.com/seL4/seL4.git";
-    rev = "881de507fe528490dc5e570c7810a149bad5880f"; # 15.0.0
+    rev = "44b2b946fc51fc6ebdaf126ff72b9e073575dc81"; # master
     local = localRoot + "/seL4";
   };
 
   microkit = fetchGit {
     url = "https://github.com/seL4/microkit.git";
-    rev = "27e7b6784664a5e62c11b49559995d266dece3c3"; # 2.2.0
+    rev = "ee52c8b2b60927654848678e5edd5cda3a3b2543"; # main
     local = localRoot + "/microkit";
     extraFilter = path: type:
       lib.hasSuffix "/target" path;
@@ -70,7 +70,7 @@ in rec {
 
   sdfgen = fetchGit {
     url = "https://github.com/au-ts/microkit_sdf_gen";
-    rev = "562963f99736f7deeb6091b275f3ef8709ada059"; # main
+    rev = "b8d04abec8dc9f63c16cadf6770292f45ab3c0a6"; # main
     local = localRoot + "/microkit_sdf_gen";
     extraFilter = path: type:
       lib.hasSuffix "/.zig-cache" path || lib.hasSuffix "/zig-out" path || lib.hasSuffix "/result" path;
