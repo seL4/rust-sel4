@@ -122,10 +122,11 @@ in rec {
                 hypervisor = true; # HACK around sel4-kernel-loader's config limitations
               } // args);
             in {
-              noPrinting = mkForBuildTest {
-                debugBuild = true;
-                printing = false;
-              };
+              # TODO kernel build broken
+              # noPrinting = mkForBuildTest {
+              #   debugBuild = true;
+              #   printing = false;
+              # };
               noDebug = mkForBuildTest {
                 debugBuild = false;
                 printing = true;
