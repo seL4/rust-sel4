@@ -98,6 +98,8 @@ pub enum TranslationTableObjectType {
     EPTPageDirectory,
     #[sel4_cfg(VTX)]
     EPTPageTable,
+    #[sel4_cfg(IOMMU)]
+    IOPageTable,
 }
 
 impl TranslationTableObjectType {
@@ -124,6 +126,8 @@ impl TranslationTableObjectType {
                 Self::EPTPageDirectory => ObjectBlueprint::Arch(ObjectBlueprintX86::EPTPageDirectory),
                 #[sel4_cfg(VTX)]
                 Self::EPTPageTable => ObjectBlueprint::Arch(ObjectBlueprintX86::EPTPageTable),
+                #[sel4_cfg(IOMMU)]
+                Self::IOPageTable => ObjectBlueprint::Arch(ObjectBlueprintX86::IOPageTable),
             }
         }
     }
@@ -143,6 +147,8 @@ impl TranslationTableObjectType {
                 Self::EPTPageDirectory => u32_into_usize(sys::seL4_X86_EPTPDIndexBits),
                 #[sel4_cfg(VTX)]
                 Self::EPTPageTable => u32_into_usize(sys::seL4_X86_EPTPTIndexBits),
+                #[sel4_cfg(IOMMU)]
+                Self::IOPageTable => u32_into_usize(sys::seL4_IOPageTableIndexBits),
             }
         }
     }
@@ -167,6 +173,11 @@ impl TranslationTableObjectType {
             _ => return None,
         })
     }
+
+    #[sel4_cfg(IOMMU)]
+    pub const fn from_level_io_page_table(_level: usize) -> Option<Self> {
+        Some(Self::IOPageTable)
+    }
 }
 
 impl CapTypeForTranslationTableObject for cap_type::PML4 {
@@ -189,8 +200,70 @@ impl CapTypeForTranslationTableObject for cap_type::PageTable {
         TranslationTableObjectType::PageTable;
 }
 
+#[sel4_cfg(IOMMU)]
+impl CapTypeForTranslationTableObject for cap_type::IOPageTable {
+    const TRANSLATION_TABLE_OBJECT_TYPE: TranslationTableObjectType =
+        TranslationTableObjectType::IOPageTable;
+}
+
 pub mod vspace_levels {
     pub const NUM_LEVELS: usize = 4;
 
     pub const HIGHEST_LEVEL_WITH_PAGE_ENTRIES: usize = NUM_LEVELS - 3;
+}
+
+#[sel4_cfg(all(ARCH_X86_64, IOMMU))]
+pub mod io_space {
+    use super::sys;
+    use crate::{Word, newtype_methods};
+
+    use sel4_sys::seL4_X86_IOSpace_CapData;
+    /// Corresponds to `seL4_IOSpace_CapData`.
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    pub struct IOSpaceCapData(sys::seL4_X86_IOSpace_CapData);
+
+    impl IOSpaceCapData {
+        newtype_methods!(pub sys::seL4_X86_IOSpace_CapData);
+
+        pub fn new(domain_id: u64, pci_bus: u64, pci_dev: u64, pci_fun: u64) -> Self {
+            Self::from_inner(seL4_X86_IOSpace_CapData::new(
+                domain_id, pci_bus, pci_dev, pci_fun,
+            ))
+        }
+
+        pub fn into_word(self) -> Word {
+            let [word] = self.into_inner().0.into_inner();
+            word
+        }
+    }
+
+    impl From<IOSpaceCapData> for Word {
+        fn from(cap_data: IOSpaceCapData) -> Self {
+            cap_data.into_word()
+        }
+    }
+
+    pub mod levels {
+        use super::super::{FrameObjectType, TranslationTableObjectType};
+
+        // On x86 the leaf entries are normal frame objects, not IOMMU specific
+        fn span_bits(num_levels: usize, level: usize) -> usize {
+            assert!(level < num_levels);
+            (level..num_levels)
+                .map(|level| {
+                    TranslationTableObjectType::from_level_io_page_table(level)
+                        .unwrap()
+                        .index_bits()
+                })
+                .sum::<usize>()
+                + FrameObjectType::GRANULE.bits()
+        }
+
+        pub fn step_bits(num_levels: usize, level: usize) -> usize {
+            span_bits(num_levels, level)
+                - TranslationTableObjectType::from_level_io_page_table(level)
+                    .unwrap()
+                    .index_bits()
+        }
+    }
 }

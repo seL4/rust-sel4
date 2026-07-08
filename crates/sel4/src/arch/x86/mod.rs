@@ -22,6 +22,9 @@ pub(crate) mod top_level {
         vm_attributes::VmAttributes,
         vspace::{FrameObjectType, TranslationTableObjectType},
     };
+
+    #[crate::sel4_cfg(all(ARCH_X86_64, IOMMU))]
+    pub use super::vspace::io_space;
 }
 
 pub(crate) use vspace::vspace_levels;
@@ -57,6 +60,16 @@ pub(crate) mod cap_type_arch {
                 /// Corresponds to `seL4_X86_EPTPT`.
                 EPTPageTable { ObjectTypeArch, ObjectBlueprintArch }
             );
+        }
+    }
+
+    sel4_cfg_if! {
+        if #[sel4_cfg(IOMMU)] {
+            declare_cap_type_for_object_of_fixed_size!(
+                IOPageTable { ObjectTypeArch, ObjectBlueprintArch }
+            );
+
+            declare_cap_type!(IOSpace);
         }
     }
 
@@ -111,6 +124,13 @@ pub(crate) mod cap_arch {
             declare_cap_alias!(EPTPDPT);
             declare_cap_alias!(EPTPageDirectory);
             declare_cap_alias!(EPTPageTable);
+        }
+    }
+
+    sel4_cfg_if! {
+        if #[sel4_cfg(IOMMU)] {
+            declare_cap_alias!(IOPageTable);
+            declare_cap_alias!(IOSpace);
         }
     }
 
