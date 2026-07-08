@@ -89,6 +89,11 @@ impl<'a> Initializer<'a> {
         self.init_asids()?;
         self.init_frames()?;
         self.init_vspaces()?;
+        sel4::sel4_cfg_if! {
+            if #[sel4_cfg(all(ARCH_X86_64,IOMMU))] {
+                self.init_iospaces()?;
+            }
+        }
 
         sel4::sel4_cfg_if! {
             if #[sel4_cfg(KERNEL_MCS)] {
@@ -686,6 +691,139 @@ impl<'a> Initializer<'a> {
             }
         }
         Ok(())
+    }
+
+    #[sel4::sel4_cfg(all(ARCH_X86_64, IOMMU))]
+    fn init_iospaces(&mut self) -> Result<()> {
+        debug!("Initialising IOSpaces");
+        // Early exit if no IOSpace Objects exist
+        if !self
+            .filter_objects::<object::ArchivedIOSpace>()
+            .any(|_| true)
+        {
+            return Ok(());
+        }
+
+        let num_iopt_levels = self.bootinfo.inner().numIOPTLevels as usize;
+        if num_iopt_levels < x86_io_address_space::CAPDL_NUM_IOPT_LEVELS {
+            panic!(
+                "Error: we have assumed at least a 39 bit (3-level) address space would be supported."
+            )
+        }
+        if num_iopt_levels > x86_io_address_space::MAX_RUNTIME_NUM_LEVELS {
+            panic!("Error: seL4 reported an unsupported x86 IOPT depth.")
+        }
+
+        // We assume that the IO Address Space was created to support 39 bit addresses (seL4 calls this 3 level)
+        // Prefix depth is the number extra levels that seL4 requires, based off its runtime decision
+        let prefix_depth = num_iopt_levels - x86_io_address_space::CAPDL_NUM_IOPT_LEVELS;
+
+        for (obj_id, obj) in self.filter_objects::<object::ArchivedIOSpace>() {
+            let iospace = self.mint_iospace_cap(obj_id, obj)?;
+
+            let root_iopt_obj_id = self.init_iospace_prefix(iospace, obj, prefix_depth)?;
+
+            let root_iopt = self.object_as::<object::ArchivedIOPageTable>(root_iopt_obj_id);
+            self.init_iospace(iospace, 0, root_iopt)?;
+        }
+
+        Ok(())
+    }
+
+    #[sel4::sel4_cfg(all(ARCH_X86_64, IOMMU))]
+    fn mint_iospace_cap(
+        &self,
+        obj_id: ArchivedObjectId,
+        obj: &object::ArchivedIOSpace,
+    ) -> Result<sel4::cap::IOSpace> {
+        let dst_slot = self.orig_cslot(obj_id);
+        let dst = cslot_to_absolute_cptr(dst_slot);
+        let src = cslot_to_absolute_cptr(init_thread::slot::IO_SPACE.upcast());
+
+        // Two inherent limitations are present if using CapDL statically:
+        // The first is it assumes that a user knows the PCI BDF information ahead of time, not true
+        // since this is runtime information. The second is the spec assumes that all domain ids are
+        // valid, which is also not true since the kernel may reserve an unknown number of domain
+        // ids during boot.
+        let (pci_bus, pci_dev, pci_fn) = obj.pci_device.to_sel4();
+
+        let cap_data =
+            sel4::io_space::IOSpaceCapData::new(obj.domain_id.to_sel4(), pci_bus, pci_dev, pci_fn);
+
+        dst.mint(&src, CapRights::all(), cap_data.into())
+            .map(|_| Ok(self.orig_cap::<cap_type::IOSpace>(obj_id)))
+            .unwrap_or_else(|err| panic!("Error: {err} when minting an x86 IOSpace capability."))
+    }
+
+    #[sel4::sel4_cfg(all(ARCH_X86_64, IOMMU))]
+    fn init_iospace_prefix(
+        &self,
+        iospace: sel4::cap::IOSpace,
+        obj: &object::ArchivedIOSpace,
+        prefix_depth: usize,
+    ) -> Result<ArchivedObjectId> {
+        for slot in (0..=prefix_depth).rev() {
+            let iopt = Self::get_iopt_obj_id(obj, slot);
+            self.orig_cap::<cap_type::IOPageTable>(iopt)
+                .io_page_table_map(iospace, 0)?;
+        }
+
+        // Return obj id of the root page table
+        Ok(Self::get_iopt_obj_id(obj, 0))
+    }
+
+    #[sel4::sel4_cfg(all(ARCH_X86_64, IOMMU))]
+    fn init_iospace(
+        &mut self,
+        iospace: sel4::cap::IOSpace,
+        ioaddr: usize,
+        obj: &object::ArchivedIOPageTable,
+    ) -> Result<()> {
+        let iopt_level = obj.level.to_sel4() as usize;
+        if iopt_level >= x86_io_address_space::CAPDL_NUM_IOPT_LEVELS {
+            panic!(
+                "Error: the capdl spec contains an extra level of page tables, violating our assumed {} level format!",
+                x86_io_address_space::CAPDL_NUM_IOPT_LEVELS
+            );
+        }
+        for (i, entry) in obj.entries() {
+            let ioaddr = ioaddr
+                + (usize::from(i)
+                    << sel4::io_space::levels::step_bits(
+                        x86_io_address_space::CAPDL_NUM_IOPT_LEVELS,
+                        iopt_level,
+                    ));
+
+            match entry {
+                IOPageTableEntry::IOPageTable(cap) => {
+                    self.orig_cap::<cap_type::IOPageTable>(cap.object)
+                        .io_page_table_map(iospace, ioaddr.try_into().unwrap())?;
+
+                    let iopt_object = self.object_as::<object::ArchivedIOPageTable>(cap.object);
+                    self.init_iospace(iospace, ioaddr, iopt_object)?;
+                }
+                IOPageTableEntry::Frame(cap) => {
+                    let frame = self.orig_cap::<cap_type::UnspecifiedPage>(cap.object);
+                    let rights = cap.rights.to_sel4();
+
+                    self.copy(frame)?
+                        .io_frame_map(iospace, rights, ioaddr.try_into().unwrap())?;
+                }
+            }
+        }
+        Ok(())
+    }
+
+    #[sel4::sel4_cfg(all(ARCH_X86_64, IOMMU))]
+    fn get_iopt_obj_id(obj: &object::ArchivedIOSpace, slot: usize) -> ArchivedObjectId {
+        obj.slots
+            .iter()
+            .find(|entry| usize::from(entry.slot) == slot)
+            .map(|entry| match &entry.cap {
+                ArchivedCap::IOPageTable(cap) => cap.object,
+                _ => panic!("unexpected non-IOPageTable cap in IOSpace slot"),
+            })
+            .unwrap_or_else(|| panic!("missing IOPageTable in IOSpace slot {slot}"))
     }
 
     #[sel4::sel4_cfg(KERNEL_MCS)]

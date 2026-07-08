@@ -24,6 +24,8 @@ pub enum ObjectTypeX86 {
     LargePage,
     PageTable,
     PageDirectory,
+    #[sel4_cfg(IOMMU)]
+    IOPageTable,
     #[sel4_cfg(VTX)]
     VCpu,
     #[sel4_cfg(VTX)]
@@ -41,6 +43,8 @@ impl ObjectTypeX86 {
                 Self::LargePage => sys::_object::seL4_X86_LargePageObject,
                 Self::PageTable => sys::_object::seL4_X86_PageTableObject,
                 Self::PageDirectory => sys::_object::seL4_X86_PageDirectoryObject,
+                #[sel4_cfg(IOMMU)]
+                Self::IOPageTable => sys::_object::seL4_X86_IOPageTableObject,
                 #[sel4_cfg(VTX)]
                 Self::VCpu => sys::_object::seL4_X86_VCPUObject,
                 #[sel4_cfg(VTX)]
@@ -72,6 +76,8 @@ pub enum ObjectBlueprintX86 {
     LargePage,
     PageTable,
     PageDirectory,
+    #[sel4_cfg(IOMMU)]
+    IOPageTable,
     #[sel4_cfg(VTX)]
     VCpu,
     #[sel4_cfg(VTX)]
@@ -89,6 +95,8 @@ impl ObjectBlueprintX86 {
                 Self::LargePage => ObjectTypeX86::LargePage,
                 Self::PageTable => ObjectTypeX86::PageTable,
                 Self::PageDirectory => ObjectTypeX86::PageDirectory,
+                #[sel4_cfg(IOMMU)]
+                Self::IOPageTable => ObjectTypeX86::IOPageTable,
                 #[sel4_cfg(VTX)]
                 Self::VCpu => ObjectTypeX86::VCpu,
                 #[sel4_cfg(VTX)]
@@ -107,6 +115,8 @@ impl ObjectBlueprintX86 {
                 Self::LargePage => u32_into_usize(sys::seL4_LargePageBits),
                 Self::PageTable => u32_into_usize(sys::seL4_PageTableBits),
                 Self::PageDirectory => u32_into_usize(sys::seL4_PageDirBits),
+                #[sel4_cfg(IOMMU)]
+                Self::IOPageTable => u32_into_usize(sys::seL4_IOPageTableBits),
                 #[sel4_cfg(VTX)]
                 Self::VCpu => u32_into_usize(sys::seL4_VCPUBits),
                 #[sel4_cfg(VTX)]

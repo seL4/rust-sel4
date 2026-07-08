@@ -15,6 +15,7 @@ use rkyv::util::AlignedVec;
 mod cap_table;
 mod frame_init;
 mod spec;
+pub mod x86_io_address_space;
 
 #[cfg(feature = "transform")]
 mod transform;

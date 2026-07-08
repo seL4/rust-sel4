@@ -10,7 +10,7 @@ use sel4::{ObjectBlueprint, VmAttributes};
 
 use crate::{
     ArchivedCap, ArchivedFillEntryContentBootInfoId, ArchivedObject, ArchivedRights, ArchivedWord,
-    cap,
+    cap, object::ArchivedPCIDevice,
 };
 
 impl<D: Archive> ArchivedObject<D> {
@@ -68,6 +68,8 @@ impl<D: Archive> ArchivedObject<D> {
                     assert_eq!(obj.is_root, level == 0); // sanity check
                     sel4::TranslationTableObjectType::from_level(level.into()).unwrap().blueprint()
                 }
+                #[sel4_cfg(all(ARCH_X86_64, IOMMU))]
+                ArchivedObject::IOPageTable(_) => sel4::ObjectBlueprintArch::IOPageTable.into(),
                 ArchivedObject::AsidPool(_) => ObjectBlueprint::asid_pool(),
                 #[sel4_cfg(KERNEL_MCS)]
                 ArchivedObject::SchedContext(obj) => ObjectBlueprint::SchedContext {
@@ -111,6 +113,12 @@ impl ArchivedWord {
     #[allow(clippy::useless_conversion)]
     pub fn to_sel4(&self) -> sel4::Word {
         self.0.to_native().try_into().unwrap()
+    }
+}
+
+impl ArchivedPCIDevice {
+    pub fn to_sel4(&self) -> (sel4::Word, sel4::Word, sel4::Word) {
+        (self.bus.into(), self.device.into(), self.function.into())
     }
 }
 

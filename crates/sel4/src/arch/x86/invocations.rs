@@ -63,6 +63,18 @@ impl<T: CapTypeForFrameObject, C: InvocationContext> Cap<T, C> {
         }))
     }
 
+    #[sel4_cfg(IOMMU)]
+    pub fn io_frame_map(self, iospace: IOSpace, rights: CapRights, ioaddr: Word) -> Result<()> {
+        Error::wrap(self.invoke(|cptr, ipc_buffer| {
+            ipc_buffer.inner_mut().seL4_X86_Page_MapIO(
+                cptr.bits(),
+                iospace.bits(),
+                rights.into_inner(),
+                ioaddr,
+            )
+        }))
+    }
+
     /// Corresponds to `seL4_X86_Page_Unmap`.
     pub fn frame_unmap(self) -> Result<()> {
         Error::wrap(
@@ -174,6 +186,25 @@ impl<C: InvocationContext> EPTPageTable<C> {
                 vaddr.try_into().unwrap(),
                 attr.into_inner(),
             )
+        }))
+    }
+}
+
+#[sel4_cfg(IOMMU)]
+impl<C: InvocationContext> IOPageTable<C> {
+    pub fn io_page_table_map(self, iospace: IOSpace, ioaddr: Word) -> Result<()> {
+        Error::wrap(self.invoke(|cptr, ipc_buffer| {
+            ipc_buffer
+                .inner_mut()
+                .seL4_X86_IOPageTable_Map(cptr.bits(), iospace.bits(), ioaddr)
+        }))
+    }
+
+    pub fn io_page_table_unmap(self) -> Result<()> {
+        Error::wrap(self.invoke(|cptr, ipc_buffer| {
+            ipc_buffer
+                .inner_mut()
+                .seL4_X86_IOPageTable_Unmap(cptr.bits())
         }))
     }
 }
