@@ -279,6 +279,18 @@ impl seL4_IPCBuffer {
         ret
     }
 
+    pub fn seL4_NBRecvWithMRs(
+        &mut self,
+        src: seL4_CPtr,
+        msg0: Option<&mut seL4_Word>,
+        msg1: Option<&mut seL4_Word>,
+        msg2: Option<&mut seL4_Word>,
+        msg3: Option<&mut seL4_Word>,
+        reply_authority: ReplyAuthority,
+    ) -> (seL4_MessageInfo, seL4_Word) {
+        seL4_NBRecvWithMRsWithoutIPCBuffer(src, msg0, msg1, msg2, msg3, reply_authority)
+    }
+
     pub fn seL4_Call(&mut self, dest: seL4_CPtr, msg_info: seL4_MessageInfo) -> seL4_MessageInfo {
         let mut mr0;
         let mut mr1;
@@ -344,6 +356,27 @@ impl seL4_IPCBuffer {
         ret
     }
 
+    pub fn seL4_ReplyRecvWithMRs(
+        &mut self,
+        src: seL4_CPtr,
+        msg_info: seL4_MessageInfo,
+        msg0: Option<&mut seL4_Word>,
+        msg1: Option<&mut seL4_Word>,
+        msg2: Option<&mut seL4_Word>,
+        msg3: Option<&mut seL4_Word>,
+        reply_authority: ReplyAuthority,
+    ) -> (seL4_MessageInfo, seL4_Word) {
+        seL4_ReplyRecvWithMRsWithoutIPCBuffer(
+            src,
+            msg_info,
+            msg0,
+            msg1,
+            msg2,
+            msg3,
+            reply_authority,
+        )
+    }
+
     sel4_cfg_if! {
         if #[sel4_cfg(KERNEL_MCS)] {
             pub fn seL4_NBSendRecv(
@@ -377,6 +410,20 @@ impl seL4_IPCBuffer {
                 ret
             }
 
+            pub fn seL4_NBSendRecvWithMRs(
+                &mut self,
+                dest: seL4_CPtr,
+                msg_info: seL4_MessageInfo,
+                src: seL4_CPtr,
+                msg0: Option<&mut seL4_Word>,
+                msg1: Option<&mut seL4_Word>,
+                msg2: Option<&mut seL4_Word>,
+                msg3: Option<&mut seL4_Word>,
+                reply_authority: ReplyAuthority,
+            ) -> (seL4_MessageInfo, seL4_Word) {
+                seL4_NBSendRecvWithMRsWithoutIPCBuffer(dest, msg_info, src, msg0, msg1, msg2, msg3, reply_authority)
+            }
+
             pub fn seL4_NBSendWait(
                 &mut self,
                 dest: seL4_CPtr,
@@ -405,6 +452,19 @@ impl seL4_IPCBuffer {
                 empty_mrs_to_ipc_buffer!(self, mr0, mr1, mr2, mr3);
 
                 ret
+            }
+
+            pub fn seL4_NBSendWaitWithMRs(
+                &mut self,
+                dest: seL4_CPtr,
+                msg_info: seL4_MessageInfo,
+                src: seL4_CPtr,
+                msg0: Option<&mut seL4_Word>,
+                msg1: Option<&mut seL4_Word>,
+                msg2: Option<&mut seL4_Word>,
+                msg3: Option<&mut seL4_Word>,
+            ) -> (seL4_MessageInfo, seL4_Word) {
+                seL4_NBSendWaitWithMRsWithoutIPCBuffer(dest, msg_info, src, msg0, msg1, msg2, msg3)
             }
 
             pub fn seL4_Wait(&mut self, src: seL4_CPtr) -> (WaitMessageInfo, seL4_Word) {
@@ -459,6 +519,17 @@ impl seL4_IPCBuffer {
                 empty_mrs_to_ipc_buffer!(self, mr0, mr1, mr2, mr3);
 
                 ret
+            }
+
+            pub fn seL4_NBWaitWithMRs(
+                &mut self,
+                src: seL4_CPtr,
+                msg0: Option<&mut seL4_Word>,
+                msg1: Option<&mut seL4_Word>,
+                msg2: Option<&mut seL4_Word>,
+                msg3: Option<&mut seL4_Word>,
+            ) -> (WaitMessageInfo, seL4_Word) {
+                seL4_NBWaitWithMRsWithoutIPCBuffer(src, msg0, msg1, msg2, msg3)
             }
         } else {
 
@@ -563,6 +634,66 @@ pub fn seL4_RecvWithMRsWithoutIPCBuffer(
     ret
 }
 
+pub fn seL4_NBRecvWithMRsWithoutIPCBuffer(
+    src: seL4_CPtr,
+    msg0: Option<&mut seL4_Word>,
+    msg1: Option<&mut seL4_Word>,
+    msg2: Option<&mut seL4_Word>,
+    msg3: Option<&mut seL4_Word>,
+    reply_authority: ReplyAuthority,
+) -> (seL4_MessageInfo, seL4_Word) {
+    let mut mr0 = 0;
+    let mut mr1 = 0;
+    let mut mr2 = 0;
+    let mut mr3 = 0;
+
+    let ret = sys_recv(
+        syscall_id::NBRecv,
+        src,
+        &mut mr0,
+        &mut mr1,
+        &mut mr2,
+        &mut mr3,
+        reply_authority_to_sys_arg(reply_authority),
+    );
+
+    empty_mrs_to_args!(mr0, mr1, mr2, mr3, msg0, msg1, msg2, msg3,);
+
+    ret
+}
+
+pub fn seL4_ReplyRecvWithMRsWithoutIPCBuffer(
+    src: seL4_CPtr,
+    msg_info: seL4_MessageInfo,
+    msg0: Option<&mut seL4_Word>,
+    msg1: Option<&mut seL4_Word>,
+    msg2: Option<&mut seL4_Word>,
+    msg3: Option<&mut seL4_Word>,
+    reply_authority: ReplyAuthority,
+) -> (seL4_MessageInfo, seL4_Word) {
+    let mut mr0;
+    let mut mr1;
+    let mut mr2;
+    let mut mr3;
+
+    fill_mrs_from_args!(msg_info, mr0, mr1, mr2, mr3, msg0, msg1, msg2, msg3,);
+
+    let ret = sys_send_recv(
+        syscall_id::ReplyRecv,
+        src,
+        msg_info,
+        &mut mr0,
+        &mut mr1,
+        &mut mr2,
+        &mut mr3,
+        reply_authority_to_sys_arg(reply_authority),
+    );
+
+    empty_mrs_to_args!(mr0, mr1, mr2, mr3, msg0, msg1, msg2, msg3,);
+
+    ret
+}
+
 pub fn seL4_CallWithMRsWithoutIPCBuffer(
     dest: seL4_CPtr,
     msg_info: seL4_MessageInfo,
@@ -609,6 +740,103 @@ pub fn seL4_WaitWithMRsWithoutIPCBuffer(
 
     let ret = sys_recv(
         syscall_id::Wait,
+        src,
+        &mut mr0,
+        &mut mr1,
+        &mut mr2,
+        &mut mr3,
+        UNUSED_REPLY_ARG,
+    );
+
+    empty_mrs_to_args!(mr0, mr1, mr2, mr3, msg0, msg1, msg2, msg3,);
+
+    ret
+}
+
+#[sel4_cfg(KERNEL_MCS)]
+pub fn seL4_NBSendRecvWithMRsWithoutIPCBuffer(
+    dest: seL4_CPtr,
+    msg_info: seL4_MessageInfo,
+    src: seL4_CPtr,
+    msg0: Option<&mut seL4_Word>,
+    msg1: Option<&mut seL4_Word>,
+    msg2: Option<&mut seL4_Word>,
+    msg3: Option<&mut seL4_Word>,
+    reply_authority: ReplyAuthority,
+) -> (seL4_MessageInfo, seL4_Word) {
+    let mut mr0;
+    let mut mr1;
+    let mut mr2;
+    let mut mr3;
+
+    fill_mrs_from_args!(msg_info, mr0, mr1, mr2, mr3, msg0, msg1, msg2, msg3,);
+
+    let ret = sys_nb_send_recv(
+        syscall_id::NBSendRecv,
+        dest,
+        src,
+        msg_info,
+        &mut mr0,
+        &mut mr1,
+        &mut mr2,
+        &mut mr3,
+        reply_authority_to_sys_arg(reply_authority),
+    );
+
+    empty_mrs_to_args!(mr0, mr1, mr2, mr3, msg0, msg1, msg2, msg3,);
+
+    ret
+}
+
+#[sel4_cfg(KERNEL_MCS)]
+pub fn seL4_NBSendWaitWithMRsWithoutIPCBuffer(
+    dest: seL4_CPtr,
+    msg_info: seL4_MessageInfo,
+    src: seL4_CPtr,
+    msg0: Option<&mut seL4_Word>,
+    msg1: Option<&mut seL4_Word>,
+    msg2: Option<&mut seL4_Word>,
+    msg3: Option<&mut seL4_Word>,
+) -> (seL4_MessageInfo, seL4_Word) {
+    let mut mr0;
+    let mut mr1;
+    let mut mr2;
+    let mut mr3;
+
+    fill_mrs_from_args!(msg_info, mr0, mr1, mr2, mr3, msg0, msg1, msg2, msg3,);
+
+    let ret = sys_nb_send_recv(
+        syscall_id::NBSendWait,
+        0,
+        src,
+        msg_info,
+        &mut mr0,
+        &mut mr1,
+        &mut mr2,
+        &mut mr3,
+        dest,
+    );
+
+    empty_mrs_to_args!(mr0, mr1, mr2, mr3, msg0, msg1, msg2, msg3,);
+
+    ret
+}
+
+#[sel4_cfg(KERNEL_MCS)]
+pub fn seL4_NBWaitWithMRsWithoutIPCBuffer(
+    src: seL4_CPtr,
+    msg0: Option<&mut seL4_Word>,
+    msg1: Option<&mut seL4_Word>,
+    msg2: Option<&mut seL4_Word>,
+    msg3: Option<&mut seL4_Word>,
+) -> (WaitMessageInfo, seL4_Word) {
+    let mut mr0 = 0;
+    let mut mr1 = 0;
+    let mut mr2 = 0;
+    let mut mr3 = 0;
+
+    let ret = sys_recv(
+        syscall_id::NBWait,
         src,
         &mut mr0,
         &mut mr1,
