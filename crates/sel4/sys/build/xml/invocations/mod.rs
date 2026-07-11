@@ -14,21 +14,17 @@ use std::path::Path;
 
 use proc_macro2::{Ident, TokenStream};
 use quote::{format_ident, quote};
-
-use sel4_config::sel4_cfg_bool;
+use sel4_config_data::{config_as_bool, config_as_string};
 
 use super::{Condition, parse_xml};
 
 mod parse;
 use parse::*;
 
-const WORD_SIZE: usize = sel4_config::sel4_cfg_usize!(WORD_SIZE);
-
-#[sel4_config::sel4_cfg(WORD_SIZE = "32")]
-type Word = u32;
-
-#[sel4_config::sel4_cfg(WORD_SIZE = "64")]
-type Word = u64;
+fn get_word_size() -> usize {
+    let word_size_str = config_as_string("WORD_SIZE");
+    if word_size_str == "64" { 64 } else if word_size_str == "32" { 32 } else { panic!("unsupported word size") }
+}
 
 pub fn generate_rust(
     blocklist_for_bindgen: &mut Vec<String>,
@@ -158,8 +154,10 @@ impl<'a> InvocationGenerator<'a> {
         }
 
         let (marshalling_toks, num_msg_regs, num_caps) = self.generate_marshalling(in_params);
-        let num_msg_regs = Word::try_from(num_msg_regs).unwrap();
-        let num_caps = Word::try_from(num_caps).unwrap();
+        let num_msg_regs = u64::try_from(num_msg_regs).unwrap();
+        assert!(u128::from(num_msg_regs) < (1u128 << get_word_size()));
+        let num_caps = u64::try_from(num_caps).unwrap();
+        assert!(u128::from(num_caps) < (1u128 << get_word_size()));
 
         let invocation_label_path = {
             let ident = format_ident!("{}", invocation_id);
@@ -269,8 +267,8 @@ impl<'a> InvocationGenerator<'a> {
                             let name = format_ident!("{}", param.name);
                             for (i, member) in members.iter().enumerate() {
                                 let member = format_ident!("{}", member);
-                                let member_start = start + i * WORD_SIZE;
-                                let member_end = member_start + WORD_SIZE;
+                                let member_start = start + i * get_word_size();
+                                let member_end = member_start + get_word_size();
                                 toks.extend(quote! {
                                     self.set_mr_bits(#member_start..#member_end, #name.#member);
                                 })
@@ -314,8 +312,8 @@ impl<'a> InvocationGenerator<'a> {
                     let name = raw_ident(&param.name);
                     for (i, member) in members.iter().enumerate() {
                         let member = raw_ident(member);
-                        let member_start = start + i * WORD_SIZE;
-                        let member_end = member_start + WORD_SIZE;
+                        let member_start = start + i * get_word_size();
+                        let member_end = member_start + get_word_size();
                         toks.extend(quote! {
                             #name.#member = self.get_mr_bits(#member_start..#member_end);
                         })
@@ -400,7 +398,7 @@ impl<'a> LayoutHelper<'a> {
 
     fn lay_down_data(&mut self, parameter_type_name: &str) -> Range<usize> {
         let width = self.parameter_types.get(parameter_type_name).width();
-        let start = self.data_cursor.next_multiple_of(width.min(WORD_SIZE));
+        let start = self.data_cursor.next_multiple_of(width.min(get_word_size()));
         let end = start + width;
         self.data_cursor = end;
         start..end
@@ -413,7 +411,7 @@ impl<'a> LayoutHelper<'a> {
     }
 
     fn num_msg_regs(&self) -> usize {
-        self.data_cursor.div_ceil(WORD_SIZE)
+        self.data_cursor.div_ceil(get_word_size())
     }
 
     fn num_caps(&self) -> usize {
@@ -438,9 +436,9 @@ impl ParameterType {
     fn width(&self) -> usize {
         match self {
             Self::Primitive { width, .. } => *width,
-            Self::Capability => WORD_SIZE,
-            Self::Bitfield => WORD_SIZE,
-            Self::Struct { members } => WORD_SIZE * members.len(),
+            Self::Capability => get_word_size(),
+            Self::Bitfield => get_word_size(),
+            Self::Struct { members } => get_word_size() * members.len(),
         }
     }
 
@@ -504,7 +502,7 @@ impl ParameterTypes {
         this.insert_primitive("seL4_Uint32", 32);
         this.insert_primitive("seL4_Uint64", 64);
         this.insert_primitive("seL4_Time", 64);
-        this.insert_primitive("seL4_Word", WORD_SIZE);
+        this.insert_primitive("seL4_Word", get_word_size());
         this.insert_primitive("seL4_Bool", 1);
 
         this.insert_bitfield("seL4_CapRights_t");
@@ -519,13 +517,13 @@ impl ParameterTypes {
         this.insert_capability("seL4_SchedContext");
         this.insert_capability("seL4_SchedControl");
 
-        if sel4_cfg_bool!(ARCH_ARM) {
-            this.insert_enum("seL4_ARM_VMAttributes", WORD_SIZE);
-            this.insert_enum("seL4_VCPUReg", WORD_SIZE);
+        if config_as_bool("ARCH_ARM") {
+            this.insert_enum("seL4_ARM_VMAttributes", get_word_size());
+            this.insert_enum("seL4_VCPUReg", get_word_size());
             this.insert_capability("seL4_ARM_Page");
             this.insert_capability("seL4_ARM_PageTable");
             this.insert_capability("seL4_ARM_PageDirectory");
-            if sel4_cfg_bool!(ARCH_AARCH64) {
+            if config_as_bool("ARCH_AARCH64") {
                 this.insert_capability("seL4_ARM_PageUpperDirectory");
                 this.insert_capability("seL4_ARM_PageGlobalDirectory");
                 this.insert_capability("seL4_ARM_VSpace");
@@ -537,17 +535,17 @@ impl ParameterTypes {
             this.insert_capability("seL4_ARM_IOPageTable");
         }
 
-        if sel4_cfg_bool!(ARCH_RISCV) {
-            this.insert_enum("seL4_RISCV_VMAttributes", WORD_SIZE);
+        if config_as_bool("ARCH_RISCV") {
+            this.insert_enum("seL4_RISCV_VMAttributes", get_word_size());
             this.insert_capability("seL4_RISCV_Page");
             this.insert_capability("seL4_RISCV_PageTable");
             this.insert_capability("seL4_RISCV_ASIDControl");
             this.insert_capability("seL4_RISCV_ASIDPool");
         }
 
-        if sel4_cfg_bool!(ARCH_X86_64) {
-            this.insert_enum("seL4_X86_VMAttributes", WORD_SIZE);
-            this.insert_enum("seL4_X86_EPT_VMAttributes", WORD_SIZE);
+        if config_as_bool("ARCH_X86_64") {
+            this.insert_enum("seL4_X86_VMAttributes", get_word_size());
+            this.insert_enum("seL4_X86_EPT_VMAttributes", get_word_size());
             this.insert_capability("seL4_X86_IOPort");
             this.insert_capability("seL4_X86_IOPortControl");
             this.insert_capability("seL4_X86_ASIDControl");

@@ -39,7 +39,7 @@ impl SpecForInitializer {
     }
 
     pub fn access(buf: &[u8]) -> Result<&<Self as Archive>::Archived, rancor::Error> {
-        rkyv::access(buf)
+        Ok(unsafe { rkyv::access_unchecked(buf) })
     }
 
     #[allow(clippy::missing_safety_doc)]
