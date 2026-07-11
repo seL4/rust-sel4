@@ -16,9 +16,11 @@ in {
     pkgs.host.aarch64.none.this.worlds.default
     pkgs.host.aarch64.none.this.worlds.qemu-arm-virt.microkit
     pkgs.host.aarch32.none.this.worlds.default
+    pkgs.host.aarch32.none.this.worlds.qemu-arm-virt.mcs
     pkgs.host.riscv64.default.none.this.worlds.default
     pkgs.host.riscv64.default.none.this.worlds.qemu-riscv-virt.microkit
     pkgs.host.riscv32.default.none.this.worlds.default
+    pkgs.host.riscv32.default.none.this.worlds.spike.mcs
     pkgs.host.x86_64.none.this.worlds.default
     pkgs.host.x86_64.none.this.worlds.pc99.microkit
   ];
