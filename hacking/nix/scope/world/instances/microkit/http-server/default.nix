@@ -75,8 +75,6 @@ let
   # diskImage = largeDiskImage;
   diskImage = smallDiskImage;
 
-  targetTriple = mkSeL4RustTargetTriple { microkit = true; };
-
   pds = {
     http-server = mkPD {
       rootCrate = crates.microkit-http-server-example-server;
@@ -90,7 +88,6 @@ let
       #     modifications = seL4Modifications;
       #   }
       # ];
-      inherit targetTriple;
       commonModifications = {
         modifyManifest = lib.flip crateUtils.combineConfig {
           patch.crates-io = {
@@ -109,22 +106,18 @@ let
     pl031-driver = mkPD {
       rootCrate = crates.microkit-http-server-example-pl031-driver;
       release = true;
-      inherit targetTriple;
     };
     sp804-driver = mkPD {
       rootCrate = crates.microkit-http-server-example-sp804-driver;
       release = true;
-      inherit targetTriple;
     };
     virtio-net-driver = mkPD {
       rootCrate = crates.microkit-http-server-example-virtio-net-driver;
       release = true;
-      inherit targetTriple;
     };
     virtio-blk-driver = mkPD {
       rootCrate = crates.microkit-http-server-example-virtio-blk-driver;
       release = true;
-      inherit targetTriple;
     };
   };
 

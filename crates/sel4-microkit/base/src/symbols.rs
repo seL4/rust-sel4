@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use core::ptr;
 use core::str::{self, Utf8Error};
 
 /// Declares a symbol via which the `microkit` tool can inject a variable declared by e.g.
@@ -189,17 +188,4 @@ pub fn pd_name_bytes() -> &'static [u8] {
 /// Returns the name of this protection domain.
 pub fn pd_name() -> Result<&'static str, Utf8Error> {
     str::from_utf8(pd_name_bytes())
-}
-
-/// Returns a pointer to the protection domain's [`sel4::IpcBuffer`].
-pub fn ipc_buffer_ptr() -> *mut sel4::IpcBuffer {
-    unsafe extern "C" {
-        static mut __sel4_ipc_buffer_obj: sel4::IpcBuffer;
-    }
-
-    // Only unsafe until 1.82
-    #[allow(unused_unsafe)]
-    unsafe {
-        ptr::addr_of_mut!(__sel4_ipc_buffer_obj)
-    }
 }

@@ -6,7 +6,6 @@
 
 use core::panic::UnwindSafe;
 
-use sel4_microkit_base::ipc_buffer_ptr;
 use sel4_panicking::catch_unwind;
 use sel4_panicking_env::abort;
 
@@ -27,6 +26,10 @@ fn entrypoint() -> ! {
     }
 
     abort!("main returned")
+}
+
+fn ipc_buffer_ptr() -> *mut sel4::IpcBuffer {
+    (sel4::sys::seL4_UserVSpaceTop & !((1 << sel4::sys::seL4_PageBits) - 1)) as *mut _
 }
 
 unsafe extern "C" {

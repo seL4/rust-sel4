@@ -223,7 +223,6 @@ superCallPackage ../rust-utils {} self //
       rustTargetArchName
       "-sel4"
       (lib.optionalString rootTask "-roottask")
-      (lib.optionalString microkit "-microkit")
       (lib.optionalString minimal "-minimal")
       (lib.optionalString unwind "-unwind")
       (lib.optionalString musl "-musl")

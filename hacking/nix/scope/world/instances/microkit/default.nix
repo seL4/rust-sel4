@@ -38,7 +38,6 @@ let
     #     };
     #   }
     # ];
-    targetTriple = mkSeL4RustTargetTriple { microkit = true; };
   } // args);
 
   inherit (worldConfig) isMicrokit;
@@ -83,7 +82,7 @@ in {
       let
         pd = mkPD rec {
           rootCrate = crates.tests-microkit-minimal;
-          targetTriple = mkSeL4RustTargetTriple { microkit = true; minimal = true; };
+          targetTriple = mkSeL4RustTargetTriple { minimal = true; };
         };
       in
         callPlatform {
@@ -105,7 +104,7 @@ in {
       let
         pd = mkPD rec {
           rootCrate = crates.tests-microkit-unwind;
-          targetTriple = mkSeL4RustTargetTriple { microkit = true; unwind = true; };
+          targetTriple = mkSeL4RustTargetTriple { unwind = true; };
         };
       in
         callPlatform {
