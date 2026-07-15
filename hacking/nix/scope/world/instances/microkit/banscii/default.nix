@@ -34,7 +34,7 @@ let
     assistant = mkPD rec {
       rootCrate = crates.banscii-assistant;
       release = true;
-      targetTriple = mkSeL4RustTargetTriple { microkit = true; minimal = false; };
+      targetTriple = mkSeL4RustTargetTriple { minimal = false; };
     };
     artist = mkPD rec {
       rootCrate = crates.banscii-artist;

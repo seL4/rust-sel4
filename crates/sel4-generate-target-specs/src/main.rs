@@ -72,7 +72,6 @@ impl RiscVArch {
 enum Context {
     Unspecified,
     RootTask,
-    Microkit,
 }
 
 impl Config {
@@ -138,15 +137,6 @@ impl Config {
                 ]);
         }
 
-        if let Context::Microkit = &self.context {
-            target
-                .options
-                .link_script
-                .get_or_insert_default()
-                .to_mut()
-                .push_str("__sel4_ipc_buffer_obj = (__ehdr_start & ~(4096 - 1)) - 4096;");
-        }
-
         target.options.has_thread_local = !self.minimal;
 
         if self.unwinding_support() {
@@ -176,10 +166,7 @@ impl Config {
         if self.unwinding_support() && self.minimal {
             return false;
         }
-        if self.context.is_microkit() && !self.arch.microkit_support() {
-            return false;
-        }
-        if self.musl && (self.minimal || self.context.is_microkit()) {
+        if self.musl && self.minimal {
             return false;
         }
         true
@@ -192,9 +179,6 @@ impl Config {
             Context::Unspecified => {}
             Context::RootTask => {
                 name.push_str("-roottask");
-            }
-            Context::Microkit => {
-                name.push_str("-microkit");
             }
         }
         if self.minimal {
@@ -250,10 +234,6 @@ impl Arch {
         }
     }
 
-    fn microkit_support(&self) -> bool {
-        matches!(self, Self::AArch64 | Self::RiscV64(_) | Self::X86_64)
-    }
-
     fn unwinding_support(&self) -> bool {
         // Due to lack of support (so far) for aarch32 in the 'unwinding' crate
         !matches!(self, Self::Armv7a)
@@ -273,12 +253,8 @@ impl Arch {
 }
 
 impl Context {
-    fn is_microkit(&self) -> bool {
-        matches!(self, Self::Microkit { .. })
-    }
-
     fn all() -> Vec<Self> {
-        vec![Self::Unspecified, Self::RootTask, Self::Microkit]
+        vec![Self::Unspecified, Self::RootTask]
     }
 }
 

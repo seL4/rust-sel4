@@ -28,7 +28,7 @@ pub use message::{
     MessageInfo, MessageLabel, MessageRegisterValue, get_mr, set_mr, with_msg_bytes,
     with_msg_bytes_mut, with_msg_regs, with_msg_regs_mut,
 };
-pub use symbols::{ipc_buffer_ptr, pd_is_passive, pd_name};
+pub use symbols::{pd_is_passive, pd_name};
 
 // For macros
 #[doc(hidden)]

@@ -33,7 +33,7 @@ let
   mkView = { runtime ? null, minimal ? true }:
     let
       commonFeatures = lib.optionals (!worldConfig.isMicrokit) [ "sel4-platform-info" ];
-      targetTriple = mkSeL4RustTargetTriple { microkit = runtime == "sel4-microkit"; inherit minimal; };
+      targetTriple = mkSeL4RustTargetTriple { inherit minimal; };
     in {
       inherit seL4ConfigJSON;
       inherit (seL4Config) PLAT SEL4_ARCH KERNEL_MCS;
