@@ -7,6 +7,7 @@
 use alloc::boxed::Box;
 use alloc::string::String;
 use alloc::vec::Vec;
+use core::num::NonZero;
 use core::ops::Range;
 
 use rkyv::Archive;
@@ -146,9 +147,18 @@ pub struct IrqEntry {
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[derive(rkyv::Archive, rkyv::Serialize)]
+pub enum DomainSchedDuration {
+    Ticks(NonZero<u64>),
+    Us(NonZero<u64>),
+    EndMarker,
+}
+
+#[derive(Debug, Clone, Copy, Eq, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(rkyv::Archive, rkyv::Serialize)]
 pub struct DomainSchedEntry {
-    pub id: u8,
-    pub time: u64,
+    pub domain: u8,
+    pub duration: DomainSchedDuration,
 }
 
 pub type AsidSlotEntry = ObjectId;

@@ -1053,6 +1053,82 @@ impl<'a> Initializer<'a> {
         Ok(())
     }
 
+    #[sel4::sel4_cfg(KERNEL_MCS)]
+    fn us_to_ticks(&self, duration_us: u64) -> Result<sel4::Time> {
+        sel4::sel4_cfg_if! {
+            if #[sel4_cfg(any(ARCH_ARM, ARCH_RISCV))] {
+                const US_IN_SECOND: u64 = 1000 * 1000;
+
+                // On 32-bit platforms, Word is 32-bits, but on 64-bit platforms
+                // it is also a u64 and deemed "unnecessary".
+                #[allow(clippy::useless_conversion)]
+                let f: u64 = sel4::sel4_cfg_word!(TIMER_FREQUENCY).into();
+
+                // TODO: Formal correctness of this implementation
+                //       https://github.com/seL4/capdl/issues/98
+                // See also the corresponding implementation in capDL.
+
+                if (duration_us / US_IN_SECOND) >= (1u64 << 56) / f {
+                    panic!(
+                        "Input us {duration_us} would overflow 64-bits of \
+                         exceed 56-bit output tick maximum @ freq {f} Hz"
+                    );
+                }
+
+                let s: u64 = duration_us / US_IN_SECOND;
+                let us: u64 = duration_us % US_IN_SECOND;
+
+                // The '+ US_IN_S / 2' implements round-to-nearest behaviour
+                let ticks = s * f + ((us * f + US_IN_SECOND / 2) / US_IN_SECOND);
+
+                Ok(ticks)
+            } else if #[sel4_cfg(any(ARCH_X86, ARCH_X86_64))] {
+                let tsc_freq_bi = self
+                    .bootinfo
+                    .extra()
+                    .find(|bi| bi.id == sel4::BootInfoExtraId::X86TscFreq)
+                    .expect("Unable to determine timer frequency as \
+                             no TSC frequency provided in bootinfo");
+
+                // For x86 platforms, the timer frequency is provided in MHz by the bootinfo
+                let tsc_freq_mhz = u32::from_le_bytes(tsc_freq_bi.content().try_into().unwrap());
+
+                let ticks = duration_us
+                    .checked_mul(tsc_freq_mhz.into())
+                    .expect(format!(
+                            "Output would overflow when computing ticks for duration \
+                             {duration_us} us @ freq {tsc_freq_mhz} MHz"));
+
+                Ok(ticks)
+            } else {
+                compile_error!("unsupported architecture");
+            }
+        }
+    }
+
+    #[sel4::sel4_cfg(not(KERNEL_MCS))]
+    fn us_to_ticks(&self, duration_us: u64) -> Result<sel4::Time> {
+        // On non-MCS, 1 tick is equivalent to 1 TIMER_TICK_MS, or an integer multiple
+        // of 1 millisecond.
+
+        // On 32-bit platforms, Word is 32-bits, but on 64-bit platforms it is
+        // also a u64 and deemed "unnecessary".
+        #[allow(clippy::unnecessary_cast)]
+        const TIMER_TICK_MS: u64 = sel4::sel4_cfg_word!(TIMER_TICK_MS) as u64;
+        let period_us: u64 = 1000 * TIMER_TICK_MS;
+        let ticks: u64 = duration_us / period_us;
+        let remainder: u64 = duration_us % period_us;
+
+        if remainder != 0 {
+            panic!(
+                "domain schedule duration {duration_us} is not an \
+                 integer multiple of TIMER_TICK_MS ({TIMER_TICK_MS} ms)"
+            );
+        }
+
+        Ok(ticks)
+    }
+
     fn init_domain_schedule(&self) -> Result<()> {
         if let ArchivedOption::Some(domain_schedule) = &self.spec.domain_schedule {
             debug!("Initializing domain schedule");
@@ -1066,11 +1142,17 @@ impl<'a> Initializer<'a> {
 
             // sched_index is used as a shift, and not an invariant for the loop.
             #[allow(clippy::explicit_counter_loop)]
-            for ArchivedDomainSchedEntry { id, time } in domain_schedule.iter() {
-                let domain_time = *time;
+            for ArchivedDomainSchedEntry { domain, duration } in domain_schedule.iter() {
+                let duration_ticks: u64 = match *duration {
+                    ArchivedDomainSchedDuration::Ticks(ticks) => ticks.get(),
+                    ArchivedDomainSchedDuration::Us(us) => self.us_to_ticks(us.get())?,
+                    ArchivedDomainSchedDuration::EndMarker => 0,
+                };
+
                 init_thread::slot::DOMAIN_SET
                     .cap()
-                    .domain_set_schedule_configure(sched_index, *id, domain_time.to_native())?;
+                    .domain_set_schedule_configure(sched_index, *domain, duration_ticks)?;
+
                 sched_index += 1;
             }
         }
