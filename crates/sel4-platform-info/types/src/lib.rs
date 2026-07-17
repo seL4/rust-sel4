@@ -18,9 +18,9 @@ use alloc::vec::Vec;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone)]
-pub struct PlatformInfo<'a, T> {
-    pub memory: &'a [Range<T>],
-    pub devices: &'a [Range<T>],
+pub struct PlatformInfo<'a> {
+    pub memory: &'a [Range<u64>],
+    pub devices: &'a [Range<u64>],
 }
 
 #[cfg(feature = "owned")]
