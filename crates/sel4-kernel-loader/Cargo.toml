@@ -52,6 +52,7 @@ syn = { version = "3.0.4", features = ["parsing"] }
 [target."cfg(any(target_arch = \"arm\", target_arch = \"aarch64\"))".dependencies]
 sel4-bcm2835-aux-uart-driver = { path = "../drivers/bcm2835-aux-uart" }
 sel4-pl011-driver = { path = "../drivers/pl011" }
+smccc = "0.2.3"
 
 [target."cfg(any(target_arch = \"riscv32\", target_arch = \"riscv64\"))".dependencies]
 riscv = "0.16.0"
@@ -59,7 +60,6 @@ sbi = "0.3.0"
 
 [target."cfg(target_arch = \"aarch64\")".dependencies]
 aarch64-cpu = "11.1.0"
-smccc = "0.2.2"
 
 [target."cfg(target_arch = \"arm\")".dependencies]
 aarch32-cpu = "0.3.0"
