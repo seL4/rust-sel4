@@ -125,7 +125,7 @@ pub use cptr::{
 pub use error::{Error, Result};
 pub use fault::*;
 pub use invocation_context::{InvocationContext, NoExplicitInvocationContext, NoInvocationContext};
-pub use invocations::TcbFlagsBuilder;
+pub use invocations::{TcbFlagsBuilder, Time};
 pub use ipc_buffer::IpcBuffer;
 pub use message_info::{MessageInfo, MessageInfoBuilder};
 pub use object::{
@@ -139,14 +139,10 @@ pub use vspace::{
     vspace_levels,
 };
 
-sel4_cfg_if! {
-    if #[sel4_cfg(KERNEL_MCS)] {
-        pub use invocations::Time;
-    } else {
-        pub use syscalls::reply;
-        pub use reply_authority::ImplicitReplyAuthority;
-    }
-}
+#[sel4_cfg(not(KERNEL_MCS))]
+pub use reply_authority::ImplicitReplyAuthority;
+#[sel4_cfg(not(KERNEL_MCS))]
+pub use syscalls::reply;
 
 #[sel4_cfg(SET_TLS_BASE_SELF)]
 pub use syscalls::set_tls_base;
