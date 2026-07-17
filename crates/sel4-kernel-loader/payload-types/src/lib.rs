@@ -109,46 +109,33 @@ impl ArchivedPayload {
         }
     }
 
-    pub fn sanity_check<T: TryFrom<usize, Error: fmt::Debug> + Ord>(
-        &self,
-        platform_info: &PlatformInfo<T>,
-        own_footprint: Range<usize>,
-    ) {
+    pub fn sanity_check(&self, platform_info: &PlatformInfo, own_footprint: Range<usize>) {
         let memory = &platform_info.memory;
-        assert!(any_range_contains(
-            memory.iter(),
-            &range_try_into(&own_footprint).unwrap()
-        ));
+        let own_footprint_u64 = range_into(&own_footprint);
+        assert!(any_range_contains(memory.iter(), &own_footprint_u64));
         for region in self.data.iter() {
-            assert!(any_range_contains(
-                memory.iter(),
-                &range_try_into(&region.addr_range()).unwrap()
-            ));
-            assert!(ranges_are_disjoint(
-                &own_footprint,
-                &range_try_into(&region.addr_range()).unwrap()
-            ));
+            let region_u64 = range_into(&region.addr_range());
+            assert!(any_range_contains(memory.iter(), &region_u64));
+            assert!(ranges_are_disjoint(&own_footprint_u64, &region_u64));
         }
     }
 }
 
-fn ranges_are_disjoint<T: Ord>(this: &Range<T>, that: &Range<T>) -> bool {
+fn ranges_are_disjoint(this: &Range<u64>, that: &Range<u64>) -> bool {
     cmp::min(&this.end, &that.end) <= cmp::max(&this.start, &that.start)
 }
 
-fn range_contains<T: Ord>(this: &Range<T>, that: &Range<T>) -> bool {
+fn range_contains(this: &Range<u64>, that: &Range<u64>) -> bool {
     this.start <= that.start && that.end <= this.end
 }
 
-fn range_try_into<T: TryInto<U, Error: fmt::Debug> + Copy, U>(
-    this: &Range<T>,
-) -> Result<Range<U>, T::Error> {
-    Ok(this.start.try_into()?..this.end.try_into()?)
+fn range_into(this: &Range<usize>) -> Range<u64> {
+    this.start.try_into().unwrap()..this.end.try_into().unwrap()
 }
 
-fn any_range_contains<'a, T: Ord + 'a>(
-    mut these: impl Iterator<Item = &'a Range<T>>,
-    that: &Range<T>,
+fn any_range_contains<'a>(
+    mut these: impl Iterator<Item = &'a Range<u64>>,
+    that: &Range<u64>,
 ) -> bool {
     these.any(|this| range_contains(this, that))
 }

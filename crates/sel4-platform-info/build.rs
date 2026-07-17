@@ -32,15 +32,10 @@ fn main() {
 }
 
 fn embed(platform_info: &OwnedPlatformInfo) -> TokenStream {
-    let ty = match sel4_config::sel4_cfg_usize!(WORD_SIZE) {
-        32 => quote!(u32),
-        64 => quote!(u64),
-        _ => unreachable!(),
-    };
     let memory = embed_ranges(&platform_info.memory);
     let devices = embed_ranges(&platform_info.devices);
     quote! {
-        pub const PLATFORM_INFO: PlatformInfo<#ty> = PlatformInfo {
+        pub const PLATFORM_INFO: PlatformInfo = PlatformInfo {
             memory: #memory,
             devices: #devices,
         };
