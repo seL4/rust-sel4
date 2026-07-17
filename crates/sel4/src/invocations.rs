@@ -19,7 +19,6 @@ use crate::{
 use crate::Badge;
 
 /// Corresponds to `seL4_Time`.
-#[sel4_cfg(KERNEL_MCS)]
 pub type Time = u64;
 
 impl<C: InvocationContext> Untyped<C> {
@@ -413,7 +412,7 @@ impl<C: InvocationContext> DomainSet<C> {
         self,
         index: Word,
         domain: u8,
-        duration: u64,
+        duration: Time,
     ) -> Result<()> {
         Error::wrap(self.invoke(|cptr, ipc_buffer| {
             ipc_buffer.inner_mut().seL4_DomainSet_ScheduleConfigure(
