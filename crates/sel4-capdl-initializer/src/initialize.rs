@@ -1078,25 +1078,30 @@ impl<'a> Initializer<'a> {
     }
 
     fn start_domain_schedule(&self) -> Result<()> {
-        if self.spec.domain_schedule.is_some() {
-            debug!("Starting domain schedule");
-
-            // The start index also needs to be shifted. This makes the shift
-            // an offset into the schedule rather than an absolute index.
-            let shift = self
-                .spec
-                .domain_idx_shift
-                .as_ref()
-                .map(ArchivedWord::to_sel4)
-                .unwrap_or(0);
-
-            // Only call set start if we have been given a start index
-            if let ArchivedOption::Some(start) = self.spec.domain_set_start {
-                init_thread::slot::DOMAIN_SET
-                    .cap()
-                    .domain_set_schedule_set_start(start.to_sel4() + shift)?;
-            }
+        if self.spec.domain_schedule.is_none() {
+            return Ok(());
         }
+
+        // Only call set start if we have been given a start index
+        let ArchivedOption::Some(start) = self.spec.domain_set_start else {
+            return Ok(());
+        };
+
+        debug!("Starting domain schedule");
+
+        // The start index also needs to be shifted. This makes the shift
+        // an offset into the schedule rather than an absolute index.
+        let shift = self
+            .spec
+            .domain_idx_shift
+            .as_ref()
+            .map(ArchivedWord::to_sel4)
+            .unwrap_or(0);
+
+        init_thread::slot::DOMAIN_SET
+            .cap()
+            .domain_set_schedule_set_start(start.to_sel4() + shift)?;
+
         Ok(())
     }
 
