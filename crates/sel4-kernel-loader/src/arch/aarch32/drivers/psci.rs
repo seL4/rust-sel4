@@ -4,36 +4,14 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use sel4_config::sel4_cfg_bool;
-
 use crate::arch::secondary_entry;
-
-type PsciFunc = unsafe extern "C" fn(id: usize, param1: usize, param2: usize, param3: usize) -> i32;
-
-unsafe extern "C" {
-    fn smc_psci_func(id: usize, param1: usize, param2: usize, param3: usize) -> i32;
-    fn hvc_psci_func(id: usize, param1: usize, param2: usize, param3: usize) -> i32;
-}
-
-// TODO
-#[allow(clippy::if_same_then_else)]
-static CHOSEN_PSCI_FUNC: PsciFunc = if sel4_cfg_bool!(ARM_HYPERVISOR_SUPPORT) {
-    smc_psci_func as PsciFunc
-} else {
-    smc_psci_func as PsciFunc
-    // hvc_psci_func as PsciFunc
-};
-
-const PSCI_FID_CPU_ON: usize = 0x84000003;
-
-unsafe fn psci_cpu_on(target_cpu: usize, entry_point: usize, context_id: usize) {
-    let ret = unsafe { CHOSEN_PSCI_FUNC(PSCI_FID_CPU_ON, target_cpu, entry_point, context_id) };
-    assert_eq!(ret, 0);
-}
 
 pub(crate) fn start_core(physical_core_id: usize, sp: usize) {
     let start = secondary_entry as *const () as usize;
-    unsafe {
-        psci_cpu_on(physical_core_id, start, sp);
-    }
+    smccc::psci::cpu_on_32::<smccc::Smc>(
+        physical_core_id.try_into().unwrap(),
+        start.try_into().unwrap(),
+        sp.try_into().unwrap(),
+    )
+    .unwrap();
 }
