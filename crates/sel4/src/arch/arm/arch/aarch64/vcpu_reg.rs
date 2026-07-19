@@ -27,7 +27,6 @@ pub enum VCpuReg {
     AFSR1 = sys::seL4_VCPUReg::seL4_VCPUReg_AFSR1,
     ESR = sys::seL4_VCPUReg::seL4_VCPUReg_ESR,
     FAR = sys::seL4_VCPUReg::seL4_VCPUReg_FAR,
-    ISR = sys::seL4_VCPUReg::seL4_VCPUReg_ISR,
     VBAR = sys::seL4_VCPUReg::seL4_VCPUReg_VBAR,
     TPIDR_EL1 = sys::seL4_VCPUReg::seL4_VCPUReg_TPIDR_EL1,
     #[sel4_cfg(not(MAX_NUM_NODES = "1"))]
