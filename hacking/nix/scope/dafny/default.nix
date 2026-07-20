@@ -19,12 +19,13 @@ let
     pname = "Dafny";
     version = "4.6.0";
 
-    src = sources.fetchGit {
+    src = sources.fetchGit (rec {
       url = "https://github.com/coliasgroup/dafny.git";
       rev = "02d0a578fdf594a38c7c72d7ad56e1a62e464f44";
+      ref = sources.mkKeepRef rev;
       local = sources.localRoot + "/dafny";
       # inherit useLocal;
-    };
+    });
 
     postPatch = ''
       cp ${
