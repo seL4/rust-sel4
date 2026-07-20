@@ -9,8 +9,7 @@
 
 let
   fetchGit =
-    { url, rev
-    , ref ? mkKeepRef rev
+    { url, rev, ref ? null
     , submodules ? false
     , local ? null
     , useLocal ? false
@@ -21,9 +20,11 @@ let
     assert useLocal -> local != null;
 
     let
-      remote = builtins.fetchGit {
-        inherit url rev ref submodules;
-      };
+      remote = builtins.fetchGit ({
+        inherit url rev submodules;
+      } // lib.optionalAttrs (ref != null) {
+        inherit ref;
+      });
       cleanedSource = lib.cleanSourceWith {
         src = local;
         filter = path: type: lib.cleanSourceFilter path type || extraFilter path type;
@@ -32,9 +33,10 @@ let
     in
       base + andThen;
 
-  capdlCommon = {
+  capdlCommon = rec {
     url = "https://github.com/coliasgroup/capdl.git";
     rev = "2753f824ceeda696fff5cdb421aa8d604262c43c"; # branch rust-testing
+    ref = mkKeepRef rev;
     local = localRoot + "/capdl";
     extraFilter = path: type:
       lib.hasSuffix "/.stack-work" path || lib.hasSuffix "/stack.yaml.lock" path;
