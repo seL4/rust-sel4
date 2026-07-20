@@ -348,6 +348,15 @@ impl<C: InvocationContext> SchedControl<C> {
 
 #[sel4_cfg(KERNEL_MCS)]
 impl<C: InvocationContext> SchedContext<C> {
+    /// Corresponds to `seL4_SchedContext_Bind`.
+    pub fn bind_ntfn(self, notification: Notification) -> Result<()> {
+        Error::wrap(self.invoke(|cptr, ipc_buffer| {
+            ipc_buffer
+                .inner_mut()
+                .seL4_SchedContext_Bind(cptr.bits(), notification.bits())
+        }))
+    }
+
     /// Corresponds to `seL4_SchedContext_Unbind`.
     pub fn unbind(self) -> Result<()> {
         Error::wrap(self.invoke(|cptr, ipc_buffer| {

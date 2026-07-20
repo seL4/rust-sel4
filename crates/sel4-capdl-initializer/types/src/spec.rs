@@ -443,6 +443,8 @@ pub mod object {
         pub gprs: Vec<Word>,
 
         pub master_fault_ep: Option<Word>,
+
+        pub passive: bool,
     }
 
     #[derive(Debug, Clone, Eq, PartialEq, IsObject, HasCapTable)]
