@@ -1095,7 +1095,7 @@ impl<'a> Initializer<'a> {
 
                 let ticks = duration_us
                     .checked_mul(tsc_freq_mhz.into())
-                    .expect(format!(
+                    .unwrap_or_else(|| panic!(
                             "Output would overflow when computing ticks for duration \
                              {duration_us} us @ freq {tsc_freq_mhz} MHz"));
 
