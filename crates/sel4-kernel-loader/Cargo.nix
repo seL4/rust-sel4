@@ -10,7 +10,12 @@ mk {
   package.name = "sel4-kernel-loader";
   package.license = "BSD-2-Clause AND GPL-2.0-only";
   dependencies = {
-    inherit (versions) cfg-if log embedded-hal-nb;
+    inherit (versions)
+      cfg-if
+      log
+      embedded-hal-nb
+      fdt
+    ;
     rkyv = { version = versions.rkyv; default-features = false; };
     spin = { version = versions.spin; features = [ "lock_api" ]; };
     inherit (localCrates)
@@ -23,6 +28,7 @@ mk {
       sel4-phdrs-patched
       sel4-no-allocator
       sel4-immutable-cell
+      sel4-immediate-sync-once-cell
     ;
   };
   target."cfg(any(target_arch = \"riscv32\", target_arch = \"riscv64\"))".dependencies = {
@@ -33,6 +39,9 @@ mk {
   };
   target."cfg(target_arch = \"aarch64\")".dependencies = {
     inherit (versions) smccc aarch64-cpu;
+  };
+  target."cfg(target_arch = \"arm\")".dependencies = {
+    inherit (versions) aarch32-cpu;
   };
   build-dependencies = {
     inherit (versions)

@@ -8,11 +8,14 @@ use core::arch::{asm, global_asm};
 use core::ptr;
 use core::sync::atomic::{AtomicUsize, Ordering};
 
+use aarch64_cpu::asm::barrier::{SY, dsb};
+use aarch64_cpu::asm::sev;
+
 #[used]
 #[unsafe(no_mangle)]
 static mut spin_table_secondary_stack_bottom: usize = 0;
 
-pub(crate) fn start_secondary_core(spin_table: &[usize], core_id: usize, sp: usize) {
+pub(crate) fn start_core(spin_table: &[usize], core_id: usize, sp: usize) {
     unsafe {
         spin_table_secondary_stack_bottom = sp;
 
@@ -27,8 +30,8 @@ pub(crate) fn start_secondary_core(spin_table: &[usize], core_id: usize, sp: usi
         dc_cvac(ptr::addr_of!(spin_table_secondary_stack_bottom) as usize);
 
         // Barrier ensure both strl and dc cvac happen before sev
-        asm!("dsb sy");
-        asm!("sev");
+        dsb(SY);
+        sev();
     }
 }
 
@@ -47,9 +50,8 @@ global_asm! {
 
         .global spin_table_secondary_entry
         spin_table_secondary_entry:
-            ldr x9, =spin_table_secondary_stack_bottom
-            ldr x9, [x9]
-            mov sp, x9
+            ldr x0, =spin_table_secondary_stack_bottom
+            ldr x0, [x0]
             b secondary_entry
     "#
 }

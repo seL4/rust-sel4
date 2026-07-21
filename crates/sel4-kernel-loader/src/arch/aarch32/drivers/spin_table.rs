@@ -7,11 +7,14 @@
 use core::arch::{asm, global_asm};
 use core::ptr;
 
+use aarch32_cpu::asm::sev;
+use aarch32_cpu::cache::clean_data_cache_line_to_poc;
+
 #[used]
 #[unsafe(no_mangle)]
 static mut spin_table_secondary_stack_bottom: usize = 0;
 
-pub(crate) fn start_secondary_core(spin_table: &[usize], core_id: usize, sp: usize) {
+pub(crate) fn start_core(spin_table: &[usize], core_id: usize, sp: usize) {
     unsafe {
         ptr::addr_of_mut!(spin_table_secondary_stack_bottom).write(sp);
 
@@ -20,11 +23,11 @@ pub(crate) fn start_secondary_core(spin_table: &[usize], core_id: usize, sp: usi
 
         start_ptr.write_volatile(start);
 
-        clean_dcache_entry(ptr::addr_of!(spin_table_secondary_stack_bottom) as usize);
+        clean_data_cache_line_to_poc(ptr::addr_of!(spin_table_secondary_stack_bottom) as u32);
 
         // Barrier ensure both strl and dc cvac happen before sev
         asm!("dsb sy");
-        asm!("sev");
+        sev();
     }
 }
 
@@ -45,15 +48,6 @@ global_asm! {
         spin_table_secondary_entry:
             ldr r0, =spin_table_secondary_stack_bottom
             ldr r0, [r0]
-            mov sp, r0
             b secondary_entry
     "#
-}
-
-// helpers
-
-unsafe fn clean_dcache_entry(vaddr: usize) {
-    unsafe {
-        asm!("mcr p15, 0, {vaddr}, c7, c10, 1", vaddr = in(reg) vaddr);
-    }
 }

@@ -25,6 +25,7 @@
 
 _start:
     mov     r0, r2
+    mov     r0, #0 // TODO
 
     cpsid   ifa                 // Disable Async aborts that might be pending from bootloader
 
@@ -38,38 +39,22 @@ _start:
     mcr     ACTLR(r1)
 #endif /* CONFIG_MAX_NUM_NODES > 1 */
 
-    ldr     r0, =__bss_start    // [TODO] GNU LD has __bss_start__ and __bss_end__ which feel more robust
-    ldr     r1, =_end
-    mov     r3, #0
-
-clearzi:
-    cmp     r0, r1
-    beq     clearzi_exit
-    str     r3, [r0]
-    add     r0, r0, #4
-    b       clearzi
-
-clearzi_exit:
-
     ldr     r9, =__primary_stack_bottom
     ldr     r9, [r9]
     mov     sp, r9
+
+    mov     r6, r0
     bl      leave_hyp
     bl      init_core_state
+    mov     r0, r6
     b       arch_main
-    b       hang
 
 
 secondary_entry:
+    mov     sp, r0
     bl      leave_hyp
     bl      init_core_state
     b       arch_secondary_main
-    b       hang
-
-
-hang:
-    wfe
-    b       hang
 
 
 BEGIN_LOCAL_FUNC(init_core_state)

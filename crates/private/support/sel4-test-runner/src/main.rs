@@ -207,7 +207,12 @@ impl<'a> Runner<'a> {
     }
 
     fn is_resettable(&self) -> bool {
-        self.file.symbol_by_name("_reset").is_some()
+        self.file.sections().any(|section| {
+            section
+                .name()
+                .map(|name| name == ".persistent" || name.starts_with(".persistent."))
+                .unwrap_or(false)
+        })
     }
 
     fn mk_resettable(&self) -> anyhow::Result<()> {

@@ -16,50 +16,37 @@
 .extern __primary_stack_size
 .extern arch_main
 .extern arch_secondary_main
+.extern arm_vector_table
 
-.extern clean_and_invalideate_dcache
+.extern clean_and_invalidate_dcache
 .extern invalidate_dcache
 .extern invalidate_icache
 
 .section ".text.startup"
 
 _start:
-    mrs     x0, mpidr_el1
-    and     x0, x0, #0xf        // Check processor id
-    cbnz    x0, hang            // Hang for all non-primary CPU
-
-    ldr     x0, =__bss_start    // [TODO] GNU LD has __bss_start__ and __bss_end__ which feel more robust
-    ldr     x1, =_end
-
-clear_bss_loop:
-    str     xzr, [x0], #8
-    cmp     x0, x1
-    b.lt    clear_bss_loop
-
+    mov     x24, x0
     ldr     x9, =__primary_stack_bottom
     ldr     x9, [x9]
     mov     sp, x9
     bl      init_core_state
+    mov     x0, x24
     b       arch_main
 
 
 secondary_entry:
+    mov     sp, x0
     bl      init_core_state
     b       arch_secondary_main
-
-
-hang:
-    wfe
-    b       hang
 
 
 BEGIN_LOCAL_FUNC(init_core_state)
     stp     x29, x30, [sp, #-16]!
     mov     x29, sp
 
-    bl      clean_and_invalideate_dcache
+    bl      clean_and_invalidate_dcache
 
-    disable_mmu sctlr_el2, x8
+    disable_mmu sctlr_el2, x9
 
     bl      invalidate_icache
 
@@ -71,30 +58,37 @@ BEGIN_LOCAL_FUNC(init_core_state)
      *   NORMAL             100     11111111
      *   NORMAL_WT          101     10101010
      */
-    ldr     x5, =MAIR(0x00, MT_DEVICE_nGnRnE) | \
+    ldr     x9, =MAIR(0x00, MT_DEVICE_nGnRnE) | \
                  MAIR(0x04, MT_DEVICE_nGnRE) | \
                  MAIR(0x0c, MT_DEVICE_GRE) | \
                  MAIR(0x44, MT_NORMAL_NC) | \
                  MAIR(0xff, MT_NORMAL) | \
                  MAIR(0xaa, MT_NORMAL_WT)
-    msr     mair_el2, x5
-    ldr     x8, =TCR_T0SZ(48) | TCR_IRGN0_WBWC | TCR_ORGN0_WBWC | TCR_SH0_ISH | TCR_TG0_4K | TCR_PS | TCR_EL2_RES1
-    msr     tcr_el2, x8
+    msr     mair_el2, x9
+    ldr     x9, =TCR_T0SZ(48) | \
+                 TCR_IRGN0_WBWC | \
+                 TCR_ORGN0_WBWC | \
+                 TCR_SH0_ISH | \
+                 TCR_TG0_4K | \
+                 TCR_PS | \
+                 TCR_EL2_RES1
+    msr     tcr_el2, x9
     isb
 
-    ldr     x8, =loader_level_0_table
-    ldr     x8, [x8]
-    msr     ttbr0_el2, x8
+    ldr     x9, =loader_level_0_table
+    ldr     x9, [x9]
+    msr     ttbr0_el2, x9
     isb
 
     tlbi    alle2is
     dsb     ish
     isb
 
-    enable_mmu  sctlr_el2, x8
+    enable_mmu  sctlr_el2, x9
 
-    adrp    x8, arm_vector_table
-    msr     vbar_el2, x8
+    ldr     x9, =arm_vector_table
+    msr     vbar_el2, x9
+    isb
 
     ic      ialluis
     dsb     ish
