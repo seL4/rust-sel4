@@ -30,7 +30,7 @@ fn main(bootinfo: &sel4::BootInfoPtr) -> ! {
         if ut.paddr() > last_end {
             debug_println!("{:x?}", last_end..ut.paddr());
         }
-        last_end = ut.paddr() + (1 << ut.size_bits());
+        last_end = ut.paddr().wrapping_add(1 << ut.size_bits());
     }
 
     debug_println!("Gaps in kernel untypeds:");
