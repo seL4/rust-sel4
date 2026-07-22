@@ -35,7 +35,7 @@ let
 
   capdlCommon = rec {
     url = "https://github.com/coliasgroup/capdl.git";
-    rev = "2753f824ceeda696fff5cdb421aa8d604262c43c"; # branch rust-testing
+    rev = "26b8d39c17e99e5423763e9ed292a1d123c39f56"; # branch rust
     ref = mkKeepRef rev;
     local = localRoot + "/capdl";
     extraFilter = path: type:
@@ -58,13 +58,13 @@ in rec {
 
   seL4 = fetchGit {
     url = "https://github.com/seL4/seL4.git";
-    rev = "0fcbb71a2a0fb37dabef0e40c97afacc41f7cc71"; # master
+    rev = "6e7c3b733d296cfd88d5fbf635c96e447a882374"; # 16.0.0
     local = localRoot + "/seL4";
   };
 
   microkit = fetchGit {
     url = "https://github.com/seL4/microkit.git";
-    rev = "ee52c8b2b60927654848678e5edd5cda3a3b2543"; # main
+    rev = "8780fab8699f5aeec109b21325ff37c741736b24"; # 2.2.0
     local = localRoot + "/microkit";
     extraFilter = path: type:
       lib.hasSuffix "/target" path;
@@ -94,7 +94,7 @@ in rec {
 
   lionsosAttrs = {
     url = "https://github.com/au-ts/lionsos";
-    rev = "927fc257c786df3b0b3c2d19673c186e0a166df3"; # main
+    rev = "4a5656a32574049817f62054832abeae85861ff5"; # main
     # ref = null;
     local = localRoot + "/lionsos";
   };
