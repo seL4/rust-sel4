@@ -12,6 +12,13 @@ pub const SEL4_PREFIX_ENV: &str = "SEL4_PREFIX";
 pub const SEL4_INCLUDE_DIRS_ENV: &str = "SEL4_INCLUDE_DIRS";
 
 fn get_asserting_valid_unicode(var: &str) -> Option<String> {
+    get_asserting_valid_unicode_runtime(var)
+        .inspect(|_| {
+            println!("cargo::rerun-if-env-changed={var}");
+        })
+}
+
+fn get_asserting_valid_unicode_runtime(var: &str) -> Option<String> {
     env::var(var)
         .map_err(|err| {
             if let VarError::NotUnicode(val) = err {
@@ -19,10 +26,8 @@ fn get_asserting_valid_unicode(var: &str) -> Option<String> {
             }
         })
         .ok()
-        .inspect(|_| {
-            println!("cargo::rerun-if-env-changed={var}");
-        })
 }
+
 
 pub fn get_with_sel4_prefix_relative_fallback(
     var: &str,
@@ -48,6 +53,10 @@ pub fn get_sel4_prefix() -> Option<PathBuf> {
     get_asserting_valid_unicode(SEL4_PREFIX_ENV).map(PathBuf::from)
 }
 
+pub fn get_sel4_prefix_runtime() -> Option<PathBuf> {
+    get_asserting_valid_unicode_runtime(SEL4_PREFIX_ENV).map(PathBuf::from)
+}
+
 pub fn get_libsel4_include_dirs() -> impl Iterator<Item = PathBuf> {
     get_asserting_valid_unicode(SEL4_INCLUDE_DIRS_ENV)
         .map(|val| val.split(':').map(PathBuf::from).collect())
@@ -57,6 +66,14 @@ pub fn get_libsel4_include_dirs() -> impl Iterator<Item = PathBuf> {
         .inspect(|path| {
             println!("cargo::rerun-if-changed={}", path.display());
         })
+}
+
+pub fn get_libsel4_include_dirs_runtime() -> impl Iterator<Item = PathBuf> {
+    get_asserting_valid_unicode_runtime(SEL4_INCLUDE_DIRS_ENV)
+        .map(|val| val.split(':').map(PathBuf::from).collect())
+        .or_else(|| get_sel4_prefix_runtime().map(|sel4_prefix| vec![sel4_prefix.join("libsel4/include")]))
+        .unwrap_or_else(|| panic!("{SEL4_INCLUDE_DIRS_ENV} or {SEL4_PREFIX_ENV} must be set"))
+        .into_iter()
 }
 
 pub fn try_find_in_libsel4_include_dirs(relative_path: impl AsRef<Path>) -> Option<PathBuf> {
@@ -72,6 +89,26 @@ pub fn try_find_in_libsel4_include_dirs(relative_path: impl AsRef<Path>) -> Opti
 pub fn find_in_libsel4_include_dirs(relative_path: impl AsRef<Path>) -> PathBuf {
     let relative_path = relative_path.as_ref();
     try_find_in_libsel4_include_dirs(relative_path).unwrap_or_else(|| {
+        panic!(
+            "{} not found in libsel4 include path",
+            relative_path.display()
+        )
+    })
+}
+
+pub fn try_find_in_libsel4_include_dirs_runtime(relative_path: impl AsRef<Path>) -> Option<PathBuf> {
+    for d in get_libsel4_include_dirs_runtime() {
+        let path = Path::new(&d).join(relative_path.as_ref());
+        if path.exists() {
+            return Some(path);
+        }
+    }
+    None
+}
+
+pub fn find_in_libsel4_include_dirs_runtime(relative_path: impl AsRef<Path>) -> PathBuf {
+    let relative_path = relative_path.as_ref();
+    try_find_in_libsel4_include_dirs_runtime(relative_path).unwrap_or_else(|| {
         panic!(
             "{} not found in libsel4 include path",
             relative_path.display()

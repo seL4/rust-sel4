@@ -18,5 +18,5 @@ license = "BSD-2-Clause"
 links = "sddf"
 
 [build-dependencies]
-bindgen = "0.72.1"
+bindgen = { version = "0.72.1", features = ["runtime"], default-features = false }
 cc = "1.2.43"

@@ -19,7 +19,7 @@ mk {
   };
   build-dependencies = {
     inherit (versions)
-      proc-macro2 quote prettyplease
+      proc-macro2 quote
       bindgen xmltree glob
       regex pest pest_derive
     ;

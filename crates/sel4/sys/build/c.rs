@@ -45,6 +45,7 @@ pub fn generate_rust(
         arch => arch,
     };
 
+    eprintln!("starting bidngen");
     let mut builder = bindgen::Builder::default()
         .header_contents("wrapper.h", HEADER_CONTENTS)
         .detect_include_paths(false)
@@ -60,12 +61,14 @@ pub fn generate_rust(
         builder = builder.blocklist_item(item);
     }
 
-    builder
+    let x = builder
         .constified_enum_module(".*")
         .derive_eq(true)
         .derive_default(true)
         .generate_comments(false)
         .use_core()
         .generate()
-        .unwrap()
+        .unwrap();
+   eprintln!("builder go");
+   x
 }
