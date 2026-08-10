@@ -6,12 +6,20 @@
 
 #![no_std]
 
-use core::arch::global_asm;
-use core::slice;
+use core::{
+    arch::global_asm,
+    slice,
+};
 
 use sel4_panicking_env::abort;
-use sel4_phdrs::{PT_SEL4_RESET_REGIONS, locate_phdrs};
-use sel4_stack::{Stack, StackBottom};
+use sel4_phdrs::{
+    PT_SEL4_RESET_REGIONS,
+    locate_phdrs,
+};
+use sel4_stack::{
+    Stack,
+    StackBottom,
+};
 
 use sel4_phdrs_patched as _;
 

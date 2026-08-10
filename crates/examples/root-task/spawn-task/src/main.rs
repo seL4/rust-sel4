@@ -12,9 +12,15 @@ extern crate alloc;
 
 use core::ptr;
 
-use object::{File, Object};
+use object::{
+    File,
+    Object,
+};
 
-use sel4_root_task::{Never, root_task};
+use sel4_root_task::{
+    Never,
+    root_task,
+};
 
 mod child_vspace;
 mod object_allocator;

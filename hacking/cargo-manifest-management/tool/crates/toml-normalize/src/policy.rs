@@ -4,12 +4,24 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use std::cmp::{Ordering, Reverse};
+use std::cmp::{
+    Ordering,
+    Reverse,
+};
 
-use serde::{Deserialize, Serialize};
-use serde_with::{DisplayFromStr, serde_as};
+use serde::{
+    Deserialize,
+    Serialize,
+};
+use serde_with::{
+    DisplayFromStr,
+    serde_as,
+};
 
-use toml_path_regex::{PathRegex, PathSegment};
+use toml_path_regex::{
+    PathRegex,
+    PathSegment,
+};
 
 use crate::AbstractPolicy;
 

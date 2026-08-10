@@ -10,25 +10,49 @@
 extern crate alloc;
 
 use alloc::rc::Rc;
-use core::cell::RefCell;
-use core::future::Future;
-use core::marker::PhantomData;
-use core::pin::Pin;
-use core::task::{Context, Poll};
+use core::{
+    cell::RefCell,
+    future::Future,
+    marker::PhantomData,
+    pin::Pin,
+    task::{
+        Context,
+        Poll,
+    },
+};
 
 use async_unsync::semaphore::Semaphore;
 
 use sel4_abstract_allocator::AbstractAllocator;
-use sel4_async_block_io::{BlockIO, BlockIOLayout, BlockSize, Operation, access::Access};
+use sel4_async_block_io::{
+    BlockIO,
+    BlockIOLayout,
+    BlockSize,
+    Operation,
+    access::Access,
+};
 use sel4_shared_memory::SharedMemoryRef;
-use sel4_shared_ring_buffer::{RingBuffers, roles::Provide};
+use sel4_shared_ring_buffer::{
+    RingBuffers,
+    roles::Provide,
+};
 use sel4_shared_ring_buffer_block_io_types::BlockIORequest;
 
 mod errors;
 mod owned;
 
-pub use errors::{Error, ErrorOrUserError, IOError, PeerMisbehaviorError, UserError};
-pub use owned::{IssueRequestBuf, OwnedSharedRingBufferBlockIO, PollRequestBuf};
+pub use errors::{
+    Error,
+    ErrorOrUserError,
+    IOError,
+    PeerMisbehaviorError,
+    UserError,
+};
+pub use owned::{
+    IssueRequestBuf,
+    OwnedSharedRingBufferBlockIO,
+    PollRequestBuf,
+};
 
 pub struct SharedRingBufferBlockIO<N, P, A: AbstractAllocator, F> {
     shared: Rc<RefCell<Inner<N, P, A, F>>>,

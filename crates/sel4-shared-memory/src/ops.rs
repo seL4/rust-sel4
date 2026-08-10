@@ -6,9 +6,15 @@
 
 use core::ptr;
 
-use zerocopy::{FromBytes, IntoBytes};
+use zerocopy::{
+    FromBytes,
+    IntoBytes,
+};
 
-use sel4_abstract_ptr::memory_type::{BulkOps, UnitaryOps};
+use sel4_abstract_ptr::memory_type::{
+    BulkOps,
+    UnitaryOps,
+};
 
 use crate::SharedMemory;
 

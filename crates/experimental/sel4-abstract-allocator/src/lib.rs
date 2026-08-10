@@ -9,9 +9,11 @@
 #[cfg(feature = "alloc")]
 extern crate alloc;
 
-use core::alloc::Layout;
-use core::fmt;
-use core::ops::Range;
+use core::{
+    alloc::Layout,
+    fmt,
+    ops::Range,
+};
 
 pub mod bump;
 

@@ -24,9 +24,15 @@ mod rt;
 mod this_image;
 
 use crate::{
-    arch::{Arch, ArchImpl},
+    arch::{
+        Arch,
+        ArchImpl,
+    },
     barrier::Barrier,
-    plat::{Plat, PlatImpl},
+    plat::{
+        Plat,
+        PlatImpl,
+    },
 };
 
 const MAX_NUM_NODES: usize = sel4_config::sel4_cfg_usize!(MAX_NUM_NODES);

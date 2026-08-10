@@ -4,14 +4,24 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use core::cell::RefCell;
-use core::fmt;
-use core::ops::Deref;
-use core::time::Duration;
+use core::{
+    cell::RefCell,
+    fmt,
+    ops::Deref,
+    time::Duration,
+};
 
-use lock_api::{Mutex, RawMutex};
+use lock_api::{
+    Mutex,
+    RawMutex,
+};
 
-use crate::{HandleInterrupt, WrappedMutex, WrappedRefCell, WrappedRefCellError};
+use crate::{
+    HandleInterrupt,
+    WrappedMutex,
+    WrappedRefCell,
+    WrappedRefCellError,
+};
 
 pub trait ErrorType {
     type Error: fmt::Debug;

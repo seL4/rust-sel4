@@ -4,13 +4,18 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use core::arch::asm;
-use core::ffi::c_int;
+use core::{
+    arch::asm,
+    ffi::c_int,
+};
 
 use sel4_config::sel4_cfg;
 
 use super::sys_id_to_word;
-use crate::{seL4_MessageInfo, seL4_Word};
+use crate::{
+    seL4_MessageInfo,
+    seL4_Word,
+};
 
 // NOTE
 // asm!() does not allow r6 to be used for input or output operands, because it's sometimes used by LLVM.

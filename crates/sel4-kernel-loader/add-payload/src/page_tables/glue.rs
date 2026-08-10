@@ -6,9 +6,19 @@
 
 use std::ops::Range;
 
-use super::regions::{AbstractRegion, AbstractRegions, AbstractRegionsBuilder};
-use super::scheme::Scheme;
-use super::table::{MkLeafFn, RegionContent, Table};
+use super::{
+    regions::{
+        AbstractRegion,
+        AbstractRegions,
+        AbstractRegionsBuilder,
+    },
+    scheme::Scheme,
+    table::{
+        MkLeafFn,
+        RegionContent,
+        Table,
+    },
+};
 
 pub(crate) type Region = AbstractRegion<Option<RegionContent>>;
 pub(crate) type Regions = AbstractRegions<Option<RegionContent>>;

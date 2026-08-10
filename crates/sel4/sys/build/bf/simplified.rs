@@ -4,8 +4,10 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use std::collections::BTreeSet;
-use std::ops::Range;
+use std::{
+    collections::BTreeSet,
+    ops::Range,
+};
 
 use super::parser::ast;
 

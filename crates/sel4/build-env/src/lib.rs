@@ -4,8 +4,16 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use std::env::{self, VarError};
-use std::path::{Path, PathBuf};
+use std::{
+    env::{
+        self,
+        VarError,
+    },
+    path::{
+        Path,
+        PathBuf,
+    },
+};
 
 pub const SEL4_PREFIX_ENV: &str = "SEL4_PREFIX";
 

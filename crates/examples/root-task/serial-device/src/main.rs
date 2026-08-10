@@ -10,11 +10,17 @@
 use core::ptr;
 
 use sel4::CapTypeForObjectOfFixedSize;
-use sel4_root_task::{Never, root_task};
+use sel4_root_task::{
+    Never,
+    root_task,
+};
 
 mod device;
 
-use device::{Device, RegisterBlock};
+use device::{
+    Device,
+    RegisterBlock,
+};
 
 const SERIAL_DEVICE_IRQ: usize = 33;
 

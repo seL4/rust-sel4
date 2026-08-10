@@ -4,8 +4,14 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use core::ptr;
-use core::sync::atomic::{AtomicI32, AtomicUsize, Ordering};
+use core::{
+    ptr,
+    sync::atomic::{
+        AtomicI32,
+        AtomicUsize,
+        Ordering,
+    },
+};
 
 use sel4_config::sel4_cfg_usize;
 

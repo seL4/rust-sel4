@@ -4,14 +4,20 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use core::convert::Infallible;
-use core::marker::PhantomData;
+use core::{
+    convert::Infallible,
+    marker::PhantomData,
+};
 
 use futures::future;
 
 use sel4_async_block_io::{
-    BlockIO, Operation,
-    access::{Access, Witness},
+    BlockIO,
+    Operation,
+    access::{
+        Access,
+        Witness,
+    },
     constant_block_sizes,
 };
 

@@ -4,9 +4,19 @@
 // SPDX-License-Identifier: MIT
 //
 
-use core::ops::{BitAnd, BitAndAssign, BitOr, BitOrAssign, Not};
+use core::ops::{
+    BitAnd,
+    BitAndAssign,
+    BitOr,
+    BitOrAssign,
+    Not,
+};
 
-use crate::{newtype_methods, sel4_cfg_if, sys};
+use crate::{
+    newtype_methods,
+    sel4_cfg_if,
+    sys,
+};
 
 /// Corresponds to `seL4_X86_VMAttributes`.
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]

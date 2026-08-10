@@ -4,8 +4,10 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use core::ffi::c_int;
-use core::panic::UnwindSafe;
+use core::{
+    ffi::c_int,
+    panic::UnwindSafe,
+};
 
 use sel4_panicking_env::abort_without_info;
 

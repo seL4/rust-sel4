@@ -4,8 +4,10 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use crate::bf::*;
-use crate::c::*;
+use crate::{
+    bf::*,
+    c::*,
+};
 
 pub mod invocation_label {
     include!(concat!(env!("OUT_DIR"), "/invocation_labels.rs"));

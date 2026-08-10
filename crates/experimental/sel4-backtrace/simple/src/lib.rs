@@ -8,8 +8,14 @@
 
 use core::convert::Infallible;
 
-use sel4_backtrace::{BacktraceSendWithToken, BacktraceSendWithoutToken};
-use sel4_panicking_env::{debug_print, debug_println};
+use sel4_backtrace::{
+    BacktraceSendWithToken,
+    BacktraceSendWithoutToken,
+};
+use sel4_panicking_env::{
+    debug_print,
+    debug_println,
+};
 
 #[cfg(feature = "alloc")]
 use sel4_backtrace::Backtrace;

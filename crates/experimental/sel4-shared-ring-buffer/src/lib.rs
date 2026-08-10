@@ -6,17 +6,35 @@
 
 #![no_std]
 
-use core::marker::PhantomData;
-use core::num::Wrapping;
-use core::sync::atomic::{AtomicU32, Ordering};
+use core::{
+    marker::PhantomData,
+    num::Wrapping,
+    sync::atomic::{
+        AtomicU32,
+        Ordering,
+    },
+};
 
-use zerocopy::{FromBytes, IntoBytes};
+use zerocopy::{
+    FromBytes,
+    IntoBytes,
+};
 
-use sel4_shared_memory::{SharedMemoryPtr, SharedMemoryRef, map_field};
+use sel4_shared_memory::{
+    SharedMemoryPtr,
+    SharedMemoryRef,
+    map_field,
+};
 
 pub mod roles;
 
-use roles::{Read, RingBufferRole, RingBufferRoleValue, RingBuffersRole, Write};
+use roles::{
+    Read,
+    RingBufferRole,
+    RingBufferRoleValue,
+    RingBuffersRole,
+    Write,
+};
 
 mod descriptor;
 

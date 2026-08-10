@@ -7,7 +7,13 @@
 use rkyv::Archive;
 
 use crate::{
-    ArchivedCapSlot, ArchivedCapTableEntry, CapSlot, CapTableEntry, IsArchivedCap, IsCap, cap,
+    ArchivedCapSlot,
+    ArchivedCapTableEntry,
+    CapSlot,
+    CapTableEntry,
+    IsArchivedCap,
+    IsCap,
+    cap,
     object,
 };
 

@@ -4,15 +4,36 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use std::collections::{BTreeMap, BTreeSet, HashMap};
-use std::fs;
-use std::path::PathBuf;
+use std::{
+    collections::{
+        BTreeMap,
+        BTreeSet,
+        HashMap,
+    },
+    fs,
+    path::PathBuf,
+};
 
 use anyhow::bail;
-use cargo_metadata::semver::{Version, VersionReq};
-use cargo_metadata::{Metadata, MetadataCommand};
-use clap::{Parser, Subcommand};
-use toml_edit::{Document, Formatted, Item, Table, Value};
+use cargo_metadata::{
+    Metadata,
+    MetadataCommand,
+    semver::{
+        Version,
+        VersionReq,
+    },
+};
+use clap::{
+    Parser,
+    Subcommand,
+};
+use toml_edit::{
+    Document,
+    Formatted,
+    Item,
+    Table,
+    Value,
+};
 
 #[derive(Debug, Parser)]
 struct Cli {

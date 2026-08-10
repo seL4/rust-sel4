@@ -8,9 +8,15 @@
 
 use core::panic::UnwindSafe;
 
-pub use sel4_minimal_linux_syscalls::{exit_failure, exit_success};
+pub use sel4_minimal_linux_syscalls::{
+    exit_failure,
+    exit_success,
+};
 pub use sel4_panicking::catch_unwind;
-pub use sel4_panicking_env::{abort, debug_println};
+pub use sel4_panicking_env::{
+    abort,
+    debug_println,
+};
 
 pub use sel4_minimal_linux_runtime_macros::main;
 
@@ -100,8 +106,15 @@ where
 // For macros
 #[doc(hidden)]
 pub mod _private {
-    pub use crate::{_run_main, DEFAULT_STACK_SIZE, declare_main};
+    pub use crate::{
+        _run_main,
+        DEFAULT_STACK_SIZE,
+        declare_main,
+    };
     pub use one_shot_mutex::sync::RawOneShotMutex;
-    pub use sel4_dlmalloc::{StaticDlmalloc, StaticHeap};
+    pub use sel4_dlmalloc::{
+        StaticDlmalloc,
+        StaticHeap,
+    };
     pub use sel4_runtime_common::declare_stack;
 }

@@ -4,8 +4,10 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use std::ops::Range;
-use std::sync::Arc;
+use std::{
+    ops::Range,
+    sync::Arc,
+};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub(crate) struct AbstractRegion<T> {

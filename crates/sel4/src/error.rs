@@ -5,7 +5,10 @@
 // SPDX-License-Identifier: MIT
 //
 
-use core::{fmt, result};
+use core::{
+    fmt,
+    result,
+};
 
 use crate::sys;
 

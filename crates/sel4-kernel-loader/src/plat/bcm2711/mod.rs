@@ -4,14 +4,22 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use embedded_hal_nb::nb;
-use embedded_hal_nb::serial::Write;
+use embedded_hal_nb::{
+    nb,
+    serial::Write,
+};
 use spin::lock_api::Mutex;
 
 use sel4_bcm2835_aux_uart_driver::Driver as Bcm2835AuxUartDriver;
-use sel4_config::{sel4_cfg, sel4_cfg_bool};
+use sel4_config::{
+    sel4_cfg,
+    sel4_cfg_bool,
+};
 
-use crate::{arch::reset_cntvoff, plat::Plat};
+use crate::{
+    arch::reset_cntvoff,
+    plat::Plat,
+};
 
 const SERIAL_DEVICE_BASE_ADDR: usize = 0xfe21_5000;
 

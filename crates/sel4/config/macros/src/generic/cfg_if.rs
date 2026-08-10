@@ -8,11 +8,17 @@ use proc_macro2::TokenStream;
 use quote::quote;
 use syn::{
     Token,
-    parse::{ParseStream, Parser},
+    parse::{
+        ParseStream,
+        Parser,
+    },
     spanned::Spanned,
 };
 
-use super::{Condition, MacroImpls};
+use super::{
+    Condition,
+    MacroImpls,
+};
 
 impl MacroImpls<'_> {
     pub fn cfg_if_impl(&self, toks: TokenStream) -> TokenStream {

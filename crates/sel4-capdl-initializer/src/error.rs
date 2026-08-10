@@ -4,8 +4,10 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use core::convert::Infallible;
-use core::fmt;
+use core::{
+    convert::Infallible,
+    fmt,
+};
 
 use crate::cslot_allocator::CSlotAllocatorError;
 

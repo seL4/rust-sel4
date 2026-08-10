@@ -7,7 +7,13 @@
 #![no_std]
 #![no_main]
 
-use sel4_microkit::{Channel, Handler, memory_region_symbol, protection_domain, var};
+use sel4_microkit::{
+    Channel,
+    Handler,
+    memory_region_symbol,
+    protection_domain,
+    var,
+};
 use sel4_microkit_driver_adapters::serial::driver::HandlerImpl;
 
 #[cfg(feature = "board-qemu_virt_aarch64")]

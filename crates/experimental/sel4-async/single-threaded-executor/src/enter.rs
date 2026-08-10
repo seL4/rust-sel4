@@ -6,8 +6,10 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 //
 
-use core::cell::Cell;
-use core::fmt;
+use core::{
+    cell::Cell,
+    fmt,
+};
 
 #[thread_local]
 static ENTERED: Cell<bool> = Cell::new(false);

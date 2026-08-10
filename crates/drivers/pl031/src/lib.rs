@@ -6,7 +6,11 @@
 
 #![no_std]
 
-use rtcc::{DateTime, DateTimeAccess, NaiveDateTime};
+use rtcc::{
+    DateTime,
+    DateTimeAccess,
+    NaiveDateTime,
+};
 
 mod device;
 

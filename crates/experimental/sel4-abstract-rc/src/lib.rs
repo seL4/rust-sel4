@@ -8,8 +8,10 @@
 
 extern crate alloc;
 
-use alloc::rc::Rc;
-use alloc::sync::Arc;
+use alloc::{
+    rc::Rc,
+    sync::Arc,
+};
 use core::ops::Deref;
 
 pub trait AbstractRcT {

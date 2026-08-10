@@ -10,7 +10,10 @@ use sel4_immediate_sync_once_cell::ImmediateSyncOnceCell;
 use sel4_panicking::set_hook as set_outer_hook;
 use sel4_panicking_env::debug_println;
 
-pub use sel4_panicking::{PanicHook, catch_unwind};
+pub use sel4_panicking::{
+    PanicHook,
+    catch_unwind,
+};
 
 use crate::pd_name;
 

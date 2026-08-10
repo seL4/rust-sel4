@@ -11,27 +11,63 @@
 
 extern crate alloc;
 
-use alloc::rc::Rc;
-use alloc::vec;
-use alloc::vec::Vec;
-use core::cell::RefCell;
-use core::future::poll_fn;
-use core::marker::PhantomData;
-use core::pin::Pin;
-use core::task::{self, Poll};
+use alloc::{
+    rc::Rc,
+    vec,
+    vec::Vec,
+};
+use core::{
+    cell::RefCell,
+    future::poll_fn,
+    marker::PhantomData,
+    pin::Pin,
+    task::{
+        self,
+        Poll,
+    },
+};
 
 use thiserror::Error;
 
 use log::info;
 use smoltcp::{
-    iface::{Config, Context, Interface, PollResult, SocketHandle, SocketSet},
+    iface::{
+        Config,
+        Context,
+        Interface,
+        PollResult,
+        SocketHandle,
+        SocketSet,
+    },
     phy::Device,
-    socket::{AnySocket, dhcpv4, dns, tcp},
-    time::{Duration, Instant},
-    wire::{DnsQueryType, IpAddress, IpCidr, IpEndpoint, IpListenEndpoint, Ipv4Address, Ipv4Cidr},
+    socket::{
+        AnySocket,
+        dhcpv4,
+        dns,
+        tcp,
+    },
+    time::{
+        Duration,
+        Instant,
+    },
+    wire::{
+        DnsQueryType,
+        IpAddress,
+        IpCidr,
+        IpEndpoint,
+        IpListenEndpoint,
+        Ipv4Address,
+        Ipv4Cidr,
+    },
 };
 
-use sel4_async_io::{Error as AsyncIOError, ErrorKind, ErrorType, Read, Write};
+use sel4_async_io::{
+    Error as AsyncIOError,
+    ErrorKind,
+    ErrorType,
+    Read,
+    Write,
+};
 
 pub(crate) const DEFAULT_KEEP_ALIVE_INTERVAL: u64 = 75000;
 pub(crate) const DEFAULT_TCP_SOCKET_BUFFER_SIZE: usize = 65535;

@@ -6,7 +6,12 @@
 
 use spin::Mutex;
 
-use sel4_logging::{LevelFilter, Logger, LoggerBuilder, SynchronizedLogger};
+use sel4_logging::{
+    LevelFilter,
+    Logger,
+    LoggerBuilder,
+    SynchronizedLogger,
+};
 
 use crate::fmt::debug_print;
 

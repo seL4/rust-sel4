@@ -9,14 +9,22 @@
 #![no_std]
 #![feature(c_variadic)]
 
-use core::ffi::{c_char, c_int, c_void};
+use core::ffi::{
+    c_char,
+    c_int,
+    c_void,
+};
 
 mod arch;
 mod syscall_registers;
 
 pub use arch::*;
 pub use syscall_registers::{
-    IteratorAsSyscallArgs, SyscallArg, SyscallArgs, SyscallWordArg, VaListAsSyscallArgs,
+    IteratorAsSyscallArgs,
+    SyscallArg,
+    SyscallArgs,
+    SyscallWordArg,
+    VaListAsSyscallArgs,
 };
 
 pub type SyscallNumber = isize;

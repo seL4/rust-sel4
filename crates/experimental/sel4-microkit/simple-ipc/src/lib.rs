@@ -6,14 +6,24 @@
 
 #![no_std]
 
-use core::error::Error;
-use core::fmt;
+use core::{
+    error::Error,
+    fmt,
+};
 
-use serde::{Deserialize, Serialize};
+use serde::{
+    Deserialize,
+    Serialize,
+};
 use zerocopy::IntoBytes;
 
 use sel4_microkit_base::{
-    Channel, MessageInfo, MessageLabel, MessageRegisterValue, with_msg_regs, with_msg_regs_mut,
+    Channel,
+    MessageInfo,
+    MessageLabel,
+    MessageRegisterValue,
+    with_msg_regs,
+    with_msg_regs_mut,
 };
 
 const MAX_MESSAGE_LABEL: MessageLabel =

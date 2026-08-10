@@ -10,7 +10,10 @@ use rkyv::util::AlignedVec;
 
 use sel4_capdl_initializer_types::InputSpec;
 use sel4_patch_elf::dynamic::Patching;
-use sel4_phdrs_constants::{PT_SEL4_CAPDL_FRAME_DATA, PT_SEL4_CAPDL_SPEC};
+use sel4_phdrs_constants::{
+    PT_SEL4_CAPDL_FRAME_DATA,
+    PT_SEL4_CAPDL_SPEC,
+};
 
 mod reserialize_spec;
 

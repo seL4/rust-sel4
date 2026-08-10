@@ -5,10 +5,22 @@
 //
 
 use proc_macro2::TokenStream;
-use quote::{ToTokens, quote, quote_spanned};
-use syn::{Token, parse2, spanned::Spanned};
+use quote::{
+    ToTokens,
+    quote,
+    quote_spanned,
+};
+use syn::{
+    Token,
+    parse2,
+    spanned::Spanned,
+};
 
-use super::{Condition, MacroImpls, parse_or_return};
+use super::{
+    Condition,
+    MacroImpls,
+    parse_or_return,
+};
 
 macro_rules! ensure_empty {
     ($tokenstream:ident) => {

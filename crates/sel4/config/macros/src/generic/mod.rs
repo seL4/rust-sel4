@@ -13,7 +13,10 @@ mod condition;
 mod expr_macros;
 
 use common_helpers::parse_or_return;
-use condition::{Condition, EvalError};
+use condition::{
+    Condition,
+    EvalError,
+};
 
 pub struct MacroImpls<'a> {
     config: &'a Configuration,

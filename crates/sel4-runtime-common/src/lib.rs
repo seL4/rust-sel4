@@ -11,7 +11,10 @@
 #![feature(linkage)]
 #![allow(internal_features)]
 
-use core::sync::atomic::{AtomicBool, Ordering};
+use core::sync::atomic::{
+    AtomicBool,
+    Ordering,
+};
 
 use sel4_panicking_env::abort;
 
@@ -117,5 +120,8 @@ pub mod _private {
     pub use super::_run_entrypoint;
     pub use cfg_if::cfg_if;
     pub use core::arch::global_asm;
-    pub use sel4_stack::{Stack, StackBottom};
+    pub use sel4_stack::{
+        Stack,
+        StackBottom,
+    };
 }

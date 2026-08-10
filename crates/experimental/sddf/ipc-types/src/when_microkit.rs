@@ -4,9 +4,19 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use sel4_microkit_base::{Channel, MessageInfo, with_msg_regs, with_msg_regs_mut};
+use sel4_microkit_base::{
+    Channel,
+    MessageInfo,
+    with_msg_regs,
+    with_msg_regs_mut,
+};
 
-use crate::{CallError, CallTarget, MessageReader, MessageWriter};
+use crate::{
+    CallError,
+    CallTarget,
+    MessageReader,
+    MessageWriter,
+};
 
 impl CallTarget for Channel {
     fn call<T, W: MessageWriter, R: MessageReader<T>>(

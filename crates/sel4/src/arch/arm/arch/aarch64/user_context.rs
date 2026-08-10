@@ -5,7 +5,11 @@
 // SPDX-License-Identifier: MIT
 //
 
-use crate::{Word, newtype_methods, sys};
+use crate::{
+    Word,
+    newtype_methods,
+    sys,
+};
 
 /// Corresponds to `seL4_UserContext`.
 #[derive(Debug, Clone, PartialEq, Eq, Default)]

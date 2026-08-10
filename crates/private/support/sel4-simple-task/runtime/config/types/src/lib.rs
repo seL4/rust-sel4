@@ -10,15 +10,22 @@ extern crate alloc;
 
 use core::ops::Range;
 
-use alloc::string::String;
-use alloc::vec::Vec;
+use alloc::{
+    string::String,
+    vec::Vec,
+};
 
-use rkyv::Archive;
-use rkyv::rancor;
-use rkyv::util::AlignedVec;
+use rkyv::{
+    Archive,
+    rancor,
+    util::AlignedVec,
+};
 
 #[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
+use serde::{
+    Deserialize,
+    Serialize,
+};
 
 #[cfg(target_pointer_width = "32")]
 type NativeWord = u32;

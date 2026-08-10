@@ -5,11 +5,22 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 //
 
-use core::{marker::PhantomData, ptr::NonNull};
+use core::{
+    marker::PhantomData,
+    ptr::NonNull,
+};
 
 use crate::{
     AbstractPtr,
-    access::{Access, ReadOnly, ReadWrite, Readable, RestrictAccess, Writable, WriteOnly},
+    access::{
+        Access,
+        ReadOnly,
+        ReadWrite,
+        Readable,
+        RestrictAccess,
+        Writable,
+        WriteOnly,
+    },
     memory_type::UnitaryOps,
 };
 

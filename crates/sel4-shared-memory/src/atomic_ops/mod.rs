@@ -4,10 +4,16 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 //
 
-use core::sync::atomic::{self, Ordering};
+use core::sync::atomic::{
+    self,
+    Ordering,
+};
 
 use aligned::Aligned;
-use zerocopy::{FromBytes, IntoBytes};
+use zerocopy::{
+    FromBytes,
+    IntoBytes,
+};
 
 use sel4_abstract_ptr::memory_type::AtomicOps;
 

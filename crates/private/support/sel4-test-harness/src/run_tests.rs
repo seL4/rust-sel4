@@ -5,16 +5,29 @@
 //
 
 use alloc::string::String;
-use core::fmt;
-use core::panic::AssertUnwindSafe;
+use core::{
+    fmt,
+    panic::AssertUnwindSafe,
+};
 
 use sel4_panicking::catch_unwind;
-use sel4_panicking_env::{debug_print, debug_println};
-use sel4_test_sentinels::{indicate_failure, indicate_success};
+use sel4_panicking_env::{
+    debug_print,
+    debug_println,
+};
+use sel4_test_sentinels::{
+    indicate_failure,
+    indicate_success,
+};
 
 use crate::{
     config::types::*,
-    for_generated_code::{Runnable, ShouldPanic, TestDescAndFn, TestFn},
+    for_generated_code::{
+        Runnable,
+        ShouldPanic,
+        TestDescAndFn,
+        TestFn,
+    },
 };
 
 pub fn run_tests_with_config(config: &Config, tests: &[&TestDescAndFn]) {

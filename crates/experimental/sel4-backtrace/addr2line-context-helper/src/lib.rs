@@ -11,7 +11,10 @@ extern crate alloc;
 use alloc::rc::Rc;
 
 use addr2line::Context as AbstractContext;
-use object::{Object, ObjectSection};
+use object::{
+    Object,
+    ObjectSection,
+};
 
 pub type Context = AbstractContext<gimli::EndianRcSlice<gimli::RunTimeEndian>>;
 

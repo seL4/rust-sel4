@@ -4,9 +4,19 @@
 // SPDX-License-Identifier: MIT
 //
 
-use core::cell::{Ref, RefCell, RefMut, UnsafeCell};
-use core::fmt;
-use core::sync::atomic::{AtomicIsize, Ordering};
+use core::{
+    cell::{
+        Ref,
+        RefCell,
+        RefMut,
+        UnsafeCell,
+    },
+    fmt,
+    sync::atomic::{
+        AtomicIsize,
+        Ordering,
+    },
+};
 
 pub(crate) struct TokenCell<K, A> {
     token: K,

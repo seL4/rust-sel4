@@ -6,8 +6,13 @@
 
 #![no_std]
 
-use core::cell::UnsafeCell;
-use core::sync::atomic::{AtomicBool, Ordering};
+use core::{
+    cell::UnsafeCell,
+    sync::atomic::{
+        AtomicBool,
+        Ordering,
+    },
+};
 
 pub struct ImmediateSyncOnceCell<T> {
     init_started: AtomicBool,

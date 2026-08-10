@@ -6,13 +6,25 @@
 
 #![no_std]
 
-use core::fmt;
-use core::marker::PhantomData;
-use core::mem;
+use core::{
+    fmt,
+    marker::PhantomData,
+    mem,
+};
 
-use serde::{Deserialize, Serialize};
+use serde::{
+    Deserialize,
+    Serialize,
+};
 
-use sel4::{Badge, IpcBuffer, MessageInfo, MessageInfoBuilder, Word, cap::Endpoint};
+use sel4::{
+    Badge,
+    IpcBuffer,
+    MessageInfo,
+    MessageInfoBuilder,
+    Word,
+    cap::Endpoint,
+};
 
 const BYTES_PER_WORD: usize = mem::size_of::<Word>() / mem::size_of::<u8>();
 

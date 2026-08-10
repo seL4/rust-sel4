@@ -4,9 +4,15 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use std::panic::{UnwindSafe, catch_unwind};
+use std::panic::{
+    UnwindSafe,
+    catch_unwind,
+};
 
-use crate::{Termination, abort};
+use crate::{
+    Termination,
+    abort,
+};
 
 sel4_runtime_common::declare_entrypoint_with_stack_init!();
 

@@ -56,7 +56,10 @@ macro_rules! declare_heap {
 }
 
 pub mod _private {
-    pub use sel4_dlmalloc::{StaticDlmalloc, StaticHeap};
+    pub use sel4_dlmalloc::{
+        StaticDlmalloc,
+        StaticHeap,
+    };
     pub use sel4_sync::RawLazyNotificationMutex;
 
     pub use super::get_global_allocator_mutex_notification;

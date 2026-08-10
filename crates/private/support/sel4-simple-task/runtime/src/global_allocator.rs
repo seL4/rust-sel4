@@ -4,7 +4,10 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use sel4_dlmalloc::{DeferredStaticDlmalloc, StaticHeapBounds};
+use sel4_dlmalloc::{
+    DeferredStaticDlmalloc,
+    StaticHeapBounds,
+};
 use sel4_sync::RawDeferredNotificationMutex;
 
 #[global_allocator]

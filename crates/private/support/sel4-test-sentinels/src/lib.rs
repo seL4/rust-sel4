@@ -8,7 +8,10 @@
 #![feature(core_intrinsics)]
 #![allow(internal_features)]
 
-use sel4_panicking_env::{debug_println, register_abort_trap};
+use sel4_panicking_env::{
+    debug_println,
+    register_abort_trap,
+};
 
 pub fn indicate_success() -> ! {
     debug_println!("INDICATE_SUCCESS\x06");

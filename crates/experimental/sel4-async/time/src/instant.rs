@@ -4,8 +4,15 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use core::ops::{Add, AddAssign, Sub, SubAssign};
-use core::time::Duration;
+use core::{
+    ops::{
+        Add,
+        AddAssign,
+        Sub,
+        SubAssign,
+    },
+    time::Duration,
+};
 
 #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Instant {

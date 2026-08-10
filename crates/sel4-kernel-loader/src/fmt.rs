@@ -9,7 +9,10 @@
 
 use core::fmt;
 
-use crate::plat::{Plat, PlatImpl};
+use crate::plat::{
+    Plat,
+    PlatImpl,
+};
 
 struct DebugWrite;
 

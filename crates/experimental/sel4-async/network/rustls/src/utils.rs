@@ -7,12 +7,20 @@
 // Derived from https://github.com/rustls/rustls/pull/1648 by https://github.com/japaric
 
 use alloc::vec::Vec;
-use core::pin::Pin;
-use core::task::{self, Poll};
+use core::{
+    pin::Pin,
+    task::{
+        self,
+        Poll,
+    },
+};
 
 use rustls::unbuffered::InsufficientSizeError;
 
-use sel4_async_io::{Read, Write};
+use sel4_async_io::{
+    Read,
+    Write,
+};
 
 use crate::Error;
 

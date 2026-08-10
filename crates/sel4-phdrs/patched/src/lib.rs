@@ -6,10 +6,16 @@
 
 #![no_std]
 
-use core::error::Error;
-use core::fmt;
+use core::{
+    error::Error,
+    fmt,
+};
 
-use sel4_phdrs::{ProgramHeader, ProgramHeaders, register_locate_phdrs};
+use sel4_phdrs::{
+    ProgramHeader,
+    ProgramHeaders,
+    register_locate_phdrs,
+};
 use sel4_rodata_static::rodata_static;
 
 register_locate_phdrs!(locate_patched_phdrs);

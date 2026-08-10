@@ -7,9 +7,17 @@
 #![no_std]
 #![no_main]
 
-use core::sync::atomic::{AtomicBool, Ordering};
+use core::sync::atomic::{
+    AtomicBool,
+    Ordering,
+};
 
-use sel4_microkit::{NullHandler, debug_println, panicking, protection_domain};
+use sel4_microkit::{
+    NullHandler,
+    debug_println,
+    panicking,
+    protection_domain,
+};
 
 sel4_test_microkit::embed_sdf_xml!("system.xml");
 

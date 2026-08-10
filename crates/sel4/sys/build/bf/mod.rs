@@ -4,11 +4,19 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use std::fs;
-use std::path::Path;
+use std::{
+    fs,
+    path::Path,
+};
 
-use proc_macro2::{Literal, TokenStream};
-use quote::{format_ident, quote};
+use proc_macro2::{
+    Literal,
+    TokenStream,
+};
+use quote::{
+    format_ident,
+    quote,
+};
 use syn::Ident;
 
 mod parser;

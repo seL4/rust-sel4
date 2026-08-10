@@ -4,15 +4,22 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use core::arch::asm;
-use core::mem;
+use core::{
+    arch::asm,
+    mem,
+};
 
 use riscv::register::satp;
 
 use sel4_config::sel4_cfg_if;
 use sel4_kernel_loader_payload_types::ArchivedPayloadInfo;
 
-use crate::{arch::Arch, main, secondary_main, this_image::kernel_boot_level_0_table};
+use crate::{
+    arch::Arch,
+    main,
+    secondary_main,
+    this_image::kernel_boot_level_0_table,
+};
 
 pub(crate) struct PerCoreImpl {
     hart_id: usize,

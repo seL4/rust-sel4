@@ -5,9 +5,11 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 //
 
-use alloc::borrow::Cow;
-use alloc::fmt;
-use alloc::string::String;
+use alloc::{
+    borrow::Cow,
+    fmt,
+    string::String,
+};
 
 use crate::short_backtrace::__rust_begin_short_backtrace;
 

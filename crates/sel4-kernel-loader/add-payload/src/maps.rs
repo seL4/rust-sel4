@@ -12,7 +12,13 @@ use std::ops::Range;
 use sel4_platform_info_types::OwnedPlatformInfo;
 
 use crate::page_tables::{
-    LeafDescriptor, MkLeafArgs, RawDescriptor, Region, RegionsBuilder, Scheme, schemes,
+    LeafDescriptor,
+    MkLeafArgs,
+    RawDescriptor,
+    Region,
+    RegionsBuilder,
+    Scheme,
+    schemes,
 };
 
 pub(crate) fn mk_loader_map(

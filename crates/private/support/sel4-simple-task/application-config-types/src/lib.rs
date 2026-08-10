@@ -9,7 +9,10 @@
 use core::marker::PhantomData;
 
 use sel4_simple_task_threading::StaticThread;
-use serde::{Deserialize, Serialize};
+use serde::{
+    Deserialize,
+    Serialize,
+};
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 #[serde(transparent)]

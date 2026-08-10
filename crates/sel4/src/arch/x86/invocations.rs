@@ -7,8 +7,19 @@
 use sel4_config::sel4_cfg;
 
 use crate::{
-    AbsoluteCPtr, Cap, CapRights, CapTypeForFrameObject, Error, InvocationContext, Result,
-    TranslationTableObjectType, VmAttributes, Word, cap::*, cap_type, sel4_cfg_wrap_match,
+    AbsoluteCPtr,
+    Cap,
+    CapRights,
+    CapTypeForFrameObject,
+    Error,
+    InvocationContext,
+    Result,
+    TranslationTableObjectType,
+    VmAttributes,
+    Word,
+    cap::*,
+    cap_type,
+    sel4_cfg_wrap_match,
 };
 
 #[sel4_cfg(VTX)]

@@ -6,12 +6,22 @@
 
 use core::cell::UnsafeCell;
 
-use crate::{InvocationContext, IpcBuffer};
+use crate::{
+    InvocationContext,
+    IpcBuffer,
+};
 
 mod token;
 
 #[allow(unused_imports)]
-use token::{Accessor, BorrowError, BorrowMutError, SyncToken, TokenCell, UnsyncToken};
+use token::{
+    Accessor,
+    BorrowError,
+    BorrowMutError,
+    SyncToken,
+    TokenCell,
+    UnsyncToken,
+};
 
 // // //
 

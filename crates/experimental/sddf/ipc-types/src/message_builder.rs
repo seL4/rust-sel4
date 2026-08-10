@@ -4,7 +4,10 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use crate::{MessageLabel, MessageRegisterValue};
+use crate::{
+    MessageLabel,
+    MessageRegisterValue,
+};
 
 pub struct MessageBuilder<'a> {
     label: MessageLabel,

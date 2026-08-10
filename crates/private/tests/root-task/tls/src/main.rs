@@ -10,7 +10,10 @@
 
 use core::hint::black_box;
 
-use sel4_root_task::{debug_println, root_task};
+use sel4_root_task::{
+    debug_println,
+    root_task,
+};
 
 const X: i32 = 1337;
 

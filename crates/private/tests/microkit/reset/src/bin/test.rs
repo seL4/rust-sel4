@@ -8,7 +8,11 @@
 #![no_main]
 #![allow(static_mut_refs)]
 
-use sel4_microkit::{NullHandler, debug_println, protection_domain};
+use sel4_microkit::{
+    NullHandler,
+    debug_println,
+    protection_domain,
+};
 use sel4_reset::reset;
 
 sel4_test_microkit::embed_sdf_xml!("system.xml");

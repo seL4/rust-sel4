@@ -6,7 +6,10 @@
 //
 
 use embedded_hal_nb::nb;
-use serde::{Deserialize, Serialize};
+use serde::{
+    Deserialize,
+    Serialize,
+};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub(crate) enum NonBlocking<T> {

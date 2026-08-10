@@ -5,8 +5,14 @@
 // SPDX-License-Identifier: MIT
 //
 
-use core::marker::PhantomData;
-use core::sync::atomic::{AtomicIsize, Ordering, fence};
+use core::{
+    marker::PhantomData,
+    sync::atomic::{
+        AtomicIsize,
+        Ordering,
+        fence,
+    },
+};
 
 use sel4_immediate_sync_once_cell::ImmediateSyncOnceCell;
 

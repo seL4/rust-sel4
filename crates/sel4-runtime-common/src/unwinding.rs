@@ -7,10 +7,17 @@
 use sel4_panicking_env::abort;
 
 use unwinding::custom_eh_frame_finder::{
-    EhFrameFinder, FrameInfo, FrameInfoKind, set_custom_eh_frame_finder,
+    EhFrameFinder,
+    FrameInfo,
+    FrameInfoKind,
+    set_custom_eh_frame_finder,
 };
 
-use sel4_phdrs::{PT_GNU_EH_FRAME, PT_LOAD, locate_phdrs};
+use sel4_phdrs::{
+    PT_GNU_EH_FRAME,
+    PT_LOAD,
+    locate_phdrs,
+};
 
 struct EhFrameFinderImpl;
 

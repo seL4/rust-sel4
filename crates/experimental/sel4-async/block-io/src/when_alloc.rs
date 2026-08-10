@@ -4,17 +4,28 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use alloc::rc::Rc;
-use alloc::vec;
-use alloc::vec::Vec;
-use core::cell::RefCell;
-use core::num::NonZeroUsize;
-use core::ops::Deref;
+use alloc::{
+    rc::Rc,
+    vec,
+    vec::Vec,
+};
+use core::{
+    cell::RefCell,
+    num::NonZeroUsize,
+    ops::Deref,
+};
 
 use futures::future;
 use lru::LruCache;
 
-use crate::{Access, BlockIO, BlockIOLayout, BlockSize, Operation, wrapper_methods};
+use crate::{
+    Access,
+    BlockIO,
+    BlockIOLayout,
+    BlockSize,
+    Operation,
+    wrapper_methods,
+};
 
 pub struct DynamicBlockSize {
     bits: usize,

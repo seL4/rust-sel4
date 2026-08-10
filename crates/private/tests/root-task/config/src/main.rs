@@ -7,7 +7,10 @@
 #![no_std]
 #![no_main]
 
-use sel4_root_task::{debug_println, root_task};
+use sel4_root_task::{
+    debug_println,
+    root_task,
+};
 
 #[sel4::sel4_cfg(not(KERNEL_STACK_BITS = "0"))]
 #[root_task]

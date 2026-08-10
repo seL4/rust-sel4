@@ -8,7 +8,10 @@ use core::ops::Range;
 
 use sel4_immutable_cell::ImmutableCell;
 use sel4_kernel_loader_payload_types::*;
-use sel4_phdrs::{PT_SEL4_KERNEL_LOADER_PAYLOAD, locate_phdrs};
+use sel4_phdrs::{
+    PT_SEL4_KERNEL_LOADER_PAYLOAD,
+    locate_phdrs,
+};
 
 use sel4_phdrs_patched as _;
 
@@ -39,7 +42,10 @@ pub(crate) static kernel_boot_level_0_table: ImmutableCell<usize> = ImmutableCel
 
 pub(crate) mod stacks {
     use sel4_config::sel4_cfg_usize;
-    use sel4_stack::{Stack, StackBottom};
+    use sel4_stack::{
+        Stack,
+        StackBottom,
+    };
 
     const PRIMARY_STACK_SIZE: usize = 4096 * 8; // TODO this is excessive
 

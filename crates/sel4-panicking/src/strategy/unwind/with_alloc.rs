@@ -6,10 +6,16 @@
 
 use alloc::boxed::Box;
 
-use unwinding::abi::*;
-use unwinding::panicking::Exception;
+use unwinding::{
+    abi::*,
+    panicking::Exception,
+};
 
-use super::{ExceptionImpl, RustPanic, foreign_exception};
+use super::{
+    ExceptionImpl,
+    RustPanic,
+    foreign_exception,
+};
 
 unsafe impl Exception for RustPanic {
     const CLASS: [u8; 8] = RustPanic::EXCEPTION_CLASS;

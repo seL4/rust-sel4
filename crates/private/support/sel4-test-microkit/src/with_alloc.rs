@@ -7,7 +7,15 @@
 use alloc::boxed::Box;
 use core::error::Error;
 
-use sel4_microkit::{Channel, ChannelSet, Child, DeferredAction, Handler, MessageInfo, Never};
+use sel4_microkit::{
+    Channel,
+    ChannelSet,
+    Child,
+    DeferredAction,
+    Handler,
+    MessageInfo,
+    Never,
+};
 
 pub type UpcastedHandler = Box<dyn Handler<Error = Box<dyn Error>> + 'static>;
 

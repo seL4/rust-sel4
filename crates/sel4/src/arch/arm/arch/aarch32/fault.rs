@@ -4,7 +4,10 @@
 // SPDX-License-Identifier: MIT
 //
 
-use crate::{UnknownSyscall, Word};
+use crate::{
+    UnknownSyscall,
+    Word,
+};
 
 impl UnknownSyscall {
     pub fn cpsr(&self) -> Word {

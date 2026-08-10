@@ -4,7 +4,10 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use core::str::{self, Utf8Error};
+use core::str::{
+    self,
+    Utf8Error,
+};
 
 /// Declares a symbol via which the `microkit` tool can inject a variable declared by e.g.
 /// `setvar_vaddr`, and returns the variable's value at runtime.

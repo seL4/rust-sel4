@@ -9,7 +9,10 @@
 use core::ops::Deref;
 
 use tock_registers::{
-    interfaces::{Readable, Writeable},
+    interfaces::{
+        Readable,
+        Writeable,
+    },
     register_structs,
     registers::ReadWrite,
 };

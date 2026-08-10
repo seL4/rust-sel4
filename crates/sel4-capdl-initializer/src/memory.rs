@@ -4,10 +4,18 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use core::ops::Range;
-use core::ptr;
+use core::{
+    ops::Range,
+    ptr,
+};
 
-use sel4::{CapTypeForFrameObjectOfFixedSize, cap_type, init_thread, sel4_cfg_attr, sel4_cfg_bool};
+use sel4::{
+    CapTypeForFrameObjectOfFixedSize,
+    cap_type,
+    init_thread,
+    sel4_cfg_attr,
+    sel4_cfg_bool,
+};
 
 const SMALL_PAGE_PLACEHOLDER_SIZE: usize = if sel4_cfg_bool!(ARCH_AARCH32) {
     1 << 16

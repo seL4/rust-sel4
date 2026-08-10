@@ -6,12 +6,17 @@
 
 #![no_std]
 
-use core::alloc::Layout;
-use core::ops::Range;
+use core::{
+    alloc::Layout,
+    ops::Range,
+};
 
 use offset_allocator::NodeIndex;
 
-use sel4_abstract_allocator::{AbstractAllocator, AbstractAllocatorAllocation};
+use sel4_abstract_allocator::{
+    AbstractAllocator,
+    AbstractAllocatorAllocation,
+};
 
 pub struct OffsetAllocator<NI: NodeIndex = u16> {
     inner: offset_allocator::Allocator<NI>,

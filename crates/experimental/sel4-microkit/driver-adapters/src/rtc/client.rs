@@ -4,7 +4,10 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use rtcc::{DateTimeAccess, NaiveDateTime};
+use rtcc::{
+    DateTimeAccess,
+    NaiveDateTime,
+};
 
 use sel4_microkit::Channel;
 use sel4_microkit_simple_ipc as simple_ipc;

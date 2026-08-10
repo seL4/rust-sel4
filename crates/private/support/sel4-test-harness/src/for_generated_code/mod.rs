@@ -4,11 +4,16 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 //
 
-use alloc::format;
-use alloc::string::String;
+use alloc::{
+    format,
+    string::String,
+};
 use core::fmt;
 
-use crate::{config::get_config, run_tests::run_tests_with_config};
+use crate::{
+    config::get_config,
+    run_tests::run_tests_with_config,
+};
 
 pub(crate) mod types;
 

@@ -4,8 +4,10 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use std::env;
-use std::process::Command;
+use std::{
+    env,
+    process::Command,
+};
 
 use anyhow::Error;
 

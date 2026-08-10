@@ -6,7 +6,11 @@
 
 use toml_path_regex::PathRegex;
 
-use crate::{KeyOrdering, Policy, TableRule};
+use crate::{
+    KeyOrdering,
+    Policy,
+    TableRule,
+};
 
 pub fn cargo_manifest_policy() -> Policy {
     Policy {

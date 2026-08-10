@@ -4,9 +4,14 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use std::env::{self, VarError};
-use std::fs;
-use std::path::PathBuf;
+use std::{
+    env::{
+        self,
+        VarError,
+    },
+    fs,
+    path::PathBuf,
+};
 
 const SEL4_INCLUDE_DIRS_ENV: &str = "SEL4_INCLUDE_DIRS";
 const SDDF_INCLUDE_DIRS_ENV: &str = "SDDF_INCLUDE_DIRS";

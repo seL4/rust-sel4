@@ -7,10 +7,12 @@
 #![no_std]
 #![feature(linkage)]
 
-use core::error::Error;
-use core::fmt;
-use core::ops::Range;
-use core::slice;
+use core::{
+    error::Error,
+    fmt,
+    ops::Range,
+    slice,
+};
 
 pub use sel4_phdrs_constants::*;
 

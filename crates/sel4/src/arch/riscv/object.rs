@@ -6,9 +6,15 @@
 
 use core::ffi::c_uint;
 
-use sel4_config::{sel4_cfg_enum, sel4_cfg_wrap_match};
+use sel4_config::{
+    sel4_cfg_enum,
+    sel4_cfg_wrap_match,
+};
 
-use crate::{const_helpers::u32_into_usize, sys};
+use crate::{
+    const_helpers::u32_into_usize,
+    sys,
+};
 
 pub type ObjectTypeArch = ObjectTypeRISCV;
 

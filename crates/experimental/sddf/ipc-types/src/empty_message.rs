@@ -7,8 +7,13 @@
 use core::convert::Infallible;
 
 use crate::{
-    MessagParseError, MessageBuilder, MessageLabel, MessageParser, MessageRegisterValue,
-    MessageWriter, ReadFromMessage,
+    MessagParseError,
+    MessageBuilder,
+    MessageLabel,
+    MessageParser,
+    MessageRegisterValue,
+    MessageWriter,
+    ReadFromMessage,
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]

@@ -6,16 +6,30 @@
 //
 
 use core::{
-    ops::{Range, RangeBounds},
-    ptr::{self, NonNull},
+    ops::{
+        Range,
+        RangeBounds,
+    },
+    ptr::{
+        self,
+        NonNull,
+    },
     slice::SliceIndex,
 };
 
 use crate::{
     AbstractPtr,
-    access::{Access, Readable, Writable},
+    access::{
+        Access,
+        Readable,
+        Writable,
+    },
     core_ext::{
-        AbstractPtrSliceIndex, non_null_index, non_null_slice_as_mut_ptr, non_null_slice_len, range,
+        AbstractPtrSliceIndex,
+        non_null_index,
+        non_null_slice_as_mut_ptr,
+        non_null_slice_len,
+        range,
     },
     memory_type::BulkOps,
 };

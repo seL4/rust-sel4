@@ -4,21 +4,37 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use alloc::boxed::Box;
-use alloc::string::String;
-use alloc::vec::Vec;
-use core::num::NonZero;
-use core::ops::Range;
+use alloc::{
+    boxed::Box,
+    string::String,
+    vec::Vec,
+};
+use core::{
+    num::NonZero,
+    ops::Range,
+};
 
-use rkyv::Archive;
-use rkyv::option::ArchivedOption;
+use rkyv::{
+    Archive,
+    option::ArchivedOption,
+};
 
 #[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
+use serde::{
+    Deserialize,
+    Serialize,
+};
 
-use sel4_capdl_initializer_types_derive::{HasCapTable, IsCap, IsObject};
+use sel4_capdl_initializer_types_derive::{
+    HasCapTable,
+    IsCap,
+    IsObject,
+};
 
-use crate::{HasArchivedCapTable, HasCapTable};
+use crate::{
+    HasArchivedCapTable,
+    HasCapTable,
+};
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]

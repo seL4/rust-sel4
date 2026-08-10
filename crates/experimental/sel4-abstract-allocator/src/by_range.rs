@@ -5,10 +5,15 @@
 //
 
 use alloc::collections::BTreeMap;
-use core::alloc::Layout;
-use core::ops::Range;
+use core::{
+    alloc::Layout,
+    ops::Range,
+};
 
-use crate::{AbstractAllocator, AbstractAllocatorAllocation};
+use crate::{
+    AbstractAllocator,
+    AbstractAllocatorAllocation,
+};
 
 pub struct ByRange<A: AbstractAllocator> {
     inner: A,

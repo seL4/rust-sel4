@@ -6,8 +6,16 @@
 
 #![no_std]
 
-use num_enum::{IntoPrimitive, TryFromPrimitive, TryFromPrimitiveError};
-use zerocopy::{FromBytes, Immutable, IntoBytes};
+use num_enum::{
+    IntoPrimitive,
+    TryFromPrimitive,
+    TryFromPrimitiveError,
+};
+use zerocopy::{
+    FromBytes,
+    Immutable,
+    IntoBytes,
+};
 
 use sel4_shared_ring_buffer::Descriptor;
 

@@ -5,8 +5,17 @@
 //
 
 use core::{
-    ops::{self, Bound, Range, RangeBounds, RangeTo},
-    ptr::{self, NonNull},
+    ops::{
+        self,
+        Bound,
+        Range,
+        RangeBounds,
+        RangeTo,
+    },
+    ptr::{
+        self,
+        NonNull,
+    },
     slice::SliceIndex,
 };
 

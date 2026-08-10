@@ -9,9 +9,13 @@
 
 use core::fmt;
 
-use addr2line::Context;
-use addr2line::gimli::Error;
-use addr2line::gimli::read::Reader;
+use addr2line::{
+    Context,
+    gimli::{
+        Error,
+        read::Reader,
+    },
+};
 
 use sel4_backtrace_symbolize::symbolize;
 

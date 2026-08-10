@@ -7,8 +7,10 @@
 extern crate alloc;
 
 use alloc::vec::Vec;
-use core::iter;
-use core::mem;
+use core::{
+    iter,
+    mem,
+};
 
 type Result<T> = core::result::Result<T, SlotTrackerError>;
 

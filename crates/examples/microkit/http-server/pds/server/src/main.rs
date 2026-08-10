@@ -9,31 +9,63 @@
 
 extern crate alloc;
 
-use alloc::rc::Rc;
-use alloc::sync::Arc;
+use alloc::{
+    rc::Rc,
+    sync::Arc,
+};
 use core::time::Duration;
 
 use one_shot_mutex::sync::OneShotMutex;
 use rtcc::DateTimeAccess;
-use smoltcp::iface::Config;
-use smoltcp::phy::{Device, DeviceCapabilities, Medium};
-use smoltcp::wire::{EthernetAddress, HardwareAddress};
+use smoltcp::{
+    iface::Config,
+    phy::{
+        Device,
+        DeviceCapabilities,
+        Medium,
+    },
+    wire::{
+        EthernetAddress,
+        HardwareAddress,
+    },
+};
 
-use sel4_abstract_allocator::WithAlignmentBound;
-use sel4_abstract_allocator::basic::BasicAllocator;
+use sel4_abstract_allocator::{
+    WithAlignmentBound,
+    basic::BasicAllocator,
+};
 use sel4_async_block_io::{
-    BlockSize, CachedBlockIO, ConstantBlockSize, constant_block_sizes::BlockSize512, disk::Disk,
+    BlockSize,
+    CachedBlockIO,
+    ConstantBlockSize,
+    constant_block_sizes::BlockSize512,
+    disk::Disk,
 };
 use sel4_async_time::Instant;
-use sel4_driver_interfaces::block::GetBlockDeviceLayout;
-use sel4_driver_interfaces::net::GetNetDeviceMeta;
-use sel4_driver_interfaces::timer::{Clock, DefaultTimer};
-use sel4_logging::{LevelFilter, Logger, LoggerBuilder};
-use sel4_microkit::{Handler, memory_region_symbol, protection_domain};
-use sel4_microkit_driver_adapters::block::client::Client as BlockClient;
-use sel4_microkit_driver_adapters::net::client::Client as NetClient;
-use sel4_microkit_driver_adapters::rtc::client::Client as RtcClient;
-use sel4_microkit_driver_adapters::timer::client::Client as TimerClient;
+use sel4_driver_interfaces::{
+    block::GetBlockDeviceLayout,
+    net::GetNetDeviceMeta,
+    timer::{
+        Clock,
+        DefaultTimer,
+    },
+};
+use sel4_logging::{
+    LevelFilter,
+    Logger,
+    LoggerBuilder,
+};
+use sel4_microkit::{
+    Handler,
+    memory_region_symbol,
+    protection_domain,
+};
+use sel4_microkit_driver_adapters::{
+    block::client::Client as BlockClient,
+    net::client::Client as NetClient,
+    rtc::client::Client as RtcClient,
+    timer::client::Client as TimerClient,
+};
 use sel4_newlib as _;
 use sel4_shared_memory::SharedMemoryRef;
 use sel4_shared_ring_buffer::RingBuffers;

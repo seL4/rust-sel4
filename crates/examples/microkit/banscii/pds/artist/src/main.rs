@@ -14,12 +14,21 @@ use alloc::vec;
 use rsa::signature::SignatureEncoding;
 
 use sel4_microkit::{
-    Channel, Handler, Infallible, MessageInfo, memory_region_symbol, protection_domain, var,
+    Channel,
+    Handler,
+    Infallible,
+    MessageInfo,
+    memory_region_symbol,
+    protection_domain,
+    var,
 };
 use sel4_microkit_simple_ipc as simple_ipc;
 use sel4_shared_memory::{
     SharedMemoryRef,
-    access::{ReadOnly, ReadWrite},
+    access::{
+        ReadOnly,
+        ReadWrite,
+    },
 };
 
 use banscii_artist_interface_types::*;

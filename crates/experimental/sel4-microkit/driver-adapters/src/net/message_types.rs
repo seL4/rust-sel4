@@ -5,7 +5,10 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use serde::{Deserialize, Serialize};
+use serde::{
+    Deserialize,
+    Serialize,
+};
 
 use sel4_driver_interfaces::net::MacAddress;
 

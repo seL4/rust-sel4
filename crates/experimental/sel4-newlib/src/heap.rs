@@ -4,9 +4,17 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use core::cell::UnsafeCell;
-use core::ffi::{c_int, c_void};
-use core::sync::atomic::{AtomicIsize, Ordering};
+use core::{
+    cell::UnsafeCell,
+    ffi::{
+        c_int,
+        c_void,
+    },
+    sync::atomic::{
+        AtomicIsize,
+        Ordering,
+    },
+};
 
 use sel4_panicking_env::abort;
 

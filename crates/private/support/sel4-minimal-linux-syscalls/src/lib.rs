@@ -6,9 +6,16 @@
 
 #![no_std]
 
-use sel4_panicking_env::{abort, register_abort_trap, register_debug_put_char};
+use sel4_panicking_env::{
+    abort,
+    register_abort_trap,
+    register_debug_put_char,
+};
 
-use syscalls::{Sysno, syscall};
+use syscalls::{
+    Sysno,
+    syscall,
+};
 
 register_debug_put_char!(debug_put_char);
 

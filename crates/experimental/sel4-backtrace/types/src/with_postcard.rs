@@ -7,7 +7,11 @@
 use postcard::ser_flavors::Flavor;
 use serde::Serialize;
 
-use crate::{Entry, Postamble, Preamble};
+use crate::{
+    Entry,
+    Postamble,
+    Preamble,
+};
 
 struct LameFlavor<F> {
     send_byte: F,

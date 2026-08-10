@@ -10,7 +10,11 @@
 #![allow(clippy::single_match)]
 
 use sel4_platform_info::PLATFORM_INFO;
-use sel4_root_task::{debug_print, debug_println, root_task};
+use sel4_root_task::{
+    debug_print,
+    debug_println,
+    root_task,
+};
 
 #[repr(C, align(8192))]
 struct Y(i32);

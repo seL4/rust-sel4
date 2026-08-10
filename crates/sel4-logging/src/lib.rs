@@ -6,11 +6,22 @@
 
 #![no_std]
 
-use core::fmt::{self, Write};
+use core::fmt::{
+    self,
+    Write,
+};
 
-use log::{Log, Metadata, Record, SetLoggerError};
+use log::{
+    Log,
+    Metadata,
+    Record,
+    SetLoggerError,
+};
 
-pub use log::{self, LevelFilter};
+pub use log::{
+    self,
+    LevelFilter,
+};
 
 mod synchronized;
 

@@ -7,9 +7,11 @@
 #![no_std]
 #![feature(linkage)]
 
-use core::fmt;
-use core::panic::Location;
-use core::str;
+use core::{
+    fmt,
+    panic::Location,
+    str,
+};
 
 unsafe extern "Rust" {
     fn __sel4_panicking_env__debug_put_char(c: u8);

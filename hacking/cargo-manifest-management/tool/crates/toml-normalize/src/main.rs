@@ -4,13 +4,26 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use std::fs;
-use std::io::{Read, Write};
-use std::path::PathBuf;
+use std::{
+    fs,
+    io::{
+        Read,
+        Write,
+    },
+    path::PathBuf,
+};
 
-use clap::{CommandFactory, FromArgMatches, Parser};
+use clap::{
+    CommandFactory,
+    FromArgMatches,
+    Parser,
+};
 
-use toml_normalize::{Formatter, Policy, builtin_policies};
+use toml_normalize::{
+    Formatter,
+    Policy,
+    builtin_policies,
+};
 
 #[derive(Debug, Parser)]
 struct Args {

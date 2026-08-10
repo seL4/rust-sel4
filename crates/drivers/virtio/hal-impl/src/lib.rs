@@ -6,14 +6,27 @@
 
 #![no_std]
 
-use core::alloc::Layout;
-use core::ptr::{self, NonNull};
+use core::{
+    alloc::Layout,
+    ptr::{
+        self,
+        NonNull,
+    },
+};
 
 use one_shot_mutex::sync::OneShotMutex;
-use virtio_drivers::{BufferDirection, Hal, PAGE_SIZE, PhysAddr};
+use virtio_drivers::{
+    BufferDirection,
+    Hal,
+    PAGE_SIZE,
+    PhysAddr,
+};
 
-use sel4_abstract_allocator::basic::BasicAllocator;
-use sel4_abstract_allocator::{ByRange, WithAlignmentBound};
+use sel4_abstract_allocator::{
+    ByRange,
+    WithAlignmentBound,
+    basic::BasicAllocator,
+};
 use sel4_immediate_sync_once_cell::ImmediateSyncOnceCell;
 use sel4_shared_memory::SharedMemoryRef;
 

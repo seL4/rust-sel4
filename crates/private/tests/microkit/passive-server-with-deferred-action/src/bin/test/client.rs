@@ -4,7 +4,12 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use sel4_microkit::{Channel, ChannelSet, Handler, Infallible};
+use sel4_microkit::{
+    Channel,
+    ChannelSet,
+    Handler,
+    Infallible,
+};
 
 const SERVER: Channel = Channel::new(0);
 

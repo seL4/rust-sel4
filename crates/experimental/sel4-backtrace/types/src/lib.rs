@@ -10,7 +10,10 @@
 extern crate alloc;
 
 #[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
+use serde::{
+    Deserialize,
+    Serialize,
+};
 
 cfg_if::cfg_if! {
     if #[cfg(feature = "alloc")] {

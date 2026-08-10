@@ -6,11 +6,19 @@
 
 use core::fmt::Debug;
 
-use rustls::Error as TlsError;
-use rustls::unbuffered::{EncodeError, EncryptError};
+use rustls::{
+    Error as TlsError,
+    unbuffered::{
+        EncodeError,
+        EncryptError,
+    },
+};
 use thiserror::Error;
 
-use sel4_async_io::{Error as AsyncIOError, ErrorKind};
+use sel4_async_io::{
+    Error as AsyncIOError,
+    ErrorKind,
+};
 
 #[derive(Debug, Error)]
 pub enum Error<E> {

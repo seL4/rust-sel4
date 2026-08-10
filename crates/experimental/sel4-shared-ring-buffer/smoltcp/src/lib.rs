@@ -8,20 +8,42 @@
 
 extern crate alloc;
 
-use lock_api::{Mutex, RawMutex};
+use lock_api::{
+    Mutex,
+    RawMutex,
+};
 use one_shot_mutex::unsync::RawOneShotMutex;
-use smoltcp::phy::{self, Device, DeviceCapabilities};
-use smoltcp::time::Instant;
+use smoltcp::{
+    phy::{
+        self,
+        Device,
+        DeviceCapabilities,
+    },
+    time::Instant,
+};
 
 use sel4_abstract_allocator::AbstractAllocator;
-use sel4_abstract_rc::{AbstractRcT, RcT};
+use sel4_abstract_rc::{
+    AbstractRcT,
+    RcT,
+};
 use sel4_shared_memory::SharedMemoryRef;
-use sel4_shared_ring_buffer::{RingBuffers, roles::Provide};
+use sel4_shared_ring_buffer::{
+    RingBuffers,
+    roles::Provide,
+};
 
 mod inner;
 
-pub use inner::{Error, PeerMisbehaviorError};
-use inner::{Inner, RxBufferIndex, TxBufferIndex};
+pub use inner::{
+    Error,
+    PeerMisbehaviorError,
+};
+use inner::{
+    Inner,
+    RxBufferIndex,
+    TxBufferIndex,
+};
 
 pub struct DeviceImpl<A: AbstractAllocator, R: RawMutex = RawOneShotMutex, P: AbstractRcT = RcT> {
     inner: P::Rc<Mutex<R, Inner<A>>>,

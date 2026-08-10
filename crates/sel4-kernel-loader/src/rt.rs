@@ -6,7 +6,10 @@
 
 use core::panic::PanicInfo;
 
-use crate::arch::{Arch, ArchImpl};
+use crate::arch::{
+    Arch,
+    ArchImpl,
+};
 
 #[panic_handler]
 fn panic_handler(info: &PanicInfo) -> ! {

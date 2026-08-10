@@ -4,13 +4,25 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use core::mem;
-use core::ops::Range;
-use core::slice;
+use core::{
+    mem,
+    ops::Range,
+    slice,
+};
 
-use sel4_bitfield_ops::{PrimInt, UnsignedPrimInt, get_bits, set_bits, set_bits_from_slice};
+use sel4_bitfield_ops::{
+    PrimInt,
+    UnsignedPrimInt,
+    get_bits,
+    set_bits,
+    set_bits_from_slice,
+};
 
-use crate::{seL4_CPtr, seL4_IPCBuffer, seL4_Word};
+use crate::{
+    seL4_CPtr,
+    seL4_IPCBuffer,
+    seL4_Word,
+};
 
 impl seL4_IPCBuffer {
     pub(crate) fn get_mr(&self, i: usize) -> seL4_Word {

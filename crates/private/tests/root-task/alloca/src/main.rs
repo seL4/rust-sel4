@@ -10,7 +10,10 @@
 use core::alloc::Layout;
 
 use sel4_alloca::*;
-use sel4_root_task::{debug_println, root_task};
+use sel4_root_task::{
+    debug_println,
+    root_task,
+};
 
 const X: usize = 1234;
 

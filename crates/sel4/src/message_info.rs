@@ -4,7 +4,11 @@
 // SPDX-License-Identifier: MIT
 //
 
-use crate::{Word, newtype_methods, sys};
+use crate::{
+    Word,
+    newtype_methods,
+    sys,
+};
 
 /// Corresponds to `seL4_MessageInfo_t`.
 #[derive(Debug, Clone, PartialEq, Eq)]

@@ -12,5 +12,9 @@ mod conn;
 mod error;
 mod utils;
 
-pub use conn::{ClientConnector, ServerConnector, TlsStream};
+pub use conn::{
+    ClientConnector,
+    ServerConnector,
+    TlsStream,
+};
 pub use error::Error;

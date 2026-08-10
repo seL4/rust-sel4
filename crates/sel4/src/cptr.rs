@@ -5,11 +5,19 @@
 // SPDX-License-Identifier: MIT
 //
 
-use core::fmt;
-use core::hash::Hash;
-use core::marker::PhantomData;
+use core::{
+    fmt,
+    hash::Hash,
+    marker::PhantomData,
+};
 
-use crate::{InvocationContext, IpcBuffer, NoExplicitInvocationContext, WORD_SIZE, sys};
+use crate::{
+    InvocationContext,
+    IpcBuffer,
+    NoExplicitInvocationContext,
+    WORD_SIZE,
+    sys,
+};
 
 /// The raw bits of a capability pointer.
 pub type CPtrBits = sys::seL4_CPtr;
@@ -175,7 +183,8 @@ pub mod cap_type {
     use sel4_config::sel4_cfg_if;
 
     use crate::{
-        declare_cap_type, declare_cap_type_for_object_of_fixed_size,
+        declare_cap_type,
+        declare_cap_type_for_object_of_fixed_size,
         declare_cap_type_for_object_of_variable_size,
     };
 

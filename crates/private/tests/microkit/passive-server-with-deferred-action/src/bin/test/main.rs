@@ -8,7 +8,10 @@
 #![no_main]
 
 use sel4_microkit::protection_domain;
-use sel4_test_microkit::{embed_sdf_xml, match_handler};
+use sel4_test_microkit::{
+    embed_sdf_xml,
+    match_handler,
+};
 
 embed_sdf_xml!("system.xml");
 

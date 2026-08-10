@@ -6,11 +6,22 @@
 
 #![no_std]
 
-use core::cell::{RefCell, RefMut};
-use core::fmt;
-use core::ops::{Deref, DerefMut};
+use core::{
+    cell::{
+        RefCell,
+        RefMut,
+    },
+    fmt,
+    ops::{
+        Deref,
+        DerefMut,
+    },
+};
 
-use lock_api::{Mutex, RawMutex};
+use lock_api::{
+    Mutex,
+    RawMutex,
+};
 
 pub mod block;
 pub mod net;

@@ -4,12 +4,23 @@
 // SPDX-License-Identifier: MIT
 //
 
-use sel4_config::{sel4_cfg, sel4_cfg_enum, sel4_cfg_if, sel4_cfg_wrap_match};
+use sel4_config::{
+    sel4_cfg,
+    sel4_cfg_enum,
+    sel4_cfg_if,
+    sel4_cfg_wrap_match,
+};
 
 use crate::{
-    CapTypeForFrameObject, CapTypeForFrameObjectOfFixedSize, CapTypeForTranslationTableObject,
-    ObjectBlueprint, ObjectBlueprintX64, ObjectBlueprintX86, cap_type,
-    const_helpers::u32_into_usize, sys,
+    CapTypeForFrameObject,
+    CapTypeForFrameObjectOfFixedSize,
+    CapTypeForTranslationTableObject,
+    ObjectBlueprint,
+    ObjectBlueprintX64,
+    ObjectBlueprintX86,
+    cap_type,
+    const_helpers::u32_into_usize,
+    sys,
 };
 
 /// Frame object types for this kernel configuration.
@@ -215,7 +226,10 @@ pub mod vspace_levels {
 #[sel4_cfg(all(ARCH_X86_64, IOMMU))]
 pub mod io_space {
     use super::sys;
-    use crate::{Word, newtype_methods};
+    use crate::{
+        Word,
+        newtype_methods,
+    };
 
     use sel4_sys::seL4_X86_IOSpace_CapData;
     /// Corresponds to `seL4_IOSpace_CapData`.
@@ -244,7 +258,10 @@ pub mod io_space {
     }
 
     pub mod levels {
-        use super::super::{FrameObjectType, TranslationTableObjectType};
+        use super::super::{
+            FrameObjectType,
+            TranslationTableObjectType,
+        };
 
         // On x86 the leaf entries are normal frame objects, not IOMMU specific
         fn span_bits(num_levels: usize, level: usize) -> usize {

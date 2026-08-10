@@ -4,7 +4,10 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use alloc::collections::btree_map::{BTreeMap, Entry};
+use alloc::collections::btree_map::{
+    BTreeMap,
+    Entry,
+};
 
 use crate::SubKey;
 

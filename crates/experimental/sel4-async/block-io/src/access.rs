@@ -41,7 +41,11 @@ pub trait WriteAccess: Access {
 use sealing::AccessSealed;
 
 mod sealing {
-    use super::{ReadOnly, ReadWrite, WriteOnly};
+    use super::{
+        ReadOnly,
+        ReadWrite,
+        WriteOnly,
+    };
 
     pub trait AccessSealed {}
 

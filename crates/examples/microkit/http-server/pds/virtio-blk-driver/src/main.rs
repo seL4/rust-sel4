@@ -9,28 +9,47 @@
 
 extern crate alloc;
 
-use alloc::boxed::Box;
-use alloc::collections::BTreeMap;
-use core::pin::Pin;
-use core::ptr::NonNull;
+use alloc::{
+    boxed::Box,
+    collections::BTreeMap,
+};
+use core::{
+    pin::Pin,
+    ptr::NonNull,
+};
 
 use virtio_drivers::{
     device::blk::*,
     transport::{
-        DeviceType, Transport,
-        mmio::{MmioTransport, VirtIOHeader},
+        DeviceType,
+        Transport,
+        mmio::{
+            MmioTransport,
+            VirtIOHeader,
+        },
     },
 };
 
 use sel4_microkit::{
-    Channel, ChannelSet, Handler, Infallible, MessageInfo, memory_region_symbol, protection_domain,
+    Channel,
+    ChannelSet,
+    Handler,
+    Infallible,
+    MessageInfo,
+    memory_region_symbol,
+    protection_domain,
     var,
 };
 use sel4_microkit_driver_adapters::block::driver::handle_client_request;
 use sel4_shared_memory::SharedMemoryRef;
-use sel4_shared_ring_buffer::{RingBuffers, roles::Use};
+use sel4_shared_ring_buffer::{
+    RingBuffers,
+    roles::Use,
+};
 use sel4_shared_ring_buffer_block_io_types::{
-    BlockIORequest, BlockIORequestStatus, BlockIORequestType,
+    BlockIORequest,
+    BlockIORequestStatus,
+    BlockIORequestType,
 };
 use sel4_virtio_blk::GetBlockDeviceLayoutWrapper;
 use sel4_virtio_hal_impl::HalImpl;

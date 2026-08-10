@@ -4,8 +4,10 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use std::env;
-use std::path::Path;
+use std::{
+    env,
+    path::Path,
+};
 
 #[rustfmt::skip]
 const BLOCKLIST: &[&str] = &[

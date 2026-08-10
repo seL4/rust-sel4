@@ -6,7 +6,10 @@
 
 use sel4_alloca::with_alloca_ptr;
 
-use crate::{SetThreadPointerFn, TlsImage};
+use crate::{
+    SetThreadPointerFn,
+    TlsImage,
+};
 
 impl TlsImage {
     #[allow(clippy::missing_safety_doc)]

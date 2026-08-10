@@ -9,12 +9,19 @@
 
 use sel4::sel4_cfg_if;
 
-pub use sel4_panicking_env::{abort, debug_print, debug_println};
+pub use sel4_panicking_env::{
+    abort,
+    debug_print,
+    debug_println,
+};
 
 mod entry;
 mod termination;
 
-pub use termination::{Never, Termination};
+pub use termination::{
+    Never,
+    Termination,
+};
 
 #[doc(hidden)]
 #[macro_export]
@@ -62,5 +69,10 @@ pub mod _private {
     pub use sel4::BootInfoPtr;
     pub use sel4_runtime_common::declare_stack;
 
-    pub use crate::{DEFAULT_STACK_SIZE, declare_main, declare_root_task, entry::run_main};
+    pub use crate::{
+        DEFAULT_STACK_SIZE,
+        declare_main,
+        declare_root_task,
+        entry::run_main,
+    };
 }

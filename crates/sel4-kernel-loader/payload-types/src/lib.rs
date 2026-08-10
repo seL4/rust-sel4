@@ -9,15 +9,19 @@
 extern crate alloc;
 
 use alloc::vec::Vec;
-use core::cmp;
-use core::fmt;
-use core::ops::Range;
-use core::ptr;
-use core::slice;
+use core::{
+    cmp,
+    fmt,
+    ops::Range,
+    ptr,
+    slice,
+};
 
-use rkyv::Archive;
-use rkyv::rancor;
-use rkyv::util::AlignedVec;
+use rkyv::{
+    Archive,
+    rancor,
+    util::AlignedVec,
+};
 
 use sel4_platform_info_types::PlatformInfo;
 

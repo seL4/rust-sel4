@@ -43,10 +43,16 @@ mod printing;
 mod termination;
 
 pub use heap::set_global_allocator_mutex_notification;
-pub use termination::{Never, Termination};
+pub use termination::{
+    Never,
+    Termination,
+};
 
 #[sel4::sel4_cfg(PRINTING)]
-pub use printing::{debug_print, debug_println};
+pub use printing::{
+    debug_print,
+    debug_println,
+};
 
 /// Declares a function to be the root task's main function.
 ///
@@ -133,6 +139,10 @@ pub mod _private {
     pub use crate::heap::_private as heap;
 
     pub use crate::{
-        DEFAULT_STACK_SIZE, declare_heap, declare_main, declare_root_task, entry::run_main,
+        DEFAULT_STACK_SIZE,
+        declare_heap,
+        declare_main,
+        declare_root_task,
+        entry::run_main,
     };
 }

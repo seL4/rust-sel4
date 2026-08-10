@@ -9,7 +9,10 @@ use core::ptr;
 use one_shot_mutex::sync::RawOneShotMutex;
 
 use sel4::CapTypeForFrameObjectOfFixedSize;
-use sel4_dlmalloc::{StaticDlmalloc, StaticHeap};
+use sel4_dlmalloc::{
+    StaticDlmalloc,
+    StaticHeap,
+};
 use sel4_panicking::catch_unwind;
 use sel4_panicking_env::abort;
 

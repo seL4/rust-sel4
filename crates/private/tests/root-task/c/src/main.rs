@@ -10,7 +10,10 @@
 use core::ffi::c_char;
 
 use sel4_newlib as _;
-use sel4_root_task::{debug_println, root_task};
+use sel4_root_task::{
+    debug_println,
+    root_task,
+};
 
 unsafe extern "C" {
     fn test(s: *const c_char) -> i32;

@@ -10,9 +10,20 @@ use rkyv::Archive;
 
 use sel4_capdl_initializer_types::SpecForInitializer;
 use sel4_immediate_sync_once_cell::ImmediateSyncOnceCell;
-use sel4_logging::{LevelFilter, Logger, LoggerBuilder};
-use sel4_phdrs::{PT_SEL4_CAPDL_FRAME_DATA, PT_SEL4_CAPDL_SPEC, locate_phdrs};
-use sel4_root_task::{debug_print, root_task};
+use sel4_logging::{
+    LevelFilter,
+    Logger,
+    LoggerBuilder,
+};
+use sel4_phdrs::{
+    PT_SEL4_CAPDL_FRAME_DATA,
+    PT_SEL4_CAPDL_SPEC,
+    locate_phdrs,
+};
+use sel4_root_task::{
+    debug_print,
+    root_task,
+};
 
 use sel4_phdrs_patched as _;
 

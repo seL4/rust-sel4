@@ -4,20 +4,39 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use std::fs;
-use std::ops::Range;
-use std::path::Path;
+use std::{
+    fs,
+    ops::Range,
+    path::Path,
+};
 
 use num::Integer;
-use object::read::elf::{ElfFile, FileHeader, ProgramHeader};
-use object::{Object, ObjectSegment, ReadRef};
+use object::{
+    Object,
+    ObjectSegment,
+    ReadRef,
+    read::elf::{
+        ElfFile,
+        FileHeader,
+        ProgramHeader,
+    },
+};
 
 use sel4_kernel_loader_payload_types::{
-    DtbInfo, Payload, PayloadInfo, Region, UserImageInfo, Word,
+    DtbInfo,
+    Payload,
+    PayloadInfo,
+    Region,
+    UserImageInfo,
+    Word,
 };
 use sel4_platform_info_types::OwnedPlatformInfo;
 
-use crate::utils::{loadable_segments, virt_footprint, with_elf};
+use crate::utils::{
+    loadable_segments,
+    virt_footprint,
+    with_elf,
+};
 
 const PAGE_SIZE: u64 = 4096;
 

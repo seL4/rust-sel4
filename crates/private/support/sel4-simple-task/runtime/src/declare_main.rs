@@ -4,8 +4,10 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use core::fmt;
-use core::panic::UnwindSafe;
+use core::{
+    fmt,
+    panic::UnwindSafe,
+};
 
 use serde::Deserialize;
 
@@ -65,9 +67,11 @@ macro_rules! declare_main_with {
 }
 
 pub mod _private {
-    pub use super::run_main;
-    pub use super::run_main_postcard;
-    pub use super::wrap;
+    pub use super::{
+        run_main,
+        run_main_postcard,
+        wrap,
+    };
 
     #[cfg(feature = "serde_json")]
     pub use super::run_main_json;

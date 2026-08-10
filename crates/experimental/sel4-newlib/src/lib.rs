@@ -9,7 +9,11 @@
 #![no_std]
 
 #[allow(unused_imports)]
-use core::ffi::{c_char, c_int, c_uint};
+use core::ffi::{
+    c_char,
+    c_int,
+    c_uint,
+};
 
 mod errno;
 mod heap;

@@ -8,7 +8,10 @@ use std::{
     collections::BTreeMap,
     fs::File,
     os::unix::fs::FileExt as _,
-    path::{Path, PathBuf},
+    path::{
+        Path,
+        PathBuf,
+    },
 };
 
 use sel4_capdl_initializer_types::*;

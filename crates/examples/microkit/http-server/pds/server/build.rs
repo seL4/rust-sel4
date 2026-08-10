@@ -4,9 +4,11 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use std::env;
-use std::fs;
-use std::path::PathBuf;
+use std::{
+    env,
+    fs,
+    path::PathBuf,
+};
 
 use rcgen::generate_simple_self_signed;
 

@@ -14,7 +14,11 @@ use alloc::string::String;
 use sel4_backtrace::collect;
 use sel4_backtrace_embedded_debug_info::get_context;
 use sel4_backtrace_simple::SimpleBacktracing;
-use sel4_root_task::{debug_println, panicking, root_task};
+use sel4_root_task::{
+    debug_println,
+    panicking,
+    root_task,
+};
 
 // TODO
 // Why are such a large stack and heap required? The unwinding part seems to consume the stack, and

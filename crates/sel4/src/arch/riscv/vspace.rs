@@ -10,8 +10,14 @@ use sel4_config::sel4_cfg_wrap_match;
 
 #[allow(unused_imports)]
 use crate::{
-    CapTypeForFrameObject, CapTypeForFrameObjectOfFixedSize, CapTypeForTranslationTableObject,
-    ObjectBlueprint, ObjectBlueprintRiscV, cap_type, const_helpers::u32_into_usize, sys,
+    CapTypeForFrameObject,
+    CapTypeForFrameObjectOfFixedSize,
+    CapTypeForTranslationTableObject,
+    ObjectBlueprint,
+    ObjectBlueprintRiscV,
+    cap_type,
+    const_helpers::u32_into_usize,
+    sys,
 };
 
 /// Frame object types for this kernel configuration.

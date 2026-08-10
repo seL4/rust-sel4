@@ -9,7 +9,10 @@
 #![allow(static_mut_refs)]
 
 use sel4_reset::reset1;
-use sel4_root_task::{debug_println, root_task};
+use sel4_root_task::{
+    debug_println,
+    root_task,
+};
 
 const INIT: usize = 1337;
 

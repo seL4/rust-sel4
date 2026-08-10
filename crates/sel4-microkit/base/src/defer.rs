@@ -4,7 +4,10 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use crate::{Channel, IrqAckError};
+use crate::{
+    Channel,
+    IrqAckError,
+};
 
 // For rustdoc
 #[allow(unused_imports)]

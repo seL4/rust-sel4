@@ -5,7 +5,11 @@
 //
 
 #[cfg(feature = "detect-libc")]
-use std::{path::Path, process::Stdio, str};
+use std::{
+    path::Path,
+    process::Stdio,
+    str,
+};
 
 fn main() {
     if cfg!(feature = "link-libc") {

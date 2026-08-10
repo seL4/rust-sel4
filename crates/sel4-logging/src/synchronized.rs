@@ -4,8 +4,15 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use lock_api::{Mutex, RawMutex};
-use log::{Log, Metadata, Record};
+use lock_api::{
+    Mutex,
+    RawMutex,
+};
+use log::{
+    Log,
+    Metadata,
+    Record,
+};
 
 pub struct SynchronizedLogger<R, T>(Mutex<R, T>);
 

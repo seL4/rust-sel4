@@ -4,7 +4,10 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use pest::{Parser, iterators::Pair};
+use pest::{
+    Parser,
+    iterators::Pair,
+};
 use pest_derive::Parser;
 use regex::Regex;
 

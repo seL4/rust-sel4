@@ -87,7 +87,10 @@ impl RingBufferRoleValue {
     }
 }
 
-use sealing::{RingBufferRoleSealed, RingBuffersRoleSealed};
+use sealing::{
+    RingBufferRoleSealed,
+    RingBuffersRoleSealed,
+};
 
 mod sealing {
     use super::*;

@@ -4,9 +4,16 @@
 // SPDX-License-Identifier: MIT
 //
 
-use sel4_config::{sel4_cfg, sel4_cfg_enum, sel4_cfg_wrap_match};
+use sel4_config::{
+    sel4_cfg,
+    sel4_cfg_enum,
+    sel4_cfg_wrap_match,
+};
 
-use crate::{declare_fault_newtype, sys};
+use crate::{
+    declare_fault_newtype,
+    sys,
+};
 
 declare_fault_newtype!(NullFault, seL4_Fault_NullFault);
 declare_fault_newtype!(CapFault, seL4_Fault_CapFault);

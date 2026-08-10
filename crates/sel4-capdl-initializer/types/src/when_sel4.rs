@@ -6,11 +6,19 @@
 
 use rkyv::Archive;
 
-use sel4::{ObjectBlueprint, VmAttributes};
+use sel4::{
+    ObjectBlueprint,
+    VmAttributes,
+};
 
 use crate::{
-    ArchivedCap, ArchivedFillEntryContentBootInfoId, ArchivedObject, ArchivedRights, ArchivedWord,
-    cap, object::ArchivedPCIDevice,
+    ArchivedCap,
+    ArchivedFillEntryContentBootInfoId,
+    ArchivedObject,
+    ArchivedRights,
+    ArchivedWord,
+    cap,
+    object::ArchivedPCIDevice,
 };
 
 impl<D: Archive> ArchivedObject<D> {

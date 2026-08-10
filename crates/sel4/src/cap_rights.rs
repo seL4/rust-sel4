@@ -4,7 +4,10 @@
 // SPDX-License-Identifier: MIT
 //
 
-use crate::{newtype_methods, sys};
+use crate::{
+    newtype_methods,
+    sys,
+};
 
 /// Corresponds to `seL4_CapRights_t`.
 #[derive(Debug, Clone, PartialEq, Eq)]

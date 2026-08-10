@@ -6,7 +6,10 @@
 
 use crate::bf::SeL4Bitfield;
 
-use crate::{seL4_MessageInfo, seL4_Word};
+use crate::{
+    seL4_MessageInfo,
+    seL4_Word,
+};
 
 mod arch;
 

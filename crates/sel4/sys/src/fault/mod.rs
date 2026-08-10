@@ -4,8 +4,10 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use crate::bf::*;
-use crate::c::*;
+use crate::{
+    bf::*,
+    c::*,
+};
 
 use sel4_config::sel4_cfg_wrap_match;
 

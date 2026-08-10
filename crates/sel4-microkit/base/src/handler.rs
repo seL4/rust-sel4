@@ -10,10 +10,20 @@ use core::fmt;
 use alloc::boxed::Box;
 
 use crate::{
-    Channel, Child, MessageInfo,
-    defer::{DeferredAction, PreparedDeferredAction},
-    ipc::{self, ChannelSet, Event},
-    pd_is_passive, symbols,
+    Channel,
+    Child,
+    MessageInfo,
+    defer::{
+        DeferredAction,
+        PreparedDeferredAction,
+    },
+    ipc::{
+        self,
+        ChannelSet,
+        Event,
+    },
+    pd_is_passive,
+    symbols,
 };
 
 pub use core::convert::Infallible;

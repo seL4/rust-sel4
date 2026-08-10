@@ -6,7 +6,10 @@
 
 use core::sync::atomic::Ordering;
 
-use crate::{AbstractPtr, memory_type::AtomicOps};
+use crate::{
+    AbstractPtr,
+    memory_type::AtomicOps,
+};
 
 impl<M, T, A> AbstractPtr<'_, M, T, A>
 where

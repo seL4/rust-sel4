@@ -31,8 +31,11 @@ fn init() {
 mod dummy_custom_getrandom {
     use core::cell::RefCell;
 
-    use rand::rngs::SmallRng;
-    use rand::{Rng, SeedableRng};
+    use rand::{
+        Rng,
+        SeedableRng,
+        rngs::SmallRng,
+    };
 
     #[cfg(not(target_thread_local))]
     compile_error!("");

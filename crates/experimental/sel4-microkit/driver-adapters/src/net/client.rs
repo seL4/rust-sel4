@@ -5,7 +5,10 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use sel4_driver_interfaces::net::{GetNetDeviceMeta, MacAddress};
+use sel4_driver_interfaces::net::{
+    GetNetDeviceMeta,
+    MacAddress,
+};
 use sel4_microkit::Channel;
 use sel4_microkit_simple_ipc as simple_ipc;
 

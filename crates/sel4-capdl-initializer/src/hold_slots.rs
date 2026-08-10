@@ -4,10 +4,15 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use sel4::{AbsoluteCPtr, init_thread::Slot};
+use sel4::{
+    AbsoluteCPtr,
+    init_thread::Slot,
+};
 
-use crate::cslot_allocator::CSlotAllocator;
-use crate::error::CapDLInitializerError;
+use crate::{
+    cslot_allocator::CSlotAllocator,
+    error::CapDLInitializerError,
+};
 
 const NUM_SLOTS: usize = 2;
 

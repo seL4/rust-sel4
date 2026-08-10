@@ -9,24 +9,42 @@
 
 extern crate alloc;
 
-use alloc::vec;
-use alloc::vec::Vec;
-use core::fmt::Write;
-use core::mem;
-use core::str;
+use alloc::{
+    vec,
+    vec::Vec,
+};
+use core::{
+    fmt::Write,
+    mem,
+    str,
+};
 
-use embedded_hal_nb::serial::{self, Read as _, Write as _};
+use embedded_hal_nb::serial::{
+    self,
+    Read as _,
+    Write as _,
+};
 
 use sel4_microkit::{
-    Channel, ChannelSet, Handler, Infallible, memory_region_symbol, protection_domain, var,
+    Channel,
+    ChannelSet,
+    Handler,
+    Infallible,
+    memory_region_symbol,
+    protection_domain,
+    var,
 };
 use sel4_microkit_driver_adapters::serial::client::{
-    Client as SerialClient, Error as SerialClientError,
+    Client as SerialClient,
+    Error as SerialClientError,
 };
 use sel4_microkit_simple_ipc as simple_ipc;
 use sel4_shared_memory::{
     SharedMemoryRef,
-    access::{ReadOnly, ReadWrite},
+    access::{
+        ReadOnly,
+        ReadWrite,
+    },
 };
 
 use banscii_artist_interface_types as artist;

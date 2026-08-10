@@ -7,9 +7,16 @@
 #![no_std]
 #![no_main]
 
-use core::sync::atomic::{AtomicBool, Ordering};
+use core::sync::atomic::{
+    AtomicBool,
+    Ordering,
+};
 
-use sel4_root_task::{debug_println, panicking, root_task};
+use sel4_root_task::{
+    debug_println,
+    panicking,
+    root_task,
+};
 
 static F1_DROPPED: AtomicBool = AtomicBool::new(false);
 

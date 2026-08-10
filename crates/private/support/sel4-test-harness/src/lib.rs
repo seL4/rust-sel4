@@ -18,7 +18,8 @@ mod short_backtrace;
 
 pub mod for_generated_code;
 
-pub use {
-    config::{set_config, types::*},
-    entry::run_test_main,
+pub use config::{
+    set_config,
+    types::*,
 };
+pub use entry::run_test_main;

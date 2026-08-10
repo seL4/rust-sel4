@@ -4,8 +4,10 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use core::cell::Cell;
-use core::fmt;
+use core::{
+    cell::Cell,
+    fmt,
+};
 
 #[thread_local]
 static PANIC_COUNT: Cell<usize> = Cell::new(0);

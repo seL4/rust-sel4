@@ -4,10 +4,15 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use core::ffi::c_int;
-use core::mem::{self, MaybeUninit};
-use core::panic::UnwindSafe;
-use core::ptr;
+use core::{
+    ffi::c_int,
+    mem::{
+        self,
+        MaybeUninit,
+    },
+    panic::UnwindSafe,
+    ptr,
+};
 
 use unwinding::abi::*;
 

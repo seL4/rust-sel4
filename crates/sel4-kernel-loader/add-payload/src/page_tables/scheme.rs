@@ -6,7 +6,10 @@
 
 use core::ops::Range;
 
-use bitfield::{BitMut, BitRangeMut};
+use bitfield::{
+    BitMut,
+    BitRangeMut,
+};
 
 use sel4_config_types::Configuration;
 

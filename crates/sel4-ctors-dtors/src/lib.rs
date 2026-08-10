@@ -11,10 +11,12 @@
 #![no_std]
 #![feature(linkage)]
 
-use core::fmt;
-use core::mem;
-use core::ptr;
-use core::slice;
+use core::{
+    fmt,
+    mem,
+    ptr,
+    slice,
+};
 
 type ArrayEntry = extern "C" fn();
 

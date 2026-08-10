@@ -4,7 +4,11 @@
 // SPDX-License-Identifier: MIT
 //
 
-use crate::{Word, newtype_methods, sys};
+use crate::{
+    Word,
+    newtype_methods,
+    sys,
+};
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct UserContext(sys::seL4_UserContext);

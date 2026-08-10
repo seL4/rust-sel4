@@ -6,9 +6,11 @@
 
 #![no_std]
 
-use core::convert::Infallible;
-use core::error::Error;
-use core::fmt;
+use core::{
+    convert::Infallible,
+    error::Error,
+    fmt,
+};
 
 // // //
 
@@ -17,8 +19,15 @@ mod message_builder;
 mod message_parser;
 
 pub use empty_message::EmptyMessage;
-pub use message_builder::{IntoMessageRegisterValue, MessageBuilder};
-pub use message_parser::{MessagParseError, MessageParser, TryFromMessageRegisterValue};
+pub use message_builder::{
+    IntoMessageRegisterValue,
+    MessageBuilder,
+};
+pub use message_parser::{
+    MessagParseError,
+    MessageParser,
+    TryFromMessageRegisterValue,
+};
 
 #[cfg(feature = "sel4-microkit-base")]
 mod when_microkit;

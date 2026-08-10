@@ -87,8 +87,17 @@
 #![allow(clippy::unit_arg)]
 
 pub use sel4_config::{
-    self as config, sel4_cfg, sel4_cfg_attr, sel4_cfg_bool, sel4_cfg_enum, sel4_cfg_if,
-    sel4_cfg_match, sel4_cfg_str, sel4_cfg_struct, sel4_cfg_usize, sel4_cfg_word,
+    self as config,
+    sel4_cfg,
+    sel4_cfg_attr,
+    sel4_cfg_bool,
+    sel4_cfg_enum,
+    sel4_cfg_if,
+    sel4_cfg_match,
+    sel4_cfg_str,
+    sel4_cfg_struct,
+    sel4_cfg_usize,
+    sel4_cfg_word,
     sel4_cfg_wrap_match,
 };
 
@@ -115,27 +124,71 @@ mod vspace;
 pub mod init_thread;
 
 pub use bootinfo::{
-    BootInfo, BootInfoExtra, BootInfoExtraId, BootInfoExtraIter, BootInfoPtr, UntypedDesc,
+    BootInfo,
+    BootInfoExtra,
+    BootInfoExtraId,
+    BootInfoExtraIter,
+    BootInfoPtr,
+    UntypedDesc,
 };
-pub use cap_rights::{CapRights, CapRightsBuilder};
+pub use cap_rights::{
+    CapRights,
+    CapRightsBuilder,
+};
 pub use cnode_cap_data::CNodeCapData;
 pub use cptr::{
-    AbsoluteCPtr, CPtr, CPtrBits, CPtrWithDepth, Cap, CapType, HasCPtrWithDepth, cap, cap_type,
+    AbsoluteCPtr,
+    CPtr,
+    CPtrBits,
+    CPtrWithDepth,
+    Cap,
+    CapType,
+    HasCPtrWithDepth,
+    cap,
+    cap_type,
 };
-pub use error::{Error, Result};
+pub use error::{
+    Error,
+    Result,
+};
 pub use fault::*;
-pub use invocation_context::{InvocationContext, NoExplicitInvocationContext, NoInvocationContext};
-pub use invocations::{TcbFlagsBuilder, Time};
+pub use invocation_context::{
+    InvocationContext,
+    NoExplicitInvocationContext,
+    NoInvocationContext,
+};
+pub use invocations::{
+    TcbFlagsBuilder,
+    Time,
+};
 pub use ipc_buffer::IpcBuffer;
-pub use message_info::{MessageInfo, MessageInfoBuilder};
+pub use message_info::{
+    MessageInfo,
+    MessageInfoBuilder,
+};
 pub use object::{
-    CapTypeForObject, CapTypeForObjectOfFixedSize, CapTypeForObjectOfVariableSize, ObjectBlueprint,
+    CapTypeForObject,
+    CapTypeForObjectOfFixedSize,
+    CapTypeForObjectOfVariableSize,
+    ObjectBlueprint,
     ObjectType,
 };
-pub use reply_authority::{ConveysReplyAuthority, ReplyAuthority};
-pub use syscalls::{Badge, CallWithMRs, FastMessages, NUM_MESSAGE_REGISTERS, RecvWithMRs, r#yield};
+pub use reply_authority::{
+    ConveysReplyAuthority,
+    ReplyAuthority,
+};
+pub use syscalls::{
+    Badge,
+    CallWithMRs,
+    FastMessages,
+    NUM_MESSAGE_REGISTERS,
+    RecvWithMRs,
+    r#yield,
+};
 pub use vspace::{
-    CapTypeForFrameObject, CapTypeForFrameObjectOfFixedSize, CapTypeForTranslationTableObject,
+    CapTypeForFrameObject,
+    CapTypeForFrameObjectOfFixedSize,
+    CapTypeForTranslationTableObject,
     vspace_levels,
 };
 
@@ -150,9 +203,13 @@ pub use syscalls::set_tls_base;
 pub use arch::top_level::*;
 
 pub(crate) use helper_macros::{
-    declare_cap_alias, declare_cap_type, declare_cap_type_for_object,
-    declare_cap_type_for_object_of_fixed_size, declare_cap_type_for_object_of_variable_size,
-    declare_fault_newtype, newtype_methods,
+    declare_cap_alias,
+    declare_cap_type,
+    declare_cap_type_for_object,
+    declare_cap_type_for_object_of_fixed_size,
+    declare_cap_type_for_object_of_variable_size,
+    declare_fault_newtype,
+    newtype_methods,
 };
 
 sel4_cfg_if! {
@@ -203,8 +260,13 @@ mod state;
 
 #[cfg(feature = "state")]
 pub use state::{
-    ImplicitInvocationContext, ipc_buffer_is_thread_local, set_ipc_buffer,
-    try_with_ipc_buffer_slot, try_with_ipc_buffer_slot_mut, with_ipc_buffer, with_ipc_buffer_mut,
+    ImplicitInvocationContext,
+    ipc_buffer_is_thread_local,
+    set_ipc_buffer,
+    try_with_ipc_buffer_slot,
+    try_with_ipc_buffer_slot_mut,
+    with_ipc_buffer,
+    with_ipc_buffer_mut,
 };
 
 /// Corresponds to `seL4_Word`.

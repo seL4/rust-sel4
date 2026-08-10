@@ -4,10 +4,15 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use core::error::Error;
-use core::fmt;
+use core::{
+    error::Error,
+    fmt,
+};
 
-use crate::{MessageLabel, MessageRegisterValue};
+use crate::{
+    MessageLabel,
+    MessageRegisterValue,
+};
 
 pub struct MessageParser<'a> {
     label: MessageLabel,

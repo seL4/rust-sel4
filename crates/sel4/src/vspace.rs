@@ -6,7 +6,11 @@
 //
 
 use crate::{
-    CapType, CapTypeForObjectOfFixedSize, FrameObjectType, TranslationTableObjectType, cap_type,
+    CapType,
+    CapTypeForObjectOfFixedSize,
+    FrameObjectType,
+    TranslationTableObjectType,
+    cap_type,
 };
 
 impl FrameObjectType {
@@ -38,7 +42,11 @@ pub trait CapTypeForTranslationTableObject: CapTypeForObjectOfFixedSize {
 
 /// Items describing the layout of address translation structures for this kernel configuration.
 pub mod vspace_levels {
-    use crate::{FrameObjectType, TranslationTableObjectType, sel4_cfg};
+    use crate::{
+        FrameObjectType,
+        TranslationTableObjectType,
+        sel4_cfg,
+    };
 
     /// The maximum number of levels of translation tables for this kernel configuration.
     pub use crate::arch::vspace_levels::NUM_LEVELS;

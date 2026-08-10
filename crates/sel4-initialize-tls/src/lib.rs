@@ -17,10 +17,12 @@
 
 #![no_std]
 
-use core::alloc::Layout;
-use core::mem;
-use core::ptr;
-use core::slice;
+use core::{
+    alloc::Layout,
+    mem,
+    ptr,
+    slice,
+};
 
 #[cfg(feature = "alloc")]
 extern crate alloc;
@@ -36,7 +38,10 @@ compile_error!("unsupported architecture");
 
 mod set_thread_pointer;
 
-pub use set_thread_pointer::{DEFAULT_SET_THREAD_POINTER_FN, SetThreadPointerFn};
+pub use set_thread_pointer::{
+    DEFAULT_SET_THREAD_POINTER_FN,
+    SetThreadPointerFn,
+};
 
 mod static_allocation;
 pub use static_allocation::*;

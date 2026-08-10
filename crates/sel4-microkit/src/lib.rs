@@ -43,7 +43,10 @@ mod printing;
 pub mod panicking;
 
 #[sel4::sel4_cfg(PRINTING)]
-pub use printing::{debug_print, debug_println};
+pub use printing::{
+    debug_print,
+    debug_println,
+};
 
 /// Declares a function to be the the protection domain's initialization function.
 ///
@@ -112,8 +115,15 @@ pub mod _private {
     pub use crate::heap::_private as heap;
 
     pub use sel4_runtime_common::{
-        declare_entrypoint, declare_entrypoint_with_stack_init, declare_stack,
+        declare_entrypoint,
+        declare_entrypoint_with_stack_init,
+        declare_stack,
     };
 
-    pub use crate::{declare_heap, declare_init, declare_protection_domain, entry::run_main};
+    pub use crate::{
+        declare_heap,
+        declare_init,
+        declare_protection_domain,
+        entry::run_main,
+    };
 }

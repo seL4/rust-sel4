@@ -6,7 +6,12 @@
 
 use core::time::Duration;
 
-use sel4_driver_interfaces::timer::{Clock, ErrorType, NumTimers, Timers};
+use sel4_driver_interfaces::timer::{
+    Clock,
+    ErrorType,
+    NumTimers,
+    Timers,
+};
 use sel4_microkit::Channel;
 use sel4_microkit_simple_ipc as simple_ipc;
 

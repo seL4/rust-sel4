@@ -4,7 +4,10 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use xmltree::{Element, XMLNode};
+use xmltree::{
+    Element,
+    XMLNode,
+};
 
 use sel4_config_data::Configuration;
 

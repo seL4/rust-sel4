@@ -4,13 +4,27 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use core::mem;
-use core::ops::Range;
+use core::{
+    mem,
+    ops::Range,
+};
 
-use gpt_disk_types::{GptHeader, MasterBootRecord, MbrPartitionRecord};
-use num_enum::{IntoPrimitive, TryFromPrimitive};
+use gpt_disk_types::{
+    GptHeader,
+    MasterBootRecord,
+    MbrPartitionRecord,
+};
+use num_enum::{
+    IntoPrimitive,
+    TryFromPrimitive,
+};
 
-use crate::{BlockIO, Partition, access::ReadOnly, read_bytes};
+use crate::{
+    BlockIO,
+    Partition,
+    access::ReadOnly,
+    read_bytes,
+};
 
 pub struct Disk<T> {
     io: T,

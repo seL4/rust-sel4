@@ -15,7 +15,10 @@ use core::ops::Range;
 use alloc::vec::Vec;
 
 #[cfg(feature = "owned")]
-use serde::{Deserialize, Serialize};
+use serde::{
+    Deserialize,
+    Serialize,
+};
 
 #[derive(Debug, Clone)]
 pub struct PlatformInfo<'a> {

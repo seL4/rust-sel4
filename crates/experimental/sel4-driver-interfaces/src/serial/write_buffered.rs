@@ -4,8 +4,10 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use embedded_hal_nb::nb;
-use embedded_hal_nb::serial;
+use embedded_hal_nb::{
+    nb,
+    serial,
+};
 use heapless::Deque;
 
 #[derive(Debug, Clone)]

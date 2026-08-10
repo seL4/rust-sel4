@@ -6,7 +6,11 @@
 
 use core::ops::Range;
 
-use zerocopy::{FromBytes, Immutable, IntoBytes};
+use zerocopy::{
+    FromBytes,
+    Immutable,
+    IntoBytes,
+};
 
 #[repr(C)]
 #[derive(Copy, Clone, Debug, PartialOrd, Ord, PartialEq, Eq, FromBytes, IntoBytes, Immutable)]

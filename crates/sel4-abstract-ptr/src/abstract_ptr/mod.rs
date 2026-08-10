@@ -5,7 +5,13 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 //
 
-use core::{cmp::Ordering, fmt, hash, marker::PhantomData, ptr::NonNull};
+use core::{
+    cmp::Ordering,
+    fmt,
+    hash,
+    marker::PhantomData,
+    ptr::NonNull,
+};
 
 use crate::access::ReadWrite;
 

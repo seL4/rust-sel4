@@ -4,15 +4,29 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use core::ffi::c_int;
-use core::sync::atomic::{Ordering, compiler_fence};
+use core::{
+    ffi::c_int,
+    sync::atomic::{
+        Ordering,
+        compiler_fence,
+    },
+};
 
-use sel4_config::{sel4_cfg, sel4_cfg_if};
+use sel4_config::{
+    sel4_cfg,
+    sel4_cfg_if,
+};
 
 #[allow(unused_imports)]
 use crate::{
-    ReplyAuthority, WaitMessageInfo, seL4_CPtr, seL4_IPCBuffer, seL4_MessageInfo, seL4_Uint32,
-    seL4_Word, syscall_id,
+    ReplyAuthority,
+    WaitMessageInfo,
+    seL4_CPtr,
+    seL4_IPCBuffer,
+    seL4_MessageInfo,
+    seL4_Uint32,
+    seL4_Word,
+    syscall_id,
 };
 
 #[allow(unused_imports)]

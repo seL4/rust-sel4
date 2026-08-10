@@ -6,9 +6,20 @@
 
 #![no_std]
 
-use core::marker::PhantomData;
-use core::mem;
-use core::ops::{BitAnd, BitAndAssign, BitOr, BitOrAssign, Not, Range, Shl, Shr};
+use core::{
+    marker::PhantomData,
+    mem,
+    ops::{
+        BitAnd,
+        BitAndAssign,
+        BitOr,
+        BitOrAssign,
+        Not,
+        Range,
+        Shl,
+        Shr,
+    },
+};
 
 pub trait UnsignedPrimInt:
     UnsignedPrimIntSealed
@@ -56,7 +67,10 @@ where
     }
 }
 
-use sealing::{PrimIntSealed, UnsignedPrimIntSealed};
+use sealing::{
+    PrimIntSealed,
+    UnsignedPrimIntSealed,
+};
 
 mod sealing {
     pub trait UnsignedPrimIntSealed {}
@@ -358,8 +372,10 @@ mod test {
 
     extern crate std;
 
-    use std::eprintln;
-    use std::fmt;
+    use std::{
+        eprintln,
+        fmt,
+    };
 
     use super::*;
 

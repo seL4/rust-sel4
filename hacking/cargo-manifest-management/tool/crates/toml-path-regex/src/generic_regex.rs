@@ -4,8 +4,10 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use std::borrow::Borrow;
-use std::rc::Rc;
+use std::{
+    borrow::Borrow,
+    rc::Rc,
+};
 
 // TODO mitigate regex size explosion with smart constructors
 

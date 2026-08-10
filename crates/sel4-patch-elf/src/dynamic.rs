@@ -4,8 +4,14 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use object::elf::{FileHeader32, FileHeader64};
-use object::{Endianness, File};
+use object::{
+    Endianness,
+    File,
+    elf::{
+        FileHeader32,
+        FileHeader64,
+    },
+};
 
 use super as low_level;
 

@@ -6,7 +6,10 @@
 
 use core::alloc::Layout;
 
-use crate::{Region, TlsImage};
+use crate::{
+    Region,
+    TlsImage,
+};
 
 pub struct HeapTlsReservation {
     start: *mut u8,

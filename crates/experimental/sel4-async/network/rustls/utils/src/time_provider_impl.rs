@@ -4,11 +4,15 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use core::fmt;
-use core::time::Duration;
+use core::{
+    fmt,
+    time::Duration,
+};
 
-use rustls::pki_types::UnixTime;
-use rustls::time_provider::TimeProvider;
+use rustls::{
+    pki_types::UnixTime,
+    time_provider::TimeProvider,
+};
 
 use sel4_async_time::Instant;
 

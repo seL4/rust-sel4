@@ -8,16 +8,31 @@
 //! A generic microkit handler for implementors of [`smoltcp::phy::Device`].
 
 use smoltcp::{
-    phy::{self, RxToken, TxToken},
+    phy::{
+        self,
+        RxToken,
+        TxToken,
+    },
     time::Instant,
 };
 
-use sel4_driver_interfaces::HandleInterrupt;
-use sel4_driver_interfaces::net::GetNetDeviceMeta;
-use sel4_microkit::{Channel, ChannelSet, Handler, Infallible, MessageInfo};
+use sel4_driver_interfaces::{
+    HandleInterrupt,
+    net::GetNetDeviceMeta,
+};
+use sel4_microkit::{
+    Channel,
+    ChannelSet,
+    Handler,
+    Infallible,
+    MessageInfo,
+};
 use sel4_microkit_simple_ipc as simple_ipc;
 use sel4_shared_memory::SharedMemoryRef;
-use sel4_shared_ring_buffer::{RingBuffers, roles::Use};
+use sel4_shared_ring_buffer::{
+    RingBuffers,
+    roles::Use,
+};
 
 use super::message_types::*;
 

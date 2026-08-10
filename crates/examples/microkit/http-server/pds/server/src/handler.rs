@@ -4,25 +4,53 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use alloc::boxed::Box;
-use alloc::sync::Arc;
-use core::future::Future;
-use core::pin::Pin;
-use core::time::Duration;
+use alloc::{
+    boxed::Box,
+    sync::Arc,
+};
+use core::{
+    future::Future,
+    pin::Pin,
+    time::Duration,
+};
 
 use futures::future::LocalBoxFuture;
 use one_shot_mutex::sync::OneShotMutex;
-use smoltcp::iface::Config;
-use smoltcp::time::Instant as SmoltcpInstant;
+use smoltcp::{
+    iface::Config,
+    time::Instant as SmoltcpInstant,
+};
 
-use sel4_abstract_allocator::WithAlignmentBound;
-use sel4_abstract_allocator::basic::BasicAllocator;
-use sel4_async_block_io::{access::ReadOnly, constant_block_sizes::BlockSize512};
-use sel4_async_network::{DhcpOverrides, ManagedInterface};
-use sel4_async_single_threaded_executor::{LocalPool, LocalSpawner};
-use sel4_async_time::{Instant, TimerManager};
-use sel4_driver_interfaces::timer::{Clock, DefaultTimer, Timer};
-use sel4_microkit::{ChannelSet, Handler, Infallible};
+use sel4_abstract_allocator::{
+    WithAlignmentBound,
+    basic::BasicAllocator,
+};
+use sel4_async_block_io::{
+    access::ReadOnly,
+    constant_block_sizes::BlockSize512,
+};
+use sel4_async_network::{
+    DhcpOverrides,
+    ManagedInterface,
+};
+use sel4_async_single_threaded_executor::{
+    LocalPool,
+    LocalSpawner,
+};
+use sel4_async_time::{
+    Instant,
+    TimerManager,
+};
+use sel4_driver_interfaces::timer::{
+    Clock,
+    DefaultTimer,
+    Timer,
+};
+use sel4_microkit::{
+    ChannelSet,
+    Handler,
+    Infallible,
+};
 use sel4_microkit_driver_adapters::timer::client::Client as TimerClient;
 use sel4_shared_ring_buffer_block_io::SharedRingBufferBlockIO;
 

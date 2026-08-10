@@ -21,7 +21,10 @@ mod vcpu_reg;
 pub(crate) mod top_level {
     pub use super::{
         object::{
-            ObjectBlueprintAArch32, ObjectBlueprintSeL4Arch, ObjectTypeAArch32, ObjectTypeSeL4Arch,
+            ObjectBlueprintAArch32,
+            ObjectBlueprintSeL4Arch,
+            ObjectTypeAArch32,
+            ObjectTypeSeL4Arch,
         },
         user_context::UserContext,
     };

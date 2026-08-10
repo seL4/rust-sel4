@@ -4,10 +4,12 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use std::env;
-use std::fs;
-use std::ops::Range;
-use std::path::PathBuf;
+use std::{
+    env,
+    fs,
+    ops::Range,
+    path::PathBuf,
+};
 
 use proc_macro2::TokenStream;
 use quote::quote;

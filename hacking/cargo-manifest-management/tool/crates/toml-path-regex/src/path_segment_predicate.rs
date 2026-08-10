@@ -7,7 +7,11 @@
 use rangemap::inclusive_set::RangeInclusiveSet;
 use regex::Regex;
 
-use super::{PathSegment, generic_regex::Predicate, parse::IndexRange};
+use super::{
+    PathSegment,
+    generic_regex::Predicate,
+    parse::IndexRange,
+};
 
 pub struct PathSegmentPredicate {
     inner: Inner,

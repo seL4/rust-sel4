@@ -4,15 +4,20 @@
 // SPDX-License-Identifier: MIT
 //
 
-use alloc::vec;
-use alloc::vec::Vec;
+use alloc::{
+    vec,
+    vec::Vec,
+};
 use core::convert::Infallible;
 
 #[cfg(feature = "postcard")]
 use core::fmt;
 
 #[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
+use serde::{
+    Deserialize,
+    Serialize,
+};
 
 use crate::*;
 
@@ -139,8 +144,10 @@ impl<T: Serialize> fmt::Display for DisplayHex<'_, T> {
 mod test {
     extern crate std;
 
-    use alloc::borrow::ToOwned;
-    use alloc::string::String;
+    use alloc::{
+        borrow::ToOwned,
+        string::String,
+    };
 
     use super::*;
 

@@ -11,7 +11,10 @@ use core::convert::Infallible;
 #[cfg(feature = "postcard")]
 use serde::Serialize;
 
-use sel4_backtrace_types::{Entry, Error as BacktraceError};
+use sel4_backtrace_types::{
+    Entry,
+    Error as BacktraceError,
+};
 
 cfg_if::cfg_if! {
     if #[cfg(all(feature = "unwinding", panic = "unwind"))] {

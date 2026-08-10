@@ -4,17 +4,33 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use std::fs::{self, File};
+use std::fs::{
+    self,
+    File,
+};
 
 use anyhow::Result;
 use clap::Parser;
-use object::elf::{FileHeader32, FileHeader64};
-use object::read::elf::{ElfFile, FileHeader, ProgramHeader};
-use object::{Endianness, ReadRef};
+use object::{
+    Endianness,
+    ReadRef,
+    elf::{
+        FileHeader32,
+        FileHeader64,
+    },
+    read::elf::{
+        ElfFile,
+        FileHeader,
+        ProgramHeader,
+    },
+};
 use rkyv::util::AlignedVec;
 
 use sel4_config_types::Configuration;
-use sel4_patch_elf::{FileHeaderExt, Patching};
+use sel4_patch_elf::{
+    FileHeaderExt,
+    Patching,
+};
 use sel4_phdrs_constants::PT_SEL4_KERNEL_LOADER_PAYLOAD;
 use sel4_platform_info_types::OwnedPlatformInfo;
 
@@ -23,8 +39,13 @@ mod page_tables;
 mod serialize_payload;
 mod utils;
 
-use crate::page_tables::Scheme;
-use crate::utils::{virt_footprint, with_elf};
+use crate::{
+    page_tables::Scheme,
+    utils::{
+        virt_footprint,
+        with_elf,
+    },
+};
 
 type ArchiveAlignedVec = AlignedVec;
 

@@ -4,15 +4,23 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use std::env;
-use std::fs;
-use std::path::PathBuf;
+use std::{
+    env,
+    fs,
+    path::PathBuf,
+};
 
 use proc_macro2::TokenStream;
-use quote::{format_ident, quote};
+use quote::{
+    format_ident,
+    quote,
+};
 
 use sel4_config_data::get_kernel_config;
-use sel4_config_types::{Configuration, Value};
+use sel4_config_types::{
+    Configuration,
+    Value,
+};
 
 fn main() {
     let toks = generate_consts(get_kernel_config());

@@ -9,7 +9,10 @@ use std::fs;
 use anyhow::Result;
 use clap::Parser;
 
-use sel4_capdl_initializer_add_spec::{ObjectNamesLevel, add_spec};
+use sel4_capdl_initializer_add_spec::{
+    ObjectNamesLevel,
+    add_spec,
+};
 
 #[derive(Parser, Debug)]
 pub struct Cli {

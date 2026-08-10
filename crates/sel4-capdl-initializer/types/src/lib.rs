@@ -8,9 +8,11 @@
 
 extern crate alloc;
 
-use rkyv::Archive;
-use rkyv::rancor;
-use rkyv::util::AlignedVec;
+use rkyv::{
+    Archive,
+    rancor,
+    util::AlignedVec,
+};
 
 mod cap_table;
 mod frame_init;
@@ -23,7 +25,10 @@ mod transform;
 #[cfg(feature = "sel4")]
 mod when_sel4;
 
-pub use cap_table::{HasArchivedCapTable, HasCapTable};
+pub use cap_table::{
+    HasArchivedCapTable,
+    HasCapTable,
+};
 pub use frame_init::*;
 pub use spec::*;
 

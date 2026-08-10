@@ -4,11 +4,23 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use std::borrow::Borrow;
-use std::sync::Arc;
+use std::{
+    borrow::Borrow,
+    sync::Arc,
+};
 
-use super::regions::{AbstractRegion, AbstractRegions};
-use super::scheme::{LeafDescriptor, Level, RawDescriptor, Scheme};
+use super::{
+    regions::{
+        AbstractRegion,
+        AbstractRegions,
+    },
+    scheme::{
+        LeafDescriptor,
+        Level,
+        RawDescriptor,
+        Scheme,
+    },
+};
 
 #[derive(Debug)]
 pub(crate) struct Table {

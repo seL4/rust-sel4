@@ -8,7 +8,11 @@ use core::convert::Infallible;
 
 use rtcc::DateTimeAccess;
 
-use sel4_microkit::{Channel, Handler, MessageInfo};
+use sel4_microkit::{
+    Channel,
+    Handler,
+    MessageInfo,
+};
 use sel4_microkit_simple_ipc as simple_ipc;
 
 use super::message_types::*;

@@ -13,18 +13,30 @@
 #[cfg(feature = "alloc")]
 extern crate alloc;
 
-use core::panic::{PanicInfo, UnwindSafe};
+use core::panic::{
+    PanicInfo,
+    UnwindSafe,
+};
 
-use sel4_panicking_env::{abort, debug_println};
+use sel4_panicking_env::{
+    abort,
+    debug_println,
+};
 
 mod count;
 mod hook;
 mod strategy;
 
-use count::{count_panic, count_panic_caught};
+use count::{
+    count_panic,
+    count_panic_caught,
+};
 use hook::get_hook;
 
-pub use hook::{PanicHook, set_hook};
+pub use hook::{
+    PanicHook,
+    set_hook,
+};
 
 #[cfg_attr(feature = "panic-handler", panic_handler)]
 #[cfg_attr(not(feature = "panic-handler"), allow(dead_code))]

@@ -7,12 +7,18 @@
 #![no_std]
 #![feature(c_variadic)]
 
-use core::ffi::{CStr, c_char};
+use core::ffi::{
+    CStr,
+    c_char,
+};
 
 use sel4_immediate_sync_once_cell::ImmediateSyncOnceCell;
 
 pub use sel4_linux_syscall_types::{
-    ParseSyscallError, Syscall, SyscallReturnValue, VaListAsSyscallArgs,
+    ParseSyscallError,
+    Syscall,
+    SyscallReturnValue,
+    VaListAsSyscallArgs,
 };
 
 // TODO: support the `struct __libc __libc;` state?

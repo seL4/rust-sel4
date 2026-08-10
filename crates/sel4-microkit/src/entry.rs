@@ -9,7 +9,10 @@ use core::panic::UnwindSafe;
 use sel4_panicking::catch_unwind;
 use sel4_panicking_env::abort;
 
-use crate::{Handler, panicking::init_panicking};
+use crate::{
+    Handler,
+    panicking::init_panicking,
+};
 
 sel4_runtime_common::declare_rust_entrypoint! {
     entrypoint()

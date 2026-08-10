@@ -8,7 +8,11 @@ use core::fmt;
 
 use crate::{
     MessageInfo,
-    symbols::{pd_irqs, pd_notifications, pd_pps},
+    symbols::{
+        pd_irqs,
+        pd_notifications,
+        pd_pps,
+    },
 };
 
 const BASE_OUTPUT_NOTIFICATION_SLOT: usize = 10;

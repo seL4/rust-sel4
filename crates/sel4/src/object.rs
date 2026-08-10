@@ -8,8 +8,14 @@
 use core::ffi::c_uint;
 
 use crate::{
-    CapType, ObjectBlueprintArch, ObjectTypeArch, const_helpers::u32_into_usize, sel4_cfg,
-    sel4_cfg_enum, sel4_cfg_wrap_match, sys,
+    CapType,
+    ObjectBlueprintArch,
+    ObjectTypeArch,
+    const_helpers::u32_into_usize,
+    sel4_cfg,
+    sel4_cfg_enum,
+    sel4_cfg_wrap_match,
+    sys,
 };
 
 #[sel4_cfg(KERNEL_MCS)]

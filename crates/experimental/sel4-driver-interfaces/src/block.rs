@@ -4,14 +4,26 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use core::cell::RefCell;
-use core::fmt;
-use core::ops::Deref;
+use core::{
+    cell::RefCell,
+    fmt,
+    ops::Deref,
+};
 
-use lock_api::{Mutex, RawMutex};
-use serde::{Deserialize, Serialize};
+use lock_api::{
+    Mutex,
+    RawMutex,
+};
+use serde::{
+    Deserialize,
+    Serialize,
+};
 
-use crate::{WrappedMutex, WrappedRefCell, WrappedRefCellError};
+use crate::{
+    WrappedMutex,
+    WrappedRefCell,
+    WrappedRefCellError,
+};
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Serialize, Deserialize)]
 pub struct MacAddress(pub [u8; 6]);

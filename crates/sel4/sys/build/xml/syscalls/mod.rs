@@ -7,9 +7,15 @@
 use std::path::Path;
 
 use proc_macro2::TokenStream;
-use quote::{format_ident, quote};
+use quote::{
+    format_ident,
+    quote,
+};
 
-use super::{Condition, parse_xml};
+use super::{
+    Condition,
+    parse_xml,
+};
 
 mod parse;
 

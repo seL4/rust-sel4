@@ -11,18 +11,30 @@
 extern crate alloc;
 
 use alloc::boxed::Box;
-use core::cell::UnsafeCell;
-use core::mem;
-use core::ops::Range;
-use core::panic::UnwindSafe;
-use core::ptr;
+use core::{
+    cell::UnsafeCell,
+    mem,
+    ops::Range,
+    panic::UnwindSafe,
+    ptr,
+};
 
 use cfg_if::cfg_if;
 
-use sel4_initialize_tls::{TlsImage, UncheckedTlsImage};
-use sel4_phdrs::{PT_TLS, locate_phdrs};
+use sel4_initialize_tls::{
+    TlsImage,
+    UncheckedTlsImage,
+};
+use sel4_phdrs::{
+    PT_TLS,
+    locate_phdrs,
+};
 use sel4_root_task::{
-    Never, abort, panicking::catch_unwind, root_task, set_global_allocator_mutex_notification,
+    Never,
+    abort,
+    panicking::catch_unwind,
+    root_task,
+    set_global_allocator_mutex_notification,
 };
 use sel4_stack::Stack;
 

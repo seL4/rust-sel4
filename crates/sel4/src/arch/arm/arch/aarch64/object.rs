@@ -6,7 +6,10 @@
 
 use core::ffi::c_uint;
 
-use crate::{const_helpers::u32_into_usize, sys};
+use crate::{
+    const_helpers::u32_into_usize,
+    sys,
+};
 
 /// Alias for [`ObjectTypeAArch64`].
 pub type ObjectTypeSeL4Arch = ObjectTypeAArch64;

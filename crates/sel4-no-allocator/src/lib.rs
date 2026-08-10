@@ -6,7 +6,10 @@
 
 #![no_std]
 
-use core::alloc::{GlobalAlloc, Layout};
+use core::alloc::{
+    GlobalAlloc,
+    Layout,
+};
 
 #[global_allocator]
 static A: NoAllocator = NoAllocator;
