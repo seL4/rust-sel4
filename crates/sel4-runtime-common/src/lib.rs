@@ -115,7 +115,8 @@ macro_rules! declare_rust_entrypoint {
 #[doc(hidden)]
 pub mod _private {
     pub use super::_run_entrypoint;
-    pub use cfg_if::cfg_if;
-    pub use core::arch::global_asm;
+    pub use super::start::{call_rust_entrypoint, stack_init};
+    pub use core::arch::naked_asm;
+    pub use core::cfg_select;
     pub use sel4_stack::{Stack, StackBottom};
 }

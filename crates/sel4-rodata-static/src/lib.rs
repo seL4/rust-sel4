@@ -20,13 +20,13 @@ macro_rules! rodata_static {
                     .section .rodata.rodata_static.{ident}, "aR", %progbits
                     .global {ident}
                     .size {ident}, {size}
-                    .p2align {align}
+                    .p2align {p2align}
                     {ident}:
                         .skip {size}, 0
                 "#,
                 ident = sym $ident,
                 size = const $crate::_private::size_of::<$ty>(),
-                align = const $crate::_private::align_of::<$ty>(),
+                p2align = const $crate::_private::align_of::<$ty>().trailing_zeros(),
             }
         }
         unsafe { &asm::$ident }

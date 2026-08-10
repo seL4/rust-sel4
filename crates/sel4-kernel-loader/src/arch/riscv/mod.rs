@@ -4,127 +4,126 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use core::arch::asm;
-use core::mem;
+use core::arch::naked_asm;
 
 use riscv::register::satp;
 
-use sel4_config::sel4_cfg_if;
-use sel4_kernel_loader_payload_types::ArchivedPayloadInfo;
+use sel4_config::{sel4_cfg_if, sel4_cfg_usize};
 
-use crate::{arch::Arch, main, secondary_main, this_image::kernel_boot_level_0_table};
+use crate::{
+    arch::Arch,
+    main, secondary_main,
+    this_image::{kernel_boot_level_0_table, stacks::PRIMARY_STACK_BOTTOM},
+};
 
-pub(crate) struct PerCoreImpl {
-    hart_id: usize,
+macro_rules! asm_prolog {
+    () => {
+        r#"
+            .extern __global_pointer$
+            .option push
+            .option norelax
+            1:  auipc gp, %pcrel_hi(__global_pointer$)
+                addi  gp, gp, %pcrel_lo(1b)
+            .option pop
+        "#
+    };
 }
 
+#[unsafe(naked)]
 #[unsafe(no_mangle)]
-extern "C" fn arch_main(hart_id: usize) -> ! {
-    main(PerCoreImpl { hart_id })
+#[unsafe(link_section = ".text.start")]
+extern "C" fn _start(hart_id: usize, dtb: usize) -> ! {
+    naked_asm! {
+        cfg_select! {
+            target_arch = "riscv64" => r#"
+                .macro lx dst, src
+                    ld \dst, \src
+                .endm
+            "#,
+            target_arch = "riscv32" => r#"
+                .macro lx dst, src
+                    lw \dst, \src
+                .endm
+            "#,
+        },
+        asm_prolog!(),
+        r#"
+                la sp, {stack_bottom}
+                lx sp, (sp)
+                la s0, {arch_main}
+                jr s0
+            .purgem lx
+        "#,
+        stack_bottom = sym PRIMARY_STACK_BOTTOM,
+        arch_main = sym arch_main,
+    }
 }
 
-#[unsafe(no_mangle)]
+#[unsafe(naked)]
+pub(crate) extern "C" fn start_secondary(hart_id: usize) -> ! {
+    naked_asm! {
+        asm_prolog!(),
+        r#"
+            mv sp, a1
+            la s0, {arch_secondary_main}
+            jr s0
+        "#,
+        arch_secondary_main = sym arch_secondary_main,
+    }
+}
+
+extern "C" fn arch_main(hart_id: usize, dtb: usize) -> ! {
+    main(hart_id, dtb)
+}
+
 extern "C" fn arch_secondary_main(hart_id: usize) -> ! {
-    secondary_main(PerCoreImpl { hart_id })
+    secondary_main(hart_id)
 }
 
 pub(crate) enum ArchImpl {}
 
 impl Arch for ArchImpl {
-    type PerCore = PerCoreImpl;
+    fn physical_to_logical_core_id(physical_core_id: usize) -> Option<usize> {
+        let logical_core_id = physical_core_id.checked_sub(sel4_cfg_usize!(FIRST_HART_ID))?;
+        if logical_core_id < sel4_cfg_usize!(MAX_NUM_NODES) {
+            Some(logical_core_id)
+        } else {
+            None
+        }
+    }
+
+    fn logical_to_physical_core_id(logical_core_id: usize) -> usize {
+        logical_core_id + sel4_cfg_usize!(FIRST_HART_ID)
+    }
 
     fn idle() -> ! {
         loop {
-            unsafe {
-                asm!("wfi");
-            }
+            riscv::asm::wfi();
         }
     }
 
-    #[allow(unused_variables)]
-    fn enter_kernel(
-        core_id: usize,
-        payload_info: &ArchivedPayloadInfo,
-        per_core: Self::PerCore,
-    ) -> ! {
-        let kernel_entry =
-            unsafe { mem::transmute::<usize, KernelEntry>(payload_info.kernel_entry.to_usize()) };
-
-        let ui_p_reg_start = payload_info.user_image.ui_p_reg_start.to_usize();
-        let ui_p_reg_end = payload_info.user_image.ui_p_reg_end.to_usize();
-        let pv_offset = payload_info.user_image.pv_offset.to_usize();
-        let v_entry = payload_info.user_image.v_entry.to_usize();
-
-        let (dtb_addr_p, dtb_size) = match payload_info.dtb.as_ref() {
-            Some(dtb) => (dtb.addr_p.to_usize(), dtb.size.to_usize()),
-            None => (0, 0),
-        };
-
-        let hart_id = per_core.hart_id;
-
+    fn prepare_to_enter_kernel(_core_id: usize) {
         switch_page_tables();
-
-        sel4_cfg_if! {
-            if #[sel4_cfg(MAX_NUM_NODES = "1")] {
-                (kernel_entry)(
-                    ui_p_reg_start,
-                    ui_p_reg_end,
-                    pv_offset,
-                    v_entry,
-                    dtb_addr_p,
-                    dtb_size,
-                )
-            } else {
-                (kernel_entry)(
-                    ui_p_reg_start,
-                    ui_p_reg_end,
-                    pv_offset,
-                    v_entry,
-                    dtb_addr_p,
-                    dtb_size,
-                    hart_id,
-                    core_id,
-                )
-            }
-        }
-    }
-}
-
-sel4_cfg_if! {
-    if #[sel4_cfg(MAX_NUM_NODES = "1")] {
-        type KernelEntry = extern "C" fn(
-            ui_p_reg_start: usize,
-            ui_p_reg_end: usize,
-            pv_offset: usize,
-            v_entry: usize,
-            dtb_addr_p: usize,
-            dtb_size: usize,
-        ) -> !;
-    } else {
-        type KernelEntry = extern "C" fn(
-            ui_p_reg_start: usize,
-            ui_p_reg_end: usize,
-            pv_offset: usize,
-            v_entry: usize,
-            dtb_addr_p: usize,
-            dtb_size: usize,
-            hart_id: usize,
-            core_id: usize,
-        ) -> !;
     }
 }
 
 fn switch_page_tables() {
-    #[cfg(target_pointer_width = "32")]
-    const MODE: satp::Mode = satp::Mode::Sv32;
+    const MODE: satp::Mode = sel4_cfg_if! {
+        if #[sel4_cfg(all(SEL4_ARCH = "riscv64", PT_LEVELS = "3"))] {
+            satp::Mode::Sv39
+        } else if #[sel4_cfg(all(SEL4_ARCH = "riscv32", PT_LEVELS = "2"))] {
+            satp::Mode::Sv32
+        } else {
+            compiler_error!("unsupported configuration");
+        }
+    };
 
-    #[cfg(target_pointer_width = "64")]
-    const MODE: satp::Mode = satp::Mode::Sv39;
+    let ppn = kernel_boot_level_0_table.get() >> 12;
+    riscv::asm::sfence_vma_all();
 
     unsafe {
-        let ppn = kernel_boot_level_0_table.get() >> 12;
-        asm!("sfence.vma", options(nostack));
         satp::set(MODE, 0, ppn);
-        asm!("fence.i", options(nostack));
     }
+
+    riscv::asm::fence_i();
 }
