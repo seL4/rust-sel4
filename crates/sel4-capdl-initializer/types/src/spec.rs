@@ -781,6 +781,8 @@ pub mod cap {
     #[derive(rkyv::Archive, rkyv::Serialize)]
     pub struct ArmSmc {
         pub object: ObjectId,
+        // 0 means no-badge / unbadged => full-rights
+        pub badge: Word,
     }
 
     #[derive(Debug, Clone, Eq, PartialEq, IsCap)]

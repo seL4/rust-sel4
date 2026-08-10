@@ -103,6 +103,7 @@ impl ArchivedCap {
             ArchivedCap::CNode(cap) => {
                 sel4::CNodeCapData::new(cap.guard.to_sel4(), cap.guard_size.into()).into_word()
             }
+            ArchivedCap::ArmSmc(cap) => cap.badge.to_sel4(),
 
             _ => return None,
         })
