@@ -19,6 +19,6 @@ license = "BSD-2-Clause"
 [dependencies]
 anyhow = "1.0.100"
 clap = { version = "4.5.50", features = ["derive"] }
-object = "0.38.1"
+object = "0.40.0"
 sel4-test-sentinels-wrapper = { path = "../sel4-test-sentinels/wrapper" }
 tempfile = "3.27.0"
