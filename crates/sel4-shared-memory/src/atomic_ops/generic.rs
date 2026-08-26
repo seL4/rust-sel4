@@ -44,10 +44,25 @@ cfg_if! {
                         intrinsics::$prefix::<_, { AO::$ord }>$args
                     };
                 }
+            } else if #[cfg(before_volatile)] {
+                macro_rules! with_ordering {
+                    ($ord:ident, $prefix:ident, kind = A, $args:tt) => {
+                        intrinsics::$prefix::<_, { AO::$ord }>$args
+                    };
+                    ($ord:ident, $prefix:ident, kind = AV, $args:tt) => {
+                        intrinsics::$prefix::<_, { AO::$ord }>$args
+                    };
+                    ($ord:ident, $prefix:ident, kind = B, $args:tt) => {
+                        intrinsics::$prefix::<_, _, { AO::$ord }>$args
+                    };
+                }
             } else {
                 macro_rules! with_ordering {
                     ($ord:ident, $prefix:ident, kind = A, $args:tt) => {
                         intrinsics::$prefix::<_, { AO::$ord }>$args
+                    };
+                    ($ord:ident, $prefix:ident, kind = AV, $args:tt) => {
+                        intrinsics::$prefix::<_, { AO::$ord }, false>$args
                     };
                     ($ord:ident, $prefix:ident, kind = B, $args:tt) => {
                         intrinsics::$prefix::<_, _, { AO::$ord }>$args
@@ -122,7 +137,7 @@ pub(crate) unsafe fn atomic_store<T: Copy>(dst: *mut T, val: T, order: Ordering)
     // SAFETY: the caller must uphold the safety contract for `atomic_store`.
     unsafe {
         match_ordering! {
-            atomic_store, kind = A, (dst, val), match order,
+            atomic_store, kind = AV, (dst, val), match order,
                 [
                     Relaxed,
                     Release,
@@ -141,7 +156,7 @@ pub(crate) unsafe fn atomic_load<T: Copy>(dst: *const T, order: Ordering) -> T {
     // SAFETY: the caller must uphold the safety contract for `atomic_load`.
     unsafe {
         match_ordering! {
-            atomic_load, kind = A, (dst), match order,
+            atomic_load, kind = AV, (dst), match order,
                 [
                     Relaxed,
                     Acquire,

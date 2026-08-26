@@ -8,7 +8,7 @@ use std::fs::{self, File};
 
 use anyhow::Result;
 use clap::Parser;
-use object::elf::{FileHeader32, FileHeader64};
+use object::elf::{FileHeader32, FileHeader64, ProgramType};
 use object::read::elf::{ElfFile, FileHeader, ProgramHeader};
 use object::{Endianness, ReadRef};
 use rkyv::util::AlignedVec;
@@ -191,7 +191,7 @@ where
     }
 
     patching.add_data_segment_with_meta_phdr(
-        PT_SEL4_KERNEL_LOADER_PAYLOAD,
+        ProgramType(PT_SEL4_KERNEL_LOADER_PAYLOAD),
         ArchiveAlignedVec::ALIGNMENT.try_into().unwrap(),
         &payload_data,
     );

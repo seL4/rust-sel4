@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use object::elf::{FileHeader32, FileHeader64};
+use object::elf::{FileHeader32, FileHeader64, ProgramType};
 use object::{Endianness, File};
 
 use super as low_level;
@@ -44,7 +44,12 @@ impl<'a> Patching<'a> {
         }
     }
 
-    pub fn add_data_segment_with_meta_phdr(&mut self, p_type: u32, data_align: u64, data: &[u8]) {
+    pub fn add_data_segment_with_meta_phdr(
+        &mut self,
+        p_type: ProgramType,
+        data_align: u64,
+        data: &[u8],
+    ) {
         match self {
             Self::Patching32(this) => {
                 this.add_data_segment_with_meta_phdr(p_type, data_align, data)

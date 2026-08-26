@@ -8,7 +8,8 @@ use std::fmt;
 use std::ops::Range;
 
 use object::elf::{
-    FileHeader32, FileHeader64, PF_R, PT_LOAD, PT_PHDR, ProgramHeader32, ProgramHeader64,
+    FileHeader32, FileHeader64, PF_R, PT_LOAD, PT_PHDR, ProgramFlags, ProgramHeader32,
+    ProgramHeader64, ProgramType,
 };
 use object::read::elf::{ElfFile, FileHeader, ProgramHeader};
 use object::{Endian, Object as _, ObjectSegment as _, ObjectSymbol as _, Pod, U32, U64, pod};
@@ -151,7 +152,12 @@ impl<'a, T: FileHeaderExt> Patching<'a, T> {
         self.add_data_segment_inner(data_align, f);
     }
 
-    pub fn add_data_segment_with_meta_phdr(&mut self, p_type: u32, data_align: u64, data: &[u8]) {
+    pub fn add_data_segment_with_meta_phdr(
+        &mut self,
+        p_type: ProgramType,
+        data_align: u64,
+        data: &[u8],
+    ) {
         let endian = self.endian();
         let mut phdr = *self.add_data_segment_inner(data_align, |_| data);
         phdr.set_p_type(endian, p_type);
@@ -192,7 +198,7 @@ impl<'a, T: FileHeaderExt> Patching<'a, T> {
         );
         self.patch_symbol(
             "sel4_phdrs_patched__phnum",
-            &endian.write_u16_bytes(u16::try_from(self.phdrs.len()).unwrap()),
+            &endian.write_u16(u16::try_from(self.phdrs.len()).unwrap()),
         );
 
         self.data
@@ -201,8 +207,8 @@ impl<'a, T: FileHeaderExt> Patching<'a, T> {
 
 #[derive(Debug, Copy, Clone, Default)]
 pub struct GenericProgramHeader {
-    pub p_type: u32,
-    pub p_flags: u32,
+    pub p_type: ProgramType,
+    pub p_flags: ProgramFlags,
     pub p_offset: u64,
     pub p_vaddr: u64,
     pub p_paddr: u64,
@@ -248,19 +254,19 @@ pub trait WordExt: TryFrom<u64, Error: fmt::Debug> + Pod {
 
 impl WordExt for u32 {
     fn write_bytes(&self, endian: impl Endian) -> Vec<u8> {
-        endian.write_u32_bytes(*self).to_vec()
+        endian.write_u32(*self).to_vec()
     }
 }
 
 impl WordExt for u64 {
     fn write_bytes(&self, endian: impl Endian) -> Vec<u8> {
-        endian.write_u64_bytes(*self).to_vec()
+        endian.write_u64(*self).to_vec()
     }
 }
 
 pub trait ProgramHeaderExt: ProgramHeader {
     fn from_generic(endian: Self::Endian, generic: &GenericProgramHeader) -> Self;
-    fn set_p_type(&mut self, endian: Self::Endian, p_type: u32);
+    fn set_p_type(&mut self, endian: Self::Endian, p_type: ProgramType);
 }
 
 impl<E: Endian> ProgramHeaderExt for ProgramHeader32<E> {
@@ -277,7 +283,7 @@ impl<E: Endian> ProgramHeaderExt for ProgramHeader32<E> {
         }
     }
 
-    fn set_p_type(&mut self, endian: Self::Endian, p_type: u32) {
+    fn set_p_type(&mut self, endian: Self::Endian, p_type: ProgramType) {
         self.p_type.set(endian, p_type)
     }
 }
@@ -296,7 +302,7 @@ impl<E: Endian> ProgramHeaderExt for ProgramHeader64<E> {
         }
     }
 
-    fn set_p_type(&mut self, endian: Self::Endian, p_type: u32) {
+    fn set_p_type(&mut self, endian: Self::Endian, p_type: ProgramType) {
         self.p_type.set(endian, p_type)
     }
 }

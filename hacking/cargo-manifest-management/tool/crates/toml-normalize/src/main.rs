@@ -131,7 +131,7 @@ fn main() {
         .unwrap_or_else(|| Box::new(std::io::stdout()) as Box<dyn Write>);
 
     out_write
-        .write_fmt(format_args!("{}", &out_toml))
+        .write_fmt(format_args!("{}", out_toml))
         .and_then(|_| out_write.flush())
         .unwrap_or_else(|err| panic!("error writing to output file: {}", err));
 }

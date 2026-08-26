@@ -9,7 +9,7 @@ use std::path::PathBuf;
 
 use anyhow::Error;
 use clap::Parser;
-use object::elf::{PF_R, PF_W, PT_LOAD};
+use object::elf::{PF_R, PF_W, PT_LOAD, ProgramType};
 use object::read::elf::{ElfFile, FileHeader, ProgramHeader};
 use object::{File, Object, ObjectSection, Pod, pod};
 use rangemap::RangeSet;
@@ -100,7 +100,7 @@ fn add_regions<'a, T: FileHeader + FileHeaderExt>(this: &mut Patching<'a, T>) ->
     let mut regions: Vec<RegionMeta<T>> = vec![];
     for seg in this.orig_elf().segments() {
         let phdr = seg.elf_program_header();
-        if phdr.p_type(endian) == PT_LOAD && phdr.p_flags(endian) & PF_W != 0 {
+        if phdr.p_type(endian) == PT_LOAD && phdr.p_flags(endian).contains(PF_W) {
             let p_offset = phdr.p_offset(endian).into();
             let p_vaddr = phdr.p_vaddr(endian).into();
             let p_memsz = phdr.p_memsz(endian).into();
@@ -146,7 +146,7 @@ fn add_regions<'a, T: FileHeader + FileHeaderExt>(this: &mut Patching<'a, T>) ->
 
     let regions_meta_data = RegionMeta::pack_to_vec(&regions);
     this.add_data_segment_with_meta_phdr(
-        PT_SEL4_RESET_REGIONS,
+        ProgramType(PT_SEL4_RESET_REGIONS),
         align_of::<RegionMeta<T>>().try_into().unwrap(),
         &regions_meta_data,
     );

@@ -93,6 +93,6 @@ impl<'a> VaListAsSyscallArgs<'a> {
 
 impl SyscallArgs for VaListAsSyscallArgs<'_> {
     fn next_word_arg(&mut self) -> Option<SyscallWordArg> {
-        Some(unsafe { self.0.arg() })
+        Some(unsafe { self.0.next_arg() })
     }
 }

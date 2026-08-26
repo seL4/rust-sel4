@@ -81,6 +81,10 @@ let
     (lib.optional compilerBuiltinsMem "compiler-builtins-mem")
   ]);
 
+  profileDirName = {
+    "dev" = "debug";
+  }.${profile} or profile;
+
 in
 runCommand "sysroot" ({
   depsBuildBuild = [ buildPackages.stdenv.cc ];
@@ -104,9 +108,17 @@ runCommand "sysroot" ({
     --manifest-path ${workspace}/Cargo.toml \
     --target-dir $(pwd)/target
 
-  d=$out/lib/rustlib/${targetTriple.name}/lib
-  mkdir -p $d
-  mv target/${targetTriple.name}/*/deps/* $d
+  dst=$out/lib/rustlib/${targetTriple.name}/lib
+  mkdir -p $dst
+
+  src=target/${targetTriple.name}/${profileDirName}
+
+  # HACK for compatiblity across rust toolchain versions
+  if [ -d "$src/deps" ]; then
+    mv $src/deps/* $dst
+  else
+    mv $src/build/*/*/out/*.{rlib,rmeta} $dst
+  fi
 ''
 
 # TODO

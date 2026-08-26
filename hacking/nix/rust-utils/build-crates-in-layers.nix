@@ -185,7 +185,9 @@ let
 
   findTestsCommandPrefix = targetDir: [
     "find"
+      # HACK for compatiblity across rust toolchain versions
       "${targetDir}/${targetTriple.name}/*/deps"
+      "${targetDir}/${targetTriple.name}/*/build/*/*/out"
       "-maxdepth" "1"
       "-executable"
       "-name" "'*.elf'"

@@ -6,6 +6,7 @@
 
 use std::path::Path;
 
+use object::elf::ProgramType;
 use rkyv::util::AlignedVec;
 
 use sel4_capdl_initializer_types::InputSpec;
@@ -50,13 +51,13 @@ pub fn add_spec(
     let mut patching = Patching::new(&parsed);
 
     patching.add_data_segment_with_meta_phdr(
-        PT_SEL4_CAPDL_FRAME_DATA,
+        ProgramType(PT_SEL4_CAPDL_FRAME_DATA),
         1 << GRANULE_SIZE_BITS,
         &embedded_frame_data,
     );
 
     patching.add_data_segment_with_meta_phdr(
-        PT_SEL4_CAPDL_SPEC,
+        ProgramType(PT_SEL4_CAPDL_SPEC),
         ArchiveAlignedVec::ALIGNMENT.try_into().unwrap(),
         &spec_data,
     );
