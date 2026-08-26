@@ -5,7 +5,6 @@
 //
 
 #![no_std]
-#![feature(c_variadic)]
 
 use core::ffi::{CStr, c_char};
 

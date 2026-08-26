@@ -7,7 +7,6 @@
 // TODO use https://github.com/mebeim/linux-syscalls/tree/master/db
 
 #![no_std]
-#![feature(c_variadic)]
 
 use core::ffi::{c_char, c_int, c_void};
 

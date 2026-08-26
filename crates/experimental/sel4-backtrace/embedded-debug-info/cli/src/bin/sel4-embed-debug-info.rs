@@ -8,6 +8,7 @@ use std::fs;
 use std::io;
 
 use clap::Parser;
+use object::elf::ProgramType;
 use object::read::elf::ElfFile;
 
 use sel4_patch_elf::{FileHeaderExt, Patching};
@@ -42,6 +43,6 @@ fn main() -> Result<(), io::Error> {
 
 fn with_bit_width<T: FileHeaderExt>(image_elf: &ElfFile<T>, content: &[u8]) -> Vec<u8> {
     let mut patching = Patching::new(image_elf);
-    patching.add_data_segment_with_meta_phdr(PT_SEL4_EMBEDDED_DEBUG_INFO, 1, content);
+    patching.add_data_segment_with_meta_phdr(ProgramType(PT_SEL4_EMBEDDED_DEBUG_INFO), 1, content);
     patching.finalize()
 }

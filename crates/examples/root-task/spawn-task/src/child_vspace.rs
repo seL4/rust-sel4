@@ -172,14 +172,14 @@ fn map_image<'a>(
 
 fn add_rights(rights: &mut sel4::CapRightsBuilder, flags: SegmentFlags) {
     match flags {
-        SegmentFlags::Elf { p_flags } => {
-            if p_flags & PF_R != 0 {
+        SegmentFlags::Elf { p_flags, .. } => {
+            if p_flags.contains(PF_R) {
                 *rights = rights.read(true);
             }
-            if p_flags & PF_W != 0 {
+            if p_flags.contains(PF_W) {
                 *rights = rights.write(true);
             }
-            if p_flags & PF_X != 0 {
+            if p_flags.contains(PF_X) {
                 *rights = rights.grant(true);
             }
         }

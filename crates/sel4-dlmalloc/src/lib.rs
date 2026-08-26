@@ -150,7 +150,7 @@ impl SimpleDlmallocAllocator for StaticDlmallocAllocator {
     fn alloc_simple(&self, size: usize) -> Option<*mut u8> {
         let old_watermark = self
             .watermark
-            .fetch_update(Ordering::SeqCst, Ordering::SeqCst, |old_watermark| {
+            .try_update(Ordering::SeqCst, Ordering::SeqCst, |old_watermark| {
                 let new_watermark = old_watermark.checked_add(size)?;
                 if new_watermark > self.bounds.size() {
                     return None;
