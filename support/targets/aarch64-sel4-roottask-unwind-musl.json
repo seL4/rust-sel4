@@ -41,6 +41,7 @@
     "kernel-address",
     "kernel-hwaddress"
   ],
+  "supports-xray": true,
   "target-family": [
     "unix"
   ],

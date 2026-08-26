@@ -35,5 +35,6 @@
     "kernel-address",
     "kernel-hwaddress"
   ],
+  "supports-xray": true,
   "target-pointer-width": 64
 }
