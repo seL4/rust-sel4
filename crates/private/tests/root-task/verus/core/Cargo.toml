@@ -20,6 +20,6 @@ license = "BSD-2-Clause"
 verify = true
 
 [dependencies]
-verus_builtin = "=0.0.0-2026-03-17-2326"
-verus_builtin_macros = "=0.0.0-2026-03-17-2326"
-vstd = { version = "=0.0.0-2026-03-17-2326", default-features = false }
+verus_builtin = "=0.0.0-2026-08-09-0044"
+verus_builtin_macros = "=0.0.0-2026-08-23-0033"
+vstd = { version = "=0.0.0-2026-08-23-0033", default-features = false }
