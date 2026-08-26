@@ -29,7 +29,7 @@ let
 
   rustToolchain = assembleRustToolchain {
     inherit channel;
-    sha256 = "sha256-qqF33vNuAdU5vua96VKVIwuc43j4EFeEXbjQ6+l4mO4=";
+    sha256 = "sha256-A1abGIbOtcBSdrUMhDGrER3pRM1hQP4fp9gh3Y4PKc8=";
   };
 
   rustEnvironment = lib.fix (self: elaborateRustEnvironment (mkDefaultElaborateRustEnvironmentArgs {
@@ -46,8 +46,8 @@ let
   src = fetchFromGitHub {
     owner = "verus-lang";
     repo = "verus";
-    rev = "release/0.2026.03.17.a96bad0";
-    sha256 = "sha256-Enc56lwMbRTsGIIJ3XTq9/dy4ZFhJYt7s9Bh2jgF/dg=";
+    rev = "release/0.2026.08.23.fbbbbcf";
+    sha256 = "sha256-+M+Y21f1ZzRW2J+hlSHZWsundhuqlhjYGqRLppopJjI=";
   };
 
   lockfile = vendorLockfile {
@@ -130,14 +130,23 @@ stdenv.mkDerivation {
   VERUS_Z3_PATH = "${z3}/bin/z3";
   VERUS_SINGULAR_PATH = "${singular}/bin/Singular";
 
+  # HACK
+  VARGO_BUILD_VERSION = "";
+  VARGO_BUILD_SHA = "";
+  VARGO_TOOLCHAIN = "";
+
   patchPhase = ''
-    substituteInPlace tools/activate --replace-fail 'cargo build' 'cargo build --offline'
+    substituteInPlace tools/activate \
+      --replace-fail 'cargo build' 'cargo build --offline'
+    # HACK
+    substituteInPlace source/rust_verify/build.rs \
+      --replace-fail 'get_verus_version(true)' 'Ok::<(String, String), ()>(("".to_owned(), "".to_owned()))' \
+      --replace-fail 'get_git_head_paths()' 'Ok::<&[&std::path::Path], ()>(&[])'
   '';
 
   configurePhase = ''
     cat ${vargoConfig} >> tools/vargo/.cargo/config.toml
-    mkdir source/.cargo
-    cp ${config} source/.cargo/config.toml
+    cat ${config} >> source/.cargo/config.toml
   '';
 
   buildPhase = ''
