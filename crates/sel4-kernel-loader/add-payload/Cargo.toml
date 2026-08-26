@@ -21,7 +21,7 @@ anyhow = "1.0.100"
 bitfield = "0.19.3"
 clap = { version = "4.5.50", features = ["derive"] }
 num = "0.4.3"
-object = "0.38.1"
+object = "0.40.0"
 rkyv = "0.8.12"
 sel4-config-types = { path = "../../sel4/config/types", features = ["serde"] }
 sel4-kernel-loader-payload-types = { path = "../payload-types" }

@@ -28,12 +28,12 @@ bindgen = "0.72.1"
 glob = "0.3.3"
 pest = "2.8.3"
 pest_derive = "2.8.3"
-prettyplease = "0.2.37"
+prettyplease = "0.3.0"
 proc-macro2 = "1.0.103"
 quote = "1.0.41"
 regex = "1.12.2"
 sel4-build-env = { path = "../build-env" }
 sel4-config = { path = "../config" }
 sel4-config-data = { path = "../config/data" }
-syn = { version = "2.0.108", features = ["parsing"] }
+syn = { version = "3.0.4", features = ["parsing"] }
 xmltree = "0.12.0"
