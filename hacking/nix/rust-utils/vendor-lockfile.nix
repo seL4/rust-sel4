@@ -42,7 +42,7 @@ let
   cratesIOSource = "registry+${cratesIORegistryURL}";
 
   mkCratesIOCrateTarballURL = { name, version }:
-    "https://crates.io/api/v1/crates/${name}/${version}/download";
+    "https://static.crates.io/crates/${name}/${version}/download";
 
   mkCrateTarballURLFns = {
     "${cratesIORegistryURL}" = mkCratesIOCrateTarballURL;
