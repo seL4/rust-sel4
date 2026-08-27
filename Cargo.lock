@@ -979,8 +979,7 @@ dependencies = [
 [[package]]
 name = "hashbrown"
 version = "0.17.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ed5909b6e89a2db4456e54cd5f673791d7eca6732202bbf2a9cc504fe2f9b84a"
+source = "git+https://github.com/coliasgroup/hashbrown.git?rev=c284cda40a72b0e9ddb1f9a8ea490d4f73473483#c284cda40a72b0e9ddb1f9a8ea490d4f73473483"
 dependencies = [
  "allocator-api2",
  "equivalent",

@@ -91,7 +91,11 @@ let
       commonModifications = {
         modifyManifest = lib.flip crateUtils.combineConfig {
           patch.crates-io = {
-            inherit (globalPatchSection.crates-io) ring;
+            inherit (globalPatchSection.crates-io)
+              ring
+              # HACK
+              hashbrown
+            ;
           };
         };
         modifyDerivation = drv: drv.overrideAttrs (self: super: {

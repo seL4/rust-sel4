@@ -310,11 +310,24 @@ superCallPackage ../rust-utils {} self //
 
   sel4-backtrace-embedded-debug-cli = mkTool crates.sel4-backtrace-embedded-debug-info-cli;
   sel4-backtrace-cli = mkTool crates.sel4-backtrace-cli;
-  sel4-capdl-initializer-add-spec = mkTool crates.sel4-capdl-initializer-add-spec;
-  sel4-simple-task-runtime-config-cli = mkTool crates.sel4-simple-task-runtime-config-cli;
-  sel4-kernel-loader-add-payload = mkTool crates.sel4-kernel-loader-add-payload;
   sel4-reset-cli = mkTool crates.sel4-reset-cli;
   sel4-test-sentinels-wrapper = mkTool crates.sel4-test-sentinels-wrapper;
+
+  # HACK
+  mkToolWithRkyv = rootCrate: buildCratesInLayers {
+    inherit rootCrate;
+    commonModifications = {
+      modifyManifest = lib.flip crateUtils.combineConfig {
+        patch.crates-io = {
+          inherit (globalPatchSection.crates-io) hashbrown;
+        };
+      };
+    };
+  };
+
+  sel4-capdl-initializer-add-spec = mkToolWithRkyv crates.sel4-capdl-initializer-add-spec;
+  sel4-kernel-loader-add-payload = mkToolWithRkyv crates.sel4-kernel-loader-add-payload;
+  sel4-simple-task-runtime-config-cli = mkToolWithRkyv crates.sel4-simple-task-runtime-config-cli;
 
   mkGenerateTargetSpecs = callBuildBuildPackage ./generate-target-specs.nix {};
 
@@ -337,6 +350,13 @@ superCallPackage ../rust-utils {} self //
     features = [
       "sel4-backtrace-types/full"
     ];
+    commonModifications = {
+      modifyManifest = lib.flip crateUtils.combineConfig {
+        patch.crates-io = {
+          inherit (globalPatchSection.crates-io) hashbrown;
+        };
+      };
+    };
   };
 
   ### kernel

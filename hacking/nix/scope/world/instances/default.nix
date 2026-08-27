@@ -16,6 +16,7 @@
 
 , crates
 , crateUtils
+, globalPatchSection
 
 , mkTask, mkSeL4KernelLoaderWithPayload
 , embedDebugInfo
@@ -124,6 +125,14 @@ in rec {
         rootTask = mkTask {
           rootCrate = crates.tests-root-task-loader;
           release = false;
+          commonModifications = {
+            modifyManifest = lib.flip crateUtils.combineConfig {
+              # HACK
+              patch.crates-io = {
+                inherit (globalPatchSection.crates-io) hashbrown;
+              };
+            };
+          };
         };
         extraPlatformArgs = lib.optionalAttrs canSimulate {
           canAutomateSimply = true;
@@ -378,6 +387,14 @@ in rec {
           rootCrate = crates.tests-capdl-threads;
           targetTriple = mkSeL4RustTargetTriple { unwind = haveUnwindingSupport; };
           release = true; # test optimizations
+          # HACK
+          commonModifications = {
+            modifyManifest = lib.flip crateUtils.combineConfig {
+              patch.crates-io = {
+                inherit (globalPatchSection.crates-io) hashbrown;
+              };
+            };
+          };
         };
         rootTask = mkCapDLInitializer {
           spec = mkSimpleCompositionCapDLSpec {
@@ -398,6 +415,14 @@ in rec {
           targetTriple = mkSeL4RustTargetTriple { unwind = haveUnwindingSupport; };
           # release = false;
           release = true;
+          # HACK
+          commonModifications = {
+            modifyManifest = lib.flip crateUtils.combineConfig {
+              patch.crates-io = {
+                inherit (globalPatchSection.crates-io) hashbrown;
+              };
+            };
+          };
         };
         rootTask = mkCapDLInitializer {
           spec = mkSimpleCompositionCapDLSpec {

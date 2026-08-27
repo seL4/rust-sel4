@@ -7,6 +7,7 @@
 { lib, buildPackages, writeText
 , buildCratesInLayers, buildSysroot, crateUtils
 , crates, bareMetalRustTargetTriple
+, globalPatchSection
 , libclangPath
 , seL4RustEnvVars, seL4ForBoot, seL4ForUserspace
 , kernelLoaderConfig
@@ -53,7 +54,16 @@ buildCratesInLayers {
   features = [];
 
   commonModifications = {
-    modifyManifest = lib.flip crateUtils.combineConfig profiles;
+    modifyManifest = lib.flip crateUtils.combineConfig (crateUtils.clobber
+      [
+        profiles
+        {
+          # HACK
+          patch.crates-io = {
+            inherit (globalPatchSection.crates-io) hashbrown;
+          };
+        }
+      ]);
     modifyConfig = lib.flip crateUtils.combineConfig {
       target.${targetTriple.name}.rustflags = [
         "--sysroot" sysroot

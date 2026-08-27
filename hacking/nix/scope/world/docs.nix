@@ -14,6 +14,7 @@
 , buildSysroot
 , libclangPath
 , crates
+, globalPatchSection
 
 , mkSeL4RustTargetTriple
 , seL4RustEnvVars
@@ -51,6 +52,12 @@ let
       prunedLockfile = pruneLockfile {
         inherit (rustEnvironment) rustToolchain vendoredSuperLockfile;
         rootCrates = [ rootCrate ];
+        extraManifest = {
+          # HACK
+          patch.crates-io = {
+            inherit (globalPatchSection.crates-io) hashbrown;
+          };
+        };
       };
 
       vendoredLockfile = vendorLockfile {
@@ -90,6 +97,10 @@ let
       manifest = crateUtils.toTOMLFile "Cargo.toml" ({
         workspace.resolver = "3";
         workspace.members = [ "src/${rootCrate.name}" ];
+        # HACK
+        patch.crates-io = {
+          inherit (globalPatchSection.crates-io) hashbrown;
+        };
       });
 
       src = crateUtils.collectReals (lib.attrValues rootCrate.closure);
