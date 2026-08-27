@@ -24,7 +24,7 @@
     members = lib.naturalSort (lib.mapAttrsToList (_: v: v.path) localCrates);
   };
   patch.crates-io = {
-    ring = localCrates.ring or  {
+    ring = localCrates.ring or {
       git = "https://github.com/coliasgroup/ring.git";
       rev = "0f749acc5d5a8310dfc3ff985df04056f497fc1b"; # branch sel4
     };
