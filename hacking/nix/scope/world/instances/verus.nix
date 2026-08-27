@@ -8,6 +8,7 @@
 
 , crates
 , crateUtils
+, globalPatchSection
 , seL4Modifications
 , mkTask
 
@@ -38,6 +39,15 @@ mkInstance {
       # }
     ];
   
+    # HACK
+    commonModifications = {
+      modifyManifest = lib.flip crateUtils.combineConfig {
+        patch.crates-io = {
+          inherit (globalPatchSection.crates-io) hashbrown;
+        };
+      };
+    };
+
     verifyWithVerus = true;
   };
 
