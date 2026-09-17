@@ -20,7 +20,7 @@ use sel4_capdl_initializer_types_derive::{HasCapTable, IsCap, IsObject};
 
 use crate::{HasArchivedCapTable, HasCapTable};
 
-#[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[derive(rkyv::Archive, rkyv::Serialize)]
 #[rkyv(derive(Debug, Copy, Clone, Eq, PartialEq))]
@@ -62,7 +62,7 @@ impl ArchivedObjectId {
     }
 }
 
-#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[derive(rkyv::Archive, rkyv::Serialize)]
 #[rkyv(derive(Debug, Copy, Clone, Eq, PartialEq))]
@@ -92,7 +92,7 @@ impl From<ArchivedCapSlot> for usize {
     }
 }
 
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[derive(rkyv::Archive, rkyv::Serialize)]
 pub struct CapTableEntry {
@@ -118,7 +118,7 @@ pub struct Spec<D> {
     pub log_level: Option<u8>,
 }
 
-#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[derive(rkyv::Archive, rkyv::Serialize)]
 #[rkyv(derive(Debug, Copy, Clone, Eq, PartialEq))]
@@ -136,7 +136,7 @@ impl From<Word> for u64 {
     }
 }
 
-#[derive(Debug, Clone, Copy, Eq, PartialEq)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Ord, PartialOrd, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[derive(rkyv::Archive, rkyv::Serialize)]
 pub struct IrqEntry {
@@ -144,7 +144,7 @@ pub struct IrqEntry {
     pub handler: ObjectId,
 }
 
-#[derive(Debug, Clone, Copy, Eq, PartialEq)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Ord, PartialOrd, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[derive(rkyv::Archive, rkyv::Serialize)]
 pub enum DomainSchedDuration {
@@ -153,7 +153,7 @@ pub enum DomainSchedDuration {
     EndMarker,
 }
 
-#[derive(Debug, Clone, Copy, Eq, PartialEq)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Ord, PartialOrd, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[derive(rkyv::Archive, rkyv::Serialize)]
 pub struct DomainSchedEntry {
@@ -163,7 +163,7 @@ pub struct DomainSchedEntry {
 
 pub type AsidSlotEntry = ObjectId;
 
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[derive(rkyv::Archive, rkyv::Serialize)]
 pub struct UntypedCover {
@@ -171,7 +171,7 @@ pub struct UntypedCover {
     pub children: Range<ObjectId>,
 }
 
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[derive(rkyv::Archive, rkyv::Serialize)]
 pub struct OrigCapSlots {
@@ -179,7 +179,7 @@ pub struct OrigCapSlots {
     pub offsets_by_object: Vec<Option<u32>>,
 }
 
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[derive(rkyv::Archive, rkyv::Serialize)]
 pub struct NamedObject<D> {
@@ -187,7 +187,7 @@ pub struct NamedObject<D> {
     pub object: Object<D>,
 }
 
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[derive(rkyv::Archive, rkyv::Serialize)]
 pub enum Object<D> {
@@ -281,7 +281,7 @@ impl<D: Archive> ArchivedObject<D> {
     }
 }
 
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[derive(rkyv::Archive, rkyv::Serialize)]
 pub enum Cap {
@@ -410,7 +410,7 @@ impl ArchivedCap {
 pub mod object {
     use super::*;
 
-    #[derive(Debug, Clone, Eq, PartialEq, IsObject)]
+    #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, IsObject)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
     #[derive(rkyv::Archive, rkyv::Serialize)]
     pub struct Untyped {
@@ -418,7 +418,7 @@ pub mod object {
         pub paddr: Option<Word>,
     }
 
-    #[derive(Debug, Clone, Eq, PartialEq, IsObject, HasCapTable)]
+    #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, IsObject, HasCapTable)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
     #[derive(rkyv::Archive, rkyv::Serialize)]
     pub struct CNode {
@@ -426,7 +426,7 @@ pub mod object {
         pub slots: Vec<CapTableEntry>,
     }
 
-    #[derive(Debug, Clone, Eq, PartialEq, IsObject, HasCapTable)]
+    #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, IsObject, HasCapTable)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
     #[derive(rkyv::Archive, rkyv::Serialize)]
     pub struct Tcb {
@@ -434,7 +434,7 @@ pub mod object {
         pub extra: Box<TcbExtraInfo>,
     }
 
-    #[derive(Debug, Clone, Eq, PartialEq)]
+    #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
     #[derive(rkyv::Archive, rkyv::Serialize)]
     pub struct TcbExtraInfo {
@@ -455,14 +455,14 @@ pub mod object {
         pub master_fault_ep: Option<Word>,
     }
 
-    #[derive(Debug, Clone, Eq, PartialEq, IsObject, HasCapTable)]
+    #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, IsObject, HasCapTable)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
     #[derive(rkyv::Archive, rkyv::Serialize)]
     pub struct Irq {
         pub slots: Vec<CapTableEntry>,
     }
 
-    #[derive(Debug, Clone, Eq, PartialEq, IsObject)]
+    #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, IsObject)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
     #[derive(rkyv::Archive, rkyv::Serialize)]
     pub struct Frame<D> {
@@ -471,7 +471,7 @@ pub mod object {
         pub init: D,
     }
 
-    #[derive(Debug, Clone, Eq, PartialEq, IsObject, HasCapTable)]
+    #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, IsObject, HasCapTable)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
     #[derive(rkyv::Archive, rkyv::Serialize)]
     pub struct PageTable {
@@ -482,14 +482,14 @@ pub mod object {
         pub slots: Vec<CapTableEntry>,
     }
 
-    #[derive(Debug, Clone, Eq, PartialEq, IsObject)]
+    #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, IsObject)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
     #[derive(rkyv::Archive, rkyv::Serialize)]
     pub struct AsidPool {
         pub high: Word,
     }
 
-    #[derive(Debug, Clone, Eq, PartialEq, IsObject, HasCapTable)]
+    #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, IsObject, HasCapTable)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
     #[derive(rkyv::Archive, rkyv::Serialize)]
     pub struct IOSpace {
@@ -498,7 +498,7 @@ pub mod object {
         pub pci_device: PCIDevice,
     }
 
-    #[derive(Debug, Clone, Copy, Eq, PartialEq)]
+    #[derive(Debug, Clone, Copy, Eq, PartialEq, Ord, PartialOrd, Hash)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
     #[derive(rkyv::Archive, rkyv::Serialize)]
     pub struct PCIDevice {
@@ -514,7 +514,7 @@ pub mod object {
         pub const PCI_FUNC_MAX: u8 = (1 << 3) - 1;
     }
 
-    #[derive(Debug, Clone, Eq, PartialEq, IsObject, HasCapTable)]
+    #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, IsObject, HasCapTable)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
     #[derive(rkyv::Archive, rkyv::Serialize)]
     pub struct IOPageTable {
@@ -522,7 +522,7 @@ pub mod object {
         pub level: Word,
     }
 
-    #[derive(Debug, Clone, Eq, PartialEq, IsObject, HasCapTable)]
+    #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, IsObject, HasCapTable)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
     #[derive(rkyv::Archive, rkyv::Serialize)]
     pub struct ArmIrq {
@@ -530,7 +530,7 @@ pub mod object {
         pub extra: Box<ArmIrqExtraInfo>,
     }
 
-    #[derive(Debug, Clone, Eq, PartialEq)]
+    #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
     #[derive(rkyv::Archive, rkyv::Serialize)]
     pub struct ArmIrqExtraInfo {
@@ -538,7 +538,7 @@ pub mod object {
         pub target: Word,
     }
 
-    #[derive(Debug, Clone, Eq, PartialEq, IsObject, HasCapTable)]
+    #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, IsObject, HasCapTable)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
     #[derive(rkyv::Archive, rkyv::Serialize)]
     pub struct IrqMsi {
@@ -546,7 +546,7 @@ pub mod object {
         pub extra: Box<IrqMsiExtraInfo>,
     }
 
-    #[derive(Debug, Clone, Eq, PartialEq)]
+    #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
     #[derive(rkyv::Archive, rkyv::Serialize)]
     pub struct IrqMsiExtraInfo {
@@ -556,7 +556,7 @@ pub mod object {
         pub pci_func: Word,
     }
 
-    #[derive(Debug, Clone, Eq, PartialEq, IsObject, HasCapTable)]
+    #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, IsObject, HasCapTable)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
     #[derive(rkyv::Archive, rkyv::Serialize)]
     pub struct IrqIOApic {
@@ -564,7 +564,7 @@ pub mod object {
         pub extra: Box<IrqIOApicExtraInfo>,
     }
 
-    #[derive(Debug, Clone, Eq, PartialEq)]
+    #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
     #[derive(rkyv::Archive, rkyv::Serialize)]
     pub struct IrqIOApicExtraInfo {
@@ -574,7 +574,7 @@ pub mod object {
         pub polarity: Word,
     }
 
-    #[derive(Debug, Clone, Eq, PartialEq, IsObject, HasCapTable)]
+    #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, IsObject, HasCapTable)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
     #[derive(rkyv::Archive, rkyv::Serialize)]
     pub struct RiscvIrq {
@@ -582,14 +582,14 @@ pub mod object {
         pub extra: RiscvIrqExtraInfo,
     }
 
-    #[derive(Debug, Clone, Eq, PartialEq)]
+    #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
     #[derive(rkyv::Archive, rkyv::Serialize)]
     pub struct RiscvIrqExtraInfo {
         pub trigger: u8,
     }
 
-    #[derive(Debug, Clone, Eq, PartialEq, IsObject)]
+    #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, IsObject)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
     #[derive(rkyv::Archive, rkyv::Serialize)]
     pub struct IOPorts {
@@ -597,7 +597,7 @@ pub mod object {
         pub end_port: Word,
     }
 
-    #[derive(Debug, Clone, Eq, PartialEq, IsObject)]
+    #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, IsObject)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
     #[derive(rkyv::Archive, rkyv::Serialize)]
     pub struct SchedContext {
@@ -605,7 +605,7 @@ pub mod object {
         pub extra: SchedContextExtraInfo,
     }
 
-    #[derive(Debug, Clone, Eq, PartialEq)]
+    #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
     #[derive(rkyv::Archive, rkyv::Serialize)]
     pub struct SchedContextExtraInfo {
@@ -616,7 +616,7 @@ pub mod object {
 }
 
 // TODO Would packing have an actual effect on memory footprint?
-#[derive(Debug, Clone, Copy, Eq, PartialEq)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Ord, PartialOrd, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[derive(rkyv::Archive, rkyv::Serialize)]
 pub struct Rights {
@@ -629,14 +629,14 @@ pub struct Rights {
 pub mod cap {
     use super::*;
 
-    #[derive(Debug, Clone, Eq, PartialEq, IsCap)]
+    #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, IsCap)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
     #[derive(rkyv::Archive, rkyv::Serialize)]
     pub struct Untyped {
         pub object: ObjectId,
     }
 
-    #[derive(Debug, Clone, Eq, PartialEq, IsCap)]
+    #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, IsCap)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
     #[derive(rkyv::Archive, rkyv::Serialize)]
     pub struct Endpoint {
@@ -650,7 +650,7 @@ pub mod cap {
         pub rights: Rights,
     }
 
-    #[derive(Debug, Clone, Eq, PartialEq, IsCap)]
+    #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, IsCap)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
     #[derive(rkyv::Archive, rkyv::Serialize)]
     pub struct Notification {
@@ -659,7 +659,7 @@ pub mod cap {
         pub rights: Rights,
     }
 
-    #[derive(Debug, Clone, Eq, PartialEq, IsCap)]
+    #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, IsCap)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
     #[derive(rkyv::Archive, rkyv::Serialize)]
     pub struct CNode {
@@ -668,28 +668,28 @@ pub mod cap {
         pub guard_size: u8,
     }
 
-    #[derive(Debug, Clone, Eq, PartialEq, IsCap)]
+    #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, IsCap)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
     #[derive(rkyv::Archive, rkyv::Serialize)]
     pub struct Tcb {
         pub object: ObjectId,
     }
 
-    #[derive(Debug, Clone, Eq, PartialEq, IsCap)]
+    #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, IsCap)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
     #[derive(rkyv::Archive, rkyv::Serialize)]
     pub struct IrqHandler {
         pub object: ObjectId,
     }
 
-    #[derive(Debug, Clone, Eq, PartialEq, IsCap)]
+    #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, IsCap)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
     #[derive(rkyv::Archive, rkyv::Serialize)]
     pub struct VCpu {
         pub object: ObjectId,
     }
 
-    #[derive(Debug, Clone, Eq, PartialEq, IsCap)]
+    #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, IsCap)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
     #[derive(rkyv::Archive, rkyv::Serialize)]
     pub struct Frame {
@@ -699,77 +699,77 @@ pub mod cap {
         pub executable: bool,
     }
 
-    #[derive(Debug, Clone, Eq, PartialEq, IsCap)]
+    #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, IsCap)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
     #[derive(rkyv::Archive, rkyv::Serialize)]
     pub struct PageTable {
         pub object: ObjectId,
     }
 
-    #[derive(Debug, Clone, Eq, PartialEq, IsCap)]
+    #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, IsCap)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
     #[derive(rkyv::Archive, rkyv::Serialize)]
     pub struct AsidPool {
         pub object: ObjectId,
     }
 
-    #[derive(Debug, Clone, Eq, PartialEq, IsCap)]
+    #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, IsCap)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
     #[derive(rkyv::Archive, rkyv::Serialize)]
     pub struct IOSpace {
         pub object: ObjectId,
     }
 
-    #[derive(Debug, Clone, Eq, PartialEq, IsCap)]
+    #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, IsCap)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
     #[derive(rkyv::Archive, rkyv::Serialize)]
     pub struct IOPageTable {
         pub object: ObjectId,
     }
 
-    #[derive(Debug, Clone, Eq, PartialEq, IsCap)]
+    #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, IsCap)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
     #[derive(rkyv::Archive, rkyv::Serialize)]
     pub struct ArmIrqHandler {
         pub object: ObjectId,
     }
 
-    #[derive(Debug, Clone, Eq, PartialEq, IsCap)]
+    #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, IsCap)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
     #[derive(rkyv::Archive, rkyv::Serialize)]
     pub struct IrqMsiHandler {
         pub object: ObjectId,
     }
 
-    #[derive(Debug, Clone, Eq, PartialEq, IsCap)]
+    #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, IsCap)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
     #[derive(rkyv::Archive, rkyv::Serialize)]
     pub struct IrqIOApicHandler {
         pub object: ObjectId,
     }
 
-    #[derive(Debug, Clone, Eq, PartialEq, IsCap)]
+    #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, IsCap)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
     #[derive(rkyv::Archive, rkyv::Serialize)]
     pub struct RiscvIrqHandler {
         pub object: ObjectId,
     }
 
-    #[derive(Debug, Clone, Eq, PartialEq, IsCap)]
+    #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, IsCap)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
     #[derive(rkyv::Archive, rkyv::Serialize)]
     pub struct IOPorts {
         pub object: ObjectId,
     }
 
-    #[derive(Debug, Clone, Eq, PartialEq, IsCap)]
+    #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, IsCap)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
     #[derive(rkyv::Archive, rkyv::Serialize)]
     pub struct SchedContext {
         pub object: ObjectId,
     }
 
-    #[derive(Debug, Clone, Eq, PartialEq, IsCap)]
+    #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, IsCap)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
     #[derive(rkyv::Archive, rkyv::Serialize)]
     pub struct Reply {
@@ -777,7 +777,7 @@ pub mod cap {
         pub rights: Rights,
     }
 
-    #[derive(Debug, Clone, Eq, PartialEq, IsCap)]
+    #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, IsCap)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
     #[derive(rkyv::Archive, rkyv::Serialize)]
     pub struct ArmSmc {
@@ -786,7 +786,7 @@ pub mod cap {
         pub badge: Word,
     }
 
-    #[derive(Debug, Clone, Eq, PartialEq, IsCap)]
+    #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, IsCap)]
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
     #[derive(rkyv::Archive, rkyv::Serialize)]
     pub struct DomainSet {
