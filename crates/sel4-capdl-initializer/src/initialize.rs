@@ -517,6 +517,7 @@ impl<'a> Initializer<'a> {
                         let orig_cptr = self.orig_absolute_cptr(logical_nfn_cap.object);
                         let slot = self.cslot_alloc_or_panic();
                         let cptr = cslot_to_absolute_cptr(slot);
+                        // all() here inherits from rights on logical_nfn_cap
                         cptr.mint(&orig_cptr, CapRights::all(), badge)?;
                         slot.cap().downcast()
                     }
@@ -750,7 +751,7 @@ impl<'a> Initializer<'a> {
         let cap_data =
             sel4::io_space::IOSpaceCapData::new(obj.domain_id.to_sel4(), pci_bus, pci_dev, pci_fn);
 
-        dst.mint(&src, CapRights::all(), cap_data.into())
+        dst.mint(&src, CapRights::none(), cap_data.into())
             .map(|_| Ok(self.orig_cap::<cap_type::IOSpace>(obj_id)))
             .unwrap_or_else(|err| panic!("Error: {err} when minting an x86 IOSpace capability."))
     }
@@ -1036,7 +1037,7 @@ impl<'a> Initializer<'a> {
             let cnode = self.orig_cap::<cap_type::CNode>(obj_id);
             for entry in obj.slots() {
                 let badge = entry.cap.badge();
-                let rights = entry.cap.rights().unwrap_or(CapRights::all());
+                let rights = entry.cap.rights().unwrap_or(CapRights::none());
                 let src = init_thread::slot::CNODE
                     .cap()
                     .absolute_cptr(self.orig_cap::<cap_type::Unspecified>(entry.cap.obj()));
