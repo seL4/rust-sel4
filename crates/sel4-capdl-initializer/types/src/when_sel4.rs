@@ -90,6 +90,7 @@ impl ArchivedCap {
                 ArchivedCap::Endpoint(cap) => &cap.rights,
                 ArchivedCap::Notification(cap) => &cap.rights,
                 ArchivedCap::Frame(cap) => &cap.rights,
+                ArchivedCap::Reply(cap) => &cap.rights,
                 _ => return None,
             }
             .to_sel4(),
