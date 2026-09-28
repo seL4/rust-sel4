@@ -774,6 +774,7 @@ pub mod cap {
     #[derive(rkyv::Archive, rkyv::Serialize)]
     pub struct Reply {
         pub object: ObjectId,
+        pub rights: Rights,
     }
 
     #[derive(Debug, Clone, Eq, PartialEq, IsCap)]
