@@ -61,16 +61,30 @@ fn main(bootinfo: &sel4::BootInfoPtr) -> sel4::Result<Never> {
 
     let child_tcb = object_allocator.allocate_fixed_sized::<sel4::cap_type::Tcb>();
 
-    child_tcb
-        .tcb_configure(
-            sel4::init_thread::slot::NULL.cptr(),
-            child_cnode,
-            sel4::CNodeCapData::new(0, sel4::WORD_SIZE - child_cnode_size_bits),
-            child_vspace,
-            ipc_buffer_addr as sel4::Word,
-            ipc_buffer_cap,
-        )
-        .unwrap();
+    sel4::sel4_cfg_if! {
+        if #[sel4_cfg(KERNEL_MCS)] {
+            child_tcb
+                .tcb_configure(
+                    child_cnode,
+                    sel4::CNodeCapData::new(0, sel4::WORD_SIZE - child_cnode_size_bits),
+                    child_vspace,
+                    ipc_buffer_addr as sel4::Word,
+                    ipc_buffer_cap,
+                )
+                .unwrap();
+        } else {
+            child_tcb
+                .tcb_configure(
+                    sel4::init_thread::slot::NULL.cptr(),
+                    child_cnode,
+                    sel4::CNodeCapData::new(0, sel4::WORD_SIZE - child_cnode_size_bits),
+                    child_vspace,
+                    ipc_buffer_addr as sel4::Word,
+                    ipc_buffer_cap,
+                )
+                .unwrap();
+        }
+    }
 
     child_cnode
         .absolute_cptr_from_bits_with_depth(2, child_cnode_size_bits)
