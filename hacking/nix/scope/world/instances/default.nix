@@ -128,14 +128,6 @@ in rec {
         rootTask = mkTask {
           rootCrate = crates.tests-root-task-loader;
           release = false;
-          commonModifications = {
-            modifyManifest = lib.flip crateUtils.combineConfig {
-              # HACK
-              patch.crates-io = {
-                inherit (globalPatchSection.crates-io) hashbrown;
-              };
-            };
-          };
         };
         extraPlatformArgs = lib.optionalAttrs canSimulate {
           canAutomateSimply = true;

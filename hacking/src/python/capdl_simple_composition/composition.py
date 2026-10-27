@@ -58,9 +58,9 @@ class BaseComposition:
         if self.kernel_config.sel4_arch() != 'x86_64':
             device_tree_path = f'{kernel}/support/kernel.dtb'
             self.device_tree = DeviceTree(device_tree_path)
-            platform_info_path = f'{kernel}/support/platform_gen.yaml'
+            platform_info_path = f'{kernel}/support/platform_gen.json'
             with open(platform_info_path) as f:
-                self.platform_info = yaml.load(f, Loader=yaml.FullLoader)
+                self.platform_info = json.load(f)
 
         with open(object_sizes) as f:
             object_sizes = yaml.load(f, Loader=yaml.FullLoader)

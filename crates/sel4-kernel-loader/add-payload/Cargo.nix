@@ -12,7 +12,6 @@ mk {
     inherit (versions)
       anyhow
       serde_json
-      serde_yaml
       num
       object
       rkyv

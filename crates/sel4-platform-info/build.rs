@@ -18,13 +18,13 @@ use sel4_platform_info_types::OwnedPlatformInfo;
 const SEL4_PLATFORM_INFO_ENV: &str = "SEL4_PLATFORM_INFO";
 
 #[sel4_config::sel4_cfg(ARCH_X86)]
-compile_error!("platform_gen.yaml is not generated for x86 platforms");
+compile_error!("platform_gen.json is not generated for x86 platforms");
 
 fn main() {
     let platform_info_path =
-        get_with_sel4_prefix_relative_fallback(SEL4_PLATFORM_INFO_ENV, "support/platform_gen.yaml");
+        get_with_sel4_prefix_relative_fallback(SEL4_PLATFORM_INFO_ENV, "support/platform_gen.json");
     let platform_info: OwnedPlatformInfo =
-        serde_yaml::from_reader(fs::File::open(platform_info_path).unwrap()).unwrap();
+        serde_json::from_reader(fs::File::open(platform_info_path).unwrap()).unwrap();
     let fragment = embed(&platform_info);
     let out_dir = env::var("OUT_DIR").unwrap();
     let out_path = PathBuf::from(&out_dir).join("gen.rs");
