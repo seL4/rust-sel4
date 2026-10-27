@@ -6,14 +6,16 @@
 
 use sel4_config::sel4_cfg_usize;
 
-cfg_if::cfg_if! {
-    if #[cfg(target_arch = "aarch64")] {
+cfg_select! {
+    target_arch = "aarch64" => {
         mod aarch64;
         pub(crate) use aarch64::*;
-    } else if #[cfg(target_arch = "arm")] {
+    }
+    target_arch = "arm" => {
         mod aarch32;
         pub(crate) use aarch32::*;
-    } else if #[cfg(any(target_arch = "riscv64", target_arch = "riscv32"))] {
+    }
+    any(target_arch = "riscv64", target_arch = "riscv32") => {
         mod riscv;
         pub(crate) use riscv::*;
     }

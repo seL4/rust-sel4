@@ -9,7 +9,6 @@
 mk {
   package.name = "spawn-thread";
   dependencies = {
-    inherit (versions) cfg-if;
     inherit (localCrates)
       sel4
       sel4-root-task

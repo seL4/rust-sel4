@@ -47,12 +47,14 @@
 //! "C"` block. Whether it is thread-local is determined by the following pseudocode:
 //!
 //! ```rust
-//! cfg_if! {
-//!     if #[cfg(all(any(target_thread_local, feature = "tls"), not(feature = "non-thread-local-state")))] {
+//! cfg_select! {
+//!     all(any(target_thread_local, feature = "tls"), not(feature = "non-thread-local-state")) => {
 //!         // thread-local
-//!     } else if #[cfg(not(feature = "thread-local-state"))] {
+//!     }
+//!     not(feature = "thread-local-state") => {
 //!         // not thread-local
-//!     } else {
+//!     }
+//!     _ => {
 //!         compile_error!(r#"invalid configuration"#);
 //!     }
 //! }

@@ -9,7 +9,6 @@
 mk {
   package.name = "tests-root-task-panicking";
   dependencies = {
-    inherit (versions) cfg-if;
     inherit (localCrates)
       sel4
       sel4-root-task

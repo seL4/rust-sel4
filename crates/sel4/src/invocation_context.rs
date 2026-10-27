@@ -41,13 +41,10 @@ impl<U: InvocationContext> InvocationContext for &RefCell<U> {
     }
 }
 
-cfg_if::cfg_if! {
-    if #[cfg(feature = "state")] {
-        type NoExplicitInvocationContextInternal = crate::ImplicitInvocationContext;
-    } else {
-        type NoExplicitInvocationContextInternal = NoInvocationContext;
-    }
-}
+type NoExplicitInvocationContextInternal = cfg_select! {
+    feature = "state" => crate::ImplicitInvocationContext,
+    _ => NoInvocationContext,
+};
 
 /// The default strategy for discovering the current thread's IPC buffer.
 ///

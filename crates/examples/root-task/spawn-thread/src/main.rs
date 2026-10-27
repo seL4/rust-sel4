@@ -17,8 +17,6 @@ use core::ops::Range;
 use core::panic::UnwindSafe;
 use core::ptr;
 
-use cfg_if::cfg_if;
-
 use sel4_initialize_tls::{TlsImage, UncheckedTlsImage};
 use sel4_phdrs::{PT_TLS, locate_phdrs};
 use sel4_root_task::{
@@ -150,26 +148,23 @@ fn create_user_context(f: SecondaryThreadFn) -> sel4::UserContext {
     *user_context_thread_pointer_mut(&mut ctx) = tls_reservation.thread_pointer() as sel4::Word;
     mem::forget(tls_reservation);
 
-    cfg_if! {
-        if #[cfg(any(target_arch = "riscv32", target_arch = "riscv64"))] {
+    cfg_select! {
+        any(target_arch = "riscv32", target_arch = "riscv64") => {
             ctx.inner_mut().gp = riscv_get_gp();
         }
+        _ => {}
     }
 
     ctx
 }
 
 fn user_context_thread_pointer_mut(ctx: &mut sel4::UserContext) -> &mut sel4::Word {
-    cfg_if! {
-        if #[cfg(target_arch = "aarch64")] {
-            &mut ctx.inner_mut().tpidr_el0
-        } else if #[cfg(target_arch = "arm")] {
-            &mut ctx.inner_mut().tpidrurw
-        } else if #[cfg(any(target_arch = "riscv32", target_arch = "riscv64"))] {
-            &mut ctx.inner_mut().tp
-        } else if #[cfg(target_arch = "x86_64")] {
-            &mut ctx.inner_mut().fs_base
-        } else {
+    cfg_select! {
+        target_arch = "aarch64" => &mut ctx.inner_mut().tpidr_el0,
+        target_arch = "arm" => &mut ctx.inner_mut().tpidrurw,
+        any(target_arch = "riscv32", target_arch = "riscv64") => &mut ctx.inner_mut().tp,
+        target_arch = "x86_64" => &mut ctx.inner_mut().fs_base,
+        _ => {
             compile_error!("unsupported architecture");
         }
     }

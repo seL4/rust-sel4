@@ -13,10 +13,11 @@ use unwinding::abi::*;
 
 use sel4_panicking_env::abort;
 
-cfg_if::cfg_if! {
-    if #[cfg(feature = "alloc")] {
+cfg_select! {
+    feature = "alloc" => {
         mod with_alloc;
-    } else {
+    }
+    _ => {
         mod without_alloc;
     }
 }

@@ -9,7 +9,7 @@
 mk {
   package.name = "meta";
   dependencies = {
-    inherit (versions) cfg-if log;
+    inherit (versions) log;
 
     inherit (localCrates)
       sel4

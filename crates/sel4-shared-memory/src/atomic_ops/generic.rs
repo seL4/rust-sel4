@@ -10,8 +10,6 @@ use core::intrinsics;
 #[cfg(not(before_const_generic_ordering))]
 use core::intrinsics::AtomicOrdering as AO;
 
-use cfg_if::cfg_if;
-
 #[cfg(before_const_generic_ordering)]
 use paste::paste;
 
@@ -19,8 +17,8 @@ use super::ordering::OrderingExhaustive as Ordering;
 
 use Ordering::*;
 
-cfg_if! {
-    if #[cfg(before_const_generic_ordering)] {
+cfg_select! {
+    before_const_generic_ordering => {
         macro_rules! with_ordering {
             ($ord:ident, $prefix:ident, kind = $_kind:ident, $args:tt) => {
                 paste! {
@@ -36,15 +34,17 @@ cfg_if! {
                 }
             };
         }
-    } else {
-        cfg_if! {
-            if #[cfg(before_move_integer_pointer_cast)] {
+    }
+    _ => {
+        cfg_select! {
+            before_move_integer_pointer_cast => {
                 macro_rules! with_ordering {
                     ($ord:ident, $prefix:ident, kind = $_kind:ident, $args:tt) => {
                         intrinsics::$prefix::<_, { AO::$ord }>$args
                     };
                 }
-            } else if #[cfg(before_volatile)] {
+            }
+            before_volatile => {
                 macro_rules! with_ordering {
                     ($ord:ident, $prefix:ident, kind = A, $args:tt) => {
                         intrinsics::$prefix::<_, { AO::$ord }>$args
@@ -56,7 +56,8 @@ cfg_if! {
                         intrinsics::$prefix::<_, _, { AO::$ord }>$args
                     };
                 }
-            } else {
+            }
+            _ => {
                 macro_rules! with_ordering {
                     ($ord:ident, $prefix:ident, kind = A, $args:tt) => {
                         intrinsics::$prefix::<_, { AO::$ord }>$args

@@ -23,8 +23,11 @@ unsafe impl<T: Sync> Sync for SyncUnsafeCell<T> {}
 #[repr(transparent)]
 struct TokenCellWrapper<A>(TokenCell<TokenImpl, A>);
 
-cfg_if::cfg_if! {
-    if #[cfg(all(any(target_thread_local, feature = "tls"), not(feature = "non-thread-local-state")))] {
+cfg_select! {
+    all(
+        any(target_thread_local, feature = "tls"),
+        not(feature = "non-thread-local-state")
+    ) => {
         type TokenImpl = UnsyncToken;
 
         const STATE_IS_THREAD_LOCAL: bool = true;
@@ -35,13 +38,15 @@ cfg_if::cfg_if! {
                 $item
             }
         }
-    } else if #[cfg(not(feature = "thread-local-state"))] {
-        cfg_if::cfg_if! {
-            if #[cfg(feature = "single-threaded")] {
+    }
+    not(feature = "thread-local-state") => {
+        cfg_select! {
+            feature = "single-threaded" => {
                 unsafe impl<A> Sync for TokenCellWrapper<A> {}
 
                 type TokenImpl = UnsyncToken;
-            } else {
+            }
+            _ => {
                 type TokenImpl = SyncToken;
             }
         }
@@ -53,21 +58,23 @@ cfg_if::cfg_if! {
                 $item
             }
         }
-    } else {
+    }
+    _ => {
         compile_error!(r#"invalid configuration"#);
     }
 }
 
 macro_rules! maybe_extern {
     { $ident:ident: $ty:ty = $init:expr; } => {
-        cfg_if::cfg_if! {
-            if #[cfg(feature = "extern-state")] {
+        cfg_select! {
+            feature = "extern-state" => {
                 unsafe extern "C" {
                     maybe_add_thread_local_attr! {
                         static $ident: $ty;
                     }
                 }
-            } else {
+            }
+            _ => {
                 maybe_add_thread_local_attr! {
                     #[allow(non_upper_case_globals)]
                     #[cfg_attr(feature = "exposed-state", no_mangle)]

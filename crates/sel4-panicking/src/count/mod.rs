@@ -4,11 +4,12 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-cfg_if::cfg_if! {
-    if #[cfg(target_thread_local)] {
+cfg_select! {
+    target_thread_local => {
         mod with_tls;
         use with_tls as whether_tls;
-    } else {
+    }
+    _ => {
         mod without_tls;
         use without_tls as whether_tls;
     }

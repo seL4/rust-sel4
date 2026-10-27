@@ -9,7 +9,7 @@
 mk {
   package.name = "sel4-generate-target-specs";
   dependencies = {
-    inherit (versions) cfg-if serde_json;
+    inherit (versions) serde_json;
     clap = { version = versions.clap; features = [ "derive" ]; };
   };
   build-dependencies = {

@@ -10,7 +10,6 @@ mk {
   package.name = "sel4-microkit";
   dependencies = {
     inherit (versions)
-      cfg-if
       one-shot-mutex
     ;
     inherit (localCrates)

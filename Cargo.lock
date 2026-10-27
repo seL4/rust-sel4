@@ -1252,7 +1252,6 @@ checksum = "cf8baf1c55e62ffcace7a9f06f4bd9cd3f0c4beb022d3b367256b91b87513d98"
 name = "meta"
 version = "0.1.0"
 dependencies = [
- "cfg-if",
  "log",
  "sel4",
  "sel4-abstract-allocator",
@@ -2198,7 +2197,6 @@ dependencies = [
 name = "sel4"
 version = "0.1.0"
 dependencies = [
- "cfg-if",
  "sel4-config",
  "sel4-sys",
 ]
@@ -2232,9 +2230,6 @@ version = "0.1.0"
 [[package]]
 name = "sel4-alloca"
 version = "0.1.0"
-dependencies = [
- "cfg-if",
-]
 
 [[package]]
 name = "sel4-async-block-io"
@@ -2326,7 +2321,6 @@ dependencies = [
 name = "sel4-backtrace"
 version = "0.1.0"
 dependencies = [
- "cfg-if",
  "postcard",
  "sel4-backtrace-types",
  "serde",
@@ -2396,7 +2390,6 @@ name = "sel4-backtrace-types"
 version = "0.1.0"
 dependencies = [
  "addr2line",
- "cfg-if",
  "postcard",
  "sel4-backtrace-symbolize",
  "serde",
@@ -2539,7 +2532,6 @@ dependencies = [
 name = "sel4-generate-target-specs"
 version = "0.1.0"
 dependencies = [
- "cfg-if",
  "clap",
  "rustversion",
  "serde_json",
@@ -2557,7 +2549,6 @@ version = "0.1.0"
 name = "sel4-initialize-tls"
 version = "0.1.0"
 dependencies = [
- "cfg-if",
  "sel4-alloca",
 ]
 
@@ -2568,7 +2559,6 @@ dependencies = [
  "aarch32-cpu",
  "aarch64-cpu",
  "cc",
- "cfg-if",
  "embedded-hal-nb",
  "fdt",
  "glob",
@@ -2648,9 +2638,6 @@ dependencies = [
 [[package]]
 name = "sel4-linux-syscall-types"
 version = "0.1.0"
-dependencies = [
- "cfg-if",
-]
 
 [[package]]
 name = "sel4-logging"
@@ -2664,7 +2651,6 @@ dependencies = [
 name = "sel4-microkit"
 version = "0.1.0"
 dependencies = [
- "cfg-if",
  "one-shot-mutex",
  "sel4",
  "sel4-dlmalloc",
@@ -2786,7 +2772,6 @@ version = "0.1.0"
 name = "sel4-panicking"
 version = "0.1.0"
 dependencies = [
- "cfg-if",
  "sel4-immediate-sync-once-cell",
  "sel4-panicking-env",
  "unwinding",
@@ -2862,7 +2847,6 @@ dependencies = [
 name = "sel4-reset"
 version = "0.1.0"
 dependencies = [
- "cfg-if",
  "sel4-panicking-env",
  "sel4-phdrs",
  "sel4-phdrs-patched",
@@ -2938,7 +2922,6 @@ dependencies = [
 name = "sel4-runtime-common"
 version = "0.1.0"
 dependencies = [
- "cfg-if",
  "sel4",
  "sel4-ctors-dtors",
  "sel4-immutable-cell",
@@ -2954,7 +2937,6 @@ name = "sel4-shared-memory"
 version = "0.1.0"
 dependencies = [
  "aligned",
- "cfg-if",
  "paste",
  "rustversion",
  "sel4-abstract-ptr",
@@ -3385,7 +3367,6 @@ dependencies = [
 name = "spawn-task-child"
 version = "0.1.0"
 dependencies = [
- "cfg-if",
  "one-shot-mutex",
  "sel4",
  "sel4-dlmalloc",
@@ -3398,7 +3379,6 @@ dependencies = [
 name = "spawn-thread"
 version = "0.1.0"
 dependencies = [
- "cfg-if",
  "sel4",
  "sel4-initialize-tls",
  "sel4-phdrs",
@@ -3662,7 +3642,6 @@ dependencies = [
 name = "tests-root-task-panicking"
 version = "0.1.0"
 dependencies = [
- "cfg-if",
  "sel4",
  "sel4-root-task",
  "sel4-test-root-task",

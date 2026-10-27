@@ -9,7 +9,6 @@
 mk {
   package.name = "sel4-initialize-tls";
   dependencies = {
-    inherit (versions) cfg-if;
     sel4-alloca = localCrates.sel4-alloca // { optional = true; };
   };
   features = {
