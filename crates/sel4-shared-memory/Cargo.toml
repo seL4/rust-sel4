@@ -20,7 +20,6 @@ license = "MIT OR Apache-2.0"
 atomics = []
 
 [dependencies]
-paste = "1.0.15"
 sel4-abstract-ptr = { path = "../sel4-abstract-ptr" }
 zerocopy = "0.8.27"
 

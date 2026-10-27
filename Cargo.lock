@@ -2383,9 +2383,6 @@ dependencies = [
 [[package]]
 name = "sel4-bitfield-ops"
 version = "0.1.0"
-dependencies = [
- "rustversion",
-]
 
 [[package]]
 name = "sel4-build-env"
@@ -2509,7 +2506,6 @@ name = "sel4-generate-target-specs"
 version = "0.1.0"
 dependencies = [
  "clap",
- "rustversion",
  "serde_json",
 ]
 
@@ -2911,7 +2907,6 @@ dependencies = [
 name = "sel4-shared-memory"
 version = "0.1.0"
 dependencies = [
- "paste",
  "rustversion",
  "sel4-abstract-ptr",
  "zerocopy",
