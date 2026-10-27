@@ -2531,13 +2531,11 @@ dependencies = [
 name = "sel4-config"
 version = "0.1.0"
 dependencies = [
- "prettyplease 0.3.0",
  "proc-macro2",
  "quote",
  "sel4-config-data",
  "sel4-config-macros",
  "sel4-config-types",
- "syn 3.0.9",
 ]
 
 [[package]]
@@ -3175,7 +3173,6 @@ dependencies = [
  "log",
  "pest",
  "pest_derive",
- "prettyplease 0.3.0",
  "proc-macro2",
  "quote",
  "regex",
@@ -3183,7 +3180,6 @@ dependencies = [
  "sel4-build-env",
  "sel4-config",
  "sel4-config-data",
- "syn 3.0.9",
  "xmltree",
 ]
 
