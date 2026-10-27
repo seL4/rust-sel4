@@ -52,12 +52,24 @@ impl<'a> MkLeafArgs<'a> {
 
 pub(crate) struct RegionContent {
     mk_leaf: Box<dyn MkLeafFn>,
+    min_leaf_level_opt: Option<Level>,
 }
 
 impl RegionContent {
     pub(crate) fn new(mk_leaf: impl MkLeafFn + 'static) -> Self {
         Self {
             mk_leaf: Box::new(mk_leaf),
+            min_leaf_level_opt: None,
+        }
+    }
+
+    pub(crate) fn new_with_min_leaf_level(
+        min_leaf_level: Level,
+        mk_leaf: impl MkLeafFn + 'static,
+    ) -> Self {
+        Self {
+            mk_leaf: Box::new(mk_leaf),
+            min_leaf_level_opt: Some(min_leaf_level),
         }
     }
 }
@@ -101,11 +113,7 @@ where
     fn construct_inner(&mut self, level: Level, table_vaddr: u64) -> Table {
         assert!(level < self.scheme.num_levels());
         let num_entries = self.scheme.num_entries_in_table(level);
-        let step_bits = ((level + 1)..self.scheme.num_levels())
-            .map(|level| self.scheme.level_bits(level))
-            .sum::<u64>()
-            + self.scheme.page_bits();
-        let step = 1 << step_bits;
+        let step = 1 << self.scheme.leaf_size_bits(level);
         Table {
             entries: (0..num_entries)
                 .map(|i| {
@@ -115,8 +123,12 @@ where
                     }
                     assert!(self.current_end() > entry_vaddr);
                     if self.current_end() < entry_vaddr + step
-                        || (self.current_content().is_some()
-                            && level < self.scheme.min_level_for_leaf())
+                        || self.current_content().is_some_and(|content| {
+                            level
+                                < content
+                                    .min_leaf_level_opt
+                                    .unwrap_or_else(|| self.scheme.min_level_for_leaf())
+                        })
                     {
                         AbstractEntry::Branch(Box::new(
                             self.construct_inner(level + 1, entry_vaddr),

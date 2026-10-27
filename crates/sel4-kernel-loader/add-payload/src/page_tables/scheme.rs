@@ -122,19 +122,21 @@ impl Scheme {
         0..(1 << self.vaddr_bits())
     }
 
-    pub(crate) fn largest_leaf_size_bits(&self) -> u64 {
-        ((self.min_level_for_leaf() + 1)..self.num_levels())
+    pub(crate) fn leaf_size_bits(&self, level: Level) -> u64 {
+        ((level + 1)..self.num_levels())
             .map(|level| self.level_bits(level))
             .sum::<u64>()
             + self.page_bits()
     }
 
+    pub(crate) fn min_level_for_leaf_size_bits(&self, max_leaf_size_bits: u64) -> Level {
+        (self.min_level_for_leaf()..self.num_levels())
+            .find(|&level| self.leaf_size_bits(level) <= max_leaf_size_bits)
+            .unwrap()
+    }
+
     pub(crate) fn check_paddr_for_level(&self, level: Level, paddr: u64) {
-        let num_zero_bits = ((level + 1)..self.num_levels())
-            .map(|level| self.level_bits(level))
-            .sum::<u64>()
-            + self.page_bits();
-        let mask = (1 << num_zero_bits) - 1;
+        let mask = (1 << self.leaf_size_bits(level)) - 1;
         assert_eq!(paddr & mask, 0);
     }
 

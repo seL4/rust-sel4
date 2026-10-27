@@ -7,7 +7,7 @@
 use std::ops::Range;
 
 use super::regions::{AbstractRegion, AbstractRegions, AbstractRegionsBuilder};
-use super::scheme::Scheme;
+use super::scheme::{Level, Scheme};
 use super::table::{MkLeafFn, RegionContent, Table};
 
 pub(crate) type Region = AbstractRegion<Option<RegionContent>>;
@@ -31,6 +31,20 @@ impl Region {
         Self {
             range,
             content: Some(RegionContent::new(mk_leaf)),
+        }
+    }
+
+    pub(crate) fn valid_with_min_leaf_level(
+        range: Range<u64>,
+        min_leaf_level: Level,
+        mk_leaf: impl MkLeafFn + 'static,
+    ) -> Self {
+        Self {
+            range,
+            content: Some(RegionContent::new_with_min_leaf_level(
+                min_leaf_level,
+                mk_leaf,
+            )),
         }
     }
 

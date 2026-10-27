@@ -48,18 +48,23 @@ pub(crate) fn mk_kernel_map(
     kernel_virt_addr_range: Range<u64>,
     kernel_phys_to_virt_offset: u64,
 ) -> (Vec<u8>, u64) {
+    let kernel_min_leaf_level =
+        scheme.min_level_for_leaf_size_bits(kernel_phys_to_virt_offset.trailing_zeros().into());
+
     let virt_start = kernel_virt_addr_range.start;
     let virt_end = kernel_virt_addr_range.end;
-    let virt_map_end = virt_end.next_multiple_of(1 << scheme.largest_leaf_size_bits());
+    let virt_map_end = virt_end.next_multiple_of(1 << scheme.leaf_size_bits(kernel_min_leaf_level));
 
     let regions = RegionsBuilder::new(scheme)
         .insert(Region::valid(
             0..virt_start,
             mk_identity_leaf_for_kernel_map,
         ))
-        .insert(Region::valid(virt_start..virt_map_end, move |loc| {
-            mk_kernel_leaf_for_kernel_map(smp, kernel_phys_to_virt_offset, loc)
-        }));
+        .insert(Region::valid_with_min_leaf_level(
+            virt_start..virt_map_end,
+            kernel_min_leaf_level,
+            move |loc| mk_kernel_leaf_for_kernel_map(smp, kernel_phys_to_virt_offset, loc),
+        ));
 
     regions.build().construct_table(scheme).embed(scheme, vaddr)
 }
