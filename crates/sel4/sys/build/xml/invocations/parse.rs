@@ -4,9 +4,9 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use xmltree::{Element, XMLNode};
+use roxmltree::Node;
 
-use crate::xml::Condition;
+use crate::xml::{Condition, child_elements};
 
 #[derive(Debug)]
 pub struct Api {
@@ -61,11 +61,11 @@ impl Method {
 // // //
 
 impl Api {
-    pub fn parse(e: &Element) -> Self {
+    pub fn parse(e: Node) -> Self {
         let mut structs = vec![];
         let mut interfaces = vec![];
-        for child in e.children.iter().filter_map(XMLNode::as_element) {
-            match child.name.as_str() {
+        for child in child_elements(e) {
+            match child.tag_name().name() {
                 "struct" => {
                     structs.push(Struct::parse(child));
                 }
@@ -76,7 +76,7 @@ impl Api {
             }
         }
         Self {
-            name: e.attributes.get("name").map(ToOwned::to_owned),
+            name: e.attribute("name").map(ToOwned::to_owned),
             structs,
             interfaces,
         }
@@ -84,12 +84,12 @@ impl Api {
 }
 
 impl Struct {
-    fn parse(e: &Element) -> Self {
+    fn parse(e: Node) -> Self {
         let mut members = vec![];
-        for child in e.children.iter().filter_map(XMLNode::as_element) {
-            match child.name.as_str() {
+        for child in child_elements(e) {
+            match child.tag_name().name() {
                 "member" => {
-                    members.push(child.attributes.get("name").unwrap().to_owned());
+                    members.push(child.attribute("name").unwrap().to_owned());
                 }
                 _ => {
                     panic!();
@@ -97,33 +97,33 @@ impl Struct {
             }
         }
         Self {
-            name: e.attributes.get("name").unwrap().to_owned(),
+            name: e.attribute("name").unwrap().to_owned(),
             members,
         }
     }
 }
 
 impl Interface {
-    fn parse(e: &Element) -> Self {
+    fn parse(e: Node) -> Self {
         let mut methods = vec![];
-        for child in e.children.iter().filter_map(XMLNode::as_element) {
-            if child.name.as_str() == "method" {
+        for child in child_elements(e) {
+            if child.tag_name().name() == "method" {
                 methods.push(Method::parse(child));
             }
         }
         Self {
-            name: e.attributes.get("name").unwrap().to_owned(),
+            name: e.attribute("name").unwrap().to_owned(),
             methods,
         }
     }
 }
 
 impl Method {
-    fn parse(e: &Element) -> Self {
+    fn parse(e: Node) -> Self {
         let mut condition = None;
         let mut parameters = vec![];
-        for child in e.children.iter().filter_map(XMLNode::as_element) {
-            match child.name.as_str() {
+        for child in child_elements(e) {
+            match child.tag_name().name() {
                 "condition" => {
                     assert!(condition.is_none());
                     condition = Some(Condition::parse(child));
@@ -135,8 +135,8 @@ impl Method {
             }
         }
         Self {
-            name: e.attributes.get("name").unwrap().to_owned(),
-            id: e.attributes.get("id").unwrap().to_owned(),
+            name: e.attribute("name").unwrap().to_owned(),
+            id: e.attribute("id").unwrap().to_owned(),
             condition,
             parameters,
         }
@@ -144,11 +144,11 @@ impl Method {
 }
 
 impl Parameter {
-    fn parse(e: &Element) -> Self {
+    fn parse(e: Node) -> Self {
         Self {
-            name: e.attributes.get("name").unwrap().to_owned(),
-            ty: e.attributes.get("type").unwrap().to_owned(),
-            direction: ParameterDirection::parse(e.attributes.get("dir").unwrap()),
+            name: e.attribute("name").unwrap().to_owned(),
+            ty: e.attribute("type").unwrap().to_owned(),
+            direction: ParameterDirection::parse(e.attribute("dir").unwrap()),
         }
     }
 }

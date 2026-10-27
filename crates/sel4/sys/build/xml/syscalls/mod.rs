@@ -16,7 +16,7 @@ mod parse;
 use parse::*;
 
 pub fn generate_rust(syscalls_xml_path: impl AsRef<Path>) -> TokenStream {
-    let syscalls = Syscalls::parse(&parse_xml(syscalls_xml_path));
+    let syscalls = parse_xml(syscalls_xml_path, Syscalls::parse);
     let ty = quote!(i32);
     let mut i = -1i32;
     let mut toks = quote!();
