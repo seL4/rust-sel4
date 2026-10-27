@@ -15,11 +15,9 @@ mk {
   };
   build-dependencies = {
     inherit (versions)
-      prettyplease
       proc-macro2
       quote
     ;
-    syn = { version = versions.syn; features = [ "parsing" ]; };
     inherit (localCrates)
       sel4-config-data
       sel4-config-types

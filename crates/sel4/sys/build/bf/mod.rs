@@ -7,9 +7,8 @@
 use std::fs;
 use std::path::Path;
 
-use proc_macro2::{Literal, TokenStream};
+use proc_macro2::{Ident, Literal, TokenStream};
 use quote::{format_ident, quote};
-use syn::Ident;
 
 mod parser;
 mod simplified;
