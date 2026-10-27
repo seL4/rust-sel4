@@ -25,4 +25,4 @@ quote = "1.0.41"
 sel4-build-env = { path = "../sel4/build-env" }
 sel4-config = { path = "../sel4/config" }
 sel4-platform-info-types = { path = "types", features = ["owned"] }
-serde_yaml = "0.9.34"
+serde_json = "1.0.145"

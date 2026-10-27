@@ -88,7 +88,7 @@ impl Paths {
                 .platform_info
                 .as_ref()
                 .map(ToOwned::to_owned)
-                .or(sel4_prefix.map(|prefix| format!("{prefix}/support/platform_gen.yaml")))
+                .or(sel4_prefix.map(|prefix| format!("{prefix}/support/platform_gen.json")))
                 .unwrap(),
             loader_path: cli.loader.to_owned(),
             app_path: cli.app.to_owned(),
@@ -123,7 +123,7 @@ where
     T: FileHeaderExt,
 {
     let platform_info: OwnedPlatformInfo =
-        serde_yaml::from_reader(fs::File::open(&paths.platform_info_path).unwrap()).unwrap();
+        serde_json::from_reader(fs::File::open(&paths.platform_info_path).unwrap()).unwrap();
 
     let payload = serialize_payload::serialize_payload::<T>(
         &paths.kernel_path,

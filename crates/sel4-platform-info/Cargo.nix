@@ -14,7 +14,7 @@ mk {
     ;
   };
   build-dependencies = {
-    inherit (versions) proc-macro2 quote serde_yaml;
+    inherit (versions) proc-macro2 quote serde_json;
     inherit (localCrates)
       sel4-build-env
       sel4-config

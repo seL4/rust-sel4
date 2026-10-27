@@ -99,8 +99,8 @@ the crates which use them:
   `$SEL4_PREFIX` is set) which must contain a colon-separated list of include paths for the libsel4
   headers. See the the `sel4` crate's rustdoc for more information.
 - `sel4-platform-info`, whose dependants include `sel4-kernel-loader`, uses `$SEL4_PLATFORM_INFO`
-  (defaulting to `$SEL4_PREFIX/support/platform_gen.yaml` if `$SEL4_PREFIX` is set) which must
-  contain the path of the `platform_gen.yaml` file from the seL4 kernel build system.
+  (defaulting to `$SEL4_PREFIX/support/platform_gen.json` if `$SEL4_PREFIX` is set) which must
+  contain the path of the `platform_gen.json` file from the seL4 kernel build system.
 - `sel4-kernel-loader` uses `$SEL4_KERNEL` (defaulting to `$SEL4_PREFIX/bin/kernel.elf` if
   `$SEL4_PREFIX` is set) which must contain the path of the seL4 kernel (as an ELF executable).
 
