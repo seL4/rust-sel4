@@ -64,7 +64,7 @@ in rec {
 
   microkit = fetchGit {
     url = "https://github.com/seL4/microkit.git";
-    rev = "8780fab8699f5aeec109b21325ff37c741736b24"; # 2.3.0
+    rev = "5e46573c89c28f353634e5ec198458ecf4bab286"; # before 2.4.0
     local = localRoot + "/microkit";
     extraFilter = path: type:
       lib.hasSuffix "/target" path;

@@ -5,7 +5,7 @@
 #
 
 [toolchain]
-channel = "1.94"
+channel = "1.95"
 components = [
     "rust-src",
 ]
