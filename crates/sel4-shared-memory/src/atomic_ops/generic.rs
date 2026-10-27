@@ -7,77 +7,45 @@
 
 use core::intrinsics;
 
-#[cfg(not(before_const_generic_ordering))]
 use core::intrinsics::AtomicOrdering as AO;
-
-#[cfg(before_const_generic_ordering)]
-use paste::paste;
 
 use super::ordering::OrderingExhaustive as Ordering;
 
 use Ordering::*;
 
 cfg_select! {
-    before_const_generic_ordering => {
+    before_volatile => {
         macro_rules! with_ordering {
-            ($ord:ident, $prefix:ident, kind = $_kind:ident, $args:tt) => {
-                paste! {
-                    intrinsics::[<$prefix _ $ord:lower>]$args
-                }
+            ($ord:ident, $prefix:ident, kind = A, $args:tt) => {
+                intrinsics::$prefix::<_, { AO::$ord }>$args
             };
-        }
-
-        macro_rules! with_orderings {
-            ($set_ord:ident, $fetch_ord:ident, $prefix:ident, $args:tt) => {
-                paste! {
-                    intrinsics::[<$prefix _ $set_ord:lower _ $fetch_ord:lower>]$args
-                }
+            ($ord:ident, $prefix:ident, kind = AV, $args:tt) => {
+                intrinsics::$prefix::<_, { AO::$ord }>$args
+            };
+            ($ord:ident, $prefix:ident, kind = B, $args:tt) => {
+                intrinsics::$prefix::<_, _, { AO::$ord }>$args
             };
         }
     }
     _ => {
-        cfg_select! {
-            before_move_integer_pointer_cast => {
-                macro_rules! with_ordering {
-                    ($ord:ident, $prefix:ident, kind = $_kind:ident, $args:tt) => {
-                        intrinsics::$prefix::<_, { AO::$ord }>$args
-                    };
-                }
-            }
-            before_volatile => {
-                macro_rules! with_ordering {
-                    ($ord:ident, $prefix:ident, kind = A, $args:tt) => {
-                        intrinsics::$prefix::<_, { AO::$ord }>$args
-                    };
-                    ($ord:ident, $prefix:ident, kind = AV, $args:tt) => {
-                        intrinsics::$prefix::<_, { AO::$ord }>$args
-                    };
-                    ($ord:ident, $prefix:ident, kind = B, $args:tt) => {
-                        intrinsics::$prefix::<_, _, { AO::$ord }>$args
-                    };
-                }
-            }
-            _ => {
-                macro_rules! with_ordering {
-                    ($ord:ident, $prefix:ident, kind = A, $args:tt) => {
-                        intrinsics::$prefix::<_, { AO::$ord }>$args
-                    };
-                    ($ord:ident, $prefix:ident, kind = AV, $args:tt) => {
-                        intrinsics::$prefix::<_, { AO::$ord }, false>$args
-                    };
-                    ($ord:ident, $prefix:ident, kind = B, $args:tt) => {
-                        intrinsics::$prefix::<_, _, { AO::$ord }>$args
-                    };
-                }
-            }
-        }
-
-        macro_rules! with_orderings {
-            ($set_ord:ident, $fetch_ord:ident, $prefix:ident, $args:tt) => {
-                intrinsics::$prefix::<_, { AO::$set_ord }, { AO::$fetch_ord }>$args
+        macro_rules! with_ordering {
+            ($ord:ident, $prefix:ident, kind = A, $args:tt) => {
+                intrinsics::$prefix::<_, { AO::$ord }>$args
+            };
+            ($ord:ident, $prefix:ident, kind = AV, $args:tt) => {
+                intrinsics::$prefix::<_, { AO::$ord }, false>$args
+            };
+            ($ord:ident, $prefix:ident, kind = B, $args:tt) => {
+                intrinsics::$prefix::<_, _, { AO::$ord }>$args
             };
         }
     }
+}
+
+macro_rules! with_orderings {
+    ($set_ord:ident, $fetch_ord:ident, $prefix:ident, $args:tt) => {
+        intrinsics::$prefix::<_, { AO::$set_ord }, { AO::$fetch_ord }>$args
+    };
 }
 
 macro_rules! match_ordering {

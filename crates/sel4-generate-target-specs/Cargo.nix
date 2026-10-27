@@ -12,9 +12,6 @@ mk {
     inherit (versions) serde_json;
     clap = { version = versions.clap; features = [ "derive" ]; };
   };
-  build-dependencies = {
-    inherit (versions) rustversion;
-  };
   package.metadata.rust-analyzer = {
     rustc_private = true;
   };

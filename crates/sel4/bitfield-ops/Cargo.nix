@@ -8,7 +8,4 @@
 
 mk {
   package.name = "sel4-bitfield-ops";
-  build-dependencies = {
-    inherit (versions) rustversion;
-  };
 }

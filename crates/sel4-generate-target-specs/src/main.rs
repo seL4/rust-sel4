@@ -16,17 +16,8 @@ use std::path::Path;
 
 use rustc_target::json::ToJson;
 use rustc_target::spec::{
-    Cc, Env, LinkerFlavor, Lld, Os, PanicStrategy, RelocModel, RelroLevel, Target,
+    Cc, Env, LinkerFlavor, Lld, Os, PanicStrategy, RelocModel, RelroLevel, Target, TargetTuple,
 };
-
-cfg_select! {
-    target_tuple => {
-        use rustc_target::spec::TargetTuple;
-    }
-    _ => {
-        use rustc_target::spec::TargetTriple;
-    }
-}
 
 use clap::{Parser, Subcommand};
 
@@ -106,11 +97,6 @@ impl Config {
             let options = &mut target.options;
             options.exe_suffix = ".elf".into();
             options.eh_frame_header = true;
-
-            #[cfg(target_spec_has_is_builtin)]
-            {
-                options.is_builtin = false;
-            }
         }
 
         assert_eq!(target.options.linker_flavor, CHOSEN_LINKER_FLAVOR);
@@ -259,20 +245,8 @@ impl Context {
 }
 
 fn builtin(tuple: &str) -> Target {
-    cfg_select! {
-        target_tuple => {
-            let target_tuple = TargetTuple::from_tuple(tuple);
-        }
-        _ => {
-            let target_tuple = TargetTriple::from_triple(tuple);
-        }
-    };
-    #[allow(unused_mut)]
-    let mut target = Target::expect_builtin(&target_tuple);
-    #[cfg(target_spec_has_metadata)]
-    {
-        target.metadata = Default::default();
-    }
+    let mut target = Target::expect_builtin(&TargetTuple::from_tuple(tuple));
+    target.metadata = Default::default();
     target
 }
 
