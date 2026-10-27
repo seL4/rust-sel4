@@ -4,9 +4,11 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use xmltree::{Element, XMLNode};
+use roxmltree::Node;
 
 use sel4_config_data::Configuration;
+
+use super::child_elements;
 
 #[derive(Debug, Clone)]
 pub enum Condition {
@@ -17,26 +19,24 @@ pub enum Condition {
 }
 
 impl Condition {
-    pub fn parse(e: &Element) -> Self {
+    pub fn parse(e: Node) -> Self {
         Self::parse_unary(e)
     }
 
-    fn parse_unary(e: &Element) -> Self {
-        assert_eq!(e.children.len(), 1);
-        Self::parse_inner(e.children[0].as_element().unwrap())
+    fn parse_unary(e: Node) -> Self {
+        let mut children = child_elements(e);
+        let child = children.next().unwrap();
+        assert!(children.next().is_none());
+        Self::parse_inner(child)
     }
 
-    fn parse_n_ary(e: &Element) -> Vec<Self> {
-        e.children
-            .iter()
-            .filter_map(XMLNode::as_element)
-            .map(Self::parse_inner)
-            .collect()
+    fn parse_n_ary(e: Node) -> Vec<Self> {
+        child_elements(e).map(Self::parse_inner).collect()
     }
 
-    fn parse_inner(e: &Element) -> Self {
-        match e.name.as_str() {
-            "config" => Self::Variable(Self::parse_var(e.attributes.get("var").unwrap())),
+    fn parse_inner(e: Node) -> Self {
+        match e.tag_name().name() {
+            "config" => Self::Variable(Self::parse_var(e.attribute("var").unwrap())),
             "not" => Self::Not(Box::new(Self::parse_unary(e))),
             "and" => Self::And(Self::parse_n_ary(e)),
             "or" => Self::Or(Self::parse_n_ary(e)),

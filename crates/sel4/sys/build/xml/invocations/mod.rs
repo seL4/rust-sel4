@@ -37,7 +37,7 @@ pub fn generate_rust(
     let mut structs = vec![];
     let mut interfaces = vec![];
     for f in interface_xml_paths {
-        let api = Api::parse(&parse_xml(f));
+        let api = parse_xml(f, Api::parse);
         structs.extend(api.structs);
         interfaces.extend(api.interfaces);
     }

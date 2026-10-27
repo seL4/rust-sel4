@@ -56,6 +56,7 @@ rcgen = "0.14.5"
 ring = { version = "=0.17.8", auto-update = false }
 riscv = "0.16.0"
 rkyv = "0.8.12"
+roxmltree = "0.21.2"
 rsa = "0.9.8"
 rtcc = "0.4.0"
 rustls = "0.23.5"
@@ -78,7 +79,6 @@ tock-registers = "0.10.0"
 unwinding = "0.2.8"
 virtio-drivers = "0.13.0"
 webpki-roots = "1.0.3"
-xmltree = "0.12.0"
 zerocopy = "0.8.27"
 
 [allow.vstd]
