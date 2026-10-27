@@ -21,7 +21,7 @@ mk {
     inherit (versions)
       proc-macro2 quote
       bindgen xmltree glob
-      regex pest pest_derive
+      nom
     ;
     inherit (localCrates)
       sel4-build-env

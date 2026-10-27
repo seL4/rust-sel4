@@ -143,7 +143,6 @@ let
         nativeBuildInputs = [ rsync rustToolchain ];
         RUST_TARGET_PATH = rustEnvironment.mkTargetPath targetTriple;
         LIBCLANG_PATH = libclangPath;
-        HOST_CC = "${buildPackages.stdenv.cc.targetPrefix}cc";
       } // lib.optionalAttrs (!rustEnvironment.isNightly) {
         # HACK
         RUSTC_BOOTSTRAP = 1;

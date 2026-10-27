@@ -112,7 +112,6 @@ let
     depsBuildBuild = [ buildPackages.stdenv.cc ];
     nativeBuildInputs = [ rustEnvironment.rustToolchain ] ++ lib.optionals verifyWithVerus [ verus ];
     RUST_TARGET_PATH = rustEnvironment.mkTargetPath targetTriple;
-    HOST_CC = "${buildPackages.stdenv.cc.targetPrefix}cc";
   } // lib.optionalAttrs (!rustEnvironment.isNightly) {
     # HACK
     RUSTC_BOOTSTRAP = 1;

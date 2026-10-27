@@ -4,70 +4,57 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use pest::{Parser, iterators::Pair};
-use pest_derive::Parser;
-use regex::Regex;
+use nom::{
+    IResult, Parser,
+    branch::alt,
+    bytes::complete::{tag, take_while},
+    character::complete::{digit0, multispace1, not_line_ending, satisfy},
+    combinator::{all_consuming, cut, map, map_res, opt, recognize, value},
+    error::{VerboseError, convert_error},
+    multi::{many0, many0_count, separated_list1},
+    sequence::{delimited, pair, preceded, separated_pair, terminated, tuple},
+};
 
 pub mod ast;
 
 use ast::*;
 
-#[derive(Parser)]
-#[grammar = "build/bf/parser/grammar.pest"]
-struct BitfieldParser;
+type Result<'a, T> = IResult<&'a str, T, VerboseError<&'a str>>;
 
 pub fn parse(text: &str) -> File {
-    let text = remove_comments(text);
-    let result = BitfieldParser::parse(Rule::file, &text);
-    let pair = result
-        .unwrap_or_else(|err| panic!("{}", err))
-        .next()
-        .unwrap();
-    File::parse(pair)
+    let entities = match all_consuming(terminated(many0(entity), ws))(text) {
+        Ok((_, entities)) => entities,
+        Err(nom::Err::Error(err) | nom::Err::Failure(err)) => {
+            panic!("{}", convert_error(text, err))
+        }
+        Err(nom::Err::Incomplete(_)) => unreachable!(),
+    };
+    File::from_entities(entities)
 }
 
-fn remove_comments(text: &str) -> String {
-    let re = Regex::new(r"--[^\n]*\n").unwrap();
-    re.replace_all(text, "").into_owned()
+enum RawEntity {
+    Base(Base),
+    Block(Block),
+    TaggedUnion(TaggedUnion),
 }
 
 impl File {
-    fn parse(pair: Pair<Rule>) -> Self {
-        assert_eq!(pair.as_rule(), Rule::file);
-
+    fn from_entities(entities: Vec<RawEntity>) -> Self {
         let mut current_base = None;
         let mut blocks = vec![];
         let mut tagged_unions = vec![];
 
-        for pair in pair.into_inner() {
-            match pair.as_rule() {
-                Rule::entity => {
-                    let pair = pair.into_inner().next().unwrap();
-                    match pair.as_rule() {
-                        Rule::base => current_base = Some(Base::parse(pair)),
-                        Rule::block => {
-                            assert!(current_base.is_some());
-                            blocks.push(Entity {
-                                base: current_base.as_ref().unwrap().clone(),
-                                inner: Block::parse(pair),
-                            })
-                        }
-                        Rule::tagged_union => {
-                            assert!(current_base.is_some());
-                            tagged_unions.push(Entity {
-                                base: current_base.as_ref().unwrap().clone(),
-                                inner: TaggedUnion::parse(pair),
-                            })
-                        }
-                        _ => {
-                            unreachable!()
-                        }
-                    }
-                }
-                Rule::EOI => {}
-                _ => {
-                    unreachable!()
-                }
+        for entity in entities {
+            match entity {
+                RawEntity::Base(base) => current_base = Some(base),
+                RawEntity::Block(block) => blocks.push(Entity {
+                    base: current_base.clone().unwrap(),
+                    inner: block,
+                }),
+                RawEntity::TaggedUnion(tagged_union) => tagged_unions.push(Entity {
+                    base: current_base.clone().unwrap(),
+                    inner: tagged_union,
+                }),
             }
         }
 
@@ -78,158 +65,165 @@ impl File {
     }
 }
 
-impl Base {
-    fn parse(pair: Pair<Rule>) -> Self {
-        assert_eq!(pair.as_rule(), Rule::base);
-        let mut pairs = pair.into_inner();
-        let base = pairs.next().unwrap().as_str().parse().unwrap();
-        let opt_base_mask = pairs.next().unwrap();
-        assert_eq!(opt_base_mask.as_rule(), Rule::opt_base_mask);
-        let (base_bits, sign_extend) = match opt_base_mask.into_inner().next() {
-            Some(base_mask) => {
-                assert_eq!(base_mask.as_rule(), Rule::base_mask);
-                let mut pairs = base_mask.into_inner();
-                (
-                    pairs.next().unwrap().as_str().parse().unwrap(),
-                    pairs.next().unwrap().as_str().parse::<usize>().unwrap() == 1,
-                )
-            }
-            None => (base, false),
-        };
-        Self {
-            base,
-            base_bits,
-            sign_extend,
-        }
-    }
+fn token<'a, O>(
+    inner: impl Parser<&'a str, O, VerboseError<&'a str>>,
+) -> impl FnMut(&'a str) -> Result<'a, O> {
+    preceded(ws, inner)
 }
 
-impl Block {
-    fn parse(pair: Pair<Rule>) -> Self {
-        assert_eq!(pair.as_rule(), Rule::block);
-        let mut pairs = pair.into_inner();
-        let name = pairs.next().unwrap().as_str().to_owned();
-        let opt_visible_order_spec = pairs.next().unwrap();
-        assert_eq!(
-            opt_visible_order_spec.as_rule(),
-            Rule::opt_visible_order_spec
-        );
-        let visible_order_spec =
-            opt_visible_order_spec
-                .into_inner()
-                .next()
-                .map(|visible_order_spec| {
-                    assert_eq!(visible_order_spec.as_rule(), Rule::visible_order_spec);
-                    visible_order_spec
-                        .into_inner()
-                        .map(|pair| pair.as_str().to_owned())
-                        .collect::<Vec<Ident>>()
-                });
-        let segments_pair = pairs.next().unwrap();
-        assert_eq!(segments_pair.as_rule(), Rule::segments);
-        let segments = segments_pair.into_inner().map(Segment::parse).collect();
-        Self {
+fn ws(input: &str) -> Result<'_, ()> {
+    value(
+        (),
+        many0_count(alt((
+            multispace1,
+            recognize(pair(tag("--"), not_line_ending)),
+        ))),
+    )(input)
+}
+
+fn keyword<'a>(kw: &'static str) -> impl FnMut(&'a str) -> Result<'a, &'a str> {
+    token(tag(kw))
+}
+
+fn ident(input: &str) -> Result<'_, Ident> {
+    token(map(
+        recognize(pair(
+            satisfy(|c| c.is_ascii_alphabetic()),
+            take_while(|c: char| c.is_ascii_alphanumeric() || c == '_'),
+        )),
+        str::to_owned,
+    ))(input)
+}
+
+fn intlit(input: &str) -> Result<'_, usize> {
+    token(map_res(
+        alt((
+            tag("0"),
+            recognize(pair(satisfy(|c| matches!(c, '1'..='9')), digit0)),
+        )),
+        str::parse,
+    ))(input)
+}
+
+fn paren_list<'a, O>(
+    item: impl FnMut(&'a str) -> Result<'a, O>,
+) -> impl FnMut(&'a str) -> Result<'a, Vec<O>> {
+    delimited(
+        keyword("("),
+        separated_list1(keyword(","), item),
+        keyword(")"),
+    )
+}
+
+fn entity(input: &str) -> Result<'_, RawEntity> {
+    alt((
+        map(base, RawEntity::Base),
+        map(block, RawEntity::Block),
+        map(tagged_union, RawEntity::TaggedUnion),
+    ))(input)
+}
+
+fn base(input: &str) -> Result<'_, Base> {
+    map(
+        preceded(
+            keyword("base"),
+            cut(pair(
+                intlit,
+                opt(delimited(
+                    keyword("("),
+                    separated_pair(intlit, keyword(","), intlit),
+                    keyword(")"),
+                )),
+            )),
+        ),
+        |(base, base_mask)| {
+            let (base_bits, sign_extend) = match base_mask {
+                Some((base_bits, sign_extend)) => (base_bits, sign_extend == 1),
+                None => (base, false),
+            };
+            Base {
+                base,
+                base_bits,
+                sign_extend,
+            }
+        },
+    )(input)
+}
+
+fn block(input: &str) -> Result<'_, Block> {
+    map(
+        preceded(
+            keyword("block"),
+            cut(tuple((
+                ident,
+                opt(paren_list(ident)),
+                delimited(keyword("{"), many0(segment), keyword("}")),
+            ))),
+        ),
+        |(name, visible_order_spec, segments)| Block {
             name,
             visible_order_spec,
             segments,
-        }
-    }
+        },
+    )(input)
 }
 
-impl Segment {
-    fn parse(pair: Pair<Rule>) -> Self {
-        assert_eq!(pair.as_rule(), Rule::segment);
-        let mut pairs = pair.into_inner();
-        let field = {
-            let pair = pairs.next().unwrap();
-            match pair.as_rule() {
-                Rule::segment_field => {
-                    let mut pairs = pair.into_inner();
-                    let is_high = match pairs.next().unwrap().as_rule() {
-                        Rule::field_low => false,
-                        Rule::field_high => false,
-                        _ => unreachable!(),
-                    };
-                    let name = pairs.next().unwrap().as_str().to_owned();
-                    Some(Field { name, is_high })
-                }
-                Rule::segment_padding => None,
-                _ => {
-                    unreachable!()
-                }
-            }
-        };
-        let width = pairs.next().unwrap().as_str().parse().unwrap();
-        Self { width, field }
-    }
+fn segment(input: &str) -> Result<'_, Segment> {
+    let field = map(
+        pair(
+            alt((
+                value(true, keyword("field_high")),
+                value(false, keyword("field")),
+            )),
+            cut(ident),
+        ),
+        |(is_high, name)| Some(Field { name, is_high }),
+    );
+    let padding = value(None, keyword("padding"));
+    map(
+        pair(alt((field, padding)), cut(intlit)),
+        |(field, width)| Segment { width, field },
+    )(input)
 }
 
-impl TaggedUnion {
-    fn parse(pair: Pair<Rule>) -> Self {
-        assert_eq!(pair.as_rule(), Rule::tagged_union);
-        let mut pairs = pair.into_inner();
-        let name = pairs.next().unwrap().as_str().to_owned();
-        let tag_name = pairs.next().unwrap().as_str().to_owned();
-        let opt_tag_slices = pairs.next().unwrap();
-        assert_eq!(opt_tag_slices.as_rule(), Rule::opt_tag_slices);
-        let tag_slices = match opt_tag_slices.into_inner().next() {
-            Some(tag_slices_pair) => {
-                assert_eq!(tag_slices_pair.as_rule(), Rule::tag_slices);
-                tag_slices_pair
-                    .into_inner()
-                    .map(|pair| pair.as_str().to_owned())
-                    .collect::<Vec<Ident>>()
-            }
-            None => {
-                vec![tag_name.clone()]
-            }
-        };
-        let classes_pair = pairs.next().unwrap();
-        assert_eq!(classes_pair.as_rule(), Rule::classes);
-        let classes = classes_pair.into_inner().map(Class::parse).collect();
-        let tags_pair = pairs.next().unwrap();
-        assert_eq!(tags_pair.as_rule(), Rule::tags);
-        let tags = tags_pair.into_inner().map(Tag::parse).collect();
-        Self {
+fn tagged_union(input: &str) -> Result<'_, TaggedUnion> {
+    map(
+        preceded(
+            keyword("tagged_union"),
+            cut(tuple((
+                ident,
+                ident,
+                opt(paren_list(ident)),
+                preceded(keyword("{"), many0(class)),
+                terminated(many0(union_tag), keyword("}")),
+            ))),
+        ),
+        |(name, tag_name, tag_slices, classes, tags)| TaggedUnion {
+            tag_slices: tag_slices.unwrap_or_else(|| vec![tag_name.clone()]),
             name,
             tag_name,
-            tag_slices,
             classes,
             tags,
-        }
-    }
+        },
+    )(input)
 }
 
-impl Class {
-    fn parse(pair: Pair<Rule>) -> Self {
-        assert_eq!(pair.as_rule(), Rule::class);
-        let mut pairs = pair.into_inner();
-        let width = pairs.next().unwrap().as_str().parse().unwrap();
-        let mask = pairs.next().unwrap().as_str().parse().unwrap();
-        Self { width, mask }
-    }
+fn class(input: &str) -> Result<'_, Class> {
+    map(
+        preceded(keyword("mask"), cut(pair(intlit, intlit))),
+        |(width, mask)| Class { width, mask },
+    )(input)
 }
 
-impl Tag {
-    fn parse(pair: Pair<Rule>) -> Self {
-        assert_eq!(pair.as_rule(), Rule::tag);
-        let mut pairs = pair.into_inner();
-        let name = pairs.next().unwrap().as_str().to_owned();
-        let values = {
-            let pair = pairs.next().unwrap().into_inner().next().unwrap();
-            match pair.as_rule() {
-                Rule::tag_value_one => {
-                    vec![pair.into_inner().next().unwrap().as_str().parse().unwrap()]
-                }
-                Rule::tag_value_many => pair
-                    .into_inner()
-                    .map(|pair| pair.as_str().parse().unwrap())
-                    .collect(),
-                _ => {
-                    unreachable!()
-                }
-            }
-        };
-        Self { name, values }
-    }
+fn union_tag(input: &str) -> Result<'_, Tag> {
+    map(
+        preceded(
+            keyword("tag"),
+            cut(pair(
+                ident,
+                alt((map(intlit, |v| vec![v]), paren_list(intlit))),
+            )),
+        ),
+        |(name, values)| Tag { name, values },
+    )(input)
 }
