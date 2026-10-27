@@ -11,7 +11,6 @@ mk {
   lib.proc-macro = true;
   dependencies = {
     inherit (versions)
-      fallible-iterator
       proc-macro2
       quote
     ;

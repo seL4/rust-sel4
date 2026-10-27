@@ -15,7 +15,6 @@ extern crate alloc;
 use alloc::borrow::Cow;
 use core::fmt;
 
-use addr2line::fallible_iterator::FallibleIterator;
 use addr2line::gimli;
 use addr2line::{Context, Location};
 
@@ -84,7 +83,7 @@ pub fn symbolize(
 
         if opts.do_functions || opts.do_inlines {
             let mut printed_anything = false;
-            let mut frames = ctx.find_frames(probe).skip_all_loads().unwrap().peekable();
+            let mut frames = ctx.find_frames(probe).skip_all_loads().unwrap();
             let mut first = true;
             while let Some(frame) = frames.next().unwrap() {
                 if !first {
