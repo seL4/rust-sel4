@@ -18,11 +18,12 @@ mk {
     ;
   };
   build-dependencies = {
-    inherit (versions)
-      proc-macro2 quote
-      bindgen roxmltree glob
-      nom
-    ;
+    inherit (versions) glob;
+    proc-macro2 = { version = versions.proc-macro2; default-features = false; };
+    quote = { version = versions.quote; default-features = false; };
+    bindgen = { version = versions.bindgen; default-features = false; features = [ "runtime" ]; };
+    nom = { version = versions.nom; default-features = false; features = [ "alloc" ]; };
+    roxmltree = { version = versions.roxmltree; default-features = false; };
     inherit (localCrates)
       sel4-build-env
       sel4-config

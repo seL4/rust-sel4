@@ -23,7 +23,6 @@ dlmalloc = "0.2.11"
 embedded-hal-nb = "1.0"
 embedded-io-async = "0.7.0"
 env_logger = "0.11.8"
-fallible-iterator = "0.3.0"
 fdt = "0.1.5"
 futures = "0.3.31"
 getrandom = { version = "0.2.10", auto-update = false }

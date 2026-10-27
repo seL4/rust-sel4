@@ -2498,7 +2498,6 @@ dependencies = [
 name = "sel4-config-macros"
 version = "0.1.0"
 dependencies = [
- "fallible-iterator",
  "proc-macro2",
  "quote",
  "sel4-config-data",

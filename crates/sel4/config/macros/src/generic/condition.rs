@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use fallible_iterator::FallibleIterator;
 use proc_macro2::{Span, TokenStream};
 use quote::quote_spanned;
 use syn::Token;
@@ -111,10 +110,20 @@ impl ConfigurationForEval<'_> {
             },
             Condition::Not(cond_) => !self.eval(cond_)?,
             Condition::All(conds) => {
-                fallible_iterator::convert(conds.iter().map(Ok)).all(|cond_| self.eval(cond_))?
+                for cond_ in conds {
+                    if !self.eval(cond_)? {
+                        return Ok(false);
+                    }
+                }
+                true
             }
             Condition::Any(conds) => {
-                fallible_iterator::convert(conds.iter().map(Ok)).any(|cond_| self.eval(cond_))?
+                for cond_ in conds {
+                    if self.eval(cond_)? {
+                        return Ok(true);
+                    }
+                }
+                false
             }
         })
     }

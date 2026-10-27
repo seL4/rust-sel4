@@ -9,7 +9,7 @@
 mk {
   package.name = "sel4-config-data";
   dependencies = {
-    inherit (versions) serde_json;
+    serde_json = { version = versions.serde_json; default-features = false; features = [ "alloc" ]; };
     sel4-config-types = localCrates.sel4-config-types // { features = [ "serde" ]; };
   };
   build-dependencies = {

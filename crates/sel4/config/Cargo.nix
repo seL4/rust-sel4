@@ -14,10 +14,8 @@ mk {
     ;
   };
   build-dependencies = {
-    inherit (versions)
-      proc-macro2
-      quote
-    ;
+    proc-macro2 = { version = versions.proc-macro2; default-features = false; };
+    quote = { version = versions.quote; default-features = false; };
     inherit (localCrates)
       sel4-config-data
       sel4-config-types
