@@ -22,7 +22,6 @@ extern-symbols = ["sel4-microkit-base/extern-symbols"]
 full = ["alloc"]
 
 [dependencies]
-cfg-if = "1.0.4"
 one-shot-mutex = "0.2.1"
 sel4 = { path = "../sel4", features = ["single-threaded"] }
 sel4-dlmalloc = { path = "../sel4-dlmalloc" }

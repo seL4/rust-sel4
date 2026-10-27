@@ -59,8 +59,5 @@
 #![feature(macro_attr)]
 #![feature(macro_derive)]
 
-// To replace cfg_if, and to use in place of asm_cfg in some cases
-#![feature(cfg_select)]
-
 // For more accurate #[naked] ABIs
 #![feature(abi_custom)]

@@ -13,8 +13,8 @@ use serde::Serialize;
 
 use sel4_backtrace_types::{Entry, Error as BacktraceError};
 
-cfg_if::cfg_if! {
-    if #[cfg(all(feature = "unwinding", panic = "unwind"))] {
+cfg_select! {
+    all(feature = "unwinding", panic = "unwind") => {
         use core::ffi::c_void;
 
         use unwinding::abi::*;
@@ -33,9 +33,7 @@ cfg_if::cfg_if! {
                 let data = unsafe { &mut *(arg as *mut CallbackData<F1>) };
                 let ip = _Unwind_GetIP(unwind_ctx);
                 match (data.f)(Entry {
-                    stack_frame: StackFrame {
-                        ip,
-                    },
+                    stack_frame: StackFrame { ip },
                 }) {
                     Ok(()) => UnwindReasonCode::NO_REASON,
                     Err(_) => UnwindReasonCode::FATAL_PHASE2_ERROR,
@@ -51,15 +49,16 @@ cfg_if::cfg_if! {
                 }),
             }
         }
-    } else {
+    }
+    _ => {
         pub fn collect_with<F: FnMut(Entry) -> Result<(), E>, E>(_f: F) -> Option<BacktraceError> {
             None
         }
     }
 }
 
-cfg_if::cfg_if! {
-    if #[cfg(feature = "alloc")] {
+cfg_select! {
+    feature = "alloc" => {
         extern crate alloc;
 
         pub use sel4_backtrace_types::Backtrace;
@@ -73,8 +72,8 @@ cfg_if::cfg_if! {
             builder.finalize(error)
         }
 
-        cfg_if::cfg_if! {
-            if #[cfg(feature = "postcard")] {
+        cfg_select! {
+            feature = "postcard" => {
                 pub fn send_with<T: Serialize, F: FnMut(u8) -> Result<(), E>, E>(
                     bt: &Backtrace<T>,
                     mut send_byte: F,
@@ -87,21 +86,21 @@ cfg_if::cfg_if! {
                     Ok(())
                 }
             }
+            _ => {}
         }
     }
+    _ => {}
 }
 
-cfg_if::cfg_if! {
-    if #[cfg(feature = "postcard")] {
+cfg_select! {
+    feature = "postcard" => {
         use sel4_backtrace_types::{Postamble, Preamble};
 
         pub fn collect_and_send_with<T: Serialize, F: FnMut(u8) -> Result<(), E>, E>(
             image: T,
             mut send_byte: F,
         ) -> postcard::Result<()> {
-            let preamble = Preamble {
-                image,
-            };
+            let preamble = Preamble { image };
             preamble.send(&mut send_byte)?;
             let error = collect_with(|entry| entry.send(&mut send_byte).map_err(|_| ()));
             let postamble = Postamble { error };
@@ -157,15 +156,13 @@ cfg_if::cfg_if! {
 
             fn collect_and_send(&self) -> Result<Result<(), postcard::Error>, Self::ControlError> {
                 let token = self.start()?;
-                let r = collect_and_send_with(self.image(), |b| {
-                    self.send_byte(&token, b)
-                });
+                let r = collect_and_send_with(self.image(), |b| self.send_byte(&token, b));
                 self.finish(token)?;
                 Ok(r)
             }
 
-            cfg_if::cfg_if! {
-                if #[cfg(feature = "alloc")] {
+            cfg_select! {
+                feature = "alloc" => {
                     fn collect(&self) -> Backtrace<Self::Image> {
                         collect(self.image())
                     }
@@ -173,16 +170,17 @@ cfg_if::cfg_if! {
                     fn send(
                         &self,
                         bt: &Backtrace<Self::Image>,
-                    ) -> Result<Result<(), postcard::Error>, Self::ControlError> {
+                    ) -> Result<Result<(), postcard::Error>, Self::ControlError>
+                    {
                         let token = self.start()?;
-                        let r = send_with(bt, |b| {
-                            self.send_byte(&token, b)
-                        });
+                        let r = send_with(bt, |b| self.send_byte(&token, b));
                         self.finish(token)?;
                         Ok(r)
                     }
                 }
+                _ => {}
             }
         }
     }
+    _ => {}
 }

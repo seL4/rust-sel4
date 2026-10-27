@@ -9,7 +9,6 @@
 mk {
   package.name = "sel4-panicking";
   dependencies = {
-    inherit (versions) cfg-if;
     inherit (localCrates)
       sel4-panicking-env
       sel4-immediate-sync-once-cell

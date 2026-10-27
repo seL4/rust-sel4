@@ -9,7 +9,6 @@
 mk {
   package.name = "sel4-runtime-common";
   dependencies = {
-    inherit (versions) cfg-if;
     inherit (localCrates)
       sel4-panicking-env
       sel4-phdrs

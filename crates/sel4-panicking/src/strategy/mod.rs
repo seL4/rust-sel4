@@ -4,11 +4,12 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-cfg_if::cfg_if! {
-    if #[cfg(panic = "unwind")] {
+cfg_select! {
+    panic = "unwind" => {
         mod unwind;
         use unwind as imp;
-    } else {
+    }
+    _ => {
         mod abort;
         use abort as imp;
     }

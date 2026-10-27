@@ -10,7 +10,6 @@ mk {
   package.name = "spawn-task-child";
   dependencies = {
     inherit (versions)
-      cfg-if
       one-shot-mutex
     ;
     inherit (localCrates)

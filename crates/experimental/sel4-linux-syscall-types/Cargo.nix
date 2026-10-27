@@ -8,7 +8,4 @@
 
 mk {
   package.name = "sel4-linux-syscall-types";
-  dependencies = {
-    inherit (versions) cfg-if;
-  };
 }

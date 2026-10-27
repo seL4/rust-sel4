@@ -12,11 +12,12 @@ extern crate alloc;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-cfg_if::cfg_if! {
-    if #[cfg(feature = "alloc")] {
+cfg_select! {
+    feature = "alloc" => {
         mod with_alloc;
         pub use with_alloc::Backtrace;
     }
+    _ => {}
 }
 
 #[cfg(feature = "postcard")]

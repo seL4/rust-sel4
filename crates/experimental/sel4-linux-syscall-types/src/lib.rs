@@ -75,18 +75,20 @@ pub enum Syscall {
     },
 }
 
-cfg_if::cfg_if! {
-    if #[cfg(target_pointer_width = "64")] {
+cfg_select! {
+    target_pointer_width = "64" => {
         const NR_MMAP: SyscallNumber = syscall_number::MMAP;
-    } else {
+    }
+    _ => {
         const NR_MMAP: SyscallNumber = syscall_number::MMAP2;
     }
 }
 
-cfg_if::cfg_if! {
-    if #[cfg(target_arch = "riscv32")] {
+cfg_select! {
+    target_arch = "riscv32" => {
         const NR_LSEEK: SyscallNumber = syscall_number::_LLSEEK;
-    } else {
+    }
+    _ => {
         const NR_LSEEK: SyscallNumber = syscall_number::LSEEK;
     }
 }

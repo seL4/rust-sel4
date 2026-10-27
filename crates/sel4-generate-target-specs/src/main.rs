@@ -19,15 +19,15 @@ use rustc_target::spec::{
     Cc, Env, LinkerFlavor, Lld, Os, PanicStrategy, RelocModel, RelroLevel, Target,
 };
 
-cfg_if! {
-    if #[cfg(target_tuple)] {
+cfg_select! {
+    target_tuple => {
         use rustc_target::spec::TargetTuple;
-    } else {
+    }
+    _ => {
         use rustc_target::spec::TargetTriple;
     }
 }
 
-use cfg_if::cfg_if;
 use clap::{Parser, Subcommand};
 
 const CHOSEN_LINKER_FLAVOR: LinkerFlavor = LinkerFlavor::Gnu(Cc::No, Lld::Yes);
@@ -259,10 +259,11 @@ impl Context {
 }
 
 fn builtin(tuple: &str) -> Target {
-    cfg_if! {
-        if #[cfg(target_tuple)] {
+    cfg_select! {
+        target_tuple => {
             let target_tuple = TargetTuple::from_tuple(tuple);
-        } else {
+        }
+        _ => {
             let target_tuple = TargetTriple::from_triple(tuple);
         }
     };

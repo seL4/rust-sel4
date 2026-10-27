@@ -4,8 +4,6 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use cfg_if::cfg_if;
-
 use sel4_panicking_env::abort;
 use sel4_phdrs::PT_TLS;
 use sel4_phdrs::locate_phdrs;
@@ -38,8 +36,8 @@ macro_rules! use_default_set_thread_pointer_fn {
     };
 }
 
-cfg_if! {
-    if #[cfg(feature = "sel4")] {
+cfg_select! {
+    feature = "sel4" => {
         sel4::sel4_cfg_if! {
             if #[sel4_cfg(all(ARCH_X86_64, SET_TLS_BASE_SELF))] {
                 const CHOSEN_SET_THREAD_POINTER_FN: SetThreadPointerFn = set_thread_pointer_via_syscall;
@@ -51,7 +49,8 @@ cfg_if! {
                 use_default_set_thread_pointer_fn!();
             }
         }
-    } else {
+    }
+    _ => {
         use_default_set_thread_pointer_fn!();
     }
 }

@@ -8,7 +8,4 @@
 
 mk {
   package.name = "sel4-alloca";
-  dependencies = {
-    inherit (versions) cfg-if;
-  };
 }

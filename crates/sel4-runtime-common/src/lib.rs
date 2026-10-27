@@ -35,14 +35,9 @@ compile_error!("unsupported architecture");
 
 #[allow(clippy::missing_safety_doc)]
 pub unsafe fn with_local_init(f: impl FnOnce() -> !) -> ! {
-    cfg_if::cfg_if! {
-        if #[cfg(target_thread_local)] {
-            unsafe {
-                tls::with_tls(f)
-            }
-        } else {
-            f()
-        }
+    cfg_select! {
+        target_thread_local => unsafe { tls::with_tls(f) },
+        _ => f(),
     }
 }
 

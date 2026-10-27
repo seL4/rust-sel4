@@ -15,7 +15,7 @@ version = "0.1.0"
 authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
 edition = "2024"
 license = "MIT"
-rust-version = "1.85"
+rust-version = "1.95"
 
 [features]
 default = ["state"]
@@ -28,6 +28,5 @@ thread-local-state = []
 tls = []
 
 [dependencies]
-cfg-if = "1.0.4"
 sel4-config = { path = "config" }
 sel4-sys = { path = "sys" }
