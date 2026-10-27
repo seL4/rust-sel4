@@ -12,7 +12,6 @@ mk {
     inherit (versions)
       anyhow
       serde_json
-      num
       rkyv
     ;
     object = objectWith [];

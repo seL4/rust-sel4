@@ -17,7 +17,6 @@ mk {
       sel4-microkit
       sel4-shared-memory
       sel4
-      sel4-logging
       sel4-immediate-sync-once-cell
       sel4-shared-ring-buffer
       sel4-shared-ring-buffer-block-io-types

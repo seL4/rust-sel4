@@ -267,7 +267,6 @@ dependencies = [
 name = "create-vscode-workspace"
 version = "0.1.0"
 dependencies = [
- "anyhow",
  "cargo_metadata 0.23.1",
  "clap",
  "jsonc-parser",

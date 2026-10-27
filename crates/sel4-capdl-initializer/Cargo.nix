@@ -16,7 +16,6 @@ mk {
     inherit (localCrates)
       sel4
       sel4-logging
-      sel4-immutable-cell
       sel4-immediate-sync-once-cell
       sel4-phdrs
       sel4-phdrs-patched
