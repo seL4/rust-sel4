@@ -16,9 +16,6 @@ authors = ["Nick Spinale <nick.spinale@coliasgroup.com>"]
 edition = "2024"
 license = "BSD-2-Clause"
 
-[dependencies]
-log = "0.4.28"
-
 [dev-dependencies.test]
 path = "../../../support/sel4-root-task-default-test-harness"
 package = "sel4-root-task-default-test-harness"

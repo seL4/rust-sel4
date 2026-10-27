@@ -14,7 +14,6 @@ mk {
       sel4-never-polyfill
       sel4-panicking-env
       sel4-phdrs
-      sel4-immutable-cell
       sel4-stack
       sel4-ctors-dtors
     ;
