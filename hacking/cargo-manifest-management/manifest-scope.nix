@@ -163,6 +163,12 @@ in rec {
     inherit features;
   };
 
+  objectWith = features: {
+    version = versions.object;
+    default-features = false;
+    features = [ "read_core" "elf" ] ++ features;
+  };
+
   unwindingWith = features: filterOutEmptyFeatureList {
     version = versions.unwinding;
     default-features = false;

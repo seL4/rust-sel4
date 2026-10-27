@@ -4,21 +4,20 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
-use std::fs::File;
+use std::fs;
 use std::ops::Range;
 use std::path::Path;
 
 use object::elf::PT_LOAD;
 use object::read::elf::{ElfFile, ElfSegment, FileHeader, ProgramHeader};
-use object::{Object, ObjectSegment, ReadCache, ReadRef};
+use object::{Object, ObjectSegment, ReadRef};
 
 pub(crate) fn with_elf<T: FileHeader, R, F>(path: impl AsRef<Path>, f: F) -> R
 where
-    F: FnOnce(&ElfFile<T, &ReadCache<File>>) -> R,
+    F: FnOnce(&ElfFile<T, &[u8]>) -> R,
 {
-    let file = File::open(path).unwrap();
-    let read_cache = ReadCache::new(file);
-    let elf = ElfFile::<T, _>::parse(&read_cache).unwrap();
+    let bytes = fs::read(path).unwrap();
+    let elf = ElfFile::<T, _>::parse(&*bytes).unwrap();
     f(&elf)
 }
 

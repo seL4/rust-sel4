@@ -4,13 +4,11 @@
 # SPDX-License-Identifier: BSD-2-Clause
 #
 
-{ mk, versions }:
+{ mk, versions, objectWith }:
 
 mk {
   package.name = "sel4-patch-elf";
   dependencies = {
-    inherit (versions)
-      object
-    ;
+    object = objectWith [];
   };
 }

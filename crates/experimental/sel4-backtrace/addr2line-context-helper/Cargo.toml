@@ -18,7 +18,7 @@ license = "BSD-2-Clause"
 
 [dependencies]
 gimli = { version = "0.34.0", default-features = false, features = ["endian-reader"] }
-object = { version = "0.40.0", default-features = false, features = ["read"] }
+object = { version = "0.40.0", default-features = false, features = ["read_core", "elf"] }
 stable_deref_trait = { version = "1.2.1", default-features = false, features = ["alloc"] }
 thiserror = { version = "2.0.17", default-features = false }
 

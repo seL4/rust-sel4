@@ -4,13 +4,13 @@
 # SPDX-License-Identifier: BSD-2-Clause
 #
 
-{ mk, localCrates, versions }:
+{ mk, localCrates, versions, objectWith }:
 
 mk {
   package.name = "sel4-backtrace-embedded-debug-info";
   dependencies = {
     addr2line = { version = versions.addr2line; default-features = false; };
-    object = { version = versions.object; default-features = false; features = [ "read" ]; };
+    object = objectWith [];
     inherit (localCrates)
       sel4-backtrace-addr2line-context-helper
       sel4-phdrs
