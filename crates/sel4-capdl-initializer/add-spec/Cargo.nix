@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
 #
 
-{ mk, localCrates, versions }:
+{ mk, localCrates, versions, objectWith }:
 
 mk {
   package.name = "sel4-capdl-initializer-add-spec";
@@ -14,8 +14,8 @@ mk {
       serde_json
       num
       rkyv
-      object
     ;
+    object = objectWith [];
     clap = { version = versions.clap; features = [ "derive" ]; };
     inherit (localCrates)
       sel4-patch-elf

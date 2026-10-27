@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
 #
 
-{ mk, localCrates, versions, postcardWith }:
+{ mk, localCrates, versions, postcardWith, objectWith }:
 
 mk {
   package.name = "sel4-kernel-loader";
@@ -47,12 +47,12 @@ mk {
     inherit (versions)
       proc-macro2
       quote
-      object
       serde
       prettyplease
       cc
       glob
     ;
+    object = objectWith [];
     postcard = postcardWith [ "alloc" ];
     syn = { version = versions.syn; features = [ "parsing" ]; };
     inherit (localCrates)

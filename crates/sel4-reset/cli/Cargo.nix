@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
 #
 
-{ mk, localCrates, versions }:
+{ mk, localCrates, versions, objectWith }:
 
 mk {
   package.name = "sel4-reset-cli";
@@ -12,8 +12,8 @@ mk {
     inherit (versions)
       anyhow
       rangemap
-      object
     ;
+    object = objectWith [];
     clap = { version = versions.clap; features = [ "derive" ]; };
     inherit (localCrates)
       sel4-patch-elf

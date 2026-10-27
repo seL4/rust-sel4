@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
 #
 
-{ mk, localCrates, versions, serdeWith }:
+{ mk, localCrates, versions, serdeWith, objectWith }:
 
 mk {
   package.name = "sel4-kernel-loader-add-payload";
@@ -13,10 +13,10 @@ mk {
       anyhow
       serde_json
       num
-      object
       rkyv
       bitfield
     ;
+    object = objectWith [];
     clap = { version = versions.clap; features = [ "derive" ]; };
     inherit (localCrates)
       sel4-patch-elf

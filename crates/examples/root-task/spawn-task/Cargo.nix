@@ -4,12 +4,12 @@
 # SPDX-License-Identifier: BSD-2-Clause
 #
 
-{ mk, versions, localCrates }:
+{ mk, versions, localCrates, objectWith }:
 
 mk {
   package.name = "spawn-task";
   dependencies = {
-    object = { version = versions.object; default-features = false; features = [ "read" ]; };
+    object = objectWith [];
     inherit (localCrates)
       sel4
       sel4-root-task
