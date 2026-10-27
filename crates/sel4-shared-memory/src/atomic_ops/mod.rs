@@ -6,7 +6,6 @@
 
 use core::sync::atomic::{self, Ordering};
 
-use aligned::Aligned;
 use zerocopy::{FromBytes, IntoBytes};
 
 use sel4_abstract_ptr::memory_type::AtomicOps;
@@ -23,14 +22,6 @@ pub trait Atomic: AtomicSealed {
 
 trait AtomicSealed {
     const IS_SIGNED: bool;
-}
-
-impl<A: Atomic> Atomic for Aligned<A, A::Value> {
-    type Value = A::Value;
-}
-
-impl<A: Atomic> AtomicSealed for Aligned<A, A::Value> {
-    const IS_SIGNED: bool = A::IS_SIGNED;
 }
 
 macro_rules! impl_atomic {

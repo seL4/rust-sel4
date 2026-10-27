@@ -17,10 +17,9 @@ edition = "2024"
 license = "MIT OR Apache-2.0"
 
 [features]
-atomics = ["dep:aligned"]
+atomics = []
 
 [dependencies]
-aligned = { version = "0.4.2", optional = true }
 paste = "1.0.15"
 sel4-abstract-ptr = { path = "../sel4-abstract-ptr" }
 zerocopy = "0.8.27"
