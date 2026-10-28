@@ -88,6 +88,20 @@ let
 
         dontFixup = true;
 
+        patchPhase = ''
+          # TODO HACK
+
+          substituteInPlace build_sdk.py \
+            --replace \
+              'frozenset(args.boards.split(","))' \
+              'frozenset(filter(lambda x: x != "", args.boards.split(",")))'
+
+          substituteInPlace build_sdk.py \
+            --replace \
+              'frozenset(args.configs.split(","))' \
+              'frozenset(filter(lambda x: x != "", args.configs.split(",")))'
+        '';
+
         configurePhase = ''
           cat ${toTOMLFile "x" vendored.configFragment} >> .cargo/config.toml
         '';
@@ -131,6 +145,13 @@ let
         extraArgs = lib.concatMap toolchainPrefixArgs stdenvs;
       };
 
+  tool = mkSdkCommon {
+    extraArgs = [
+      "--boards" "''"
+      "--configs" "''"
+    ];
+  };
+
   forWorld = worldConfig:
     let
       inherit (worldConfig) platformRequiresLoader microkitConfig;
@@ -144,6 +165,7 @@ let
 
       sdk = mkSdkCommon {
         extraArgs = [
+          "--skip-tool"
           "--boards" board
           "--configs" config
         ] ++ toolchainPrefixArgs stdenv;
@@ -156,6 +178,9 @@ let
         , searchPath
         }:
         lib.fix (self: runCommand "system" {
+          nativeBuildInputs = [
+            tool
+          ];
           passthru = {
             inherit systemXML;
             image = "${self}/${imageName}.img";
@@ -163,7 +188,7 @@ let
         } ''
           mkdir $out
           MICROKIT_SDK=${sdk} \
-            ${sdk}/bin/microkit ${systemXML} \
+            microkit ${systemXML} \
               --search-path ${lib.concatStringsSep " " searchPath} \
               --board ${board} \
               --config ${config} \
@@ -202,6 +227,7 @@ let
 in {
   inherit
     sdk
+    tool
     genSDF
     forWorld
   ;
