@@ -5,7 +5,7 @@
 #
 
 { lib, stdenv
-, buildPackages, pkgsBuildBuild
+, buildPackages
 , linkFarm, writeScript, runCommand
 , buildEnv
 , callPackage
@@ -13,6 +13,7 @@
 , dtc, libxml2
 , python312Packages
 , fenix
+, vendorLockfile, vendorSysrootLockfile, mergeVendoredLockfiles
 , libclangPath
 , qemuForSeL4
 , sources
@@ -56,40 +57,14 @@ let
     }:
 
     let
-      inherit (pkgsBuildBuild.rustPlatform) importCargoLock;
+      vendored = mergeVendoredLockfiles [
+        (vendorSysrootLockfile rustToolchain)
+        (vendorLockfile {
+          inherit rustToolchain;
+          lockfile = microkitSource + "/Cargo.lock";
+        })
+      ];
 
-      vendoredWorkspace = importCargoLock {
-        lockFile = microkitSource + "/Cargo.lock";
-        allowBuiltinFetchGit = true;
-      };
-
-      vendoredStdWorkspace = importCargoLock {
-        lockFile = rustToolchain + "/lib/rustlib/src/rust/library/Cargo.lock";
-        allowBuiltinFetchGit = true;
-      };
-
-      vendored = runCommand "vendored" {
-        nativeBuildInputs = [
-          python312Packages.toml
-        ];
-      } ''
-        mkdir $out
-        for d in ${vendoredStdWorkspace}/* ${vendoredWorkspace}/*; do
-          name=$(basename $d)
-          if [ -d $out/$name ]; then
-            ! diff -r -q $d $out/$name
-          else
-            cp -r $d $out
-          fi
-        done
-
-        mkdir $out/.cargo
-        python3 ${./merge-config.py} \
-          -d $out \
-          ${vendoredStdWorkspace}/.cargo/config.toml \
-          ${vendoredWorkspace}/.cargo/config.toml \
-             > $out/.cargo/config.toml
-      '';
     in
       stdenv.mkDerivation {
         name = "microkit-sdk";
@@ -114,7 +89,7 @@ let
         dontFixup = true;
 
         configurePhase = ''
-          cat ${vendored}/.cargo/config.toml >> .cargo/config.toml
+          cat ${toTOMLFile "x" vendored.configFragment} >> .cargo/config.toml
         '';
 
         buildPhase = ''
