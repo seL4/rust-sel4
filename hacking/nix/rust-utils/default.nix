@@ -34,6 +34,11 @@ in
 
   pathToLink = callBuildBuildPackage ./path-to-link.nix {};
 
+  vendorSysrootLockfile = rustToolchain: vendorLockfile {
+    inherit rustToolchain;
+    lockfile = symlinkToRegularFile "Cargo.lock" "${rustToolchain}/lib/rustlib/src/rust/library/Cargo.lock";
+  };
+
   mkCompilerRTSource = { rev, hash }:
     let
       llvmProject = fetchFromGitHub {
@@ -63,36 +68,18 @@ in
         if channel != null
         then lib.hasPrefix "nightly-" channel
         else throw "could not determine isNightly automatically"
-    , backwardsCompatibilityHacks ? {}
     , mkCustomTargetPath ? customTargetTripleTripleName: throw "unimplemented"
     , chooseLinker ? { targetTriple, platform }: null
     , vendoredSuperLockfile ? null
     }:
-    let
-      elaborateBackwardsCompatibilityHacks =
-        { outDirInsteadOfArtifactDir ? false
-        , noLibraryWorkspace ? false
-        }:
-        {
-          inherit
-            outDirInsteadOfArtifactDir
-            noLibraryWorkspace
-          ;
-        };
-      elaboratedBackwardsCompatibilityHacks = elaborateBackwardsCompatibilityHacks backwardsCompatibilityHacks;
-    in {
+    {
       inherit rustToolchain channel isNightly;
       inherit chooseLinker;
       inherit vendoredSuperLockfile;
 
-      artifactDirFlag = if elaboratedBackwardsCompatibilityHacks.outDirInsteadOfArtifactDir then "--out-dir" else "--artifact-dir";
-
       mkTargetPath = targetTriple: if !targetTriple.isBuiltin then mkCustomTargetPath targetTriple.name else emptyDirectory;
 
-      vendoredSysrootLockfile = vendorLockfile {
-        inherit rustToolchain;
-        lockfile = symlinkToRegularFile "Cargo.lock" "${rustToolchain}/lib/rustlib/src/rust/${lib.optionalString (!elaboratedBackwardsCompatibilityHacks.noLibraryWorkspace) "library/"}Cargo.lock";
-      };
+      vendoredSysrootLockfile = vendorSysrootLockfile rustToolchain;
     }
   );
 }
