@@ -17,14 +17,10 @@
 , qemuForSeL4
 , sources
 , toTOMLFile
+, selfTopLevel
 }:
 
-worldConfig:
-
 let
-  inherit (worldConfig) platformRequiresLoader microkitConfig;
-  inherit (microkitConfig) board config;
-
   microkitSource = sources.microkit;
 
   kernelSource = sources.seL4;
@@ -49,18 +45,16 @@ let
     '';
   };
 
-  sdkArch =
-    if stdenv.hostPlatform.isAarch64 then "aarch64"
-    else if stdenv.hostPlatform.isRiscV64 then "riscv64"
-    else if stdenv.hostPlatform.isx86_64 then "x86_64"
-    else throw "unknown arch";
-
   rustToolchain = fenix.fromToolchainFile {
     file = ./rust-toolchain.toml;
     sha256 = "sha256-gh/xTkxKHL4eiRXzWv8KP7vfjSk61Iq48x47BEDFgfk=";
   };
 
-  sdk =
+  mkSdkCommon =
+    { extraDepsBuildBuild ? []
+    , extraArgs ? []
+    }:
+
     let
       inherit (pkgsBuildBuild.rustPlatform) importCargoLock;
 
@@ -115,7 +109,7 @@ let
           buildPackages.stdenv.cc
           # NOTE: cause drv.__spliced.buildBuild to be used to work around splicing issue
           qemuForSeL4
-        ];
+        ] ++ extraDepsBuildBuild;
 
         dontFixup = true;
 
@@ -126,11 +120,9 @@ let
         buildPhase = ''
           python3 build_sdk.py \
             --sel4 ${kernelSourcePatched} \
-            --boards ${board} \
-            --configs ${config} \
-            --gcc-toolchain-prefix-${sdkArch} ${lib.removeSuffix "-" stdenv.cc.targetPrefix} \
             --skip-docs \
-            --skip-tar
+            --skip-tar \
+            ${lib.concatStringsSep " " extraArgs}
         '';
 
         installPhase = ''
@@ -138,53 +130,104 @@ let
         '';
       };
 
-  imageName = if platformRequiresLoader then "loader" else "root-task";
+  sdkArch = stdenv':
+    if stdenv'.hostPlatform.isAarch64 then "aarch64"
+    else if stdenv'.hostPlatform.isRiscV64 then "riscv64"
+    else if stdenv'.hostPlatform.isx86_64 then "x86_64"
+    else throw "unknown arch";
 
-  mkSystemImage =
-    { systemXML
-    , searchPath
-    }:
-    lib.fix (self: runCommand "system" {
-      passthru = {
-        inherit systemXML;
-        image = "${self}/${imageName}.img";
-      };
-    } ''
-      mkdir $out
-      MICROKIT_SDK=${sdk} \
-        ${sdk}/bin/microkit ${systemXML} \
-          --search-path ${lib.concatStringsSep " " searchPath} \
-          --board ${board} \
-          --config ${config} \
-          -o $out/${imageName}.img \
-          -r $out/report.txt
-    '');
+  toolchainPrefixArgs = stdenv': [
+    "--gcc-toolchain-prefix-${sdkArch stdenv'}" (lib.removeSuffix "-" stdenv'.cc.targetPrefix)
+  ];
 
-  mkSystem =
-    { systemXML
-    , searchPath
-    , extraDebuggingLinks ? []
-    , passthru ? {}
-    }:
+  sdk =
     let
-      system = mkSystemImage { inherit systemXML searchPath; };
-    in {
-      inherit system;
-      "${if platformRequiresLoader then "loaderImage" else "rootTaskImage"}" = system.image;
-      debuggingLinks = [
-        { name = "${imageName}.img"; path = system.image; }
-        { name = "report.txt"; path = "${system}/report.txt"; }
-        { name = "sdk/elf"; path = "${sdk}/board/${board}/${config}/elf"; }
-        { name = "sel4-symbolize-backtrace";
-          path = "${buildPackages.this.sel4-backtrace-cli}/bin/sel4-symbolize-backtrace";
-        }
-      ] ++ extraDebuggingLinks;
-    } // passthru;
+      stdenvs = map (pkgs: pkgs.stdenv) [
+        selfTopLevel.pkgs.host.aarch64.none
+        selfTopLevel.pkgs.host.riscv64.default.none
+        selfTopLevel.pkgs.host.x86_64.none
+      ];
+    in
+      mkSdkCommon {
+        extraDepsBuildBuild = lib.flip lib.concatMap stdenvs (stdenv': [
+          stdenv'.cc.bintools.bintools
+          stdenv'.cc.cc
+        ]);
+        extraArgs = lib.concatMap toolchainPrefixArgs stdenvs;
+      };
 
-in rec {
+  forWorld = worldConfig:
+    let
+      inherit (worldConfig) platformRequiresLoader microkitConfig;
+      inherit (microkitConfig) board config;
+
+      sdkArch =
+        if stdenv.hostPlatform.isAarch64 then "aarch64"
+        else if stdenv.hostPlatform.isRiscV64 then "riscv64"
+        else if stdenv.hostPlatform.isx86_64 then "x86_64"
+        else throw "unknown arch";
+
+      sdk = mkSdkCommon {
+        extraArgs = [
+          "--boards" board
+          "--configs" config
+        ] ++ toolchainPrefixArgs stdenv;
+      };
+
+      imageName = if platformRequiresLoader then "loader" else "root-task";
+
+      mkSystemImage =
+        { systemXML
+        , searchPath
+        }:
+        lib.fix (self: runCommand "system" {
+          passthru = {
+            inherit systemXML;
+            image = "${self}/${imageName}.img";
+          };
+        } ''
+          mkdir $out
+          MICROKIT_SDK=${sdk} \
+            ${sdk}/bin/microkit ${systemXML} \
+              --search-path ${lib.concatStringsSep " " searchPath} \
+              --board ${board} \
+              --config ${config} \
+              -o $out/${imageName}.img \
+              -r $out/report.txt
+        '');
+
+      mkSystem =
+        { systemXML
+        , searchPath
+        , extraDebuggingLinks ? []
+        , passthru ? {}
+        }:
+        let
+          system = mkSystemImage { inherit systemXML searchPath; };
+        in {
+          inherit system;
+          "${if platformRequiresLoader then "loaderImage" else "rootTaskImage"}" = system.image;
+          debuggingLinks = [
+            { name = "${imageName}.img"; path = system.image; }
+            { name = "report.txt"; path = "${system}/report.txt"; }
+            { name = "sdk/elf"; path = "${sdk}/board/${board}/${config}/elf"; }
+            { name = "sel4-symbolize-backtrace";
+              path = "${buildPackages.this.sel4-backtrace-cli}/bin/sel4-symbolize-backtrace";
+            }
+          ] ++ extraDebuggingLinks;
+        } // passthru;
+
+    in {
+      inherit
+        sdk
+        mkSystem
+      ;
+    };
+
+in {
   inherit
     sdk
-    mkSystem
     genSDF
+    forWorld
   ;
 }

@@ -370,7 +370,8 @@ superCallPackage ../rust-utils {} self //
 
   cmakeConfigHelpers = callPackage ./cmake-config-helpers.nix {};
 
-  mkMicrokit = callPackage ./microkit {};
+  microkit = callPackage ./microkit {};
+  mkMicrokit = microkit.forWorld;
 
   sdfgen = callPackage ./microkit/sdfgen.nix {};
 
