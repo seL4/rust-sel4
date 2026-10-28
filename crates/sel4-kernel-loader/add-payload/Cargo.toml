@@ -18,7 +18,7 @@ license = "BSD-2-Clause"
 
 [dependencies]
 anyhow = "1.0.100"
-bitfield = "0.19.3"
+bitfield = "0.20.0"
 clap = { version = "4.5.50", features = ["derive"] }
 num = "0.4.3"
 object = { version = "0.40.0", default-features = false, features = ["read_core", "elf"] }
