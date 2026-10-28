@@ -21,7 +21,6 @@ pub enum VCpuReg {
     MAIR = sys::seL4_VCPUReg::seL4_VCPUReg_MAIR,
     AMAIR = sys::seL4_VCPUReg::seL4_VCPUReg_AMAIR,
     CIDR = sys::seL4_VCPUReg::seL4_VCPUReg_CIDR,
-    ACTLR = sys::seL4_VCPUReg::seL4_VCPUReg_ACTLR,
     CPACR = sys::seL4_VCPUReg::seL4_VCPUReg_CPACR,
     AFSR0 = sys::seL4_VCPUReg::seL4_VCPUReg_AFSR0,
     AFSR1 = sys::seL4_VCPUReg::seL4_VCPUReg_AFSR1,
