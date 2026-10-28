@@ -18,6 +18,7 @@
 , sources
 , sdfgen
 , microkit
+, microkitCommon
 
 , worldConfig
 , callPlatform
@@ -55,10 +56,10 @@ let
       llvm.libllvm
     ];
 
-    MICROKIT_SDK = microkit.sdkWithTool;
+    MICROKIT_SDK = microkit.sdk;
     MICROKIT_CONFIG = microkitConfig.config;
     MICROKIT_BOARD = microkitConfig.board;
-    MICROKIT_TOOL = "${microkit.tool}/bin/microkit";
+    MICROKIT_TOOL = "${microkitCommon.tool}/bin/microkit";
 
     buildCommand = ''
       make -C ${src} BUILD_DIR=$out
