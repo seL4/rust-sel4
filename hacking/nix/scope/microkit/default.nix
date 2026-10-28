@@ -18,10 +18,13 @@
 , qemuForSeL4
 , sources
 , toTOMLFile
+, crates, crateUtils
 , selfTopLevel
 }:
 
 let
+  useSelf = false;
+
   microkitSource = sources.microkit;
 
   kernelSource = sources.seL4;
@@ -65,6 +68,10 @@ let
         })
       ];
 
+      cratesClosure = crateUtils.collectReals (lib.attrValues (crateUtils.getClosureOfCrates [
+        crates.sel4-capdl-initializer
+        crates.sel4-capdl-initializer-types
+      ]));
     in
       stdenv.mkDerivation {
         name = "microkit-sdk";
@@ -100,6 +107,17 @@ let
             --replace \
               'frozenset(args.configs.split(","))' \
               'frozenset(filter(lambda x: x != "", args.configs.split(",")))'
+        '' + lib.optionalString useSelf ''
+          # TODO HACK
+
+          rm rust-sel4
+          mkdir rust-sel4
+          ln -s ${cratesClosure} rust-sel4/crates
+
+          substituteInPlace Cargo.toml \
+            --replace-fail \
+              'rust-sel4/crates/sel4-capdl-initializer/types' \
+              'rust-sel4/crates/sel4-capdl-initializer-types'
         '';
 
         configurePhase = ''
