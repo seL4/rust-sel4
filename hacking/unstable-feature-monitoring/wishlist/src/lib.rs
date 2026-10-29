@@ -61,3 +61,14 @@
 
 // For more accurate #[naked] ABIs
 #![feature(abi_custom)]
+
+// To generalize sel4-config-env to work in proc-macro crates
+#![feature(proc_macro_tracked_env)]
+#![feature(proc_macro_tracked_path)]
+
+// Once this is stabilized and used by the futures-io crate, that crate can replace sel4-async-io
+#![feature(core_io)]
+
+// Makes Rust tooling recognize this as a proc-macro crate more consistently, allowing us to track
+// `proc_macro_*` features.
+extern crate proc_macro;
