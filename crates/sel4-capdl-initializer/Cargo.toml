@@ -32,3 +32,6 @@ sel4-no-allocator = { path = "../sel4-no-allocator" }
 sel4-phdrs = { path = "../sel4-phdrs" }
 sel4-phdrs-patched = { path = "../sel4-phdrs/patched" }
 sel4-root-task = { path = "../sel4-root-task", features = ["single-threaded"] }
+
+[lints]
+cargo = { unused_dependencies = "allow" }
