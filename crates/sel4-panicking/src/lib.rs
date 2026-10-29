@@ -8,7 +8,6 @@
 #![feature(cfg_target_thread_local)]
 #![feature(panic_can_unwind)]
 #![cfg_attr(target_thread_local, feature(thread_local))]
-#![allow(internal_features)]
 
 #[cfg(feature = "alloc")]
 extern crate alloc;

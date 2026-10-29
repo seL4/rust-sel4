@@ -20,6 +20,7 @@ mk {
       sel4
       sel4-dlmalloc
       sel4-immediate-sync-once-cell
+      sel4-never-polyfill
       sel4-panicking-env
       sel4-simple-task-runtime-config-types
       sel4-simple-task-runtime-macros

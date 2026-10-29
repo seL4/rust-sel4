@@ -33,6 +33,7 @@ sel4-driver-interfaces = { path = "../../../../../experimental/sel4-driver-inter
 sel4-immediate-sync-once-cell = { path = "../../../../../sel4-immediate-sync-once-cell" }
 sel4-logging = { path = "../../../../../sel4-logging" }
 sel4-microkit = { path = "../../../../../sel4-microkit", features = ["alloc"] }
+sel4-never-polyfill = { path = "../../../../../sel4-never-polyfill" }
 sel4-shared-memory = { path = "../../../../../sel4-shared-memory" }
 sel4-shared-ring-buffer = { path = "../../../../../experimental/sel4-shared-ring-buffer" }
 

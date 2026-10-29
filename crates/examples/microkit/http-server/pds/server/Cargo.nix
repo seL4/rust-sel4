@@ -32,6 +32,7 @@ mk {
       sel4-logging
       sel4-immediate-sync-once-cell
       sel4-microkit-driver-adapters
+      sel4-never-polyfill
       sel4-driver-interfaces
       sel4-shared-memory
       sel4-async-single-threaded-executor

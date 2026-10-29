@@ -779,6 +779,8 @@ name = "example-root-task-without-runtime"
 version = "0.1.0"
 dependencies = [
  "sel4",
+ "sel4-crash-polyfill",
+ "sel4-never-polyfill",
 ]
 
 [[package]]
@@ -1307,6 +1309,7 @@ dependencies = [
  "sel4-logging",
  "sel4-microkit",
  "sel4-microkit-driver-adapters",
+ "sel4-never-polyfill",
  "sel4-newlib",
  "sel4-shared-memory",
  "sel4-shared-ring-buffer",
@@ -2456,6 +2459,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "sel4-crash-polyfill"
+version = "0.1.0"
+dependencies = [
+ "rustversion",
+]
+
+[[package]]
 name = "sel4-ctors-dtors"
 version = "0.1.0"
 
@@ -2616,6 +2626,7 @@ version = "0.1.0"
 dependencies = [
  "sel4",
  "sel4-immutable-cell",
+ "sel4-never-polyfill",
 ]
 
 [[package]]
@@ -2693,6 +2704,13 @@ version = "0.1.0"
 dependencies = [
  "sel4-immediate-sync-once-cell",
  "sel4-linux-syscall-types",
+]
+
+[[package]]
+name = "sel4-never-polyfill"
+version = "0.1.0"
+dependencies = [
+ "rustversion",
 ]
 
 [[package]]
@@ -2832,6 +2850,7 @@ dependencies = [
  "sel4",
  "sel4-dlmalloc",
  "sel4-immediate-sync-once-cell",
+ "sel4-never-polyfill",
  "sel4-panicking",
  "sel4-panicking-env",
  "sel4-root-task-macros",
@@ -2862,6 +2881,7 @@ name = "sel4-root-task-with-std"
 version = "0.1.0"
 dependencies = [
  "sel4",
+ "sel4-never-polyfill",
  "sel4-panicking-env",
  "sel4-runtime-common",
 ]
@@ -2871,9 +2891,11 @@ name = "sel4-runtime-common"
 version = "0.1.0"
 dependencies = [
  "sel4",
+ "sel4-crash-polyfill",
  "sel4-ctors-dtors",
  "sel4-immutable-cell",
  "sel4-initialize-tls",
+ "sel4-never-polyfill",
  "sel4-panicking-env",
  "sel4-phdrs",
  "sel4-stack",
@@ -2973,6 +2995,7 @@ dependencies = [
  "sel4-backtrace-simple",
  "sel4-dlmalloc",
  "sel4-immediate-sync-once-cell",
+ "sel4-never-polyfill",
  "sel4-panicking",
  "sel4-panicking-env",
  "sel4-runtime-common",
@@ -3067,6 +3090,7 @@ name = "sel4-test-harness"
 version = "0.1.0"
 dependencies = [
  "sel4-immediate-sync-once-cell",
+ "sel4-never-polyfill",
  "sel4-panicking",
  "sel4-panicking-env",
  "sel4-test-sentinels",
@@ -3102,6 +3126,7 @@ dependencies = [
 name = "sel4-test-sentinels"
 version = "0.1.0"
 dependencies = [
+ "sel4-crash-polyfill",
  "sel4-panicking-env",
 ]
 

@@ -5,7 +5,6 @@
 //
 
 #![feature(linkage)]
-#![feature(never_type)]
 
 use sel4::sel4_cfg_if;
 

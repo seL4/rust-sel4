@@ -11,6 +11,7 @@ mk {
   dependencies = {
     inherit (localCrates)
       sel4-immutable-cell
+      sel4-never-polyfill
       sel4
     ;
   };

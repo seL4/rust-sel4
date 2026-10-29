@@ -17,4 +17,5 @@ edition = "2024"
 license = "BSD-2-Clause"
 
 [dependencies]
+sel4-crash-polyfill = { path = "../../../sel4-crash-polyfill" }
 sel4-panicking-env = { path = "../../../sel4-panicking/env" }

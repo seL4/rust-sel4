@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 
+use sel4_never_polyfill::Never;
 use sel4_panicking_env::abort;
 use sel4_phdrs::PT_TLS;
 use sel4_phdrs::locate_phdrs;
@@ -12,7 +13,7 @@ use sel4_phdrs::locate_phdrs;
 use sel4_initialize_tls::{DEFAULT_SET_THREAD_POINTER_FN, SetThreadPointerFn, UncheckedTlsImage};
 
 #[allow(clippy::missing_safety_doc)]
-pub(crate) unsafe fn with_tls(f: impl FnOnce() -> !) -> ! {
+pub(crate) unsafe fn with_tls(f: impl FnOnce() -> Never) -> ! {
     let phdr = locate_phdrs()
         .unwrap_or_else(|err| abort!("{err}"))
         .find_by_type(PT_TLS)

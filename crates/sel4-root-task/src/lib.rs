@@ -30,7 +30,6 @@
 
 #![no_std]
 #![feature(linkage)]
-#![feature(never_type)]
 
 pub use sel4_panicking_env::abort;
 

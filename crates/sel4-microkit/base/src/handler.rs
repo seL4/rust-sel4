@@ -18,6 +18,9 @@ use crate::{
 
 pub use core::convert::Infallible;
 
+#[doc(hidden)]
+pub use sel4_never_polyfill::Never;
+
 /// Trait for the application-specific part of a protection domain's main loop.
 pub trait Handler {
     /// Error type returned by this protection domain's entrypoints.
@@ -117,9 +120,6 @@ pub trait Handler {
         }
     }
 }
-
-#[doc(hidden)]
-pub enum Never {}
 
 impl Handler for Never {
     type Error = Infallible;

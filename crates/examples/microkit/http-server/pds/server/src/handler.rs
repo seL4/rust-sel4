@@ -24,11 +24,10 @@ use sel4_async_time::{Instant, TimerManager};
 use sel4_driver_interfaces::timer::{Clock, DefaultTimer, Timer};
 use sel4_microkit::{ChannelSet, Handler, Infallible};
 use sel4_microkit_driver_adapters::timer::client::Client as TimerClient;
+use sel4_never_polyfill::Never;
 use sel4_shared_ring_buffer_block_io::SharedRingBufferBlockIO;
 
 use crate::DeviceImpl;
-
-pub(crate) enum Never {}
 
 pub(crate) struct HandlerImpl {
     timer_driver_channel: sel4_microkit::Channel,

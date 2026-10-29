@@ -18,3 +18,5 @@ license = "BSD-2-Clause"
 
 [dependencies]
 sel4 = { path = "../../../sel4", default-features = false }
+sel4-crash-polyfill = { path = "../../../sel4-crash-polyfill" }
+sel4-never-polyfill = { path = "../../../sel4-never-polyfill" }

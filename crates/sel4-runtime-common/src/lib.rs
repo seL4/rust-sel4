@@ -6,13 +6,11 @@
 
 #![no_std]
 #![feature(cfg_target_thread_local)]
-#![feature(never_type)]
-#![feature(core_intrinsics)]
 #![feature(linkage)]
-#![allow(internal_features)]
 
 use core::sync::atomic::{AtomicBool, Ordering};
 
+use sel4_never_polyfill::Never;
 use sel4_panicking_env::abort;
 
 mod abort;
@@ -34,7 +32,7 @@ mod unwinding;
 compile_error!("unsupported architecture");
 
 #[allow(clippy::missing_safety_doc)]
-pub unsafe fn with_local_init(f: impl FnOnce() -> !) -> ! {
+pub unsafe fn with_local_init(f: impl FnOnce() -> Never) -> ! {
     cfg_select! {
         target_thread_local => unsafe { tls::with_tls(f) },
         _ => f(),
@@ -71,7 +69,7 @@ extern "C" fn __aeabi_read_tp() -> usize {
 
 #[doc(hidden)]
 #[allow(unreachable_code)]
-pub unsafe fn _run_entrypoint(global_init_cond: bool, f: impl FnOnce() -> !) -> ! {
+pub unsafe fn _run_entrypoint(global_init_cond: bool, f: impl FnOnce() -> Never) -> ! {
     unsafe {
         with_local_init(|| {
             if global_init_cond {
