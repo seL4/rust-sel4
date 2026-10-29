@@ -22,9 +22,9 @@ pub fn generate_rust(
     let text = fs::read_to_string(bf_path).unwrap();
     let file = parser::parse(&text);
     let file = simplify(&file);
-    let mut generator = BitfieldGenerator::new(blocklist_for_bindgen);
+    let mut generator = BitfieldGenerator::new(blocklist_for_bindgen, file.base);
     for block in file.blocks.iter() {
-        generator.generate_block(&block.name, &block.backing_type, &block.fields, None);
+        generator.generate_block(&block.name, block.multiple, &block.fields, None);
     }
     for tagged_union in file.tagged_unions.iter() {
         generator.generate_tagged_union(tagged_union);
@@ -34,21 +34,32 @@ pub fn generate_rust(
 
 struct BitfieldGenerator<'a> {
     blocklist_for_bindgen: &'a mut Vec<String>,
+    base: usize,
     toks: TokenStream,
 }
 
 impl<'a> BitfieldGenerator<'a> {
-    fn new(blocklist_for_bindgen: &'a mut Vec<String>) -> Self {
+    fn new(blocklist_for_bindgen: &'a mut Vec<String>, base: usize) -> Self {
         Self {
             blocklist_for_bindgen,
+            base,
             toks: quote!(),
         }
+    }
+
+    fn primitive_type(&self) -> TokenStream {
+        format!("u{}", self.base).parse::<TokenStream>().unwrap()
+    }
+
+    fn bitfield_type(&self, multiple: usize) -> TokenStream {
+        let primitive = self.primitive_type();
+        quote!(SeL4Bitfield<#primitive, #multiple>)
     }
 
     fn generate_block(
         &mut self,
         name: &str,
-        backing_type: &BackingType,
+        multiple: usize,
         fields: &[Field],
         tag_info: Option<BlockTagInfo>,
     ) {
@@ -63,8 +74,8 @@ impl<'a> BitfieldGenerator<'a> {
 
         let unpacked_ident = format_ident!("{}_Unpacked", name_ident);
 
-        let primitive_type = backing_type.primitive();
-        let bitfield_type = backing_type.bitfield();
+        let primitive_type = self.primitive_type();
+        let bitfield_type = self.bitfield_type(multiple);
 
         let mut non_tag_fields_with_types = vec![];
         let mut non_tag_fields = vec![];
@@ -186,8 +197,8 @@ impl<'a> BitfieldGenerator<'a> {
     fn generate_tagged_union(&mut self, tagged_union: &TaggedUnion) {
         let name_ident = format_ident!("{}", tagged_union.name);
         let splayed_ident = format_ident!("{}_Splayed", tagged_union.name);
-        let primitive_type = tagged_union.backing_type.primitive();
-        let bitfield_type = tagged_union.backing_type.bitfield();
+        let primitive_type = self.primitive_type();
+        let bitfield_type = self.bitfield_type(tagged_union.multiple);
         let tag_values_module_ident = mk_tag_values_module_ident(&tagged_union.name);
 
         self.blocklist_for_bindgen.push(name_ident.to_string());
@@ -226,7 +237,7 @@ impl<'a> BitfieldGenerator<'a> {
 
             self.generate_block(
                 &tag.name,
-                &tagged_union.backing_type,
+                tagged_union.multiple,
                 &tag.fields,
                 Some(BlockTagInfo {
                     tagged_union_name: tagged_union.name.clone(),
@@ -302,18 +313,6 @@ impl<'a> BitfieldGenerator<'a> {
 struct BlockTagInfo {
     tagged_union_name: String,
     tag_name: String,
-}
-
-impl BackingType {
-    fn primitive(&self) -> TokenStream {
-        format!("u{}", self.base).parse::<TokenStream>().unwrap()
-    }
-
-    fn bitfield(&self) -> TokenStream {
-        let primitive = self.primitive();
-        let multiple = self.multiple;
-        quote!(SeL4Bitfield<#primitive, #multiple>)
-    }
 }
 
 fn mk_tagged_union_variant_block_type_ident(tagged_union_name: &str, tag_name: &str) -> Ident {
