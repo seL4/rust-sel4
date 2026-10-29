@@ -9,12 +9,13 @@ use std::ops::Range;
 
 use super::parser::ast;
 
-pub fn simplify(orig: &ast::File) -> File {
-    File::simplify(orig)
+pub fn simplify(orig_file: &ast::File) -> File {
+    File::simplify(orig_file)
 }
 
 #[derive(Debug)]
 pub struct File {
+    pub base: usize,
     pub blocks: Vec<Block>,
     pub tagged_unions: Vec<TaggedUnion>,
 }
@@ -22,14 +23,8 @@ pub struct File {
 #[derive(Debug)]
 pub struct Block {
     pub name: String,
-    pub backing_type: BackingType,
-    pub fields: Vec<Field>,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct BackingType {
-    pub base: usize,
     pub multiple: usize,
+    pub fields: Vec<Field>,
 }
 
 #[derive(Debug)]
@@ -44,7 +39,7 @@ pub struct TaggedUnion {
     pub name: String,
     pub tag_name: String,
     pub tag_range: Range<usize>,
-    pub backing_type: BackingType,
+    pub multiple: usize,
     pub tags: Vec<Tag>,
 }
 
@@ -57,38 +52,38 @@ pub struct Tag {
 
 impl File {
     fn simplify(orig_file: &ast::File) -> Self {
-        let tagged_unions = orig_file
-            .tagged_unions
+        let base = orig_file.base;
+        let mut orig_blocks = vec![];
+        let mut orig_tagged_unions = vec![];
+        for declaration in orig_file.declarations.iter() {
+            match declaration {
+                ast::Declaration::Block(block) => orig_blocks.push(block),
+                ast::Declaration::TaggedUnion(tagged_union) => {
+                    orig_tagged_unions.push(tagged_union)
+                }
+            }
+        }
+        let tagged_unions = orig_tagged_unions
             .iter()
             .map(|orig_tagged_union| {
-                let tag_name = orig_tagged_union.inner.tag_name.clone();
-                let base = simplify_base(&orig_tagged_union.base);
-                assert_eq!(orig_tagged_union.inner.tag_slices.len(), 1);
-                assert_eq!(orig_tagged_union.inner.tag_slices[0], tag_name);
-                assert!(orig_tagged_union.inner.classes.is_empty());
+                let tag_name = orig_tagged_union.tag_name.clone();
                 let blocks_with_values = orig_tagged_union
-                    .inner
                     .tags
                     .iter()
                     .map(|orig_tag| {
-                        assert_eq!(orig_tag.values.len(), 1);
-                        let value = orig_tag.values[0];
-                        let orig_block = orig_file
-                            .blocks
+                        let orig_block = orig_blocks
                             .iter()
-                            .find(|orig_block| orig_block.inner.name == orig_tag.name)
+                            .find(|orig_block| orig_block.name == orig_tag.name)
                             .unwrap();
-                        let block = Block::simplify(orig_block);
-                        (block, value)
+                        let block = Block::simplify(base, orig_block);
+                        (block, orig_tag.value)
                     })
                     .collect::<Vec<(Block, usize)>>();
-                let backing_type = unified(
+                let multiple = unified(
                     blocks_with_values
                         .iter()
-                        .map(|(block, _value)| &block.backing_type),
-                )
-                .clone();
-                assert_eq!(backing_type.base, base);
+                        .map(|(block, _value)| block.multiple),
+                );
                 let tag_range = unified(blocks_with_values.iter().map(|(block, _value)| {
                     let field = block
                         .fields
@@ -106,10 +101,10 @@ impl File {
                     })
                     .collect();
                 TaggedUnion {
-                    name: orig_tagged_union.inner.name.clone(),
+                    name: orig_tagged_union.name.clone(),
                     tag_name,
                     tag_range,
-                    backing_type,
+                    multiple,
                     tags,
                 }
             })
@@ -118,13 +113,13 @@ impl File {
             .iter()
             .flat_map(|tagged_union| tagged_union.tags.iter().map(|tag| tag.name.to_owned()))
             .collect::<BTreeSet<String>>();
-        let blocks = orig_file
-            .blocks
+        let blocks = orig_blocks
             .iter()
-            .filter(|block| !blocks_to_exclude.contains(&block.inner.name))
-            .map(Block::simplify)
+            .filter(|block| !blocks_to_exclude.contains(&block.name))
+            .map(|block| Block::simplify(base, block))
             .collect();
         Self {
+            base,
             blocks,
             tagged_unions,
         }
@@ -132,16 +127,13 @@ impl File {
 }
 
 impl Block {
-    fn simplify(orig: &ast::Entity<ast::Block>) -> Self {
-        let base = simplify_base(&orig.base);
-        assert!(orig.inner.visible_order_spec.is_none());
+    fn simplify(base: usize, orig: &ast::Block) -> Self {
         let mut cur_offset = 0;
         let mut fields = vec![];
-        for segment in orig.inner.segments.iter().rev() {
-            if let Some(field) = &segment.field {
-                assert!(!field.is_high);
+        for segment in orig.segments.iter().rev() {
+            if let Some(name) = &segment.field {
                 fields.push(Field {
-                    name: field.name.clone(),
+                    name: name.clone(),
                     offset: cur_offset,
                     width: segment.width,
                 })
@@ -151,17 +143,11 @@ impl Block {
         fields.reverse(); // order matters for ::new(...) parameter list
         let multiple = cur_offset / base;
         Self {
-            name: orig.inner.name.clone(),
-            backing_type: BackingType { base, multiple },
+            name: orig.name.clone(),
+            multiple,
             fields,
         }
     }
-}
-
-fn simplify_base(base: &ast::Base) -> usize {
-    assert_eq!(base.base_bits, base.base);
-    assert!(!base.sign_extend);
-    base.base
 }
 
 fn unified<T: Eq>(mut it: impl Iterator<Item = T>) -> T {
