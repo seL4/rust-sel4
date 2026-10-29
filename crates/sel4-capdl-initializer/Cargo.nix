@@ -33,4 +33,5 @@ mk {
       "sel4-capdl-initializer-types/deflate"
     ];
   };
+  lints.cargo.unused_dependencies = "allow";
 }

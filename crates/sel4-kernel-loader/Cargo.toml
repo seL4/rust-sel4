@@ -53,3 +53,6 @@ aarch64-cpu = "11.1.0"
 
 [target."cfg(target_arch = \"arm\")".dependencies]
 aarch32-cpu = "0.3.0"
+
+[lints]
+cargo = { unused_dependencies = "allow" }

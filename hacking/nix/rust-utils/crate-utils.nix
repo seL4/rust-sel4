@@ -349,13 +349,12 @@ rec {
             path = dummyLibInSrc;
             harness = false;
           };
-        }
-        {
           bin = lib.forEach (manifest.bin or []) (bin:
             bin // {
               path = dummyMainWithOrWithoutStdInSrc;
             }
           );
+          lints.cargo.unused_dependencies = "allow";
         }
       ];
 

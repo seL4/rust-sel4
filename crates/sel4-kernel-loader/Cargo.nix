@@ -53,4 +53,5 @@ mk {
       sel4-build-env
     ;
   };
+  lints.cargo.unused_dependencies = "allow";
 }
