@@ -14,6 +14,7 @@ find \
         $top_level_dir/crates \
         $here/extra-used-unstable-features.rs \
         -type f -name 'lib.rs' \
-        -exec grep -q '^#!\[feature(' '{}' ';' \
+        -exec grep -q -e '^#!\[feature(' -e '^#!\[cfg_attr(.*, feature(' '{}' ';' \
         -printf "%P\n" \
-    | sort
+    | sort \
+    | sed 's,/src/lib.rs,,'

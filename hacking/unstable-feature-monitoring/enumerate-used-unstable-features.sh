@@ -14,6 +14,7 @@ find \
         $top_level_dir/crates \
         $here/extra-used-unstable-features.rs \
         -type f -name '*.rs' \
-        -exec sed -n 's|\(^#!\[feature([^]]*]\).*|\1|p' '{}' ';' \
+        -exec sed -n 's|^#!\[feature(\([^]]*\))].*|\1|p' '{}' ';' \
+        -exec sed -n 's|^#!\[cfg_attr(.*, feature(\([^]]*\)))].*|\1|p' '{}' ';' \
     | sort \
     | uniq
