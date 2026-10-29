@@ -12,6 +12,7 @@ mk {
     inherit (localCrates)
       sel4
       sel4-immediate-sync-once-cell
+      sel4-never-polyfill
       sel4-panicking-env
       sel4-dlmalloc
       sel4-sync

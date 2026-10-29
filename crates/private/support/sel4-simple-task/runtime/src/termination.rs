@@ -6,6 +6,7 @@
 
 use core::fmt;
 
+use sel4_never_polyfill::Never;
 use sel4_panicking_env::debug_println;
 
 pub trait InfallibleTermination {
@@ -18,7 +19,7 @@ impl InfallibleTermination for () {
     }
 }
 
-impl InfallibleTermination for ! {
+impl InfallibleTermination for Never {
     fn report(self) {
         self
     }
@@ -40,7 +41,7 @@ pub trait Termination {
 }
 
 impl<T: InfallibleTermination> Termination for T {
-    type Error = !;
+    type Error = Never;
 
     fn report(self) -> Result<(), Self::Error> {
         self.report();

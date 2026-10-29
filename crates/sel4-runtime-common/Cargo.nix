@@ -10,6 +10,8 @@ mk {
   package.name = "sel4-runtime-common";
   dependencies = {
     inherit (localCrates)
+      sel4-crash-polyfill
+      sel4-never-polyfill
       sel4-panicking-env
       sel4-phdrs
       sel4-immutable-cell

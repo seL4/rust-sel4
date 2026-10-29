@@ -11,6 +11,7 @@ mk {
   dependencies = {
     inherit (localCrates)
       sel4
+      sel4-never-polyfill
       sel4-panicking-env
     ;
     sel4-runtime-common = localCrates.sel4-runtime-common // { features = [ "sel4" ]; };

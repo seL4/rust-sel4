@@ -10,6 +10,7 @@ mk {
   package.name = "sel4-test-sentinels";
   dependencies = {
     inherit (localCrates)
+      sel4-crash-polyfill
       sel4-panicking-env
     ;
   };

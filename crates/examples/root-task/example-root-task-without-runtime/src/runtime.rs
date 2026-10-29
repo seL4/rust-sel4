@@ -6,6 +6,8 @@
 
 use core::arch::naked_asm;
 
+use sel4_crash_polyfill::crash;
+
 use super::main;
 
 mod stack {
@@ -111,5 +113,5 @@ unsafe extern "C" fn rust_entrypoint(bootinfo: *const sel4::BootInfo) -> ! {
 #[panic_handler]
 fn panic(info: &core::panic::PanicInfo<'_>) -> ! {
     sel4::debug_println!("{}", info);
-    loop {}
+    crash()
 }

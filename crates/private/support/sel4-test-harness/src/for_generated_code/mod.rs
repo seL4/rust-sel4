@@ -8,6 +8,8 @@ use alloc::format;
 use alloc::string::String;
 use core::fmt;
 
+use sel4_never_polyfill::Never;
+
 use crate::{config::get_config, run_tests::run_tests_with_config};
 
 pub(crate) mod types;
@@ -21,15 +23,15 @@ pub trait Termination {
 }
 
 impl Termination for () {
-    type Error = !;
+    type Error = Never;
 
     fn report(self) -> Result<(), Self::Error> {
         Ok(())
     }
 }
 
-impl Termination for ! {
-    type Error = !;
+impl Termination for Never {
+    type Error = Never;
 
     fn report(self) -> Result<(), Self::Error> {
         self

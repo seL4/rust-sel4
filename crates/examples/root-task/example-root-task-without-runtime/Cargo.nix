@@ -10,5 +10,6 @@ mk {
   package.name = "example-root-task-without-runtime";
   dependencies = {
     sel4 = localCrates.sel4 // { default-features = false; };
+    inherit (localCrates) sel4-crash-polyfill sel4-never-polyfill;
   };
 }

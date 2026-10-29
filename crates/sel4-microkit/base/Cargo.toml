@@ -23,3 +23,4 @@ extern-symbols = []
 [dependencies]
 sel4 = { path = "../../sel4" }
 sel4-immutable-cell = { path = "../../sel4-immutable-cell" }
+sel4-never-polyfill = { path = "../../sel4-never-polyfill" }

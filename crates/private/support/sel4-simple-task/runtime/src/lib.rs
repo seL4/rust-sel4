@@ -5,9 +5,7 @@
 //
 
 #![no_std]
-#![feature(never_type)]
 #![feature(thread_local)]
-#![allow(internal_features)]
 #![allow(clippy::useless_conversion)]
 
 #[cfg(feature = "alloc")]

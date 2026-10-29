@@ -6,7 +6,6 @@
 
 #![no_std]
 #![no_main]
-#![feature(never_type)]
 
 extern crate alloc;
 
@@ -187,10 +186,10 @@ unsafe extern "C" fn secondary_thread_entrypoint(arg: sel4::Word) -> ! {
     abort!("secondary thread panicked")
 }
 
-struct SecondaryThreadFn(Box<dyn FnOnce() -> ! + UnwindSafe + Send + 'static>);
+struct SecondaryThreadFn(Box<dyn FnOnce() -> Never + UnwindSafe + Send + 'static>);
 
 impl SecondaryThreadFn {
-    fn new(f: impl FnOnce() -> ! + UnwindSafe + Send + 'static) -> Self {
+    fn new(f: impl FnOnce() -> Never + UnwindSafe + Send + 'static) -> Self {
         Self(Box::new(f))
     }
 

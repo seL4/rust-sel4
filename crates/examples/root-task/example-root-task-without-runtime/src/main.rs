@@ -7,9 +7,9 @@
 #![no_std]
 #![no_main]
 
-mod runtime;
+use sel4_never_polyfill::Never;
 
-enum Never {}
+mod runtime;
 
 fn main(bootinfo: &sel4::BootInfoPtr) -> sel4::Result<Never> {
     sel4::debug_println!("Hello, World!");
