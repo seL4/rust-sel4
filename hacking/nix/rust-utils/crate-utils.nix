@@ -78,12 +78,11 @@ rec {
     #![cfg_attr(target_os = "none", no_std)]
     #![cfg_attr(target_os = "none", no_main)]
     #![cfg_attr(target_os = "none", feature(lang_items))]
-    #![cfg_attr(target_os = "none", feature(core_intrinsics))]
 
     #[cfg(target_os = "none")]
     #[panic_handler]
     fn panic_handler(_: &core::panic::PanicInfo) -> ! {
-      core::intrinsics::abort()
+      loop {}
     }
 
     #[cfg(target_os = "none")]

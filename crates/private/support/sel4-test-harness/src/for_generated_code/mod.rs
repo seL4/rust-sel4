@@ -52,6 +52,17 @@ pub fn assert_test_result<T: Termination>(result: T) -> Result<(), String> {
     })
 }
 
+// Used by older toolchains
 pub fn test_main_static(tests: &[&TestDescAndFn]) {
     run_tests_with_config(&get_config(), tests)
+}
+
+pub type ExitCode = ();
+
+pub fn test_main_env_args(tests: &[&TestDescAndFn]) -> ExitCode {
+    test_main_static(tests)
+}
+
+pub fn test_main_env_args_abort(tests: &[&TestDescAndFn]) -> ExitCode {
+    test_main_static(tests)
 }
