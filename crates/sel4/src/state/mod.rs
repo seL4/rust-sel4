@@ -77,7 +77,7 @@ macro_rules! maybe_extern {
             _ => {
                 maybe_add_thread_local_attr! {
                     #[allow(non_upper_case_globals)]
-                    #[cfg_attr(feature = "exposed-state", no_mangle)]
+                    #[cfg_attr(feature = "exposed-state", unsafe(no_mangle))]
                     static $ident: $ty = $init;
                 }
             }
