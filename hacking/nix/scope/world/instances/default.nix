@@ -44,6 +44,7 @@ let
   haveMinimalRuntime = !isMicrokit;
   haveUnwindingSupport = !stdenv.hostPlatform.isAarch32;
   haveKernelLoader = stdenv.hostPlatform.isAarch || stdenv.hostPlatform.isRiscV;
+  haveMasqueradeKernelLoader = haveKernelLoader && stdenv.hostPlatform.isAarch64;
   haveCapDLInitializer = true;
 
   maybe = condition: v: if condition then v else null;
@@ -72,14 +73,15 @@ let
 
   mkInstance =
     { rootTask
+    , masquerade ? false
     , ...
     } @ args:
     callPlatform (
       {
         system = mkSystem {
-          inherit rootTask;
+          inherit rootTask masquerade;
         };
-      } // builtins.removeAttrs args [ "rootTask" ]
+      } // builtins.removeAttrs args [ "rootTask" "masquerade" ]
     );
 
 in rec {
@@ -87,6 +89,7 @@ in rec {
   # TODO collect automatically
   all = lib.filter (v: v != null) [
     tests.root-task.loader
+    tests.root-task.loader-masquerade
     tests.root-task.config
     tests.root-task.tls
     tests.root-task.backtrace
@@ -136,6 +139,15 @@ in rec {
         };
         extraPlatformArgs = lib.optionalAttrs canSimulate {
           canAutomateSimply = true;
+        };
+      });
+
+      loader-masquerade = maybe (haveMasqueradeKernelLoader && haveFullRuntime) (mkInstance {
+        inherit (loader) rootTask;
+        masquerade = true;
+        extraPlatformArgs = lib.optionalAttrs canSimulate {
+          canAutomateSimply = true;
+          extraQEMUArgs = [ "-semihosting" ];
         };
       });
 

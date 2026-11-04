@@ -249,6 +249,10 @@ superCallPackage ../rust-utils {} self //
 
   bareMetalRustTargetTriple = mkBuiltinRustTargetTriple bareMetalBuiltinRustTargetTriple;
 
+  bareMetalBuiltinRustTargetTripleSoftFloat = {
+    aarch64 = "${bareMetalBuiltinRustTargetTriple}-softfloat";
+  }."${seL4Arch}";
+
   defaultRustTargetTriple =
     if stdenv.hostPlatform.isNone
     then mkSeL4RustTargetTriple {}
@@ -327,6 +331,7 @@ superCallPackage ../rust-utils {} self //
 
   sel4-capdl-initializer-add-spec = mkToolWithRkyv crates.sel4-capdl-initializer-add-spec;
   sel4-kernel-loader-add-payload = mkToolWithRkyv crates.sel4-kernel-loader-add-payload;
+  sel4-kernel-loader-masquerade-add-payload = mkTool crates.sel4-kernel-loader-masquerade-add-payload;
   sel4-simple-task-runtime-config-cli = mkToolWithRkyv crates.sel4-simple-task-runtime-config-cli;
 
   mkGenerateTargetSpecs = callBuildBuildPackage ./generate-target-specs.nix {};
