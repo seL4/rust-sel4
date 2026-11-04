@@ -181,8 +181,15 @@ self: with self;
     app = appELF;
   };
 
+  sel4-kernel-loader-masquerade = callPackage ./sel4-kernel-loader-masquerade.nix {};
+
+  mkSeL4KernelLoaderMasquerade = { loaderELF }: callPackage ./mk-sel4-kernel-loader-masquerade.nix {} {
+    inherit loaderELF;
+  };
+
   mkSystem =
     { rootTask
+    , masquerade ? false
     , extraDebuggingLinks ? []
     , passthru ? {}
     }:
@@ -193,6 +200,12 @@ self: with self;
           appELF = rootTask.elf;
         };
 
+      masqueradeImage =
+        assert stdenv.hostPlatform.isAarch64;
+        mkSeL4KernelLoaderMasquerade {
+          loaderELF = loader.elf;
+        };
+
       symbolizeRootTaskBacktrace = writeScript "x.sh" ''
         #!${buildPackages.runtimeShell}
         exec ${buildPackages.this.sel4-backtrace-cli}/bin/sel4-symbolize-backtrace -f ${rootTask.elf} "$@"
@@ -200,7 +213,7 @@ self: with self;
     in {
       inherit loader rootTask;
       rootTaskImage = rootTask.elf;
-      loaderImage = loader.elf;
+      loaderImage = if masquerade then masqueradeImage.elf else loader.elf;
       debuggingLinks = [
         { name = "kernel.elf"; path = "${seL4ForBoot}/bin/kernel.elf"; }
         { name = "root-task.elf"; path = rootTask.elf; }
@@ -211,6 +224,8 @@ self: with self;
       ] ++ lib.optionals worldConfig.platformRequiresLoader [
         { name = "loader.elf"; path = loader.elf; }
         { name = "loader.debug.elf"; path = loader.split.full; }
+      ] ++ lib.optionals masquerade [
+        { name = "loader.masquerade.img"; path = masqueradeImage.split.full; }
       ] ++ (rootTask.debuggingLinks or []) ++ extraDebuggingLinks;
     } // passthru;
 

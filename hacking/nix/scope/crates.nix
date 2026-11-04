@@ -30,6 +30,11 @@ let
         "asm"
       ];
     };
+    sel4-kernel-loader-masquerade = {
+      extraPaths = [
+        "x.lds"
+      ];
+    };
     tests-root-task-c = {
       extraPaths = [
         "cbits"
