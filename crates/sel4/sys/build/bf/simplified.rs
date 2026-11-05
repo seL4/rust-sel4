@@ -7,9 +7,9 @@
 use std::collections::BTreeSet;
 use std::ops::Range;
 
-use super::parser::ast;
+use super::parser;
 
-pub fn simplify(orig_file: &ast::File) -> File {
+pub fn simplify(orig_file: &parser::File) -> File {
     File::simplify(orig_file)
 }
 
@@ -51,14 +51,14 @@ pub struct Tag {
 }
 
 impl File {
-    fn simplify(orig_file: &ast::File) -> Self {
+    fn simplify(orig_file: &parser::File) -> Self {
         let base = orig_file.base;
         let mut orig_blocks = vec![];
         let mut orig_tagged_unions = vec![];
         for declaration in orig_file.declarations.iter() {
             match declaration {
-                ast::Declaration::Block(block) => orig_blocks.push(block),
-                ast::Declaration::TaggedUnion(tagged_union) => {
+                parser::Declaration::Block(block) => orig_blocks.push(block),
+                parser::Declaration::TaggedUnion(tagged_union) => {
                     orig_tagged_unions.push(tagged_union)
                 }
             }
@@ -127,7 +127,7 @@ impl File {
 }
 
 impl Block {
-    fn simplify(base: usize, orig: &ast::Block) -> Self {
+    fn simplify(base: usize, orig: &parser::Block) -> Self {
         let mut cur_offset = 0;
         let mut fields = vec![];
         for segment in orig.segments.iter().rev() {

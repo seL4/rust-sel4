@@ -15,11 +15,46 @@ use nom::{
     sequence::{delimited, pair, preceded, terminated, tuple},
 };
 
-pub mod ast;
-
-use ast::*;
-
 type Result<'a, T> = IResult<&'a str, T, VerboseError<&'a str>>;
+
+pub type Ident = String;
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct File {
+    pub base: usize,
+    pub declarations: Vec<Declaration>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum Declaration {
+    Block(Block),
+    TaggedUnion(TaggedUnion),
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Block {
+    pub name: Ident,
+    pub segments: Vec<Segment>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Segment {
+    pub width: usize,
+    pub field: Option<Ident>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct TaggedUnion {
+    pub name: Ident,
+    pub tag_name: Ident,
+    pub tags: Vec<Tag>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Tag {
+    pub name: Ident,
+    pub value: usize,
+}
 
 pub fn parse(text: &str) -> File {
     match all_consuming(terminated(file, ws))(text) {
