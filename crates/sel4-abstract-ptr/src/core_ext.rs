@@ -92,7 +92,11 @@ impl<T> AbstractPtrSliceIndex<[T]> for Range<usize> {}
 impl<T> AbstractPtrSliceIndexInternal<[T]> for Range<usize> {
     fn abstract_ptr_slice_index(self, slice: *mut [T]) -> *mut Self::Output {
         bounds_check(mut_ptr_slice_len(slice), self.clone());
-        ptr::slice_from_raw_parts_mut(self.start.abstract_ptr_slice_index(slice), self.len())
+        // The check above ensures `start <= end <= len`. Offset from the base
+        // pointer directly: indexing with `start` alone would reject the valid
+        // empty range `len..len`.
+        let start = mut_ptr_slice_as_mut_ptr(slice).wrapping_add(self.start);
+        ptr::slice_from_raw_parts_mut(start, self.len())
     }
 }
 
@@ -120,4 +124,38 @@ fn bounds_check(len: usize, index: impl SliceIndex<[()]>) {
 
     let bound_check_slice = &MAX_ARRAY[..len];
     let _ = &bound_check_slice[index];
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn index_len<I>(slice: &mut [u8], index: I) -> usize
+    where
+        I: AbstractPtrSliceIndex<[u8], Output = [u8]> + SliceIndex<[()]> + Clone,
+    {
+        non_null_slice_len(non_null_index(NonNull::from(slice), index))
+    }
+
+    #[test]
+    fn empty_range_at_end() {
+        let mut a = [0u8; 9];
+        assert_eq!(index_len(&mut a, 9..9), 0);
+        assert_eq!(index_len(&mut a, 9..), 0);
+        assert_eq!(index_len(&mut a, 4..9), 5);
+    }
+
+    #[test]
+    fn empty_range_of_empty_slice() {
+        let mut a = [0u8; 0];
+        assert_eq!(index_len(&mut a, 0..0), 0);
+        assert_eq!(index_len(&mut a, 0..), 0);
+    }
+
+    #[test]
+    #[should_panic]
+    fn range_past_end_still_panics() {
+        let mut a = [0u8; 9];
+        index_len(&mut a, 10..10);
+    }
 }
